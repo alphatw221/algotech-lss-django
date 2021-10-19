@@ -1,0 +1,392 @@
+{
+	"info": {
+		"_postman_id": "766219ca-8e11-474d-9fb7-ac9befb0918c",
+		"name": "LiveShowSeller (read only pls)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "token",
+			"item": [
+				{
+					"name": "token (algotech)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"algotech\",\n    \"password\": \"algo83111T%%\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER_IP}}/token/",
+							"host": [
+								"{{SERVER_IP}}"
+							],
+							"path": [
+								"token",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "token verify",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"token\": \"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjE0MjM5MzY2LCJqdGkiOiI4OGU3NmE0NDViMGM0NzQ1OTllMTFiNTlkMWNkNWY5ZCIsInVzZXJfaWQiOjN9.s-UI9hGgr-hpfESPzJu6VVntm6h1F99HVMO_QgaZ4Mo\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER_IP}}/token/verify/",
+							"host": [
+								"{{SERVER_IP}}"
+							],
+							"path": [
+								"token",
+								"verify",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "token refresh",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refresh\": \"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTYxNDMyMjE2NiwianRpIjoiOTNlMDM5ZGQxZTE0NDY4MWIyMDZmYTE1NjJmMDJmZTMiLCJ1c2VyX2lkIjozfQ.Zo8TtGXaWuVFfJFKVwc85MBKZCrnIVvKQKSdCO5ucAo\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER_IP}}/token/refresh/",
+							"host": [
+								"{{SERVER_IP}}"
+							],
+							"path": [
+								"token",
+								"refresh",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "1. When you log in, receive 2 tokens (Access token, Refresh token) in response from the server.  \n2. The access token will have less expiry time and Refresh will have long expiry time.  \n3. The client (Front end) will store refresh token in his local storage and access token in cookies.  \n4. The client will use an access token for calling APIs. But when it expires, pick the refresh token from local storage and call auth server API to get the new token.  \n5. The auth server will have an API exposed which will accept refresh token and checks for its validity and return a new access token.  \n6. Once the refresh token is expired, the User will be logged out.  \n\n> Reference: https://codertw.com/%E5%89%8D%E7%AB%AF%E9%96%8B%E7%99%BC/2049/  ",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "test",
+			"item": [
+				{
+					"name": "sample",
+					"item": [
+						{
+							"name": "create",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"title\": \"111\",\n    \"integer\": 111\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER_IP}}/api/sample/",
+									"host": [
+										"{{SERVER_IP}}"
+									],
+									"path": [
+										"api",
+										"sample",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "list",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER_IP}}/api/sample/?integer=111",
+									"host": [
+										"{{SERVER_IP}}"
+									],
+									"path": [
+										"api",
+										"sample",
+										""
+									],
+									"query": [
+										{
+											"key": "integer",
+											"value": "111"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "retrieve",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER_IP}}/api/sample/2/",
+									"host": [
+										"{{SERVER_IP}}"
+									],
+									"path": [
+										"api",
+										"sample",
+										"2",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "update",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"title\": \"222\",\n    \"number\": 222\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER_IP}}/api/sample/2/",
+									"host": [
+										"{{SERVER_IP}}"
+									],
+									"path": [
+										"api",
+										"sample",
+										"2",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "destroy",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER_IP}}/api/sample/1/",
+									"host": [
+										"{{SERVER_IP}}"
+									],
+									"path": [
+										"api",
+										"sample",
+										"1",
+										""
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "test_viewset",
+					"item": [
+						{
+							"name": "test",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER_IP}}/api/test_viewset/test/",
+									"host": [
+										"{{SERVER_IP}}"
+									],
+									"path": [
+										"api",
+										"test_viewset",
+										"test",
+										""
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "test",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER_IP}}/api/test/",
+							"host": [
+								"{{SERVER_IP}}"
+							],
+							"path": [
+								"api",
+								"test",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "test_api",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"data1\":\"data1\",\n    \"data2\":\"data2\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER_IP}}/api/test_api/path/?param1=param1&param2=param2",
+							"host": [
+								"{{SERVER_IP}}"
+							],
+							"path": [
+								"api",
+								"test_api",
+								"path",
+								""
+							],
+							"query": [
+								{
+									"key": "param1",
+									"value": "param1"
+								},
+								{
+									"key": "param2",
+									"value": "param2"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjM0NjM3NTg4LCJpYXQiOjE2MzQ2MzcyODgsImp0aSI6ImJhMGFlMmEyOTdkOTQwMGNhZGZlY2QyNmUxMmEwNzE2IiwidXNlcl9pZCI6MX0.I6wsMvL_JEOPAXyupQF_y2PqdcJ5lPJRcg3z7Efh8Lc",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "SERVER_IP",
+			"value": "http://localhost:8000"
+		}
+	]
+}
