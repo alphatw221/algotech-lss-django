@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-_*%^a_086!sv_#y^t(c0(+%dbqufars4zf8##q!yqjlp#c7m!l
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '10.1.1.16', '0.0.0.0', ]
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', ]
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Application definition
@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'django_cron',
     'api',
 ]
 
@@ -92,10 +94,6 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 25,
     # 'DATETIME_FORMAT': '%s',
 }
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
-}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -133,18 +131,13 @@ WSGI_APPLICATION = 'lss.wsgi.application'
 
 DATABASES = {
     'default': {
-        # # MySQL
-        # 'ENGINE': 'django.db.backends.mysql',
-        # # 'HOST': '172.22.0.7',
-        # 'HOST': 'localhost',
-        # 'PORT': '3306',
-        # 'NAME': 'gfs',
-        # 'USER': 'gfs',
-        # 'PASSWORD': 'algo83111T%%',
-        # 'OPTIONS': {'charset': 'utf8mb4'},
-
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'djongo',
+        'CLIENT': {
+            'host': 'mongodb+srv://lss:algo83111T%25%25@lss.isjfn.mongodb.net/test?retryWrites=true&w=majority&ssl=true&ssl_cert_reqs=CERT_NONE',
+            'username': 'lss',
+            'password': 'algo83111T%%',
+            'authMechanism': 'SCRAM-SHA-1'
+        }
     }
 }
 
