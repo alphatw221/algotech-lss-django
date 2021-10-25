@@ -133,7 +133,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'djongo',
         'CLIENT': {
-            'host': 'mongodb+srv://lss:algo83111T%25%25@lss.isjfn.mongodb.net/test?retryWrites=true&w=majority&ssl=true&ssl_cert_reqs=CERT_NONE',
+            'host': 'mongodb://34.101.72.38/?retryWrites=true&w=majority',
             'username': 'lss',
             'password': 'algo83111T%%',
             'authMechanism': 'SCRAM-SHA-1'
