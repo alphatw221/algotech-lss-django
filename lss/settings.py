@@ -133,7 +133,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'djongo',
         'CLIENT': {
-            'host': 'mongodb://34.126.127.5/?retryWrites=true&w=majority',
+            'host': 'mongodb://34.126.127.5:27017/?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false',
             'username': 'lss',
             'password': 'algo83111T%%',
             'authMechanism': 'SCRAM-SHA-1'
