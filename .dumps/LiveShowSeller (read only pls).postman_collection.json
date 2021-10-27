@@ -292,6 +292,9 @@
 				{
 					"name": "test",
 					"request": {
+						"auth": {
+							"type": "noauth"
+						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -358,7 +361,7 @@
 		"bearer": [
 			{
 				"key": "token",
-				"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjM1MjI2NzcyLCJpYXQiOjE2MzUyMjY0NzIsImp0aSI6IjlkYzQ5MzQ5NzFmYjQ5ZDA4ZGY3M2MxMDI1MDRkZDI0IiwidXNlcl9pZCI6MX0.KMm0tZRTRBxhk6u0rnWOijxK2YtcAkbEyMyvfZa5SGw",
+				"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjM1MzI3MTk4LCJpYXQiOjE2MzUzMjY4OTgsImp0aSI6IjJmOGU2YTk3ZDUyOTRkYTdiMjRjNWI0MTRmODIzNzQ4IiwidXNlcl9pZCI6MX0.C0HOdhjGrNWYEHrxxjSwlU73B4ctw3KQonsKpikqT0I",
 				"type": "string"
 			}
 		]
