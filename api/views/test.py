@@ -32,5 +32,5 @@ class TestViewSet(viewsets.GenericViewSet):
     permission_classes = [IsAdminUser | IsAuthenticated]
 
     @action(detail=False, methods=['GET'])
-    def test(self, request, pk=None, *args, **kwargs):
+    def test(self, request, *args, **kwargs):
         return Response({'msg': 'TestViewSet test accomplished.'})

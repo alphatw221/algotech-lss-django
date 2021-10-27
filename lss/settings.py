@@ -134,10 +134,13 @@ WSGI_APPLICATION = 'lss.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'djongo',
+        'ENFORCE_SCHEMA': False,
         'CLIENT': {
-            'host': 'mongodb://34.126.127.5:27017/?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false',
+            'host': 'mongodb://34.126.127.5/?readPreference=primary&directConnection=true&ssl=false',
+            'port': 27017,
             'username': 'lss',
             'password': 'algo83111T%%',
+            'authSource': 'admin',
             'authMechanism': 'SCRAM-SHA-1'
         }
     }
