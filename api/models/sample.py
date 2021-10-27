@@ -8,11 +8,11 @@ class Sample(models.Model):
     integer = models.IntegerField(null=True, blank=True)
     decimal = models.DecimalField(
         max_digits=10, decimal_places=2, blank=True, null=True)
-    udpated_at = models.DateTimeField(auto_now=True)
+    updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
 
-class SampleSerializer(serializers.HyperlinkedModelSerializer):
+class SampleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Sample
         fields = '__all__'
