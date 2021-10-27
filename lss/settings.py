@@ -137,12 +137,15 @@ DATABASES = {
         'NAME': 'lss',
         'ENFORCE_SCHEMA': False,
         'CLIENT': {
-            'host': 'mongodb://34.126.127.5/?readPreference=primary&directConnection=true&ssl=false',
+            'host': 'mongodb://34.126.127.5',
             'port': 27017,
             'username': 'lss',
             'password': 'algo83111T%%',
             'authSource': 'admin',
-            'authMechanism': 'SCRAM-SHA-1'
+            'authMechanism': 'SCRAM-SHA-1',
+            'readPreference': 'primary',
+            'directConnection': True,
+            'ssl': False,
         }
     }
 }
