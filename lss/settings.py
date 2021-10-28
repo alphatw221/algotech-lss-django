@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_cron',
     'api',
+    'automation',
 ]
 
 LOGGING = {
