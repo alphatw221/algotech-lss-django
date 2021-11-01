@@ -11,9 +11,9 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        for i in range(5):
-            Sample.objects.create(title=f'{pendulum.now()}', integer=i)
-
-            time.sleep(5)
-
-        self.stdout.write(self.style.SUCCESS('done'))
+        try:
+            for _ in range(10):
+                print(f'{pendulum.now()} - {Sample.objects.all().count()=}')
+                time.sleep(1)
+        except KeyboardInterrupt:
+            self.stdout.write(self.style.SUCCESS('Stopped'))
