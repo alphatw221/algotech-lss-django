@@ -127,7 +127,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"title\": \"111\",\n    \"integer\": 111\n}",
+									"raw": "{\n    \"title\": \"111\",\n    \"integer\": 111,\n    \"json\": {\n        \"key1\": \"val1\",\n        \"key2\": \"val2\",\n        \"key3\": \"val3\"\n    }\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -361,7 +361,7 @@
 		"bearer": [
 			{
 				"key": "token",
-				"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjM1MzI3MTk4LCJpYXQiOjE2MzUzMjY4OTgsImp0aSI6IjJmOGU2YTk3ZDUyOTRkYTdiMjRjNWI0MTRmODIzNzQ4IiwidXNlcl9pZCI6MX0.C0HOdhjGrNWYEHrxxjSwlU73B4ctw3KQonsKpikqT0I",
+				"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjM1ODM3NTAzLCJpYXQiOjE2MzU4MzcyMDMsImp0aSI6IjhkOWJiZjhjOWIwZjQwYWNhNDhjZDJkNDYyN2QzODZiIiwidXNlcl9pZCI6MX0.jGbRVcQLgHNFsO_eflA_MYRLgDOhTcf5hYmqcIYAUf0",
 				"type": "string"
 			}
 		]
