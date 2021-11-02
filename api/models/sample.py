@@ -8,6 +8,8 @@ class Sample(models.Model):
     integer = models.IntegerField(null=True, blank=True)
     decimal = models.DecimalField(
         max_digits=10, decimal_places=2, blank=True, null=True)
+    json = models.JSONField(
+        blank=False, null=True, default=None)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
