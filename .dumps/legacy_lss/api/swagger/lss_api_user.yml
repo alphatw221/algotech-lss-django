@@ -1,0 +1,61 @@
+swagger: "2.0"
+info:
+  version: 1.0.0
+  title: Live Show Seller
+  description: Live Show Seller RESTful Web API Server
+  termsOfService: N/A
+  contact:
+    name: API Support
+    url: N/A
+    email: tech@algotech.app
+consumes:
+  - application/json
+produces:
+  - application/json
+
+basePath: /
+
+paths:
+  /user/:
+    post:
+      x-swagger-router-controller: api.user
+      operationId: create_user
+      description: Create a user
+      produces:
+        - application/json
+      responses:
+        "201":
+          description: JSON schema of User
+          schema:
+            type: object
+        "500":
+          description: Error message
+          schema:
+            type: string
+
+  /user/{user_id}/:
+    get:
+      x-swagger-router-controller: api.user
+      operationId: get_user
+      description: Get the user by user_id
+      produces:
+        - application/json
+      parameters:
+        - name: user_id
+          in: path
+          description: Specify the user
+          required: true
+          type: string
+      responses:
+        "200":
+          description: JSON schema of User
+          schema:
+            type: object
+        "404":
+          description: Error message
+          schema:
+            type: string
+        "500":
+          description: Error message
+          schema:
+            type: string

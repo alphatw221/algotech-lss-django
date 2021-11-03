@@ -217,3 +217,23 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 # django-cron
 CRON_CLASSES = [
 ]
+
+# LSS
+WEB_SERVER_URL = "https://"
+SHOPPING_CART_URL = f"{WEB_SERVER_URL}/"
+
+# Facebook
+FACEBOOK_API_URL = "https://graph.facebook.com/"
+
+# Youtube
+YOUTUBE_API_URL = ""
+YOUTUBE_API_CONFIG = {
+    "web": {
+        "project_id": "primeval-nectar-322805",
+        "client_id": "936983829411-6lq90ld3vs8f4ksbl4gv7hrjlsgkkqjg.apps.googleusercontent.com",
+        "client_secret": "k7xYNAy5P7yc5YtZ-ecQ3Qhc",
+        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+        "token_uri": "https://oauth2.googleapis.com/token",
+        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+    }
+}
