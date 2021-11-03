@@ -12,7 +12,8 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 import os
 from pathlib import Path
-from datetime import timedelta
+from datetime import timedelta, timezone
+import datetime
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -97,6 +98,11 @@ REST_FRAMEWORK = {
     # 'DATETIME_FORMAT': '%s',
 }
 
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+}
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -137,15 +143,22 @@ DATABASES = {
         'NAME': 'lss',
         'ENFORCE_SCHEMA': False,
         'CLIENT': {
-            'host': 'mongodb://34.126.127.5',
+            'host': 'mongodb://localhost',
             'port': 27017,
-            'username': 'lss',
-            'password': 'algo83111T%%',
-            'authSource': 'admin',
-            'authMechanism': 'SCRAM-SHA-1',
+            # 'username': 'lss',
+            # 'password': 'algo83111T%%',
+            # 'authSource': 'admin',
+            # 'authMechanism': 'SCRAM-SHA-1',
             'readPreference': 'primary',
-            'directConnection': True,
             'ssl': False,
+            # 'host': 'mongodb://34.126.92.142,35.240.200.4,34.126.155.150',
+            # 'port': 27017,
+            # 'username': 'lss',
+            # 'password': 'algo83111T%%',
+            # 'authSource': 'admin',
+            # 'authMechanism': 'SCRAM-SHA-1',
+            # 'readPreference': 'primary',
+            # 'ssl': False,
         }
     }
 }
@@ -175,7 +188,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+# TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Taipei'
 
 USE_I18N = True
 
@@ -196,7 +210,7 @@ STATICFILES_DIRS = [
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # django-cron
 CRON_CLASSES = [
