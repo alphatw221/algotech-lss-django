@@ -15,23 +15,23 @@ class User(models.Model):
     ip = models.CharField(max_length=255, null=True, blank=True)
     remark = models.TextField(default=None, null=True, blank=True)
 
-    payment_meta = models.JSONField( default=None, null=True, blank=True)
-    meta = models.JSONField( default=None, null=True, blank=True)
+    payment_meta = models.JSONField(default=None, null=True, blank=True)
+    meta = models.JSONField(default=None, null=True, blank=True)
 
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
 
-
 class UserSerializer(serializers.ModelSerializer):
-    
+
     class Meta:
         model = User
         fields = '__all__'
 
     meta = serializers.JSONField()
     payment_meta = serializers.JSONField()
-    
+
+
 class UserAdmin(admin.ModelAdmin):
     model = User
     list_display = [field.name for field in User._meta.fields]

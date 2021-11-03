@@ -5,8 +5,6 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from django.contrib.auth.models import User
 from django.conf import settings
 
-# Create your views here.
-
 
 @api_view(['GET'])
 def test(request):

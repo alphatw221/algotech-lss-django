@@ -12,8 +12,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 import os
 from pathlib import Path
-from datetime import timedelta, timezone
-import datetime
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -29,8 +28,7 @@ SECRET_KEY = 'django-insecure-_*%^a_086!sv_#y^t(c0(+%dbqufars4zf8##q!yqjlp#c7m!l
 DEBUG = True
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0',
-                 "gipassl.algotech.app",
-                 ]
+                 "gipassl.algotech.app", ]
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Application definition
@@ -144,7 +142,9 @@ DATABASES = {
         'NAME': 'lss',
         'ENFORCE_SCHEMA': False,
         'CLIENT': {
-            # 'host': 'mongodb://34.126.127.5:27017',
+            # Production internal
+            'host': 'mongodb://10.148.0.7:27017, 10.148.0.8:27017, 10.148.0.9:27017',
+            # Production external
             'host': 'mongodb://34.126.92.142:27017, 35.240.200.4:27017, 34.126.155.150:27017',
             'replicaSet': 'rs0',
             'username': 'lss',
@@ -153,6 +153,7 @@ DATABASES = {
             'authMechanism': 'SCRAM-SHA-1',
             'readPreference': 'primary',
             'ssl': False,
+            # Development
             # 'host': 'mongodb://34.126.92.142,35.240.200.4,34.126.155.150',
             # 'port': 27017,
             # 'username': 'lss',
@@ -190,8 +191,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-# TIME_ZONE = 'UTC'
-TIME_ZONE = 'Asia/Taipei'
+TIME_ZONE = 'UTC'
 
 USE_I18N = True
 

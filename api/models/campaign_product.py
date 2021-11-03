@@ -4,27 +4,37 @@ from rest_framework import serializers
 from ..models.campaign import Campaign
 from ..models.product import Product
 
+
 class CampaignProduct(models.Model):
 
     def __str__(self):
         return self.name
-    
-    campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE, related_name='products')
 
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='campaign_products')
-    
-    name = models.CharField(max_length=255, null=True, blank=True, default=None)  
+    campaign = models.ForeignKey(
+        Campaign, on_delete=models.CASCADE, related_name='products')
+
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name='campaign_products')
+
+    name = models.CharField(max_length=255, null=True,
+                            blank=True, default=None)
     order_code = models.CharField(max_length=255, null=True, blank=True)
-    product_quantity =models.IntegerField( blank=False, null=True, default=None)
-    product_order_amount = models.IntegerField( blank=False, null=True, default=None)
-    max_order_amount = models.IntegerField( blank=False, null=True, default=None)
-    customer_removable = models.BooleanField( blank=False, null=True, default=None)
-    customer_editable = models.BooleanField( blank=False, null=True, default=None)
-    product_active_stat = models.IntegerField( blank=False, null=True, default=None)
+    product_quantity = models.IntegerField(
+        blank=False, null=True, default=None)
+    product_order_amount = models.IntegerField(
+        blank=False, null=True, default=None)
+    max_order_amount = models.IntegerField(
+        blank=False, null=True, default=None)
+    customer_removable = models.BooleanField(
+        blank=False, null=True, default=None)
+    customer_editable = models.BooleanField(
+        blank=False, null=True, default=None)
+    product_active_stat = models.IntegerField(
+        blank=False, null=True, default=None)
 
-    platform_meta = models.JSONField( default=None, null=True, blank=True)
-    meta = models.JSONField( default=None, null=True, blank=True)
-    
+    platform_meta = models.JSONField(default=None, null=True, blank=True)
+    meta = models.JSONField(default=None, null=True, blank=True)
+
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -37,6 +47,7 @@ class CampaignProductSerializer(serializers.ModelSerializer):
 
     platform_meta = serializers.JSONField()
     meta = serializers.JSONField()
+
 
 class CampaignProductAdmin(admin.ModelAdmin):
     model = CampaignProduct
