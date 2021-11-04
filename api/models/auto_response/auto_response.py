@@ -9,7 +9,7 @@ class AutoResponse(models.Model):
         db_table = 'api_auto_response'
 
     user_group = models.ForeignKey(
-        UserGroup, null=True, on_delete=models.CASCADE, related_name='campaigns')
+        UserGroup, null=True, on_delete=models.CASCADE, related_name='auto_responses')
 
     description = models.TextField(null=True, blank=True, default=None)
     input_msg = models.TextField(null=True, blank=True, default=None)
