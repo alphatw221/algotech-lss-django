@@ -5,27 +5,31 @@ from ..models.user import User
 
 
 class AutoResponse(models.Model):
+    class Meta:
+        db_table = 'api_auto_response'
+
+    description = models.TextField(null=True, blank=True, default=None)
+    input_msg = models.TextField(null=True, blank=True, default=None)
+    output_msg = models.TextField(null=True, blank=True, default=None)
+
+    type = models.CharField(max_length=255, null=True, blank=True)
+    status = models.CharField(max_length=255, null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    meta = models.JSONField(null=True, blank=True, default=None)
 
     def __str__(self):
         return str(self.id)
 
-    message_req = models.TextField(default=None, null=True, blank=True)
-    message_res = models.TextField(default=None, null=True, blank=True)
-    message_type = models.TextField(default=None, null=True, blank=True)
-    message_des = models.TextField(default=None, null=True, blank=True)
-
-    meta = models.JSONField(default=None, null=True, blank=True)
-
-    updated_at = models.DateTimeField(auto_now=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
 
 class AutoResponseSerializer(serializers.ModelSerializer):
-    meta = serializers.JSONField()
-
     class Meta:
         model = AutoResponse
         fields = '__all__'
+
+    meta = serializers.JSONField()
 
 
 class AutoResponseAdmin(admin.ModelAdmin):
