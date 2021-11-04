@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from api.models.test import sample
-from api.models.user import user
+from api.models.user import user, user_group
 from api.models.auto_response import auto_response
 from api.models.campaign import campaign, campaign_product, campaign_order, campaign_comment, campaign_lucky_draw
 from api.models.product import product
@@ -11,6 +11,7 @@ from api.models.order import order
 admin.site.register(sample.Sample, sample.SampleAdmin)
 
 admin.site.register(user.User, user.UserAdmin)
+admin.site.register(user_group.UserGroup, user_group.UserGroupAdmin)
 
 admin.site.register(auto_response.AutoResponse,
                     auto_response.AutoResponseAdmin)

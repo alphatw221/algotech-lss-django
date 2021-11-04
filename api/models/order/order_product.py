@@ -15,18 +15,6 @@ class OrderProduct(models.Model):
     def __str__(self):
         return str(self.id)
 
-    campaign = models.ForeignKey(
-        Campaign, on_delete=models.CASCADE, related_name='order_products')
-
-    campaign_order = models.ForeignKey(
-        CampaignOrder, on_delete=models.CASCADE, related_name='order_products')
-
-    campaign_product = models.ForeignKey(
-        CampaignProduct, on_delete=models.CASCADE, related_name='order_products')
-
-    campaign_comment = models.ForeignKey(
-        CampaignComment, on_delete=models.CASCADE, related_name='order_products')
-
     user_id = models.CharField(max_length=255, null=True, blank=True)
     user_name = models.CharField(max_length=255, null=True, blank=True)
     order_quantity = models.IntegerField(blank=False, null=True, default=None)

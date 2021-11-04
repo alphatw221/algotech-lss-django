@@ -1,6 +1,7 @@
 from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
+from api.models.user.user_group import UserGroup
 from api.models.user.user import User
 from dataclasses import dataclass
 
@@ -9,8 +10,11 @@ class Campaign(models.Model):
     class Meta:
         db_table = 'api_campaign'
 
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='campaigns')
+    user_group = models.ForeignKey(
+        UserGroup, null=True, on_delete=models.SET_NULL, related_name='campaigns')
+    created_by = models.ForeignKey(
+        User, null=True, on_delete=models.SET_NULL, related_name='campaigns')
+
     title = models.CharField(max_length=255, null=True, blank=True)
     description = models.TextField(null=True, blank=True, default=None)
     start_time = models.DateTimeField(null=True, blank=True, default=None)

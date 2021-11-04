@@ -1,11 +1,15 @@
 from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
+from api.models.user.user_group import UserGroup
 
 
 class AutoResponse(models.Model):
     class Meta:
         db_table = 'api_auto_response'
+
+    user_group = models.ForeignKey(
+        UserGroup, null=True, on_delete=models.CASCADE, related_name='campaigns')
 
     description = models.TextField(null=True, blank=True, default=None)
     input_msg = models.TextField(null=True, blank=True, default=None)

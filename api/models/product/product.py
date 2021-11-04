@@ -12,7 +12,7 @@ class Product(models.Model):
         return self.name
 
     user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='products')
+        User, null=True, on_delete=models.SET_NULL, related_name='products')
 
     name = models.CharField(max_length=255, null=True, blank=True)
     quantity = models.IntegerField(blank=False, null=False, default=0)

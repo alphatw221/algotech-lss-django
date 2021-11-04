@@ -1,9 +1,12 @@
 from django.urls import path, include
 from rest_framework import routers
 
+from api.models.user import user_group
+
 from .views import (
     test,
     user,
+    user_group,
     auto_response,
     campaign,
     campaign_product,
@@ -27,6 +30,7 @@ def url_setup(urlpatterns):
     router.register(r'sample', test.SampleViewSet)
 
     router.register(r'user', user.UserViewSet)
+    router.register(r'user_group', user_group.UserGroupViewSet)
 
     router.register(r'auto_response', auto_response.AutoResponseViewSet)
 
