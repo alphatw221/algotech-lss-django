@@ -224,6 +224,11 @@ SHOPPING_CART_URL = f"{WEB_SERVER_URL}/"
 
 # Facebook
 FACEBOOK_API_URL = "https://graph.facebook.com/"
+FACEBOOK_APP_CREDS = {
+    "name": "Live Show Seller - Algotech",
+    "app_id": "967598017063136",
+    "app_secret": "e36ab1560c8d85cbc413e07fb7232f99",
+}
 
 # Youtube
 YOUTUBE_API_URL = ""
