@@ -1,7 +1,7 @@
 import pendulum
 import time
 from django.core.management.base import BaseCommand
-from api.models.sample import Sample
+from api.models.test.sample import Sample
 
 
 class Command(BaseCommand):
