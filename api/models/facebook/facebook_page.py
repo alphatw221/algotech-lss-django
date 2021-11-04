@@ -39,7 +39,7 @@ class FacebookPageSerializer(serializers.ModelSerializer):
     payment_meta = serializers.JSONField(default=dict)
 
 
-class UserAdmin(admin.ModelAdmin):
+class FacebookPageAdmin(admin.ModelAdmin):
     model = FacebookPage
     list_display = [field.name for field in FacebookPage._meta.fields]
     search_fields = [field.name for field in FacebookPage._meta.fields]

@@ -3,14 +3,14 @@ from dataclasses import dataclass
 
 
 @dataclass
-class FacebookUser:
+class FacebookInfo:
     user_id: str = ''
     email: str = ''
     name: str = ''
     token: str = ''
 
 
-class FacebookUserSerializer(serializers.Serializer):
+class FacebookInfoSerializer(serializers.Serializer):
     user_id = serializers.CharField()
     email = serializers.CharField()
     name = serializers.CharField()
