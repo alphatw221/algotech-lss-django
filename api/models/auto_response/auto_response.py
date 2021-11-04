@@ -1,7 +1,6 @@
 from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
-from ..models.user import User
 
 
 class AutoResponse(models.Model):
@@ -14,7 +13,6 @@ class AutoResponse(models.Model):
 
     type = models.CharField(max_length=255, null=True, blank=True)
     status = models.CharField(max_length=255, null=True, blank=True)
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -29,7 +27,7 @@ class AutoResponseSerializer(serializers.ModelSerializer):
         model = AutoResponse
         fields = '__all__'
 
-    meta = serializers.JSONField()
+    meta = serializers.JSONField(default=dict)
 
 
 class AutoResponseAdmin(admin.ModelAdmin):

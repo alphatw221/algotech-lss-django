@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from django.contrib.auth.models import User
 from django.conf import settings
+from api.models.test.sample import Sample, SampleSerializer
 
 
 @api_view(['GET'])
@@ -32,3 +33,10 @@ class TestViewSet(viewsets.GenericViewSet):
     @action(detail=False, methods=['GET'])
     def test(self, request, *args, **kwargs):
         return Response({'msg': 'TestViewSet test accomplished.'})
+
+
+class SampleViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated,)
+    queryset = Sample.objects.all().order_by('id')
+    serializer_class = SampleSerializer
+    filterset_fields = []

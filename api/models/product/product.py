@@ -3,7 +3,7 @@
 from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
-from ..models.user import User
+from api.models.user.user import User
 
 
 class Product(models.Model):
@@ -31,7 +31,7 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = '__all__'
 
-    meta = serializers.JSONField()
+    meta = serializers.JSONField(default=dict)
 
 
 class ProductAdmin(admin.ModelAdmin):

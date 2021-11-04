@@ -1,6 +1,6 @@
 from rest_framework import viewsets
-from ..models.user import User, UserSerializer
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from api.models.user.user import User, UserSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):

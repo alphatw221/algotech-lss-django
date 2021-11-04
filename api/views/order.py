@@ -1,6 +1,6 @@
 from rest_framework import viewsets
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
-from ..models.order import Order, OrderSerializer
+from rest_framework.permissions import IsAuthenticated
+from api.models.order.order import Order, OrderSerializer
 
 
 class OrderViewSet(viewsets.ModelViewSet):

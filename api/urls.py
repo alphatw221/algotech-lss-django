@@ -3,7 +3,6 @@ from rest_framework import routers
 
 from .views import (
     test,
-    sample,
     user,
     auto_response,
     campaign,
@@ -25,7 +24,7 @@ def url_setup(urlpatterns):
         path('test/', test.test, name='test'),
         path('test_api/<path>/', test.test_api, name='test_api'),
     ]
-    router.register(r'sample', sample.SampleViewSet)
+    router.register(r'sample', test.SampleViewSet)
 
     router.register(r'user', user.UserViewSet)
 

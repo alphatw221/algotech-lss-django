@@ -15,7 +15,7 @@ class Sample(models.Model):
 
 
 class SampleSerializer(serializers.ModelSerializer):
-    meta = serializers.JSONField()
+    meta = serializers.JSONField(default=dict)
 
     class Meta:
         model = Sample

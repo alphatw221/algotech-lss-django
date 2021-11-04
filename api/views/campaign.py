@@ -1,6 +1,6 @@
 from rest_framework import viewsets
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
-from ..models.campaign import Campaign, CampaignSerializer
+from rest_framework.permissions import IsAuthenticated
+from api.models.campaign.campaign import Campaign, CampaignSerializer
 
 
 class CampaignViewSet(viewsets.ModelViewSet):

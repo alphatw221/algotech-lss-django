@@ -1,8 +1,8 @@
 
 from rest_framework import viewsets
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 
-from ..models.campaign_comment import CampaignComment, CampaignCommentSerializer
+from api.models.campaign.campaign_comment import CampaignComment, CampaignCommentSerializer
 
 
 class CampaignCommentViewSet(viewsets.ModelViewSet):

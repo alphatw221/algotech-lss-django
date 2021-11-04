@@ -4,10 +4,10 @@ from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
 
-from ..models.campaign import Campaign
-from ..models.campaign_product import CampaignProduct
-from ..models.campaign_comment import CampaignComment
-from ..models.campaign_order import CampaignOrder
+from api.models.campaign.campaign import Campaign
+from api.models.campaign.campaign_product import CampaignProduct
+from api.models.campaign.campaign_comment import CampaignComment
+from api.models.campaign.campaign_order import CampaignOrder
 
 
 class OrderProduct(models.Model):
@@ -45,7 +45,7 @@ class OrderProductSerializer(serializers.ModelSerializer):
         model = OrderProduct
         fields = '__all__'
 
-    meta = serializers.JSONField()
+    meta = serializers.JSONField(default=dict)
 
 
 class OrderProductAdmin(admin.ModelAdmin):

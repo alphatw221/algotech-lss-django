@@ -1,6 +1,6 @@
 from rest_framework import viewsets
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
-from ..models.product import Product, ProductSerializer
+from rest_framework.permissions import IsAuthenticated
+from api.models.product.product import Product, ProductSerializer
 
 
 class ProductViewSet(viewsets.ModelViewSet):

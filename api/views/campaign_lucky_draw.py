@@ -1,7 +1,7 @@
 from rest_framework import viewsets
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 
-from ..models.campaign_lucky_draw import CampaignLuckyDraw, CampaignLuckyDrawSerializer
+from api.models.campaign.campaign_lucky_draw import CampaignLuckyDraw, CampaignLuckyDrawSerializer
 
 
 class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
