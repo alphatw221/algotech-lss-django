@@ -6,12 +6,12 @@ from .models import (
     auto_response,
     campaign,
     campaign_product,
-    campaign_order,
-    order_product,
-    campaign_lucky_draw,
     campaign_comment,
+    campaign_order,
+    campaign_lucky_draw,
     product,
-    order
+    order,
+    order_product,
 )
 
 
@@ -21,11 +21,6 @@ admin.site.register(user.User, user.UserAdmin)
 
 admin.site.register(auto_response.AutoResponse,
                     auto_response.AutoResponseAdmin)
-admin.site.register(product.Product, product.ProductAdmin)
-
-admin.site.register(order_product.OrderProduct,
-                    order_product.OrderProductAdmin)
-admin.site.register(order.Order, order.OrderAdmin)
 
 admin.site.register(campaign.Campaign, campaign.CampaignAdmin)
 admin.site.register(campaign_product.CampaignProduct,
@@ -36,3 +31,9 @@ admin.site.register(campaign_lucky_draw.CampaignLuckyDraw,
                     campaign_lucky_draw.CampaignLuckyDrawAdmin)
 admin.site.register(campaign_comment.CampaignComment,
                     campaign_comment.CampaignCommentAdmin)
+
+# admin.site.register(product.Product, product.ProductAdmin)
+
+# admin.site.register(order.Order, order.OrderAdmin)
+# admin.site.register(order_product.OrderProduct,
+#                     order_product.OrderProductAdmin)

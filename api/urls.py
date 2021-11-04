@@ -2,18 +2,18 @@ from django.urls import path, include
 from rest_framework import routers
 
 from .views import (
-    auto_response,
-    campaign,
-    campaign_comment,
-    campaign_lucky_draw,
-    campaign_order,
-    campaign_product,
-    order_product,
-    order,
-    product,
-    user,
     test,
     sample,
+    user,
+    auto_response,
+    campaign,
+    campaign_product,
+    campaign_comment,
+    campaign_order,
+    campaign_lucky_draw,
+    product,
+    order,
+    order_product,
 )
 
 
@@ -27,6 +27,8 @@ def url_setup(urlpatterns):
     ]
     router.register(r'sample', sample.SampleViewSet)
 
+    router.register(r'user', user.UserViewSet)
+
     router.register(r'auto_response', auto_response.AutoResponseViewSet)
 
     router.register(r'campaign_comment',
@@ -38,12 +40,10 @@ def url_setup(urlpatterns):
                     campaign_product.CampaignProductViewSet)
     router.register(r'campaign', campaign.CampaignViewSet)
 
-    router.register(r'order_product', order_product.OrderProductViewSet)
-    router.register(r'order', order.OrderViewSet)
+    # router.register(r'product', product.ProductViewSet)
 
-    router.register(r'product', product.ProductViewSet)
-
-    router.register(r'user', user.UserViewSet)
+    # router.register(r'order_product', order_product.OrderProductViewSet)
+    # router.register(r'order', order.OrderViewSet)
 
     urlpatterns.append(path('', include(router.urls)))
 
