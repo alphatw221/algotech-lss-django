@@ -7,6 +7,7 @@ from .views import (
     test,
     user,
     user_group,
+    user_plan,
     auto_response,
     campaign,
     campaign_product,
@@ -31,6 +32,7 @@ def url_setup(urlpatterns):
 
     router.register(r'user', user.UserViewSet)
     router.register(r'user_group', user_group.UserGroupViewSet)
+    router.register(r'user_plan', user_plan.UserPlanViewSet)
 
     router.register(r'auto_response', auto_response.AutoResponseViewSet)
 

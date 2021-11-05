@@ -2,6 +2,7 @@ from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
 from api.models.user.facebook_info import FacebookInfoSerializer
+from api.models.user.user_plan import UserPlan
 
 
 class User(models.Model):
@@ -26,6 +27,8 @@ class User(models.Model):
 
     facebook_info = models.JSONField(null=True, blank=True, default=dict)
     youtube_info = models.JSONField(null=True, blank=True, default=dict)
+    user_plan = models.ForeignKey(
+        UserPlan, null=True, on_delete=models.SET_NULL, related_name='users')
     meta = models.JSONField(null=True, blank=True, default=dict)
     payment_meta = models.JSONField(null=True, blank=True, default=dict)
 
