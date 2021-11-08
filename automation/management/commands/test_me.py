@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
-from api.models.user.user import User, FacebookUser, FacebookUserSerializer
+from api.models.user.user import User
+from api.models.user.facebook_info import FacebookInfo, FacebookInfoSerializer
 
 
 class Command(BaseCommand):
@@ -9,8 +10,8 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        t = FacebookUser(user_id='testaaa', token='dsfsdf')
-        serializer = FacebookUserSerializer(t)
+        t = FacebookInfo(user_id='testaaa', token='dsfsdf')
+        serializer = FacebookInfoSerializer(t)
 
         user = User.objects.get(id=1)
         user.facebook = serializer.data
