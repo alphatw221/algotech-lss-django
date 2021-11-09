@@ -41,7 +41,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = '__all__'
 
-    facebook_info = FacebookInfoSerializer()
+    facebook_info = FacebookInfoSerializer(required=False)
     youtube_info = serializers.JSONField(default=dict)
     meta = serializers.JSONField(default=dict)
     payment_meta = serializers.JSONField(default=dict)

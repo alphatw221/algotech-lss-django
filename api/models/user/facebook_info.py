@@ -11,7 +11,7 @@ class FacebookInfo:
 
 
 class FacebookInfoSerializer(serializers.Serializer):
-    user_id = serializers.CharField()
-    email = serializers.CharField()
-    name = serializers.CharField()
-    token = serializers.CharField()
+    user_id = serializers.CharField(required=False)
+    email = serializers.CharField(required=False)
+    name = serializers.CharField(required=False)
+    token = serializers.CharField(required=False)
