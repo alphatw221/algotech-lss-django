@@ -1,49 +1,39 @@
 from django.urls import path, include
 from rest_framework import routers
 
-from api.models.user import user_group
-
-from .views import (
-    test,
-    user,
-    user_group,
-    user_plan,
-    auto_response,
-    campaign,
-    campaign_product,
-    campaign_comment,
-    campaign_order,
-    campaign_lucky_draw,
-    product,
-    order,
-    order_product,
-)
+from api.views.auto_response.auto_response import AutoResponseViewSet
+from api.views.campaign.campaign import CampaignViewSet
+from api.views.campaign.campaign_comment import CampaignCommentViewSet
+from api.views.campaign.campaign_lucky_draw import CampaignLuckyDrawViewSet
+from api.views.campaign.campaign_order import CampaignOrderViewSet
+from api.views.campaign.campaign_product import CampaignProductViewSet
+from api.views.test.test import SampleViewSet, TestViewSet, test, test_api
+from api.views.user.user import UserViewSet
+from api.views.user.user_group import UserGroupViewSet
+from api.views.user.user_plan import UserPlanViewSet
 
 
 def url_setup(urlpatterns):
     router = routers.DefaultRouter()
 
-    router.register(r'test_viewset', test.TestViewSet)
+    router.register(r'test_viewset', TestViewSet)
     urlpatterns += [
-        path('test/', test.test, name='test'),
-        path('test_api/<path>/', test.test_api, name='test_api'),
+        path('test/', test, name='test'),
+        path('test_api/<path>/', test_api, name='test_api'),
     ]
-    router.register(r'sample', test.SampleViewSet)
+    router.register(r'sample', SampleViewSet)
 
-    router.register(r'user', user.UserViewSet)
-    router.register(r'user_group', user_group.UserGroupViewSet)
-    router.register(r'user_plan', user_plan.UserPlanViewSet)
+    router.register(r'user', UserViewSet)
+    router.register(r'user_group', UserGroupViewSet)
+    router.register(r'user_plan', UserPlanViewSet)
 
-    router.register(r'auto_response', auto_response.AutoResponseViewSet)
+    router.register(r'auto_response', AutoResponseViewSet)
 
-    router.register(r'campaign_comment',
-                    campaign_comment.CampaignCommentViewSet)
-    router.register(r'campaign_lucky_draw',
-                    campaign_lucky_draw.CampaignLuckyDrawViewSet)
-    router.register(r'campaign_order', campaign_order.CampaignOrderViewSet)
-    router.register(r'campaign_product',
-                    campaign_product.CampaignProductViewSet)
-    router.register(r'campaign', campaign.CampaignViewSet)
+    router.register(r'campaign_comment', CampaignCommentViewSet)
+    router.register(r'campaign_lucky_draw', CampaignLuckyDrawViewSet)
+    router.register(r'campaign_order', CampaignOrderViewSet)
+    router.register(r'campaign_product', CampaignProductViewSet)
+    router.register(r'campaign', CampaignViewSet)
 
     # router.register(r'product', product.ProductViewSet)
 
