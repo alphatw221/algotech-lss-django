@@ -1,6 +1,7 @@
 import threading
-import pendulum
 import time
+import traceback
+import pendulum
 from django.core.management.base import BaseCommand
 
 
@@ -11,22 +12,24 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        threading.Thread(target=time_loop, args=(test_mod, 5),
-                         daemon=True).start()
+        threading.Thread(target=print_now, daemon=True).start()
 
         waiting_for_SIGINT = threading.Event().wait()
 
 
-def time_loop(func, sleep_time):
-    while True:
-        try:
-            func()
-        except:
-            ...
-        finally:
-            ...
-        time.sleep(sleep_time)
+def time_loop(sleep_time):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            while True:
+                try:
+                    func(*args, **kwargs)
+                except Exception:
+                    print(traceback.format_exc())
+                time.sleep(sleep_time)
+        return wrapper
+    return decorator
 
 
-def test_mod():
+@time_loop(5)
+def print_now():
     print(pendulum.now())
