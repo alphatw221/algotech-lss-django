@@ -1,7 +1,8 @@
 from django.core.management.base import BaseCommand
-from api.models.user.user import User
-from api.models.user.facebook_info import FacebookInfo, FacebookInfoSerializer
-from api.utils.api.facebook.user import api_fb_me
+from api.utils.api.facebook.page import *
+from api.utils.api.facebook.user import *
+from api.utils.api.facebook.post import *
+import pprint
 
 
 class Command(BaseCommand):
@@ -11,4 +12,8 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        api_fb_me('EAANwBngXqOABAIdePIFce0LlMlN5QogbsihP2paRAiGtunqsVmcrxwhFjcDYZArL0jvhaalblb3fhYOTgMgjweLMyBrMVvezA8L1CR0Q2cSy1nOg43t1xEksQmhQ3xLR7d6znCRvv7n79tl5poEuGO39u67pZBP1nc2gRL6ta1FiNLZAam081n2hVykp5JqQrU7STA6CCorcnZBnM5ukJ9pDdEWBSHUZD')
+        token = 'EAANwBngXqOABACRnLpEPLpWkFRCGeXy8ZCKR4djZCFof6ZBZCZCGZCulEViYZAt2rZB7SIXYWeE9gXhE5ODeY4vmTtK1ER7cf0ArFAfQGFDAnDN7n0Rq9t6s4Fkm9vRyKZBHBm9Txpk2z3DRuBYPaZByBw73tv3MQu1DN9CiqyTIFCSgCrIkj50GVNH4lgaD6mZBSH9UdN5wZAdZACAZDZD'
+        rc, rr = api_fb_get_page_posts(
+            token, "109130787659110",)
+        pprint.pprint(rc)
+        pprint.pprint(rr)

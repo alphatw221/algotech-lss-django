@@ -32,7 +32,7 @@ class RestApiJsonCaller:
         response = requests.post(self._get_url(),
                                  headers=self.headers,
                                  params=self.params,
-                                 data=self.data,)
+                                 json=self.data,)
         return self._jsonify_response(response)
 
     def _get_url(self):
