@@ -23,23 +23,35 @@ class RestApiJsonCaller:
             self.headers['Authorization'] = f'Bearer {self.bearer_token}'
 
     def get(self):
-        response = requests.get(self._get_url(),
-                                headers=self.headers,
-                                params=self.params,)
-        return self._jsonify_response(response)
+        return self.__request_template(requests.get,
+                                       headers=self.headers,
+                                       params=self.params,)
 
     def post(self):
-        response = requests.post(self._get_url(),
-                                 headers=self.headers,
-                                 params=self.params,
-                                 json=self.data,)
-        return self._jsonify_response(response)
+        return self.__request_template(requests.post,
+                                       headers=self.headers,
+                                       params=self.params,
+                                       json=self.data,)
 
-    def _get_url(self):
-        return f"{self.domain_url}/{f'{self.path}/' if self.path else ''}"
+    def _process_response(self, response):
+        if response.status_code // 100 == 2:
+            ...  # handels status code 2XX
+        else:
+            ...  # handels status code not 2XX
 
-    def _jsonify_response(self, response):
+    def _format_response(self, response):
         try:
             return response.status_code, response.json()
         except:
             return response.status_code, {'Invalid json response': response.text}
+
+    def __request_template(self, request_func, *args, **kwargs):
+        try:
+            response = request_func(url=self.__get_url(), *args, **kwargs)
+            self._process_response(response)
+            return self._format_response(response)
+        except Exception as e:
+            return 0, {'RestApiJsonCaller error': e}
+
+    def __get_url(self):
+        return f"{self.domain_url}/{f'{self.path}/' if self.path else ''}"
