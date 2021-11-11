@@ -25,9 +25,9 @@ class Campaign(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     facebook_page = models.ForeignKey(
-        FacebookPage, null=True, on_delete=models.SET_NULL, related_name='campaigns')
+        FacebookPage, blank=True, null=True, on_delete=models.SET_NULL, related_name='campaigns')
     youtube_channel = models.ForeignKey(
-        YoutubeChannel, null=True, on_delete=models.SET_NULL, related_name='campaigns')
+        YoutubeChannel, blank=True, null=True, on_delete=models.SET_NULL, related_name='campaigns')
     meta = models.JSONField(null=True, blank=True, default=None)
 
     def __str__(self):
@@ -40,8 +40,8 @@ class CampaignSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     meta = serializers.JSONField(default=dict)
-    facebook_page = FacebookPageSerializer()
-    youtube_channel = YoutubeChannelSerializer()
+    # facebook_page = FacebookPageSerializer()
+    # youtube_channel = YoutubeChannelSerializer()
 
 
 class CampaignAdmin(admin.ModelAdmin):
