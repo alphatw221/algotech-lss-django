@@ -12,8 +12,8 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        token = 'EAANwBngXqOABACRnLpEPLpWkFRCGeXy8ZCKR4djZCFof6ZBZCZCGZCulEViYZAt2rZB7SIXYWeE9gXhE5ODeY4vmTtK1ER7cf0ArFAfQGFDAnDN7n0Rq9t6s4Fkm9vRyKZBHBm9Txpk2z3DRuBYPaZByBw73tv3MQu1DN9CiqyTIFCSgCrIkj50GVNH4lgaD6mZBSH9UdN5wZAdZACAZDZD'
-        rc, rr = api_fb_get_page_posts(
-            token, "109130787659110",)
+        token = 'EAANwBngXqOABACkzcVQLUj2pypO5r9aVXySsg4FJZAynAZBYoJfCVteHNgfUh9QbGEnOZBxXgdDJFofwLi49vIp5ZC1h3NXw71oAUv0mpgFzDa19aoRID4QVnc4C5Tbc0r8JXBunHLTMoPELVURVOQoOYZAxTsw3IThx9fyajyurrBIfZAHsyRtlKs5Kw01NcTULERgrgyWSpvKm2RGQnZAzlihRpmPL90ZD'
+        rc, rr = api_fb_get_post_likes(
+            token, '109130787659110_1014690035757404')
         pprint.pprint(rc)
         pprint.pprint(rr)

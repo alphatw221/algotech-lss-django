@@ -1,6 +1,15 @@
 from api.utils.api.facebook._fb_api_caller import FacebookApiCaller
 
 
+def api_fb_get_post_likes(page_token: str, post_id: str, since: int = 1):
+    params = {
+        'limit': 100
+    }
+    ret = FacebookApiCaller(f'{post_id}/likes', bearer_token=page_token,
+                            params=params).get()
+    return ret
+
+
 def api_fb_get_post_comments(page_token: str, post_id: str, since: int = 1):
     params = {
         'since': since, 'order': 'chronological', 'limit': 100,
@@ -27,6 +36,15 @@ def api_fb_post_page_comment_on_comment(page_token: str, comment_id: str, messag
         "message": message_text
     }
     ret = FacebookApiCaller(f'{comment_id}/comments', bearer_token=page_token,
+                            data=data).post()
+    return ret
+
+
+def api_fb_post_page_comment_on_post(page_token: str, post_id: str, message_text: str):
+    data = {
+        "message": message_text
+    }
+    ret = FacebookApiCaller(f'{post_id}/comments', bearer_token=page_token,
                             data=data).post()
     return ret
 

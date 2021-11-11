@@ -145,23 +145,23 @@ DATABASES = {
             # Production internal
             # 'host': 'mongodb://10.148.0.7:27017, 10.148.0.8:27017, 10.148.0.9:27017',
             # Production external
-            # 'host': 'mongodb://34.126.92.142:27017, 35.240.200.4:27017, 34.126.155.150:27017',
-            # 'replicaSet': 'rs0',
-            # 'username': 'lss',
-            # 'password': 'algo83111T%%',
-            # 'authSource': 'admin',
-            # 'authMechanism': 'SCRAM-SHA-1',
-            # 'readPreference': 'primary',
-            # 'ssl': False,
-            # Development
-            'host': 'mongodb://34.126.92.142,35.240.200.4,34.126.155.150',
-            'port': 27017,
+            'host': 'mongodb://34.126.92.142:27017, 35.240.200.4:27017, 34.126.155.150:27017',
+            'replicaSet': 'rs0',
             'username': 'lss',
             'password': 'algo83111T%%',
             'authSource': 'admin',
             'authMechanism': 'SCRAM-SHA-1',
             'readPreference': 'primary',
             'ssl': False,
+            # Development
+            # 'host': 'mongodb://34.126.92.142,35.240.200.4,34.126.155.150',
+            # 'port': 27017,
+            # 'username': 'lss',
+            # 'password': 'algo83111T%%',
+            # 'authSource': 'admin',
+            # 'authMechanism': 'SCRAM-SHA-1',
+            # 'readPreference': 'primary',
+            # 'ssl': False,
         }
     }
 }
@@ -223,7 +223,7 @@ WEB_SERVER_URL = "https://"
 SHOPPING_CART_URL = f"{WEB_SERVER_URL}/"
 
 # Facebook
-FACEBOOK_API_URL = "https://graph.facebook.com/"
+FACEBOOK_API_URL = "https://graph.facebook.com"
 FACEBOOK_APP_CREDS = {
     "name": "Live Show Seller - Algotech",
     "app_id": "967598017063136",
