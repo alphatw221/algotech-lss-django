@@ -16,7 +16,7 @@ class FacebookPage(models.Model):
         max_length=255, null=True, blank=True, default='Asia/Singapore')
     token = models.CharField(max_length=255, null=True, blank=True)
     token_update_by = models.CharField(max_length=255, null=True, blank=True)
-    token_update_at = models.DateTimeField()
+    token_update_at = models.DateTimeField(null=True)
 
     type = models.CharField(max_length=255, null=True, blank=True)
     status = models.CharField(max_length=255, null=True, blank=True)

@@ -43,7 +43,6 @@ class CampaignProductSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     meta = serializers.JSONField(default=dict)
-    platform_meta = serializers.JSONField(default=dict)
 
 
 class CampaignProductAdmin(admin.ModelAdmin):

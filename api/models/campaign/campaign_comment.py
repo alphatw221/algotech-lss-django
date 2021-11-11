@@ -34,7 +34,6 @@ class CampaignCommentSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     meta = serializers.JSONField(default=dict)
-    platform_meta = serializers.JSONField(default=dict)
 
 
 class CampaignCommentAdmin(admin.ModelAdmin):

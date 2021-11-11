@@ -3,21 +3,27 @@ from rest_framework import routers
 
 from api.models.user import user_group
 
-from .views import (
-    test,
-    user,
-    user_group,
-    user_plan,
-    auto_response,
-    campaign,
-    campaign_product,
-    campaign_comment,
-    campaign_order,
-    campaign_lucky_draw,
-    product,
-    order,
-    order_product,
-)
+from api.views.test import test
+
+from api.views.user import user
+from api.views.user import user_group
+from api.views.user import user_plan
+
+from api.views.auto_response import auto_response
+
+from api.views.campaign import campaign
+from api.views.campaign import campaign_comment
+from api.views.campaign import campaign_lucky_draw
+from api.views.campaign import campaign_order
+from api.views.campaign import campaign_product
+
+
+from api.views.facebook import facebook_page
+
+from api.views.product import order_product
+from api.views.product import product
+
+from api.views.order import order
 
 
 def url_setup(urlpatterns):
@@ -45,10 +51,12 @@ def url_setup(urlpatterns):
                     campaign_product.CampaignProductViewSet)
     router.register(r'campaign', campaign.CampaignViewSet)
 
-    # router.register(r'product', product.ProductViewSet)
+    router.register(r'facebook_page', facebook_page.FacebookPageViewSet)
 
-    # router.register(r'order_product', order_product.OrderProductViewSet)
-    # router.register(r'order', order.OrderViewSet)
+    router.register(r'product', product.ProductViewSet)
+    router.register(r'order_product', order_product.OrderProductViewSet)
+
+    router.register(r'order', order.OrderViewSet)
 
     urlpatterns.append(path('', include(router.urls)))
 
