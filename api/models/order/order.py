@@ -6,7 +6,6 @@ from rest_framework import serializers
 
 
 class Order(models.Model):
-
     user_id = models.CharField(max_length=255, null=True, blank=True)
     user_name = models.CharField(max_length=255, null=True, blank=True)
     image = models.CharField(max_length=255, null=True, blank=True)
@@ -17,6 +16,7 @@ class Order(models.Model):
 
     meta = models.JSONField(default=None, null=True, blank=True)
     product = models.JSONField(default=None, null=True, blank=True)
+    history = models.JSONField(default=None, null=True, blank=True)
 
 
 class OrderSerializer(serializers.ModelSerializer):
@@ -27,6 +27,8 @@ class OrderSerializer(serializers.ModelSerializer):
         read_only_fields = ['created_at', 'modified_at']
 
     meta = serializers.JSONField(default=dict)
+    product = serializers.JSONField(default=dict)
+    history = serializers.JSONField(default=dict)
 
 
 class OrderAdmin(admin.ModelAdmin):

@@ -1,9 +1,9 @@
-
-#TODO: WIP
 from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
 from api.models.campaign.campaign import Campaign
+from api.models.campaign.campaign_product import CampaignProduct
+from api.models.campaign.campaign_comment import CampaignComment
 
 
 class CartProduct(models.Model):
@@ -12,6 +12,13 @@ class CartProduct(models.Model):
 
     campaign = models.ForeignKey(
         Campaign, blank=True, null=True, on_delete=models.SET_NULL, related_name='cart_products')
+    campaign_product = models.ForeignKey(
+        CampaignProduct, blank=True, null=True, on_delete=models.SET_NULL, related_name='cart_products')
+    campaign_comment = models.ForeignKey(
+        CampaignComment, blank=True, null=True, on_delete=models.SET_NULL, related_name='cart_products')
+
+    qty = models.IntegerField(blank=False, null=True, default=0)
+    order_code = models.CharField(max_length=255, null=True, blank=True)
 
     customer_id = models.CharField(max_length=255, null=True, blank=True)
     customer_name = models.CharField(max_length=255, null=True, blank=True)
