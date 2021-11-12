@@ -11,13 +11,45 @@ class CampaignProduct(models.Model):
 
     campaign = models.ForeignKey(
         Campaign, on_delete=models.CASCADE, related_name='products')
-    product = models.ForeignKey(
-        Product, on_delete=models.CASCADE, related_name='campaign_products')
 
-    name = models.CharField(max_length=255, null=True, blank=True)
+    qty_for_sale = models.IntegerField(blank=False, null=True, default=0)
+    qty_sold = models.IntegerField(blank=False, null=True, default=0)
+
+    product = models.ForeignKey(
+        Product, blank=True, null=True, on_delete=models.SET_NULL, related_name='campaign_products')
+
+    name = models.CharField(max_length=255, null=True,
+                            blank=True, default=None)
+    excerpt = models.TextField(null=True, blank=True, default=None)
+    description = models.TextField(null=True, blank=True, default=None)
+    content = models.TextField(null=True, blank=True, default=None)
+    remark = models.TextField(null=True, blank=True, default=None)
+    price = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True, default=0)
+    price_ori = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True, default=0)
+    tax = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True, default=0)
+    currency = models.CharField(
+        max_length=255, null=True, blank=True, default=None)
+    cost = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True, default=0)
+    cost_currency = models.CharField(
+        max_length=8, null=True, blank=True, default=None)
+    points = models.IntegerField(
+        null=True, blank=True, default=0)
+    model = models.CharField(
+        max_length=32, null=True, blank=True, default=None)
+    sku = models.CharField(
+        max_length=32, null=True, blank=True, default=None)
+    upc = models.CharField(
+        max_length=32, null=True, blank=True, default=None)
+    image = models.CharField(
+        max_length=256, null=True, blank=True, default=None)
+    sort_order = models.IntegerField(
+        null=True, blank=True, default=0)
+
     order_code = models.CharField(max_length=255, null=True, blank=True)
-    quantity = models.IntegerField(blank=False, null=True, default=0)
-    sold_amount = models.IntegerField(blank=False, null=True, default=0)
     max_order_amount = models.IntegerField(
         blank=False, null=True, default=None)
     customer_removable = models.BooleanField(
@@ -30,10 +62,9 @@ class CampaignProduct(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    meta = models.JSONField(null=True, blank=True, default=None)
-
-    def __str__(self):
-        return self.name
+    meta = models.JSONField(default=None, null=True, blank=True)
+    meta_logistic = models.JSONField(default=None, null=True, blank=True)
+    tag = models.JSONField(default=None, null=True, blank=True)
 
 
 class CampaignProductSerializer(serializers.ModelSerializer):
@@ -41,6 +72,7 @@ class CampaignProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = CampaignProduct
         fields = '__all__'
+        read_only_fields = ['created_at', 'modified_at']
 
     meta = serializers.JSONField(default=dict)
 

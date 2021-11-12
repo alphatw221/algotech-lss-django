@@ -17,6 +17,7 @@ class CampaignComment(models.Model):
     customer_name = models.CharField(max_length=255, null=True, blank=True)
     image = models.CharField(max_length=512, null=True, blank=True)
 
+    platform = models.CharField(max_length=255, null=True, blank=True)
     type = models.CharField(max_length=255, null=True, blank=True)
     status = models.CharField(max_length=255, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -25,13 +26,14 @@ class CampaignComment(models.Model):
     meta = models.JSONField(null=True, blank=True, default=None)
 
     def __str__(self):
-        return str(self.id)
+        return self.message
 
 
 class CampaignCommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = CampaignComment
         fields = '__all__'
+        read_only_fields = ['created_at', 'modified_at']
 
     meta = serializers.JSONField(default=dict)
 

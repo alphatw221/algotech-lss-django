@@ -1,5 +1,3 @@
-
-#TODO: WIP
 from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
@@ -13,12 +11,13 @@ class CampaignLuckyDraw(models.Model):
 
     campaign = models.ForeignKey(
         Campaign, on_delete=models.CASCADE, related_name='campaign_lucky_draws')
-    campaign_product = models.ForeignKey(
-        CampaignProduct, on_delete=models.CASCADE, related_name='campaign_lucky_draws')
-    source_type = models.CharField(max_length=255, null=True, blank=True)
-    source_id = models.IntegerField(null=True, blank=True, default=None)
+    prize_campaign_product = models.ForeignKey(
+        CampaignProduct, blank=True, null=True, on_delete=models.SET_NULL, related_name='campaign_lucky_draws')
 
-    keyword = models.CharField(max_length=255, null=True, blank=True)
+    source_id = models.IntegerField(null=True, blank=True, default=None)
+    source_type = models.CharField(max_length=255, null=True, blank=True)
+    condition = models.CharField(max_length=255, null=True, blank=True)
+    condition_type = models.CharField(max_length=255, null=True, blank=True)
     num_of_winner = models.IntegerField(null=True, blank=True, default=1)
     candidate_set = models.JSONField(default=None, null=True, blank=True)
     winner_list = models.JSONField(default=None, null=True, blank=True)
@@ -30,14 +29,12 @@ class CampaignLuckyDraw(models.Model):
 
     meta = models.JSONField(default=None, null=True, blank=True)
 
-    def __str__(self):
-        return str(self.id)
-
 
 class CampaignLuckyDrawSerializer(serializers.ModelSerializer):
     class Meta:
         model = CampaignLuckyDraw
         fields = '__all__'
+        read_only_fields = ['created_at', 'modified_at']
 
     meta = serializers.JSONField(default=dict)
 

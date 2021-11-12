@@ -40,6 +40,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = '__all__'
+        read_only_fields = ['created_at', 'modified_at']
 
     facebook_info = FacebookInfoSerializer(required=False)
     youtube_info = serializers.JSONField(default=dict)

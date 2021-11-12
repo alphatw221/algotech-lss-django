@@ -4,7 +4,7 @@ from rest_framework import serializers
 from api.models.user.user import User
 from api.models.facebook.facebook_page import FacebookPage, FacebookPageSerializer
 from api.models.youtube.youtube_channel import YoutubeChannel, YoutubeChannelSerializer
-from dataclasses import dataclass
+from api.models.campaign.facebook_campaign import FacebookCampaign
 
 
 class Campaign(models.Model):
@@ -26,33 +26,30 @@ class Campaign(models.Model):
 
     facebook_page = models.ForeignKey(
         FacebookPage, blank=True, null=True, on_delete=models.SET_NULL, related_name='campaigns')
+    facebook_campaign = models.JSONField(null=True, blank=True, default=None)
     youtube_channel = models.ForeignKey(
         YoutubeChannel, blank=True, null=True, on_delete=models.SET_NULL, related_name='campaigns')
+    youtube_campaign = models.JSONField(null=True, blank=True, default=None)
     meta = models.JSONField(null=True, blank=True, default=None)
 
     def __str__(self):
-        return str(self.id)
+        return self.title
 
 
 class CampaignSerializer(serializers.ModelSerializer):
     class Meta:
         model = Campaign
         fields = '__all__'
+        read_only_fields = ['created_at', 'modified_at']
 
     meta = serializers.JSONField(default=dict)
     # facebook_page = FacebookPageSerializer()
+    facebook_campaign = serializers.JSONField(default=dict)
     # youtube_channel = YoutubeChannelSerializer()
+    youtube_campaign = serializers.JSONField(default=dict)
 
 
 class CampaignAdmin(admin.ModelAdmin):
     model = Campaign
     list_display = [field.name for field in Campaign._meta.fields]
     search_fields = [field.name for field in Campaign._meta.fields]
-
-
-@dataclass
-class FacebookCampaign:
-    page_id: str = ''
-    post_id: str = ''
-    live_video_id: str = ''
-    embed_url: str = ''

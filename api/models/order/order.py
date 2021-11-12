@@ -3,23 +3,20 @@
 from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
-from api.models.campaign.campaign import Campaign
 
 
 class Order(models.Model):
-
-    def __str__(self):
-        return str(self.id)
 
     user_id = models.CharField(max_length=255, null=True, blank=True)
     user_name = models.CharField(max_length=255, null=True, blank=True)
     image = models.CharField(max_length=255, null=True, blank=True)
     remark = models.TextField(default=None, null=True, blank=True)
 
-    meta = models.JSONField(default=None, null=True, blank=True)
-
-    updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    meta = models.JSONField(default=None, null=True, blank=True)
+    product = models.JSONField(default=None, null=True, blank=True)
 
 
 class OrderSerializer(serializers.ModelSerializer):
@@ -27,6 +24,7 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = '__all__'
+        read_only_fields = ['created_at', 'modified_at']
 
     meta = serializers.JSONField(default=dict)
 

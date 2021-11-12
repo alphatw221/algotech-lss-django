@@ -18,14 +18,12 @@ class AutoResponse(models.Model):
 
     meta = models.JSONField(null=True, blank=True, default=None)
 
-    def __str__(self):
-        return str(self.id)
-
 
 class AutoResponseSerializer(serializers.ModelSerializer):
     class Meta:
         model = AutoResponse
         fields = '__all__'
+        read_only_fields = ['created_at', 'modified_at']
 
     meta = serializers.JSONField(default=dict)
 

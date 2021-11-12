@@ -27,6 +27,7 @@ class UserPlanSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserPlan
         fields = '__all__'
+        read_only_fields = ['created_at', 'modified_at']
 
     meta = serializers.JSONField(default=dict)
 

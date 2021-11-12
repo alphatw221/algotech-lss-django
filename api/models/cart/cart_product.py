@@ -1,15 +1,17 @@
+
+#TODO: WIP
 from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
 from api.models.campaign.campaign import Campaign
 
 
-class CampaignOrder(models.Model):
+class CartProduct(models.Model):
     class Meta:
-        db_table = 'api_campaign_order'
+        db_table = 'api_cart_product'
 
     campaign = models.ForeignKey(
-        Campaign, on_delete=models.CASCADE, related_name='campaign_orders')
+        Campaign, blank=True, null=True, on_delete=models.SET_NULL, related_name='cart_products')
 
     customer_id = models.CharField(max_length=255, null=True, blank=True)
     customer_name = models.CharField(max_length=255, null=True, blank=True)
@@ -24,20 +26,18 @@ class CampaignOrder(models.Model):
 
     meta = models.JSONField(null=True, blank=True, default=None)
 
-    def __str__(self):
-        return str(self.id)
 
-
-class CampaignOrderSerializer(serializers.ModelSerializer):
+class CartProductSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = CampaignOrder
+        model = CartProduct
         fields = '__all__'
+        read_only_fields = ['created_at', 'modified_at']
 
     meta = serializers.JSONField(default=dict)
 
 
-class CampaignOrderAdmin(admin.ModelAdmin):
-    model = CampaignOrder
-    list_display = [field.name for field in CampaignOrder._meta.fields]
-    search_fields = [field.name for field in CampaignOrder._meta.fields]
+class CartProductAdmin(admin.ModelAdmin):
+    model = CartProduct
+    list_display = [field.name for field in CartProduct._meta.fields]
+    search_fields = [field.name for field in CartProduct._meta.fields]
