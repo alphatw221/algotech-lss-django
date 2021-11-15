@@ -6,8 +6,8 @@ from djongo import models
 class Sample(models.Model):
     title = models.CharField(max_length=255, null=True, blank=True)
     integer = models.IntegerField(null=True, blank=True)
-    decimal = models.DecimalField(
-        max_digits=10, decimal_places=2, blank=True, null=True)
+    decimal = models.CharField(
+        max_length=255, null=True, blank=True, default='0.00')
     meta = models.JSONField(
         blank=False, null=True, default=None)
     updated_at = models.DateTimeField(auto_now=True)

@@ -24,16 +24,16 @@ class CampaignProduct(models.Model):
     description = models.TextField(null=True, blank=True, default=None)
     content = models.TextField(null=True, blank=True, default=None)
     remark = models.TextField(null=True, blank=True, default=None)
-    price = models.DecimalField(
-        max_digits=10, decimal_places=2, null=True, blank=True, default=0)
-    price_ori = models.DecimalField(
-        max_digits=10, decimal_places=2, null=True, blank=True, default=0)
-    tax = models.DecimalField(
-        max_digits=10, decimal_places=2, null=True, blank=True, default=0)
+    price = models.CharField(
+        max_length=255, null=True, blank=True, default='0.00')
+    price_ori = models.CharField(
+        max_length=255, null=True, blank=True, default='0.00')
+    tax = models.CharField(
+        max_length=255, null=True, blank=True, default='0.00')
     currency = models.CharField(
         max_length=255, null=True, blank=True, default=None)
-    cost = models.DecimalField(
-        max_digits=10, decimal_places=2, null=True, blank=True, default=0)
+    cost = models.CharField(
+        max_length=255, null=True, blank=True, default='0.00')
     cost_currency = models.CharField(
         max_length=8, null=True, blank=True, default=None)
     points = models.IntegerField(

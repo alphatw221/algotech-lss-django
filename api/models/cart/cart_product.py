@@ -20,12 +20,11 @@ class CartProduct(models.Model):
     qty = models.IntegerField(blank=False, null=True, default=0)
     order_code = models.CharField(max_length=255, null=True, blank=True)
 
-    customer_id = models.CharField(max_length=255, null=True, blank=True)
-    customer_name = models.CharField(max_length=255, null=True, blank=True)
-    remark = models.TextField(default=None, null=True, blank=True)
-    image = models.CharField(max_length=512, null=True, blank=True)
-
     platform = models.CharField(max_length=255, null=True, blank=True)
+    platform_id = models.CharField(max_length=255, null=True, blank=True)
+    platform_email = models.CharField(max_length=255, null=True, blank=True)
+    remark = models.TextField(default=None, null=True, blank=True)
+
     type = models.CharField(max_length=255, null=True, blank=True)
     status = models.CharField(max_length=255, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
