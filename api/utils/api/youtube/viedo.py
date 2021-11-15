@@ -25,7 +25,7 @@ def api_youtube_get_video_comment_thread(page_token: str, video_id: str, max_res
     return ret
 
 
-def api_youtube_post_video_comment_thread(access_token: str, comment_thread_id: str, text: str):
+def api_youtube_post_video_comment(access_token: str, comment_thread_id: str, text: str):
 
     data = {
         "snippet": {
