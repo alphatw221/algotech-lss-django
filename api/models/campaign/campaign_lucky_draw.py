@@ -19,15 +19,15 @@ class CampaignLuckyDraw(models.Model):
     condition = models.CharField(max_length=255, null=True, blank=True)
     condition_type = models.CharField(max_length=255, null=True, blank=True)
     num_of_winner = models.IntegerField(null=True, blank=True, default=1)
-    candidate_set = models.JSONField(default=None, null=True, blank=True)
-    winner_list = models.JSONField(default=None, null=True, blank=True)
+    candidate_set = models.JSONField(default=dict, null=True, blank=True)
+    winner_list = models.JSONField(default=dict, null=True, blank=True)
 
     type = models.CharField(max_length=255, null=True, blank=True)
     status = models.CharField(max_length=255, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    meta = models.JSONField(default=None, null=True, blank=True)
+    meta = models.JSONField(default=dict, null=True, blank=True)
 
 
 class CampaignLuckyDrawSerializer(serializers.ModelSerializer):

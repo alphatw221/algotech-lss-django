@@ -101,9 +101,9 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    meta = models.JSONField(default=None, null=True, blank=True)
-    product = models.JSONField(default=None, null=True, blank=True)
-    history = models.JSONField(default=None, null=True, blank=True)
+    meta = models.JSONField(default=dict, null=True, blank=True)
+    product = models.JSONField(default=dict, null=True, blank=True)
+    history = models.JSONField(default=dict, null=True, blank=True)
 
 
 class OrderSerializer(serializers.ModelSerializer):

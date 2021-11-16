@@ -26,11 +26,11 @@ class Campaign(models.Model):
 
     facebook_page = models.ForeignKey(
         FacebookPage, blank=True, null=True, on_delete=models.SET_NULL, related_name='campaigns')
-    facebook_campaign = models.JSONField(null=True, blank=True, default=None)
+    facebook_campaign = models.JSONField(null=True, blank=True, default=dict)
     youtube_channel = models.ForeignKey(
         YoutubeChannel, blank=True, null=True, on_delete=models.SET_NULL, related_name='campaigns')
-    youtube_campaign = models.JSONField(null=True, blank=True, default=None)
-    meta = models.JSONField(null=True, blank=True, default=None)
+    youtube_campaign = models.JSONField(null=True, blank=True, default=dict)
+    meta = models.JSONField(null=True, blank=True, default=dict)
 
     def __str__(self):
         return self.title

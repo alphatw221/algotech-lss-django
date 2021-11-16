@@ -16,7 +16,7 @@ class AutoResponse(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    meta = models.JSONField(null=True, blank=True, default=None)
+    meta = models.JSONField(null=True, blank=True, default=dict)
 
 
 class AutoResponseSerializer(serializers.ModelSerializer):

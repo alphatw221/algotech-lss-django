@@ -52,9 +52,9 @@ class Product(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    meta = models.JSONField(default=None, null=True, blank=True)
-    meta_logistic = models.JSONField(default=None, null=True, blank=True)
-    tag = models.JSONField(default=None, null=True, blank=True)
+    meta = models.JSONField(default=dict, null=True, blank=True)
+    meta_logistic = models.JSONField(default=dict, null=True, blank=True)
+    tag = models.JSONField(default=dict, null=True, blank=True)
 
     def __str__(self):
         return self.name

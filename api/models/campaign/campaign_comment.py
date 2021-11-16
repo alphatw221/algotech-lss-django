@@ -2,6 +2,7 @@ from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
 from api.models.campaign.campaign import Campaign
+import time
 
 
 class CampaignComment(models.Model):
@@ -13,6 +14,8 @@ class CampaignComment(models.Model):
 
     comment_id = models.CharField(max_length=255, null=True, blank=True)
     message = models.TextField(null=True, blank=True, default=None)
+    commented_at = models.IntegerField(
+        null=True, blank=True, default=time.time)
     customer_id = models.CharField(max_length=255, null=True, blank=True)
     customer_name = models.CharField(max_length=255, null=True, blank=True)
     image = models.CharField(max_length=512, null=True, blank=True)
@@ -21,9 +24,8 @@ class CampaignComment(models.Model):
     type = models.CharField(max_length=255, null=True, blank=True)
     status = models.CharField(max_length=255, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
-    meta = models.JSONField(null=True, blank=True, default=None)
+    meta = models.JSONField(null=True, blank=True, default=dict)
 
     def __str__(self):
         return self.message
