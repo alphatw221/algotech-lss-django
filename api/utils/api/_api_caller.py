@@ -1,5 +1,8 @@
 from dataclasses import dataclass, field
 import requests
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -37,7 +40,11 @@ class RestApiJsonCaller:
         if response.status_code // 100 == 2:
             ...  # handels status code 2XX
         else:
-            ...  # handels status code not 2XX
+            logger.info(
+                f'Not 2XX response:\n'
+                f'{response.request.headers=}, {response.request.body=}, \n'
+                f'{response.status_code=}, {response.text=}'
+            )
 
     def _format_response(self, response):
         try:

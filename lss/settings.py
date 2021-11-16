@@ -65,16 +65,23 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'simple'
         },
-        'file': {
+        'file_error': {
             'level': 'ERROR',
             'class': 'logging.FileHandler',
             'filename': 'error.log',
             'formatter': 'standard'
         },
+        'file_info': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': 'info.log',
+            'formatter': 'standard'
+        },
     },
     'loggers': {
         '': {
-            'handlers': ['file'],
+            'handlers': ['file_error', 'file_info'],
+            'level': 'INFO',
             'propagate': True,
         },
     }
