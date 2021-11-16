@@ -18,7 +18,7 @@ class User(models.Model):
     description = models.TextField(null=True, blank=True, default=None)
     remark = models.TextField(null=True, blank=True, default=None)
     email = models.CharField(max_length=255, null=True,
-                             blank=True, unique=True)
+                             blank=True)
     phone = models.CharField(max_length=255, null=True, blank=True)
     image = models.CharField(max_length=512, null=True, blank=True)
     ip = models.CharField(max_length=255, null=True, blank=True)
