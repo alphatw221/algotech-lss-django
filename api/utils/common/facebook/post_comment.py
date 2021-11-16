@@ -2,7 +2,7 @@ from api.models.campaign.campaign import Campaign
 from api.utils.api.facebook.post import api_fb_get_post_comments
 from api.utils.orm.campaign_comment import get_latest_commented_at, update_or_create_comment
 
-MAX_REQUEST_TIMES = 10
+MAX_CONTINUOUS_REQUEST_TIMES = 10
 
 
 def campaign_facebook_post_capture_comments(campaign: Campaign):
@@ -26,7 +26,9 @@ def _capture_comments_helper(campaign: Campaign, page_token: str, post_id: str):
             return
 
         comments = data.get('data', [])
-        return _save_comments(comments)
+        _save_comments(comments)
+        _update_stats(comments)
+        return _get_since(comments)
 
     def _handle_facebook_error(data):
         if data['error']['type'] in ('GraphMethodException', 'OAuthException'):
@@ -43,14 +45,21 @@ def _capture_comments_helper(campaign: Campaign, page_token: str, post_id: str):
                 'customer_name': comment['from']['name'],
                 'image': comment['from']['picture']['data']['url'],
             })
-        return len(comments)
 
-    total_comment_captured = 0
-    for _ in range(MAX_REQUEST_TIMES):
-        since = get_latest_commented_at(campaign, 'facebook')
-        comment_captured = _capture_batch_comments(since)
-        total_comment_captured += comment_captured
-        if comment_captured <= 1:
+    def _update_stats(comments):
+        nonlocal total_comments_captured
+        total_comments_captured += len(comments)
+
+    def _get_since(comments):
+        if len(comments) <= 1:
+            return False  # False is the signal to stop iteration
+        return comments[-1]['created_time']
+
+    total_comments_captured = 0
+    since = get_latest_commented_at(campaign, 'facebook')
+    for _ in range(MAX_CONTINUOUS_REQUEST_TIMES):
+        since = _capture_batch_comments(since)
+        if not since:
             break
 
-    return total_comment_captured
+    return f'{campaign.id=} {total_comments_captured=}'
