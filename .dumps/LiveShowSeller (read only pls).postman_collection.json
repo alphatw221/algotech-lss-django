@@ -359,13 +359,76 @@
 			"name": "user",
 			"item": [
 				{
+					"name": "login",
+					"item": [
+						{
+							"name": "customer_login",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"id\":\"id123\",\r\n    \"name\":\"name123\",\r\n    \"email\":\"test@email.com\",\r\n    \"picture\":{\r\n        \"data\":{\r\n            \"heitht\":50,\r\n            \"is_silhouette\":false,\r\n            \"url\":\"facebook_picture_url\",\r\n            \"width\":50\r\n        }\r\n    }\r\n    \r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER_IP}}/api/user/customer_login/",
+									"host": [
+										"{{SERVER_IP}}"
+									],
+									"path": [
+										"api",
+										"user",
+										"customer_login",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "user_login",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"id\":\"id1234\",\r\n    \"name\":\"name1234\",\r\n    \"email\":\"test1234@email.com\",\r\n    \"picture\":{\r\n        \"data\":{\r\n            \"heitht\":50,\r\n            \"is_silhouette\":false,\r\n            \"url\":\"facebook_picture_url\",\r\n            \"width\":50\r\n        }\r\n    }\r\n    \r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER_IP}}/api/user/user_login/",
+									"host": [
+										"{{SERVER_IP}}"
+									],
+									"path": [
+										"api",
+										"user",
+										"user_login",
+										""
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
 					"name": "create",
 					"request": {
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\":\"test\",\r\n    \"company_name\":\"test\",\r\n    \"phone_number\":\"test\",\r\n    \"image\":\"test\",\r\n    \"ip\":\"test\",\r\n    \"remark\":\"test\",\r\n    \"payment_meta\":{\"test\":\"test\"},\r\n    \"platform_meta\":{\"test\":\"test\"},\r\n    \"meta\":{\"test\":\"test\"}\r\n}",
+							"raw": "{\r\n    \"name\":\"test\",\r\n    \"description\":\"test\",\r\n    \"remark\":\"test\",\r\n    \"email\":\"test\",\r\n    \"phone\":\"test\",\r\n    \"image\":\"test\",\r\n    \"ip\":\"test\",\r\n    \"region\":\"test\",\r\n    \"timezone\":\"Asiz/Singapore\",\r\n    \"type\":\"test\",\r\n    \"status\":\"test\",\r\n\r\n    \"facebook_info\":{\"user_id\":\"facebook_id\",\"email\":\"test@email.com\",\"name\":\"test_name\",\"token\":\"test_token\"},\r\n    \"youtube_info\":{},\r\n    \"user_plan\":null,\r\n\r\n    \"meta\":{\"test\":\"test\"},\r\n    \"payment_meta\":{\"test\":\"test\"}\r\n    \r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -410,13 +473,132 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{SERVER_IP}}/api/user/1",
+							"raw": "{{SERVER_IP}}/api/user/2",
 							"host": [
 								"{{SERVER_IP}}"
 							],
 							"path": [
 								"api",
 								"user",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"facebook_info\": {},\r\n    \"youtube_info\": {},\r\n    \"meta\": {},\r\n    \"payment_meta\": {},\r\n    \"name\": \"update_name\",\r\n    \"description\": \"test\",\r\n    \"remark\": \"test\",\r\n    \"email\": \"test\",\r\n    \"phone\": \"test\",\r\n    \"image\": \"test\",\r\n    \"ip\": \"test\",\r\n    \"region\": \"test\",\r\n    \"timezone\": \"Asiz/Singapore\",\r\n    \"type\": \"test\",\r\n    \"status\": \"test\",\r\n    \"user_plan\": 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER_IP}}/api/user/1/",
+							"host": [
+								"{{SERVER_IP}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "destroy",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER_IP}}/api/user_plan/1/",
+							"host": [
+								"{{SERVER_IP}}"
+							],
+							"path": [
+								"api",
+								"user_plan",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "user_plan",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\":\"test\",\r\n    \"description\":\"test\",\r\n    \"remark\":\"test\",\r\n    \"image\":\"test\",\r\n    \"type\":\"test\",\r\n    \"status\":\"test\",\r\n\r\n    \"meta\":{\"test\":\"test\"}\r\n    \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER_IP}}/api/user-plan/",
+							"host": [
+								"{{SERVER_IP}}"
+							],
+							"path": [
+								"api",
+								"user-plan",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "list",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER_IP}}/api/user-plan",
+							"host": [
+								"{{SERVER_IP}}"
+							],
+							"path": [
+								"api",
+								"user-plan"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "retrieve",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER_IP}}/api/user-plan/1",
+							"host": [
+								"{{SERVER_IP}}"
+							],
+							"path": [
+								"api",
+								"user-plan",
 								"1"
 							]
 						}
@@ -430,7 +612,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"update_name\"\r\n}",
+							"raw": "{\r\n    \r\n    \"name\": \"update_name\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -438,13 +620,13 @@
 							}
 						},
 						"url": {
-							"raw": "{{SERVER_IP}}/api/user/1/",
+							"raw": "{{SERVER_IP}}/api/user-plan/1/",
 							"host": [
 								"{{SERVER_IP}}"
 							],
 							"path": [
 								"api",
-								"user",
+								"user-plan",
 								"1",
 								""
 							]
@@ -458,13 +640,13 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{SERVER_IP}}/api/user/1/",
+							"raw": "{{SERVER_IP}}/api/user-plan/1/",
 							"host": [
 								"{{SERVER_IP}}"
 							],
 							"path": [
 								"api",
-								"user",
+								"user-plan",
 								"1",
 								""
 							]
@@ -475,7 +657,7 @@
 			]
 		},
 		{
-			"name": "campaign",
+			"name": "user_group",
 			"item": [
 				{
 					"name": "create",
@@ -484,7 +666,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"user\":1,\r\n    \"campaign_id\":\"test\",\r\n    \"post_id\":\"test\",\r\n    \"live_video_id\":\"test\",\r\n    \"embed_url\":\"test\",\r\n    \"title\":\"test\",\r\n    \"description\":\"test\",\r\n    \"user_id_added\":\"test\",\r\n    \"start_time\":\"2021-11-02T12:22:23.814000+08:00\",\r\n    \"end_time\":\"2021-11-03T12:22:23.814000+08:00\",\r\n    \"platform_meta\":{\"test\":\"test\"},\r\n    \"meta\":{\"test\": \"test\"}\r\n}",
+							"raw": "{\r\n    \"name\":\"test\",\r\n    \"description\":\"test\",\r\n    \"remark\":\"test\",\r\n    \"image\":\"test\",\r\n    \"type\":\"test\",\r\n    \"status\":\"test\",\r\n\r\n    \"meta\":{\"test\":\"test\"}\r\n    \r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -492,13 +674,13 @@
 							}
 						},
 						"url": {
-							"raw": "{{SERVER_IP}}/api/campaign/",
+							"raw": "{{SERVER_IP}}/api/user-group/",
 							"host": [
 								"{{SERVER_IP}}"
 							],
 							"path": [
 								"api",
-								"campaign",
+								"user-group",
 								""
 							]
 						}
@@ -511,13 +693,13 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{SERVER_IP}}/api/campaign",
+							"raw": "{{SERVER_IP}}/api/user-group",
 							"host": [
 								"{{SERVER_IP}}"
 							],
 							"path": [
 								"api",
-								"campaign"
+								"user-group"
 							]
 						}
 					},
@@ -529,15 +711,14 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{SERVER_IP}}/api/campaign/1/",
+							"raw": "{{SERVER_IP}}/api/user-group/1",
 							"host": [
 								"{{SERVER_IP}}"
 							],
 							"path": [
 								"api",
-								"campaign",
-								"1",
-								""
+								"user-group",
+								"1"
 							]
 						}
 					},
@@ -546,11 +727,11 @@
 				{
 					"name": "update",
 					"request": {
-						"method": "PATCH",
+						"method": "PUT",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"campaign_id\": \"update_id2\"\r\n}",
+							"raw": "{\r\n    \r\n    \"name\": \"update_name\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -558,13 +739,13 @@
 							}
 						},
 						"url": {
-							"raw": "{{SERVER_IP}}/api/campaign/1/",
+							"raw": "{{SERVER_IP}}/api/user-group/1/",
 							"host": [
 								"{{SERVER_IP}}"
 							],
 							"path": [
 								"api",
-								"campaign",
+								"user-group",
 								"1",
 								""
 							]
@@ -578,253 +759,13 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{SERVER_IP}}/api/campaign/1/",
+							"raw": "{{SERVER_IP}}/api/user-group/1/",
 							"host": [
 								"{{SERVER_IP}}"
 							],
 							"path": [
 								"api",
-								"campaign",
-								"1",
-								""
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "campaign_order",
-			"item": [
-				{
-					"name": "create",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"campaign\":1,\r\n    \"user_id\":\"test\",\r\n    \"user_name\":\"test\",\r\n    \"image\":\"test\",\r\n    \"remark\":\"test\",\r\n    \r\n    \"platform_meta\":{\"test\": \"test\"},\r\n    \"meta\":{\"test\": \"test\"}\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{SERVER_IP}}/api/campaign_order/",
-							"host": [
-								"{{SERVER_IP}}"
-							],
-							"path": [
-								"api",
-								"campaign_order",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "list",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{SERVER_IP}}/api/campaign_order",
-							"host": [
-								"{{SERVER_IP}}"
-							],
-							"path": [
-								"api",
-								"campaign_order"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "retrieve",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{SERVER_IP}}/api/campaign_order/1/",
-							"host": [
-								"{{SERVER_IP}}"
-							],
-							"path": [
-								"api",
-								"campaign_order",
-								"1",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "update",
-					"request": {
-						"method": "PATCH",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"remark\": \"update_remark\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{SERVER_IP}}/api/campaign_order/1/",
-							"host": [
-								"{{SERVER_IP}}"
-							],
-							"path": [
-								"api",
-								"campaign_order",
-								"1",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "destroy",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{SERVER_IP}}/api/campaign_order/1/",
-							"host": [
-								"{{SERVER_IP}}"
-							],
-							"path": [
-								"api",
-								"campaign_order",
-								"1",
-								""
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "order_product",
-			"item": [
-				{
-					"name": "create",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"campaign\":1,\r\n    \"campaign_order\":1,\r\n    \"campaign_product\":1,\r\n    \"campaign_comment\":1,\r\n    \"user_id\":\"test\",\r\n    \"user_name\":\"test\",\r\n    \"order_quantity\":0,\r\n    \"message\":\"test\",\r\n    \"order_stat\":0,\r\n    \"meta\":{\"test\": \"test\"}\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{SERVER_IP}}/api/order_product/",
-							"host": [
-								"{{SERVER_IP}}"
-							],
-							"path": [
-								"api",
-								"order_product",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "list",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{SERVER_IP}}/api/order_product",
-							"host": [
-								"{{SERVER_IP}}"
-							],
-							"path": [
-								"api",
-								"order_product"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "retrieve",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{SERVER_IP}}/api/order_product/1/",
-							"host": [
-								"{{SERVER_IP}}"
-							],
-							"path": [
-								"api",
-								"order_product",
-								"1",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "update",
-					"request": {
-						"method": "PATCH",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"order_quantity\": 1\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{SERVER_IP}}/api/order_product/1/",
-							"host": [
-								"{{SERVER_IP}}"
-							],
-							"path": [
-								"api",
-								"order_product",
-								"1",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "destroy",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{SERVER_IP}}/api/order_product/1/",
-							"host": [
-								"{{SERVER_IP}}"
-							],
-							"path": [
-								"api",
-								"order_product",
+								"user-group",
 								"1",
 								""
 							]
@@ -844,7 +785,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"message_req\":\"test\",\r\n    \"message_res\":\"test\",\r\n    \"message_type\":\"test\",\r\n    \"message_des\":\"test\",\r\n    \r\n    \"meta\":{\"test\": \"test\"}\r\n}",
+							"raw": "{\r\n    \"description\":\"test\",\r\n    \"input_msg\":\"test\",\r\n    \"output_msg\":\"test\",\r\n    \"type\":\"test\",\r\n    \"status\":\"test\",\r\n    \r\n    \"meta\":{\"test\": \"test\"}\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -906,11 +847,11 @@
 				{
 					"name": "update",
 					"request": {
-						"method": "PATCH",
+						"method": "PUT",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"message_req\": \"update_message_req\"\r\n}",
+							"raw": "{\r\n    \"description\": \"update_description\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -955,7 +896,7 @@
 			]
 		},
 		{
-			"name": "campaign_lucky_draw",
+			"name": "campaign",
 			"item": [
 				{
 					"name": "create",
@@ -964,7 +905,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"campaign\":1,\r\n    \"campaign_product\":1,\r\n    \"order_code\":\"test\",\r\n    \"num_of_winner\":10,\r\n    \"candidate_set\":\"test\",\r\n    \"winner_list\":\"test\",\r\n\r\n    \"platform_meta\":{\"test\": \"test\"},\r\n    \"meta\":{\"test\": \"test\"}\r\n}",
+							"raw": "{\r\n    \"created_by\":1,\r\n    \"title\":\"test\",\r\n    \"description\":\"test\",\r\n    \"start_at\":\"2021-11-02T12:22:23.814000+08:00\",\r\n    \"end_at\":\"2021-11-03T12:22:23.814000+08:00\",\r\n\r\n    \"type\":\"test\",\r\n    \"status\":\"test\",\r\n    \"facebook_page\":null,\r\n    \"facebook_campaign\":{},\r\n    \"youtube_channel\":null,\r\n    \"youtube_campaign\":{},\r\n    \"meta\":{\"test\": \"test\"}\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -972,13 +913,13 @@
 							}
 						},
 						"url": {
-							"raw": "{{SERVER_IP}}/api/campaign_lucky_draw/",
+							"raw": "{{SERVER_IP}}/api/campaign/",
 							"host": [
 								"{{SERVER_IP}}"
 							],
 							"path": [
 								"api",
-								"campaign_lucky_draw",
+								"campaign",
 								""
 							]
 						}
@@ -991,13 +932,13 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{SERVER_IP}}/api/campaign_lucky_draw",
+							"raw": "{{SERVER_IP}}/api/campaign",
 							"host": [
 								"{{SERVER_IP}}"
 							],
 							"path": [
 								"api",
-								"campaign_lucky_draw"
+								"campaign"
 							]
 						}
 					},
@@ -1009,13 +950,13 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{SERVER_IP}}/api/campaign_lucky_draw/1/",
+							"raw": "{{SERVER_IP}}/api/campaign/1/",
 							"host": [
 								"{{SERVER_IP}}"
 							],
 							"path": [
 								"api",
-								"campaign_lucky_draw",
+								"campaign",
 								"1",
 								""
 							]
@@ -1026,11 +967,11 @@
 				{
 					"name": "update",
 					"request": {
-						"method": "PATCH",
+						"method": "PUT",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"order_code\": \"update_order_code\"\r\n}",
+							"raw": "{\r\n    \"start_at\": \"2020-11-02T04:22:23.814000Z\",\r\n    \"end_at\": \"2022-11-03T04:22:23.814000Z\",\r\n    \"campaign_id\": \"update_id2\",\r\n    \"youtube_campaign\":{\"live_chat_id\":\"Cg0KC1BaQ1Jtd0NOZ0VRKicKGFVDb1FfSHU2UHZwSzBqREtyWW9TZ1FydxILUFpDUm13Q05nRVE\"}\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1038,253 +979,13 @@
 							}
 						},
 						"url": {
-							"raw": "{{SERVER_IP}}/api/campaign_lucky_draw/1/",
+							"raw": "{{SERVER_IP}}/api/campaign/1/",
 							"host": [
 								"{{SERVER_IP}}"
 							],
 							"path": [
 								"api",
-								"campaign_lucky_draw",
-								"1",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "destroy",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{SERVER_IP}}/api/campaign_lucky_draw/1/",
-							"host": [
-								"{{SERVER_IP}}"
-							],
-							"path": [
-								"api",
-								"campaign_lucky_draw",
-								"1",
-								""
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "campaign_comment",
-			"item": [
-				{
-					"name": "create",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"campaign\":1,\r\n    \"campaign_id\":\"test\",\r\n    \"user_id\":\"test\",\r\n    \"user_name\":\"test\",\r\n    \"message\":\"test5\",\r\n    \"picture_url\":\"test\",\r\n\r\n    \"platform_meta\":{\"test\": \"test\"},\r\n    \"meta\":{\"test\": \"test\"}\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{SERVER_IP}}/api/campaign_comment/",
-							"host": [
-								"{{SERVER_IP}}"
-							],
-							"path": [
-								"api",
-								"campaign_comment",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "list",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{SERVER_IP}}/api/campaign_comment",
-							"host": [
-								"{{SERVER_IP}}"
-							],
-							"path": [
-								"api",
-								"campaign_comment"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "retrieve",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{SERVER_IP}}/api/campaign_comment/1/",
-							"host": [
-								"{{SERVER_IP}}"
-							],
-							"path": [
-								"api",
-								"campaign_comment",
-								"1",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "update",
-					"request": {
-						"method": "PATCH",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"message\": \"update_message\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{SERVER_IP}}/api/campaign_comment/1/",
-							"host": [
-								"{{SERVER_IP}}"
-							],
-							"path": [
-								"api",
-								"campaign_comment",
-								"1",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "destroy",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{SERVER_IP}}/api/campaign_comment/1/",
-							"host": [
-								"{{SERVER_IP}}"
-							],
-							"path": [
-								"api",
-								"campaign_comment",
-								"1",
-								""
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "campaign_product",
-			"item": [
-				{
-					"name": "create",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"campaign\":1,\r\n    \"product\":1,\r\n    \"name\":null,\r\n    \"embed_url\":\"test\",\r\n    \"order_code\":\"test\",\r\n    \"product_quantity\":10,\r\n    \"product_order_amount\":1,\r\n    \"max_order_amount\":1,\r\n    \"customer_removable\":false,\r\n    \"customer_editable\":false,\r\n    \"product_active_stat\":0,\r\n\r\n    \"platform_meta\": {\"test\": \"test\"},\r\n    \"meta\":{\"test\": \"test\"}\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{SERVER_IP}}/api/campaign_product/",
-							"host": [
-								"{{SERVER_IP}}"
-							],
-							"path": [
-								"api",
-								"campaign_product",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "list",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{SERVER_IP}}/api/campaign_product",
-							"host": [
-								"{{SERVER_IP}}"
-							],
-							"path": [
-								"api",
-								"campaign_product"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "retrieve",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{SERVER_IP}}/api/campaign_product/1/",
-							"host": [
-								"{{SERVER_IP}}"
-							],
-							"path": [
-								"api",
-								"campaign_product",
-								"1",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "update",
-					"request": {
-						"method": "PATCH",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"meta\": \"{update_meta}\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{SERVER_IP}}/api/campaign_product/1/",
-							"host": [
-								"{{SERVER_IP}}"
-							],
-							"path": [
-								"api",
-								"campaign_product",
+								"campaign",
 								"1",
 								""
 							]
@@ -1315,6 +1016,486 @@
 			]
 		},
 		{
+			"name": "cart_product",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"campaign\":1,\r\n    \"campaign_product\":\"test\",\r\n    \"campaign_comment\":\"test\",\r\n\r\n    \"qty\":\"test\",\r\n    \"order_code\":\"test\",\r\n\r\n    \"customer_id\":\"test\",\r\n    \"customer_name\":\"test\",\r\n    \"remark\":\"test\",\r\n    \"image\":\"test\",\r\n    \r\n    \"platform\":\"test\",\r\n    \"type\":\"test\",\r\n    \"status\":\"test\",\r\n    \r\n    \"meta\":{\"test\": \"test\"}\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER_IP}}/api/cart-product/",
+							"host": [
+								"{{SERVER_IP}}"
+							],
+							"path": [
+								"api",
+								"cart-product",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "list",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER_IP}}/api/cart-product",
+							"host": [
+								"{{SERVER_IP}}"
+							],
+							"path": [
+								"api",
+								"cart-product"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "retrieve",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER_IP}}/api/cart-product/1/",
+							"host": [
+								"{{SERVER_IP}}"
+							],
+							"path": [
+								"api",
+								"cart-product",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"remark\": \"update_remark\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER_IP}}/api/cart-product/1/",
+							"host": [
+								"{{SERVER_IP}}"
+							],
+							"path": [
+								"api",
+								"cart-product",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "destroy",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER_IP}}/api/cart-product/1/",
+							"host": [
+								"{{SERVER_IP}}"
+							],
+							"path": [
+								"api",
+								"cart-product",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "campaign_comment",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"campaign\":1,\r\n    \"comment_id\":\"test\",\r\n    \"message\":\"test\",\r\n    \"customer_id\":\"test\",\r\n    \"customer_name\":\"test5\",\r\n    \"image\":\"test\",\r\n\r\n    \"platform\":\"test\",\r\n    \"type\":\"test\",\r\n    \"status\":\"test\",\r\n\r\n    \"meta\":{\"test\": \"test\"}\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER_IP}}/api/campaign-comment/",
+							"host": [
+								"{{SERVER_IP}}"
+							],
+							"path": [
+								"api",
+								"campaign-comment",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "list",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER_IP}}/api/campaign-comment",
+							"host": [
+								"{{SERVER_IP}}"
+							],
+							"path": [
+								"api",
+								"campaign-comment"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "retrieve",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER_IP}}/api/campaign-comment/1/",
+							"host": [
+								"{{SERVER_IP}}"
+							],
+							"path": [
+								"api",
+								"campaign-comment",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"campaign\":1,\r\n    \"message\": \"update_message\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER_IP}}/api/campaign-comment/1/",
+							"host": [
+								"{{SERVER_IP}}"
+							],
+							"path": [
+								"api",
+								"campaign-comment",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "destroy",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER_IP}}/api/campaign-comment/1/",
+							"host": [
+								"{{SERVER_IP}}"
+							],
+							"path": [
+								"api",
+								"campaign-comment",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "campaign_lucky_draw",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"campaign\":1,\r\n    \"prize_campaign_product\":1,\r\n    \r\n    \"source_id\":10,\r\n    \"source_type\":\"test\",\r\n    \"condition\":\"test\",\r\n    \"condition_type\":\"test\",\r\n    \"num_of_winner\":1,\r\n    \"candidate_set\":[],\r\n    \"winner_list\":[],\r\n    \"type\":\"test\",\r\n    \"status\":\"test\",\r\n    \r\n    \"meta\":{\"test\": \"test\"}\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER_IP}}/api/campaign-lucky_draw/",
+							"host": [
+								"{{SERVER_IP}}"
+							],
+							"path": [
+								"api",
+								"campaign-lucky_draw",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "list",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER_IP}}/api/campaign-lucky_draw",
+							"host": [
+								"{{SERVER_IP}}"
+							],
+							"path": [
+								"api",
+								"campaign-lucky_draw"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "retrieve",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER_IP}}/api/campaign-lucky_draw/1/",
+							"host": [
+								"{{SERVER_IP}}"
+							],
+							"path": [
+								"api",
+								"campaign-lucky_draw",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"campaign\":1,\r\n    \"campaign_product\":1,\r\n    \"status\": \"update_status\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER_IP}}/api/campaign-lucky_draw/1/",
+							"host": [
+								"{{SERVER_IP}}"
+							],
+							"path": [
+								"api",
+								"campaign-lucky_draw",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "destroy",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER_IP}}/api/campaign-lucky_draw/1/",
+							"host": [
+								"{{SERVER_IP}}"
+							],
+							"path": [
+								"api",
+								"campaign-lucky_draw",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "campaign_product",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"campaign\":1,\r\n\r\n\r\n    \"qty_for_sale\":10,\r\n    \"qty_sold\":0,\r\n\r\n    \"product\":1,\r\n    \"name\":\"test4\",\r\n    \"excerpt\":\"test\",\r\n    \"description\":\"test\",\r\n    \"content\":\"test\",\r\n    \"remark\":\"test\",\r\n\r\n    \"price\":10.00,\r\n    \"price_ori\":10.00,\r\n    \"tax\":1.00,\r\n    \"currency\":\"sgd\",\r\n    \"cost\":10.00,\r\n    \"cost_currency\":\"sgd\",\r\n\r\n    \"points\":1,\r\n    \"model\":\"test4\",\r\n    \"sku\":\"test4\",\r\n    \"upc\":\"test\",\r\n    \"image\":\"test4\",\r\n    \"sort_order\":1,\r\n\r\n    \"order_code\":\"test4\",\r\n    \"max_order_amount\":1,\r\n    \"customer_removable\":false,\r\n    \"customer_editable\":false,\r\n    \"type\":\"test\",\r\n    \"status\":\"test\",\r\n\r\n    \"meta\":{},\r\n    \"meta_logistic\":{},\r\n    \"tag\":[]\r\n\r\n\r\n\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER_IP}}/api/campaign-product/",
+							"host": [
+								"{{SERVER_IP}}"
+							],
+							"path": [
+								"api",
+								"campaign-product",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "list",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER_IP}}/api/campaign-product",
+							"host": [
+								"{{SERVER_IP}}"
+							],
+							"path": [
+								"api",
+								"campaign-product"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "retrieve",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER_IP}}/api/campaign-product/1/",
+							"host": [
+								"{{SERVER_IP}}"
+							],
+							"path": [
+								"api",
+								"campaign-product",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"meta\": {\"test\":\"update_test\"},\r\n    \"campaign\":1,\r\n    \"product\":1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER_IP}}/api/campaign-product/1/",
+							"host": [
+								"{{SERVER_IP}}"
+							],
+							"path": [
+								"api",
+								"campaign-product",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "destroy",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER_IP}}/api/campaign-product/1/",
+							"host": [
+								"{{SERVER_IP}}"
+							],
+							"path": [
+								"api",
+								"campaign-product",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "order",
 			"item": [
 				{
@@ -1324,7 +1505,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"campaign\":1,\r\n    \"user_id\":\"test\",\r\n    \"user_name\":\"test\",\r\n    \"image\":\"test\",\r\n    \"remark\":\"test\",\r\n    \r\n    \"platform_meta\":{\"test\": \"test\"},\r\n    \"meta\":{\"test\": \"test\"}\r\n}",
+							"raw": "{\r\n\r\n    \"user_id\":\"test\",\r\n    \"user_name\":\"test\",\r\n    \"image\":\"test\",\r\n    \"remark\":\"test\",\r\n    \r\n    \"meta\":{\"test\": \"test\"},\r\n    \"product\":{},\r\n    \"history\":{}\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1386,7 +1567,7 @@
 				{
 					"name": "update",
 					"request": {
-						"method": "PATCH",
+						"method": "PUT",
 						"header": [],
 						"body": {
 							"mode": "raw",
@@ -1435,6 +1616,246 @@
 			]
 		},
 		{
+			"name": "order_product",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"user_id\":\"test\",\r\n    \"user_name\":\"test\",\r\n    \"order_quantity\":1,\r\n    \"message\":\"test\",\r\n    \"order_stat\":1,\r\n    \"meta\":{\"test\": \"test\"}\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER_IP}}/api/order_product/",
+							"host": [
+								"{{SERVER_IP}}"
+							],
+							"path": [
+								"api",
+								"order_product",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "list",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER_IP}}/api/order_product",
+							"host": [
+								"{{SERVER_IP}}"
+							],
+							"path": [
+								"api",
+								"order_product"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "retrieve",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER_IP}}/api/order_product/1/",
+							"host": [
+								"{{SERVER_IP}}"
+							],
+							"path": [
+								"api",
+								"order_product",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"order_quantity\": 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER_IP}}/api/order_product/1/",
+							"host": [
+								"{{SERVER_IP}}"
+							],
+							"path": [
+								"api",
+								"order_product",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "destroy",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER_IP}}/api/order_product/1/",
+							"host": [
+								"{{SERVER_IP}}"
+							],
+							"path": [
+								"api",
+								"order_product",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "facebook_page",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"page_id\":\"109130787659110\",\r\n    \"name\":\"快賣\",\r\n    \"remark\":\"快賣\",\r\n    \"image\":\"快賣\",\r\n    \"region\":\"region\",\r\n    \"timezone\":\"timezone\",\r\n    \"token\": \"EAANwBngXqOABAPtWsHYvXj7jZCSgcZCu3hjVQQSTIJL2utZAgPUZCAlf1yQfLWIo8XUywsl2S95apmu7Yto3sOI66gZBaFpqjh2NYZCtPKy5EZAn84dJOlXX1LwFluyQMh5jqZBErQVDRBYcZBAqVa0zZAd5i2XbUrl7aASrGHlFmIZAu7nGNgYhltu\",\r\n    \"token_update_by\":null,\r\n    \"token_update_at\":\"2021-11-02T12:22:23\",\r\n    \"type\":\"test\",\r\n    \"status\":\"test\",\r\n    \"meta\":{},\r\n    \"payment_meta\":{}\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER_IP}}/api/facebook_page/",
+							"host": [
+								"{{SERVER_IP}}"
+							],
+							"path": [
+								"api",
+								"facebook_page",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "list",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER_IP}}/api/facebook_page",
+							"host": [
+								"{{SERVER_IP}}"
+							],
+							"path": [
+								"api",
+								"facebook_page"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "retrieve",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER_IP}}/api/facebook_page/1/",
+							"host": [
+								"{{SERVER_IP}}"
+							],
+							"path": [
+								"api",
+								"facebook_page",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"update_name\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER_IP}}/api/facebook_page/1/",
+							"host": [
+								"{{SERVER_IP}}"
+							],
+							"path": [
+								"api",
+								"facebook_page",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "destroy",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER_IP}}/api/campaign/1/",
+							"host": [
+								"{{SERVER_IP}}"
+							],
+							"path": [
+								"api",
+								"campaign",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "product",
 			"item": [
 				{
@@ -1444,7 +1865,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"user\":1,\r\n    \"name\":\"test4\",\r\n    \"quantity\":100,\r\n    \"image\":\"test\",\r\n    \"price\":100,\r\n    \"meta\":{\"test\": \"test\"}\r\n}",
+							"raw": "{\r\n    \"user\":1,\r\n    \"name\":\"test4\",\r\n    \"excerpt\":\"test\",\r\n    \"description\":\"test\",\r\n    \"content\":\"test\",\r\n    \"remark\":\"test\",\r\n\r\n    \"price\":10.00,\r\n    \"price_ori\":10.00,\r\n    \"tax\":1.00,\r\n    \"currency\":\"sgd\",\r\n    \"cost\":10.00,\r\n    \"cost_currency\":\"sgd\",\r\n\r\n    \"points\":1,\r\n    \"model\":\"test4\",\r\n    \"sku\":\"test4\",\r\n    \"upc\":\"test\",\r\n    \"image\":\"test4\",\r\n    \"sort_order\":1,\r\n\r\n    \"order_code\":\"test4\",\r\n    \"max_order_amount\":1,\r\n    \"customer_removable\":false,\r\n    \"customer_editable\":false,\r\n    \"type\":\"test\",\r\n    \"status\":\"test\",\r\n\r\n    \"meta\":{},\r\n    \"meta_logistic\":{},\r\n    \"tag\":[]\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1505,7 +1926,7 @@
 				{
 					"name": "update",
 					"request": {
-						"method": "PATCH",
+						"method": "PUT",
 						"header": [],
 						"body": {
 							"mode": "raw",
@@ -1559,7 +1980,7 @@
 		"bearer": [
 			{
 				"key": "token",
-				"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjM1OTkxMDExLCJpYXQiOjE2MzU5MDQ2MTEsImp0aSI6ImZiZDM5YWRjYmZkYjRiODM4MzIwNTgxOTU4NGEzMjRlIiwidXNlcl9pZCI6MX0.i5YNvSEPP2xM0ZNKRYLjoEo49vJXYvRknbgp6TsuZrE",
+				"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjM3NjU0ODgwLCJpYXQiOjE2MzcwNTAwODAsImp0aSI6ImQxMThlNWVhMDI4ZjRlODdhNjhiMmJmZWQ5MDZjNGI3IiwidXNlcl9pZCI6MX0.QncT6TmttdjE2-T1GXyv24Ox93SGR2hBFpR5RvQEWu0",
 				"type": "string"
 			}
 		]
@@ -1591,7 +2012,7 @@
 		},
 		{
 			"key": "PRODUCTION_IP",
-			"value": "https://gipassl.algotech.app/"
+			"value": "https://gipassl.algotech.app"
 		}
 	]
 }
