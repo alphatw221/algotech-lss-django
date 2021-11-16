@@ -68,20 +68,20 @@ LOGGING = {
         'file_error': {
             'level': 'ERROR',
             'class': 'logging.FileHandler',
-            'filename': 'error.log',
+            'filename': '_error.log',
             'formatter': 'standard'
         },
-        'file_info': {
-            'level': 'INFO',
+        'file_warning': {
+            'level': 'WARNING',
             'class': 'logging.FileHandler',
-            'filename': 'info.log',
+            'filename': '_warning.log',
             'formatter': 'standard'
         },
     },
     'loggers': {
         '': {
-            'handlers': ['file_error', 'file_info'],
-            'level': 'INFO',
+            'handlers': ['file_error', 'file_warning'],
+            'level': 'WARNING',
             'propagate': True,
         },
     }

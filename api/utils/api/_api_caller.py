@@ -40,8 +40,8 @@ class RestApiJsonCaller:
         if response.status_code // 100 == 2:
             ...  # handels status code 2XX
         else:
-            logger.info(
-                f'Not 2XX response:\n'
+            logger.warning(
+                f'Not 2XX HTTP Response:\n'
                 f'{response.request.headers=}, {response.request.body=}, \n'
                 f'{response.status_code=}, {response.text=}'
             )
