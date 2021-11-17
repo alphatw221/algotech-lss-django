@@ -22,3 +22,13 @@ def update_or_create_comment(campaign: Campaign, platform: str,
             defaults=defaults)
     except Exception:
         ...
+
+
+def get_comments_count(campaign: Campaign, platform: str):
+    try:
+        return CampaignComment.objects.filter(
+            campaign=campaign,
+            platform=platform
+        ).count()
+    except Exception:
+        return 0
