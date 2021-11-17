@@ -9,6 +9,11 @@ class CampaignComment(models.Model):
     class Meta:
         db_table = 'api_campaign_comment'
 
+    STATUS_CHOICES = [
+        (0, 'New'),
+        (1, 'Processed'),
+    ]
+
     campaign = models.ForeignKey(
         Campaign, on_delete=models.CASCADE, related_name='comments')
 
@@ -22,7 +27,8 @@ class CampaignComment(models.Model):
 
     platform = models.CharField(max_length=255, null=True, blank=True)
     type = models.CharField(max_length=255, null=True, blank=True)
-    status = models.CharField(max_length=255, null=True, blank=True)
+    status = models.IntegerField(blank=True,
+                                 choices=STATUS_CHOICES, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
     meta = models.JSONField(null=True, blank=True, default=dict)
