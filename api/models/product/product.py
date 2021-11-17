@@ -22,10 +22,6 @@ class Product(models.Model):
         max_length=255, null=True, blank=True, default='0.00')
     currency = models.CharField(
         max_length=255, null=True, blank=True, default=None)
-    cost = models.CharField(
-        max_length=255, null=True, blank=True, default='0.00')
-    cost_currency = models.CharField(
-        max_length=255, null=True, blank=True, default=None)
     points = models.IntegerField(
         null=True, blank=True, default=0)
     model = models.CharField(

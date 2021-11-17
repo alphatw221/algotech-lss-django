@@ -12,6 +12,7 @@ class FacebookPage(models.Model):
     remark = models.TextField(null=True, blank=True, default=None)
     image = models.CharField(max_length=512, null=True, blank=True)
     region = models.CharField(max_length=255, null=True, blank=True)
+    currency = models.CharField(max_length=255, null=True, blank=True)
     timezone = models.CharField(
         max_length=255, null=True, blank=True, default='Asia/Singapore')
     token = models.CharField(max_length=255, null=True, blank=True)

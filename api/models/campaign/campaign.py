@@ -19,6 +19,8 @@ class Campaign(models.Model):
     start_at = models.DateTimeField(null=True, blank=True, default=None)
     end_at = models.DateTimeField(null=True, blank=True, default=None)
 
+    currency = models.CharField(max_length=255, null=True, blank=True)
+
     type = models.CharField(max_length=255, null=True, blank=True)
     status = models.CharField(max_length=255, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
