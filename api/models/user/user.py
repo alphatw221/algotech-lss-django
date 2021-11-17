@@ -9,6 +9,11 @@ class User(models.Model):
     class Meta:
         db_table = 'api_user'
 
+    TYPE_CHOICES = [
+        ('customer', 'customer'),
+        ('user', 'user'),
+    ]
+
     name = models.CharField(max_length=255, null=True, blank=True)
     description = models.TextField(null=True, blank=True, default=None)
     remark = models.TextField(null=True, blank=True, default=None)
@@ -20,7 +25,8 @@ class User(models.Model):
     timezone = models.CharField(
         max_length=255, null=True, blank=True, default='Asia/Singapore')
 
-    type = models.CharField(max_length=255, null=True, blank=True)
+    type = models.CharField(max_length=255, null=True,
+                            blank=True, choices=TYPE_CHOICES, default='customer')
     status = models.CharField(max_length=255, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
