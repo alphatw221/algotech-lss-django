@@ -34,10 +34,10 @@ class UserViewSet(viewsets.ModelViewSet):
         else:
             user = User.objects.create(
                 name=facebook_name, email=email, type="customer")
-            user.facebook_info["id"] = facebook_id
-            user.facebook_info["name"] = facebook_name
-            user.facebook_info["picture"] = picture
-            user.save()
+        user.facebook_info["id"] = facebook_id
+        user.facebook_info["name"] = facebook_name
+        user.facebook_info["picture"] = picture
+        user.save()
 
         if AuthUser.objects.filter(email=email).exists():
             auth_user = AuthUser.objects.get(email=email)
@@ -71,10 +71,10 @@ class UserViewSet(viewsets.ModelViewSet):
         else:
             user = User.objects.create(
                 name=facebook_name, email=email, type="user")
-            user.facebook_info["id"] = facebook_id
-            user.facebook_info["name"] = facebook_name
-            user.facebook_info["picture"] = picture
-            user.save()
+        user.facebook_info["id"] = facebook_id
+        user.facebook_info["name"] = facebook_name
+        user.facebook_info["picture"] = picture
+        user.save()
 
         if AuthUser.objects.filter(email=email).exists():
             auth_user = AuthUser.objects.get(email=email)
