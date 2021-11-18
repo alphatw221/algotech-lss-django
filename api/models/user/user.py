@@ -1,10 +1,9 @@
 from django.contrib import admin
+from django.contrib.auth.models import User as AuthUser
 from djongo import models
 from rest_framework import serializers
 from api.models.user.facebook_info import FacebookInfoSerializer
 from api.models.user.user_plan import UserPlan
-
-from django.contrib.auth.models import User as AuthUser
 
 
 class User(models.Model):
