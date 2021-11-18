@@ -25,5 +25,7 @@ class Command(BaseCommand):
                 processor = CommentProcessor(campaign)
                 result = processor.process()
             except Exception as e:
+                import traceback
+                print(traceback.format_exc())
                 result = e
             print(f'{pendulum.now()} - {campaign.title=} {campaign.id=} - {result=}')
