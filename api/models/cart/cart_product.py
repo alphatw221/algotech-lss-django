@@ -21,8 +21,8 @@ class CartProduct(models.Model):
     order_code = models.CharField(max_length=255, null=True, blank=True)
 
     platform = models.CharField(max_length=255, null=True, blank=True)
-    platform_id = models.CharField(max_length=255, null=True, blank=True)
-    platform_email = models.CharField(max_length=255, null=True, blank=True)
+    customer_id = models.CharField(max_length=255, null=True, blank=True)
+    customer_name = models.CharField(max_length=255, null=True, blank=True)
     remark = models.TextField(default=None, null=True, blank=True)
 
     type = models.CharField(max_length=255, null=True, blank=True)

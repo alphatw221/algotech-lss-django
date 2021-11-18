@@ -3,8 +3,10 @@ from api.models.campaign.campaign import Campaign
 from api.utils.api.facebook.page import *
 from api.utils.api.facebook.user import *
 from api.utils.api.facebook.post import *
+from api.utils.common.campaign_comment.comment_processor import *
 from api.utils.common.facebook.post_comment import *
 from api.utils.orm.campaign import *
+from api.utils.orm.campaign_comment import *
 import pprint
 
 
@@ -15,4 +17,6 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        print(get_active_campaign_now())
+        campaign = Campaign.objects.get(pk=2)
+        processor = CommentProcessor(campaign)
+        processor.process()

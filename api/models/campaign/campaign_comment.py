@@ -33,9 +33,6 @@ class CampaignComment(models.Model):
 
     meta = models.JSONField(null=True, blank=True, default=dict)
 
-    def __str__(self):
-        return self.message
-
 
 class CampaignCommentSerializer(serializers.ModelSerializer):
     class Meta:

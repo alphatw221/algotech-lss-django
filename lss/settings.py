@@ -239,10 +239,6 @@ FACEBOOK_APP_CREDS = {
     "app_id": "967598017063136",
     "app_secret": "e36ab1560c8d85cbc413e07fb7232f99",
 }
-FACEBOOK_COMMENT_CAPTURING = {
-    'MAX_CONTINUOUS_REQUEST_TIMES': 10,
-    'REST_INTERVAL_SECONDS': 5,
-}
 
 # Youtube
 YOUTUBE_API_URL = ""
@@ -255,4 +251,13 @@ YOUTUBE_API_CONFIG = {
         "token_uri": "https://oauth2.googleapis.com/token",
         "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
     }
+}
+
+
+COMMENT_PROCESSING = {
+    'REST_INTERVAL_SECONDS': 3,
+}
+FACEBOOK_COMMENT_CAPTURING = {
+    'MAX_CONTINUOUS_REQUEST_TIMES': 10,
+    'REST_INTERVAL_SECONDS': 5,
 }

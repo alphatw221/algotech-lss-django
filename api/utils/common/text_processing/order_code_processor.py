@@ -1,15 +1,39 @@
+from api.models.campaign.campaign_comment import CampaignComment
+from api.models.campaign.campaign_product import CampaignProduct
+from api.utils.common.cart_product.cart_product_request import CartProductRequest
+from api.utils.common.text_processing._text_processor import TextProcessor
 
-# TODO: refactor order_code module
 
-""" 
+class OrderCodeProcessor(TextProcessor):
+    @staticmethod
+    def process(comment: CampaignComment, order_codes_mapping: dict[str, CampaignProduct]):
+        cart_product_requests = OrderCodeProcessor._get_orders_from_comment(
+            comment, order_codes_mapping)
+        return cart_product_requests
+
+    @staticmethod
+    def _get_orders_from_comment(comment: CampaignComment, order_codes_mapping: dict[str, CampaignProduct]):
+        cart_product_requests = []
+        text = comment.message.lower()
+
+        for order_code, campaign_product in order_codes_mapping.items():
+            qty = OrderCodeProcessor._get_order_from_text(text, order_code)
+            if qty:
+                cart_product_requests.append(
+                    CartProductRequest(campaign_product, comment, qty, order_code))
+        return cart_product_requests
+
+    def _get_order_from_text(text: str, order_code: str):
+        if not order_code:
+            return None
+
+        # TODO: complete the function
+
+        return 1
+
+
+#! deprecated
 def order_qty_in_comment(comment, order_code):
-    # Ignore empty order code
-    if order_code == '' or order_code is None:
-        return None
-
-    comment = comment.lower()
-    order_code = order_code.lower()
-
     porduct_name_index = comment.find(order_code)
     if porduct_name_index == -1:  # -1 means no match
         return None
@@ -65,4 +89,3 @@ def order_qty_in_comment(comment, order_code):
     if not order_amount:
         return None
     return int(order_amount)
-"""
