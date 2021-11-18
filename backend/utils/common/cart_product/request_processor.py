@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from api.models.cart.cart_product import CartProduct
-from api.utils.common.cart_product.request import CartProductRequest, CartProductRequestItem
+from backend.utils.common.cart_product.request import CartProductRequest, CartProductRequestItem
 
 
 class CartProductRequestProcessor(ABC):
@@ -14,15 +14,22 @@ class CartProductRequestProcessorV1(CartProductRequestProcessor):
     @staticmethod
     def process(request: CartProductRequest):
         for item in request.get_items():
+            CartProductRequestProcessorV1._validate_request(item)
             CartProductRequestProcessorV1._create_cart_product(item)
-            CartProductRequestProcessorV1._external_actions()
+        CartProductRequestProcessorV1._external_actions(request)
+
+    @staticmethod
+    def _validate_request(item: CartProductRequestItem):
+        ...
+        # TODO: check by qty and item.campaign_product
 
     @staticmethod
     def _create_cart_product(item: CartProductRequestItem):
-        print(item)
+        ...
+        # TODO: create cart product if valid
         CartProduct.objects.all()
 
     @staticmethod
-    def _external_actions():
+    def _external_actions(request):
         ...
-        # TODO
+        # TODO: request.campaign_comment.platform

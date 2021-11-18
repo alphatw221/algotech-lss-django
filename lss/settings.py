@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'django_cron',
     'api',
     'automation',
+    'backend',
 ]
 
 LOGGING = {
