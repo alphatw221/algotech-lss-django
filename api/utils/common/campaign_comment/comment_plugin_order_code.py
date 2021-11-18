@@ -9,7 +9,8 @@ from api.utils.common.text_processing._text_processor import TextProcessor
 @dataclass
 class CommentPluginOrderCode():
     @staticmethod
-    def process(text_processor: TextProcessor, cart_product_request_processor: CartProductRequestProcessor,
+    def process(text_processor: TextProcessor,
+                cart_product_request_processor: CartProductRequestProcessor,
                 comment: str, order_codes_mapping: dict[str, CampaignProduct]):
         if cart_product_requests := CommentPluginOrderCode._get_orders_from_comment(
                 text_processor, comment, order_codes_mapping):
@@ -17,7 +18,8 @@ class CommentPluginOrderCode():
 
     @staticmethod
     def _get_orders_from_comment(text_processor: TextProcessor,
-                                 comment: CampaignComment, order_codes_mapping: dict[str, CampaignProduct]):
+                                 comment: CampaignComment,
+                                 order_codes_mapping: dict[str, CampaignProduct]):
         cart_product_requests = None
         text = comment.message.lower()
 
