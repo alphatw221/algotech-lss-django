@@ -54,17 +54,6 @@ def order_qty_in_comment(comment, order_code):
         else:
             break
 
-#    # If there's none, we find the closest consecutive digits before product_name
-#    if not order_amount:
-#         begin_index = porduct_name_index
-#         for char_index in reversed(range(0, begin_index)):
-#             if comment[char_index].isdigit():
-#                 order_amount = comment[char_index] + order_amount
-#             elif not order_amount:
-#                 continue
-#             else:
-#                 break
-
     if not order_amount:
         return None
     return int(order_amount)
