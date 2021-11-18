@@ -231,8 +231,8 @@ FACEBOOK_APP_CREDS = {
 }
 
 # Youtube
-YOUTUBE_API_KEY = "AIzaSyDcsngr4WWNI5HUi9CNMLVRgCx5YdTaaA0"
 YOUTUBE_API_URL = "https://www.googleapis.com/youtube/v3"
+YOUTUBE_API_KEY = "AIzaSyDcsngr4WWNI5HUi9CNMLVRgCx5YdTaaA0"
 YOUTUBE_API_CONFIG = {
     "web": {
         "project_id": "primeval-nectar-322805",
