@@ -13,7 +13,7 @@ sudo /root/.local/bin/poetry run gunicorn lss.wsgi --bind 0.0.0.0:8000 --workers
 
 ## Scripts
 
-`lss_start.sh`
+`/home/ubuntu/lss_start.sh`
 
 ```shell
 #!/bin/bash
@@ -29,7 +29,7 @@ screen -S auto_fb -X stuff "sudo /root/.local/bin/poetry run python manage.py au
 sudo screen -ls
 ```
 
-`lss_end.sh`
+`/home/ubuntu/lss_end.sh`
 
 ```shell
 #!/bin/bash
