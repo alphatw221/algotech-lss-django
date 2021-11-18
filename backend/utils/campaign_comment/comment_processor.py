@@ -2,9 +2,9 @@ from dataclasses import dataclass
 from api.models.campaign.campaign import Campaign
 from api.utils.orm.campaign_comment import get_campaign_comments
 from api.utils.orm.campaign_product import get_campaign_products_order_codes_mapping
-from backend.utils.common.campaign_comment.comment_plugin_order_code import CommentPluginOrderCode
-from backend.utils.common.text_processing.order_code_processor import OrderCodeTextProcessor
-from backend.utils.common.cart_product.request_processor import CartProductRequestProcessorV1
+from backend.utils.campaign_comment.comment_plugin_order_code import CommentPluginOrderCode
+from backend.utils.text_processing.order_code_processor import OrderCodeTextProcessor
+from backend.utils.cart_product.request_processor import CartProductRequestProcessorV1
 
 
 @dataclass

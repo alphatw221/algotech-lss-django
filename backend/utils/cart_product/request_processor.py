@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from api.models.cart.cart_product import CartProduct
-from backend.utils.common.cart_product.request import CartProductRequest, CartProductRequestItem
+from backend.utils.cart_product.request import CartProductRequest, CartProductRequestItem
 
 
 class CartProductRequestProcessor(ABC):

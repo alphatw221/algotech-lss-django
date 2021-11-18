@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 from api.models.campaign.campaign_comment import CampaignComment
 from api.models.campaign.campaign_product import CampaignProduct
-from backend.utils.common.cart_product.request import CartProductRequest
-from backend.utils.common.cart_product.request_processor import CartProductRequestProcessor
-from backend.utils.common.text_processing._text_processor import TextProcessor
+from backend.utils.cart_product.request import CartProductRequest
+from backend.utils.cart_product.request_processor import CartProductRequestProcessor
+from backend.utils.text_processing._text_processor import TextProcessor
 
 
 @dataclass
