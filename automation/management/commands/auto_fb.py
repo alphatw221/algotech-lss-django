@@ -13,14 +13,7 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        # import threading
-        # threading.Thread(target=print_now, daemon=True).start()
-        # waiting_for_SIGINT = threading.Event().wait()
         self.campaign_facebook_capture_comments()
-
-    @time_loop(5)
-    def print_now(self):
-        print(pendulum.now())
 
     @time_loop(settings.FACEBOOK_COMMENT_CAPTURING['REST_INTERVAL_SECONDS'])
     def campaign_facebook_capture_comments(self):
