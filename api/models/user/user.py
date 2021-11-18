@@ -4,6 +4,8 @@ from rest_framework import serializers
 from api.models.user.facebook_info import FacebookInfoSerializer
 from api.models.user.user_plan import UserPlan
 
+from django.contrib.auth.models import User as AuthUser
+
 
 class User(models.Model):
     class Meta:
@@ -37,6 +39,9 @@ class User(models.Model):
         UserPlan, null=True, on_delete=models.SET_NULL, related_name='users')
     meta = models.JSONField(null=True, blank=True, default=dict)
     payment_meta = models.JSONField(null=True, blank=True, default=dict)
+
+    auth_user = models.ForeignKey(
+        AuthUser, on_delete=models.CASCADE, related_name="api_users")
 
     def __str__(self):
         return self.name
