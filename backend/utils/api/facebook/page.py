@@ -1,4 +1,4 @@
-from api.utils.api.facebook._fb_api_caller import FacebookApiCaller
+from backend.utils.api.facebook._fb_api_caller import FacebookApiCaller
 
 
 def api_fb_get_page_posts(page_token: str, page_id: str):

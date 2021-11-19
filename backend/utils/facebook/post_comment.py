@@ -1,5 +1,5 @@
 from api.models.campaign.campaign import Campaign
-from api.utils.api.facebook.post import api_fb_get_post_comments
+from backend.utils.api.facebook.post import api_fb_get_post_comments
 from api.utils.orm.campaign_comment import get_latest_commented_at, update_or_create_comment, get_comments_count
 from django.conf import settings
 
