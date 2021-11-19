@@ -9,6 +9,17 @@ class CampaignProduct(models.Model):
     class Meta:
         db_table = 'api_campaign_product'
 
+    TYPE_CHOICES = [
+        ('n/a', 'Not available'),
+        ('product', 'Added from product table'),
+        ('quick_add', 'Added from quick-add function'),
+    ]
+
+    STATUS_CHOICES = [
+        (0, 'Deactivated'),
+        (1, 'Activated'),
+    ]
+
     campaign = models.ForeignKey(
         Campaign, on_delete=models.CASCADE, related_name='products')
 
@@ -53,8 +64,10 @@ class CampaignProduct(models.Model):
     customer_editable = models.BooleanField(
         blank=False, null=True, default=False)
 
-    type = models.CharField(max_length=255, null=True, blank=True)
-    status = models.CharField(max_length=255, null=True, blank=True)
+    type = models.CharField(max_length=255, blank=True,
+                            choices=TYPE_CHOICES, default='n/a')
+    status = models.IntegerField(blank=True,
+                                 choices=STATUS_CHOICES, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
