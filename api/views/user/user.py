@@ -9,7 +9,6 @@ from api.models.facebook.facebook_page import FacebookPage
 from rest_framework.response import Response
 from rest_framework import status
 
-
 class UserViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, IsAdminUser)
     queryset = User.objects.all().order_by('id')

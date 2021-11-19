@@ -25,8 +25,6 @@ from lss.views.custom_jwt import (
     CustomTokenRefreshView,
     CustomTokenVerifyView)
 
-from api.views.test.test import test
-
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),
