@@ -5,10 +5,13 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from django.contrib.auth.models import User
 from django.conf import settings
 from api.models.test.sample import Sample, SampleSerializer
+from rest_framework import status
 
 
 @api_view(['GET'])
 def test(request):
+
+    return Response('test', status=status.HTTP_401_UNAUTHORIZED)
     return Response('test accomplished')
 
 

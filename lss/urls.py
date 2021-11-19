@@ -20,6 +20,12 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
     TokenVerifyView,
 )
+from lss.views.custom_jwt import (
+    CustomTokenObtainPairView,
+    CustomTokenRefreshView,
+    CustomTokenVerifyView)
+
+from api.views.test.test import test
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -27,4 +33,13 @@ urlpatterns = [
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('token/verify/', TokenVerifyView.as_view(), name='token_verify'),
+
+    path('custom_token/', CustomTokenObtainPairView.as_view(),
+         name='custom_token_obtain_pair'),
+    path('custom_token/refresh/', CustomTokenRefreshView.as_view(),
+         name='custom_token_refresh'),
+    path('custom_token/verify/', CustomTokenVerifyView.as_view(),
+         name='custom_token_verify'),
+
+    path('custom_token/false_verify/', test),
 ]
