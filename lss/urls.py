@@ -40,6 +40,4 @@ urlpatterns = [
          name='custom_token_refresh'),
     path('custom_token/verify/', CustomTokenVerifyView.as_view(),
          name='custom_token_verify'),
-
-    path('custom_token/false_verify/', test),
 ]
