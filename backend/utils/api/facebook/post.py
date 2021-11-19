@@ -1,4 +1,4 @@
-from api.utils.api.facebook._fb_api_caller import FacebookApiCaller
+from backend.utils.api.facebook._fb_api_caller import FacebookApiCaller
 
 
 def api_fb_get_post_likes(page_token: str, post_id: str, since: int = 1):
