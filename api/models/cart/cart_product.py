@@ -10,6 +10,18 @@ class CartProduct(models.Model):
     class Meta:
         db_table = 'api_cart_product'
 
+    TYPE_CHOICES = [
+        ('n/a', 'Not available'),
+        ('order_code', 'Added from order code in campaign comment'),
+        ('cart', 'Added from cart'),
+    ]
+
+    STATUS_CHOICES = [
+        ('valid', 'Valid'),
+        ('ordered', 'In order'),
+        ('voided', 'Cannelled'),
+    ]
+
     campaign = models.ForeignKey(
         Campaign, blank=True, null=True, on_delete=models.SET_NULL, related_name='cart_products')
     campaign_product = models.ForeignKey(
@@ -25,8 +37,10 @@ class CartProduct(models.Model):
     customer_name = models.CharField(max_length=255, null=True, blank=True)
     remark = models.TextField(default=None, null=True, blank=True)
 
-    type = models.CharField(max_length=255, null=True, blank=True)
-    status = models.CharField(max_length=255, null=True, blank=True)
+    type = models.CharField(max_length=255, blank=True,
+                            choices=TYPE_CHOICES, default='n/a')
+    status = models.CharField(max_length=255, blank=True,
+                              choices=STATUS_CHOICES, default='valid')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

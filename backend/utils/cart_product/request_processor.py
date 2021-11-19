@@ -35,7 +35,7 @@ class CartProductRequestProcessorV1(CartProductRequestProcessor):
                 'platform': request.campaign_comment.platform,
                 'customer_id': request.campaign_comment.customer_id,
                 'customer_name': request.campaign_comment.customer_name,
-                'type': None,
-                'status': None,
+                'type': 'order_code',
+                'status': 'valid',
             }
         )

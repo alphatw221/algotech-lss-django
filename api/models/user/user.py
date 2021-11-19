@@ -11,8 +11,8 @@ class User(models.Model):
         db_table = 'api_user'
 
     TYPE_CHOICES = [
-        ('customer', 'customer'),
-        ('user', 'user'),
+        ('customer', 'Customer'),
+        ('user', 'User'),
     ]
 
     name = models.CharField(max_length=255, null=True, blank=True)
