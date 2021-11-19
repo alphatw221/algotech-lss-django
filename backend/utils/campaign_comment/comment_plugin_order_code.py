@@ -30,7 +30,7 @@ class CommentPluginOrderCode():
         text = comment.message.lower()
 
         for order_code, campaign_product in order_codes_mapping.items():
-            if qty := text_processor.process(text, order_code):
+            if (qty := text_processor.process(text, order_code)) is not None:
                 if not cart_product_request:
                     cart_product_request = CartProductRequest(comment)
 

@@ -60,13 +60,19 @@ def test_cases_for_question_mark():
     assert OrderCodeTextProcessor.process(comment, order_code) == None
 
 
-def test_cursor_idx_position():
-    assert OrderCodeTextProcessor._get_idx_after_order_code(
+def test_text_after_order_code():
+    assert OrderCodeTextProcessor._get_text_after_order_code(
         'AAA +3', 'BBB') == None
-    assert OrderCodeTextProcessor._get_idx_after_order_code(
-        'AAA +3', 'AAA') == 3
-    assert OrderCodeTextProcessor._get_idx_after_order_code(
-        'BBBAAA', 'AAA') == None
+    assert OrderCodeTextProcessor._get_text_after_order_code(
+        'BBBAAA', 'AAA') == ''
+    assert OrderCodeTextProcessor._get_text_after_order_code(
+        'AAA +3', 'AAA') == ' +3'
+    assert OrderCodeTextProcessor._get_text_after_order_code(
+        'BBBAAAA', 'AAA') == 'A'
+    assert OrderCodeTextProcessor._get_text_after_order_code(
+        'BBBAAAA+10', 'AAA') == 'A+10'
+    assert OrderCodeTextProcessor._get_text_after_order_code(
+        'BBBAA', 'AAA') == None
 
 
 def test_get_order_qty():

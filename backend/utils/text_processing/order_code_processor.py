@@ -1,7 +1,7 @@
 from backend.utils.text_processing._text_processor import TextProcessor
 
 
-class OrderCodeTextProcessor():
+class OrderCodeTextProcessor(TextProcessor):
     ordering_chars = set('+*Xx')
     aborting_chars = set('?')
     null_chars = set(' ')
@@ -11,28 +11,23 @@ class OrderCodeTextProcessor():
         if not text or not order_code:
             return None
 
-        cursor_idx = OrderCodeTextProcessor._get_idx_after_order_code(
+        text_after_order_code = OrderCodeTextProcessor._get_text_after_order_code(
             text, order_code)
-        if cursor_idx is None:
+        if not text_after_order_code:
             return None
 
-        if OrderCodeTextProcessor._text_has_aborting_chars(text[cursor_idx:]):
+        if OrderCodeTextProcessor._text_has_aborting_chars(text_after_order_code):
             return None
 
-        return OrderCodeTextProcessor._get_order_qty(text[cursor_idx:])
+        return OrderCodeTextProcessor._get_order_qty(text_after_order_code)
 
     @staticmethod
-    def _get_idx_after_order_code(text: str, order_code: str):
+    def _get_text_after_order_code(text: str, order_code: str):
         # check if order code in text (-1 means negative)
         cursor_idx = text.find(order_code)
         if cursor_idx == -1:
             return None
-        # move cursor to the char after order code
-        cursor_idx += len(order_code)
-        # if cursor is out of bound
-        if cursor_idx >= len(text):
-            return None
-        return cursor_idx
+        return text[cursor_idx+len(order_code):]
 
     @staticmethod
     def _get_order_qty(text: str):
