@@ -13,7 +13,10 @@ class CartProduct(models.Model):
     TYPE_CHOICES = [
         ('n/a', 'Not available'),
         ('order_code', 'Added from order code in campaign comment'),
-        ('cart', 'Added from cart'),
+        ('cart', 'Added from cart page function'),
+        ('lucky_draw_cart', 'Added from lucky draw from cart product'),
+        ('lucky_draw_comment', 'Added from lucky draw from campaign comment keyword'),
+        ('lucky_draw_like', 'Added from lucky draw from campaign like'),
     ]
 
     STATUS_CHOICES = [
