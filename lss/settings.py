@@ -164,15 +164,6 @@ DATABASES = {
             'authMechanism': 'SCRAM-SHA-1',
             'readPreference': 'primary',
             'ssl': False,
-            # Development
-            # 'host': 'mongodb://34.126.92.142,35.240.200.4,34.126.155.150',
-            # 'port': 27017,
-            # 'username': 'lss',
-            # 'password': 'algo83111T%%',
-            # 'authSource': 'admin',
-            # 'authMechanism': 'SCRAM-SHA-1',
-            # 'readPreference': 'primary',
-            # 'ssl': False,
         }
     }
 }
@@ -229,7 +220,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 CRON_CLASSES = [
 ]
 
-# LSS
+# Live Show Seller info
 WEB_SERVER_URL = "https://"
 SHOPPING_CART_URL = f"{WEB_SERVER_URL}/"
 
@@ -255,7 +246,7 @@ YOUTUBE_API_CONFIG = {
     }
 }
 
-
+# backend app
 COMMENT_PROCESSING = {
     'REST_INTERVAL_SECONDS': 3,
 }
