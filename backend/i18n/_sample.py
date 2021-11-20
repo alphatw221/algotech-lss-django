@@ -4,7 +4,7 @@ from backend.i18n._helper import lang_kwarg_translate
 
 @lang_kwarg_translate
 def i18n_sample(items: tuple, lang=None):
-    output = [_('Product added. Details: ')]
+    output = [_('Product details: ')]
     for item in items:
         output.append(
             _('Order code: {order_code}. Order quantity: {qty}. ').format(

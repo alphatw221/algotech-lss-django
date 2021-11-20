@@ -1,4 +1,4 @@
-from backend.scraping.text_processing._text_processor import TextProcessor
+from backend.utils.text_processing._text_processor import TextProcessor
 
 
 class OrderCodeTextProcessor(TextProcessor):
@@ -31,7 +31,7 @@ class OrderCodeTextProcessor(TextProcessor):
 
     @staticmethod
     def _get_order_qty(text: str):
-        order_qty, is_ordering = [], False
+        is_ordering, order_qty = False, []
 
         for c in text:
             if is_ordering:

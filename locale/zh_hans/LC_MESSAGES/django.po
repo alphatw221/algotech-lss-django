@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-21 01:42+0800\n"
+"POT-Creation-Date: 2021-11-21 01:43+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,9 +20,9 @@ msgstr ""
 
 #: .\backend\i18n\_sample.py:7
 msgid "Product details: "
-msgstr "產品資訊："
+msgstr "簡中："
 
 #: .\backend\i18n\_sample.py:10
 #, python-brace-format
 msgid "Order code: {order_code}. Order quantity: {qty}. "
-msgstr "代號：{order_code}，數量：{qty}。"
+msgstr "簡中：{order_code}，簡中：{qty}。"

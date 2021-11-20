@@ -1,4 +1,4 @@
-from backend.scraping.text_processing.order_code_processor import OrderCodeTextProcessor
+from backend.utils.text_processing.order_code_processor import OrderCodeTextProcessor
 
 
 def test_empty_text_or_order_code():

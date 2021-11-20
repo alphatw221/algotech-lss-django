@@ -1,9 +1,10 @@
 import pendulum
+from api.utils.orm.campaign import get_active_campaign_now
+from automation.utils.timeloop import time_loop
+from backend.campaign.campaign_comment.comment_processor import \
+    CommentProcessor
 from django.conf import settings
 from django.core.management.base import BaseCommand
-from backend.campaign.campaign_comment.comment_processor import CommentProcessor
-from automation.utils.timeloop import time_loop
-from api.utils.orm.campaign import get_active_campaign_now
 
 
 class Command(BaseCommand):
