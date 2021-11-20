@@ -21,7 +21,7 @@ class Command(BaseCommand):
         self.i18n()
 
     def i18n(self):
-        from backend.i18n.product_added import i18n_product_added
+        from backend.i18n.sample import i18n_sample
         items = [('AAA', 1), ('BBB', 10)]
-        print(i18n_product_added(items, lang='en'))
-        print(i18n_product_added(items, lang='zh-hant'))
+        print(i18n_sample(items, lang='en'))
+        print(i18n_sample(items, lang='zh-hant'))
