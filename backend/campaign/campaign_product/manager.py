@@ -1,0 +1,3 @@
+class CampaignProductManager:
+    ...
+    # TODO: Atomic, Synchronized
