@@ -2,11 +2,11 @@ from dataclasses import dataclass
 from api.models.campaign.campaign import Campaign
 from api.utils.orm.campaign_comment import get_campaign_comments
 from api.utils.orm.campaign_product import get_campaign_products_order_codes_mapping
-from backend.utils.campaign_comment.comment_plugin_order_code import CommentPluginOrderCode
-from backend.utils.text_processing.order_code_processor import OrderCodeTextProcessor
-from backend.utils.cart_product.request_validator import CartProductRequestValidatorV1
-from backend.utils.cart_product.request_processor import CartProductRequestProcessorV1
-from backend.utils.cart_product.request_responder import CartProductRequestResponderV1
+from backend.campaign.campaign_comment.comment_plugin_order_code import CommentPluginOrderCode
+from backend.scraping.text_processing.order_code_processor import OrderCodeTextProcessor
+from backend.cart.cart_product.request_validator import CartProductRequestValidatorV1
+from backend.cart.cart_product.request_processor import CartProductRequestProcessorV1
+from backend.cart.cart_product.request_responder import CartProductRequestResponderV1
 
 
 @dataclass

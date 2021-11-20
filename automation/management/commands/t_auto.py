@@ -3,7 +3,7 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 from automation.utils.timeloop import time_loop
 from api.utils.orm.campaign import get_active_campaign_now
-from backend.utils.facebook.post_comment import campaign_facebook_post_capture_comments
+from backend.scraping.facebook.post_comment import campaign_facebook_post_capture_comments
 
 
 class Command(BaseCommand):

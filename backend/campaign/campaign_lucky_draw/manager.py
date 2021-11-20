@@ -1,0 +1,3 @@
+class CampaignLuckyDrawManager:
+    ...
+    # TODO: strategy pattern for lucky draw from cart products, comment, likes

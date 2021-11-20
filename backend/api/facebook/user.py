@@ -1,4 +1,4 @@
-from backend.utils.api.facebook._fb_api_caller import FacebookApiCaller
+from backend.api.facebook._fb_api_caller import FacebookApiCaller
 from django.conf import settings
 
 

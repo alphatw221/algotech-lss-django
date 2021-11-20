@@ -1,4 +1,4 @@
-from backend.utils.text_processing._text_processor import TextProcessor
+from backend.scraping.text_processing._text_processor import TextProcessor
 
 
 class OrderCodeTextProcessor(TextProcessor):

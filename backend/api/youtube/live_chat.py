@@ -1,4 +1,4 @@
-from backend.utils.api.youtube._youtube_api_caller import YoutubeApiCaller
+from backend.api.youtube._youtube_api_caller import YoutubeApiCaller
 from django.conf import settings
 
 

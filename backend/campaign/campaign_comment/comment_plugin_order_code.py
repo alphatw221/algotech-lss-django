@@ -1,11 +1,11 @@
 from dataclasses import dataclass
 from api.models.campaign.campaign_comment import CampaignComment
 from api.models.campaign.campaign_product import CampaignProduct
-from backend.utils.text_processing._text_processor import TextProcessor
-from backend.utils.cart_product.request_validator import CartProductRequestValidator
-from backend.utils.cart_product.request_processor import CartProductRequestProcessor
-from backend.utils.cart_product.request_responder import CartProductRequestResponder
-from backend.utils.cart_product.request import CartProductRequest
+from backend.scraping.text_processing._text_processor import TextProcessor
+from backend.cart.cart_product.request_validator import CartProductRequestValidator
+from backend.cart.cart_product.request_processor import CartProductRequestProcessor
+from backend.cart.cart_product.request_responder import CartProductRequestResponder
+from backend.cart.cart_product.request import CartProductRequest
 
 
 @dataclass

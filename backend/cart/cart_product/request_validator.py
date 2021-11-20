@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from backend.utils.cart_product.request import CartProductRequest, CartProductRequestItem, RequestState
+from backend.cart.cart_product.request import CartProductRequest, CartProductRequestItem, RequestState
 
 
 class CartProductRequestValidator(ABC):
