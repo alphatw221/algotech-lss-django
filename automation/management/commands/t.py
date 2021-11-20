@@ -1,3 +1,4 @@
+
 from django.core.management.base import BaseCommand
 from api.models.campaign.campaign import Campaign
 from backend.utils.api.facebook.page import *
@@ -17,6 +18,10 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        campaign = Campaign.objects.get(pk=2)
-        processor = CommentProcessor(campaign)
-        processor.process()
+        self.i18n()
+
+    def i18n(self):
+        from backend.i18n.product_added import i18n_product_added
+        items = [('AAA', 1), ('BBB', 10)]
+        print(i18n_product_added(items, lang='en'))
+        print(i18n_product_added(items, lang='zh-hant'))
