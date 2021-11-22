@@ -6,13 +6,11 @@ from backend.cart.cart_product.request import (CartProductRequest,
 
 
 class CartProductRequestResponder(ABC):
-    @staticmethod
     @abstractmethod
-    def process(request: CartProductRequest):
+    def process(self, request: CartProductRequest):
         ...
 
 
 class CartProductRequestResponderRegular(CartProductRequestResponder):
-    @staticmethod
-    def process(request: CartProductRequest):
+    def process(self, request: CartProductRequest):
         print(request)

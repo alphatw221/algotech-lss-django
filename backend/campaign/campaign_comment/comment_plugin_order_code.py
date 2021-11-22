@@ -23,9 +23,10 @@ class CommentPluginOrderCode():
         if cart_product_request := CommentPluginOrderCode._get_orders_from_comment(
                 text_processor,
                 comment, order_codes_mapping):
-            cart_product_request_validator.process(cart_product_request)
-            cart_product_request_processor.process(cart_product_request)
-            cart_product_request_responder.process(cart_product_request)
+            cart_product_request_validator().process(cart_product_request)
+            cart_product_request_processor(
+                check_inv=False).process(cart_product_request)
+            cart_product_request_responder().process(cart_product_request)
 
     @staticmethod
     def _get_orders_from_comment(text_processor: TextProcessor,
