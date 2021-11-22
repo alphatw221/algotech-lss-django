@@ -11,7 +11,7 @@ from datetime import datetime
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated, IsAdminUser)
+    permission_classes = (IsAuthenticated)
     queryset = User.objects.all().order_by('id')
     serializer_class = UserSerializer
     filterset_fields = []
