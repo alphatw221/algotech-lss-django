@@ -9,7 +9,7 @@ def update_or_create_cart_product(campaign: Campaign,
                                   campaign_comment: CampaignComment,
                                   defaults: dict):
     try:
-        CartProduct.objects.update_or_create(
+        return CartProduct.objects.update_or_create(
             campaign=campaign,
             campaign_product=campaign_product,
             campaign_comment=campaign_comment,
@@ -18,17 +18,24 @@ def update_or_create_cart_product(campaign: Campaign,
         ...
 
 
-def filter_cart_product(campaign: Campaign,
-                        campaign_product: CampaignProduct,
-                        type: tuple, status: str,
-                        customer_id: str):
+def filter_last_cart_product(campaign: Campaign,
+                             campaign_product: CampaignProduct,
+                             type: tuple, status: str,
+                             customer_id: str):
     try:
-        campaign_product = CartProduct.objects.filter(
+        return CartProduct.objects.filter(
             campaign=campaign,
             campaign_product=campaign_product,
             type__in=type,
             status=status,
-            customer_id=customer_id).latest('pk')
-        return campaign_product if campaign_product else None
+            customer_id=customer_id).last()
+    except Exception:
+        ...
+
+
+def update_cart_product_qty(cart_product: CartProduct, qty: int):
+    try:
+        cart_product.qty = qty
+        cart_product.save()
     except Exception:
         ...

@@ -17,16 +17,14 @@ class CommentPluginOrderCode():
     @staticmethod
     def process(text_processor: TextProcessor,
                 comment: str, order_codes_mapping: dict[str, CampaignProduct],
-                cart_product_request_validator: CartProductRequestValidator,
-                cart_product_request_processor: CartProductRequestProcessor,
-                cart_product_request_responder: CartProductRequestResponder):
+                cprv: CartProductRequestValidator,
+                cprp: CartProductRequestProcessor,
+                cprr: CartProductRequestResponder):
         if cart_product_request := CommentPluginOrderCode._get_orders_from_comment(
-                text_processor,
-                comment, order_codes_mapping):
-            cart_product_request_validator().process(cart_product_request)
-            cart_product_request_processor(
-                check_inv=True).process(cart_product_request)
-            cart_product_request_responder().process(cart_product_request)
+                text_processor, comment, order_codes_mapping):
+            cprv.process(cart_product_request)
+            cprp.process(cart_product_request)
+            cprr.process(cart_product_request)
 
     @staticmethod
     def _get_orders_from_comment(text_processor: TextProcessor,

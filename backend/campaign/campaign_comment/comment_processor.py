@@ -35,11 +35,12 @@ class CommentProcessor:
 
     def _process_comment(self, comment):
         # TODO: Campaign can be set not to validate cart request, swap out CartProductRequestValidatorRegular
-        CommentPluginOrderCode.process(OrderCodeTextProcessor,
-                                       comment, self.order_codes_mapping,
-                                       CartProductRequestValidatorRegular,
-                                       CartProductRequestProcessorRegular,
-                                       CartProductRequestResponderRegular)
+        tp = OrderCodeTextProcessor
+        cprv = CartProductRequestValidatorRegular()
+        cprp = CartProductRequestProcessorRegular(check_inv=True)
+        cprr = CartProductRequestResponderRegular()
+        CommentPluginOrderCode.process(tp, comment, self.order_codes_mapping,
+                                       cprv, cprp, cprr)
 
     def _mark_comment_processed(self, comment):
         comment.status = 1
