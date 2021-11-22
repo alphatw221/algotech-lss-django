@@ -12,6 +12,11 @@ class CampaignProductPagination(LimitOffsetPagination):
     max_limit = 100
 
 
+class CampaignProductPagination(PageNumberPagination):
+
+    default_limit = 25
+
+
 class CampaignProductViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     queryset = CampaignProduct.objects.all().order_by('id')

@@ -29,7 +29,7 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_facebook_pages_by_client(self, request):
 
         api_user = request.user.api_users.get(type='user', status='valid')
-
+        # TODO 檢查
         status_code, response = api_fb_get_accounts_from_user(
             user_token=api_user.facebook_info['token'], user_id=api_user.facebook_info['id'])
 
