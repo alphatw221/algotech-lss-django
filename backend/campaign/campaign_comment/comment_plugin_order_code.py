@@ -25,7 +25,7 @@ class CommentPluginOrderCode():
                 comment, order_codes_mapping):
             cart_product_request_validator().process(cart_product_request)
             cart_product_request_processor(
-                check_inv=False).process(cart_product_request)
+                check_inv=True).process(cart_product_request)
             cart_product_request_responder().process(cart_product_request)
 
     @staticmethod

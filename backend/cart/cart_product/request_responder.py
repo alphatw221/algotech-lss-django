@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 
 from backend.cart.cart_product.request import (CartProductRequest,
                                                CartProductRequestItem,
@@ -6,7 +6,6 @@ from backend.cart.cart_product.request import (CartProductRequest,
 
 
 class CartProductRequestResponder(ABC):
-    @abstractmethod
     def process(self, request: CartProductRequest):
         ...
 

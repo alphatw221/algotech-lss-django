@@ -5,6 +5,8 @@ from api.utils.orm import cart_product
 
 
 class CartProductManager:
+    NO_DUPLICATE_TYPES = ('order_code', 'cart')
+
     @staticmethod
     def update_or_create_cart_product(campaign: Campaign,
                                       campaign_product: CampaignProduct,
@@ -12,7 +14,7 @@ class CartProductManager:
                                       qty: int, order_code: str, platform: str,
                                       customer_id: str, customer_name: str,
                                       type: str, status: str):
-        cart_product.update_or_create_cart_product(
+        return cart_product.update_or_create_cart_product(
             campaign,
             campaign_product,
             campaign_comment,
@@ -25,4 +27,16 @@ class CartProductManager:
                 'type': type,
                 'status': status,
             }
+        )
+
+    @staticmethod
+    def filter_valid_customer_cart_product(campaign: Campaign,
+                                           campaign_product: CampaignProduct,
+                                           customer_id: str):
+        return cart_product.filter_cart_product(
+            campaign,
+            campaign_product,
+            CartProductManager.NO_DUPLICATE_TYPES,
+            'valid',
+            customer_id
         )
