@@ -19,3 +19,13 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['POST'], url_path=r'user_login')
     def user_login(self, request, pk=None):
         return seller_login_helper(self, request, pk=None)
+
+    @action(detail=False, methods=['GET'], url_path=r'user_facebook_pages')
+    def user_facebook_pages(self, request, pk=None):
+
+        request.user
+        # TODO 驗證身分
+
+        # TODO 後續改成模組
+
+        return seller_login_helper(self, request, pk=None)
