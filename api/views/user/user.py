@@ -2,7 +2,7 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from api.models.user.user import User, UserSerializer
-from api.views.user._user import login_helper
+from api.views.user._user import seller_login_helper, customer_login_helper
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -14,8 +14,8 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['POST'], url_path=r'customer_login')
     def customer_login(self, request, pk=None):
 
-        return login_helper(self, request, 'customer', pk=None)
+        return customer_login_helper(self, request, pk=None)
 
     @action(detail=False, methods=['POST'], url_path=r'user_login')
     def user_login(self, request, pk=None):
-        return login_helper(self, request, 'user', pk=None)
+        return seller_login_helper(self, request, pk=None)
