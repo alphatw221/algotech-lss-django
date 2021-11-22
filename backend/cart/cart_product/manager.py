@@ -1,7 +1,8 @@
 from api.models.campaign.campaign import Campaign
 from api.models.campaign.campaign_comment import CampaignComment
 from api.models.campaign.campaign_product import CampaignProduct
-from api.utils.orm import cart_product
+from api.models.cart.cart_product import CartProduct
+from api.utils.orm import cart_product as orm_cart_product
 
 
 class CartProductManager:
@@ -14,7 +15,7 @@ class CartProductManager:
                                       qty: int, order_code: str, platform: str,
                                       customer_id: str, customer_name: str,
                                       type: str, status: str):
-        return cart_product.update_or_create_cart_product(
+        return orm_cart_product.update_or_create_cart_product(
             campaign,
             campaign_product,
             campaign_comment,
@@ -30,13 +31,18 @@ class CartProductManager:
         )
 
     @staticmethod
-    def filter_valid_customer_cart_product(campaign: Campaign,
-                                           campaign_product: CampaignProduct,
-                                           customer_id: str):
-        return cart_product.filter_cart_product(
+    def get_last_valid_cart_product(campaign: Campaign,
+                                    campaign_product: CampaignProduct,
+                                    customer_id: str):
+        return orm_cart_product.filter_last_cart_product(
             campaign,
             campaign_product,
             CartProductManager.NO_DUPLICATE_TYPES,
             'valid',
             customer_id
         )
+
+    @staticmethod
+    def update_cart_product_qty(cart_product: CartProduct,
+                                qty: int):
+        orm_cart_product.update_cart_product_qty(cart_product, qty)

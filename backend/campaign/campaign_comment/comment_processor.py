@@ -19,22 +19,28 @@ from backend.utils.text_processing.order_code_processor import \
 @dataclass
 class CommentProcessor:
     campaign: Campaign
+    enable_order_code: bool = True
+    only_activated_order_code: bool = True
 
     def __post_init__(self):
         self.unprocessed_comments = get_campaign_comments(
             self.campaign, status=0, order_by='pk', limit=1000)
-        self.order_codes_mapping = get_campaign_products_order_codes_mapping(
-            self.campaign, lower=True)
+
+        status = 1 if self.only_activated_order_code else None
+        self.order_codes_mapping = \
+            get_campaign_products_order_codes_mapping(
+                self.campaign, status=status, lower=True) \
+            if self.enable_order_code \
+            else {}
 
     def process(self):
         for comment in self.unprocessed_comments:
-            self._process_comment(comment)
-            self._mark_comment_processed(comment)
+            self._plugin_order_code(comment)
+            self._mark_and_save_comment(comment)
 
         return f'{len(self.unprocessed_comments)=}'
 
-    def _process_comment(self, comment):
-        # TODO: Campaign can be set not to validate cart request, swap out CartProductRequestValidatorRegular
+    def _plugin_order_code(self, comment):
         tp = OrderCodeTextProcessor
         cprv = CartProductRequestValidatorRegular()
         cprp = CartProductRequestProcessorRegular(check_inv=True)
@@ -43,6 +49,6 @@ class CommentProcessor:
                                                 cprv, cprp, cprr)
         comment.meta['CommentPluginOrderCode'] = result
 
-    def _mark_comment_processed(self, comment):
+    def _mark_and_save_comment(self, comment):
         comment.status = 1
         comment.save()
