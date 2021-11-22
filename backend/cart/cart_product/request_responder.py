@@ -6,7 +6,7 @@ from backend.cart.cart_product.request import (CartProductRequest,
 
 
 class CartProductRequestResponder(ABC):
-    def process(self, request: CartProductRequest):
+    def process():
         ...
 
 

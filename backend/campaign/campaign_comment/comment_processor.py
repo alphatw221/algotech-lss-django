@@ -39,8 +39,9 @@ class CommentProcessor:
         cprv = CartProductRequestValidatorRegular()
         cprp = CartProductRequestProcessorRegular(check_inv=True)
         cprr = CartProductRequestResponderRegular()
-        CommentPluginOrderCode.process(tp, comment, self.order_codes_mapping,
-                                       cprv, cprp, cprr)
+        result = CommentPluginOrderCode.process(tp, comment, self.order_codes_mapping,
+                                                cprv, cprp, cprr)
+        comment.meta['CommentPluginOrderCode'] = result
 
     def _mark_comment_processed(self, comment):
         comment.status = 1

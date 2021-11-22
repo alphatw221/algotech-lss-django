@@ -26,7 +26,9 @@ class CommentPluginOrderCode():
             cprp.process(cart_product_request)
             cprr.process(cart_product_request)
 
-    @staticmethod
+            return cart_product_request.get_items_repr()
+
+    @ staticmethod
     def _get_orders_from_comment(text_processor: TextProcessor,
                                  comment: CampaignComment, order_codes_mapping: dict[str, CampaignProduct]):
         cart_product_request = None
