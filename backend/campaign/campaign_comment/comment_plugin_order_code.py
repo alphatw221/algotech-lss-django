@@ -1,11 +1,15 @@
 from dataclasses import dataclass
+
 from api.models.campaign.campaign_comment import CampaignComment
 from api.models.campaign.campaign_product import CampaignProduct
-from backend.utils.text_processing._text_processor import TextProcessor
-from backend.cart.cart_product.request_validator import CartProductRequestValidator
-from backend.cart.cart_product.request_processor import CartProductRequestProcessor
-from backend.cart.cart_product.request_responder import CartProductRequestResponder
 from backend.cart.cart_product.request import CartProductRequest
+from backend.cart.cart_product.request_processor import \
+    CartProductRequestProcessor
+from backend.cart.cart_product.request_responder import \
+    CartProductRequestResponder
+from backend.cart.cart_product.request_validator import \
+    CartProductRequestValidator
+from backend.utils.text_processing._text_processor import TextProcessor
 
 
 @dataclass
@@ -35,6 +39,6 @@ class CommentPluginOrderCode():
                     cart_product_request = CartProductRequest(comment)
 
                 cart_product_request.add_item(
-                    campaign_product, qty, order_code)
+                    campaign_product, qty)
 
         return cart_product_request

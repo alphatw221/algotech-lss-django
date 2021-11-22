@@ -1,12 +1,19 @@
 from dataclasses import dataclass
+
 from api.models.campaign.campaign import Campaign
 from api.utils.orm.campaign_comment import get_campaign_comments
-from api.utils.orm.campaign_product import get_campaign_products_order_codes_mapping
-from backend.campaign.campaign_comment.comment_plugin_order_code import CommentPluginOrderCode
-from backend.utils.text_processing.order_code_processor import OrderCodeTextProcessor
-from backend.cart.cart_product.request_validator import CartProductRequestValidatorV1
-from backend.cart.cart_product.request_processor import CartProductRequestProcessorV1
-from backend.cart.cart_product.request_responder import CartProductRequestResponderV1
+from api.utils.orm.campaign_product import \
+    get_campaign_products_order_codes_mapping
+from backend.campaign.campaign_comment.comment_plugin_order_code import \
+    CommentPluginOrderCode
+from backend.cart.cart_product.request_processor import \
+    CartProductRequestProcessorRegular
+from backend.cart.cart_product.request_responder import \
+    CartProductRequestResponderRegular
+from backend.cart.cart_product.request_validator import \
+    CartProductRequestValidatorRegular
+from backend.utils.text_processing.order_code_processor import \
+    OrderCodeTextProcessor
 
 
 @dataclass
@@ -27,11 +34,12 @@ class CommentProcessor:
         return f'{len(self.unprocessed_comments)=}'
 
     def _process_comment(self, comment):
+        # TODO: Campaign can be set not to validate cart request, swap out CartProductRequestValidatorRegular
         CommentPluginOrderCode.process(OrderCodeTextProcessor,
                                        comment, self.order_codes_mapping,
-                                       CartProductRequestValidatorV1,
-                                       CartProductRequestProcessorV1,
-                                       CartProductRequestResponderV1)
+                                       CartProductRequestValidatorRegular,
+                                       CartProductRequestProcessorRegular,
+                                       CartProductRequestResponderRegular)
 
     def _mark_comment_processed(self, comment):
         comment.status = 1
