@@ -48,11 +48,14 @@ class CampaignSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['created_at', 'modified_at']
 
-    meta = serializers.JSONField(default=dict)
-    # facebook_page = FacebookPageSerializer()
+     # facebook_page = FacebookPageSerializer()
     facebook_campaign = serializers.JSONField(default=dict)
     # youtube_channel = YoutubeChannelSerializer()
     youtube_campaign = serializers.JSONField(default=dict)
+    meta = serializers.JSONField(default=dict)
+    meta_payment = serializers.JSONField(default=dict)
+    meta_logistic = serializers.JSONField(default=dict)
+   
 
 
 class CampaignAdmin(admin.ModelAdmin):

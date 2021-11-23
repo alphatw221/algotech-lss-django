@@ -39,7 +39,8 @@ class FacebookPageSerializer(serializers.ModelSerializer):
         read_only_fields = ['created_at', 'modified_at']
 
     meta = serializers.JSONField(default=dict)
-    payment_meta = serializers.JSONField(default=dict)
+    meta_payment = serializers.JSONField(default=dict)
+    meta_logistic = serializers.JSONField(default=dict)
 
 
 class FacebookPageAdmin(admin.ModelAdmin):
