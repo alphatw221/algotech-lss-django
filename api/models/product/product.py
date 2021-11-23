@@ -5,6 +5,13 @@ from api.models.user.user import User
 
 
 class Product(models.Model):
+
+    STATUS_CHOICES = [
+        ('for sale', 'For Sale'),
+        ('disable', 'Disable'),
+        ('archive', 'Archive')
+    ]
+
     user = models.ForeignKey(
         User, null=True, on_delete=models.SET_NULL, related_name='products')
 
@@ -44,7 +51,8 @@ class Product(models.Model):
         blank=False, null=True, default=False)
 
     type = models.CharField(max_length=255, null=True, blank=True)
-    status = models.CharField(max_length=255, null=True, blank=True)
+    status = models.CharField(
+        max_length=255, null=True, blank=True, choices=STATUS_CHOICES, default='for sale')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
