@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
@@ -11,6 +12,8 @@ class FacebookPage(models.Model):
     name = models.CharField(max_length=255, null=True, blank=True)
     remark = models.TextField(null=True, blank=True, default=None)
     image = models.CharField(max_length=512, null=True, blank=True)
+    lang = models.CharField(max_length=255, blank=True,
+                            choices=settings.LANGUAGES, default='en')
     region = models.CharField(max_length=255, null=True, blank=True)
     currency = models.CharField(max_length=255, null=True, blank=True)
     timezone = models.CharField(
