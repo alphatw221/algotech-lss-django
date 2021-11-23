@@ -89,8 +89,6 @@ class CampaignViewSet(viewsets.ModelViewSet):
         elif api_user.status != "valid":
             return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # json = io.BytesIO(request.body)
-        # data = JSONParser().parse(json)
         data = request.data
         data['created_by'] = api_user.id
         serializer = self.get_serializer(data=data)
@@ -129,9 +127,8 @@ class CampaignViewSet(viewsets.ModelViewSet):
         campaign = api_user.campaigns.get(id=pk)
 
         try:
-            json = io.BytesIO(request.body)
-            data = JSONParser().parse(json)
-            serializer = self.get_serializer(campaign, data=data, partial=True)
+            serializer = self.get_serializer(
+                campaign, data=request.data, partial=True)
             if not serializer.is_valid():
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             serializer.save()
