@@ -1,10 +1,12 @@
+from api.models.campaign.facebook_campaign import FacebookCampaign
+from api.models.facebook.facebook_page import (FacebookPage,
+                                               FacebookPageSerializer)
+from api.models.user.user import User
+from api.models.youtube.youtube_channel import (YoutubeChannel,
+                                                YoutubeChannelSerializer)
 from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
-from api.models.user.user import User
-from api.models.facebook.facebook_page import FacebookPage, FacebookPageSerializer
-from api.models.youtube.youtube_channel import YoutubeChannel, YoutubeChannelSerializer
-from api.models.campaign.facebook_campaign import FacebookCampaign
 
 
 class Campaign(models.Model):
@@ -33,6 +35,8 @@ class Campaign(models.Model):
         YoutubeChannel, blank=True, null=True, on_delete=models.SET_NULL, related_name='campaigns')
     youtube_campaign = models.JSONField(null=True, blank=True, default=dict)
     meta = models.JSONField(null=True, blank=True, default=dict)
+    meta_payment = models.JSONField(null=True, blank=True, default=dict)
+    meta_logistic = models.JSONField(default=dict, null=True, blank=dict)
 
     def __str__(self):
         return self.title

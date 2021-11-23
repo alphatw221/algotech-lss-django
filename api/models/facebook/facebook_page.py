@@ -25,7 +25,8 @@ class FacebookPage(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     meta = models.JSONField(null=True, blank=True, default=dict)
-    payment_meta = models.JSONField(null=True, blank=True, default=dict)
+    meta_payment = models.JSONField(null=True, blank=True, default=dict)
+    meta_logistic = models.JSONField(default=dict, null=True, blank=dict)
 
     def __str__(self):
         return self.name
