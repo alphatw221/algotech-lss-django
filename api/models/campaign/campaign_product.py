@@ -1,5 +1,6 @@
 from api.models.campaign.campaign import Campaign
 from api.models.product.product import Product
+from api.models.user.user import User
 from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
@@ -23,8 +24,12 @@ class CampaignProduct(models.Model):
     campaign = models.ForeignKey(
         Campaign, on_delete=models.CASCADE, related_name='products')
 
+    created_by = models.ForeignKey(
+        User, null=True, on_delete=models.SET_NULL, related_name='campaign_products')
+
     product = models.ForeignKey(
         Product, blank=True, null=True, on_delete=models.SET_NULL, related_name='campaign_products')
+
     qty_for_sale = models.IntegerField(blank=False, null=True, default=0)
     qty_sold = models.IntegerField(blank=False, null=True, default=0)
 

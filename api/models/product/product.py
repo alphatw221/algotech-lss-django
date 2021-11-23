@@ -1,3 +1,4 @@
+from api.models.user.user import User
 from api.models.user.user_subscription import UserSubscription
 from django.contrib import admin
 from djongo import models
@@ -6,13 +7,15 @@ from rest_framework import serializers
 
 class Product(models.Model):
     STATUS_CHOICES = [
-        ('enabled', 'enabled'),
-        ('disabled', 'disabled'),
-        ('archived', 'archived'),
+        ('enabled', 'Enabled'),
+        ('disabled', 'Disabled'),
+        ('archived', 'Archived'),
     ]
-    
+
     user_subscription = models.ForeignKey(
         UserSubscription, null=True, on_delete=models.SET_NULL, related_name='products')
+    created_by = models.ForeignKey(
+        User, null=True, on_delete=models.SET_NULL, related_name='products')
 
     qty = models.IntegerField(blank=False, null=True, default=0)
 
@@ -53,7 +56,7 @@ class Product(models.Model):
 
     type = models.CharField(max_length=255, null=True, blank=True)
     status = models.CharField(max_length=255, blank=True,
-                            choices=STATUS_CHOICES, default='enabled')
+                              choices=STATUS_CHOICES, default='enabled')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
