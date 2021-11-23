@@ -99,8 +99,7 @@ class ProductViewSet(viewsets.ModelViewSet):
             return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            json = io.BytesIO(request.body)
-            data = JSONParser().parse(json)
+            data = request.data
             data['user'] = api_user.id
             serializer = self.get_serializer(data=data)
 
@@ -125,12 +124,11 @@ class ProductViewSet(viewsets.ModelViewSet):
 
         if not api_user.products.filter(id=pk).exists():
             return Response({"message": "no product found"}, status=status.HTTP_400_BAD_REQUEST)
-        products = api_user.products.get(id=pk)
+        product = api_user.products.get(id=pk)
 
         try:
-            json = io.BytesIO(request.body)
-            data = JSONParser().parse(json)
-            serializer = self.get_serializer(products, data=data, partial=True)
+            serializer = self.get_serializer(
+                product, data=request.data, partial=True)
             if not serializer.is_valid():
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             serializer.save()

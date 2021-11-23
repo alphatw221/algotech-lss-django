@@ -89,26 +89,17 @@ class CampaignViewSet(viewsets.ModelViewSet):
         elif api_user.status != "valid":
             return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
 
-        data = request.data
-        data['created_by'] = api_user.id
-        serializer = self.get_serializer(data=data)
+        try:
+            data = request.data
+            data['created_by'] = api_user.id
+            serializer = self.get_serializer(data=data)
 
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        serializer.save()
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            serializer.save()
 
-        # try:
-        #     json = io.BytesIO(request.body)
-        #     data = JSONParser().parse(json)
-        #     data['created_by'] = api_user.id
-        #     serializer = self.get_serializer(data=data)
-
-        #     if not serializer.is_valid():
-        #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        #     serializer.save()
-
-        # except:
-        #     return Response({"message": "error occerd during creating"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except:
+            return Response({"message": "error occerd during creating"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
