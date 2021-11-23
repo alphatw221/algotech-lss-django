@@ -151,7 +151,7 @@ class ProductViewSet(viewsets.ModelViewSet):
             return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
 
         if not api_user.products.filter(id=pk).exists():
-            return Response({"message": "no campaign found"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": "no product found"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             api_user.products.get(id=pk).delete()
