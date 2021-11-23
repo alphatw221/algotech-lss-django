@@ -91,8 +91,9 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         print(type(request))
         print(type(request.body))
-        data = io.BytesIO(request.body)
+        # data = io.BytesIO(request.body)
         # data = JSONParser().parse(json)
+        data = request.DATA
         data['created_by'] = api_user.id
         serializer = self.get_serializer(data=data)
 
