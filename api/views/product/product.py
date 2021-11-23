@@ -9,7 +9,6 @@ from rest_framework.decorators import action
 
 class ProductPagination(PageNumberPagination):
 
-    page_size = 25
     page_query_param = 'page'
     page_size_query_param = 'page_size'
 
@@ -43,7 +42,8 @@ class ProductViewSet(viewsets.ModelViewSet):
         elif api_user.status != "valid":
             return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
 
-        queryset = Product.objects.filter(user=api_user)
+        queryset = self.queryset.filter(user=api_user)
+
         try:
             if product_status:
                 queryset = queryset.filter(status=product_status)
@@ -53,5 +53,14 @@ class ProductViewSet(viewsets.ModelViewSet):
                 queryset = queryset.order_by(order_by)
         except:
             return Response({"message": "query error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        serializer = ProductSerializer(queryset)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            result = self.get_paginated_response(serializer.data)
+            data = result.data
+        else:
+            serializer = self.get_serializer(queryset, many=True)
+            data = serializer.data
+
+        return Response(data, status=status.HTTP_200_OK)
