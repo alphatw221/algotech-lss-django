@@ -89,9 +89,6 @@ class CampaignViewSet(viewsets.ModelViewSet):
         elif api_user.status != "valid":
             return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
 
-        print(type(request))
-        print(type(request.body))
-        print(request.data)
         json = io.BytesIO(request.body)
         data = JSONParser().parse(json)
         data = request.data
