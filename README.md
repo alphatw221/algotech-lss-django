@@ -13,10 +13,23 @@ sudo /root/.local/bin/poetry run gunicorn lss.wsgi --bind 0.0.0.0:8000 --workers
 
 ## Scripts
 
-`cron_tab`
+### `server.sh`
+
+Usage:
 
 ```shell
-@reboot /root/lss/_lss_start.sh
+# Start server
+server.sh start
+# Stop server
+server.sh stop
+# Reload server
+server.sh reload
+```
+
+### `cron_tab`
+
+```shell
+@reboot /root/lss/server.sh start
 ```
 
 ## Test Notes
