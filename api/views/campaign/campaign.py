@@ -91,6 +91,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         print(type(request))
         print(type(request.body))
+        print(request.data)
         # data = io.BytesIO(request.body)
         # data = JSONParser().parse(json)
         data = request.data
