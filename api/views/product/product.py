@@ -24,7 +24,7 @@ class ProductPagination(PageNumberPagination):
 
 class ProductViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
-    queryset = Product.objects.all().order_by('id')
+    queryset = Product.objects.all()
     serializer_class = ProductSerializer
     filterset_fields = []
     pagination_class = ProductPagination
@@ -43,7 +43,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         elif api_user.status != "valid":
             return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
 
-        queryset = self.queryset
+        queryset = Product.objects.all()
         try:
             if product_status:
                 queryset = queryset.filter(status=product_status)
@@ -54,4 +54,4 @@ class ProductViewSet(viewsets.ModelViewSet):
         except:
             return Response({"message": "query error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        return Response(queryset.all(), status=status.HTTP_200_OK)
+        return Response(queryset, status=status.HTTP_200_OK)
