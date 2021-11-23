@@ -89,8 +89,8 @@ class CampaignViewSet(viewsets.ModelViewSet):
         elif api_user.status != "valid":
             return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
 
-        json = io.BytesIO(request.body)
-        data = JSONParser().parse(json)
+        # json = io.BytesIO(request.body)
+        # data = JSONParser().parse(json)
         data = request.data
         data['created_by'] = api_user.id
         serializer = self.get_serializer(data=data)
