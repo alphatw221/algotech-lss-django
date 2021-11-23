@@ -62,6 +62,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
             return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
+            print(request.body)
             json = io.BytesIO(request.body)
             print(json)
             data = JSONParser().parse(json)
