@@ -15,6 +15,11 @@ class User(models.Model):
         ('user', 'User'),
     ]
 
+    STATUS_CHOICES = [
+        ('new', 'New'),
+        ('valid', 'Valid'),
+    ]
+
     name = models.CharField(max_length=255, null=True, blank=True)
     description = models.TextField(null=True, blank=True, default=None)
     remark = models.TextField(null=True, blank=True, default=None)
@@ -28,7 +33,8 @@ class User(models.Model):
 
     type = models.CharField(max_length=255, null=True,
                             blank=True, choices=TYPE_CHOICES, default='customer')
-    status = models.CharField(max_length=255, null=True, blank=True)
+    status = models.CharField(
+        max_length=255, null=True, blank=True, choices=STATUS_CHOICES, default='new')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
