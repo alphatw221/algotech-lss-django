@@ -43,7 +43,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         elif api_user.status != "valid":
             return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
 
-        queryset = Product.objects.all()
+        queryset = Product.objects.filter(user=api_user)
         try:
             if product_status:
                 queryset = queryset.filter(status=product_status)
@@ -53,5 +53,5 @@ class ProductViewSet(viewsets.ModelViewSet):
                 queryset = queryset.order_by(order_by)
         except:
             return Response({"message": "query error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-        return Response(queryset, status=status.HTTP_200_OK)
+        serializer = ProductSerializer(queryset)
+        return Response(serializer.data, status=status.HTTP_200_OK)
