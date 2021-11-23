@@ -23,8 +23,11 @@ class Command(BaseCommand):
 
         for campaign in get_active_campaign_now():
             try:
-                processor = CommentProcessor(campaign)
-                result = processor.process()
+                result = CommentProcessor(
+                    campaign,
+                    enable_order_code=True,
+                    only_activated_order_code=False
+                ).process()
             except Exception as e:
                 import traceback
                 print(traceback.format_exc())

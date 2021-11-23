@@ -1,16 +1,15 @@
-from abc import ABC, abstractmethod
-from backend.cart.cart_product.request import CartProductRequest, CartProductRequestItem, RequestState
+from abc import ABC
+
+from backend.cart.cart_product.request import (CartProductRequest,
+                                               CartProductRequestItem,
+                                               RequestState)
 
 
 class CartProductRequestResponder(ABC):
-    @staticmethod
-    @abstractmethod
-    def process(request: CartProductRequest):
+    def process():
         ...
 
 
-class CartProductRequestResponderV1(CartProductRequestResponder):
-    @staticmethod
-    def process(request: CartProductRequest):
-        ...
-        # TODO: respond based on platform
+class CartProductRequestResponderRegular(CartProductRequestResponder):
+    def process(self, request: CartProductRequest):
+        print(request)
