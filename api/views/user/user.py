@@ -10,6 +10,7 @@ from api.models.facebook.facebook_page import FacebookPage
 from datetime import datetime
 
 
+
 class UserViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     queryset = User.objects.all().order_by('id')
