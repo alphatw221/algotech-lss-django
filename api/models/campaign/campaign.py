@@ -34,6 +34,9 @@ class Campaign(models.Model):
     youtube_campaign = models.JSONField(null=True, blank=True, default=dict)
     meta = models.JSONField(null=True, blank=True, default=dict)
 
+    payment_info = models.JSONField(null=True, blank=True, default=dict)
+    logistics_info = models.JSONField(null=True, blank=True, default=dict)
+
     def __str__(self):
         return self.title
 

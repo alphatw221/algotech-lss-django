@@ -5,6 +5,8 @@ from rest_framework.response import Response
 from api.models import order, product
 from api.models.product.product import Product, ProductSerializer
 from rest_framework.decorators import action
+import io
+from rest_framework.parsers import JSONParser
 
 
 class ProductPagination(PageNumberPagination):
@@ -28,8 +30,29 @@ class ProductViewSet(viewsets.ModelViewSet):
     filterset_fields = []
     pagination_class = ProductPagination
 
-    @action(detail=False, methods=['GET'], url_path=r'user_products')
-    def get_user_products(self, request):
+    @action(detail=True, methods=['GET'], url_path=r'retrieve_product')
+    def retrieve_product(self, request, pk=None):
+
+        api_user = request.user.api_users.get(type='user')
+        # TODO 檢查
+        if not api_user:
+            return Response({"message": "no user found"}, status=status.HTTP_400_BAD_REQUEST)
+        elif api_user.status != "valid":
+            return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not api_user.campaigns.filter(id=pk).exists():
+            return Response({"message": "no campaign found"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            product = api_user.products.get(id=pk)
+            serializer = self.get_serializer(product)
+        except:
+            return Response({"message": "error occerd during retriving"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['GET'], url_path=r'list_product')
+    def list_product(self, request):
 
         order_by = request.query_params.get('order_by')
         product_status = request.query_params.get('status')
@@ -64,3 +87,75 @@ class ProductViewSet(viewsets.ModelViewSet):
             data = serializer.data
 
         return Response(data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['POST'], url_path=r'create_product')
+    def create_product(self, request):
+
+        api_user = request.user.api_users.get(type='user')
+        # TODO 檢查
+        if not api_user:
+            return Response({"message": "no user found"}, status=status.HTTP_400_BAD_REQUEST)
+        elif api_user.status != "valid":
+            return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            json = io.BytesIO(request.body)
+            data = JSONParser().parse(json)
+            data['user'] = api_user.id
+            serializer = self.get_serializer(data=data)
+
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            serializer.save()
+
+        except:
+            return Response({"message": "error occerd during creating"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['PUT'], url_path=r'update_product')
+    def update_product(self, request, pk=None):
+
+        api_user = request.user.api_users.get(type='user')
+        # TODO 檢查
+        if not api_user:
+            return Response({"message": "no user found"}, status=status.HTTP_400_BAD_REQUEST)
+        elif api_user.status != "valid":
+            return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not api_user.products.filter(id=pk).exists():
+            return Response({"message": "no product found"}, status=status.HTTP_400_BAD_REQUEST)
+        products = api_user.products.get(id=pk)
+
+        try:
+            json = io.BytesIO(request.body)
+            data = JSONParser().parse(json)
+            serializer = self.get_serializer(products, data=data, partial=True)
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            serializer.save()
+
+        except:
+            return Response({"message": "error occerd during updating"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['DELETE'], url_path=r'delete_product')
+    def delete_product(self, request, pk=None):
+
+        api_user = request.user.api_users.get(type='user')
+        # TODO 檢查
+        if not api_user:
+            return Response({"message": "no user found"}, status=status.HTTP_400_BAD_REQUEST)
+        elif api_user.status != "valid":
+            return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not api_user.products.filter(id=pk).exists():
+            return Response({"message": "no campaign found"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            api_user.products.get(id=pk).delete()
+        except:
+            return Response({"message": "error occerd during deleting"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response({"message": "delete success"}, status=status.HTTP_200_OK)

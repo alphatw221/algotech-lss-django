@@ -22,6 +22,27 @@ class CampaignViewSet(viewsets.ModelViewSet):
     filterset_fields = []
     pagination_class = CampaignPagination
 
+    @action(detail=True, methods=['GET'], url_path=r'retrieve_campaign')
+    def retrieve_campaign(self, request, pk=None):
+
+        api_user = request.user.api_users.get(type='user')
+        # TODO 檢查
+        if not api_user:
+            return Response({"message": "no user found"}, status=status.HTTP_400_BAD_REQUEST)
+        elif api_user.status != "valid":
+            return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not api_user.campaigns.filter(id=pk).exists():
+            return Response({"message": "no campaign found"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            campaign = api_user.campaigns.get(id=pk)
+            serializer = self.get_serializer(campaign)
+        except:
+            return Response({"message": "error occerd during retriving"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
     @action(detail=False, methods=['GET'], url_path=r'list_campaign')
     def list_campaign(self, request):
 
@@ -113,7 +134,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['DEL'], url_path=r'delete_campaign')
+    @action(detail=True, methods=['DELETE'], url_path=r'delete_campaign')
     def delete_campaign(self, request, pk=None):
 
         api_user = request.user.api_users.get(type='user')
@@ -125,17 +146,10 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         if not api_user.campaigns.filter(id=pk).exists():
             return Response({"message": "no campaign found"}, status=status.HTTP_400_BAD_REQUEST)
-        api_user.campaigns.get(id=pk).delete()
 
         try:
-            json = io.BytesIO(request.body)
-            data = JSONParser().parse(json)
-            serializer = self.get_serializer(campaign, data=data, partial=True)
-            if not serializer.is_valid():
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            serializer.save()
-
+            api_user.campaigns.get(id=pk).delete()
         except:
-            return Response({"message": "error occerd during updating"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"message": "error occerd during deleting"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response({"message": "delete success"}, status=status.HTTP_200_OK)

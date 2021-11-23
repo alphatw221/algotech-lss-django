@@ -7,7 +7,7 @@ from api.models.user.user import User
 class Product(models.Model):
 
     STATUS_CHOICES = [
-        ('for sale', 'For Sale'),
+        ('for_sale', 'For Sale'),
         ('disable', 'Disable'),
         ('archive', 'Archive')
     ]
