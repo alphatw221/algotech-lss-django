@@ -1,9 +1,10 @@
 import pendulum
+from api.utils.orm.campaign import get_active_campaign_now
+from automation.utils.timeloop import time_loop
+from backend.campaign.campaign_comment.comment_processor import \
+    CommentProcessor
 from django.conf import settings
 from django.core.management.base import BaseCommand
-from backend.utils.campaign_comment.comment_processor import CommentProcessor
-from automation.utils.timeloop import time_loop
-from api.utils.orm.campaign import get_active_campaign_now
 
 
 class Command(BaseCommand):
@@ -22,8 +23,11 @@ class Command(BaseCommand):
 
         for campaign in get_active_campaign_now():
             try:
-                processor = CommentProcessor(campaign)
-                result = processor.process()
+                result = CommentProcessor(
+                    campaign,
+                    enable_order_code=True,
+                    only_activated_order_code=False
+                ).process()
             except Exception as e:
                 import traceback
                 print(traceback.format_exc())

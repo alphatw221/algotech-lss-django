@@ -116,6 +116,7 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -164,15 +165,6 @@ DATABASES = {
             'authMechanism': 'SCRAM-SHA-1',
             'readPreference': 'primary',
             'ssl': False,
-            # Development
-            # 'host': 'mongodb://34.126.92.142,35.240.200.4,34.126.155.150',
-            # 'port': 27017,
-            # 'username': 'lss',
-            # 'password': 'algo83111T%%',
-            # 'authSource': 'admin',
-            # 'authMechanism': 'SCRAM-SHA-1',
-            # 'readPreference': 'primary',
-            # 'ssl': False,
         }
     }
 }
@@ -210,6 +202,12 @@ USE_L10N = True
 
 USE_TZ = True
 
+LOCALE_PATHS = [os.path.join(BASE_DIR, 'locale')]
+LANGUAGES = [
+    ('en', 'English'),
+    ('zh-hans', 'Simplified Chinese'),
+    ('zh-hant', 'Traditional Chinese'),
+]
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
@@ -229,7 +227,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 CRON_CLASSES = [
 ]
 
-# LSS
+# Live Show Seller info
 WEB_SERVER_URL = "https://"
 SHOPPING_CART_URL = f"{WEB_SERVER_URL}/"
 
@@ -255,7 +253,7 @@ YOUTUBE_API_CONFIG = {
     }
 }
 
-
+# backend app
 COMMENT_PROCESSING = {
     'REST_INTERVAL_SECONDS': 3,
 }

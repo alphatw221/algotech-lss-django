@@ -1,13 +1,15 @@
-from django.core.management.base import BaseCommand
+
+import pprint
+
 from api.models.campaign.campaign import Campaign
-from backend.utils.api.facebook.page import *
-from backend.utils.api.facebook.user import *
-from backend.utils.api.facebook.post import *
-from backend.utils.campaign_comment.comment_processor import *
-from backend.utils.facebook.post_comment import *
 from api.utils.orm.campaign import *
 from api.utils.orm.campaign_comment import *
-import pprint
+from backend.api.facebook.page import *
+from backend.api.facebook.post import *
+from backend.api.facebook.user import *
+from backend.campaign.campaign_comment.comment_processor import *
+from backend.comment_catching.facebook.post_comment import *
+from django.core.management.base import BaseCommand
 
 
 class Command(BaseCommand):
@@ -17,6 +19,11 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        campaign = Campaign.objects.get(pk=2)
-        processor = CommentProcessor(campaign)
-        processor.process()
+        self.i18n_test()
+
+    def i18n_test(self):
+        from backend.i18n._sample import i18n_sample
+        items = [('AAA', 1), ('BBB', 10)]
+        print(i18n_sample(items, lang='en'))
+        print(i18n_sample(items, lang='zh-hant'))
+        print(i18n_sample(items, lang='zh-hans'))

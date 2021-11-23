@@ -11,8 +11,13 @@ class User(models.Model):
         db_table = 'api_user'
 
     TYPE_CHOICES = [
-        ('customer', 'customer'),
-        ('user', 'user'),
+        ('customer', 'Customer'),
+        ('user', 'User'),
+    ]
+
+    STATUS_CHOICES = [
+        ('new', 'New'),
+        ('valid', 'Valid'),
     ]
 
     name = models.CharField(max_length=255, null=True, blank=True)
@@ -28,7 +33,8 @@ class User(models.Model):
 
     type = models.CharField(max_length=255, null=True,
                             blank=True, choices=TYPE_CHOICES, default='customer')
-    status = models.CharField(max_length=255, null=True, blank=True)
+    status = models.CharField(
+        max_length=255, null=True, blank=True, choices=STATUS_CHOICES, default='new')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

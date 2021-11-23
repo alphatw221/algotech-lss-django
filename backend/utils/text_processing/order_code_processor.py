@@ -2,58 +2,71 @@ from backend.utils.text_processing._text_processor import TextProcessor
 
 
 class OrderCodeTextProcessor(TextProcessor):
+    ordering_chars = set('+*Xx')
+    aborting_chars = set('?')
+    null_chars = set(' ')
+
+    @staticmethod
     def process(text: str, order_code: str):
-        if not order_code:
+        if not text or not order_code:
             return None
 
-        # TODO: complete the function
-
-        return 1
-
-
-#! deprecated
-def order_qty_in_comment(comment, order_code):
-    porduct_name_index = comment.find(order_code)
-    if porduct_name_index == -1:  # -1 means no match
-        return None
-
-    # If product_name is in the comment, calculate the amount
-    order_amount = ""
-    # We find the closest consecutive digits after product_name in the string
-    begin_index = porduct_name_index + len(order_code)
-    # Scan rest of the string for exception rules
-    for char_index in range(begin_index, len(comment)):
-        # If there's a "?" after order code, the order doesn't count
-        if comment[char_index] == "?":
+        text_after_order_code = OrderCodeTextProcessor._get_text_after_order_code(
+            text, order_code)
+        if not text_after_order_code:
             return None
 
-    plus_one_chars = set('+*Xx')
-    having_plus_one_char = False
-    # Find the first index that is a digit
-    first_digit_index = len(comment)
-    for char_index in range(begin_index, len(comment)):
-        if having_plus_one_char:
-            # Find the first digit
-            if comment[char_index].isdigit():
-                first_digit_index = char_index
-                break
-        else:
-            if comment[char_index] in plus_one_chars:
-                having_plus_one_char = True
-            elif comment[char_index] == ' ':
-                pass
+        if OrderCodeTextProcessor._text_has_aborting_chars(text_after_order_code):
+            return None
+
+        return OrderCodeTextProcessor._get_order_qty(text_after_order_code)
+
+    @staticmethod
+    def _get_text_after_order_code(text: str, order_code: str):
+        # check if order code in text (-1 means negative)
+        cursor_idx = text.find(order_code)
+        if cursor_idx == -1:
+            return None
+        return text[cursor_idx+len(order_code):]
+
+    @staticmethod
+    def _get_order_qty(text: str):
+        is_ordering, order_qty = False, []
+
+        for c in text:
+            if is_ordering:
+                if c.isdigit():
+                    order_qty.append(c)
+                elif not order_qty and \
+                        OrderCodeTextProcessor._is_null_chars(c):
+                    continue
+                else:
+                    break
+            elif OrderCodeTextProcessor._is_null_chars(c):
+                continue
+            elif OrderCodeTextProcessor._is_ordering_chars(c):
+                is_ordering = True
+                continue
             else:
-                return None
+                break
 
-    # Check the remaining char after order code
-    for char_index in range(first_digit_index, len(comment)):
-        if comment[char_index].isdigit():
-            order_amount += comment[char_index]
-        elif not order_amount:
-            continue
-        else:
-            break
+        if not is_ordering or not order_qty:
+            return None
+        return int(''.join(order_qty))
 
-    if not order_amount:
-        return None
-    return int(order_amount)
+    @staticmethod
+    def _is_ordering_chars(char: str):
+        return char in OrderCodeTextProcessor.ordering_chars
+
+    @staticmethod
+    def _is_null_chars(char: str):
+        return char in OrderCodeTextProcessor.null_chars
+
+    @staticmethod
+    def _text_has_aborting_chars(text: str):
+        return OrderCodeTextProcessor._text_has_chars(
+            text, OrderCodeTextProcessor.aborting_chars)
+
+    @staticmethod
+    def _text_has_chars(text: str, chars_set: set[str]):
+        return any([c in text for c in chars_set])
