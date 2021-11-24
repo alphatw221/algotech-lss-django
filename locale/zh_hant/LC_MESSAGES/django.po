@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-21 01:42+0800\n"
+"POT-Creation-Date: 2021-11-24 15:13+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,11 +18,104 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: .\backend\i18n\_sample.py:7
-msgid "Product details: "
-msgstr "產品資訊："
-
-#: .\backend\i18n\_sample.py:10
+#: .\backend\i18n\campaign_announcement.py:8
 #, python-brace-format
-msgid "Order code: {order_code}. Order quantity: {qty}. "
-msgstr "代號：{order_code}，數量：{qty}。"
+msgid "PRODUCT_CLOSED{order_code}"
+msgstr ""
+
+#: .\backend\i18n\campaign_announcement.py:15
+#, python-brace-format
+msgid "PRODUCT_SOLD_OUT{order_code}"
+msgstr ""
+
+#: .\backend\i18n\campaign_announcement.py:22
+#, python-brace-format
+msgid "LUCKY_DRAW_WINNER{customer_name}{product_name}"
+msgstr "測試繁體中文{customer_name}{product_name}"
+
+#: .\backend\i18n\cart_product_request.py:9
+msgid "MESSAGE_PREFIX"
+msgstr ""
+
+#: .\backend\i18n\cart_product_request.py:19
+#, python-brace-format
+msgid "SHOPPING_CART_INFO{link}"
+msgstr ""
+
+#: .\backend\i18n\cart_product_request.py:25
+msgid "MORE_INFO_IN_PM_NOTICE"
+msgstr ""
+
+#: .\backend\i18n\cart_product_request.py:31
+#, python-brace-format
+msgid "ITEM_INFO{order_code}{qty}{result}"
+msgstr ""
+
+#: .\backend\i18n\cart_product_request.py:41
+msgid "ADDED"
+msgstr ""
+
+#: .\backend\i18n\cart_product_request.py:43
+msgid "UPDATED"
+msgstr ""
+
+#: .\backend\i18n\cart_product_request.py:45
+msgid "DELETED"
+msgstr ""
+
+#: .\backend\i18n\cart_product_request.py:47
+msgid "INSUFFICIENT_INV"
+msgstr ""
+
+#: .\backend\i18n\cart_product_request.py:49
+msgid "INVALID_PRODUCT_NOT_ACTIVATED"
+msgstr ""
+
+#: .\backend\i18n\cart_product_request.py:51
+msgid "INVALID_EXCEED_MAX_ORDER_AMOUNT"
+msgstr ""
+
+#: .\backend\i18n\cart_product_request.py:53
+msgid "INVALID_REMOVE_NOT_ALLOWED"
+msgstr ""
+
+#: .\backend\i18n\cart_product_request.py:55
+msgid "INVALID_EDIT_NOT_ALLOWED"
+msgstr ""
+
+#: .\backend\i18n\cart_product_request.py:57
+msgid "INVALID_ADD_ZERO_QTY"
+msgstr ""
+
+#: .\backend\i18n\cart_product_request.py:59
+msgid "N/A"
+msgstr ""
+
+#: .\backend\i18n\comment_command.py:8
+msgid "MESSAGE_HEADER"
+msgstr ""
+
+#: .\backend\i18n\comment_command.py:10
+#, python-brace-format
+msgid "DELIVERY{dollar_sign}{delivery}"
+msgstr ""
+
+#: .\backend\i18n\comment_command.py:13
+#, python-brace-format
+msgid "OPTION{dollar_sign}{option}"
+msgstr ""
+
+#: .\backend\i18n\comment_command.py:16
+#, python-brace-format
+msgid "TOTAL{dollar_sign}{total}"
+msgstr ""
+
+#: .\backend\i18n\comment_command.py:19
+#, python-brace-format
+msgid "DETAIL{link}"
+msgstr ""
+
+#: .\backend\i18n\comment_command.py:28
+#, python-brace-format
+msgid "ITEM_INFO{name}{qty}{dollar_sign}{total}"
+msgstr ""

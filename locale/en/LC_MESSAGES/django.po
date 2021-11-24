@@ -16,106 +16,110 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: .\backend\i18n\campaign_announcement.py:8
 #, python-brace-format
 msgid "PRODUCT_CLOSED{order_code}"
-msgstr ""
+msgstr "Order code: {order_code} has closed."
 
 #: .\backend\i18n\campaign_announcement.py:15
 #, python-brace-format
 msgid "PRODUCT_SOLD_OUT{order_code}"
-msgstr ""
+msgstr "Order code: {order_code} is sold out."
 
 #: .\backend\i18n\campaign_announcement.py:22
 #, python-brace-format
 msgid "LUCKY_DRAW_WINNER{customer_name}{product_name}"
-msgstr "測試簡體中文{customer_name}{product_name}"
+msgstr ""
+"Congratulations to {customer_name} on wining lucky "
+"draw! Prize: {product_name}. Please check your shopping cart."
 
 #: .\backend\i18n\cart_product_request.py:9
 msgid "MESSAGE_PREFIX"
-msgstr ""
+msgstr "Live Show Seller notice:"
 
 #: .\backend\i18n\cart_product_request.py:19
 #, python-brace-format
 msgid "SHOPPING_CART_INFO{link}"
-msgstr ""
+msgstr "Shopping cart: {link}"
 
 #: .\backend\i18n\cart_product_request.py:25
 msgid "MORE_INFO_IN_PM_NOTICE"
 msgstr ""
+"Shopping Cart link is sent via FB Messenger, please contact page admin if "
+"not received any notification."
 
 #: .\backend\i18n\cart_product_request.py:31
 #, python-brace-format
 msgid "ITEM_INFO{order_code}{qty}{result}"
-msgstr ""
+msgstr "Product({order_code} - Qty:{qty}) {result}."
 
 #: .\backend\i18n\cart_product_request.py:41
 msgid "ADDED"
-msgstr ""
+msgstr "is added"
 
 #: .\backend\i18n\cart_product_request.py:43
 msgid "UPDATED"
-msgstr ""
+msgstr "is updated"
 
 #: .\backend\i18n\cart_product_request.py:45
 msgid "DELETED"
-msgstr ""
+msgstr "is removed"
 
 #: .\backend\i18n\cart_product_request.py:47
 msgid "INSUFFICIENT_INV"
-msgstr ""
+msgstr "is sold out"
 
 #: .\backend\i18n\cart_product_request.py:49
 msgid "INVALID_PRODUCT_NOT_ACTIVATED"
-msgstr ""
+msgstr "is unavailable"
 
 #: .\backend\i18n\cart_product_request.py:51
 msgid "INVALID_EXCEED_MAX_ORDER_AMOUNT"
-msgstr ""
+msgstr "has a maximum ordering quantity of {max_order_amount}"
 
 #: .\backend\i18n\cart_product_request.py:53
 msgid "INVALID_REMOVE_NOT_ALLOWED"
-msgstr ""
+msgstr "is not allowed to remove"
 
 #: .\backend\i18n\cart_product_request.py:55
 msgid "INVALID_EDIT_NOT_ALLOWED"
-msgstr ""
+msgstr "is not allowed to edit"
 
 #: .\backend\i18n\cart_product_request.py:57
 msgid "INVALID_ADD_ZERO_QTY"
-msgstr ""
+msgstr "can not be added with 0 qty"
 
 #: .\backend\i18n\cart_product_request.py:59
 msgid "N/A"
-msgstr ""
+msgstr "has an operation error"
 
 #: .\backend\i18n\comment_command.py:8
 msgid "MESSAGE_HEADER"
-msgstr ""
+msgstr "Your order:"
 
 #: .\backend\i18n\comment_command.py:10
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "DELIVERY{dollar_sign}{delivery}"
-msgstr ""
+msgstr "Delivery: {dollar_sign}{delivery}"
 
 #: .\backend\i18n\comment_command.py:13
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "OPTION{dollar_sign}{option}"
-msgstr ""
+msgstr "Option: {dollar_sign}{option}"
 
 #: .\backend\i18n\comment_command.py:16
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "TOTAL{dollar_sign}{total}"
-msgstr ""
+msgstr "Total: {dollar_sign}{total}"
 
 #: .\backend\i18n\comment_command.py:19
 #, python-brace-format
 msgid "DETAIL{link}"
-msgstr ""
+msgstr "Find out details: {link}"
 
 #: .\backend\i18n\comment_command.py:28
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "ITEM_INFO{name}{qty}{dollar_sign}{total}"
-msgstr ""
+msgstr "{name} Qty:{qty} {dollar_sign}{total}"

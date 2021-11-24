@@ -22,9 +22,15 @@ class Command(BaseCommand):
         self.i18n_test()
 
     def i18n_test(self):
-        from backend.i18n._sample import i18n_sample
-        items = [('AAA', 1), ('BBB', 10)]
-        print(i18n_sample(items))
-        print(i18n_sample(items, lang='en'))
-        print(i18n_sample(items, lang='zh-hant'))
-        print(i18n_sample(items, lang='zh-hans'))
+        from backend.i18n.campaign_announcement import \
+            i18n_get_campaign_announcement_lucky_draw_winner
+        customer_name = 'John'
+        product_name = 'Phone'
+        print(i18n_get_campaign_announcement_lucky_draw_winner(
+            customer_name, product_name))
+        print(i18n_get_campaign_announcement_lucky_draw_winner(
+            customer_name, product_name, lang='en'))
+        print(i18n_get_campaign_announcement_lucky_draw_winner(
+            customer_name, product_name, lang='zh-hant'))
+        print(i18n_get_campaign_announcement_lucky_draw_winner(
+            customer_name, product_name, lang='zh-hans'))
