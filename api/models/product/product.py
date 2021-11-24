@@ -58,13 +58,8 @@ class Product(models.Model):
     type = models.CharField(max_length=255, null=True, blank=True)
 
 
-<< << << < HEAD
-status = models.CharField(
-    max_length=255, null=True, blank=True, choices=STATUS_CHOICES, default='for sale')
-== == == =
 status = models.CharField(max_length=255, blank=True,
                           choices=STATUS_CHOICES, default='enabled')
->>>>>> > master
 created_at = models.DateTimeField(auto_now_add=True)
 updated_at = models.DateTimeField(auto_now=True)
 
