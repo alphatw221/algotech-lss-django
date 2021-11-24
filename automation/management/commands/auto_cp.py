@@ -26,7 +26,7 @@ class Command(BaseCommand):
                 result = CommentProcessor(
                     campaign,
                     comment_batch_size=settings.COMMENT_PROCESSING['COMMENT_BATCH_SIZE'],
-                    max_response_workers=settings.COMMENT_PROCESSING['MAX_WORKERS'],
+                    max_response_workers=settings.COMMENT_PROCESSING['MAX_RESPONSE_WORKERS'],
                     enable_order_code=True,
                     only_activated_order_code=False,
                     response_platforms=['facebook', 'youtube']
