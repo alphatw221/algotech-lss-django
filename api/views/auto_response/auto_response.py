@@ -40,17 +40,11 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
         platform = self.platform_dict[platform_name].objects.get(
             page_id=platform_id)
         # TODO 檢查使用者有這個platform的權限
-        print(platform)
-        auto_responses = platform.auto_responses.all()
-        print(auto_responses.values())
-        serializer = self.get_serializer(auto_responses)
 
-        print('serializer:')
-        print(serializer.data)
-        return Response('test', status=status.HTTP_200_OK)
-        # try:
+        try:
+            auto_responses = platform.auto_responses.all()
+            serializer = self.get_serializer(auto_responses, many=True)
+        except:
+            return Response({"message": "query error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        # except:
-        #     return Response({"message": "query error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-        # return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK)

@@ -24,9 +24,6 @@ class AutoResponse(models.Model):
 
     meta = models.JSONField(null=True, blank=True, default=dict)
 
-    facebook_page = models.ForeignKey(
-        FacebookPage, on_delete=models.CASCADE, related_name='auto_responses')
-
 
 class AutoResponseSerializer(serializers.ModelSerializer):
     class Meta:
@@ -34,7 +31,7 @@ class AutoResponseSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['created_at', 'modified_at']
 
-    facebook_page = FacebookPageSerializer(read_only=True)
+    # facebook_page = FacebookPageSerializer(read_only=True)
     meta = serializers.JSONField(default=dict)
 
 
