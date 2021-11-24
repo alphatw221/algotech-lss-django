@@ -19,11 +19,11 @@ Usage:
 
 ```shell
 # Start server
-server.sh start
+./server.sh start
 # Stop server
-server.sh stop
+./server.sh stop
 # Reload server
-server.sh reload
+./server.sh reload
 ```
 
 ### `cron_tab`
