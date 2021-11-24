@@ -71,14 +71,14 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
         if not self.platform_dict[platform_name].objects.filter(page_id=platform_id).exists():
             return Response({"message": "no platfrom found"}, status=status.HTTP_400_BAD_REQUEST)
 
-        if platform_name == 'facebook':
-            platform = self.platform_dict['facebook_page'].objects.get(
-                page_id=platform_id)
-            # TODO 檢查使用者有這個platform的權限
-            status_code, response = api_fb_get_page_admin()
+        # if platform_name == 'facebook':
+        #     platform = self.platform_dict['facebook_page'].objects.get(
+        #         page_id=platform_id)
+        #     # TODO 檢查使用者有這個platform的權限
+        #     status_code, response = api_fb_get_page_admin()
 
-        elif platform_name == 'youtube':
-            pass
+        # elif platform_name == 'youtube':
+        #     pass
 
         try:
             auto_responses = platform.auto_responses.all()
