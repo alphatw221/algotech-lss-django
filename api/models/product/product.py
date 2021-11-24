@@ -57,15 +57,14 @@ class Product(models.Model):
 
     type = models.CharField(max_length=255, null=True, blank=True)
 
+    status = models.CharField(
+        max_length=255, blank=True, choices=STATUS_CHOICES, default='enabled')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
-status = models.CharField(max_length=255, blank=True,
-                          choices=STATUS_CHOICES, default='enabled')
-created_at = models.DateTimeField(auto_now_add=True)
-updated_at = models.DateTimeField(auto_now=True)
-
-meta = models.JSONField(default=dict, null=True, blank=True)
-meta_logistic = models.JSONField(default=dict, null=True, blank=True)
-tag = models.JSONField(default=dict, null=True, blank=True)
+    meta = models.JSONField(default=dict, null=True, blank=True)
+    meta_logistic = models.JSONField(default=dict, null=True, blank=True)
+    tag = models.JSONField(default=dict, null=True, blank=True)
 
 
 def __str__(self):

@@ -6,6 +6,7 @@ from api.views.test import test
 from api.views.user import user
 from api.views.user import user_group
 from api.views.user import user_plan
+from api.views.user import user_subscription
 
 from api.views.auto_response import auto_response
 
@@ -36,6 +37,8 @@ def url_setup(urlpatterns):
     router.register(r'user', user.UserViewSet)
     router.register(r'user-group', user_group.UserGroupViewSet)
     router.register(r'user-plan', user_plan.UserPlanViewSet)
+    router.register(r'user-subscription',
+                    user_subscription.UserSubscriptionViewSet)
 
     router.register(r'auto_response', auto_response.AutoResponseViewSet)
 

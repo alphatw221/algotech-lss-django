@@ -1,6 +1,7 @@
 from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
+from api.models.facebook.facebook_page import FacebookPage
 
 
 class AutoResponse(models.Model):
@@ -17,6 +18,9 @@ class AutoResponse(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     meta = models.JSONField(null=True, blank=True, default=dict)
+
+    facebook_page = models.ForeignKey(
+        FacebookPage, on_delete=models.CASCADE, related_name='auto_responses')
 
 
 class AutoResponseSerializer(serializers.ModelSerializer):
