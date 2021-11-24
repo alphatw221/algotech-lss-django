@@ -79,7 +79,7 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['created_at', 'modified_at']
 
-    user_subscription = UserSubscriptionSerializer(read_only=True)
+    # user_subscription = UserSubscriptionSerializer(read_only=True)
     created_by = UserSerializer(read_only=True)
 
     meta = serializers.JSONField(default=dict)

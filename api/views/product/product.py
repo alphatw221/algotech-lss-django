@@ -40,11 +40,15 @@ class ProductViewSet(viewsets.ModelViewSet):
         elif api_user.status != "valid":
             return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
 
-        if not api_user.campaigns.filter(id=pk).exists():
-            return Response({"message": "no campaign found"}, status=status.HTTP_400_BAD_REQUEST)
+        user_subscription = api_user.user_subscriptions.all()[0]
+        if not user_subscription:
+            return Response({"message": "user have no subscription"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not user_subscription.products.filter(id=pk).exists():
+            return Response({"message": "no product found"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            product = api_user.products.get(id=pk)
+            product = user_subscription.products.get(id=pk)
             serializer = self.get_serializer(product)
         except:
             return Response({"message": "error occerd during retriving"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -65,9 +69,12 @@ class ProductViewSet(viewsets.ModelViewSet):
         elif api_user.status != "valid":
             return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
 
-        queryset = self.queryset.filter(user=api_user)
+        user_subscription = api_user.user_subscriptions.all()[0]
+        if not user_subscription:
+            return Response({"message": "user have no subscription"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
+            queryset = user_subscription.products.all()
             if product_status:
                 queryset = queryset.filter(status=product_status)
             if key_word:
@@ -98,9 +105,14 @@ class ProductViewSet(viewsets.ModelViewSet):
         elif api_user.status != "valid":
             return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
 
+        user_subscription = api_user.user_subscriptions.all()[0]
+        if not user_subscription:
+            return Response({"message": "user have no subscription"}, status=status.HTTP_400_BAD_REQUEST)
+
         try:
+
             data = request.data
-            data['user'] = api_user.id
+            data['user_subscription'] = user_subscription.id
             serializer = self.get_serializer(data=data)
 
             if not serializer.is_valid():
@@ -122,11 +134,15 @@ class ProductViewSet(viewsets.ModelViewSet):
         elif api_user.status != "valid":
             return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
 
-        if not api_user.products.filter(id=pk).exists():
+        user_subscription = api_user.user_subscriptions.all()[0]
+        if not user_subscription:
+            return Response({"message": "user have no subscription"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not user_subscription.products.filter(id=pk).exists():
             return Response({"message": "no product found"}, status=status.HTTP_400_BAD_REQUEST)
-        product = api_user.products.get(id=pk)
 
         try:
+            product = user_subscription.products.get(id=pk)
             serializer = self.get_serializer(
                 product, data=request.data, partial=True)
             if not serializer.is_valid():
@@ -148,11 +164,15 @@ class ProductViewSet(viewsets.ModelViewSet):
         elif api_user.status != "valid":
             return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
 
-        if not api_user.products.filter(id=pk).exists():
+        user_subscription = api_user.user_subscriptions.all()[0]
+        if not user_subscription:
+            return Response({"message": "user have no subscription"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not user_subscription.products.filter(id=pk).exists():
             return Response({"message": "no product found"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            api_user.products.get(id=pk).delete()
+            user_subscription.products.get(id=pk).delete()
         except:
             return Response({"message": "error occerd during deleting"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
