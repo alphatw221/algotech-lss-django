@@ -9,21 +9,15 @@ def i18n_get_request_response(request: CartProductRequest, lang=None):
     output = [_('MESSAGE_PREFIX')]
     output.extend(_i18n_get_items_info(request))
 
-    shopping_cart_info = _i18n_get_shopping_cart_info()
-    more_info_in_pm_notice = _i18n_get_more_info_in_pm_notice()
-    return ''.join(output), shopping_cart_info, more_info_in_pm_notice
+    return ''.join(output)
 
 
-def _i18n_get_shopping_cart_info():
-    return _(
-        'SHOPPING_CART_INFO{link}'
-    ).format(link=settings.SHOPPING_CART_URL)
-
-
-def _i18n_get_more_info_in_pm_notice():
-    return _(
-        'MORE_INFO_IN_PM_NOTICE'
-    )
+@lang_translate_default_en
+def i18n_get_additional_text(lang=None):
+    shopping_cart_info = _('SHOPPING_CART_INFO{link}'
+                           ).format(link=settings.SHOPPING_CART_URL)
+    more_info_in_pm_notice = _('MORE_INFO_IN_PM_NOTICE')
+    return shopping_cart_info, more_info_in_pm_notice
 
 
 def _i18n_get_items_info(request: CartProductRequest):
