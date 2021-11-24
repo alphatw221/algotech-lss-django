@@ -42,6 +42,7 @@ class CartProductRequestItem:
 class CartProductRequest:
     campaign_comment: CampaignComment
     items: list[CartProductRequestItem] = field(default_factory=list)
+    notification_result: dict = None
 
     def __repr__(self) -> str:
         return (
@@ -63,3 +64,6 @@ class CartProductRequest:
 
     def get_items_repr(self):
         return f'{self.items}'
+
+    def get_notification_result(self):
+        return f'{self.notification_result}'

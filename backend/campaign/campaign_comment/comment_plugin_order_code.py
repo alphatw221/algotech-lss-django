@@ -26,7 +26,7 @@ class CommentPluginOrderCode():
             cprp.process(cart_product_request)
             cprr.process(cart_product_request)
 
-            return cart_product_request.get_items_repr()
+            return cart_product_request.get_items_repr(), cart_product_request.get_notification_result()
 
     @staticmethod
     def _get_orders_from_comment(text_processor: TextProcessor,

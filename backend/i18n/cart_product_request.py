@@ -14,10 +14,10 @@ def i18n_get_request_response(request: CartProductRequest, lang=None):
     return ''.join(output), shopping_cart_info, more_info_in_pm_notice
 
 
-def _i18n_get_shopping_cart_info(link: str):
+def _i18n_get_shopping_cart_info():
     return _(
         'SHOPPING_CART_INFO{link}'
-    ).format(link=link)
+    ).format(link=settings.SHOPPING_CART_URL)
 
 
 def _i18n_get_more_info_in_pm_notice():
