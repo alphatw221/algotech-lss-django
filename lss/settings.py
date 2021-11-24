@@ -11,8 +11,8 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 import os
-from pathlib import Path
 from datetime import timedelta
+from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -256,6 +256,8 @@ YOUTUBE_API_CONFIG = {
 # backend app
 COMMENT_PROCESSING = {
     'REST_INTERVAL_SECONDS': 3,
+    'COMMENT_BATCH_SIZE': 500,
+    'MAX_WORKERS': 10,
 }
 FACEBOOK_COMMENT_CAPTURING = {
     'MAX_CONTINUOUS_REQUEST_TIMES': 10,
