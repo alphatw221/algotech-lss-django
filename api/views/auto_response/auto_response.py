@@ -17,8 +17,8 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
     serializer_class = AutoResponseSerializer
     filterset_fields = []
 
-    platform_dict = {'facebook_page': FacebookPage,
-                     'youtube_channel': YoutubeChannel}
+    platform_dict = {'facebook': FacebookPage,
+                     'youtube': YoutubeChannel}
 
     @action(detail=True, methods=['GET'], url_path=r'retrieve_auto_response')
     def retrieve_auto_response(self, request, pk=None):
