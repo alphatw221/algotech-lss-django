@@ -24,6 +24,7 @@ class Command(BaseCommand):
     def i18n_test(self):
         from backend.i18n._sample import i18n_sample
         items = [('AAA', 1), ('BBB', 10)]
+        print(i18n_sample(items))
         print(i18n_sample(items, lang='en'))
         print(i18n_sample(items, lang='zh-hant'))
         print(i18n_sample(items, lang='zh-hans'))
