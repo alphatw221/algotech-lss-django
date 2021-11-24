@@ -13,50 +13,26 @@ sudo /root/.local/bin/poetry run gunicorn lss.wsgi --bind 0.0.0.0:8000 --workers
 
 ## Scripts
 
-`/home/ubuntu/lss_start.sh`
+### `server.sh`
+
+Usage:
 
 ```shell
-#!/bin/bash
-
-cd /home/ubuntu/lss
-sudo screen -dmS api
-sudo screen -S api -X stuff "sudo /root/.local/bin/poetry run gunicorn lss.wsgi --bind 0.0.0.0:8000 --workers 5\r"
-
-cd /home/ubuntu/lss
-screen -dmS auto_fb
-screen -S auto_fb -X stuff "sudo /root/.local/bin/poetry run python manage.py auto_fb\r"
-
-cd /home/ubuntu/lss
-screen -dmS auto_cp
-screen -S auto_fb -X stuff "sudo /root/.local/bin/poetry run python manage.py auto_cp\r"
-
-sudo screen -ls
+# Start server
+server.sh start
+# Stop server
+server.sh stop
+# Reload server
+server.sh reload
 ```
 
-`/home/ubuntu/lss_end.sh`
+### `cron_tab`
 
 ```shell
-#!/bin/bash
-
-screen -S api -X stuff ^C
-screen -S api -X quit
-
-screen -S auto_fb -X stuff ^C
-screen -S auto_fb -X quit
-
-screen -S auto_cp -X stuff ^C
-screen -S auto_cp -X quit
-
-screen -ls
+@reboot /root/lss/server.sh start
 ```
 
-`cron_tab`
-
-```shell
-@reboot /home/ubuntu/lss_start.sh
-```
-
-## Testing Area
+## Test Notes
 
 ### MongoDB testing script
 

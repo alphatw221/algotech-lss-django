@@ -1,10 +1,12 @@
+from api.models.campaign.facebook_campaign import FacebookCampaign
+from api.models.facebook.facebook_page import (FacebookPage,
+                                               FacebookPageSerializer)
+from api.models.user.user import User
+from api.models.youtube.youtube_channel import (YoutubeChannel,
+                                                YoutubeChannelSerializer)
 from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
-from api.models.user.user import User
-from api.models.facebook.facebook_page import FacebookPage, FacebookPageSerializer
-from api.models.youtube.youtube_channel import YoutubeChannel, YoutubeChannelSerializer
-from api.models.campaign.facebook_campaign import FacebookCampaign
 
 
 class Campaign(models.Model):
@@ -33,6 +35,8 @@ class Campaign(models.Model):
         YoutubeChannel, blank=True, null=True, on_delete=models.SET_NULL, related_name='campaigns')
     youtube_campaign = models.JSONField(null=True, blank=True, default=dict)
     meta = models.JSONField(null=True, blank=True, default=dict)
+    meta_payment = models.JSONField(null=True, blank=True, default=dict)
+    meta_logistic = models.JSONField(default=dict, null=True, blank=dict)
 
     payment_info = models.JSONField(null=True, blank=True, default=dict)
     logistics_info = models.JSONField(null=True, blank=True, default=dict)
@@ -47,11 +51,14 @@ class CampaignSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['created_at', 'modified_at']
 
-    meta = serializers.JSONField(default=dict)
-    # facebook_page = FacebookPageSerializer()
+     # facebook_page = FacebookPageSerializer()
     facebook_campaign = serializers.JSONField(default=dict)
     # youtube_channel = YoutubeChannelSerializer()
     youtube_campaign = serializers.JSONField(default=dict)
+    meta = serializers.JSONField(default=dict)
+    meta_payment = serializers.JSONField(default=dict)
+    meta_logistic = serializers.JSONField(default=dict)
+   
 
 
 class CampaignAdmin(admin.ModelAdmin):

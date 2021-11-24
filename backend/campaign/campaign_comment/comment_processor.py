@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from api.models.campaign.campaign import Campaign
 from api.utils.orm.campaign_comment import get_campaign_comments
@@ -21,6 +21,7 @@ class CommentProcessor:
     campaign: Campaign
     enable_order_code: bool = True
     only_activated_order_code: bool = True
+    response_platforms: list = field(default_factory=list)
 
     def __post_init__(self):
         self.unprocessed_comments = get_campaign_comments(
@@ -33,6 +34,14 @@ class CommentProcessor:
             if self.enable_order_code \
             else {}
 
+        response_platforms = {}
+        for platform in self.response_platforms:
+            if platform == 'facebook' and self.campaign.facebook_page:
+                response_platforms['facebook'] = self.campaign.facebook_page
+            elif platform == 'youtube' and self.campaign.youtube_channel:
+                response_platforms['youtube'] = self.campaign.youtube_channel
+        self.response_platforms = response_platforms
+
     def process(self):
         for comment in self.unprocessed_comments:
             self._plugin_order_code(comment)
@@ -44,7 +53,7 @@ class CommentProcessor:
         tp = OrderCodeTextProcessor
         cprv = CartProductRequestValidatorRegular()
         cprp = CartProductRequestProcessorRegular(check_inv=True)
-        cprr = CartProductRequestResponderRegular()
+        cprr = CartProductRequestResponderRegular(self.response_platforms)
         result = CommentPluginOrderCode.process(tp, comment, self.order_codes_mapping,
                                                 cprv, cprp, cprr)
         comment.meta['CommentPluginOrderCode'] = result

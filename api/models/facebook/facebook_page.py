@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
@@ -11,6 +12,8 @@ class FacebookPage(models.Model):
     name = models.CharField(max_length=255, null=True, blank=True)
     remark = models.TextField(null=True, blank=True, default=None)
     image = models.CharField(max_length=512, null=True, blank=True)
+    lang = models.CharField(max_length=255, blank=True,
+                            choices=settings.LANGUAGES, default='en')
     region = models.CharField(max_length=255, null=True, blank=True)
     currency = models.CharField(max_length=255, null=True, blank=True)
     timezone = models.CharField(
@@ -25,7 +28,8 @@ class FacebookPage(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     meta = models.JSONField(null=True, blank=True, default=dict)
-    payment_meta = models.JSONField(null=True, blank=True, default=dict)
+    meta_payment = models.JSONField(null=True, blank=True, default=dict)
+    meta_logistic = models.JSONField(default=dict, null=True, blank=dict)
 
     def __str__(self):
         return self.name
@@ -38,7 +42,8 @@ class FacebookPageSerializer(serializers.ModelSerializer):
         read_only_fields = ['created_at', 'modified_at']
 
     meta = serializers.JSONField(default=dict)
-    payment_meta = serializers.JSONField(default=dict)
+    meta_payment = serializers.JSONField(default=dict)
+    meta_logistic = serializers.JSONField(default=dict)
 
 
 class FacebookPageAdmin(admin.ModelAdmin):

@@ -26,7 +26,8 @@ class Command(BaseCommand):
                 result = CommentProcessor(
                     campaign,
                     enable_order_code=True,
-                    only_activated_order_code=False
+                    only_activated_order_code=False,
+                    response_platforms=['facebook', 'youtube']
                 ).process()
             except Exception as e:
                 import traceback

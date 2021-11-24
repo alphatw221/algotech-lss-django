@@ -1,19 +1,24 @@
+from api.models.user.user import User
+from api.models.user.user_subscription import UserSubscription
 from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
-from api.models.user.user import User
 
 
 class Product(models.Model):
 
     STATUS_CHOICES = [
-        ('for_sale', 'For Sale'),
-        ('disable', 'Disable'),
-        ('archive', 'Archive')
+        ('enabled', 'Enabled'),
+        ('disabled', 'Disabled'),
+        ('archived', 'Archived'),
     ]
 
-    user = models.ForeignKey(
+    user_subscription = models.ForeignKey(
+        UserSubscription, null=True, on_delete=models.SET_NULL, related_name='products')
+    created_by = models.ForeignKey(
         User, null=True, on_delete=models.SET_NULL, related_name='products')
+
+    qty = models.IntegerField(blank=False, null=True, default=0)
 
     name = models.CharField(
         max_length=255, null=True, blank=True, default=None)
@@ -51,17 +56,25 @@ class Product(models.Model):
         blank=False, null=True, default=False)
 
     type = models.CharField(max_length=255, null=True, blank=True)
-    status = models.CharField(
-        max_length=255, null=True, blank=True, choices=STATUS_CHOICES, default='for sale')
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
-    meta = models.JSONField(default=dict, null=True, blank=True)
-    meta_logistic = models.JSONField(default=dict, null=True, blank=True)
-    tag = models.JSONField(default=dict, null=True, blank=True)
 
-    def __str__(self):
-        return self.name
+<< << << < HEAD
+status = models.CharField(
+    max_length=255, null=True, blank=True, choices=STATUS_CHOICES, default='for sale')
+== == == =
+status = models.CharField(max_length=255, blank=True,
+                          choices=STATUS_CHOICES, default='enabled')
+>>>>>> > master
+created_at = models.DateTimeField(auto_now_add=True)
+updated_at = models.DateTimeField(auto_now=True)
+
+meta = models.JSONField(default=dict, null=True, blank=True)
+meta_logistic = models.JSONField(default=dict, null=True, blank=True)
+tag = models.JSONField(default=dict, null=True, blank=True)
+
+
+def __str__(self):
+    return self.name
 
 
 class ProductSerializer(serializers.ModelSerializer):
