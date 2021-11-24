@@ -1,3 +1,5 @@
+from api.models.facebook.facebook_page import (FacebookPage,
+                                               FacebookPageSerializer)
 from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
@@ -6,6 +8,9 @@ from rest_framework import serializers
 class AutoResponse(models.Model):
     class Meta:
         db_table = 'api_auto_response'
+
+    facebook_page = models.ForeignKey(
+        FacebookPage, on_delete=models.CASCADE, related_name='auto_responses')
 
     description = models.TextField(null=True, blank=True, default=None)
     input_msg = models.TextField(null=True, blank=True, default=None)
@@ -25,6 +30,7 @@ class AutoResponseSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['created_at', 'modified_at']
 
+    facebook_page = FacebookPageSerializer(read_only=True)
     meta = serializers.JSONField(default=dict)
 
 
