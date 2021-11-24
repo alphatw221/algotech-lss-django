@@ -81,6 +81,8 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
         #     pass
 
         try:
+            platform = self.platform_dict['facebook_page'].objects.get(
+                page_id=platform_id)
             auto_responses = platform.auto_responses.all()
             serializer = self.get_serializer(auto_responses, many=True)
         except:
