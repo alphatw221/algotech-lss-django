@@ -37,7 +37,7 @@ class UserSubscriptionSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['created_at', 'modified_at']
 
-    users = UserSerializer(
+    root_users = UserSerializer(
         many=True, read_only=True)
     facebook_pages = FacebookPageSerializer(
         many=True, read_only=True)
