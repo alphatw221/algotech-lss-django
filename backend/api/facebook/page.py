@@ -29,3 +29,10 @@ def api_fb_get_page_picture(page_token: str, page_id: str, height: int, width: i
     ret = FacebookApiCaller(f'v12.0/{page_id}/picture', bearer_token=page_token,
                             params=params).get()
     return ret
+
+
+def api_fb_get_page_admin(page_token: str, page_id: str, user_id: str):
+
+    ret = FacebookApiCaller(
+        f'v12.0/{page_id}/admins/{user_id}', bearer_token=page_token).get()
+    return ret
