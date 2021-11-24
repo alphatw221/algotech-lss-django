@@ -12,7 +12,7 @@ class UserSubscription(models.Model):
     class Meta:
         db_table = 'api_user_subscription'
 
-    users = models.ManyToManyField(
+    root_users = models.ManyToManyField(
         User, related_name='user_subscriptions')
     facebook_pages = models.ManyToManyField(
         FacebookPage, related_name='user_subscriptions')
