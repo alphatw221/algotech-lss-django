@@ -12,7 +12,7 @@ class UserSubscription(models.Model):
     class Meta:
         db_table = 'api_user_subscription'
 
-    users = models.ManyToManyField(
+    root_users = models.ManyToManyField(
         User, related_name='user_subscriptions')
     facebook_pages = models.ManyToManyField(
         FacebookPage, related_name='user_subscriptions')
@@ -37,7 +37,7 @@ class UserSubscriptionSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['created_at', 'modified_at']
 
-    users = UserSerializer(
+    root_users = UserSerializer(
         many=True, read_only=True)
     facebook_pages = FacebookPageSerializer(
         many=True, read_only=True)

@@ -1,5 +1,6 @@
-from api.models.user.user import User
-from api.models.user.user_subscription import UserSubscription
+from api.models.user.user import User, UserSerializer
+from api.models.user.user_subscription import (UserSubscription,
+                                               UserSubscriptionSerializer)
 from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
@@ -77,6 +78,9 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = '__all__'
         read_only_fields = ['created_at', 'modified_at']
+
+    user_subscription = UserSubscriptionSerializer(read_only=True)
+    created_by = UserSerializer(read_only=True)
 
     meta = serializers.JSONField(default=dict)
     meta_logistic = serializers.JSONField(default=dict)
