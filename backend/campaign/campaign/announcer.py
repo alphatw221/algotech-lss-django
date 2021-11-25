@@ -21,7 +21,7 @@ class CampaignAnnouncer:
     def announce_campaign_product_sold_out(campaign_product: CampaignProduct):
         return CampaignAnnouncer._announce_campaign_product_activation(
             campaign_product,
-            facebook_i18n_func=i18n_get_campaign_announcement_product_sold_out,
+            i18n_func=i18n_get_campaign_announcement_product_sold_out,
         )
 
     @staticmethod
@@ -30,14 +30,14 @@ class CampaignAnnouncer:
         # * There's no message for this action so return immediately.
         CampaignAnnouncer._announce_campaign_product_activation(
             campaign_product,
-            facebook_i18n_func=None,
+            i18n_func=None,
         )
 
     @staticmethod
     def announce_campaign_product_deactivate(campaign_product: CampaignProduct):
         return CampaignAnnouncer._announce_campaign_product_activation(
             campaign_product,
-            facebook_i18n_func=i18n_get_campaign_announcement_product_closed,
+            i18n_func=i18n_get_campaign_announcement_product_closed,
         )
 
     @staticmethod
@@ -48,15 +48,16 @@ class CampaignAnnouncer:
 
     @staticmethod
     def _announce_campaign_product_activation(campaign_product: CampaignProduct,
-                                              facebook_i18n_func: Callable):
+                                              i18n_func: Callable):
         campaign: Campaign = campaign_product.campaign
         if not campaign:
             CampaignAnnouncerError('Campagin not found.')
 
         result = {}
         if (facebook_page := campaign.facebook_page) and campaign.facebook_campaign:
-            text = facebook_i18n_func(
+            text = i18n_func(
                 campaign_product.order_code, facebook_page.lang)
+            result['text'] = text
             result['facebook'] = CampaignAnnouncer._facebook_announcement(
                 facebook_page, campaign.facebook_campaign, text)
         return result

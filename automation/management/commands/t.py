@@ -27,16 +27,7 @@ class Command(BaseCommand):
     def campagin_product_test(self):
         cp = CampaignProduct.objects.get(id=1)
         r = CampaignProductStatusProcessor.update_status(
-            cp, CampaignProductStatusProcessor.Event.ACTIVATE)
-        cp = CampaignProduct.objects.get(id=1)
-        r = CampaignProductStatusProcessor.update_status(
             cp, CampaignProductStatusProcessor.Event.DEACTIVATE)
-        cp = CampaignProduct.objects.get(id=1)
-        r = CampaignProductStatusProcessor.update_status(
-            cp, CampaignProductStatusProcessor.Event.ACTIVATE)
-        cp = CampaignProduct.objects.get(id=1)
-        r = CampaignProductStatusProcessor.update_status(
-            cp, CampaignProductStatusProcessor.Event.SOLD_OUT)
 
     def i18n_test(self):
         from backend.i18n.campaign_announcement import \
