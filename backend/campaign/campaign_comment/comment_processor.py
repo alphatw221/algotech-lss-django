@@ -69,7 +69,8 @@ class CommentProcessor:
         cprv = CartProductRequestValidatorRegular()
         cprp = CartProductRequestProcessorRegular(check_inv=True)
         cprr = CartProductRequestResponderRegular(self.response_platforms)
-        CommentPluginOrderCode.process(tp, comment, self.order_codes_mapping,
+        CommentPluginOrderCode.process(self.campaign,
+                                       tp, comment, self.order_codes_mapping,
                                        self.response_tasks, cprv, cprp, cprr)
 
     def _mark_and_save_comment(self, comment: CampaignComment):

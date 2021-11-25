@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+from api.models.campaign.campaign import Campaign
 from api.models.campaign.campaign_comment import CampaignComment
 from api.models.campaign.campaign_product import CampaignProduct
 from backend.cart.cart_product.request import CartProductRequest
@@ -15,13 +16,17 @@ from backend.utils.text_processing._text_processor import TextProcessor
 @dataclass
 class CommentPluginOrderCode():
     @staticmethod
-    def process(text_processor: TextProcessor,
+    def process(campaign: Campaign,
+                text_processor: TextProcessor,
                 comment: CampaignComment, order_codes_mapping: dict[str, CampaignProduct],
                 response_tasks: list,
                 cprv: CartProductRequestValidator,
                 cprp: CartProductRequestProcessor,
                 cprr: CartProductRequestResponder):
-        if cart_product_request := CommentPluginOrderCode._get_orders_from_comment(
+        if CommentPluginOrderCode._if_to_ignore(campaign, comment):
+            return
+
+        if cart_product_request := CommentPluginOrderCode._get_cart_product_request(
                 text_processor, comment, order_codes_mapping):
             cprv.process(cart_product_request)
             cprp.process(cart_product_request)
@@ -33,8 +38,15 @@ class CommentPluginOrderCode():
                 response_tasks.append(task)
 
     @staticmethod
-    def _get_orders_from_comment(text_processor: TextProcessor,
-                                 comment: CampaignComment, order_codes_mapping: dict[str, CampaignProduct]):
+    def _if_to_ignore(campaign: Campaign, comment: CampaignComment):
+        if comment.platform == 'facebook' and (facebook_page := campaign.facebook_page):
+            if comment.customer_id == facebook_page.page_id:
+                return True
+        return False
+
+    @staticmethod
+    def _get_cart_product_request(text_processor: TextProcessor,
+                                  comment: CampaignComment, order_codes_mapping: dict[str, CampaignProduct]):
         cart_product_request = None
         text = comment.message.lower()
 
