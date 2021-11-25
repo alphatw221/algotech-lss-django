@@ -38,10 +38,11 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
 
         if not self.platform_dict[platform_name].objects.filter(page_id=platform_id).exists():
             return Response({"message": "no platfrom found"}, status=status.HTTP_400_BAD_REQUEST)
-
         platform = self.platform_dict[platform_name].objects.get(
             page_id=platform_id)
-        # TODO 檢查使用者有這個platform的權限
+
+        if not is_admin(platform_name, api_user, platform):
+            return Response({"message": "user is not platform admin"}, status=status.HTTP_400_BAD_REQUEST)
 
         if not platform.auto_responses.filter(id=pk).exists():
             return Response({"message": "no auto_response found"}, status=status.HTTP_400_BAD_REQUEST)
@@ -75,7 +76,7 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
             page_id=platform_id)
 
         if not is_admin(platform_name, api_user, platform):
-            return Response({"message": "user not admin"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": "user is not platform admin"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             auto_responses = platform.auto_responses.all()
@@ -102,10 +103,11 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
 
         if not self.platform_dict[platform_name].objects.filter(page_id=platform_id).exists():
             return Response({"message": "no platfrom found"}, status=status.HTTP_400_BAD_REQUEST)
-
         platform = self.platform_dict[platform_name].objects.get(
             page_id=platform_id)
-        # TODO 檢查使用者有這個platform的權限
+
+        if not is_admin(platform_name, api_user, platform):
+            return Response({"message": "user is not platform admin"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             data = request.data
@@ -138,10 +140,11 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
 
         if not self.platform_dict[platform_name].objects.filter(page_id=platform_id).exists():
             return Response({"message": "no platfrom found"}, status=status.HTTP_400_BAD_REQUEST)
-
         platform = self.platform_dict[platform_name].objects.get(
             page_id=platform_id)
-        # TODO 檢查使用者有這個platform的權限
+
+        if not is_admin(platform_name, api_user, platform):
+            return Response({"message": "user is not platform admin"}, status=status.HTTP_400_BAD_REQUEST)
 
         if not platform.auto_responses.filter(id=pk).exists():
             return Response({"message": "no auto_response found"}, status=status.HTTP_400_BAD_REQUEST)
@@ -176,10 +179,11 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
 
         if not self.platform_dict[platform_name].objects.filter(page_id=platform_id).exists():
             return Response({"message": "no platfrom found"}, status=status.HTTP_400_BAD_REQUEST)
-
         platform = self.platform_dict[platform_name].objects.get(
             page_id=platform_id)
-        # TODO 檢查使用者有這個platform的權限
+
+        if not is_admin(platform_name, api_user, platform):
+            return Response({"message": "user is not platform admin"}, status=status.HTTP_400_BAD_REQUEST)
 
         if not platform.auto_responses.filter(id=pk).exists():
             return Response({"message": "no auto_response found"}, status=status.HTTP_400_BAD_REQUEST)
