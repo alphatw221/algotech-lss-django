@@ -55,7 +55,10 @@ class UserViewSet(viewsets.ModelViewSet):
                 facebook_page = FacebookPage.objects.create(
                     page_id=page_id, name=page_name, token=page_token, token_update_at=datetime.now(), token_update_by=api_user.facebook_info['id'], image=item['image'])
             del item['access_token']
-            item['id'] = facebook_page.id
+            del item['category_list']
+            del item['tasks']
+            item['id'] = facebook_page
+        del response['paging']
         return Response(response, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['GET'], url_path=r'facebook_pages')
