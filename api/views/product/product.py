@@ -1,12 +1,12 @@
 from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
-from api.models import order, product
 from api.models.product.product import Product, ProductSerializer
 from rest_framework.decorators import action
-import io
-from rest_framework.parsers import JSONParser
+from api.models.facebook.facebook_page import FacebookPage
+from api.models.youtube.youtube_channel import YoutubeChannel
+from backend.api.facebook.user import api_fb_get_me_accounts
 
 
 class ProductPagination(PageNumberPagination):
@@ -30,21 +30,37 @@ class ProductViewSet(viewsets.ModelViewSet):
     filterset_fields = []
     pagination_class = ProductPagination
 
+    platform_dict = {'facebook': FacebookPage,
+                     'youtube': YoutubeChannel}
+
     @action(detail=True, methods=['GET'], url_path=r'retrieve_product')
     def retrieve_product(self, request, pk=None):
 
+        platform_id = request.query_params.get('platform_id')
+        platform_name = request.query_params.get('platform_name')
+
         api_user = request.user.api_users.get(type='user')
-        # TODO 檢查
         if not api_user:
             return Response({"message": "no user found"}, status=status.HTTP_400_BAD_REQUEST)
         elif api_user.status != "valid":
             return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
 
-        user_subscription = api_user.user_subscriptions.all()[0]
-        if not user_subscription:
-            return Response({"message": "user have no subscription"}, status=status.HTTP_400_BAD_REQUEST)
+        if platform_name not in self.platform_dict:
+            return Response({"message": "no platfrom name found"}, status=status.HTTP_400_BAD_REQUEST)
 
-        if not user_subscription.products.filter(id=pk).exists():
+        if not self.platform_dict[platform_name].objects.filter(page_id=platform_id).exists():
+            return Response({"message": "no platfrom found"}, status=status.HTTP_400_BAD_REQUEST)
+        platform = self.platform_dict[platform_name].objects.get(
+            page_id=platform_id)
+
+        if not is_admin(platform_name, api_user, platform):
+            return Response({"message": "user is not platform admin"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user_subscription = platform.user_subscriptions.all()[0]
+        if not user_subscription:
+            return Response({"message": "platform not in any user_subscription"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not user_subscription.products.filter(id=pk).exist():
             return Response({"message": "no product found"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
@@ -58,20 +74,33 @@ class ProductViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'], url_path=r'list_product')
     def list_product(self, request):
 
+        platform_id = request.query_params.get('platform_id')
+        platform_name = request.query_params.get('platform_name')
+
         order_by = request.query_params.get('order_by')
         product_status = request.query_params.get('status')
         key_word = request.query_params.get('key_word')
 
         api_user = request.user.api_users.get(type='user')
-        # TODO 檢查
         if not api_user:
             return Response({"message": "no user found"}, status=status.HTTP_400_BAD_REQUEST)
         elif api_user.status != "valid":
             return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
 
-        user_subscription = api_user.user_subscriptions.all()[0]
+        if platform_name not in self.platform_dict:
+            return Response({"message": "no platfrom name found"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not self.platform_dict[platform_name].objects.filter(page_id=platform_id).exists():
+            return Response({"message": "no platfrom found"}, status=status.HTTP_400_BAD_REQUEST)
+        platform = self.platform_dict[platform_name].objects.get(
+            page_id=platform_id)
+
+        if not is_admin(platform_name, api_user, platform):
+            return Response({"message": "user is not platform admin"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user_subscription = platform.user_subscriptions.all()[0]
         if not user_subscription:
-            return Response({"message": "user have no subscription"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": "platform not in any user_subscription"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             queryset = user_subscription.products.all()
@@ -98,16 +127,29 @@ class ProductViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['POST'], url_path=r'create_product')
     def create_product(self, request):
 
+        platform_id = request.query_params.get('platform_id')
+        platform_name = request.query_params.get('platform_name')
+
         api_user = request.user.api_users.get(type='user')
-        # TODO 檢查
         if not api_user:
             return Response({"message": "no user found"}, status=status.HTTP_400_BAD_REQUEST)
         elif api_user.status != "valid":
             return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
 
-        user_subscription = api_user.user_subscriptions.all()[0]
+        if platform_name not in self.platform_dict:
+            return Response({"message": "no platfrom name found"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not self.platform_dict[platform_name].objects.filter(page_id=platform_id).exists():
+            return Response({"message": "no platfrom found"}, status=status.HTTP_400_BAD_REQUEST)
+        platform = self.platform_dict[platform_name].objects.get(
+            page_id=platform_id)
+
+        if not is_admin(platform_name, api_user, platform):
+            return Response({"message": "user is not platform admin"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user_subscription = platform.user_subscriptions.all()[0]
         if not user_subscription:
-            return Response({"message": "user have no subscription"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": "platform not in any user_subscription"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
 
@@ -127,16 +169,29 @@ class ProductViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['PUT'], url_path=r'update_product')
     def update_product(self, request, pk=None):
 
+        platform_id = request.query_params.get('platform_id')
+        platform_name = request.query_params.get('platform_name')
+
         api_user = request.user.api_users.get(type='user')
-        # TODO 檢查
         if not api_user:
             return Response({"message": "no user found"}, status=status.HTTP_400_BAD_REQUEST)
         elif api_user.status != "valid":
             return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
 
-        user_subscription = api_user.user_subscriptions.all()[0]
+        if platform_name not in self.platform_dict:
+            return Response({"message": "no platfrom name found"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not self.platform_dict[platform_name].objects.filter(page_id=platform_id).exists():
+            return Response({"message": "no platfrom found"}, status=status.HTTP_400_BAD_REQUEST)
+        platform = self.platform_dict[platform_name].objects.get(
+            page_id=platform_id)
+
+        if not is_admin(platform_name, api_user, platform):
+            return Response({"message": "user is not platform admin"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user_subscription = platform.user_subscriptions.all()[0]
         if not user_subscription:
-            return Response({"message": "user have no subscription"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": "platform not in any user_subscription"}, status=status.HTTP_400_BAD_REQUEST)
 
         if not user_subscription.products.filter(id=pk).exists():
             return Response({"message": "no product found"}, status=status.HTTP_400_BAD_REQUEST)
@@ -157,16 +212,29 @@ class ProductViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['DELETE'], url_path=r'delete_product')
     def delete_product(self, request, pk=None):
 
+        platform_id = request.query_params.get('platform_id')
+        platform_name = request.query_params.get('platform_name')
+
         api_user = request.user.api_users.get(type='user')
-        # TODO 檢查
         if not api_user:
             return Response({"message": "no user found"}, status=status.HTTP_400_BAD_REQUEST)
         elif api_user.status != "valid":
             return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
 
-        user_subscription = api_user.user_subscriptions.all()[0]
+        if platform_name not in self.platform_dict:
+            return Response({"message": "no platfrom name found"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not self.platform_dict[platform_name].objects.filter(page_id=platform_id).exists():
+            return Response({"message": "no platfrom found"}, status=status.HTTP_400_BAD_REQUEST)
+        platform = self.platform_dict[platform_name].objects.get(
+            page_id=platform_id)
+
+        if not is_admin(platform_name, api_user, platform):
+            return Response({"message": "user is not platform admin"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user_subscription = platform.user_subscriptions.all()[0]
         if not user_subscription:
-            return Response({"message": "user have no subscription"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": "platform not in any user_subscription"}, status=status.HTTP_400_BAD_REQUEST)
 
         if not user_subscription.products.filter(id=pk).exists():
             return Response({"message": "no product found"}, status=status.HTTP_400_BAD_REQUEST)
@@ -177,3 +245,20 @@ class ProductViewSet(viewsets.ModelViewSet):
             return Response({"message": "error occerd during deleting"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response({"message": "delete success"}, status=status.HTTP_200_OK)
+
+
+def is_admin(platform_name, api_user, platform):
+    try:
+        if platform_name == 'facebook':
+            status_code, response = api_fb_get_me_accounts(
+                api_user.facebook_info['token'])
+
+            for item in response['data']:
+                if item['id'] == platform.page_id:
+                    return True
+            return False
+        elif platform_name == 'youtube':
+            pass
+    except:
+        return False
+    return False

@@ -1,15 +1,11 @@
 from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from api.models.auto_response.auto_response import AutoResponse, AutoResponseSerializer
-from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework.decorators import action
-import io
-from rest_framework.parsers import JSONParser
 from api.models.facebook.facebook_page import FacebookPage
 from api.models.youtube.youtube_channel import YoutubeChannel
-from backend.api.facebook.page import api_fb_get_page_admin
-from backend.api.facebook.user import api_fb_get_accounts_from_user, api_fb_get_me_accounts
+from backend.api.facebook.user import api_fb_get_me_accounts
 
 
 class AutoResponseViewSet(viewsets.ModelViewSet):
