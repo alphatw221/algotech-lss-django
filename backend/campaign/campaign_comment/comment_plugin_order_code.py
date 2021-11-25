@@ -17,6 +17,7 @@ class CommentPluginOrderCode():
     @staticmethod
     def process(text_processor: TextProcessor,
                 comment: CampaignComment, order_codes_mapping: dict[str, CampaignProduct],
+                response_tasks: list,
                 cprv: CartProductRequestValidator,
                 cprp: CartProductRequestProcessor,
                 cprr: CartProductRequestResponder):
@@ -28,7 +29,8 @@ class CommentPluginOrderCode():
 
             comment.meta['CommentPluginOrderCode'] = cart_product_request.get_items_repr()
 
-            return cart_product_request.response_task
+            if task := cart_product_request.response_task:
+                response_tasks.append(task)
 
     @staticmethod
     def _get_orders_from_comment(text_processor: TextProcessor,

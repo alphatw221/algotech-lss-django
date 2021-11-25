@@ -68,6 +68,5 @@ class FacebookCartProductRequestResponder(AbstractCartProductRequestResponder):
             self.response_result['private_message'] = FacebookMessageAgent.page_message_on_comment(
                 self.token, self.comment.comment_id, text + shopping_cart_info)
 
-        print(self.comment.meta)
         self.comment.meta['response_result'] = self.response_result
         self.comment.save()

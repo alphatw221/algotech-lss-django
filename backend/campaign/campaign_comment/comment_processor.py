@@ -21,7 +21,7 @@ from backend.utils.text_processing.order_code_processor import \
 @dataclass
 class CommentProcessor:
     campaign: Campaign
-    comment_batch_size: int = 500
+    comment_batch_size: int = 100
     max_response_workers: int = 10
     enable_order_code: bool = True
     only_activated_order_code: bool = True
@@ -69,9 +69,8 @@ class CommentProcessor:
         cprv = CartProductRequestValidatorRegular()
         cprp = CartProductRequestProcessorRegular(check_inv=True)
         cprr = CartProductRequestResponderRegular(self.response_platforms)
-        if response_task := CommentPluginOrderCode.process(tp, comment, self.order_codes_mapping,
-                                                           cprv, cprp, cprr):
-            self.response_tasks.append(response_task)
+        CommentPluginOrderCode.process(tp, comment, self.order_codes_mapping,
+                                       self.response_tasks, cprv, cprp, cprr)
 
     def _mark_and_save_comment(self, comment: CampaignComment):
         comment.status = 1
