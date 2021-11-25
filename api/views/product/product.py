@@ -48,17 +48,18 @@ class ProductViewSet(viewsets.ModelViewSet):
         if platform_name not in self.platform_dict:
             return Response({"message": "no platfrom name found"}, status=status.HTTP_400_BAD_REQUEST)
 
-        if not self.platform_dict[platform_name].objects.filter(page_id=platform_id).exists():
+        if not self.platform_dict[platform_name].objects.filter(id=platform_id).exists():
             return Response({"message": "no platfrom found"}, status=status.HTTP_400_BAD_REQUEST)
         platform = self.platform_dict[platform_name].objects.get(
-            page_id=platform_id)
+            id=platform_id)
 
         if not is_admin(platform_name, api_user, platform):
             return Response({"message": "user is not platform admin"}, status=status.HTTP_400_BAD_REQUEST)
 
-        user_subscription = platform.user_subscriptions.all()[0]
-        if not user_subscription:
+        user_subscriptions = platform.user_subscriptions.all()
+        if not user_subscriptions:
             return Response({"message": "platform not in any user_subscription"}, status=status.HTTP_400_BAD_REQUEST)
+        user_subscription = user_subscriptions[0]
 
         if not user_subscription.products.filter(id=pk).exists():
             return Response({"message": "no product found"}, status=status.HTTP_400_BAD_REQUEST)
@@ -90,17 +91,18 @@ class ProductViewSet(viewsets.ModelViewSet):
         if platform_name not in self.platform_dict:
             return Response({"message": "no platfrom name found"}, status=status.HTTP_400_BAD_REQUEST)
 
-        if not self.platform_dict[platform_name].objects.filter(page_id=platform_id).exists():
+        if not self.platform_dict[platform_name].objects.filter(id=platform_id).exists():
             return Response({"message": "no platfrom found"}, status=status.HTTP_400_BAD_REQUEST)
         platform = self.platform_dict[platform_name].objects.get(
-            page_id=platform_id)
+            id=platform_id)
 
         if not is_admin(platform_name, api_user, platform):
             return Response({"message": "user is not platform admin"}, status=status.HTTP_400_BAD_REQUEST)
 
-        user_subscription = platform.user_subscriptions.all()[0]
-        if not user_subscription:
+        user_subscriptions = platform.user_subscriptions.all()
+        if not user_subscriptions:
             return Response({"message": "platform not in any user_subscription"}, status=status.HTTP_400_BAD_REQUEST)
+        user_subscription = user_subscriptions[0]
 
         try:
             queryset = user_subscription.products.all()
@@ -139,17 +141,18 @@ class ProductViewSet(viewsets.ModelViewSet):
         if platform_name not in self.platform_dict:
             return Response({"message": "no platfrom name found"}, status=status.HTTP_400_BAD_REQUEST)
 
-        if not self.platform_dict[platform_name].objects.filter(page_id=platform_id).exists():
+        if not self.platform_dict[platform_name].objects.filter(id=platform_id).exists():
             return Response({"message": "no platfrom found"}, status=status.HTTP_400_BAD_REQUEST)
         platform = self.platform_dict[platform_name].objects.get(
-            page_id=platform_id)
+            id=platform_id)
 
         if not is_admin(platform_name, api_user, platform):
             return Response({"message": "user is not platform admin"}, status=status.HTTP_400_BAD_REQUEST)
 
-        user_subscription = platform.user_subscriptions.all()[0]
-        if not user_subscription:
+        user_subscriptions = platform.user_subscriptions.all()
+        if not user_subscriptions:
             return Response({"message": "platform not in any user_subscription"}, status=status.HTTP_400_BAD_REQUEST)
+        user_subscription = user_subscriptions[0]
 
         try:
 
@@ -181,17 +184,18 @@ class ProductViewSet(viewsets.ModelViewSet):
         if platform_name not in self.platform_dict:
             return Response({"message": "no platfrom name found"}, status=status.HTTP_400_BAD_REQUEST)
 
-        if not self.platform_dict[platform_name].objects.filter(page_id=platform_id).exists():
+        if not self.platform_dict[platform_name].objects.filter(id=platform_id).exists():
             return Response({"message": "no platfrom found"}, status=status.HTTP_400_BAD_REQUEST)
         platform = self.platform_dict[platform_name].objects.get(
-            page_id=platform_id)
+            id=platform_id)
 
         if not is_admin(platform_name, api_user, platform):
             return Response({"message": "user is not platform admin"}, status=status.HTTP_400_BAD_REQUEST)
 
-        user_subscription = platform.user_subscriptions.all()[0]
-        if not user_subscription:
+        user_subscriptions = platform.user_subscriptions.all()
+        if not user_subscriptions:
             return Response({"message": "platform not in any user_subscription"}, status=status.HTTP_400_BAD_REQUEST)
+        user_subscription = user_subscriptions[0]
 
         if not user_subscription.products.filter(id=pk).exists():
             return Response({"message": "no product found"}, status=status.HTTP_400_BAD_REQUEST)
@@ -224,17 +228,18 @@ class ProductViewSet(viewsets.ModelViewSet):
         if platform_name not in self.platform_dict:
             return Response({"message": "no platfrom name found"}, status=status.HTTP_400_BAD_REQUEST)
 
-        if not self.platform_dict[platform_name].objects.filter(page_id=platform_id).exists():
+        if not self.platform_dict[platform_name].objects.filter(id=platform_id).exists():
             return Response({"message": "no platfrom found"}, status=status.HTTP_400_BAD_REQUEST)
         platform = self.platform_dict[platform_name].objects.get(
-            page_id=platform_id)
+            id=platform_id)
 
         if not is_admin(platform_name, api_user, platform):
             return Response({"message": "user is not platform admin"}, status=status.HTTP_400_BAD_REQUEST)
 
-        user_subscription = platform.user_subscriptions.all()[0]
-        if not user_subscription:
+        user_subscriptions = platform.user_subscriptions.all()
+        if not user_subscriptions:
             return Response({"message": "platform not in any user_subscription"}, status=status.HTTP_400_BAD_REQUEST)
+        user_subscription = user_subscriptions[0]
 
         if not user_subscription.products.filter(id=pk).exists():
             return Response({"message": "no product found"}, status=status.HTTP_400_BAD_REQUEST)

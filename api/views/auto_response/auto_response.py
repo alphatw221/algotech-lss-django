@@ -32,10 +32,10 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
         if platform_name not in self.platform_dict:
             return Response({"message": "no platfrom name found"}, status=status.HTTP_400_BAD_REQUEST)
 
-        if not self.platform_dict[platform_name].objects.filter(page_id=platform_id).exists():
+        if not self.platform_dict[platform_name].objects.filter(id=platform_id).exists():
             return Response({"message": "no platfrom found"}, status=status.HTTP_400_BAD_REQUEST)
         platform = self.platform_dict[platform_name].objects.get(
-            page_id=platform_id)
+            id=platform_id)
 
         if not is_admin(platform_name, api_user, platform):
             return Response({"message": "user is not platform admin"}, status=status.HTTP_400_BAD_REQUEST)
@@ -66,10 +66,10 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
         if platform_name not in self.platform_dict:
             return Response({"message": "no platform name found"}, status=status.HTTP_400_BAD_REQUEST)
 
-        if not self.platform_dict[platform_name].objects.filter(page_id=platform_id).exists():
+        if not self.platform_dict[platform_name].objects.filter(id=platform_id).exists():
             return Response({"message": "no platform found"}, status=status.HTTP_400_BAD_REQUEST)
         platform = self.platform_dict[platform_name].objects.get(
-            page_id=platform_id)
+            id=platform_id)
 
         if not is_admin(platform_name, api_user, platform):
             return Response({"message": "user is not platform admin"}, status=status.HTTP_400_BAD_REQUEST)
@@ -97,10 +97,10 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
         if platform_name not in self.platform_dict:
             return Response({"message": "no platfrom name found"}, status=status.HTTP_400_BAD_REQUEST)
 
-        if not self.platform_dict[platform_name].objects.filter(page_id=platform_id).exists():
+        if not self.platform_dict[platform_name].objects.filter(id=platform_id).exists():
             return Response({"message": "no platfrom found"}, status=status.HTTP_400_BAD_REQUEST)
         platform = self.platform_dict[platform_name].objects.get(
-            page_id=platform_id)
+            id=platform_id)
 
         if not is_admin(platform_name, api_user, platform):
             return Response({"message": "user is not platform admin"}, status=status.HTTP_400_BAD_REQUEST)
@@ -134,10 +134,10 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
         if platform_name not in self.platform_dict:
             return Response({"message": "no platfrom name found"}, status=status.HTTP_400_BAD_REQUEST)
 
-        if not self.platform_dict[platform_name].objects.filter(page_id=platform_id).exists():
+        if not self.platform_dict[platform_name].objects.filter(id=platform_id).exists():
             return Response({"message": "no platfrom found"}, status=status.HTTP_400_BAD_REQUEST)
         platform = self.platform_dict[platform_name].objects.get(
-            page_id=platform_id)
+            id=platform_id)
 
         if not is_admin(platform_name, api_user, platform):
             return Response({"message": "user is not platform admin"}, status=status.HTTP_400_BAD_REQUEST)
@@ -173,10 +173,10 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
         if platform_name not in self.platform_dict:
             return Response({"message": "no platfrom name found"}, status=status.HTTP_400_BAD_REQUEST)
 
-        if not self.platform_dict[platform_name].objects.filter(page_id=platform_id).exists():
+        if not self.platform_dict[platform_name].objects.filter(id=platform_id).exists():
             return Response({"message": "no platfrom found"}, status=status.HTTP_400_BAD_REQUEST)
         platform = self.platform_dict[platform_name].objects.get(
-            page_id=platform_id)
+            id=platform_id)
 
         if not is_admin(platform_name, api_user, platform):
             return Response({"message": "user is not platform admin"}, status=status.HTTP_400_BAD_REQUEST)
