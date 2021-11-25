@@ -25,8 +25,9 @@ def _i18n_get_items_info(request: CartProductRequest):
             'ITEM_INFO{order_code}{qty}{result}'
             ).format(order_code=item.campaign_product.order_code,
                      qty=item.qty,
-                     result=_i18n_get_item_result_text(item.state),
-                     max_order_amount=item.campaign_product.max_order_amount)
+                     result=_i18n_get_item_result_text(
+                         item.state).format(max_order_amount=item.campaign_product.max_order_amount),
+                     )
             for item in request.get_items()]
 
 
