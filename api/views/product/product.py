@@ -60,7 +60,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         if not user_subscription:
             return Response({"message": "platform not in any user_subscription"}, status=status.HTTP_400_BAD_REQUEST)
 
-        if not user_subscription.products.filter(id=pk).exist():
+        if not user_subscription.products.filter(id=pk).exists():
             return Response({"message": "no product found"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
