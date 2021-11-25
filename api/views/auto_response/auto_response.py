@@ -9,6 +9,7 @@ from rest_framework.parsers import JSONParser
 from api.models.facebook.facebook_page import FacebookPage
 from api.models.youtube.youtube_channel import YoutubeChannel
 from backend.api.facebook.page import api_fb_get_page_admin
+from backend.api.facebook.user import api_fb_get_accounts_from_user, api_fb_get_me_accounts
 
 
 class AutoResponseViewSet(viewsets.ModelViewSet):
@@ -66,23 +67,17 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
             return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
 
         if platform_name not in self.platform_dict:
-            return Response({"message": "no platfrom name found"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": "no platform name found"}, status=status.HTTP_400_BAD_REQUEST)
 
         if not self.platform_dict[platform_name].objects.filter(page_id=platform_id).exists():
-            return Response({"message": "no platfrom found"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": "no platform found"}, status=status.HTTP_400_BAD_REQUEST)
+        platform = self.platform_dict[platform_name].objects.get(
+            page_id=platform_id)
 
-        # if platform_name == 'facebook':
-        #     platform = self.platform_dict['facebook_page'].objects.get(
-        #         page_id=platform_id)
-        #     # TODO 檢查使用者有這個platform的權限
-        #     status_code, response = api_fb_get_page_admin()
-
-        # elif platform_name == 'youtube':
-        #     pass
+        if not is_admin(platform_name, api_user, platform):
+            return Response({"message": "user not admin"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            platform = self.platform_dict['facebook'].objects.get(
-                page_id=platform_id)
             auto_responses = platform.auto_responses.all()
             serializer = self.get_serializer(auto_responses, many=True)
         except:
@@ -195,3 +190,20 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
             return Response({"message": "error occerd during deleting"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response({"message": "delete success"}, status=status.HTTP_200_OK)
+
+
+def is_admin(platform_name, api_user, platform):
+    try:
+        if platform_name == 'facebook':
+            status_code, response = api_fb_get_me_accounts(
+                api_user.facebook_info['token'])
+
+            for item in response['data']:
+                if item['id'] == platform.page_id:
+                    return True
+            return False
+        elif platform_name == 'youtube':
+            pass
+    except:
+        return False
+    return False

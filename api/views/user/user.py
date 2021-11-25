@@ -11,7 +11,6 @@ from api.models.facebook.facebook_page import FacebookPage
 from datetime import datetime
 
 
-
 class UserViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     queryset = User.objects.all().order_by('id')
@@ -42,7 +41,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
         if status_code != 200:
             return Response({'message': 'api_fb_get_accounts_from_user error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+        print(response)
         for item in response['data']:
             page_token = item['access_token']
             page_id = item['id']

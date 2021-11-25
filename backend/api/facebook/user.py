@@ -12,6 +12,12 @@ def api_fb_get_id(token: str, user_or_page_id: str):
     return ret
 
 
+def api_fb_get_me_accounts(user_token: str):
+    ret = FacebookApiCaller('me/accounts',
+                            bearer_token=user_token,).get()
+    return ret
+
+
 def api_fb_get_accounts_from_user(user_token: str, user_id: str):
     ret = FacebookApiCaller(f'{user_id}/accounts',
                             bearer_token=user_token,).get()
