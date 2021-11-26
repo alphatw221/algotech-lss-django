@@ -52,7 +52,6 @@ class ProductViewSet(viewsets.ModelViewSet):
             return Response({"message": "no platfrom found"}, status=status.HTTP_400_BAD_REQUEST)
         platform = self.platform_dict[platform_name].objects.get(
             id=platform_id)
-
         if not is_admin(platform_name, api_user, platform):
             return Response({"message": "user is not platform admin"}, status=status.HTTP_400_BAD_REQUEST)
 

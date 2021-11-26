@@ -1,5 +1,5 @@
 from functools import partial
-from rest_framework import status, viewsets
+from rest_framework import serializers, status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from api.models.campaign.campaign import Campaign, CampaignSerializer
 from rest_framework.pagination import PageNumberPagination
@@ -220,7 +220,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
             return Response({"message": "no campaign found"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            api_user.campaigns.get(id=pk).delete()
+            platform.campaigns.get(id=pk).delete()
         except:
             return Response({"message": "error occerd during deleting"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

@@ -8,6 +8,8 @@ from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
 
+from api.views.facebook import facebook_page
+
 
 class Campaign(models.Model):
     class Meta:
@@ -33,6 +35,7 @@ class Campaign(models.Model):
     facebook_campaign = models.JSONField(null=True, blank=True, default=dict)
     youtube_channel = models.ForeignKey(
         YoutubeChannel, blank=True, null=True, on_delete=models.SET_NULL, related_name='campaigns')
+
     youtube_campaign = models.JSONField(null=True, blank=True, default=dict)
     meta = models.JSONField(null=True, blank=True, default=dict)
     meta_payment = models.JSONField(null=True, blank=True, default=dict)
@@ -51,14 +54,11 @@ class CampaignSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['created_at', 'modified_at']
 
-     # facebook_page = FacebookPageSerializer()
     facebook_campaign = serializers.JSONField(default=dict)
-    # youtube_channel = YoutubeChannelSerializer()
     youtube_campaign = serializers.JSONField(default=dict)
     meta = serializers.JSONField(default=dict)
     meta_payment = serializers.JSONField(default=dict)
     meta_logistic = serializers.JSONField(default=dict)
-   
 
 
 class CampaignAdmin(admin.ModelAdmin):
