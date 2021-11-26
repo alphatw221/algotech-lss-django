@@ -21,7 +21,8 @@ class Campaign(models.Model):
     end_at = models.DateTimeField(null=True, blank=True, default=None)
     ordering_start_at = models.DateTimeField(
         null=True, blank=True, default=None)
-
+    ordering_only_activated_products = models.BooleanField(
+        blank=False, null=True, default=False)
     currency = models.CharField(max_length=255, null=True, blank=True)
 
     type = models.CharField(max_length=255, null=True, blank=True)

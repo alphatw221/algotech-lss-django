@@ -26,7 +26,6 @@ class CommentProcessor:
     comment_batch_size: int = 100
     max_response_workers: int = 10
     enable_order_code: bool = True
-    only_activated_order_code: bool = True
     response_platforms: list = field(default_factory=list)
 
     def __post_init__(self):
@@ -35,7 +34,7 @@ class CommentProcessor:
 
         self.order_codes_mapping = {}
         if self.enable_order_code:
-            status = 1 if self.only_activated_order_code else None
+            status = 1 if self.campaign.ordering_only_activated_products else None
             self.order_codes_mapping = get_campaign_products_order_codes_mapping(
                 self.campaign, status=status, lower=True)
 
@@ -54,8 +53,9 @@ class CommentProcessor:
             self._plugin_order_code(comment)
             self._mark_and_save_comment(comment)
 
-        self._process_campaign_products()
-        self._process_batch_tasks()
+        if self.unprocessed_comments:
+            self._process_campaign_products()
+            self._process_batch_tasks()
 
         return f'{len(self.unprocessed_comments)=}'
 
