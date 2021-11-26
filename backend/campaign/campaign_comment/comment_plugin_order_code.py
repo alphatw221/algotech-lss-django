@@ -19,7 +19,7 @@ class CommentPluginOrderCode():
     def process(campaign: Campaign,
                 text_processor: TextProcessor,
                 comment: CampaignComment, order_codes_mapping: dict[str, CampaignProduct],
-                response_tasks: list,
+                batch_tasks_list: list,
                 cprv: CartProductRequestValidator,
                 cprp: CartProductRequestProcessor,
                 cprr: CartProductRequestResponder):
@@ -35,7 +35,7 @@ class CommentPluginOrderCode():
             comment.meta['CommentPluginOrderCode'] = cart_product_request.get_items_repr()
 
             if task := cart_product_request.response_task:
-                response_tasks.append(task)
+                batch_tasks_list.append(task)
 
     @staticmethod
     def _if_to_ignore(campaign: Campaign, comment: CampaignComment):
