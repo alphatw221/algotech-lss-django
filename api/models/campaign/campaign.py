@@ -1,9 +1,8 @@
-from api.models.campaign.facebook_campaign import FacebookCampaign
 from api.models.facebook.facebook_page import (FacebookPage,
-                                               FacebookPageSerializer)
+                                               FacebookPageInfoSerializer)
 from api.models.user.user import User
 from api.models.youtube.youtube_channel import (YoutubeChannel,
-                                                YoutubeChannelSerializer)
+                                                YoutubeChannelInfoSerializer)
 from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
@@ -20,6 +19,8 @@ class Campaign(models.Model):
     description = models.TextField(null=True, blank=True, default=None)
     start_at = models.DateTimeField(null=True, blank=True, default=None)
     end_at = models.DateTimeField(null=True, blank=True, default=None)
+    ordering_start_at = models.DateTimeField(
+        null=True, blank=True, default=None)
 
     currency = models.CharField(max_length=255, null=True, blank=True)
 
@@ -48,14 +49,13 @@ class CampaignSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['created_at', 'modified_at']
 
-     # facebook_page = FacebookPageSerializer()
+    facebook_page = FacebookPageInfoSerializer(read_only=True)
     facebook_campaign = serializers.JSONField(default=dict)
-    # youtube_channel = YoutubeChannelSerializer()
+    youtube_channel = YoutubeChannelInfoSerializer(read_only=True)
     youtube_campaign = serializers.JSONField(default=dict)
     meta = serializers.JSONField(default=dict)
     meta_payment = serializers.JSONField(default=dict)
     meta_logistic = serializers.JSONField(default=dict)
-   
 
 
 class CampaignAdmin(admin.ModelAdmin):
