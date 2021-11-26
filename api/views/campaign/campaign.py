@@ -54,7 +54,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
             return Response({"message": "no campaign found"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            campaign = api_user.campaigns.get(id=pk)
+            campaign = platform.campaigns.get(id=pk)
             serializer = self.get_serializer(campaign)
         except:
             return Response({"message": "error occerd during retriving"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
