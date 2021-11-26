@@ -1,6 +1,6 @@
 import pendulum
-from api.utils.orm.campaign import get_active_campaign_now
 from automation.utils.timeloop import time_loop
+from backend.campaign.campaign.manager import CampaignManager
 from backend.comment_catching.facebook.post_comment import \
     campaign_facebook_post_capture_comments
 from django.conf import settings
@@ -21,7 +21,7 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(
             f'{pendulum.now()} - Auto Facebook Comment Module'))
 
-        for campaign in get_active_campaign_now():
+        for campaign in CampaignManager.get_ordering_campaigns():
             try:
                 result = campaign_facebook_post_capture_comments(campaign)
             except Exception as e:

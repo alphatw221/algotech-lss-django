@@ -8,6 +8,7 @@ from api.utils.orm.campaign_comment import *
 from backend.api.facebook.page import *
 from backend.api.facebook.post import *
 from backend.api.facebook.user import *
+from backend.campaign.campaign.manager import CampaignManager
 from backend.campaign.campaign_comment.comment_processor import *
 from backend.campaign.campaign_product.status_processor import \
     CampaignProductStatusProcessor
@@ -22,7 +23,13 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.campagin_product_test()
+        self.campaign_test()
+
+    def campaign_test(self):
+        cs = CampaignManager.get_active_campaigns()
+        print(cs)
+        cs = CampaignManager.get_ordering_campaigns()
+        print(cs)
 
     def campagin_product_test(self):
         cp = CampaignProduct.objects.get(id=1)
