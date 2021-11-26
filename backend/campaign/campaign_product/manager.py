@@ -1,4 +1,6 @@
+from api.models.campaign.campaign import Campaign
 from api.models.campaign.campaign_product import CampaignProduct
+from api.utils.orm import campaign_product
 from django.db import transaction
 
 
@@ -15,6 +17,21 @@ class AlreadyInUseError(Exception):
 
 
 class CampaignProductManager:
+    @staticmethod
+    def get_campaign_products(campaign: Campaign, status: int = None,
+                              order_by: str = 'pk') -> list[CampaignProduct]:
+        return campaign_product.get_campaign_products(campaign, status, order_by)
+
+    @staticmethod
+    def get_order_codes_mapping(campaign: Campaign, status: int = None,
+                                lower: bool = True):
+        campaign_products = CampaignProductManager.get_campaign_products(
+            campaign, status)
+
+        return {campaign_product.order_code.lower() if lower
+                else campaign_product.order_code: campaign_product
+                for campaign_product in campaign_products}
+
     @staticmethod
     def update_qty_sold(campaign_product: CampaignProduct, qty: int, orig_qty: int = 0,
                         check_inv: bool = True):

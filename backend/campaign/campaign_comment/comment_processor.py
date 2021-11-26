@@ -4,10 +4,9 @@ from dataclasses import dataclass, field
 from api.models.campaign.campaign import Campaign
 from api.models.campaign.campaign_comment import CampaignComment
 from api.utils.orm.campaign_comment import get_campaign_comments
-from api.utils.orm.campaign_product import \
-    get_campaign_products_order_codes_mapping
 from backend.campaign.campaign_comment.comment_plugin_order_code import \
     CommentPluginOrderCode
+from backend.campaign.campaign_product.manager import CampaignProductManager
 from backend.campaign.campaign_product.status_processor import \
     CampaignProductStatusProcessor
 from backend.cart.cart_product.request_processor import \
@@ -32,11 +31,11 @@ class CommentProcessor:
         self.unprocessed_comments = get_campaign_comments(
             self.campaign, status=0, order_by='pk', limit=self.comment_batch_size)
 
+        self.campaign_product_status = 1 if self.campaign.ordering_only_activated_products else None
         self.order_codes_mapping = {}
         if self.enable_order_code:
-            status = 1 if self.campaign.ordering_only_activated_products else None
-            self.order_codes_mapping = get_campaign_products_order_codes_mapping(
-                self.campaign, status=status, lower=True)
+            self.order_codes_mapping = CampaignProductManager.get_order_codes_mapping(
+                self.campaign, status=self.campaign_product_status, lower=True)
 
         tmp_response_platforms = {}
         for platform in self.response_platforms:
@@ -73,7 +72,8 @@ class CommentProcessor:
         comment.save()
 
     def _process_campaign_products(self):
-        for _, campaign_product in self.order_codes_mapping.items():
+        for campaign_product in CampaignProductManager.get_campaign_products(
+                self.campaign, status=self.campaign_product_status):
             if campaign_product.status == 1 and \
                     campaign_product.qty_sold >= campaign_product.qty_for_sale:
                 task = CampaignProductStatusProcessor.get_campaign_product_sold_out_task(
