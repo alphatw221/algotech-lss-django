@@ -9,6 +9,8 @@ from rest_framework.decorators import action
 from api.models.facebook.facebook_page import FacebookPage
 from api.models.youtube.youtube_channel import YoutubeChannel
 from backend.api.facebook.user import api_fb_get_me_accounts
+from datetime import datetime
+
 platform_dict = {'facebook': FacebookPage,
                  'youtube': YoutubeChannel}
 
@@ -68,7 +70,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
         platform_id = request.query_params.get('platform_id')
 
         order_by = request.query_params.get('order_by')
-        product_status = request.query_params.get('status')
+        campaign_status = request.query_params.get('status')
         key_word = request.query_params.get('key_word')
 
         api_user = request.user.api_users.get(type='user')
@@ -91,8 +93,10 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         campaigns = platform.campaigns.all()
         try:
-            if product_status:
-                campaigns = campaigns.filter(status=product_status)
+            if campaign_status == 'history':
+                campaigns = campaigns.filter(end_at__lt=datetime.now())
+            elif campaign_status == 'schedule':
+                campaigns = campaigns.filter(end_at__gte=datetime.now())
             if key_word:
                 campaigns = campaigns.filter(name__icontains=key_word)
             if order_by:
