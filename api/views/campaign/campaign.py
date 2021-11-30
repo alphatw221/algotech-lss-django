@@ -98,7 +98,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
             elif campaign_status == 'schedule':
                 campaigns = campaigns.filter(end_at__gte=datetime.now())
             if key_word:
-                campaigns = campaigns.filter(name__icontains=key_word)
+                campaigns = campaigns.filter(title__icontains=str(key_word))
             if order_by:
                 campaigns = campaigns.order_by(order_by)
         except:
