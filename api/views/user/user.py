@@ -49,15 +49,20 @@ class UserViewSet(viewsets.ModelViewSet):
                 page_token=page_token, page_id=page_id, height=100, width=100)
             item['image'] = picture_data['data']['url'] if status_code == 200 else None
             if FacebookPage.objects.filter(page_id=page_id).exists():
-                facebook_page = FacebookPage.objects.filter(page_id=page_id).update(token=page_token, token_update_at=datetime.now(
-                ), token_update_by=api_user.facebook_info['id'], image=item['image'])
+                facebook_page = FacebookPage.objects.get(page_id=page_id)
+                facebook_page.token = page_token
+                facebook_page.token_update_at = datetime.now()
+                facebook_page.token_update_by = api_user.facebook_info['id']
+                facebook_page.image = item['image']
+                facebook_page.save()
             else:
                 facebook_page = FacebookPage.objects.create(
                     page_id=page_id, name=page_name, token=page_token, token_update_at=datetime.now(), token_update_by=api_user.facebook_info['id'], image=item['image'])
+                facebook_page.save()
             del item['access_token']
             del item['category_list']
             del item['tasks']
-            item['id'] = facebook_page
+            item['id'] = facebook_page.id
         del response['paging']
         return Response(response, status=status.HTTP_200_OK)
 
