@@ -7,7 +7,7 @@ from rest_framework import serializers
 
 class CampaignLuckyDraw(models.Model):
     class Meta:
-        db_table = 'api_lucky_draw'
+        db_table = 'api_campaign_lucky_draw'
 
     SOURCE_TYPE_CHOICES = [
         ('n/a', 'Not available'),
@@ -25,7 +25,7 @@ class CampaignLuckyDraw(models.Model):
     ]
 
     campaign = models.ForeignKey(
-        Campaign, on_delete=models.CASCADE, related_name='campaign_lucky_draws')
+        Campaign, blank=True, null=True, on_delete=models.CASCADE, related_name='campaign_lucky_draws')
     prize_campaign_product = models.ForeignKey(
         CampaignProduct, blank=True, null=True, on_delete=models.SET_NULL, related_name='campaign_lucky_draws')
 

@@ -1,26 +1,15 @@
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework import routers
 
-from api.views.test import test
-
-from api.views.user import user
-from api.views.user import user_group
-from api.views.user import user_plan
-
 from api.views.auto_response import auto_response
-
-from api.views.campaign import campaign
-from api.views.campaign import campaign_comment
-from api.views.campaign import campaign_lucky_draw
-from api.views.campaign import campaign_product
-
-from api.views.facebook import facebook_page
-
-from api.views.product import product
-
+from api.views.campaign import (campaign, campaign_comment,
+                                campaign_lucky_draw, campaign_product)
 from api.views.cart import cart_product
-
+from api.views.facebook import facebook_page
 from api.views.order import order
+from api.views.product import product
+from api.views.test import test
+from api.views.user import user, user_group, user_plan
 
 
 def url_setup(urlpatterns):
