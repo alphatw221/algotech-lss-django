@@ -12,6 +12,11 @@ class Campaign(models.Model):
     class Meta:
         db_table = 'api_campaign'
 
+    STATUS_CHOICES = [
+        ('new', 'New'),
+        ('deleted', 'Deleted'),
+    ]
+
     created_by = models.ForeignKey(
         User, null=True, on_delete=models.SET_NULL, related_name='campaigns')
 
@@ -26,7 +31,8 @@ class Campaign(models.Model):
     currency = models.CharField(max_length=255, null=True, blank=True)
 
     type = models.CharField(max_length=255, null=True, blank=True)
-    status = models.CharField(max_length=255, null=True, blank=True)
+    status = models.CharField(max_length=255, blank=True,
+                              choices=STATUS_CHOICES, default='new')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
