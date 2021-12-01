@@ -43,7 +43,7 @@ def update_cart_product_qty(cart_product: CartProduct, qty: int):
 
 def filter_cart_products(campaign: Campaign,
                          campaign_product: CampaignProduct,
-                         type: tuple, status: tuple):
+                         type: tuple, status: tuple) -> list[CartProduct]:
     try:
         return CartProduct.objects.filter(
             campaign=campaign,
