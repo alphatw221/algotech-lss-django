@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     'api',
     'automation',
     'backend',
+    'chat_bot',
+    'mail',
 ]
 
 LOGGING = {
