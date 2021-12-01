@@ -11,9 +11,12 @@ class CampaignLuckyDrawManager:
     @staticmethod
     def process(campagin: Campaign, event: CampaignLuckyDrawEvent,
                 prize_campaign_product: CampaignProduct, num_of_winner: int):
-        lucky_draw = CampaignLuckyDrawProcessor(campagin, event,
-                                                prize_campaign_product, num_of_winner)
-        return lucky_draw.process()
+        lucky_draw = CampaignLuckyDrawProcessor(
+            campagin, event,
+            prize_campaign_product, num_of_winner
+        ).process()
+
+        return lucky_draw
 
 
 @dataclass

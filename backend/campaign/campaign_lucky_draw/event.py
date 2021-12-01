@@ -1,17 +1,36 @@
-from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 
 from api.models.campaign.campaign import Campaign
 from api.models.campaign.campaign_product import CampaignProduct
 from api.utils.orm import cart_product
 
 
+@dataclass
 class CampaignLuckyDrawEvent(ABC):
-    ...
+    @abstractmethod
+    def get_source_id(self):
+        ...
+
+    @abstractmethod
+    def get_source_type(self):
+        ...
+
+    @abstractmethod
+    def get_condition(self):
+        ...
+
+    @abstractmethod
+    def get_condition_type(self):
+        ...
+
+    @abstractmethod
+    def get_candidate_set(self):
+        ...
 
 
 @dataclass
-class DrawFromCartProductEvent(ABC):
+class DrawFromCartProductEvent(CampaignLuckyDrawEvent):
     campagin: Campaign
     campagin_product: CampaignProduct
 
