@@ -1,5 +1,12 @@
 # LSS API server
 
+## URLs
+
+- API Root: <https://gipassl.algotech.app/>
+- Chat Bot - Facebook: <https://gipassl.algotech.app/chat_bot/facebook/>
+- Web Front-end: <>
+- Shopping Cart: <>
+
 ## Run server
 
 ```bash
