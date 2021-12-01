@@ -60,6 +60,9 @@ class CampaignSerializer(serializers.ModelSerializer):
     meta_payment = serializers.JSONField(default=dict)
     meta_logistic = serializers.JSONField(default=dict)
 
+    payment_info = serializers.JSONField(default=dict)
+    logistics_info = serializers.JSONField(default=dict)
+
 
 class CampaignAdmin(admin.ModelAdmin):
     model = Campaign
