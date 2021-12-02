@@ -42,6 +42,7 @@ class CartProductRequestItem:
 class CartProductRequest:
     campaign_comment: CampaignComment
     items: list[CartProductRequestItem] = field(default_factory=list)
+    response_task = None
 
     def __repr__(self) -> str:
         return (

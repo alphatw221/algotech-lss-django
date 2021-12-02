@@ -35,6 +35,13 @@ class FacebookPage(models.Model):
         return self.name
 
 
+class FacebookPageInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FacebookPage
+        fields = ['page_id', 'name', 'remark', 'image', 'lang']
+        read_only_fields = ['created_at', 'modified_at']
+
+
 class FacebookPageSerializer(serializers.ModelSerializer):
     class Meta:
         model = FacebookPage

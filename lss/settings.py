@@ -11,8 +11,8 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 import os
-from pathlib import Path
 from datetime import timedelta
+from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -28,7 +28,7 @@ SECRET_KEY = 'django-insecure-_*%^a_086!sv_#y^t(c0(+%dbqufars4zf8##q!yqjlp#c7m!l
 DEBUG = True
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0',
-                 "gipassl.algotech.app", ]
+                 "gipassl.algotech.app", 'd4b7-111-240-107-152.ngrok.io']
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = False
@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     'api',
     'automation',
     'backend',
+    'chat_bot',
+    'mail',
 ]
 
 LOGGING = {
@@ -255,9 +257,17 @@ YOUTUBE_API_CONFIG = {
 
 # backend app
 COMMENT_PROCESSING = {
-    'REST_INTERVAL_SECONDS': 3,
+    'REST_INTERVAL_SECONDS': 2,
+    'COMMENT_BATCH_SIZE': 300,
+    'MAX_RESPONSE_WORKERS': 50,
 }
 FACEBOOK_COMMENT_CAPTURING = {
     'MAX_CONTINUOUS_REQUEST_TIMES': 10,
     'REST_INTERVAL_SECONDS': 5,
+}
+
+
+# chat_bot app
+CHAT_BOT_FACEBOOK = {
+    'VERIFY_TOKEN': 'ALGOTECHLSSMESSENGER'
 }

@@ -1,15 +1,24 @@
-from enum import Enum, auto
-
-from backend.i18n._helper import lang_kwarg_translate
+from backend.i18n._helper import lang_translate_default_en
 from django.utils.translation import ugettext as _
 
 
-class CampaignAnnouncement(Enum):
-    CAMPAIGN_PRODUCT_CLOSED = auto()
-    CAMPAIGN_PRODUCT_SOLD_OUT = auto()
-    LUCKY_DRAW_WINNER = auto()
+@lang_translate_default_en
+def i18n_get_campaign_announcement_product_closed(order_code: str, lang=None):
+    return _(
+        'PRODUCT_CLOSED{order_code}'
+    ).format(order_code=order_code)
 
 
-@lang_kwarg_translate
-def i18n_get_campaign_announcement(type: CampaignAnnouncement, lang=None):
-    ...
+@lang_translate_default_en
+def i18n_get_campaign_announcement_product_sold_out(order_code: str, lang=None):
+    return _(
+        'PRODUCT_SOLD_OUT{order_code}'
+    ).format(order_code=order_code)
+
+
+@lang_translate_default_en
+def i18n_get_campaign_announcement_lucky_draw_winner(customer_name: str, product_name: str, lang=None):
+    return _(
+        'LUCKY_DRAW_WINNER{customer_name}{product_name}'
+    ).format(customer_name=customer_name,
+             product_name=product_name)

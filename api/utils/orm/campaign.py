@@ -10,3 +10,13 @@ def get_active_campaign_now():
         )
     except Exception:
         return []
+
+
+def get_ordering_campaign_now():
+    try:
+        return Campaign.objects.filter(
+            ordering_start_at__lt=pendulum.now(),
+            end_at__gt=pendulum.now(),
+        )
+    except Exception:
+        return []

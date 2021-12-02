@@ -1,13 +1,13 @@
 from django.contrib import admin
 
-from api.models.test import sample
-from api.models.user import user, user_group, user_plan
 from api.models.auto_response import auto_response
-from api.models.campaign import campaign, campaign_product, campaign_comment, campaign_lucky_draw
-from api.models.product import product
+from api.models.campaign import (campaign, campaign_comment,
+                                 campaign_lucky_draw, campaign_product)
 from api.models.cart import cart_product
 from api.models.order import order
-
+from api.models.product import product
+from api.models.test import sample
+from api.models.user import user, user_group, user_plan
 
 admin.site.register(sample.Sample, sample.SampleAdmin)
 

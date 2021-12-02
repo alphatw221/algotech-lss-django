@@ -39,3 +39,16 @@ def update_cart_product_qty(cart_product: CartProduct, qty: int):
         cart_product.save()
     except Exception:
         ...
+
+
+def filter_cart_products(campaign: Campaign,
+                         campaign_product: CampaignProduct,
+                         type: tuple, status: tuple) -> list[CartProduct]:
+    try:
+        return CartProduct.objects.filter(
+            campaign=campaign,
+            campaign_product=campaign_product,
+            type__in=type,
+            status__in=status).all()
+    except Exception:
+        ...
