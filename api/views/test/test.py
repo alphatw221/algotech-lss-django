@@ -9,7 +9,7 @@ from api.models.test.sample import Sample, SampleSerializer
 
 @api_view(['GET'])
 def test(request):
-
+    print(0)
     return Response('test accomplished')
 
 

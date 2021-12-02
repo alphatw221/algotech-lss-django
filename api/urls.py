@@ -23,6 +23,8 @@ from api.views.cart import cart_product
 
 from api.views.order import order
 
+from api.views.image import image
+
 
 def url_setup(urlpatterns):
     router = routers.DefaultRouter()
@@ -57,6 +59,10 @@ def url_setup(urlpatterns):
     router.register(r'cart-product', cart_product.CartProductViewSet)
 
     router.register(r'order', order.OrderViewSet)
+
+    urlpatterns += [
+        path('upload/<filename>', image.upload, name='file_upload'),
+    ]
 
     urlpatterns.append(path('', include(router.urls)))
 
