@@ -44,13 +44,15 @@ class DrawFromCartProductEvent(CampaignLuckyDrawEvent):
         return None
 
     def get_condition_type(self):
-        return 'cart_product'
+        return 'lucky_draw_cart_products'
 
     def get_candidate_set(self):
         cart_products = cart_product.filter_cart_products(self.campagin, self.campagin_product,
                                                           ('order_code', 'cart'),
                                                           ('valid',))
         return {
-            (cart_product.platform, cart_product.customer_id)
+            (cart_product.platform,
+             cart_product.customer_id,
+             cart_product.customer_name)
             for cart_product in cart_products
         }

@@ -18,9 +18,9 @@ class CampaignLuckyDraw(models.Model):
 
     CONDITION_TYPE_CHOICES = [
         ('n/a', 'Not available'),
-        ('cart_product', 'Draw from Cart Products'),
-        ('campaign_comment', 'Draw from Campaign Comments'),
-        ('campaign_likes', 'Draw from Campaign Likes'),
+        ('lucky_draw_cart_products', 'Draw from Cart Products'),
+        ('lucky_draw_campaign_comments', 'Draw from Campaign Comments'),
+        ('lucky_draw_campaign_likes', 'Draw from Campaign Likes'),
 
     ]
 

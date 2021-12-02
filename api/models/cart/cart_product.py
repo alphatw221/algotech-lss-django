@@ -1,9 +1,9 @@
+from api.models.campaign.campaign import Campaign
+from api.models.campaign.campaign_comment import CampaignComment
+from api.models.campaign.campaign_product import CampaignProduct
 from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
-from api.models.campaign.campaign import Campaign
-from api.models.campaign.campaign_product import CampaignProduct
-from api.models.campaign.campaign_comment import CampaignComment
 
 
 class CartProduct(models.Model):
@@ -14,9 +14,10 @@ class CartProduct(models.Model):
         ('n/a', 'Not available'),
         ('order_code', 'Added from order code in campaign comment'),
         ('cart', 'Added from cart page function'),
-        ('lucky_draw_cart', 'Added from lucky draw from cart product'),
-        ('lucky_draw_comment', 'Added from lucky draw from campaign comment keyword'),
-        ('lucky_draw_like', 'Added from lucky draw from campaign like'),
+        ('lucky_draw_cart_products', 'Added from lucky draw of cart product'),
+        ('lucky_draw_campaign_comments',
+         'Added from lucky draw of campaign comments'),
+        ('lucky_draw_campaign_likes', 'Added from lucky draw of campaign likes'),
     ]
 
     STATUS_CHOICES = [

@@ -9,8 +9,8 @@ def create_cart_product(campaign: Campaign,
                         campaign_comment: CampaignComment,
                         qty: int, order_code: str,
                         platform: str, customer_id: str, customer_name: str,
-                        remark: str, meta: dict,
-                        type: str, status: str):
+                        type: str, status: str,
+                        remark: str, meta: dict):
     try:
         return CartProduct.objects.create(
             campaign=campaign,
@@ -18,8 +18,9 @@ def create_cart_product(campaign: Campaign,
             campaign_comment=campaign_comment,
             qty=qty, order_code=order_code,
             platform=platform, customer_id=customer_id, customer_name=customer_name,
-            remark=remark, meta=meta,
-            type=type, status=status)
+            type=type, status=status,
+            remark=remark, meta=meta
+        )
     except Exception:
         ...
 

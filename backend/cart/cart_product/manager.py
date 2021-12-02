@@ -14,16 +14,16 @@ class CartProductManager:
                             campaign_comment: CampaignComment,
                             qty: int, order_code: str,
                             platform: str, customer_id: str, customer_name: str,
-                            remark: str = '', meta: dict = {},
-                            type: str = 'n/a', status: str = 'valid'):
+                            type: str = 'n/a', status: str = 'valid',
+                            remark: str = None, meta: dict = {}):
         return orm_cart_product.create_cart_product(
             campaign,
             campaign_product,
             campaign_comment,
             qty, order_code,
             platform, customer_id, customer_name,
-            remark, meta,
-            type, status
+            type, status,
+            remark, meta
         )
 
     @staticmethod

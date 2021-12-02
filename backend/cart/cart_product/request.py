@@ -1,12 +1,14 @@
 from dataclasses import dataclass, field
 from enum import Enum, auto
 
+from api.models.campaign.campaign import Campaign
 from api.models.campaign.campaign_comment import CampaignComment
 from api.models.campaign.campaign_product import CampaignProduct
 from api.models.cart.cart_product import CartProduct
 
 
 class RequestState(Enum):
+    INIT = auto()
     ADDING = auto()
     ADDED = auto()
     UPDATING = auto()
@@ -28,7 +30,7 @@ class CartProductRequestItem:
     campaign_product: CampaignProduct
     qty: int
     orig_cart_product: CartProduct = None
-    state: RequestState = None
+    state: RequestState = RequestState.INIT
 
     def __repr__(self) -> str:
         return (
@@ -40,15 +42,19 @@ class CartProductRequestItem:
 
 @dataclass
 class CartProductRequest:
-    campaign_comment: CampaignComment
+    campaign: Campaign
+    campaign_comment: CampaignComment = None
+    platform: str = None
+    customer_id: str = None
+    customer_name: str = None
+
     items: list[CartProductRequestItem] = field(default_factory=list)
     response_task = None
 
     def __repr__(self) -> str:
         return (
-            f'CartProductRequest({self.campaign_comment.id=} {self.campaign_comment.campaign=} '
-            f'{self.campaign_comment.message=} {self.campaign_comment.comment_id=} '
-            f'{self.campaign_comment.customer_id=} {self.campaign_comment.customer_name=} '
+            f'CartProductRequest({self.campaign=} {self.campaign_comment=} '
+            f'{self.platform=} {self.customer_id=} {self.customer_name=} '
             f'{self.items})'
         )
 
