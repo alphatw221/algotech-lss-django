@@ -9,7 +9,7 @@ class CartProductRequestValidator(ABC):
         ...
 
 
-class CartProductRequestValidatorRegular(CartProductRequestValidator):
+class CartProductRequestValidatorOrderCode(CartProductRequestValidator):
     def process(self, request: CartProductRequest):
         for item in request.get_items():
             if not item.campaign_product.status:

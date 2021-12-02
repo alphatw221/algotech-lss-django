@@ -22,7 +22,7 @@ class AbstractCartProductRequestResponder(ABC):
 
 
 @dataclass
-class CartProductRequestResponderRegular(CartProductRequestResponder):
+class CartProductRequestResponderOrderCode(CartProductRequestResponder):
     response_platforms: dict = field(default_factory=dict)
 
     def process(self, request: CartProductRequest,

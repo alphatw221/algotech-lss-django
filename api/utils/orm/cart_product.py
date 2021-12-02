@@ -4,6 +4,26 @@ from api.models.campaign.campaign_product import CampaignProduct
 from api.models.cart.cart_product import CartProduct
 
 
+def create_cart_product(campaign: Campaign,
+                        campaign_product: CampaignProduct,
+                        campaign_comment: CampaignComment,
+                        qty: int, order_code: str,
+                        platform: str, customer_id: str, customer_name: str,
+                        remark: str, meta: dict,
+                        type: str, status: str):
+    try:
+        return CartProduct.objects.create(
+            campaign=campaign,
+            campaign_product=campaign_product,
+            campaign_comment=campaign_comment,
+            qty=qty, order_code=order_code,
+            platform=platform, customer_id=customer_id, customer_name=customer_name,
+            remark=remark, meta=meta,
+            type=type, status=status)
+    except Exception:
+        ...
+
+
 def update_or_create_cart_product(campaign: Campaign,
                                   campaign_product: CampaignProduct,
                                   campaign_comment: CampaignComment,
