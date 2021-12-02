@@ -51,6 +51,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         platform = platform_dict[platform_name].objects.get(
             id=platform_id)
 
+        # TODO 檢查root is platform admin
         if not api_user.user_subscriptions.filter(id=user_subscription_id).exists():
             return Response({"message": "no user_subscription found"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -92,6 +93,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         platform = platform_dict[platform_name].objects.get(
             id=platform_id)
 
+        # TODO 檢查root is platform admin
         if not api_user.user_subscriptions.filter(id=user_subscription_id).exists():
             return Response({"message": "no user_subscription found"}, status=status.HTTP_400_BAD_REQUEST)
 

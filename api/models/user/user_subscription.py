@@ -28,6 +28,7 @@ class UserSubscription(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    countries = models.JSONField(null=True, blank=True, default=dict)
     meta = models.JSONField(null=True, blank=True, default=dict)
 
 
@@ -44,6 +45,7 @@ class UserSubscriptionSerializer(serializers.ModelSerializer):
     youtube_channels = YoutubeChannelSerializer(
         many=True, read_only=True)
     meta = serializers.JSONField(default=dict)
+    countries = serializers.JSONField(default=dict)
 
 
 class UserSubscriptionAdmin(admin.ModelAdmin):
