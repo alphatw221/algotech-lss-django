@@ -21,8 +21,9 @@ class CartProductRequestProcessor(ABC):
 
 
 @dataclass
-class CartProductRequestProcessorOrderCode(CartProductRequestProcessor):
+class CartProductRequestProcessorStandard(CartProductRequestProcessor):
     check_inv: bool = True
+    cart_product_type: str = 'n/a'
 
     def process(self, request: CartProductRequest):
         for item in request.get_items():
@@ -56,7 +57,7 @@ class CartProductRequestProcessorOrderCode(CartProductRequestProcessor):
             request.platform,
             request.customer_id,
             request.customer_name,
-            'order_code',
+            self.cart_product_type,
             'valid',
         )
 
