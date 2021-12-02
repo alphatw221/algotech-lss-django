@@ -1,6 +1,7 @@
 from api.models.campaign.campaign import Campaign
 from api.models.campaign.campaign_comment import CampaignComment
 from api.models.campaign.campaign_product import CampaignProduct
+from django.conf import settings
 from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
@@ -36,7 +37,8 @@ class CartProduct(models.Model):
     qty = models.IntegerField(blank=False, null=True, default=0)
     order_code = models.CharField(max_length=255, null=True, blank=True)
 
-    platform = models.CharField(max_length=255, null=True, blank=True)
+    platform = models.CharField(max_length=255, blank=True,
+                                choices=settings.SUPPORTED_PLATFORMS, default='n/a')
     customer_id = models.CharField(max_length=255, null=True, blank=True)
     customer_name = models.CharField(max_length=255, null=True, blank=True)
     remark = models.TextField(default=None, null=True, blank=True)

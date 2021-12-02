@@ -1,8 +1,10 @@
+import time
+
+from api.models.campaign.campaign import Campaign
+from django.conf import settings
 from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
-from api.models.campaign.campaign import Campaign
-import time
 
 
 class CampaignComment(models.Model):
@@ -25,7 +27,8 @@ class CampaignComment(models.Model):
     customer_name = models.CharField(max_length=255, null=True, blank=True)
     image = models.CharField(max_length=512, null=True, blank=True)
 
-    platform = models.CharField(max_length=255, null=True, blank=True)
+    platform = models.CharField(max_length=255, blank=True,
+                                choices=settings.SUPPORTED_PLATFORMS, default='n/a')
     type = models.CharField(max_length=255, null=True, blank=True)
     status = models.IntegerField(blank=True,
                                  choices=STATUS_CHOICES, default=0)
