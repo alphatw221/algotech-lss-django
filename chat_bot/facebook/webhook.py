@@ -33,8 +33,21 @@ def facebook_receive(request):
 
                 if message := webhook_event.get('message'):
                     if message.get('text'):
-                        print(message['text'], time_of_event)
                         # handleTextMessage(page_id, sender_psid, message)
+                        print(message['text'], time_of_event)
+
+                        from api.models.facebook.facebook_page import \
+                            FacebookPage
+                        from backend.api.facebook.chat_bot import \
+                            api_fb_post_page_message_chat_bot
+
+                        page_token = FacebookPage.objects.get(
+                            page_id=page_id).token
+                        response = {'text': message['text']}
+
+                        api_fb_post_page_message_chat_bot(
+                            page_token, sender_psid, response)
+                        # TODO: above code should be deliver to handleTextMessage func
                     elif message.get('attachments'):
                         ...
                     elif message.get('quick_reply'):
