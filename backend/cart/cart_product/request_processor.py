@@ -1,4 +1,4 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
 from backend.campaign.campaign_product.manager import (
@@ -11,12 +11,17 @@ from backend.cart.cart_product.request import (CartProductRequest,
 
 @dataclass
 class CartProductRequestProcessor(ABC):
+    @abstractmethod
     def process():
         ...
 
+    def _update_qty_sold(self, *args, **kwargs):
+        return CampaignProductManager.update_qty_sold(
+            *args, **kwargs, check_inv=self.check_inv)
+
 
 @dataclass
-class CartProductRequestProcessorRegular(CartProductRequestProcessor):
+class CartProductRequestProcessorOrderCode(CartProductRequestProcessor):
     check_inv: bool = True
 
     def process(self, request: CartProductRequest):
@@ -43,14 +48,14 @@ class CartProductRequestProcessorRegular(CartProductRequestProcessor):
         self._update_qty_sold(item.campaign_product,
                               item.qty)
         CartProductManager.update_or_create_cart_product(
-            request.campaign_comment.campaign,
+            request.campaign,
             item.campaign_product,
             request.campaign_comment,
             item.qty,
             item.campaign_product.order_code,
-            request.campaign_comment.platform,
-            request.campaign_comment.customer_id,
-            request.campaign_comment.customer_name,
+            request.platform,
+            request.customer_id,
+            request.customer_name,
             'order_code',
             'valid',
         )
@@ -67,6 +72,38 @@ class CartProductRequestProcessorRegular(CartProductRequestProcessor):
         CartProductManager.update_cart_product_qty(
             item.orig_cart_product, 0)
 
-    def _update_qty_sold(self, *args, **kwargs):
-        return CampaignProductManager.update_qty_sold(
-            *args, **kwargs, check_inv=self.check_inv)
+
+@dataclass
+class CartProductRequestProcessorLuckyDraw(CartProductRequestProcessor):
+    check_inv: bool = True
+    cart_product_type: str = 'n/a'
+
+    def process(self, request: CartProductRequest):
+        for item in request.get_items():
+            self._process_item_request(request, item)
+
+    def _process_item_request(self, request: CartProductRequest, item: CartProductRequestItem):
+        try:
+            if item.state == RequestState.ADDING:
+                self._add_cart_product(request, item)
+                item.state = RequestState.ADDED
+        except InsufficientInventoryError:
+            item.state = RequestState.INSUFFICIENT_INV
+        except NegativeQtyError:
+            item.state = RequestState.INVALID_NEGATIVE_QTY
+
+    def _add_cart_product(self, request: CartProductRequest, item: CartProductRequestItem):
+        self._update_qty_sold(item.campaign_product,
+                              item.qty)
+        CartProductManager.create_cart_product(
+            request.campaign,
+            item.campaign_product,
+            request.campaign_comment,
+            item.qty,
+            None,
+            request.platform,
+            request.customer_id,
+            request.customer_name,
+            self.cart_product_type,
+            'valid'
+        )

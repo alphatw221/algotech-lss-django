@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 
 from api.models.facebook.facebook_page import FacebookPage
+from api.models.youtube.youtube_channel import YoutubeChannel
 from backend.cart.cart_product.request import CartProductRequest
 from backend.i18n.cart_product_request import (i18n_get_additional_text,
                                                i18n_get_request_response)
@@ -30,22 +31,22 @@ class CartProductRequestResponderOrderCode(CartProductRequestResponder):
         if platform_object := self._get_platform_object(request):
             if not responder:
                 if isinstance(platform_object, FacebookPage):
-                    responder = FacebookCartProductRequestResponder(
+                    responder = FacebookCommentCommentPrivateMessageResponder(
                         request, platform_object)
-                elif platform_object == 'youtube':
+                elif isinstance(platform_object, YoutubeChannel):
                     ...
 
             if responder:
                 request.response_task = responder.process
 
     def _get_platform_object(self, request: CartProductRequest):
-        if (platform := request.campaign_comment.platform) in self.response_platforms:
+        if (platform := request.platform) in self.response_platforms:
             return self.response_platforms[platform]
         return None
 
 
 @dataclass
-class FacebookCartProductRequestResponder(AbstractCartProductRequestResponder):
+class FacebookCommentCommentPrivateMessageResponder(AbstractCartProductRequestResponder):
     request: CartProductRequest
     facebook_page: FacebookPage
     response_result: dict = field(default_factory=dict)

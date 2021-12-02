@@ -10,7 +10,8 @@ from backend.api.facebook.post import *
 from backend.api.facebook.user import *
 from backend.campaign.campaign.manager import CampaignManager
 from backend.campaign.campaign_comment.comment_processor import *
-from backend.campaign.campaign_lucky_draw.event import DrawFromCartProductEvent
+from backend.campaign.campaign_lucky_draw.event import \
+    DrawFromCartProductsEvent
 from backend.campaign.campaign_lucky_draw.manager import \
     CampaignLuckyDrawManager
 from backend.campaign.campaign_product.status_processor import \
@@ -36,9 +37,9 @@ class Command(BaseCommand):
 
     def lucky_draw_test(self):
         c = Campaign.objects.get(id=1)
-        cp = CampaignProduct.objects.get(id=2)
+        cp = CampaignProduct.objects.get(id=1)
         lucky_draw = CampaignLuckyDrawManager.process(
-            c, DrawFromCartProductEvent(c, cp), cp, 10,
+            c, DrawFromCartProductsEvent(c, cp), cp, 10,
         )
         print(lucky_draw)
 
