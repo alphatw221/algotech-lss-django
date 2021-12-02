@@ -230,8 +230,8 @@ CRON_CLASSES = [
 ]
 
 # Live Show Seller info
-WEB_SERVER_URL = "https://"
-SHOPPING_CART_URL = f"{WEB_SERVER_URL}/"
+WEB_SERVER_URL = "https://place_holder_lss"
+SHOPPING_CART_URL = f"{WEB_SERVER_URL}/place_holder_cart"
 
 # Facebook
 FACEBOOK_API_URL = "https://graph.facebook.com"
