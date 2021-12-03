@@ -85,11 +85,21 @@ class CampaignProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = CampaignProduct
         fields = '__all__'
-        read_only_fields = ['created_at', 'modified_at', 'qty_sold']
+        read_only_fields = ['created_at', 'modified_at',
+                            'qty_sold']
 
     meta = serializers.JSONField(default=dict)
     meta_logistic = serializers.JSONField(default=dict)
     tag = serializers.JSONField(default=list)
+
+
+class CampaignProductSerializer_Update(CampaignProductSerializer):
+    class Meta:
+        model = CampaignProduct
+        exclude = ['campaign', 'created_by']
+
+        read_only_fields = ['created_at', 'modified_at',
+                            'qty_sold']
 
 
 class CampaignProductAdmin(admin.ModelAdmin):

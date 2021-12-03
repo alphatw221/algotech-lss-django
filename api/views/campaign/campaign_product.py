@@ -1,7 +1,7 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination
-from api.models.campaign.campaign_product import CampaignProduct, CampaignProductSerializer
+from api.models.campaign.campaign_product import CampaignProduct, CampaignProductSerializer, CampaignProductSerializer_Update
 from rest_framework import status, viewsets
 from rest_framework.response import Response
 from api.models.product.product import Product, ProductSerializer
@@ -42,6 +42,7 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
 
         platform_id = request.query_params.get('platform_id')
         platform_name = request.query_params.get('platform_name')
+        campaign_id = request.query_params.get('campaign_id')
 
         api_user = request.user.api_users.get(type='user')
         if not api_user:
@@ -59,17 +60,16 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
         if not is_admin(platform_name, api_user, platform):
             return Response({"message": "user is not platform admin"}, status=status.HTTP_400_BAD_REQUEST)
 
-        user_subscriptions = platform.user_subscriptions.all()
-        if not user_subscriptions:
-            return Response({"message": "platform not in any user_subscription"}, status=status.HTTP_400_BAD_REQUEST)
-        user_subscription = user_subscriptions[0]
+        if not platform.campaigns.filter(id=campaign_id).exists():
+            return Response({"message": "no campaign found"}, status=status.HTTP_400_BAD_REQUEST)
+        campaign = platform.campaigns.get(id=campaign_id)
 
-        if not user_subscription.products.filter(id=pk).exists():
-            return Response({"message": "no product found"}, status=status.HTTP_400_BAD_REQUEST)
+        if not campaign.products.filter(id=pk).exists():
+            return Response({"message": "no campaign product found"}, status=status.HTTP_400_BAD_REQUEST)
+        campaign_product = campaign.products.get(id=pk)
 
         try:
-            product = user_subscription.products.get(id=pk)
-            serializer = self.get_serializer(product)
+            serializer = self.get_serializer(campaign_product)
         except:
             return Response({"message": "error occerd during retriving"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -103,9 +103,8 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
             return Response({"message": "no campaign found"}, status=status.HTTP_400_BAD_REQUEST)
         campaign = platform.campaigns.get(id=campaign_id)
 
-        campaign_products = campaign.products.all()
-
         try:
+            campaign_products = campaign.products.all()
             data = CampaignProductSerializer(campaign_products, many=True).data
         except:
             return Response({"message": "query error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -117,6 +116,7 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
 
         platform_id = request.query_params.get('platform_id')
         platform_name = request.query_params.get('platform_name')
+        campaign_id = request.query_params.get('campaign_id')
 
         api_user = request.user.api_users.get(type='user')
         if not api_user:
@@ -135,15 +135,14 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
         if not is_admin(platform_name, api_user, platform):
             return Response({"message": "user is not platform admin"}, status=status.HTTP_400_BAD_REQUEST)
 
-        user_subscriptions = platform.user_subscriptions.all()
-        if not user_subscriptions:
-            return Response({"message": "platform not in any user_subscription"}, status=status.HTTP_400_BAD_REQUEST)
-        user_subscription = user_subscriptions[0]
+        if not platform.campaigns.filter(id=campaign_id).exists():
+            return Response({"message": "no campaign found"}, status=status.HTTP_400_BAD_REQUEST)
+        campaign = platform.campaigns.get(id=campaign_id)
 
         try:
-
             data = request.data
-            data['user_subscription'] = user_subscription.id
+            data['campaign'] = campaign.id
+            data['created_by'] = api_user.id
             serializer = self.get_serializer(data=data)
 
             if not serializer.is_valid():
@@ -160,6 +159,7 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
 
         platform_id = request.query_params.get('platform_id')
         platform_name = request.query_params.get('platform_name')
+        campaign_id = request.query_params.get('campaign_id')
 
         api_user = request.user.api_users.get(type='user')
         if not api_user:
@@ -178,18 +178,16 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
         if not is_admin(platform_name, api_user, platform):
             return Response({"message": "user is not platform admin"}, status=status.HTTP_400_BAD_REQUEST)
 
-        user_subscriptions = platform.user_subscriptions.all()
-        if not user_subscriptions:
-            return Response({"message": "platform not in any user_subscription"}, status=status.HTTP_400_BAD_REQUEST)
-        user_subscription = user_subscriptions[0]
+        if not platform.campaigns.filter(id=campaign_id).exists():
+            return Response({"message": "no campaign found"}, status=status.HTTP_400_BAD_REQUEST)
+        campaign = platform.campaigns.get(id=campaign_id)
 
-        if not user_subscription.products.filter(id=pk).exists():
-            return Response({"message": "no product found"}, status=status.HTTP_400_BAD_REQUEST)
-
+        if not campaign.products.filter(id=pk).exists():
+            return Response({"message": "no campaign product found"}, status=status.HTTP_400_BAD_REQUEST)
+        campaign_product = campaign.products.get(id=pk)
         try:
-            product = user_subscription.products.get(id=pk)
-            serializer = self.get_serializer(
-                product, data=request.data, partial=True)
+            serializer = CampaignProductSerializer_Update(
+                campaign_product, data=request.data, partial=True)
             if not serializer.is_valid():
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             serializer.save()
@@ -204,6 +202,7 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
 
         platform_id = request.query_params.get('platform_id')
         platform_name = request.query_params.get('platform_name')
+        campaign_id = request.query_params.get('campaign_id')
 
         api_user = request.user.api_users.get(type='user')
         if not api_user:
@@ -222,16 +221,15 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
         if not is_admin(platform_name, api_user, platform):
             return Response({"message": "user is not platform admin"}, status=status.HTTP_400_BAD_REQUEST)
 
-        user_subscriptions = platform.user_subscriptions.all()
-        if not user_subscriptions:
-            return Response({"message": "platform not in any user_subscription"}, status=status.HTTP_400_BAD_REQUEST)
-        user_subscription = user_subscriptions[0]
+        if not platform.campaigns.filter(id=campaign_id).exists():
+            return Response({"message": "no campaign found"}, status=status.HTTP_400_BAD_REQUEST)
+        campaign = platform.campaigns.get(id=campaign_id)
 
-        if not user_subscription.products.filter(id=pk).exists():
-            return Response({"message": "no product found"}, status=status.HTTP_400_BAD_REQUEST)
+        if not campaign.products.filter(id=pk).exists():
+            return Response({"message": "no campaign product found"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            user_subscription.products.get(id=pk).delete()
+            campaign.products.get(id=pk).delete()
         except:
             return Response({"message": "error occerd during deleting"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
