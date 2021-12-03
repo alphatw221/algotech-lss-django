@@ -29,7 +29,7 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.cart_product_manager_test()
+        self.lucky_draw_test()
 
     def campaign_test(self):
         cs = CampaignManager.get_active_campaigns()
@@ -50,17 +50,18 @@ class Command(BaseCommand):
 
     def lucky_draw_test(self):
         c = Campaign.objects.get(id=1)
-        cp = CampaignProduct.objects.get(id=1)
+        cp = CampaignProduct.objects.get(id=5)
+        prize_cp = CampaignProduct.objects.get(id=6)
 
-        # lucky_draw = CampaignLuckyDrawManager.process(
-        #     c, DrawFromCampaignCommentsEvent(c, 'hi'), cp, 1,
-        # )
-        # print(lucky_draw)
+        lucky_draw = CampaignLuckyDrawManager.process(
+            c, DrawFromCampaignCommentsEvent(c, 'order'), prize_cp, 1,
+        )
 
-        # lucky_draw = CampaignLuckyDrawManager.process(
-        #     c, DrawFromCartProductsEvent(c, cp), cp, 10,
-        # )
-        # print(lucky_draw)
+        lucky_draw = CampaignLuckyDrawManager.process(
+            c, DrawFromCartProductsEvent(c, cp), prize_cp, 1,
+        )
+
+        print(lucky_draw)
 
     def cart_product_test(self):
         c = Campaign.objects.get(id=1)
