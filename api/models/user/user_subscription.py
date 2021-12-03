@@ -1,3 +1,4 @@
+
 from api.models.facebook.facebook_page import (FacebookPage,
                                                FacebookPageSerializer)
 from api.models.user.user import User, UserSerializer
@@ -28,8 +29,8 @@ class UserSubscription(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    countries = models.JSONField(null=True, blank=True, default=dict)
     meta = models.JSONField(null=True, blank=True, default=dict)
+    country_meta = models.JSONField(null=True, blank=True, default=dict)
 
 
 class UserSubscriptionSerializer(serializers.ModelSerializer):
@@ -44,8 +45,9 @@ class UserSubscriptionSerializer(serializers.ModelSerializer):
         many=True, read_only=True)
     youtube_channels = YoutubeChannelSerializer(
         many=True, read_only=True)
+
     meta = serializers.JSONField(default=dict)
-    countries = serializers.JSONField(default=dict)
+    country_meta = serializers.JSONField(default=dict)
 
 
 class UserSubscriptionAdmin(admin.ModelAdmin):

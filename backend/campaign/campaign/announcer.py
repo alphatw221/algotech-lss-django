@@ -2,6 +2,7 @@
 from typing import Callable
 
 from api.models.campaign.campaign import Campaign
+from api.models.campaign.campaign_lucky_draw import CampaignLuckyDraw
 from api.models.campaign.campaign_product import CampaignProduct
 from api.models.facebook.facebook_page import FacebookPage
 from backend.i18n.campaign_announcement import (
@@ -19,44 +20,45 @@ class CampaignAnnouncerError(Exception):
 class CampaignAnnouncer:
     @staticmethod
     def announce_campaign_product_sold_out(campaign_product: CampaignProduct):
-        return CampaignAnnouncer._announce_campaign_product_activation(
-            campaign_product,
+        return CampaignAnnouncer._make_announcement(
+            campaign_product.campaign,
             i18n_func=i18n_get_campaign_announcement_product_sold_out,
+            args=(campaign_product.order_code,)
         )
 
     @staticmethod
     def announce_campaign_product_activate(campaign_product: CampaignProduct):
         return
         # * There's no message for this action so return immediately.
-        CampaignAnnouncer._announce_campaign_product_activation(
-            campaign_product,
+        CampaignAnnouncer._make_announcement(
+            campaign_product.campaign,
             i18n_func=None,
         )
 
     @staticmethod
     def announce_campaign_product_deactivate(campaign_product: CampaignProduct):
-        return CampaignAnnouncer._announce_campaign_product_activation(
-            campaign_product,
+        return CampaignAnnouncer._make_announcement(
+            campaign_product.campaign,
             i18n_func=i18n_get_campaign_announcement_product_closed,
+            args=(campaign_product.order_code,)
         )
 
     @staticmethod
-    def announce_lucky_draw_winner(campaign_product: CampaignProduct, customer_name: str):
-        # TODO: lucky draw
-        i18n_get_campaign_announcement_lucky_draw_winner
-        return
+    def announce_lucky_draw_winner(campaign_lucky_draw: CampaignLuckyDraw, customer_name: str):
+        return CampaignAnnouncer._make_announcement(
+            campaign_lucky_draw.campaign,
+            i18n_func=i18n_get_campaign_announcement_lucky_draw_winner,
+            args=(campaign_lucky_draw, customer_name)
+        )
 
     @staticmethod
-    def _announce_campaign_product_activation(campaign_product: CampaignProduct,
-                                              i18n_func: Callable):
-        campaign: Campaign = campaign_product.campaign
+    def _make_announcement(campaign: Campaign, i18n_func: Callable, args: tuple):
         if not campaign:
             CampaignAnnouncerError('Campagin not found.')
 
         result = {}
         if (facebook_page := campaign.facebook_page) and campaign.facebook_campaign:
-            text = i18n_func(
-                campaign_product.order_code, facebook_page.lang)
+            text = i18n_func(*args, lang=facebook_page.lang)
             result['text'] = text
             result['facebook'] = CampaignAnnouncer._facebook_announcement(
                 facebook_page, campaign.facebook_campaign, text)

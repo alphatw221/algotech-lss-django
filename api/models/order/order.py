@@ -1,5 +1,6 @@
 
 # TODO: WIP
+from django.conf import settings
 from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
@@ -95,7 +96,8 @@ class Order(models.Model):
     tracking = models.CharField(
         max_length=32, blank=True, default='')
 
-    platform = models.CharField(max_length=255, null=True, blank=True)
+    platform = models.CharField(max_length=255, blank=True,
+                                choices=settings.SUPPORTED_PLATFORMS, default='n/a')
     type = models.CharField(max_length=255, null=True, blank=True)
     status = models.CharField(max_length=255, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

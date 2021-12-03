@@ -17,8 +17,8 @@ def i18n_get_campaign_announcement_product_sold_out(order_code: str, lang=None):
 
 
 @lang_translate_default_en
-def i18n_get_campaign_announcement_lucky_draw_winner(customer_name: str, product_name: str, lang=None):
+def i18n_get_campaign_announcement_lucky_draw_winner(product_name: str, customer_name: str, lang=None):
     return _(
         'LUCKY_DRAW_WINNER{customer_name}{product_name}'
-    ).format(customer_name=customer_name,
-             product_name=product_name)
+    ).format(product_name=product_name,
+             customer_name=customer_name)

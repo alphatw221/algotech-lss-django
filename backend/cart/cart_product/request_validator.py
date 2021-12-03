@@ -9,7 +9,7 @@ class CartProductRequestValidator(ABC):
         ...
 
 
-class CartProductRequestValidatorRegular(CartProductRequestValidator):
+class CartProductRequestValidatorStandard(CartProductRequestValidator):
     def process(self, request: CartProductRequest):
         for item in request.get_items():
             if not item.campaign_product.status:
@@ -21,9 +21,9 @@ class CartProductRequestValidatorRegular(CartProductRequestValidator):
                 return
 
             existing_cart_product = CartProductManager.get_last_valid_cart_product(
-                request.campaign_comment.campaign,
+                request.campaign,
                 item.campaign_product,
-                request.campaign_comment.customer_id,
+                request.customer_id,
             )
             if not existing_cart_product:
                 if item.qty == 0:
@@ -46,13 +46,19 @@ class CartProductRequestValidatorRegular(CartProductRequestValidator):
                     item.state = RequestState.INVALID_UNKNOWN_REQUEST
 
 
+class CartProductRequestValidatorLuckyDraw(CartProductRequestValidator):
+    def process(self, request: CartProductRequest):
+        for item in request.get_items():
+            item.state = RequestState.ADDING
+
+
 class CartProductRequestValidatorAllValid(CartProductRequestValidator):
     def process(self, request: CartProductRequest):
         for item in request.get_items():
             existing_cart_product = CartProductManager.get_last_valid_cart_product(
-                request.campaign_comment.campaign,
+                request.campaign,
                 item.campaign_product,
-                request.campaign_comment.customer_id,
+                request.customer_id,
             )
             if not existing_cart_product:
                 item.state = RequestState.ADDING

@@ -9,6 +9,24 @@ class CartProductManager:
     NO_DUPLICATE_TYPES = ('order_code', 'cart')
 
     @staticmethod
+    def create_cart_product(campaign: Campaign,
+                            campaign_product: CampaignProduct,
+                            campaign_comment: CampaignComment,
+                            qty: int, order_code: str,
+                            platform: str, customer_id: str, customer_name: str,
+                            type: str = 'n/a', status: str = 'valid',
+                            remark: str = None, meta: dict = {}):
+        return orm_cart_product.create_cart_product(
+            campaign,
+            campaign_product,
+            campaign_comment,
+            qty, order_code,
+            platform, customer_id, customer_name,
+            type, status,
+            remark, meta
+        )
+
+    @staticmethod
     def update_or_create_cart_product(campaign: Campaign,
                                       campaign_product: CampaignProduct,
                                       campaign_comment: CampaignComment,

@@ -10,11 +10,11 @@ from backend.campaign.campaign_product.manager import CampaignProductManager
 from backend.campaign.campaign_product.status_processor import \
     CampaignProductStatusProcessor
 from backend.cart.cart_product.request_processor import \
-    CartProductRequestProcessorRegular
+    CartProductRequestProcessorStandard
 from backend.cart.cart_product.request_responder import \
-    CartProductRequestResponderRegular
+    CartProductRequestResponderOrderCode
 from backend.cart.cart_product.request_validator import \
-    CartProductRequestValidatorRegular
+    CartProductRequestValidatorStandard
 from backend.utils.text_processing.order_code_processor import \
     OrderCodeTextProcessor
 
@@ -60,9 +60,10 @@ class CommentProcessor:
 
     def _plugin_order_code(self, comment: CampaignComment):
         tp = OrderCodeTextProcessor
-        cprv = CartProductRequestValidatorRegular()
-        cprp = CartProductRequestProcessorRegular(check_inv=True)
-        cprr = CartProductRequestResponderRegular(self.response_platforms)
+        cprv = CartProductRequestValidatorStandard()
+        cprp = CartProductRequestProcessorStandard(
+            check_inv=True, cart_product_type='order_code')
+        cprr = CartProductRequestResponderOrderCode(self.response_platforms)
         CommentPluginOrderCode.process(self.campaign,
                                        tp, comment, self.order_codes_mapping,
                                        self.batch_tasks_list, cprv, cprp, cprr)
