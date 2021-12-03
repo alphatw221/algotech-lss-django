@@ -2,6 +2,17 @@ from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination
 from api.models.campaign.campaign_product import CampaignProduct, CampaignProductSerializer
+from rest_framework import status, viewsets
+from rest_framework.response import Response
+from api.models.product.product import Product, ProductSerializer
+from rest_framework.decorators import action
+from api.models.facebook.facebook_page import FacebookPage
+from api.models.youtube.youtube_channel import YoutubeChannel
+from backend.api.facebook.user import api_fb_get_me_accounts
+from api.models.campaign.campaign_product import CampaignProductSerializer
+
+platform_dict = {'facebook': FacebookPage,
+                 'youtube': YoutubeChannel}
 
 
 class CampaignProductPagination(PageNumberPagination):
@@ -25,3 +36,220 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
     serializer_class = CampaignProductSerializer
     filterset_fields = []
     pagination_class = CampaignProductPagination
+
+    @action(detail=True, methods=['GET'], url_path=r'retrieve_campaign_product')
+    def retrieve_campaign_product(self, request, pk=None):
+
+        platform_id = request.query_params.get('platform_id')
+        platform_name = request.query_params.get('platform_name')
+
+        api_user = request.user.api_users.get(type='user')
+        if not api_user:
+            return Response({"message": "no user found"}, status=status.HTTP_400_BAD_REQUEST)
+        elif api_user.status != "valid":
+            return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if platform_name not in platform_dict:
+            return Response({"message": "no platfrom name found"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not platform_dict[platform_name].objects.filter(id=platform_id).exists():
+            return Response({"message": "no platfrom found"}, status=status.HTTP_400_BAD_REQUEST)
+        platform = platform_dict[platform_name].objects.get(
+            id=platform_id)
+        if not is_admin(platform_name, api_user, platform):
+            return Response({"message": "user is not platform admin"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user_subscriptions = platform.user_subscriptions.all()
+        if not user_subscriptions:
+            return Response({"message": "platform not in any user_subscription"}, status=status.HTTP_400_BAD_REQUEST)
+        user_subscription = user_subscriptions[0]
+
+        if not user_subscription.products.filter(id=pk).exists():
+            return Response({"message": "no product found"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            product = user_subscription.products.get(id=pk)
+            serializer = self.get_serializer(product)
+        except:
+            return Response({"message": "error occerd during retriving"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['GET'], url_path=r'list_campaign_product')
+    def list_campaign_product(self, request):
+
+        platform_id = request.query_params.get('platform_id')
+        platform_name = request.query_params.get('platform_name')
+        campaign_id = request.query_params.get('campaign_id')
+
+        api_user = request.user.api_users.get(type='user')
+        if not api_user:
+            return Response({"message": "no user found"}, status=status.HTTP_400_BAD_REQUEST)
+        elif api_user.status != "valid":
+            return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if platform_name not in platform_dict:
+            return Response({"message": "no platfrom name found"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not platform_dict[platform_name].objects.filter(id=platform_id).exists():
+            return Response({"message": "no platfrom found"}, status=status.HTTP_400_BAD_REQUEST)
+        platform = platform_dict[platform_name].objects.get(
+            id=platform_id)
+
+        if not is_admin(platform_name, api_user, platform):
+            return Response({"message": "user is not platform admin"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not platform.campaigns.filter(id=campaign_id).exists():
+            return Response({"message": "no campaign found"}, status=status.HTTP_400_BAD_REQUEST)
+        campaign = platform.campaigns.get(id=campaign_id)
+
+        campaign_products = campaign.products.all()
+
+        try:
+            data = CampaignProductSerializer(campaign_products, many=True).data
+        except:
+            return Response({"message": "query error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response(data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['POST'], url_path=r'create_campaign_product')
+    def create_campaign_product(self, request):
+
+        platform_id = request.query_params.get('platform_id')
+        platform_name = request.query_params.get('platform_name')
+
+        api_user = request.user.api_users.get(type='user')
+        if not api_user:
+            return Response({"message": "no user found"}, status=status.HTTP_400_BAD_REQUEST)
+        elif api_user.status != "valid":
+            return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if platform_name not in platform_dict:
+            return Response({"message": "no platfrom name found"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not platform_dict[platform_name].objects.filter(id=platform_id).exists():
+            return Response({"message": "no platfrom found"}, status=status.HTTP_400_BAD_REQUEST)
+        platform = platform_dict[platform_name].objects.get(
+            id=platform_id)
+
+        if not is_admin(platform_name, api_user, platform):
+            return Response({"message": "user is not platform admin"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user_subscriptions = platform.user_subscriptions.all()
+        if not user_subscriptions:
+            return Response({"message": "platform not in any user_subscription"}, status=status.HTTP_400_BAD_REQUEST)
+        user_subscription = user_subscriptions[0]
+
+        try:
+
+            data = request.data
+            data['user_subscription'] = user_subscription.id
+            serializer = self.get_serializer(data=data)
+
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            serializer.save()
+
+        except:
+            return Response({"message": "error occerd during creating"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['PUT'], url_path=r'update_campaign_product')
+    def update_campaign_product(self, request, pk=None):
+
+        platform_id = request.query_params.get('platform_id')
+        platform_name = request.query_params.get('platform_name')
+
+        api_user = request.user.api_users.get(type='user')
+        if not api_user:
+            return Response({"message": "no user found"}, status=status.HTTP_400_BAD_REQUEST)
+        elif api_user.status != "valid":
+            return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if platform_name not in platform_dict:
+            return Response({"message": "no platfrom name found"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not platform_dict[platform_name].objects.filter(id=platform_id).exists():
+            return Response({"message": "no platfrom found"}, status=status.HTTP_400_BAD_REQUEST)
+        platform = platform_dict[platform_name].objects.get(
+            id=platform_id)
+
+        if not is_admin(platform_name, api_user, platform):
+            return Response({"message": "user is not platform admin"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user_subscriptions = platform.user_subscriptions.all()
+        if not user_subscriptions:
+            return Response({"message": "platform not in any user_subscription"}, status=status.HTTP_400_BAD_REQUEST)
+        user_subscription = user_subscriptions[0]
+
+        if not user_subscription.products.filter(id=pk).exists():
+            return Response({"message": "no product found"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            product = user_subscription.products.get(id=pk)
+            serializer = self.get_serializer(
+                product, data=request.data, partial=True)
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            serializer.save()
+
+        except:
+            return Response({"message": "error occerd during updating"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['DELETE'], url_path=r'delete_campaign_product')
+    def delete_campaign_product(self, request, pk=None):
+
+        platform_id = request.query_params.get('platform_id')
+        platform_name = request.query_params.get('platform_name')
+
+        api_user = request.user.api_users.get(type='user')
+        if not api_user:
+            return Response({"message": "no user found"}, status=status.HTTP_400_BAD_REQUEST)
+        elif api_user.status != "valid":
+            return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if platform_name not in platform_dict:
+            return Response({"message": "no platfrom name found"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not platform_dict[platform_name].objects.filter(id=platform_id).exists():
+            return Response({"message": "no platfrom found"}, status=status.HTTP_400_BAD_REQUEST)
+        platform = platform_dict[platform_name].objects.get(
+            id=platform_id)
+
+        if not is_admin(platform_name, api_user, platform):
+            return Response({"message": "user is not platform admin"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user_subscriptions = platform.user_subscriptions.all()
+        if not user_subscriptions:
+            return Response({"message": "platform not in any user_subscription"}, status=status.HTTP_400_BAD_REQUEST)
+        user_subscription = user_subscriptions[0]
+
+        if not user_subscription.products.filter(id=pk).exists():
+            return Response({"message": "no product found"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user_subscription.products.get(id=pk).delete()
+        except:
+            return Response({"message": "error occerd during deleting"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response({"message": "delete success"}, status=status.HTTP_200_OK)
+
+
+def is_admin(platform_name, api_user, platform):
+    try:
+        if platform_name == 'facebook':
+            status_code, response = api_fb_get_me_accounts(
+                api_user.facebook_info['token'])
+
+            for item in response['data']:
+                if item['id'] == platform.page_id:
+                    return True
+            return False
+        elif platform_name == 'youtube':
+            pass
+    except:
+        return False
+    return False

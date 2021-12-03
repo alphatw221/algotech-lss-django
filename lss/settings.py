@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
+from google.oauth2 import service_account
 import os
 from datetime import timedelta
 from pathlib import Path
@@ -278,3 +279,12 @@ FACEBOOK_COMMENT_CAPTURING = {
 CHAT_BOT_FACEBOOK = {
     'VERIFY_TOKEN': 'ALGOTECHLSSMESSENGER'
 }
+
+
+DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
+STATICFILES_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
+GS_BUCKET_NAME = 'lss_public_bucket'
+
+GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
+    r"C:\Users\tnt\Documents\liveshowseller\liveshowseller-b4308e2f9dc6.json"
+)
