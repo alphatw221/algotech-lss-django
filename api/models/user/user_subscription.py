@@ -50,6 +50,17 @@ class UserSubscriptionSerializer(serializers.ModelSerializer):
     country_meta = serializers.JSONField(default=dict)
 
 
+class UserSubscriptionSerializer_Simplify(serializers.ModelSerializer):
+    class Meta:
+        model = UserSubscription
+        fields = ['id', 'meta', 'country_meta', 'name',
+                  'description', 'remark', 'type', 'status']
+        read_only_fields = ['created_at', 'modified_at']
+
+    meta = serializers.JSONField(default=dict)
+    country_meta = serializers.JSONField(default=dict)
+
+
 class UserSubscriptionAdmin(admin.ModelAdmin):
     model = UserSubscription
     list_display = [field.name for field in UserSubscription._meta.fields]

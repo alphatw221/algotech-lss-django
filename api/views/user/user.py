@@ -1,4 +1,4 @@
-from rest_framework import status, viewsets
+from rest_framework import serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from api.models.user.user import User, UserSerializer
@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from api.models.facebook.facebook_page import FacebookPage
 from datetime import datetime
+from api.models.user.user_subscription import UserSubscription, UserSubscriptionSerializer_Simplify
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -59,6 +60,11 @@ class UserViewSet(viewsets.ModelViewSet):
                 facebook_page = FacebookPage.objects.create(
                     page_id=page_id, name=page_name, token=page_token, token_update_at=datetime.now(), token_update_by=api_user.facebook_info['id'], image=item['image'])
                 facebook_page.save()
+
+            user_subscriptions = facebook_page.user_subscriptions.all()
+            item['user_subscription'] = UserSubscriptionSerializer_Simplify(
+                user_subscriptions[0]).data if user_subscriptions else None
+
             del item['access_token']
             del item['category_list']
             del item['tasks']
