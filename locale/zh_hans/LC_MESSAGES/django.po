@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-12-03 12:52+0800\n"
-"PO-Revision-Date: 2021-11-26 13:25+0800\n"
+"PO-Revision-Date: 2021-12-03 16:05+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: zh_CN\n"
@@ -32,7 +32,8 @@ msgstr "商品 {order_code} 已售完。"
 #, python-brace-format
 msgid "LUCKY_DRAW_WINNER{customer_name}{product_name}"
 msgstr ""
-"恭喜 {customer_name} 中奖，获得 {product_name}！请至购物车确认您的奖品。"
+"恭喜 {customer_name} 中奖，获得 {product_name}！请至购物车确认您的"
+"奖品。"
 
 #: .\backend\i18n\cart_product_request.py:9
 msgid "MESSAGE_PREFIX"
@@ -46,13 +47,14 @@ msgstr "点此前往购物车：{link}"
 #: .\backend\i18n\cart_product_request.py:19
 msgid "MORE_INFO_IN_PM_NOTICE"
 msgstr ""
-"购物车连结已传送到您的 FB Messenger，若没有收到讯息，请联络粉丝专页管理员/小"
-"编。"
+"购物车连结已传送到您的 FB Messenger，若没有收到讯息，请联络粉丝专页"
+"管理员/小编。"
 
 #: .\backend\i18n\cart_product_request.py:28
 #, python-brace-format
 msgid "INVALID_EXCEED_MAX_ORDER_AMOUNT{order_code}{max_order_amount}"
-msgstr "{order_code} 单次限购数量为 {max_order_amount} 件。"
+msgstr ""
+"{order_code} 无法新增，此商品单次限购数量为 {max_order_amount} 件。"
 
 #: .\backend\i18n\cart_product_request.py:35
 msgid "ADDED"
@@ -64,15 +66,15 @@ msgstr "更新成功！"
 
 #: .\backend\i18n\cart_product_request.py:39
 msgid "DELETED"
-msgstr "已从购物车删除。"
+msgstr "商品已从购物车删除。"
 
 #: .\backend\i18n\cart_product_request.py:41
 msgid "INSUFFICIENT_INV"
-msgstr "已售完。"
+msgstr "商品已售完。"
 
 #: .\backend\i18n\cart_product_request.py:43
 msgid "INVALID_PRODUCT_NOT_ACTIVATED"
-msgstr "目前无法下单。"
+msgstr "商品目前无法下单。"
 
 #: .\backend\i18n\cart_product_request.py:45
 msgid "INVALID_REMOVE_NOT_ALLOWED"
@@ -93,7 +95,7 @@ msgstr "操作错误。"
 #: .\backend\i18n\cart_product_request.py:54
 #, python-brace-format
 msgid "ITEM_INFO{order_code}{qty}{result}"
-msgstr "商品 {order_code} {qty} 件，{result}"
+msgstr "{result}商品 {order_code} - {qty} 件。"
 
 #: .\backend\i18n\comment_command.py:8
 msgid "MESSAGE_HEADER"
@@ -122,4 +124,4 @@ msgstr "查看购物车：{link}"
 #: .\backend\i18n\comment_command.py:28
 #, python-brace-format
 msgid "ITEM_INFO{name}{qty}{dollar_sign}{total}"
-msgstr "商品：{name} 数量：{qty} 金额：{dollar_sign}{total}"
+msgstr "{name} 数量：{qty} {dollar_sign}{total}"
