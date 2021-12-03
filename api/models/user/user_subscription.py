@@ -29,7 +29,9 @@ class UserSubscription(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     meta = models.JSONField(null=True, blank=True, default=dict)
-    country_meta = models.JSONField(null=True, blank=True, default=dict)
+    meta_payment = models.JSONField(null=True, blank=True, default=dict)
+    meta_logistic = models.JSONField(default=dict, null=True, blank=dict)
+    meta_country = models.JSONField(null=True, blank=True, default=dict)
 
 
 class UserSubscriptionSerializer(serializers.ModelSerializer):
@@ -46,7 +48,9 @@ class UserSubscriptionSerializer(serializers.ModelSerializer):
         many=True, read_only=True)
 
     meta = serializers.JSONField(default=dict)
-    country_meta = serializers.JSONField(default=dict)
+    meta_payment = serializers.JSONField(default=dict)
+    meta_logistic = serializers.JSONField(default=dict)
+    meta_country = serializers.JSONField(default=dict)
 
 
 class UserSubscriptionAdmin(admin.ModelAdmin):

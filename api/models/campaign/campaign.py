@@ -60,6 +60,7 @@ class CampaignSerializer(serializers.ModelSerializer):
     facebook_campaign = serializers.JSONField(default=dict)
     youtube_channel = YoutubeChannelInfoSerializer(read_only=True)
     youtube_campaign = serializers.JSONField(default=dict)
+
     meta = serializers.JSONField(default=dict)
     meta_payment = serializers.JSONField(default=dict)
     meta_logistic = serializers.JSONField(default=dict)

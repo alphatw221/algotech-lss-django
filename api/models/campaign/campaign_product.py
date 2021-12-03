@@ -12,8 +12,10 @@ class CampaignProduct(models.Model):
 
     TYPE_CHOICES = [
         ('n/a', 'Not available'),
-        ('product', 'Added from product table'),
-        ('quick_add', 'Added from quick-add function'),
+        ('product', 'Product from inventory'),
+        ('product-fast', 'Product from fast-add'),
+        ('lucky_draw', 'Lucky Draw from inventory'),
+        ('lucky_draw-fast', 'Lucky Draw from fast-add'),
     ]
 
     STATUS_CHOICES = [
