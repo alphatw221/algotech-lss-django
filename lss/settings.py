@@ -285,6 +285,10 @@ DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
 STATICFILES_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
 GS_BUCKET_NAME = 'lss_public_bucket'
 
+# GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
+#     r"C:\Users\tnt\Documents\liveshowseller\liveshowseller-b4308e2f9dc6.json"
+# )
+
 GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
-    r"C:\Users\tnt\Documents\liveshowseller\liveshowseller-b4308e2f9dc6.json"
+    "liveshowseller-b4308e2f9dc6.json"
 )
