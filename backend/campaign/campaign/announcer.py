@@ -48,7 +48,7 @@ class CampaignAnnouncer:
         return CampaignAnnouncer._make_announcement(
             campaign_lucky_draw.campaign,
             i18n_func=i18n_get_campaign_announcement_lucky_draw_winner,
-            args=(campaign_lucky_draw, customer_name)
+            args=(campaign_lucky_draw.prize_campaign_product.name, customer_name)
         )
 
     @staticmethod

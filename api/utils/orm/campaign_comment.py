@@ -1,5 +1,6 @@
 from api.models.campaign.campaign import Campaign
 from api.models.campaign.campaign_comment import CampaignComment
+from django.db.models import Count
 
 
 def get_latest_commented_at(campaign: Campaign, platform: str):
@@ -42,5 +43,16 @@ def get_campaign_comments(campaign: Campaign, status: int = None,
             campaign_comments = campaign_comments.filter(status=status)
 
         return campaign_comments.order_by(order_by).all()[:limit]
+    except Exception:
+        return []
+
+
+def get_keyword_campaign_comments(campaign: Campaign, keyword: str,
+                                  limit: int = 1000):
+    try:
+        return CampaignComment.objects.filter(
+            campaign=campaign,
+            message__contains=keyword,
+        ).values('customer_id', 'customer_name', 'platform').annotate(count=Count('customer_id')).order_by('pk')[:limit]
     except Exception:
         return []
