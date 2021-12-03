@@ -70,6 +70,12 @@ class CampaignSerializer(serializers.ModelSerializer):
     logistics_info = serializers.JSONField(default=dict)
 
 
+class CampaignSerializer_Retreive(CampaignSerializer):
+
+    facebook_page = FacebookPageSerializer(read_only=True)
+    youtube_channel = YoutubeChannelSerializer(read_only=True)
+
+
 class CampaignAdmin(admin.ModelAdmin):
     model = Campaign
     list_display = [field.name for field in Campaign._meta.fields]

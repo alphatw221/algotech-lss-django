@@ -1,7 +1,7 @@
 from functools import partial
 from rest_framework import serializers, status, viewsets
 from rest_framework.permissions import IsAuthenticated
-from api.models.campaign.campaign import Campaign, CampaignSerializer
+from api.models.campaign.campaign import Campaign, CampaignSerializer, CampaignSerializer_Retreive
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -35,7 +35,6 @@ class CampaignViewSet(viewsets.ModelViewSet):
         platform_id = request.query_params.get('platform_id')
 
         api_user = request.user.api_users.get(type='user')
-        # TODO 檢查
         if not api_user:
             return Response({"message": "no user found"}, status=status.HTTP_400_BAD_REQUEST)
         elif api_user.status != "valid":
@@ -57,7 +56,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         try:
             campaign = platform.campaigns.get(id=pk)
-            serializer = self.get_serializer(campaign)
+            serializer = CampaignSerializer_Retreive(campaign)
         except:
             return Response({"message": "error occerd during retriving"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
