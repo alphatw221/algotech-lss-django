@@ -24,6 +24,7 @@ class CartProductRequestValidatorStandard(CartProductRequestValidator):
                 request.campaign,
                 item.campaign_product,
                 request.customer_id,
+                request.platform,
             )
             if not existing_cart_product:
                 if item.qty == 0:
@@ -59,6 +60,7 @@ class CartProductRequestValidatorAllValid(CartProductRequestValidator):
                 request.campaign,
                 item.campaign_product,
                 request.customer_id,
+                request.platform,
             )
             if not existing_cart_product:
                 item.state = RequestState.ADDING

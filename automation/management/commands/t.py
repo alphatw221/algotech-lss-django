@@ -16,6 +16,8 @@ from backend.campaign.campaign_lucky_draw.manager import \
     CampaignLuckyDrawManager
 from backend.campaign.campaign_product.status_processor import \
     CampaignProductStatusProcessor
+from backend.cart.cart.manager import CartManager
+from backend.cart.cart_product.request import CartProductRequest
 from backend.comment_catching.facebook.post_comment import *
 from django.core.management.base import BaseCommand
 
@@ -27,13 +29,24 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.lucky_draw_test()
+        self.cart_product_manager_test()
 
     def campaign_test(self):
         cs = CampaignManager.get_active_campaigns()
         print(cs)
         cs = CampaignManager.get_ordering_campaigns()
         print(cs)
+
+    def cart_product_manager_test(self):
+        campaign = Campaign.objects.get(id=1)
+        campaign_product = CampaignProduct.objects.get(id=1)
+
+        cart_product_request = CartManager.create_cart_product_request(
+            campaign, 'facebook', '3141324909312956', 'Liu Ian', {
+                campaign_product: 5,
+            }
+        )
+        cart_product_request = CartManager.process(cart_product_request)
 
     def lucky_draw_test(self):
         c = Campaign.objects.get(id=1)

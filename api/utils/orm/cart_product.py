@@ -42,22 +42,26 @@ def update_or_create_cart_product(campaign: Campaign,
 def filter_last_cart_product(campaign: Campaign,
                              campaign_product: CampaignProduct,
                              type: tuple, status: str,
-                             customer_id: str):
+                             customer_id: str, platform: str):
     try:
         return CartProduct.objects.filter(
             campaign=campaign,
             campaign_product=campaign_product,
             type__in=type,
             status=status,
-            customer_id=customer_id).last()
+            customer_id=customer_id,
+            platform=platform).last()
     except Exception:
         ...
 
 
-def update_cart_product_qty(cart_product: CartProduct, qty: int):
+def update_cart_product_qty(cart_product: CartProduct, qty: int,
+                            meta_history: dict = None):
     try:
         cart_product.qty = qty
+        cart_product.meta.setdefault('history', []).append(meta_history)
         cart_product.save()
+        return cart_product
     except Exception:
         ...
 
