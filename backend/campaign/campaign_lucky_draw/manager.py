@@ -27,7 +27,6 @@ class CampaignLuckyDrawManager:
 
         cart_product_requests = CampaignLuckyDrawManager._get_cart_product_requests(
             lucky_draw, campaign, prize_campaign_product)
-
         cart_product_requests, response_result = CampaignLuckyDrawManager._handle_cart_product_requests(
             lucky_draw, event, cart_product_requests)
 
@@ -56,7 +55,6 @@ class CampaignLuckyDrawManager:
             response_result = []
             for item in cart_product_request.get_items():
                 if item.state == RequestState.ADDED:
-                    print(cart_product_request)
                     try:
                         result = CampaignAnnouncer.announce_lucky_draw_winner(
                             lucky_draw, cart_product_request.customer_name)
