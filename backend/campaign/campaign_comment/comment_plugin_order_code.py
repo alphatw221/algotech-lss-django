@@ -1,5 +1,3 @@
-from dataclasses import dataclass
-
 from api.models.campaign.campaign import Campaign
 from api.models.campaign.campaign_comment import CampaignComment
 from api.models.campaign.campaign_product import CampaignProduct
@@ -13,7 +11,6 @@ from backend.cart.cart_product.request_validator import \
 from backend.utils.text_processing._text_processor import TextProcessor
 
 
-@dataclass
 class CommentPluginOrderCode():
     @staticmethod
     def process(campaign: Campaign,
