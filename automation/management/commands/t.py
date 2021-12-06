@@ -11,7 +11,8 @@ from backend.api.facebook.user import *
 from backend.campaign.campaign.manager import CampaignManager
 from backend.campaign.campaign_comment.comment_processor import *
 from backend.campaign.campaign_lucky_draw.event import (
-    DrawFromCampaignCommentsEvent, DrawFromCartProductsEvent)
+    DrawFromCampaignCommentsEvent, DrawFromCampaignLikesEvent,
+    DrawFromCartProductsEvent)
 from backend.campaign.campaign_lucky_draw.manager import \
     CampaignLuckyDrawManager
 from backend.campaign.campaign_product.status_processor import \
@@ -54,12 +55,16 @@ class Command(BaseCommand):
         prize_cp = CampaignProduct.objects.get(id=6)
 
         lucky_draw = CampaignLuckyDrawManager.process(
-            c, DrawFromCampaignCommentsEvent(c, 'order'), prize_cp, 1,
+            c, DrawFromCampaignLikesEvent(c), prize_cp, 1,
         )
 
-        lucky_draw = CampaignLuckyDrawManager.process(
-            c, DrawFromCartProductsEvent(c, cp), prize_cp, 1,
-        )
+        # lucky_draw = CampaignLuckyDrawManager.process(
+        #     c, DrawFromCampaignCommentsEvent(c, 'order'), prize_cp, 1,
+        # )
+
+        # lucky_draw = CampaignLuckyDrawManager.process(
+        #     c, DrawFromCartProductsEvent(c, cp), prize_cp, 1,
+        # )
 
         print(lucky_draw)
 

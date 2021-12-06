@@ -5,6 +5,7 @@ from api.models.campaign.campaign import Campaign
 from api.models.campaign.campaign_product import CampaignProduct
 from api.utils.orm import campaign_comment as orm_campaign_comment
 from api.utils.orm import cart_product as orm_cart_product
+from backend.api.facebook.post import api_fb_get_post_likes
 
 
 @dataclass
@@ -92,11 +93,13 @@ class DrawFromCampaignCommentsEvent(ABC):
 
 @dataclass
 class DrawFromCampaignLikesEvent(ABC):
+    campagin: Campaign
+
     def get_source_id(self):
-        ...
+        return self.campagin.id
 
     def get_source_type(self):
-        return 'campaign_likes'
+        return 'campagin'
 
     def get_condition(self):
         return None
@@ -105,4 +108,20 @@ class DrawFromCampaignLikesEvent(ABC):
         return 'lucky_draw_campaign_likes'
 
     def get_candidate_set(self):
-        ...
+        candidate_set = set()
+
+        if self.campagin.facebook_campaign and (post_id := self.campagin.facebook_campaign.get('post_id')) and \
+                self.campagin.facebook_page and (token := self.campagin.facebook_page.token):
+            after = None
+            while True:
+                response = api_fb_get_post_likes(token, post_id, after=after)
+                for person in response[1]['data']:
+                    candidate_set.add(
+                        ('facebook', person['id'], person['name'])
+                    )
+                try:
+                    after = response[1]['paging']['cursors']['after']
+                except Exception:
+                    break
+
+        return candidate_set
