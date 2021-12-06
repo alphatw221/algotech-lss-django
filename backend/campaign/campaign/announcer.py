@@ -28,12 +28,7 @@ class CampaignAnnouncer:
 
     @staticmethod
     def announce_campaign_product_activate(campaign_product: CampaignProduct):
-        return
-        # * There's no message for this action so return immediately.
-        CampaignAnnouncer._make_announcement(
-            campaign_product.campaign,
-            i18n_func=None,
-        )
+        return  # * There's no message for this action so return immediately.
 
     @staticmethod
     def announce_campaign_product_deactivate(campaign_product: CampaignProduct):
