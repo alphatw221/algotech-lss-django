@@ -29,6 +29,8 @@ class Campaign(models.Model):
     ordering_only_activated_products = models.BooleanField(
         blank=False, null=True, default=False)
     currency = models.CharField(max_length=255, null=True, blank=True)
+    currency_sign = models.CharField(
+        max_length=255, null=True, blank=True, default='$')
 
     type = models.CharField(max_length=255, null=True, blank=True)
     status = models.CharField(max_length=255, blank=True,

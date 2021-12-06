@@ -16,6 +16,8 @@ class YoutubeChannel(models.Model):
                             choices=settings.LANGUAGES, default='en')
     region = models.CharField(max_length=255, null=True, blank=True)
     currency = models.CharField(max_length=255, null=True, blank=True)
+    currency_sign = models.CharField(
+        max_length=255, null=True, blank=True, default='$')
     timezone = models.CharField(
         max_length=255, null=True, blank=True, default='Asia/Singapore')
 

@@ -49,6 +49,8 @@ class CampaignProduct(models.Model):
         max_length=255, null=True, blank=True, default='0.00')
     currency = models.CharField(
         max_length=255, null=True, blank=True, default=None)
+    currency_sign = models.CharField(
+        max_length=255, null=True, blank=True, default='$')
     points = models.IntegerField(
         null=True, blank=True, default=0)
     model = models.CharField(

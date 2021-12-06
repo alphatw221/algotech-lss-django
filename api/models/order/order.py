@@ -1,5 +1,6 @@
 
 # TODO: WIP
+from api.models.campaign.campaign import Campaign
 from django.conf import settings
 from django.contrib import admin
 from djongo import models
@@ -7,6 +8,9 @@ from rest_framework import serializers
 
 
 class Order(models.Model):
+    campaign = models.ForeignKey(
+        Campaign, null=True, on_delete=models.SET_NULL, related_name='orders')
+
     customer_id = models.CharField(max_length=255, null=True, blank=True)
     customer_name = models.CharField(max_length=255, null=True, blank=True)
     email = models.CharField(max_length=255, null=True, blank=True)
@@ -27,10 +31,14 @@ class Order(models.Model):
         max_length=255, null=True, blank=True, default='0.00')
     currency = models.CharField(
         max_length=255, null=True, blank=True, default=None)
+    currency_sign = models.CharField(
+        max_length=255, null=True, blank=True, default='$')
     cost = models.CharField(
         max_length=255, null=True, blank=True, default='0.00')
     cost_currency = models.CharField(
         max_length=8, null=True, blank=True, default=None)
+    cost_currency_sign = models.CharField(
+        max_length=255, null=True, blank=True, default='$')
 
     payment_first_name = models.CharField(
         max_length=64, blank=True, default='')
@@ -104,8 +112,8 @@ class Order(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     meta = models.JSONField(default=dict, null=True, blank=True)
-    product = models.JSONField(default=dict, null=True, blank=True)
-    checkout_detail = models.JSONField(default=dict, null=True, blank=True)
+    products = models.JSONField(default=dict, null=True, blank=True)
+    checkout_details = models.JSONField(default=dict, null=True, blank=True)
     history = models.JSONField(default=dict, null=True, blank=True)
 
 
@@ -117,8 +125,8 @@ class OrderSerializer(serializers.ModelSerializer):
         read_only_fields = ['created_at', 'modified_at']
 
     meta = serializers.JSONField(default=dict)
-    product = serializers.JSONField(default=dict)
-    checkout_detail = serializers.JSONField(default=dict)
+    products = serializers.JSONField(default=dict)
+    checkout_details = serializers.JSONField(default=dict)
     history = serializers.JSONField(default=dict)
 
 
