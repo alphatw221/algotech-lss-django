@@ -105,6 +105,7 @@ class Order(models.Model):
 
     meta = models.JSONField(default=dict, null=True, blank=True)
     product = models.JSONField(default=dict, null=True, blank=True)
+    checkout_detail = models.JSONField(default=dict, null=True, blank=True)
     history = models.JSONField(default=dict, null=True, blank=True)
 
 
@@ -117,6 +118,7 @@ class OrderSerializer(serializers.ModelSerializer):
 
     meta = serializers.JSONField(default=dict)
     product = serializers.JSONField(default=dict)
+    checkout_detail = serializers.JSONField(default=dict)
     history = serializers.JSONField(default=dict)
 
 

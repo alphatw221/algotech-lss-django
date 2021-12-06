@@ -33,6 +33,7 @@ class CommentPluginOrderCode():
 
             if task := cart_product_request.response_task:
                 batch_tasks_list.append(task)
+                return True
 
     @staticmethod
     def _if_to_ignore(campaign: Campaign, comment: CampaignComment):
