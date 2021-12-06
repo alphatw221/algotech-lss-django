@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-12-03 12:51+0800\n"
-"PO-Revision-Date: 2021-12-03 16:06+0800\n"
-"Language: en\n"
+"PO-Revision-Date: 2021-12-03 15:55+0800\n"
+"Language: id_ID\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -21,19 +21,19 @@ msgstr ""
 #: .\backend\i18n\campaign_announcement.py:8
 #, python-brace-format
 msgid "PRODUCT_CLOSED{order_code}"
-msgstr "Order code: {order_code} has closed."
+msgstr "Kode pesanan: {order_code} telah ditutup."
 
 #: .\backend\i18n\campaign_announcement.py:15
 #, python-brace-format
 msgid "PRODUCT_SOLD_OUT{order_code}"
-msgstr "Order code: {order_code} is sold out."
+msgstr "Kode pesanan: {order_code} telah habis terjual."
 
 #: .\backend\i18n\campaign_announcement.py:22
 #, python-brace-format
 msgid "LUCKY_DRAW_WINNER{customer_name}{product_name}"
 msgstr ""
-"Congratulations to {customer_name} on wining lucky "
-"draw! Prize: {product_name}. Please check your shopping cart."
+"Selamat kepada {customer_name} karena telah memenangkan undian berhadiah! "
+"Hadiah: {product_name}. Mohon periksa keranjang belanja anda."
 
 #: .\backend\i18n\cart_product_request.py:9
 msgid "MESSAGE_PREFIX"
@@ -42,86 +42,87 @@ msgstr "Live Show Seller: "
 #: .\backend\i18n\cart_product_request.py:17
 #, python-brace-format
 msgid "SHOPPING_CART_INFO{link}"
-msgstr "Shopping cart: {link}"
+msgstr "Keranjang belanja: {link}"
 
 #: .\backend\i18n\cart_product_request.py:19
 msgid "MORE_INFO_IN_PM_NOTICE"
 msgstr ""
-"Shopping Cart link is sent via FB Messenger, please contact page admin if "
-"not received any notification."
+"Tautan Keranjang Belanja telah dikirim melalui FB Messenger, mohon "
+"hubungi admin halaman apabila anda tidak menerima notifikasi apapun."
 
 #: .\backend\i18n\cart_product_request.py:28
 #, python-brace-format
 msgid "INVALID_EXCEED_MAX_ORDER_AMOUNT{order_code}{max_order_amount}"
 msgstr ""
-"\"{order_code}\" has a maximum ordering quantity of {max_order_amount}."
+"{order_code} memiliki kuantitas maksimum pemesanan sebesar "
+"{max_order_amount}."
 
 #: .\backend\i18n\cart_product_request.py:35
 msgid "ADDED"
-msgstr "is added"
+msgstr "telah ditambah"
 
 #: .\backend\i18n\cart_product_request.py:37
 msgid "UPDATED"
-msgstr "is updated"
+msgstr "telah diperbarui"
 
 #: .\backend\i18n\cart_product_request.py:39
 msgid "DELETED"
-msgstr "is removed"
+msgstr "telah dibuang"
 
 #: .\backend\i18n\cart_product_request.py:41
 msgid "INSUFFICIENT_INV"
-msgstr "is sold out"
+msgstr "telah habis terjual"
 
 #: .\backend\i18n\cart_product_request.py:43
 msgid "INVALID_PRODUCT_NOT_ACTIVATED"
-msgstr "is unavailable"
+msgstr "sudah tidak tersedia"
 
 #: .\backend\i18n\cart_product_request.py:45
 msgid "INVALID_REMOVE_NOT_ALLOWED"
-msgstr "is not allowed to remove"
+msgstr "tidak diperbolehkan untuk membuang"
 
 #: .\backend\i18n\cart_product_request.py:47
 msgid "INVALID_EDIT_NOT_ALLOWED"
-msgstr "is not allowed to edit"
+msgstr "tidak diperbolehkan untuk mengubah"
 
 #: .\backend\i18n\cart_product_request.py:49
 msgid "INVALID_ADD_ZERO_QTY"
-msgstr "can not be added with 0 qty"
+msgstr "tidak dapat ditambahkan dengan “0”"
 
 #: .\backend\i18n\cart_product_request.py:51
 msgid "N/A"
-msgstr "has an operation error"
+msgstr "terjadi kesalahan operasi"
 
 #: .\backend\i18n\cart_product_request.py:54
 #, python-brace-format
 msgid "ITEM_INFO{order_code}{qty}{result}"
-msgstr "\"{order_code}\" Qty: {qty} {result}."
+msgstr "“{order_code}” Jumlah: {qty} {result}."
 
 #: .\backend\i18n\comment_command.py:8
 msgid "MESSAGE_HEADER"
-msgstr "Your order:"
+msgstr "Pesanan anda:"
 
 #: .\backend\i18n\comment_command.py:10
-#, fuzzy, python-brace-format
+#, python-brace-format
 msgid "DELIVERY{dollar_sign}{delivery}"
-msgstr "Delivery: {dollar_sign}{delivery}"
+msgstr "Pengiriman: {dollar_sign}{delivery}"
 
 #: .\backend\i18n\comment_command.py:13
-#, fuzzy, python-brace-format
+#, python-brace-format
 msgid "OPTION{dollar_sign}{option}"
-msgstr "Option: {dollar_sign}{option}"
+msgstr "Opsi: {dollar_sign}{option}"
 
 #: .\backend\i18n\comment_command.py:16
-#, fuzzy, python-brace-format
+#, python-brace-format
 msgid "TOTAL{dollar_sign}{total}"
 msgstr "Total: {dollar_sign}{total}"
 
 #: .\backend\i18n\comment_command.py:19
 #, python-brace-format
 msgid "DETAIL{link}"
-msgstr "Find out details: {link}"
+msgstr "Pelajari lebih lanjut: {link}"
 
 #: .\backend\i18n\comment_command.py:28
 #, python-brace-format
 msgid "ITEM_INFO{name}{qty}{dollar_sign}{total}"
-msgstr "{name} Qty:{qty} {dollar_sign}{total}"
+msgstr "{name} Jumlah: {qty} {dollar_sign}{total}"

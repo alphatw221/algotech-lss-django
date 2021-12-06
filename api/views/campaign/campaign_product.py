@@ -1,7 +1,7 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination
-from api.models.campaign.campaign_product import CampaignProduct, CampaignProductSerializer, CampaignProductSerializer_Update
+from api.models.campaign.campaign_product import CampaignProduct, CampaignProductSerializer, CampaignProductSerializerUpdate
 from rest_framework import status, viewsets
 from rest_framework.response import Response
 from api.models.product.product import Product, ProductSerializer
@@ -186,7 +186,7 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
             return Response({"message": "no campaign product found"}, status=status.HTTP_400_BAD_REQUEST)
         campaign_product = campaign.products.get(id=pk)
         try:
-            serializer = CampaignProductSerializer_Update(
+            serializer = CampaignProductSerializerUpdate(
                 campaign_product, data=request.data, partial=True)
             if not serializer.is_valid():
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

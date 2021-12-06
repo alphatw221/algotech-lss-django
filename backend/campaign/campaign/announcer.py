@@ -28,12 +28,7 @@ class CampaignAnnouncer:
 
     @staticmethod
     def announce_campaign_product_activate(campaign_product: CampaignProduct):
-        return
-        # * There's no message for this action so return immediately.
-        CampaignAnnouncer._make_announcement(
-            campaign_product.campaign,
-            i18n_func=None,
-        )
+        return  # * There's no message for this action so return immediately.
 
     @staticmethod
     def announce_campaign_product_deactivate(campaign_product: CampaignProduct):
@@ -48,7 +43,7 @@ class CampaignAnnouncer:
         return CampaignAnnouncer._make_announcement(
             campaign_lucky_draw.campaign,
             i18n_func=i18n_get_campaign_announcement_lucky_draw_winner,
-            args=(campaign_lucky_draw, customer_name)
+            args=(campaign_lucky_draw.prize_campaign_product.name, customer_name)
         )
 
     @staticmethod

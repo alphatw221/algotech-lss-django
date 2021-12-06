@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from api.models.facebook.facebook_page import FacebookPage
 from datetime import datetime
-from api.models.user.user_subscription import UserSubscription, UserSubscriptionSerializer_Simplify
+from api.models.user.user_subscription import UserSubscription, UserSubscriptionSerializerSimplify
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -62,7 +62,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 facebook_page.save()
 
             user_subscriptions = facebook_page.user_subscriptions.all()
-            item['user_subscription'] = UserSubscriptionSerializer_Simplify(
+            item['user_subscription'] = UserSubscriptionSerializerSimplify(
                 user_subscriptions[0]).data if user_subscriptions else None
 
             del item['access_token']

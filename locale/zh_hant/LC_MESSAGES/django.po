@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-24 15:13+0800\n"
-"PO-Revision-Date: 2021-11-26 12:50+0800\n"
+"POT-Creation-Date: 2021-12-03 12:52+0800\n"
+"PO-Revision-Date: 2021-12-03 16:01+0800\n"
+"Last-Translator: \n"
+"Language-Team: \n"
 "Language: zh_TW\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"Last-Translator: \n"
-"Language-Team: \n"
 "X-Generator: Poedit 3.0\n"
 
 #: .\backend\i18n\campaign_announcement.py:8
@@ -31,65 +31,71 @@ msgstr "商品 {order_code} 已售完。"
 #: .\backend\i18n\campaign_announcement.py:22
 #, python-brace-format
 msgid "LUCKY_DRAW_WINNER{customer_name}{product_name}"
-msgstr "恭喜 {customer_name} 中獎，獲得 {product_name}！請至購物車確認您的獎品。"
+msgstr ""
+"恭喜 {customer_name} 中獎，獲得 {product_name}！請至購物車確認您的"
+"獎品。"
 
 #: .\backend\i18n\cart_product_request.py:9
 msgid "MESSAGE_PREFIX"
 msgstr "Live Show Seller："
 
-#: .\backend\i18n\cart_product_request.py:19
+#: .\backend\i18n\cart_product_request.py:17
 #, python-brace-format
 msgid "SHOPPING_CART_INFO{link}"
 msgstr "點此前往購物車：{link}"
 
-#: .\backend\i18n\cart_product_request.py:25
+#: .\backend\i18n\cart_product_request.py:19
 msgid "MORE_INFO_IN_PM_NOTICE"
-msgstr "購物車連結已傳送到您的 FB Messenger，若沒有收到訊息，請聯絡粉絲專頁管理員/小編。"
+msgstr ""
+"購物車連結已傳送到您的 FB Messenger，若沒有收到訊息，請聯絡粉絲專頁"
+"管理員/小編。"
 
-#: .\backend\i18n\cart_product_request.py:31
+#: .\backend\i18n\cart_product_request.py:28
 #, python-brace-format
-msgid "ITEM_INFO{order_code}{qty}{result}"
-msgstr "商品 {order_code} {qty} 件，{result}"
+msgid "INVALID_EXCEED_MAX_ORDER_AMOUNT{order_code}{max_order_amount}"
+msgstr ""
+"{order_code} 無法新增，此商品單次限購數量為 {max_order_amount} 件。"
 
-#: .\backend\i18n\cart_product_request.py:41
+#: .\backend\i18n\cart_product_request.py:35
 msgid "ADDED"
 msgstr "下單成功！"
 
-#: .\backend\i18n\cart_product_request.py:43
+#: .\backend\i18n\cart_product_request.py:37
 msgid "UPDATED"
 msgstr "更新成功！"
 
-#: .\backend\i18n\cart_product_request.py:45
+#: .\backend\i18n\cart_product_request.py:39
 msgid "DELETED"
-msgstr "已從購物車刪除。"
+msgstr "商品已從購物車刪除。"
 
-#: .\backend\i18n\cart_product_request.py:47
+#: .\backend\i18n\cart_product_request.py:41
 msgid "INSUFFICIENT_INV"
-msgstr "已售完。"
+msgstr "商品已售完。"
 
-#: .\backend\i18n\cart_product_request.py:49
+#: .\backend\i18n\cart_product_request.py:43
 msgid "INVALID_PRODUCT_NOT_ACTIVATED"
-msgstr "目前無法下單。"
+msgstr "商品目前無法下單。"
 
-#: .\backend\i18n\cart_product_request.py:51
-msgid "INVALID_EXCEED_MAX_ORDER_AMOUNT"
-msgstr "單次限購數量為 {max_order_amount} 件。"
-
-#: .\backend\i18n\cart_product_request.py:53
+#: .\backend\i18n\cart_product_request.py:45
 msgid "INVALID_REMOVE_NOT_ALLOWED"
 msgstr "無法刪除。"
 
-#: .\backend\i18n\cart_product_request.py:55
+#: .\backend\i18n\cart_product_request.py:47
 msgid "INVALID_EDIT_NOT_ALLOWED"
 msgstr "無法修改。"
 
-#: .\backend\i18n\cart_product_request.py:57
+#: .\backend\i18n\cart_product_request.py:49
 msgid "INVALID_ADD_ZERO_QTY"
 msgstr "無法刪除。"
 
-#: .\backend\i18n\cart_product_request.py:59
+#: .\backend\i18n\cart_product_request.py:51
 msgid "N/A"
 msgstr "操作錯誤。"
+
+#: .\backend\i18n\cart_product_request.py:54
+#, python-brace-format
+msgid "ITEM_INFO{order_code}{qty}{result}"
+msgstr "{result}商品 {order_code} - {qty} 件。"
 
 #: .\backend\i18n\comment_command.py:8
 msgid "MESSAGE_HEADER"
@@ -118,4 +124,4 @@ msgstr "查看購物車：{link}"
 #: .\backend\i18n\comment_command.py:28
 #, python-brace-format
 msgid "ITEM_INFO{name}{qty}{dollar_sign}{total}"
-msgstr "商品：{name} 數量：{qty} 金額：{dollar_sign}{total}"
+msgstr "{name} 數量：{qty} {dollar_sign}{total}"

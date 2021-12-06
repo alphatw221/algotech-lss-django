@@ -11,6 +11,9 @@ from backend.cart.cart_product.request import (CartProductRequest,
 
 @dataclass
 class CartProductRequestProcessor(ABC):
+    check_inv: bool = True
+    cart_product_type: str = 'n/a'
+
     @abstractmethod
     def process():
         ...

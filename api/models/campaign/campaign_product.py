@@ -1,3 +1,4 @@
+
 from api.models.campaign.campaign import Campaign
 from api.models.product.product import Product
 from api.models.user.user import User
@@ -12,8 +13,10 @@ class CampaignProduct(models.Model):
 
     TYPE_CHOICES = [
         ('n/a', 'Not available'),
-        ('product', 'Added from product table'),
-        ('quick_add', 'Added from quick-add function'),
+        ('product', 'Product from inventory'),
+        ('product-fast', 'Product from fast-add'),
+        ('lucky_draw', 'Lucky Draw from inventory'),
+        ('lucky_draw-fast', 'Lucky Draw from fast-add'),
     ]
 
     STATUS_CHOICES = [
@@ -85,15 +88,14 @@ class CampaignProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = CampaignProduct
         fields = '__all__'
-        read_only_fields = ['created_at', 'modified_at',
-                            'qty_sold']
+        read_only_fields = ['created_at', 'modified_at', 'qty_sold']
 
     meta = serializers.JSONField(default=dict)
     meta_logistic = serializers.JSONField(default=dict)
     tag = serializers.JSONField(default=list)
 
 
-class CampaignProductSerializer_Update(CampaignProductSerializer):
+class CampaignProductSerializerUpdate(CampaignProductSerializer):
     class Meta:
         model = CampaignProduct
         exclude = ['campaign', 'created_by']

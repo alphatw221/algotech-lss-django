@@ -1,10 +1,12 @@
 from backend.api.facebook._fb_api_caller import FacebookApiCaller
 
 
-def api_fb_get_post_likes(page_token: str, post_id: str, since: int = 1):
+def api_fb_get_post_likes(page_token: str, post_id: str, after: str = None):
     params = {
         'limit': 100
     }
+    if after:
+        params['after'] = after
     ret = FacebookApiCaller(f'{post_id}/likes', bearer_token=page_token,
                             params=params).get()
     return ret

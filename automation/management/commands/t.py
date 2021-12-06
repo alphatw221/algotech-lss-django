@@ -4,18 +4,21 @@ import pprint
 from api.models.campaign.campaign import Campaign
 from api.models.campaign.campaign_product import CampaignProduct
 from api.models.cart.cart_product import CartProduct
-from api.utils.orm import cart_product
+from api.utils.orm import campaign_comment, cart_product
 from backend.api.facebook.page import *
 from backend.api.facebook.post import *
 from backend.api.facebook.user import *
 from backend.campaign.campaign.manager import CampaignManager
 from backend.campaign.campaign_comment.comment_processor import *
-from backend.campaign.campaign_lucky_draw.event import \
-    DrawFromCartProductsEvent
+from backend.campaign.campaign_lucky_draw.event import (
+    DrawFromCampaignCommentsEvent, DrawFromCampaignLikesEvent,
+    DrawFromCartProductsEvent)
 from backend.campaign.campaign_lucky_draw.manager import \
     CampaignLuckyDrawManager
 from backend.campaign.campaign_product.status_processor import \
     CampaignProductStatusProcessor
+from backend.cart.cart.manager import CartManager
+from backend.cart.cart_product.request import CartProductRequest
 from backend.comment_catching.facebook.post_comment import *
 from django.core.management.base import BaseCommand
 
@@ -35,12 +38,34 @@ class Command(BaseCommand):
         cs = CampaignManager.get_ordering_campaigns()
         print(cs)
 
+    def cart_product_manager_test(self):
+        campaign = Campaign.objects.get(id=1)
+        campaign_product = CampaignProduct.objects.get(id=1)
+
+        cart_product_request = CartManager.create_cart_product_request(
+            campaign, 'facebook', '3141324909312956', 'Liu Ian', {
+                campaign_product: 5,
+            }
+        )
+        cart_product_request = CartManager.process(cart_product_request)
+
     def lucky_draw_test(self):
         c = Campaign.objects.get(id=1)
-        cp = CampaignProduct.objects.get(id=1)
+        cp = CampaignProduct.objects.get(id=5)
+        prize_cp = CampaignProduct.objects.get(id=6)
+
         lucky_draw = CampaignLuckyDrawManager.process(
-            c, DrawFromCartProductsEvent(c, cp), cp, 10,
+            c, DrawFromCampaignLikesEvent(c), prize_cp, 1,
         )
+
+        # lucky_draw = CampaignLuckyDrawManager.process(
+        #     c, DrawFromCampaignCommentsEvent(c, 'order'), prize_cp, 1,
+        # )
+
+        # lucky_draw = CampaignLuckyDrawManager.process(
+        #     c, DrawFromCartProductsEvent(c, cp), prize_cp, 1,
+        # )
+
         print(lucky_draw)
 
     def cart_product_test(self):
