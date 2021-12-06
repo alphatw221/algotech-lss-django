@@ -10,10 +10,10 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
-from google.oauth2 import service_account
 import os
 from datetime import timedelta
 from pathlib import Path
+from google.oauth2 import service_account
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -282,13 +282,8 @@ CHAT_BOT_FACEBOOK = {
 
 
 DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
-STATICFILES_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
 GS_BUCKET_NAME = 'lss_public_bucket'
-
-# GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
-#     r"C:\Users\tnt\Documents\liveshowseller\liveshowseller-b4308e2f9dc6.json"
-# )
-
+# GCS_CREDENTIALS_FILE_PATH = "liveshowseller-b4308e2f9dc6.json"
 GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
     "liveshowseller-b4308e2f9dc6.json"
 )

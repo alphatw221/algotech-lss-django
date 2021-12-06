@@ -6,20 +6,12 @@ from django.contrib.auth.models import User
 from django.conf import settings
 from api.models.test.sample import Sample, SampleSerializer
 
-
 from django.core.files.storage import default_storage
-from django.core.files.storage import FileSystemStorage
 
 
 @api_view(['GET'])
 def test(request):
 
-    print(default_storage.exists('user_subscription_123/tnt.png'))
-    # file = default_storage.open('storage_test', 'w')
-    # file = default_storage.open('storage_test', 'r')
-    # default_storage.delete('storage_test')
-    # file.read()
-    # file.close()
     return Response('test accomplished')
 
 

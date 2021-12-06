@@ -25,6 +25,7 @@ from api.views.cart import cart_product
 from api.views.order import order
 
 from api.views.image import image
+from django.views.decorators.csrf import csrf_exempt
 
 
 def url_setup(urlpatterns):
@@ -62,7 +63,8 @@ def url_setup(urlpatterns):
     router.register(r'order', order.OrderViewSet)
 
     urlpatterns += [
-        path('upload/<filename>', image.upload, name='file_upload'),
+        path('image/upload/<filename>',
+             image.upload, name='file_upload'),
     ]
 
     urlpatterns.append(path('', include(router.urls)))

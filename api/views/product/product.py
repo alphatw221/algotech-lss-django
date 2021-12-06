@@ -2,11 +2,16 @@ from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
-from api.models.product.product import Product, ProductSerializer
-from rest_framework.decorators import action
+from api.models.product.product import Product, ProductSerializer, ProductSerializerUpdate
+from rest_framework.decorators import action, parser_classes
 from api.models.facebook.facebook_page import FacebookPage
 from api.models.youtube.youtube_channel import YoutubeChannel
 from backend.api.facebook.user import api_fb_get_me_accounts
+from rest_framework.parsers import JSONParser, MultiPartParser
+
+import json
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
 
 
 class ProductPagination(PageNumberPagination):
@@ -125,7 +130,7 @@ class ProductViewSet(viewsets.ModelViewSet):
 
         return Response(data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['POST'], url_path=r'create_product')
+    @action(detail=False, methods=['POST'], url_path=r'create_product', parser_classes=(MultiPartParser,))
     def create_product(self, request):
 
         platform_id = request.query_params.get('platform_id')
@@ -154,19 +159,28 @@ class ProductViewSet(viewsets.ModelViewSet):
         user_subscription = user_subscriptions[0]
 
         try:
-
-            data = request.data
+            text = request.data['text']
+            data = json.loads(text)
             data['user_subscription'] = user_subscription.id
             serializer = self.get_serializer(data=data)
 
             if not serializer.is_valid():
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            serializer.save()
+            product = serializer.save()
+
+            images = request.data.getlist('images')
+
+            for image in images:
+                image_path = default_storage.save(
+                    f'{user_subscription.id}/product/{product.id}/{image.name}', ContentFile(image.read()))
+                product.image[image_path] = True
+
+            product.save()
 
         except:
             return Response({"message": "error occerd during creating"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(self.get_serializer(product).data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['PUT'], url_path=r'update_product')
     def update_product(self, request, pk=None):
@@ -201,12 +215,11 @@ class ProductViewSet(viewsets.ModelViewSet):
 
         try:
             product = user_subscription.products.get(id=pk)
-            serializer = self.get_serializer(
+            serializer = ProductSerializerUpdate(
                 product, data=request.data, partial=True)
             if not serializer.is_valid():
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             serializer.save()
-
         except:
             return Response({"message": "error occerd during updating"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -249,6 +262,94 @@ class ProductViewSet(viewsets.ModelViewSet):
             return Response({"message": "error occerd during deleting"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response({"message": "delete success"}, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['POST'], url_path=r'add_image',  parser_classes=(MultiPartParser,))
+    def add_image(self, request, pk=None):
+
+        platform_id = request.query_params.get('platform_id')
+        platform_name = request.query_params.get('platform_name')
+
+        api_user = request.user.api_users.get(type='user')
+        if not api_user:
+            return Response({"message": "no user found"}, status=status.HTTP_400_BAD_REQUEST)
+        elif api_user.status != "valid":
+            return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if platform_name not in self.platform_dict:
+            return Response({"message": "no platfrom name found"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not self.platform_dict[platform_name].objects.filter(id=platform_id).exists():
+            return Response({"message": "no platfrom found"}, status=status.HTTP_400_BAD_REQUEST)
+        platform = self.platform_dict[platform_name].objects.get(
+            id=platform_id)
+
+        if not is_admin(platform_name, api_user, platform):
+            return Response({"message": "user is not platform admin"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user_subscriptions = platform.user_subscriptions.all()
+        if not user_subscriptions:
+            return Response({"message": "platform not in any user_subscription"}, status=status.HTTP_400_BAD_REQUEST)
+        user_subscription = user_subscriptions[0]
+
+        if not user_subscription.products.filter(id=pk).exists():
+            return Response({"message": "no product found"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            product = user_subscription.products.get(id=pk)
+
+            images = request.data.getlist('images')
+            for image in images:
+                image_path = default_storage.save(
+                    f'{user_subscription.id}/product/{product.id}/{image.name}', ContentFile(image.read()))+","
+                product.image[image_path] = True
+            product.save()
+
+        except:
+            return Response({"message": "error occerd during updating"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response(product.image, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['POST'], url_path=r'delete_image')
+    def delete_image(self, request, pk=None):
+
+        platform_id = request.query_params.get('platform_id')
+        platform_name = request.query_params.get('platform_name')
+        image_path = request.query_params.get('image_path')
+
+        api_user = request.user.api_users.get(type='user')
+        if not api_user:
+            return Response({"message": "no user found"}, status=status.HTTP_400_BAD_REQUEST)
+        elif api_user.status != "valid":
+            return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if platform_name not in self.platform_dict:
+            return Response({"message": "no platfrom name found"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not self.platform_dict[platform_name].objects.filter(id=platform_id).exists():
+            return Response({"message": "no platfrom found"}, status=status.HTTP_400_BAD_REQUEST)
+        platform = self.platform_dict[platform_name].objects.get(
+            id=platform_id)
+
+        if not is_admin(platform_name, api_user, platform):
+            return Response({"message": "user is not platform admin"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user_subscriptions = platform.user_subscriptions.all()
+        if not user_subscriptions:
+            return Response({"message": "platform not in any user_subscription"}, status=status.HTTP_400_BAD_REQUEST)
+        user_subscription = user_subscriptions[0]
+
+        if not user_subscription.products.filter(id=pk).exists():
+            return Response({"message": "no product found"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            product = user_subscription.products.get(id=pk)
+            del product.image[image_path]
+            product.save()
+            default_storage.delete(image_path)
+        except:
+            return Response({"message": "error occerd during updating"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response(product.image, status=status.HTTP_200_OK)
 
 
 def is_admin(platform_name, api_user, platform):

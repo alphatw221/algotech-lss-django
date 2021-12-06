@@ -1,5 +1,6 @@
 
 
+from django.views.decorators import csrf
 from rest_framework import status, viewsets, views
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes, parser_classes
@@ -10,6 +11,7 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 import os
 from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
 
 
 class FileUploadView(views.APIView):
@@ -20,7 +22,11 @@ class FileUploadView(views.APIView):
         # ...
         # do some stuff with uploaded file
         # ...
+        print(filename)
+        print(file_obj)
         return Response(status=204)
+
+# @csrf_exempt
 
 
 @api_view(['POST'])
@@ -39,8 +45,8 @@ def upload(request, filename):
     file = request.data['file']
     print(type(file))
 
-    path = default_storage.save('tmp/somename.mp3', ContentFile(file).read())
-    tmp_file = os.path.join(settings.MEDIA_ROOT, path)
+    # path = default_storage.save('tmp/somename.mp3', ContentFile(file).read())
+    # tmp_file = os.path.join(settings.MEDIA_ROOT, path)
     # try:
 
     #
