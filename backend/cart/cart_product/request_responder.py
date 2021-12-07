@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 
 from api.models.facebook.facebook_page import FacebookPage
+from api.models.instagram.instagram_profile import InstagramProfile
 from api.models.youtube.youtube_channel import YoutubeChannel
 from backend.cart.cart_product.request import CartProductRequest
 from backend.i18n.cart_product_request import (i18n_get_additional_text,
@@ -34,7 +35,9 @@ class CartProductRequestResponderOrderCode(CartProductRequestResponder):
                     responder = FacebookCommentCommentPrivateMessageResponder(
                         request, platform_object)
                 elif isinstance(platform_object, YoutubeChannel):
-                    ...
+                    ...  # TODO implement YoutubeChannel
+                elif isinstance(platform_object, InstagramProfile):
+                    ...  # TODO implement InstagramProfile
 
             if responder:
                 request.response_task = responder.process
