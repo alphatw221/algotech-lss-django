@@ -62,7 +62,7 @@ class CartProductRequest:
         try:
             self.items.append(
                 CartProductRequestItem(campaign_product, qty))
-        except:
+        except Exception:
             return
 
     def get_items(self):

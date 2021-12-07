@@ -92,7 +92,7 @@ class CampaignLuckyDrawProcessor:
             if self.num_of_winner > len(candidate_set):
                 self.num_of_winner = len(candidate_set)
             winner_list = random.sample(candidate_set, self.num_of_winner)
-        except:
+        except Exception:
             winner_list = []
 
         return campaign_lucky_draw.create_campaign_lucky_draw(

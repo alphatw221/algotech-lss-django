@@ -9,7 +9,7 @@ def get_latest_commented_at(campaign: Campaign, platform: str):
             campaign=campaign,
             platform=platform
         ).latest('commented_at').commented_at
-    except:
+    except Exception:
         return 1
 
 

@@ -51,7 +51,7 @@ class ProductViewSet(viewsets.ModelViewSet):
                 queryset = queryset.filter(name__icontains=key_word)
             if order_by:
                 queryset = queryset.order_by(order_by)
-        except:
+        except Exception:
             return Response({"message": "query error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response(queryset.all(), status=status.HTTP_200_OK)

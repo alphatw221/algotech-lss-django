@@ -58,6 +58,6 @@ class CampaignProductStatusProcessor:
             try:
                 campaign_product = CampaignProductStatusProcessor.update_status(
                     campaign_product, CampaignProductStatusProcessor.Event.SOLD_OUT)
-            except:
+            except Exception:
                 ...
         return _campaign_product_sold_out_task(campaign_product)
