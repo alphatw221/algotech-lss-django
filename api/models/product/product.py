@@ -94,6 +94,13 @@ class ProductSerializerUpdate(ProductSerializer):
         read_only_fields = ['created_at', 'modified_at']
 
 
+class ProductSerializerDropdown(ProductSerializer):
+    class Meta:
+        model = Product
+        fields = ['id', 'name', 'image']
+        read_only_fields = ['created_at', 'modified_at']
+
+
 class ProductAdmin(admin.ModelAdmin):
     model = Product
     list_display = [field.name for field in Product._meta.fields]

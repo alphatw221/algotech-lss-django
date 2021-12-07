@@ -1,7 +1,7 @@
 from functools import partial
 from rest_framework import serializers, status, viewsets
 from rest_framework.permissions import IsAuthenticated
-from api.models.campaign.campaign import Campaign, CampaignSerializer, CampaignSerializer_Retreive
+from api.models.campaign.campaign import Campaign, CampaignSerializer, CampaignSerializerRetreive
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -56,7 +56,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         try:
             campaign = platform.campaigns.get(id=pk)
-            serializer = CampaignSerializer_Retreive(campaign)
+            serializer = CampaignSerializerRetreive(campaign)
         except:
             return Response({"message": "error occerd during retriving"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
