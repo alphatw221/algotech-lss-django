@@ -62,6 +62,14 @@ class UserSubscriptionSerializerSimplify(UserSubscriptionSerializer):
         read_only_fields = ['created_at', 'modified_at']
 
 
+class UserSubscriptionSerializerMeta(UserSubscriptionSerializer):
+    class Meta:
+        model = UserSubscription
+        fields = ['meta', 'meta_country', 'meta_logistic',
+                  'meta_payment']
+        read_only_fields = ['created_at', 'modified_at']
+
+
 class UserSubscriptionAdmin(admin.ModelAdmin):
     model = UserSubscription
     list_display = [field.name for field in UserSubscription._meta.fields]

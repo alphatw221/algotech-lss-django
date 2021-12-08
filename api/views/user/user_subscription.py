@@ -1,8 +1,8 @@
-from rest_framework import status, viewsets
+from rest_framework import serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from api.models.user.user import User
-from api.models.user.user_subscription import UserSubscription, UserSubscriptionSerializer
+from api.models.user.user_subscription import UserSubscription, UserSubscriptionSerializer, UserSubscriptionSerializerMeta
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework import status
@@ -178,3 +178,54 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             return Response({"message": "error occerd during process"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response({'message': "delete target user success"}, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['GET'], url_path=r'get_meta')
+    def get_meta(self, request):
+
+        platform_id = request.query_params.get('platform_id')
+        platform_name = request.query_params.get('platform_name')
+
+        api_user = request.user.api_users.get(type='user')
+        if not api_user:
+            return Response({"message": "no user found"}, status=status.HTTP_400_BAD_REQUEST)
+        elif api_user.status != "valid":
+            return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if platform_name not in platform_dict:
+            return Response({"message": "no platfrom name found"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not platform_dict[platform_name].objects.filter(id=platform_id).exists():
+            return Response({"message": "no platfrom found"}, status=status.HTTP_400_BAD_REQUEST)
+        platform = platform_dict[platform_name].objects.get(
+            id=platform_id)
+        if not is_admin(platform_name, api_user, platform):
+            return Response({"message": "user is not platform admin"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user_subscriptions = platform.user_subscriptions.all()
+        if not user_subscriptions:
+            return Response({"message": "platform not in any user_subscription"}, status=status.HTTP_400_BAD_REQUEST)
+        user_subscription = user_subscriptions[0]
+
+        try:
+            serializer = UserSubscriptionSerializerMeta(user_subscription)
+        except:
+            return Response({"message": "error occerd during process"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+def is_admin(platform_name, api_user, platform):
+    try:
+        if platform_name == 'facebook':
+            status_code, response = api_fb_get_me_accounts(
+                api_user.facebook_info['token'])
+
+            for item in response['data']:
+                if item['id'] == platform.page_id:
+                    return True
+            return False
+        elif platform_name == 'youtube':
+            pass
+    except:
+        return False
+    return False
