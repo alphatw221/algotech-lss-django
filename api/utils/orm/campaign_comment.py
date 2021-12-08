@@ -38,7 +38,8 @@ def get_comments_count(campaign: Campaign, platform: str):
 def get_campaign_comments(campaign: Campaign, status: int = None,
                           order_by: str = 'pk', limit: int = 1000):
     try:
-        campaign_comments = CampaignComment.objects.filter(campaign=campaign)
+        campaign_comments = CampaignComment.objects.select_related('campaign').filter(
+            campaign=campaign)
         if status is not None:
             campaign_comments = campaign_comments.filter(status=status)
 

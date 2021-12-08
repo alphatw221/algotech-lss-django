@@ -46,5 +46,6 @@ Usage:
 ```mongodb
 db.getCollection('api_campaign_comment').updateMany({}, { $set: {status: NumberInt(0), meta:{}}});
 db.getCollection('api_campaign_product').updateMany({}, { $set: {qty_sold: NumberInt(0)}});
+db.getCollection('api_campaign_lucky_draw').remove({});
 db.getCollection('api_cart_product').remove({});
 ```
