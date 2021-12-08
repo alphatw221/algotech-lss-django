@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 
 from api.models.facebook.facebook_page import FacebookPage
+from api.models.instagram.instagram_profile import InstagramProfile
 from api.models.youtube.youtube_channel import YoutubeChannel
 from backend.cart.cart_product.request import CartProductRequest
 from backend.i18n.cart_product_request import (i18n_get_additional_text,
@@ -16,7 +17,7 @@ class CartProductRequestResponder(ABC):
 
 
 @dataclass
-class AbstractCartProductRequestResponder(ABC):
+class PlatformCartProductRequestResponder(ABC):
     @abstractmethod
     def process():
         ...
@@ -27,14 +28,16 @@ class CartProductRequestResponderOrderCode(CartProductRequestResponder):
     response_platforms: dict = field(default_factory=dict)
 
     def process(self, request: CartProductRequest,
-                responder: AbstractCartProductRequestResponder = None):
+                responder: PlatformCartProductRequestResponder = None):
         if platform_object := self._get_platform_object(request):
             if not responder:
                 if isinstance(platform_object, FacebookPage):
                     responder = FacebookCommentCommentPrivateMessageResponder(
                         request, platform_object)
                 elif isinstance(platform_object, YoutubeChannel):
-                    ...
+                    ...  # TODO implement YoutubeChannel
+                elif isinstance(platform_object, InstagramProfile):
+                    ...  # TODO implement InstagramProfile
 
             if responder:
                 request.response_task = responder.process
@@ -46,7 +49,7 @@ class CartProductRequestResponderOrderCode(CartProductRequestResponder):
 
 
 @dataclass
-class FacebookCommentCommentPrivateMessageResponder(AbstractCartProductRequestResponder):
+class FacebookCommentCommentPrivateMessageResponder(PlatformCartProductRequestResponder):
     request: CartProductRequest
     facebook_page: FacebookPage
     response_result: dict = field(default_factory=dict)

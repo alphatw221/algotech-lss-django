@@ -1,9 +1,10 @@
+
+from api.models.user.facebook_info import FacebookInfoSerializer
+from api.models.user.user_plan import UserPlan
 from django.contrib import admin
 from django.contrib.auth.models import User as AuthUser
 from djongo import models
 from rest_framework import serializers
-from api.models.user.facebook_info import FacebookInfoSerializer
-from api.models.user.user_plan import UserPlan
 
 
 class User(models.Model):
@@ -39,6 +40,7 @@ class User(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     facebook_info = models.JSONField(null=True, blank=True, default=dict)
+    instagram_info = models.JSONField(null=True, blank=True, default=dict)
     youtube_info = models.JSONField(null=True, blank=True, default=dict)
     user_plan = models.ForeignKey(
         UserPlan, null=True, on_delete=models.SET_NULL, related_name='users')
@@ -59,6 +61,7 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = ['created_at', 'modified_at']
 
     facebook_info = FacebookInfoSerializer(required=False)
+    instagram_info = serializers.JSONField(default=dict)
     youtube_info = serializers.JSONField(default=dict)
     meta = serializers.JSONField(default=dict)
     payment_meta = serializers.JSONField(default=dict)

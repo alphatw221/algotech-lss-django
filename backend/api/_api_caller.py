@@ -49,7 +49,7 @@ class RestApiJsonCaller:
     def _format_response(self, response):
         try:
             return response.status_code, response.json()
-        except:
+        except Exception:
             return response.status_code, {'Invalid json response': response.text}
 
     def __request_template(self, request_func, *args, **kwargs):

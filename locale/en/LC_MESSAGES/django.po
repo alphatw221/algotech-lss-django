@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-12-03 12:51+0800\n"
-"PO-Revision-Date: 2021-12-03 16:06+0800\n"
+"POT-Creation-Date: 2021-12-08 15:31+0800\n"
+"PO-Revision-Date: 2021-12-06 16:47+0800\n"
+"Last-Translator: \n"
+"Language-Team: \n"
 "Language: en\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"Last-Translator: \n"
-"Language-Team: \n"
 "X-Generator: Poedit 3.0\n"
 
 #: .\backend\i18n\campaign_announcement.py:8
@@ -54,7 +54,7 @@ msgstr ""
 #, python-brace-format
 msgid "INVALID_EXCEED_MAX_ORDER_AMOUNT{order_code}{max_order_amount}"
 msgstr ""
-"\"{order_code}\" has a maximum ordering quantity of {max_order_amount}."
+"\"{order_code}\" has a maximum ordering quantity of {max_order_amount}. "
 
 #: .\backend\i18n\cart_product_request.py:35
 msgid "ADDED"
@@ -95,33 +95,52 @@ msgstr "has an operation error"
 #: .\backend\i18n\cart_product_request.py:54
 #, python-brace-format
 msgid "ITEM_INFO{order_code}{qty}{result}"
-msgstr "\"{order_code}\" Qty: {qty} {result}."
+msgstr "\"{order_code}\" Qty: {qty} {result}. "
 
-#: .\backend\i18n\comment_command.py:8
-msgid "MESSAGE_HEADER"
-msgstr "Your order:"
+#: .\backend\i18n\comment_command.py:25
+msgid "COMMENT_COMMAND_CART_NO_CART_PRODUCT"
+msgstr "There's no cart products."
 
-#: .\backend\i18n\comment_command.py:10
-#, fuzzy, python-brace-format
-msgid "DELIVERY{dollar_sign}{delivery}"
-msgstr "Delivery: {dollar_sign}{delivery}"
+#: .\backend\i18n\comment_command.py:29
+msgid "COMMENT_COMMAND_CART_MESSAGE_HEADER"
+msgstr "Your cart products:"
 
-#: .\backend\i18n\comment_command.py:13
-#, fuzzy, python-brace-format
-msgid "OPTION{dollar_sign}{option}"
-msgstr "Option: {dollar_sign}{option}"
+#: .\backend\i18n\comment_command.py:31 .\backend\i18n\comment_command.py:77
+#, python-brace-format
+msgid "TOTAL{dollar_sign}{total}\n"
+msgstr "Total: {dollar_sign}{total}\n"
 
-#: .\backend\i18n\comment_command.py:16
-#, fuzzy, python-brace-format
-msgid "TOTAL{dollar_sign}{total}"
-msgstr "Total: {dollar_sign}{total}"
+#: .\backend\i18n\comment_command.py:34
+#, python-brace-format
+#| msgid "DETAIL{link}"
+msgid "DETAIL{link}\n"
+msgstr "Find out details: {link}\n"
 
-#: .\backend\i18n\comment_command.py:19
+#: .\backend\i18n\comment_command.py:49 .\backend\i18n\comment_command.py:88
+#, python-brace-format
+msgid "ITEM_INFO{name}{qty}{dollar_sign}{total}\n"
+msgstr "{name} Qty:{qty} {dollar_sign}{total}\n"
+
+#: .\backend\i18n\comment_command.py:65
+msgid "COMMENT_COMMAND_ORDER_NO_ORDER"
+msgstr ""
+
+#: .\backend\i18n\comment_command.py:69
+msgid "COMMENT_COMMAND_ORDER_MESSAGE_HEADER"
+msgstr ""
+
+#: .\backend\i18n\comment_command.py:71
+#, python-brace-format
+msgid "DELIVERY{dollar_sign}{delivery}\n"
+msgstr "Delivery: {dollar_sign}{delivery}\n"
+
+#: .\backend\i18n\comment_command.py:74
+#, python-brace-format
+msgid "OPTION{dollar_sign}{option}\n"
+msgstr "Option: {dollar_sign}{option}\n"
+
+#: .\backend\i18n\comment_command.py:80
 #, python-brace-format
 msgid "DETAIL{link}"
-msgstr "Find out details: {link}"
+msgstr "Find out details: {link}\n"
 
-#: .\backend\i18n\comment_command.py:28
-#, python-brace-format
-msgid "ITEM_INFO{name}{qty}{dollar_sign}{total}"
-msgstr "{name} Qty:{qty} {dollar_sign}{total}"

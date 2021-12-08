@@ -210,6 +210,7 @@ LANGUAGES = [
     ('en', 'English'),
     ('zh-hans', 'Simplified Chinese'),
     ('zh-hant', 'Traditional Chinese'),
+    ('id', 'Indonesian'),
 ]
 
 # Static files (CSS, JavaScript, Images)

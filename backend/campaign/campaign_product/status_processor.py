@@ -37,10 +37,10 @@ class CampaignProductStatusProcessor:
             campaign_product = CampaignProductManager.update_status(
                 campaign_product, to_status)
             response_result = to_announce(campaign_product)
-        except AlreadyInUseError as e:
-            raise e
-        except CampaignAnnouncerError as e:
-            raise e
+        except AlreadyInUseError:
+            raise
+        except CampaignAnnouncerError:
+            raise
 
         campaign_product.meta.setdefault('status_history', []).append({
             'time': pendulum.now('UTC'),
@@ -58,6 +58,6 @@ class CampaignProductStatusProcessor:
             try:
                 campaign_product = CampaignProductStatusProcessor.update_status(
                     campaign_product, CampaignProductStatusProcessor.Event.SOLD_OUT)
-            except:
+            except Exception:
                 ...
         return _campaign_product_sold_out_task(campaign_product)

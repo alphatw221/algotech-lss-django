@@ -1,4 +1,3 @@
-
 from api.models.facebook.facebook_page import (FacebookPage,
                                                FacebookPageSerializer)
 from api.models.user.user import User, UserSerializer
