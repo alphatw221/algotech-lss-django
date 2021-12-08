@@ -4,6 +4,10 @@ from dataclasses import dataclass, field
 from api.models.campaign.campaign import Campaign
 from api.models.campaign.campaign_comment import CampaignComment
 from api.utils.orm.campaign_comment import get_campaign_comments
+from backend.campaign.campaign_comment.command_responder import \
+    CampaginCommentResponderCommand
+from backend.campaign.campaign_comment.comment_plugin_command import \
+    CommentPluginCommand
 from backend.campaign.campaign_comment.comment_plugin_order_code import \
     CommentPluginOrderCode
 from backend.campaign.campaign_product.manager import CampaignProductManager
@@ -15,6 +19,8 @@ from backend.cart.cart_product.request_responder import \
     CartProductRequestResponderOrderCode
 from backend.cart.cart_product.request_validator import \
     CartProductRequestValidatorStandard
+from backend.utils.text_processing.command_processor import \
+    CommandTextProcessor
 from backend.utils.text_processing.order_code_processor import \
     OrderCodeTextProcessor
 
@@ -49,7 +55,8 @@ class CommentProcessor:
 
     def process(self):
         for comment in self.unprocessed_comments:
-            self._plugin_order_code(comment)
+            if not self._plugin_command(comment):
+                self._plugin_order_code(comment)
             self._mark_and_save_comment(comment)
 
         if self.unprocessed_comments:
@@ -58,15 +65,21 @@ class CommentProcessor:
 
         return f'{len(self.unprocessed_comments)=}'
 
+    def _plugin_command(self, comment: CampaignComment):
+        tp = CommandTextProcessor
+        ccr = CampaginCommentResponderCommand(self.response_platforms)
+        return CommentPluginCommand.process(tp, comment,
+                                            self.batch_tasks_list, ccr)
+
     def _plugin_order_code(self, comment: CampaignComment):
         tp = OrderCodeTextProcessor
         cprv = CartProductRequestValidatorStandard()
         cprp = CartProductRequestProcessorStandard(
             check_inv=True, cart_product_type='order_code')
         cprr = CartProductRequestResponderOrderCode(self.response_platforms)
-        CommentPluginOrderCode.process(self.campaign,
-                                       tp, comment, self.order_codes_mapping,
-                                       self.batch_tasks_list, cprv, cprp, cprr)
+        return CommentPluginOrderCode.process(self.campaign,
+                                              tp, comment, self.order_codes_mapping,
+                                              self.batch_tasks_list, cprv, cprp, cprr)
 
     def _mark_and_save_comment(self, comment: CampaignComment):
         comment.status = 1

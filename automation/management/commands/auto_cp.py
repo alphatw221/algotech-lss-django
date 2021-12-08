@@ -31,5 +31,7 @@ class Command(BaseCommand):
                     response_platforms=['facebook', 'youtube']
                 ).process()
             except Exception as e:
+                import traceback
+                print(traceback.format_exc())
                 result = e
             print(f'{pendulum.now()} - {campaign.title=} {campaign.id=} - {result=}')
