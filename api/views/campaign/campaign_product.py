@@ -111,7 +111,7 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
         try:
             campaign_products = campaign.products.all()
 
-            if status:
+            if product_status:
                 campaign_products = campaign_products.filter(
                     status=product_status)
             if type:
