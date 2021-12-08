@@ -9,13 +9,22 @@
 
 ## Run server
 
-```bash
+```shell
 # development
 python manage.py runserver 0.0.0.0:8000
 # production
 gunicorn lss.wsgi --bind 0.0.0.0:8000 --workers 5
 # production w/ root user
 sudo /root/.local/bin/poetry run gunicorn lss.wsgi --bind 0.0.0.0:8000 --workers 5
+```
+
+## Manage locale
+
+```shell
+# generate/update .po file
+python manage.py makemessages -l LANG_CODE
+# generate/update .mo file
+python manage.py compilemessages
 ```
 
 ## Scripts
