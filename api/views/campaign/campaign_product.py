@@ -82,6 +82,11 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
         platform_name = request.query_params.get('platform_name')
         campaign_id = request.query_params.get('campaign_id')
 
+        order_by = request.query_params.get('order_by')
+        product_status = request.query_params.get('status')
+        type = request.query_params.get('type')
+        key_word = request.query_params.get('key_word')
+
         api_user = request.user.api_users.get(type='user')
         if not api_user:
             return Response({"message": "no user found"}, status=status.HTTP_400_BAD_REQUEST)
@@ -105,9 +110,29 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
 
         try:
             campaign_products = campaign.products.all()
-            data = CampaignProductSerializer(campaign_products, many=True).data
+
+            if status:
+                campaign_products = campaign_products.filter(
+                    status=product_status)
+            if type:
+                campaign_products = campaign_products.filter(
+                    type=type)
+            if key_word:
+                campaign_products = campaign_products.filter(
+                    name__icontains=key_word)
+            if order_by:
+                campaign_products = campaign_products.order_by(order_by)
         except:
             return Response({"message": "query error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        page = self.paginate_queryset(campaign_products)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            result = self.get_paginated_response(serializer.data)
+            data = result.data
+        else:
+            serializer = self.get_serializer(campaign_products, many=True)
+            data = serializer.data
 
         return Response(data, status=status.HTTP_200_OK)
 
