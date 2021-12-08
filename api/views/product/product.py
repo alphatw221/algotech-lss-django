@@ -3,15 +3,28 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from api.models.product.product import Product, ProductSerializer, ProductSerializerUpdate, ProductSerializerDropdown
-from rest_framework.decorators import action, parser_classes
-from api.models.facebook.facebook_page import FacebookPage
-from api.models.youtube.youtube_channel import YoutubeChannel
-from backend.api.facebook.user import api_fb_get_me_accounts
-from rest_framework.parsers import JSONParser, MultiPartParser
+from rest_framework.decorators import action
+from rest_framework.parsers import MultiPartParser
 
 import json
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
+
+from api.utils.common.verify import Verify
+from api.utils.common.verify import ApiVerifyError
+
+
+def verify_request(api_user, platform_name, platform_id, product_id=None):
+    Verify.verify_user(api_user)
+    platform = Verify.get_platform(api_user, platform_name, platform_id)
+    user_subscription = Verify.get_user_subscription(platform)
+    if product_id:
+        if not user_subscription.products.filter(id=product_id).exists():
+            raise ApiVerifyError('no product found')
+        product = user_subscription.products.get(id=product_id)
+        return platform, user_subscription, product
+
+    return platform, user_subscription
 
 
 class ProductPagination(PageNumberPagination):
@@ -35,42 +48,19 @@ class ProductViewSet(viewsets.ModelViewSet):
     filterset_fields = []
     pagination_class = ProductPagination
 
-    platform_dict = {'facebook': FacebookPage,
-                     'youtube': YoutubeChannel}
-
     @action(detail=True, methods=['GET'], url_path=r'retrieve_product')
     def retrieve_product(self, request, pk=None):
-
-        platform_id = request.query_params.get('platform_id')
-        platform_name = request.query_params.get('platform_name')
-
-        api_user = request.user.api_users.get(type='user')
-        if not api_user:
-            return Response({"message": "no user found"}, status=status.HTTP_400_BAD_REQUEST)
-        elif api_user.status != "valid":
-            return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
-
-        if platform_name not in self.platform_dict:
-            return Response({"message": "no platfrom name found"}, status=status.HTTP_400_BAD_REQUEST)
-
-        if not self.platform_dict[platform_name].objects.filter(id=platform_id).exists():
-            return Response({"message": "no platfrom found"}, status=status.HTTP_400_BAD_REQUEST)
-        platform = self.platform_dict[platform_name].objects.get(
-            id=platform_id)
-        if not is_admin(platform_name, api_user, platform):
-            return Response({"message": "user is not platform admin"}, status=status.HTTP_400_BAD_REQUEST)
-
-        user_subscriptions = platform.user_subscriptions.all()
-        if not user_subscriptions:
-            return Response({"message": "platform not in any user_subscription"}, status=status.HTTP_400_BAD_REQUEST)
-        user_subscription = user_subscriptions[0]
-
-        if not user_subscription.products.filter(id=pk).exists():
-            return Response({"message": "no product found"}, status=status.HTTP_400_BAD_REQUEST)
-
         try:
-            product = user_subscription.products.get(id=pk)
+            platform_id = request.query_params.get('platform_id')
+            platform_name = request.query_params.get('platform_name')
+            api_user = request.user.api_users.get(type='user')
+
+            _, _, product = verify_request(
+                api_user, platform_name, platform_id, product_id=pk)
+
             serializer = self.get_serializer(product)
+        except ApiVerifyError as e:
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except:
             return Response({"message": "error occerd during retriving"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -78,37 +68,17 @@ class ProductViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['GET'], url_path=r'list_product')
     def list_product(self, request):
-
-        platform_id = request.query_params.get('platform_id')
-        platform_name = request.query_params.get('platform_name')
-
-        order_by = request.query_params.get('order_by')
-        product_status = request.query_params.get('status')
-        key_word = request.query_params.get('key_word')
-
-        api_user = request.user.api_users.get(type='user')
-        if not api_user:
-            return Response({"message": "no user found"}, status=status.HTTP_400_BAD_REQUEST)
-        elif api_user.status != "valid":
-            return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
-
-        if platform_name not in self.platform_dict:
-            return Response({"message": "no platfrom name found"}, status=status.HTTP_400_BAD_REQUEST)
-
-        if not self.platform_dict[platform_name].objects.filter(id=platform_id).exists():
-            return Response({"message": "no platfrom found"}, status=status.HTTP_400_BAD_REQUEST)
-        platform = self.platform_dict[platform_name].objects.get(
-            id=platform_id)
-
-        if not is_admin(platform_name, api_user, platform):
-            return Response({"message": "user is not platform admin"}, status=status.HTTP_400_BAD_REQUEST)
-
-        user_subscriptions = platform.user_subscriptions.all()
-        if not user_subscriptions:
-            return Response({"message": "platform not in any user_subscription"}, status=status.HTTP_400_BAD_REQUEST)
-        user_subscription = user_subscriptions[0]
-
         try:
+            platform_id = request.query_params.get('platform_id')
+            platform_name = request.query_params.get('platform_name')
+            order_by = request.query_params.get('order_by')
+            product_status = request.query_params.get('status')
+            key_word = request.query_params.get('key_word')
+            api_user = request.user.api_users.get(type='user')
+
+            _, user_subscription = verify_request(
+                api_user, platform_name, platform_id)
+
             queryset = user_subscription.products.all()
             if product_status:
                 queryset = queryset.filter(status=product_status)
@@ -116,49 +86,33 @@ class ProductViewSet(viewsets.ModelViewSet):
                 queryset = queryset.filter(name__icontains=key_word)
             if order_by:
                 queryset = queryset.order_by(order_by)
-        except:
-            return Response({"message": "query error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            result = self.get_paginated_response(serializer.data)
-            data = result.data
-        else:
-            serializer = self.get_serializer(queryset, many=True)
-            data = serializer.data
+            page = self.paginate_queryset(queryset)
+            if page is not None:
+                serializer = self.get_serializer(page, many=True)
+                result = self.get_paginated_response(serializer.data)
+                data = result.data
+            else:
+                serializer = self.get_serializer(queryset, many=True)
+                data = serializer.data
+
+        except ApiVerifyError as e:
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"message": "query error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response(data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['POST'], url_path=r'create_product', parser_classes=(MultiPartParser,))
     def create_product(self, request):
-
-        platform_id = request.query_params.get('platform_id')
-        platform_name = request.query_params.get('platform_name')
-
-        api_user = request.user.api_users.get(type='user')
-        if not api_user:
-            return Response({"message": "no user found"}, status=status.HTTP_400_BAD_REQUEST)
-        elif api_user.status != "valid":
-            return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
-
-        if platform_name not in self.platform_dict:
-            return Response({"message": "no platfrom name found"}, status=status.HTTP_400_BAD_REQUEST)
-
-        if not self.platform_dict[platform_name].objects.filter(id=platform_id).exists():
-            return Response({"message": "no platfrom found"}, status=status.HTTP_400_BAD_REQUEST)
-        platform = self.platform_dict[platform_name].objects.get(
-            id=platform_id)
-
-        if not is_admin(platform_name, api_user, platform):
-            return Response({"message": "user is not platform admin"}, status=status.HTTP_400_BAD_REQUEST)
-
-        user_subscriptions = platform.user_subscriptions.all()
-        if not user_subscriptions:
-            return Response({"message": "platform not in any user_subscription"}, status=status.HTTP_400_BAD_REQUEST)
-        user_subscription = user_subscriptions[0]
-
         try:
+            platform_id = request.query_params.get('platform_id')
+            platform_name = request.query_params.get('platform_name')
+            api_user = request.user.api_users.get(type='user')
+
+            _, user_subscription = verify_request(
+                api_user, platform_name, platform_id)
+
             text = request.data['text']
             data = json.loads(text)
             data['user_subscription'] = user_subscription.id
@@ -176,6 +130,8 @@ class ProductViewSet(viewsets.ModelViewSet):
 
                 product.save()
 
+        except ApiVerifyError as e:
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except:
             return Response({"message": "error occerd during creating"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -183,42 +139,22 @@ class ProductViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['PUT'], url_path=r'update_product')
     def update_product(self, request, pk=None):
-
-        platform_id = request.query_params.get('platform_id')
-        platform_name = request.query_params.get('platform_name')
-
-        api_user = request.user.api_users.get(type='user')
-        if not api_user:
-            return Response({"message": "no user found"}, status=status.HTTP_400_BAD_REQUEST)
-        elif api_user.status != "valid":
-            return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
-
-        if platform_name not in self.platform_dict:
-            return Response({"message": "no platfrom name found"}, status=status.HTTP_400_BAD_REQUEST)
-
-        if not self.platform_dict[platform_name].objects.filter(id=platform_id).exists():
-            return Response({"message": "no platfrom found"}, status=status.HTTP_400_BAD_REQUEST)
-        platform = self.platform_dict[platform_name].objects.get(
-            id=platform_id)
-
-        if not is_admin(platform_name, api_user, platform):
-            return Response({"message": "user is not platform admin"}, status=status.HTTP_400_BAD_REQUEST)
-
-        user_subscriptions = platform.user_subscriptions.all()
-        if not user_subscriptions:
-            return Response({"message": "platform not in any user_subscription"}, status=status.HTTP_400_BAD_REQUEST)
-        user_subscription = user_subscriptions[0]
-
-        if not user_subscription.products.filter(id=pk).exists():
-            return Response({"message": "no product found"}, status=status.HTTP_400_BAD_REQUEST)
-
         try:
-            product = user_subscription.products.get(id=pk)
+            platform_id = request.query_params.get('platform_id')
+            platform_name = request.query_params.get('platform_name')
+            api_user = request.user.api_users.get(type='user')
+
+            _, _, product = verify_request(
+                api_user, platform_name, platform_id, product_id=pk)
+
             serializer = ProductSerializerUpdate(
                 product, data=request.data, partial=True)
             if not serializer.is_valid():
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             serializer.save()
+
+        except ApiVerifyError as e:
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except:
             return Response({"message": "error occerd during updating"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -226,39 +162,18 @@ class ProductViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['DELETE'], url_path=r'delete_product')
     def delete_product(self, request, pk=None):
-
-        platform_id = request.query_params.get('platform_id')
-        platform_name = request.query_params.get('platform_name')
-
-        api_user = request.user.api_users.get(type='user')
-        if not api_user:
-            return Response({"message": "no user found"}, status=status.HTTP_400_BAD_REQUEST)
-        elif api_user.status != "valid":
-            return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
-
-        if platform_name not in self.platform_dict:
-            return Response({"message": "no platfrom name found"}, status=status.HTTP_400_BAD_REQUEST)
-
-        if not self.platform_dict[platform_name].objects.filter(id=platform_id).exists():
-            return Response({"message": "no platfrom found"}, status=status.HTTP_400_BAD_REQUEST)
-        platform = self.platform_dict[platform_name].objects.get(
-            id=platform_id)
-
-        if not is_admin(platform_name, api_user, platform):
-            return Response({"message": "user is not platform admin"}, status=status.HTTP_400_BAD_REQUEST)
-
-        user_subscriptions = platform.user_subscriptions.all()
-        if not user_subscriptions:
-            return Response({"message": "platform not in any user_subscription"}, status=status.HTTP_400_BAD_REQUEST)
-        user_subscription = user_subscriptions[0]
-
-        if not user_subscription.products.filter(id=pk).exists():
-            return Response({"message": "no product found"}, status=status.HTTP_400_BAD_REQUEST)
-
         try:
-            product = user_subscription.products.get(id=pk)
+            platform_id = request.query_params.get('platform_id')
+            platform_name = request.query_params.get('platform_name')
+            api_user = request.user.api_users.get(type='user')
+
+            _, _, product = verify_request(
+                api_user, platform_name, platform_id, product_id=pk)
+
             default_storage.delete(product.image)
             product.delete()
+        except ApiVerifyError as e:
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except:
             return Response({"message": "error occerd during deleting"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -266,37 +181,13 @@ class ProductViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['POST'], url_path=r'update_image',  parser_classes=(MultiPartParser,))
     def update_image(self, request, pk=None):
-
-        platform_id = request.query_params.get('platform_id')
-        platform_name = request.query_params.get('platform_name')
-
-        api_user = request.user.api_users.get(type='user')
-        if not api_user:
-            return Response({"message": "no user found"}, status=status.HTTP_400_BAD_REQUEST)
-        elif api_user.status != "valid":
-            return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
-
-        if platform_name not in self.platform_dict:
-            return Response({"message": "no platfrom name found"}, status=status.HTTP_400_BAD_REQUEST)
-
-        if not self.platform_dict[platform_name].objects.filter(id=platform_id).exists():
-            return Response({"message": "no platfrom found"}, status=status.HTTP_400_BAD_REQUEST)
-        platform = self.platform_dict[platform_name].objects.get(
-            id=platform_id)
-
-        if not is_admin(platform_name, api_user, platform):
-            return Response({"message": "user is not platform admin"}, status=status.HTTP_400_BAD_REQUEST)
-
-        user_subscriptions = platform.user_subscriptions.all()
-        if not user_subscriptions:
-            return Response({"message": "platform not in any user_subscription"}, status=status.HTTP_400_BAD_REQUEST)
-        user_subscription = user_subscriptions[0]
-
-        if not user_subscription.products.filter(id=pk).exists():
-            return Response({"message": "no product found"}, status=status.HTTP_400_BAD_REQUEST)
-
         try:
-            product = user_subscription.products.get(id=pk)
+            platform_id = request.query_params.get('platform_id')
+            platform_name = request.query_params.get('platform_name')
+            api_user = request.user.api_users.get(type='user')
+
+            _, user_subscription, product = verify_request(
+                api_user, platform_name, platform_id, product_id=pk)
 
             if 'image' in request.data:
                 image = request.data['image']
@@ -304,7 +195,8 @@ class ProductViewSet(viewsets.ModelViewSet):
                     f'{user_subscription.id}/product/{product.id}/{image.name}', ContentFile(image.read()))
                 product.image = image_path
                 product.save()
-
+        except ApiVerifyError as e:
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except:
             return Response({"message": "error occerd during updating"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -312,54 +204,21 @@ class ProductViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['GET'], url_path=r'product_dropdown')
     def product_dropdown(self, request):
-
-        platform_id = request.query_params.get('platform_id')
-        platform_name = request.query_params.get('platform_name')
-
-        api_user = request.user.api_users.get(type='user')
-        if not api_user:
-            return Response({"message": "no user found"}, status=status.HTTP_400_BAD_REQUEST)
-        elif api_user.status != "valid":
-            return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
-
-        if platform_name not in self.platform_dict:
-            return Response({"message": "no platfrom name found"}, status=status.HTTP_400_BAD_REQUEST)
-
-        if not self.platform_dict[platform_name].objects.filter(id=platform_id).exists():
-            return Response({"message": "no platfrom found"}, status=status.HTTP_400_BAD_REQUEST)
-        platform = self.platform_dict[platform_name].objects.get(
-            id=platform_id)
-
-        if not is_admin(platform_name, api_user, platform):
-            return Response({"message": "user is not platform admin"}, status=status.HTTP_400_BAD_REQUEST)
-
-        user_subscriptions = platform.user_subscriptions.all()
-        if not user_subscriptions:
-            return Response({"message": "platform not in any user_subscription"}, status=status.HTTP_400_BAD_REQUEST)
-        user_subscription = user_subscriptions[0]
-
         try:
+            platform_id = request.query_params.get('platform_id')
+            platform_name = request.query_params.get('platform_name')
+            api_user = request.user.api_users.get(type='user')
+
+            _, user_subscription = verify_request(
+                api_user, platform_name, platform_id)
+
             products = user_subscription.products.filter(
                 status='enabled').all()
             serializer = ProductSerializerDropdown(products, many=True)
+
+        except ApiVerifyError as e:
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except:
             return Response({"message": "query error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-def is_admin(platform_name, api_user, platform):
-    try:
-        if platform_name == 'facebook':
-            status_code, response = api_fb_get_me_accounts(
-                api_user.facebook_info['token'])
-
-            for item in response['data']:
-                if item['id'] == platform.page_id:
-                    return True
-            return False
-        elif platform_name == 'youtube':
-            pass
-    except:
-        return False
-    return False

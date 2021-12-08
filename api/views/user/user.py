@@ -39,7 +39,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
         status_code, response = api_fb_get_accounts_from_user(
             user_token=api_user.facebook_info['token'], user_id=api_user.facebook_info['id'])
-
+        print(response)
         if status_code != 200:
             return Response({'message': 'api_fb_get_accounts_from_user error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         for item in response['data']:

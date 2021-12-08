@@ -57,7 +57,7 @@ class UserSubscriptionSerializer(serializers.ModelSerializer):
 class UserSubscriptionSerializerSimplify(UserSubscriptionSerializer):
     class Meta:
         model = UserSubscription
-        fields = ['id', 'meta', 'country_meta', 'name',
+        fields = ['id', 'meta', 'meta_country', 'name',
                   'description', 'remark', 'type', 'status']
         read_only_fields = ['created_at', 'modified_at']
 
