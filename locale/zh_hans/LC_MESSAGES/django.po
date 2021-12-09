@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-12-03 12:52+0800\n"
-"PO-Revision-Date: 2021-12-03 16:05+0800\n"
+"POT-Creation-Date: 2021-12-08 15:37+0800\n"
+"PO-Revision-Date: 2021-12-06 16:52+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: zh_CN\n"
@@ -32,8 +32,7 @@ msgstr "商品 {order_code} 已售完。"
 #, python-brace-format
 msgid "LUCKY_DRAW_WINNER{customer_name}{product_name}"
 msgstr ""
-"恭喜 {customer_name} 中奖，获得 {product_name}！请至购物车确认您的"
-"奖品。"
+"恭喜 {customer_name} 中奖，获得 {product_name}！请至购物车确认您的奖品。"
 
 #: .\backend\i18n\cart_product_request.py:9
 msgid "MESSAGE_PREFIX"
@@ -47,14 +46,13 @@ msgstr "点此前往购物车：{link}"
 #: .\backend\i18n\cart_product_request.py:19
 msgid "MORE_INFO_IN_PM_NOTICE"
 msgstr ""
-"购物车连结已传送到您的 FB Messenger，若没有收到讯息，请联络粉丝专页"
-"管理员/小编。"
+"购物车连结已传送到您的 FB Messenger，若没有收到讯息，请联络粉丝专页管理员/小"
+"编。"
 
 #: .\backend\i18n\cart_product_request.py:28
 #, python-brace-format
 msgid "INVALID_EXCEED_MAX_ORDER_AMOUNT{order_code}{max_order_amount}"
-msgstr ""
-"{order_code} 无法新增，此商品单次限购数量为 {max_order_amount} 件。"
+msgstr "{order_code} 无法新增，此商品单次限购数量为 {max_order_amount} 件。"
 
 #: .\backend\i18n\cart_product_request.py:35
 msgid "ADDED"
@@ -66,62 +64,87 @@ msgstr "更新成功！"
 
 #: .\backend\i18n\cart_product_request.py:39
 msgid "DELETED"
-msgstr "商品已从购物车删除。"
+msgstr "商品已从购物车删除，"
 
 #: .\backend\i18n\cart_product_request.py:41
 msgid "INSUFFICIENT_INV"
-msgstr "商品已售完。"
+msgstr "商品已售完，"
 
 #: .\backend\i18n\cart_product_request.py:43
 msgid "INVALID_PRODUCT_NOT_ACTIVATED"
-msgstr "商品目前无法下单。"
+msgstr "商品目前无法下单，"
 
 #: .\backend\i18n\cart_product_request.py:45
 msgid "INVALID_REMOVE_NOT_ALLOWED"
-msgstr "无法删除。"
+msgstr "无法删除，"
 
 #: .\backend\i18n\cart_product_request.py:47
 msgid "INVALID_EDIT_NOT_ALLOWED"
-msgstr "无法修改。"
+msgstr "无法修改，"
 
 #: .\backend\i18n\cart_product_request.py:49
 msgid "INVALID_ADD_ZERO_QTY"
-msgstr "无法删除。"
+msgstr "无法删除，"
 
 #: .\backend\i18n\cart_product_request.py:51
 msgid "N/A"
-msgstr "操作错误。"
+msgstr "操作错误，"
 
 #: .\backend\i18n\cart_product_request.py:54
 #, python-brace-format
 msgid "ITEM_INFO{order_code}{qty}{result}"
-msgstr "{result}商品 {order_code} - {qty} 件。"
+msgstr "{result}商品 {order_code} < {qty} 件>。"
 
-#: .\backend\i18n\comment_command.py:8
-msgid "MESSAGE_HEADER"
-msgstr "订单明细："
+#: .\backend\i18n\comment_command.py:25
+msgid "COMMENT_COMMAND_CART_NO_CART_PRODUCT"
+msgstr ""
 
-#: .\backend\i18n\comment_command.py:10
-#, python-brace-format
-msgid "DELIVERY{dollar_sign}{delivery}"
-msgstr "运费：{dollar_sign}{delivery}"
+#: .\backend\i18n\comment_command.py:28
+msgid "COMMENT_COMMAND_CART_MESSAGE_HEADER"
+msgstr ""
 
-#: .\backend\i18n\comment_command.py:13
-#, python-brace-format
-msgid "OPTION{dollar_sign}{option}"
-msgstr "额外运费：{dollar_sign}{option}"
-
-#: .\backend\i18n\comment_command.py:16
-#, python-brace-format
-msgid "TOTAL{dollar_sign}{total}"
+#: .\backend\i18n\comment_command.py:30 .\backend\i18n\comment_command.py:75
+#, fuzzy, python-brace-format
+#| msgid "TOTAL{dollar_sign}{total}"
+msgid "TOTAL{dollar_sign}{total}\n"
 msgstr "订单金额：{dollar_sign}{total}"
 
-#: .\backend\i18n\comment_command.py:19
+#: .\backend\i18n\comment_command.py:32
+#, fuzzy, python-brace-format
+#| msgid "DETAIL{link}"
+msgid "DETAIL{link}\n"
+msgstr "查看购物车：{link}"
+
+#: .\backend\i18n\comment_command.py:47 .\backend\i18n\comment_command.py:86
+#, fuzzy, python-brace-format
+#| msgid "ITEM_INFO{name}{qty}{dollar_sign}{total}"
+msgid "ITEM_INFO{name}{qty}{dollar_sign}{total}\n"
+msgstr "{name} 数量：{qty} {dollar_sign}{total}"
+
+#: .\backend\i18n\comment_command.py:63
+msgid "COMMENT_COMMAND_ORDER_NO_ORDER"
+msgstr ""
+
+#: .\backend\i18n\comment_command.py:67
+msgid "COMMENT_COMMAND_ORDER_MESSAGE_HEADER"
+msgstr ""
+
+#: .\backend\i18n\comment_command.py:69
+#, fuzzy, python-brace-format
+#| msgid "DELIVERY{dollar_sign}{delivery}"
+msgid "DELIVERY{dollar_sign}{delivery}\n"
+msgstr "运费：{dollar_sign}{delivery}"
+
+#: .\backend\i18n\comment_command.py:72
+#, fuzzy, python-brace-format
+#| msgid "OPTION{dollar_sign}{option}"
+msgid "OPTION{dollar_sign}{option}\n"
+msgstr "额外运费：{dollar_sign}{option}"
+
+#: .\backend\i18n\comment_command.py:78
 #, python-brace-format
 msgid "DETAIL{link}"
 msgstr "查看购物车：{link}"
 
-#: .\backend\i18n\comment_command.py:28
-#, python-brace-format
-msgid "ITEM_INFO{name}{qty}{dollar_sign}{total}"
-msgstr "{name} 数量：{qty} {dollar_sign}{total}"
+#~ msgid "MESSAGE_HEADER"
+#~ msgstr "订单明细："

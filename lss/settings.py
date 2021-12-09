@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'backend',
     'chat_bot',
     'mail',
+    'cron',
 ]
 
 LOGGING = {
@@ -209,6 +210,7 @@ LANGUAGES = [
     ('en', 'English'),
     ('zh-hans', 'Simplified Chinese'),
     ('zh-hant', 'Traditional Chinese'),
+    ('id', 'Indonesian'),
 ]
 
 # Static files (CSS, JavaScript, Images)
@@ -280,11 +282,17 @@ CHAT_BOT_FACEBOOK = {
 }
 
 
-# SMTP Configuration
+# mail app
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'  # SMTP伺服器
-EMAIL_PORT = 587  # TLS通訊埠號
-EMAIL_USE_TLS = True  # 開啟TLS(傳輸層安全性)
-EMAIL_USE_SSL = False  # false for gmail
-EMAIL_HOST_USER = 'derekhwang@accoladeglobal.net'  # 寄件者電子郵件
-EMAIL_HOST_PASSWORD = 'jyhudyfbvpmewjsc'  # Gmail應用程式的密碼
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+EMAIL_HOST_USER = 'derekhwang@accoladeglobal.net'
+EMAIL_HOST_PASSWORD = 'jyhudyfbvpmewjsc'
+
+# cron app
+CRON_CLASSES = [
+    "cron.cron.TestCronJob",
+]
+

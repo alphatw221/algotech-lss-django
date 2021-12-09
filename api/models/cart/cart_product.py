@@ -22,8 +22,9 @@ class CartProduct(models.Model):
     ]
 
     STATUS_CHOICES = [
-        ('valid', 'Valid'),
-        ('ordered', 'In order'),
+        ('valid', 'Valid item for order'),
+        ('ordered', 'In completed order'),
+        ('staging', 'Staging for completing an order'),
         ('voided', 'Cannelled'),
     ]
 

@@ -1,6 +1,8 @@
 from api.models.campaign.campaign import Campaign
+from api.utils.orm.campaign_comment import (get_comments_count,
+                                            get_latest_commented_at,
+                                            update_or_create_comment)
 from backend.api.facebook.post import api_fb_get_post_comments
-from api.utils.orm.campaign_comment import get_latest_commented_at, update_or_create_comment, get_comments_count
 from django.conf import settings
 
 
@@ -19,8 +21,8 @@ def campaign_facebook_post_capture_comments(campaign: Campaign):
 
     try:
         return _capture_comments_helper(campaign, page_token, post_id)
-    except FacebookCaptureCommentError as e:
-        raise e
+    except FacebookCaptureCommentError:
+        raise
     except Exception:
         raise FacebookCaptureCommentError('Module internal error')
 

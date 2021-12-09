@@ -59,8 +59,8 @@ class CampaignLuckyDrawManager:
                         result = CampaignAnnouncer.announce_lucky_draw_winner(
                             lucky_draw, cart_product_request.customer_name)
                         response_result.append(result)
-                    except CampaignAnnouncerError as e:
-                        raise e
+                    except CampaignAnnouncerError:
+                        raise
                 elif item.state == RequestState.INSUFFICIENT_INV:
                     ...
                 elif item.state == RequestState.INVALID_NEGATIVE_QTY:
@@ -92,7 +92,7 @@ class CampaignLuckyDrawProcessor:
             if self.num_of_winner > len(candidate_set):
                 self.num_of_winner = len(candidate_set)
             winner_list = random.sample(candidate_set, self.num_of_winner)
-        except:
+        except Exception:
             winner_list = []
 
         return campaign_lucky_draw.create_campaign_lucky_draw(

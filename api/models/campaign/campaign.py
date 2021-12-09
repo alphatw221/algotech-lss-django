@@ -1,5 +1,7 @@
 from api.models.facebook.facebook_page import (FacebookPage,
                                                FacebookPageInfoSerializer)
+from api.models.instagram.instagram_profile import (
+    InstagramProfile, InstagramProfileInfoSerializer)
 from api.models.user.user import User
 from api.models.youtube.youtube_channel import (YoutubeChannel,
                                                 YoutubeChannelInfoSerializer)
@@ -41,6 +43,9 @@ class Campaign(models.Model):
     facebook_page = models.ForeignKey(
         FacebookPage, blank=True, null=True, on_delete=models.SET_NULL, related_name='campaigns')
     facebook_campaign = models.JSONField(null=True, blank=True, default=dict)
+    instagram_profile = models.ForeignKey(
+        InstagramProfile, blank=True, null=True, on_delete=models.SET_NULL, related_name='campaigns')
+    instagram_campaign = models.JSONField(null=True, blank=True, default=dict)
     youtube_channel = models.ForeignKey(
         YoutubeChannel, blank=True, null=True, on_delete=models.SET_NULL, related_name='campaigns')
     youtube_campaign = models.JSONField(null=True, blank=True, default=dict)
@@ -60,6 +65,8 @@ class CampaignSerializer(serializers.ModelSerializer):
 
     facebook_page = FacebookPageInfoSerializer(read_only=True)
     facebook_campaign = serializers.JSONField(default=dict)
+    instagram_profile = InstagramProfileInfoSerializer(read_only=True)
+    instagram_campaign = serializers.JSONField(default=dict)
     youtube_channel = YoutubeChannelInfoSerializer(read_only=True)
     youtube_campaign = serializers.JSONField(default=dict)
 

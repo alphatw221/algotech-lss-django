@@ -20,7 +20,7 @@ def facebook_verify(request):
 def facebook_receive(request):
     try:
         body = json.loads(request.body)
-    except:
+    except Exception:
         return HttpResponse(status=400)
 
     if body.get('object') == 'page':
@@ -54,7 +54,7 @@ def facebook_receive(request):
                         ...
                 elif postback := webhook_event.get('postback'):
                     print(postback, time_of_event)
-            except:
+            except Exception:
                 ...
 
         return HttpResponse('EVENT_RECEIVED', status=200)
