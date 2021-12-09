@@ -2,6 +2,7 @@ import json
 
 from django.conf import settings
 from django.http import HttpResponse
+from chat_bot.facebook.fb_func import *
 
 
 def facebook_verify(request):
@@ -33,21 +34,9 @@ def facebook_receive(request):
 
                 if message := webhook_event.get('message'):
                     if message.get('text'):
-                        # handleTextMessage(page_id, sender_psid, message)
-                        print(message['text'], time_of_event)
-
-                        from api.models.facebook.facebook_page import \
-                            FacebookPage
-                        from backend.api.facebook.chat_bot import \
-                            api_fb_post_page_message_chat_bot
-
-                        page_token = FacebookPage.objects.get(
-                            page_id=page_id).token
-                        response = {'text': message['text']}
-
-                        api_fb_post_page_message_chat_bot(
-                            page_token, sender_psid, response)
-                        # TODO: above code should be deliver to handleTextMessage func
+                        handleTextMessage(page_id, sender_psid, message)
+                        print (message['text'], time_of_event)
+                        
                     elif message.get('attachments'):
                         ...
                     elif message.get('quick_reply'):
