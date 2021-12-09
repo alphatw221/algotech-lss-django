@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-12-08 15:31+0800\n"
-"PO-Revision-Date: 2021-12-06 16:47+0800\n"
+"PO-Revision-Date: 2021-12-08 17:00+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: en\n"
@@ -47,7 +47,7 @@ msgstr "Shopping cart: {link}"
 #: .\backend\i18n\cart_product_request.py:19
 msgid "MORE_INFO_IN_PM_NOTICE"
 msgstr ""
-"Shopping Cart link is sent via FB Messenger, please contact page admin if "
+"Shopping cart link is sent via FB Messenger, please contact page admin if "
 "not received any notification."
 
 #: .\backend\i18n\cart_product_request.py:28
@@ -99,11 +99,11 @@ msgstr "\"{order_code}\" Qty: {qty} {result}. "
 
 #: .\backend\i18n\comment_command.py:25
 msgid "COMMENT_COMMAND_CART_NO_CART_PRODUCT"
-msgstr "There's no cart products."
+msgstr "There's no products in cart."
 
 #: .\backend\i18n\comment_command.py:29
 msgid "COMMENT_COMMAND_CART_MESSAGE_HEADER"
-msgstr "Your cart products:"
+msgstr "Your shopping cart:"
 
 #: .\backend\i18n\comment_command.py:31 .\backend\i18n\comment_command.py:77
 #, python-brace-format
@@ -123,11 +123,11 @@ msgstr "{name} Qty:{qty} {dollar_sign}{total}\n"
 
 #: .\backend\i18n\comment_command.py:65
 msgid "COMMENT_COMMAND_ORDER_NO_ORDER"
-msgstr ""
+msgstr "You have no recent orders."
 
 #: .\backend\i18n\comment_command.py:69
 msgid "COMMENT_COMMAND_ORDER_MESSAGE_HEADER"
-msgstr ""
+msgstr "Your latest order:"
 
 #: .\backend\i18n\comment_command.py:71
 #, python-brace-format
@@ -143,4 +143,3 @@ msgstr "Option: {dollar_sign}{option}\n"
 #, python-brace-format
 msgid "DETAIL{link}"
 msgstr "Find out details: {link}\n"
-
