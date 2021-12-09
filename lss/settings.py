@@ -227,9 +227,6 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
-# django-cron
-CRON_CLASSES = [
-]
 
 # Live Show Seller info
 WEB_SERVER_URL = "https://place_holder_lss"
@@ -275,12 +272,10 @@ FACEBOOK_COMMENT_CAPTURING = {
     'REST_INTERVAL_SECONDS': 5,
 }
 
-
 # chat_bot app
 CHAT_BOT_FACEBOOK = {
     'VERIFY_TOKEN': 'ALGOTECHLSSMESSENGER'
 }
-
 
 # mail app
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -293,6 +288,5 @@ EMAIL_HOST_PASSWORD = 'jyhudyfbvpmewjsc'
 
 # cron app
 CRON_CLASSES = [
-    "cron.cron.TestCronJob",
+    # "cron.cron.TestCronJob",
 ]
-
