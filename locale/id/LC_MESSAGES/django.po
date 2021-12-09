@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-12-08 15:37+0800\n"
-"PO-Revision-Date: 2021-12-08 15:39+0800\n"
+"PO-Revision-Date: 2021-12-08 16:20+0700\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: id_ID\n"
@@ -100,47 +100,44 @@ msgstr "“{order_code}” Jumlah: {qty} {result}. "
 
 #: .\backend\i18n\comment_command.py:25
 msgid "COMMENT_COMMAND_CART_NO_CART_PRODUCT"
-msgstr ""
+msgstr "Tidak ada produk dalam keranjang."
 
 #: .\backend\i18n\comment_command.py:28
 msgid "COMMENT_COMMAND_CART_MESSAGE_HEADER"
-msgstr ""
+msgstr "Keranjang belanja anda:"
 
 #: .\backend\i18n\comment_command.py:30 .\backend\i18n\comment_command.py:75
-#, fuzzy, python-brace-format
+#, python-brace-format
 msgid "TOTAL{dollar_sign}{total}\n"
 msgstr "Total: {dollar_sign}{total}\n"
 
 #: .\backend\i18n\comment_command.py:32
-#, fuzzy, python-brace-format
+#, python-brace-format
 msgid "DETAIL{link}\n"
 msgstr "Pelajari lebih lanjut: {link}\n"
 
 #: .\backend\i18n\comment_command.py:47 .\backend\i18n\comment_command.py:86
-#, fuzzy, python-brace-format
-#| msgid "ITEM_INFO{name}{qty}{dollar_sign}{total}"
+#, python-brace-format
 msgid "ITEM_INFO{name}{qty}{dollar_sign}{total}\n"
-msgstr "{name} Jumlah: {qty} {dollar_sign}{total}"
+msgstr "{name} Jumlah: {qty} {dollar_sign}{total}\n"
 
 #: .\backend\i18n\comment_command.py:63
 msgid "COMMENT_COMMAND_ORDER_NO_ORDER"
-msgstr ""
+msgstr "Anda tidak memiliki pesanan terbaru."
 
 #: .\backend\i18n\comment_command.py:67
 msgid "COMMENT_COMMAND_ORDER_MESSAGE_HEADER"
-msgstr ""
+msgstr "Pesanan terbaru anda:"
 
 #: .\backend\i18n\comment_command.py:69
-#, fuzzy, python-brace-format
-#| msgid "DELIVERY{dollar_sign}{delivery}"
+#, python-brace-format
 msgid "DELIVERY{dollar_sign}{delivery}\n"
-msgstr "Pengiriman: {dollar_sign}{delivery}"
+msgstr "Pengiriman: {dollar_sign}{delivery}\n"
 
 #: .\backend\i18n\comment_command.py:72
-#, fuzzy, python-brace-format
-#| msgid "OPTION{dollar_sign}{option}"
+#, python-brace-format
 msgid "OPTION{dollar_sign}{option}\n"
-msgstr "Opsi: {dollar_sign}{option}"
+msgstr "Opsi: {dollar_sign}{option}\n"
 
 #: .\backend\i18n\comment_command.py:78
 #, python-brace-format
