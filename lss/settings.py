@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'backend',
     'chat_bot',
     'mail',
+    'cron',
 ]
 
 LOGGING = {
@@ -279,3 +280,8 @@ FACEBOOK_COMMENT_CAPTURING = {
 CHAT_BOT_FACEBOOK = {
     'VERIFY_TOKEN': 'ALGOTECHLSSMESSENGER'
 }
+
+# cron app
+CRON_CLASSES = [
+    "cron.cron.TestCronJob",
+]
