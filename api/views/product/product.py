@@ -170,7 +170,8 @@ class ProductViewSet(viewsets.ModelViewSet):
             _, _, product = verify_request(
                 api_user, platform_name, platform_id, product_id=pk)
 
-            default_storage.delete(product.image)
+            if product.image:
+                default_storage.delete(product.image)
             product.delete()
         except ApiVerifyError as e:
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)

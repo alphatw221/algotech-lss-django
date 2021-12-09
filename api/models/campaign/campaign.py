@@ -50,6 +50,20 @@ class Campaign(models.Model):
         return self.title
 
 
+class FacebookCampaignSerializer(serializers.Serializer):
+    post_id = serializers.CharField(required=False, default="")
+    live_video_id = serializers.CharField(required=False, default="")
+    embed_url = serializers.CharField(required=False, default="")
+    remark = serializers.CharField(required=False, default="")
+
+
+class YoutubeChannelSerializer(serializers.Serializer):
+    post_id = serializers.CharField(required=False, default="")
+    live_video_id = serializers.CharField(required=False, default="")
+    embed_url = serializers.CharField(required=False, default="")
+    remark = serializers.CharField(required=False, default="")
+
+
 class CampaignSerializer(serializers.ModelSerializer):
     class Meta:
         model = Campaign
@@ -57,9 +71,9 @@ class CampaignSerializer(serializers.ModelSerializer):
         read_only_fields = ['created_at', 'modified_at']
 
     facebook_page = FacebookPageInfoSerializer(read_only=True)
-    facebook_campaign = serializers.JSONField(default=dict)
+    facebook_campaign = FacebookCampaignSerializer()
     youtube_channel = YoutubeChannelInfoSerializer(read_only=True)
-    youtube_campaign = serializers.JSONField(default=dict)
+    youtube_campaign = YoutubeChannelSerializer()
 
     meta = serializers.JSONField(default=dict)
     meta_payment = serializers.JSONField(default=dict)
