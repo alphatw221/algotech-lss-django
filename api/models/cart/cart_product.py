@@ -64,11 +64,12 @@ class CartProductSerializer(serializers.ModelSerializer):
     meta = serializers.JSONField(default=dict)
 
 
-class CartProductSerializerSellerCreate(CartProductSerializer):
+class CartProductSerializerCreate(CartProductSerializer):
 
     class Meta:
         model = CartProduct
-        fields = ["campaign_product",
+        fields = ["campaign",
+                  "campaign_product",
                   "qty",
                   "platform",
                   "customer_id",
@@ -77,7 +78,7 @@ class CartProductSerializerSellerCreate(CartProductSerializer):
         read_only_fields = ['created_at', 'modified_at']
 
 
-class CartProductSerializerSellerUpdate(CartProductSerializer):
+class CartProductSerializerUpdate(CartProductSerializer):
 
     class Meta:
         model = CartProduct

@@ -83,7 +83,7 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
             api_user = request.user.api_users.get(type='user')
             _, campaign = verify_request(
                 api_user, platform_name, platform_id, campaign_id)
-
+            print(campaign)
             campaign_products = campaign.products.all()
 
             if product_status:
@@ -98,18 +98,23 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
             if order_by:
                 campaign_products = campaign_products.order_by(order_by)
 
-            page = self.paginate_queryset(campaign_products)
-            if page is not None:
-                serializer = self.get_serializer(page, many=True)
-                result = self.get_paginated_response(serializer.data)
-                data = result.data
+            if request.query_params.get('page'):
+                page = self.paginate_queryset(campaign_products)
+                if page is not None:
+                    serializer = self.get_serializer(page, many=True)
+                    result = self.get_paginated_response(serializer.data)
+                    data = result.data
+                else:
+                    serializer = self.get_serializer(
+                        campaign_products, many=True)
+                    data = serializer.data
             else:
                 serializer = self.get_serializer(campaign_products, many=True)
                 data = serializer.data
         except ApiVerifyError as e:
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except:
-            return Response({"message": "query error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as e:
+            return Response(str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response(data, status=status.HTTP_200_OK)
 

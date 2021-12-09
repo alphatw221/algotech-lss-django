@@ -61,3 +61,4 @@ class Verify():
         if not platform.campaigns.filter(id=campaign_id).exists():
             raise ApiVerifyError("no campaign found")
         campaign = platform.campaigns.get(id=campaign_id)
+        return campaign
