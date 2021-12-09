@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'backend',
     'chat_bot',
     'mail',
+    'cron',
 ]
 
 LOGGING = {
@@ -227,9 +228,6 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
-# django-cron
-CRON_CLASSES = [
-]
 
 # Live Show Seller info
 WEB_SERVER_URL = "https://place_holder_lss"
@@ -275,7 +273,6 @@ FACEBOOK_COMMENT_CAPTURING = {
     'REST_INTERVAL_SECONDS': 5,
 }
 
-
 # chat_bot app
 CHAT_BOT_FACEBOOK = {
     'VERIFY_TOKEN': 'ALGOTECHLSSMESSENGER'
@@ -289,3 +286,17 @@ GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
     "liveshowseller-b4308e2f9dc6.json"
 )
 GS_URL = "https://storage.googleapis.com/lss_public_bucket/"
+
+# mail app
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+EMAIL_HOST_USER = 'derekhwang@accoladeglobal.net'
+EMAIL_HOST_PASSWORD = 'jyhudyfbvpmewjsc'
+
+# cron app
+CRON_CLASSES = [
+    # "cron.cron.TestCronJob",
+]
