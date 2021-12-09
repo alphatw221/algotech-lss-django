@@ -1,10 +1,10 @@
 from api.models.facebook.facebook_page import (FacebookPage,
-                                               FacebookPageInfoSerializer)
+                                               FacebookPageSerializer)
 from api.models.instagram.instagram_profile import (
     InstagramProfile, InstagramProfileInfoSerializer)
 from api.models.user.user import User, UserSerializer
 from api.models.youtube.youtube_channel import (YoutubeChannel,
-                                                YoutubeChannelInfoSerializer)
+                                                YoutubeChannelSerializer)
 from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
@@ -57,6 +57,22 @@ class UserSubscriptionSerializer(serializers.ModelSerializer):
     meta_payment = serializers.JSONField(default=dict)
     meta_logistic = serializers.JSONField(default=dict)
     meta_country = serializers.JSONField(default=dict)
+
+
+class UserSubscriptionSerializerSimplify(UserSubscriptionSerializer):
+    class Meta:
+        model = UserSubscription
+        fields = ['id', 'meta', 'meta_country', 'name',
+                  'description', 'remark', 'type', 'status']
+        read_only_fields = ['created_at', 'modified_at']
+
+
+class UserSubscriptionSerializerMeta(UserSubscriptionSerializer):
+    class Meta:
+        model = UserSubscription
+        fields = ['meta', 'meta_country', 'meta_logistic',
+                  'meta_payment']
+        read_only_fields = ['created_at', 'modified_at']
 
 
 class UserSubscriptionAdmin(admin.ModelAdmin):

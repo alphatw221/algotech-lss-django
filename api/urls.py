@@ -1,15 +1,31 @@
-from django.urls import include, path
+
+from django.urls import path, include
 from rest_framework import routers
 
-from api.views.auto_response import auto_response
-from api.views.campaign import (campaign, campaign_comment,
-                                campaign_lucky_draw, campaign_product)
-from api.views.cart import cart_product
-from api.views.facebook import facebook_page
-from api.views.order import order
-from api.views.product import product
 from api.views.test import test
-from api.views.user import user, user_group, user_plan
+
+from api.views.user import user
+from api.views.user import user_group
+from api.views.user import user_plan
+from api.views.user import user_subscription
+
+from api.views.auto_response import auto_response
+
+from api.views.campaign import campaign
+from api.views.campaign import campaign_comment
+from api.views.campaign import campaign_lucky_draw
+from api.views.campaign import campaign_product
+
+from api.views.facebook import facebook_page
+
+from api.views.product import product
+
+from api.views.cart import cart_product
+
+from api.views.order import order
+
+from api.views.image import image
+from django.views.decorators.csrf import csrf_exempt
 
 
 def url_setup(urlpatterns):
@@ -25,6 +41,8 @@ def url_setup(urlpatterns):
     router.register(r'user', user.UserViewSet)
     router.register(r'user-group', user_group.UserGroupViewSet)
     router.register(r'user-plan', user_plan.UserPlanViewSet)
+    router.register(r'user-subscription',
+                    user_subscription.UserSubscriptionViewSet)
 
     router.register(r'auto_response', auto_response.AutoResponseViewSet)
 
@@ -43,6 +61,11 @@ def url_setup(urlpatterns):
     router.register(r'cart-product', cart_product.CartProductViewSet)
 
     router.register(r'order', order.OrderViewSet)
+
+    urlpatterns += [
+        path('image/upload/<filename>',
+             image.upload, name='file_upload'),
+    ]
 
     urlpatterns.append(path('', include(router.urls)))
 

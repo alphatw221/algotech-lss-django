@@ -6,6 +6,8 @@ from django.contrib.auth.models import User
 from django.conf import settings
 from api.models.test.sample import Sample, SampleSerializer
 
+from django.core.files.storage import default_storage
+
 
 @api_view(['GET'])
 def test(request):

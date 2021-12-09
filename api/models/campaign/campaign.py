@@ -1,10 +1,11 @@
 from api.models.facebook.facebook_page import (FacebookPage,
-                                               FacebookPageInfoSerializer)
+                                               FacebookPageInfoSerializer, FacebookPageSerializer)
+
 from api.models.instagram.instagram_profile import (
     InstagramProfile, InstagramProfileInfoSerializer)
 from api.models.user.user import User
 from api.models.youtube.youtube_channel import (YoutubeChannel,
-                                                YoutubeChannelInfoSerializer)
+                                                YoutubeChannelInfoSerializer, YoutubeChannelSerializer)
 from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
@@ -57,6 +58,20 @@ class Campaign(models.Model):
         return self.title
 
 
+class FacebookCampaignSerializer(serializers.Serializer):
+    post_id = serializers.CharField(required=False, default="")
+    live_video_id = serializers.CharField(required=False, default="")
+    embed_url = serializers.CharField(required=False, default="")
+    remark = serializers.CharField(required=False, default="")
+
+
+class YoutubeChannelSerializer(serializers.Serializer):
+    post_id = serializers.CharField(required=False, default="")
+    live_video_id = serializers.CharField(required=False, default="")
+    embed_url = serializers.CharField(required=False, default="")
+    remark = serializers.CharField(required=False, default="")
+
+
 class CampaignSerializer(serializers.ModelSerializer):
     class Meta:
         model = Campaign
@@ -64,15 +79,19 @@ class CampaignSerializer(serializers.ModelSerializer):
         read_only_fields = ['created_at', 'modified_at']
 
     facebook_page = FacebookPageInfoSerializer(read_only=True)
-    facebook_campaign = serializers.JSONField(default=dict)
-    instagram_profile = InstagramProfileInfoSerializer(read_only=True)
-    instagram_campaign = serializers.JSONField(default=dict)
+    facebook_campaign = FacebookCampaignSerializer()
     youtube_channel = YoutubeChannelInfoSerializer(read_only=True)
-    youtube_campaign = serializers.JSONField(default=dict)
+    youtube_campaign = YoutubeChannelSerializer()
 
     meta = serializers.JSONField(default=dict)
     meta_payment = serializers.JSONField(default=dict)
     meta_logistic = serializers.JSONField(default=dict)
+
+
+class CampaignSerializerRetreive(CampaignSerializer):
+
+    facebook_page = FacebookPageSerializer(read_only=True)
+    youtube_channel = YoutubeChannelSerializer(read_only=True)
 
 
 class CampaignAdmin(admin.ModelAdmin):

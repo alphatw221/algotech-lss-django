@@ -3,6 +3,7 @@ from api.models.facebook.facebook_page import (FacebookPage,
 from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
+from api.models.facebook.facebook_page import FacebookPage
 
 
 class AutoResponse(models.Model):
@@ -30,7 +31,7 @@ class AutoResponseSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['created_at', 'modified_at']
 
-    facebook_page = FacebookPageSerializer(read_only=True)
+    # facebook_page = FacebookPageSerializer(read_only=True)
     meta = serializers.JSONField(default=dict)
 
 
