@@ -1,5 +1,7 @@
 from api.models.facebook.facebook_page import (FacebookPage,
                                                FacebookPageSerializer)
+from api.models.instagram.instagram_profile import (
+    InstagramProfile, InstagramProfileInfoSerializer)
 from api.models.user.user import User, UserSerializer
 from api.models.youtube.youtube_channel import (YoutubeChannel,
                                                 YoutubeChannelSerializer)
@@ -16,6 +18,8 @@ class UserSubscription(models.Model):
         User, related_name='user_subscriptions')
     facebook_pages = models.ManyToManyField(
         FacebookPage, related_name='user_subscriptions')
+    instagram_profiles = models.ManyToManyField(
+        InstagramProfile, related_name='user_subscriptions')
     youtube_channels = models.ManyToManyField(
         YoutubeChannel, related_name='user_subscriptions')
 
@@ -42,9 +46,11 @@ class UserSubscriptionSerializer(serializers.ModelSerializer):
 
     root_users = UserSerializer(
         many=True, read_only=True)
-    facebook_pages = FacebookPageSerializer(
+    facebook_pages = FacebookPageInfoSerializer(
         many=True, read_only=True)
-    youtube_channels = YoutubeChannelSerializer(
+    instagram_profiles = InstagramProfileInfoSerializer(
+        many=True, read_only=True)
+    youtube_channels = YoutubeChannelInfoSerializer(
         many=True, read_only=True)
 
     meta = serializers.JSONField(default=dict)

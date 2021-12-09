@@ -7,7 +7,6 @@ from rest_framework import serializers
 
 
 class Product(models.Model):
-
     STATUS_CHOICES = [
         ('enabled', 'Enabled'),
         ('disabled', 'Disabled'),
@@ -35,6 +34,8 @@ class Product(models.Model):
         max_length=255, null=True, blank=True, default='0.00')
     currency = models.CharField(
         max_length=255, null=True, blank=True, default=None)
+    currency_sign = models.CharField(
+        max_length=255, null=True, blank=True, default='$')
     points = models.IntegerField(
         null=True, blank=True, default=0)
     model = models.CharField(
@@ -57,9 +58,8 @@ class Product(models.Model):
         blank=False, null=True, default=False)
 
     type = models.CharField(max_length=255, null=True, blank=True)
-
-    status = models.CharField(
-        max_length=255, blank=True, choices=STATUS_CHOICES, default='enabled')
+    status = models.CharField(max_length=255, blank=True,
+                              choices=STATUS_CHOICES, default='enabled')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -67,9 +67,8 @@ class Product(models.Model):
     meta_logistic = models.JSONField(default=dict, null=True, blank=True)
     tag = models.JSONField(default=dict, null=True, blank=True)
 
-
-def __str__(self):
-    return self.name
+    def __str__(self):
+        return self.name
 
 
 class ProductSerializer(serializers.ModelSerializer):

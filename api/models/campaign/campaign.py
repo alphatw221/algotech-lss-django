@@ -1,5 +1,8 @@
 from api.models.facebook.facebook_page import (FacebookPage,
                                                FacebookPageInfoSerializer, FacebookPageSerializer)
+
+from api.models.instagram.instagram_profile import (
+    InstagramProfile, InstagramProfileInfoSerializer)
 from api.models.user.user import User
 from api.models.youtube.youtube_channel import (YoutubeChannel,
                                                 YoutubeChannelInfoSerializer, YoutubeChannelSerializer)
@@ -9,7 +12,6 @@ from rest_framework import serializers
 
 
 class Campaign(models.Model):
-
     class Meta:
         db_table = 'api_campaign'
 
@@ -30,6 +32,8 @@ class Campaign(models.Model):
     ordering_only_activated_products = models.BooleanField(
         blank=False, null=True, default=False)
     currency = models.CharField(max_length=255, null=True, blank=True)
+    currency_sign = models.CharField(
+        max_length=255, null=True, blank=True, default='$')
 
     type = models.CharField(max_length=255, null=True, blank=True)
     status = models.CharField(max_length=255, blank=True,
@@ -40,6 +44,9 @@ class Campaign(models.Model):
     facebook_page = models.ForeignKey(
         FacebookPage, blank=True, null=True, on_delete=models.SET_NULL, related_name='campaigns')
     facebook_campaign = models.JSONField(null=True, blank=True, default=dict)
+    instagram_profile = models.ForeignKey(
+        InstagramProfile, blank=True, null=True, on_delete=models.SET_NULL, related_name='campaigns')
+    instagram_campaign = models.JSONField(null=True, blank=True, default=dict)
     youtube_channel = models.ForeignKey(
         YoutubeChannel, blank=True, null=True, on_delete=models.SET_NULL, related_name='campaigns')
     youtube_campaign = models.JSONField(null=True, blank=True, default=dict)
