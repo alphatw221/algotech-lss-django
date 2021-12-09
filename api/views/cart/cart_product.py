@@ -183,7 +183,6 @@ class CartProductViewSet(viewsets.ModelViewSet):
             data = request.data
             data['campaign'] = campaign_id
             data['campaign_product'] = campaign_product_id
-            date['']
             serializer = CartProductSerializerCreate(data=data)
 
             if not serializer.is_valid():
@@ -196,48 +195,3 @@ class CartProductViewSet(viewsets.ModelViewSet):
             return Response({"message": "error occerd during creating"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
-
-    @action(detail=True, methods=['PUT'], url_path=r'buyer_update_cart_product')
-    def buyer_update_cart_product(self, request, pk=None):
-        try:
-            platform_id = request.query_params.get('platform_id')
-            platform_name = request.query_params.get('platform_name')
-            campaign_id = request.query_params.get('campaign_id')
-            api_user = request.user.api_users.get(type='user')
-
-            _, _, cart_product = verify_request(
-                api_user, platform_name, platform_id, campaign_id, cart_product_id=pk)
-
-            # TODO 檢查庫存 狀態
-            serializer = CartProductSerializerUpdate(
-                cart_product, data=request.data, partial=True)
-            if not serializer.is_valid():
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            serializer.save()
-
-        except ApiVerifyError as e:
-            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except:
-            return Response({"message": "error occerd during updating"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    @action(detail=True, methods=['DELETE'], url_path=r'buyer_delete_cart_product')
-    def buyer_delete_cart_product(self, request, pk=None):
-        try:
-            platform_id = request.query_params.get('platform_id')
-            platform_name = request.query_params.get('platform_name')
-            campaign_id = request.query_params.get('campaign_id')
-            api_user = request.user.api_users.get(type='user')
-
-            _, _, cart_product = verify_request(
-                api_user, platform_name, platform_id, campaign_id, cart_product_id=pk)
-
-            cart_product.delete()
-
-        except ApiVerifyError as e:
-            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except:
-            return Response({"message": "error occerd during deleting"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-        return Response({"message": "delete success"}, status=status.HTTP_200_OK)
