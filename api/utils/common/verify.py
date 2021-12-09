@@ -16,7 +16,6 @@ class Verify():
     def is_admin(api_user, platform_name, platform):
         try:
             if platform_name == 'facebook':
-                print('in')
                 status_code, response = api_fb_get_me_accounts(
                     api_user.facebook_info['token'])
                 for item in response['data']:

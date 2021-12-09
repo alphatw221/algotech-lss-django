@@ -64,7 +64,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
             key_word = request.query_params.get('key_word')
             api_user = request.user.api_users.get(type='user')
 
-            platform, _ = verify_request(api_user, platform_name, platform_id)
+            platform = verify_request(api_user, platform_name, platform_id)
 
             campaigns = platform.campaigns.all()
             if campaign_status == 'history':
@@ -87,8 +87,8 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         except ApiVerifyError as e:
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except:
-            return Response({"message": "query error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as e:
+            return Response(str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response(data, status=status.HTTP_200_OK)
 
@@ -99,7 +99,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
             platform_id = request.query_params.get('platform_id')
             api_user = request.user.api_users.get(type='user')
 
-            platform, _ = verify_request(api_user, platform_name, platform_id)
+            platform = verify_request(api_user, platform_name, platform_id)
 
             data = request.data
             data['created_by'] = api_user.id
