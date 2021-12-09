@@ -1,10 +1,10 @@
 from api.models.facebook.facebook_page import (FacebookPage,
-                                               FacebookPageSerializer)
+                                               FacebookPageInfoSerializer)
 from api.models.instagram.instagram_profile import (
     InstagramProfile, InstagramProfileInfoSerializer)
 from api.models.user.user import User, UserSerializer
 from api.models.youtube.youtube_channel import (YoutubeChannel,
-                                                YoutubeChannelSerializer)
+                                                YoutubeChannelInfoSerializer)
 from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
