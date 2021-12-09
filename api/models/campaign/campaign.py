@@ -9,6 +9,7 @@ from rest_framework import serializers
 
 
 class Campaign(models.Model):
+
     class Meta:
         db_table = 'api_campaign'
 
