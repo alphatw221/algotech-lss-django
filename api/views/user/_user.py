@@ -95,10 +95,10 @@ def seller_login_helper(self, request, pk=None):
         api_user = User.objects.create(
             name=facebook_name, email=email, type='user', status='new', auth_user=auth_user)
 
-    print(api_user.status)
     if api_user.status != 'valid':
         return Response({"message": "account not activated"}, status=status.HTTP_401_UNAUTHORIZED)
 
+    # TODO use serializer update to avoid error after modify model field
     api_user.facebook_info["token"] = facebook_user_token
     api_user.facebook_info["id"] = facebook_id
     api_user.facebook_info["name"] = facebook_name

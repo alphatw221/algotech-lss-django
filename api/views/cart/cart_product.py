@@ -4,16 +4,21 @@ from api.models.campaign.campaign import Campaign
 from api.models.cart.cart_product import CartProduct, CartProductSerializer, CartProductSerializerCreate, CartProductSerializerUpdate
 from rest_framework.response import Response
 from rest_framework.decorators import action
-
+from backend.cart.cart.manager import CartManager
 from api.utils.common.verify import Verify
 from api.utils.common.verify import ApiVerifyError
 
 
-def verify_seller_request(api_user, platform_name, platform_id, campaign_id, cart_product_id=None):
+def verify_seller_request(api_user, platform_name, platform_id, campaign_id, campaign_product_id=None, cart_product_id=None):
     Verify.verify_user(api_user)
     platform = Verify.get_platform(api_user, platform_name, platform_id)
     campaign = Verify.get_campaign(platform, campaign_id)
 
+    if campaign_product_id:
+        if not campaign.products.filter(id=campaign_product_id).exists():
+            raise ApiVerifyError('no campaign_product found')
+        campaign_product = campaign.products.get(id=campaign_product_id)
+        return platform, campaign, campaign_product
     if cart_product_id:
         if not campaign.cart_products.filter(id=cart_product_id).exists():
             raise ApiVerifyError('no campaign product found')
@@ -85,7 +90,7 @@ class CartProductViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['POST'], url_path=r'seller_create_cart_product')
+    @action(detail=False, methods=['GET'], url_path=r'seller_create_cart_product')
     def seller_create_cart_product(self, request):
         try:
             platform_id = request.query_params.get('platform_id')
@@ -93,31 +98,28 @@ class CartProductViewSet(viewsets.ModelViewSet):
             campaign_id = request.query_params.get('campaign_id')
             campaign_product_id = request.query_params.get(
                 'campaign_product_id')
+            qty = int(request.query_params.get('qty'))
+            platform_user_id = request.query_params.get('platform_user_id')
+            platform_user_name = request.query_params.get('platform_user_name')
             api_user = request.user.api_users.get(type='user')
 
-            _, campaign = verify_seller_request(
-                api_user, platform_name, platform_id, campaign_id)
+            _, campaign, campaign_product = verify_seller_request(
+                api_user, platform_name, platform_id, campaign_id, campaign_product_id=campaign_product_id)
 
-            if not campaign.products.filter(id=campaign_product_id).exists():
-                raise ApiVerifyError('no campaign_product found')
-
-            # TODO 檢查庫存 狀態
-
-            data = request.data
-            data['campaign'] = campaign_id
-            data['campaign_product'] = campaign_product_id
-            serializer = CartProductSerializerCreate(data=data)
-
-            if not serializer.is_valid():
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            serializer.save()
-
+            cart_product_request = CartManager.create_cart_product_request(
+                campaign, platform_name, platform_user_id, platform_user_name, {
+                    campaign_product: qty,
+                }
+            )
+            cart_product_request = CartManager.process(cart_product_request)
+            print(cart_product_request)
         except ApiVerifyError as e:
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except:
-            return Response({"message": "error occerd during creating"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        # except Exception as e:
+        #     print(str(e))
+        #     return Response({"message": "error occerd during creating"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response('test', status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['PUT'], url_path=r'seller_update_cart_product')
     def seller_update_cart_product(self, request, pk=None):
