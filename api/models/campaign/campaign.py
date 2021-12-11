@@ -82,7 +82,9 @@ class CampaignSerializer(serializers.ModelSerializer):
     facebook_campaign = FacebookCampaignSerializer()
     youtube_channel = YoutubeChannelInfoSerializer(read_only=True)
     youtube_campaign = YoutubeChannelSerializer()
-
+    instagram_profile=InstagramProfileInfoSerializer(read_only=True)
+    instagram_campaign=InstagramProfileSerializer()
+    
     meta = serializers.JSONField(default=dict)
     meta_payment = serializers.JSONField(default=dict)
     meta_logistic = serializers.JSONField(default=dict)
