@@ -80,11 +80,11 @@ class CampaignSerializer(serializers.ModelSerializer):
         read_only_fields = ['created_at', 'modified_at']
 
     facebook_page = FacebookPageInfoSerializer(read_only=True)
-    facebook_campaign = FacebookCampaignSerializer()
+    facebook_campaign = FacebookCampaignSerializer(default=dict)
     youtube_channel = YoutubeChannelInfoSerializer(read_only=True)
-    youtube_campaign = YoutubeCampaignSerializer()
+    youtube_campaign = YoutubeCampaignSerializer(default=dict)
     instagram_profile = InstagramProfileInfoSerializer(read_only=True)
-    instagram_campaign = InstagramCampaignSerializer()
+    instagram_campaign = InstagramCampaignSerializer(default=dict)
 
     meta = serializers.JSONField(default=dict)
     meta_payment = serializers.JSONField(default=dict)
