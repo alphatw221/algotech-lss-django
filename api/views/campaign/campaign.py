@@ -1,6 +1,6 @@
 from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated
-from api.models.campaign.campaign import Campaign, CampaignSerializer, CampaignSerializerRetreive
+from api.models.campaign.campaign import Campaign, CampaignSerializer, CampaignSerializerRetreive, CampaignSerializerCreate
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -101,12 +101,14 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
             platform = verify_request(api_user, platform_name, platform_id)
 
+            print(platform)
             data = request.data
             data['created_by'] = api_user.id
             # TODO 之後要改寫
             data['facebook_page'] = platform.id if platform_name == 'facebook' else None
             data['youtube_channel'] = platform.id if platform_name == 'youtube' else None
-            serializer = self.get_serializer(data=data)
+            data['instagram_profile'] = platform.id if platform_name == 'instagram' else None
+            serializer = CampaignSerializerCreate(data=data)
 
             if not serializer.is_valid():
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
