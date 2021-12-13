@@ -138,10 +138,5 @@ msgstr "運費：{dollar_sign}{delivery}\n"
 msgid "OPTION{dollar_sign}{option}\n"
 msgstr "額外運費：{dollar_sign}{option}\n"
 
-#: .\backend\i18n\comment_command.py:78
-#, python-brace-format
-msgid "DETAIL{link}"
-msgstr "查看購物車：{link}"
-
 #~ msgid "MESSAGE_HEADER"
 #~ msgstr "訂單明細："
