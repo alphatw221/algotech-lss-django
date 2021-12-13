@@ -69,7 +69,7 @@ class YoutubeCampaignSerializer(serializers.Serializer):
 
 
 class InstagramCampaignSerializer(serializers.Serializer):
-    media_id = serializers.CharField(required=False, default="")
+    live_media_id = serializers.CharField(required=False, default="")
     remark = serializers.CharField(required=False, default="")
 
 

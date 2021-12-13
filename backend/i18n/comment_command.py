@@ -38,19 +38,21 @@ def i18n_get_comment_command_cart(comment: CampaignComment):
 def _i18n_get_cart_products(cart_products: list[CartProduct]):
     items = []
     subtotal = 0
-    for cart_product in cart_products:
+    count = len(cart_products)
+    digits = len(str(count))
+    for i, cart_product in enumerate(cart_products):
         name = getattr(cart_product.campaign_product, 'name', '')
         qty = getattr(cart_product, 'qty', 0)
         total = Decimal(
             getattr(cart_product.campaign_product, 'price', '0')) * qty
-        items.append(
-            _('ITEM_INFO{name}{qty}{dollar_sign}{total}\n').format(
-                name=name,
-                qty=qty,
-                dollar_sign=cart_product.campaign_product.currency_sign,
-                total=total
-            )
-        )
+        items.append(f"{str(i).zfill(digits)}. " +
+                     _('ITEM_INFO{name}{qty}{dollar_sign}{total}\n').format(
+                         name=name,
+                         qty=qty,
+                         dollar_sign=cart_product.campaign_product.currency_sign,
+                         total=total
+                     )
+                     )
         subtotal += total
     return items, subtotal
 
