@@ -2,7 +2,7 @@ from api.models.facebook.facebook_page import (FacebookPage,
                                                FacebookPageInfoSerializer, FacebookPageSerializer)
 
 from api.models.instagram.instagram_profile import (
-    InstagramProfile, InstagramProfileInfoSerializer)
+    InstagramProfileSerializer, InstagramProfileInfoSerializer)
 from api.models.user.user import User
 from api.models.youtube.youtube_channel import (YoutubeChannel,
                                                 YoutubeChannelInfoSerializer, YoutubeChannelSerializer)
@@ -82,9 +82,9 @@ class CampaignSerializer(serializers.ModelSerializer):
     facebook_campaign = FacebookCampaignSerializer()
     youtube_channel = YoutubeChannelInfoSerializer(read_only=True)
     youtube_campaign = YoutubeChannelSerializer()
-    instagram_profile=InstagramProfileInfoSerializer(read_only=True)
-    instagram_campaign=InstagramProfileSerializer()
-    
+    instagram_profile = InstagramProfileInfoSerializer(read_only=True)
+    instagram_campaign = InstagramProfileSerializer()
+
     meta = serializers.JSONField(default=dict)
     meta_payment = serializers.JSONField(default=dict)
     meta_logistic = serializers.JSONField(default=dict)
