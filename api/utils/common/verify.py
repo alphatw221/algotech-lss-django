@@ -61,3 +61,10 @@ class Verify():
             raise ApiVerifyError("no campaign found")
         campaign = platform.campaigns.get(id=campaign_id)
         return campaign
+
+    @staticmethod
+    def get_campaign_product(campaign, campaign_product_id):
+        if not campaign.products.filter(id=campaign_product_id).exists():
+            raise ApiVerifyError('no campaign product found')
+        campaign_product = campaign.products.get(id=campaign_product_id)
+        return campaign_product

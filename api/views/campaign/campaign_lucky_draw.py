@@ -1,7 +1,31 @@
 from api.models.campaign.campaign_lucky_draw import (
     CampaignLuckyDraw, CampaignLuckyDrawSerializer)
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
+
+from api.utils.common.verify import Verify
+from api.utils.common.verify import ApiVerifyError
+
+from rest_framework.decorators import action
+from rest_framework.response import Response
+
+from backend.campaign.campaign_lucky_draw.manager import CampaignLuckyDrawManager
+from backend.campaign.campaign_lucky_draw.event import DrawFromCampaignLikesEvent, DrawFromCampaignCommentsEvent, DrawFromCartProductsEvent
+
+
+def verify_request(api_user, platform_name, platform_id, campaign_id, prize_campaign_product_id, campaign_product_id=None):
+    Verify.verify_user(api_user)
+    platform = Verify.get_platform(api_user, platform_name, platform_id)
+    campaign = Verify.get_campaign(platform, campaign_id)
+    prize_campaign_product = Verify.get_campaign_product(
+        campaign, prize_campaign_product_id)
+
+    if campaign_product_id:
+        campaign_product_id = Verify.get_campaign_product(
+            campaign, campaign_product_id)
+        return platform, campaign, prize_campaign_product, campaign_product_id
+
+    return platform, campaign, prize_campaign_product
 
 
 class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
@@ -9,3 +33,99 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
     queryset = CampaignLuckyDraw.objects.all().order_by('id')
     serializer_class = CampaignLuckyDrawSerializer
     filterset_fields = []
+
+    # lucky_draw = CampaignLuckyDrawManager.process(
+    #     c, DrawFromCampaignLikesEvent(c), prize_cp, 1,
+    # )
+
+    # lucky_draw = CampaignLuckyDrawManager.process(
+    #     c, DrawFromCampaignCommentsEvent(c, 'order'), prize_cp, 1,
+    # )
+
+    # lucky_draw = CampaignLuckyDrawManager.process(
+    #     c, DrawFromCartProductsEvent(c, cp), prize_cp, 1,
+    # )
+
+    @action(detail=True, methods=['GET'], url_path=r'lucky_draw_likes')
+    def lucky_draw_likes(self, request, pk=None):
+        try:
+            platform_id = request.query_params.get('platform_id')
+            platform_name = request.query_params.get('platform_name')
+            campaign_id = request.query_params.get('campaign_id')
+            prize_campaign_product_id = request.query_params.get(
+                'prize_campaign_product_id')
+            api_user = request.user.api_users.get(type='user')
+            qty = request.user.api_users.get(
+                type='qty') if request.user.api_users.get(type='qty') else 1
+
+            _, campaign, prize_campaign_product = verify_request(
+                api_user, platform_name, platform_id, campaign_id, prize_campaign_product_id)
+
+            lucky_draw = CampaignLuckyDrawManager.process(
+                campaign, DrawFromCampaignLikesEvent(
+                    campaign), prize_campaign_product, qty,
+            )
+
+        except ApiVerifyError as e:
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            print(str(e))
+            return Response({"message": "error occerd during draw"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response('test', status=status.HTTP_200_OK)
+
+    # @action(detail=True, methods=['GET'], url_path=r'lucky_draw_comment')
+    # def lucky_draw_comment(self, request, pk=None):
+    #     try:
+    #         platform_id = request.query_params.get('platform_id')
+    #         platform_name = request.query_params.get('platform_name')
+    #         campaign_id = request.query_params.get('campaign_id')
+    #         prize_campaign_product_id = request.query_params.get(
+    #             'prize_campaign_product_id')
+    #         api_user = request.user.api_users.get(type='user')
+    #         qty = request.user.api_users.get(
+    #             type='qty') if request.user.api_users.get(type='qty') else 1
+
+    #         _, campaign, prize_campaign_product = verify_request(
+    #             api_user, platform_name, platform_id, campaign_id, prize_campaign_product_id)
+
+    #         lucky_draw = CampaignLuckyDrawManager.process(
+    #             campaign, DrawFromCampaignCommentsEvent(
+    #                 c, 'order'), prize_campaign_product, qty,
+    #         )
+
+    #     except ApiVerifyError as e:
+    #         return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    #     except Exception as e:
+    #         print(str(e))
+    #         return Response({"message": "error occerd during draw"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    #     return Response('test', status=status.HTTP_200_OK)
+
+    # @action(detail=True, methods=['GET'], url_path=r'lucky_draw_cart')
+    # def lucky_draw_cart(self, request, pk=None):
+    #     try:
+    #         platform_id = request.query_params.get('platform_id')
+    #         platform_name = request.query_params.get('platform_name')
+    #         campaign_id = request.query_params.get('campaign_id')
+    #         prize_campaign_product_id = request.query_params.get(
+    #             'prize_campaign_product_id')
+    #         api_user = request.user.api_users.get(type='user')
+    #         qty = request.user.api_users.get(
+    #             type='qty') if request.user.api_users.get(type='qty') else 1
+
+    #         _, campaign, prize_campaign_product = verify_request(
+    #             api_user, platform_name, platform_id, campaign_id, prize_campaign_product_id)
+
+    #         lucky_draw = CampaignLuckyDrawManager.process(
+    #             campaign, DrawFromCampaignCommentsEvent(
+    #                 c, 'order'), prize_campaign_product, qty,
+    #         )
+
+    #     except ApiVerifyError as e:
+    #         return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    #     except Exception as e:
+    #         print(str(e))
+    #         return Response({"message": "error occerd during draw"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    #     return Response('test', status=status.HTTP_200_OK)
