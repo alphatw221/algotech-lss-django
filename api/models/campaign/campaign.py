@@ -60,15 +60,16 @@ class Campaign(models.Model):
 
 class FacebookCampaignSerializer(serializers.Serializer):
     post_id = serializers.CharField(required=False, default="")
-    live_video_id = serializers.CharField(required=False, default="")
-    embed_url = serializers.CharField(required=False, default="")
     remark = serializers.CharField(required=False, default="")
 
 
-class YoutubeChannelSerializer(serializers.Serializer):
-    post_id = serializers.CharField(required=False, default="")
+class YoutubeCampaignSerializer(serializers.Serializer):
     live_video_id = serializers.CharField(required=False, default="")
-    embed_url = serializers.CharField(required=False, default="")
+    remark = serializers.CharField(required=False, default="")
+
+
+class InstagramCampaignSerializer(serializers.Serializer):
+    media_id = serializers.CharField(required=False, default="")
     remark = serializers.CharField(required=False, default="")
 
 
@@ -81,9 +82,9 @@ class CampaignSerializer(serializers.ModelSerializer):
     facebook_page = FacebookPageInfoSerializer(read_only=True)
     facebook_campaign = FacebookCampaignSerializer()
     youtube_channel = YoutubeChannelInfoSerializer(read_only=True)
-    youtube_campaign = YoutubeChannelSerializer()
+    youtube_campaign = YoutubeCampaignSerializer()
     instagram_profile = InstagramProfileInfoSerializer(read_only=True)
-    instagram_campaign = InstagramProfileSerializer()
+    instagram_campaign = InstagramCampaignSerializer()
 
     meta = serializers.JSONField(default=dict)
     meta_payment = serializers.JSONField(default=dict)
@@ -94,6 +95,7 @@ class CampaignSerializerRetreive(CampaignSerializer):
 
     facebook_page = FacebookPageSerializer(read_only=True)
     youtube_channel = YoutubeChannelSerializer(read_only=True)
+    instagram_profile = InstagramProfileSerializer(read_only=True)
 
 
 class CampaignAdmin(admin.ModelAdmin):
