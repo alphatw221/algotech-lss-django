@@ -2,7 +2,7 @@ from api.models.facebook.facebook_page import (FacebookPage,
                                                FacebookPageInfoSerializer, FacebookPageSerializer)
 
 from api.models.instagram.instagram_profile import (
-    InstagramProfileSerializer, InstagramProfileInfoSerializer)
+    InstagramProfile, InstagramProfileSerializer, InstagramProfileInfoSerializer)
 from api.models.user.user import User
 from api.models.youtube.youtube_channel import (YoutubeChannel,
                                                 YoutubeChannelInfoSerializer, YoutubeChannelSerializer)
