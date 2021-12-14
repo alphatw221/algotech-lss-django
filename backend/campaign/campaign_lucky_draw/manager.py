@@ -45,6 +45,7 @@ class CampaignLuckyDrawManager:
     @staticmethod
     def _handle_cart_product_requests(lucky_draw: CampaignLuckyDraw, event: CampaignLuckyDrawEvent,
                                       cart_product_requests: list[CartProductRequest]):
+        response_result = []
         for cart_product_request in cart_product_requests:
             cprv = CartProductRequestValidatorLuckyDraw()
             cprp = CartProductRequestProcessorLuckyDraw(
@@ -52,7 +53,6 @@ class CampaignLuckyDrawManager:
             cprv.process(cart_product_request)
             cprp.process(cart_product_request)
 
-            response_result = []
             for item in cart_product_request.get_items():
                 if item.state == RequestState.ADDED:
                     try:
