@@ -11,6 +11,22 @@ from api.models.youtube.youtube_channel import YoutubeChannel
 from datetime import datetime
 from backend.api.facebook.user import api_fb_get_me_accounts
 
+from rest_framework.parsers import MultiPartParser
+import json
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+
+from api.utils.common.verify import Verify
+from api.utils.common.verify import ApiVerifyError
+
+
+def verify_request(api_user, platform_name, platform_id):
+    Verify.verify_user(api_user)
+    platform = Verify.get_platform(api_user, platform_name, platform_id)
+    user_subscription = Verify.get_user_subscription(platform)
+
+    return platform, user_subscription
+
 
 class UserSubscriptionPagination(PageNumberPagination):
 
@@ -210,6 +226,70 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             serializer = UserSubscriptionSerializerMeta(user_subscription)
         except:
             return Response({"message": "error occerd during process"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['POST'], url_path=r'update_payment', parser_classes=(MultiPartParser,))
+    def update_payment(self, request):
+        try:
+            platform_id = request.query_params.get('platform_id')
+            platform_name = request.query_params.get('platform_name')
+            api_user = request.user.api_users.get(type='user')
+
+            _, user_subscription = verify_request(
+                api_user, platform_name, platform_id)
+
+            if 'image_1' in request.data:
+                image1 = request.data['image_1']
+                image1_path = default_storage.save(
+                    f'{user_subscription.id}/payment/{image1.name}', ContentFile(image1.read()))
+            if 'image_2' in request.data:
+                image2 = request.data['image_2']
+                image2_path = default_storage.save(
+                    f'{user_subscription.id}/payment/{image2.name}', ContentFile(image2.read()))
+            if 'image_3' in request.data:
+                image3 = request.data['image_3']
+                image3_path = default_storage.save(
+                    f'{user_subscription.id}/payment/{image3.name}', ContentFile(image3.read()))
+
+            text = request.data['text']
+            data = json.loads(text)
+
+            # TODO ...
+
+            serializer = UserSubscriptionSerializer(
+                user_subscription, data={"meta_payment": data}, partial=True)
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            user_subscription = serializer.save()
+
+        except ApiVerifyError as e:
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except:
+            return Response({"message": "error occerd during creating"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['POST'], url_path=r'update_logistic')
+    def update_logistic(self, request):
+        try:
+            platform_id = request.query_params.get('platform_id')
+            platform_name = request.query_params.get('platform_name')
+            api_user = request.user.api_users.get(type='user')
+
+            _, user_subscription = verify_request(
+                api_user, platform_name, platform_id)
+
+            serializer = UserSubscriptionSerializer(
+                user_subscription, data={"meta_logistic": request.data}, partial=True)
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            user_subscription = serializer.save()
+
+        except ApiVerifyError as e:
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except:
+            return Response({"message": "error occerd during creating"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 

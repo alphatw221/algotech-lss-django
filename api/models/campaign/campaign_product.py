@@ -100,7 +100,6 @@ class CampaignProductSerializerUpdate(CampaignProductSerializer):
     class Meta:
         model = CampaignProduct
         exclude = ['campaign', 'created_by']
-        # TODO
         read_only_fields = ['created_at', 'modified_at',
                             'qty_sold']
 
