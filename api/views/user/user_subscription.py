@@ -229,8 +229,91 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['POST'], url_path=r'update_payment', parser_classes=(MultiPartParser,))
-    def update_payment(self, request):
+    # Direct Payment
+    # HitPay
+    # PayPal
+    # First Data IPG (Credit Card)
+
+    @action(detail=False, methods=['POST'], url_path=r'update_hitpay')
+    def update_hitpay(self, request):
+        try:
+            platform_id = request.query_params.get('platform_id')
+            platform_name = request.query_params.get('platform_name')
+            api_user = request.user.api_users.get(type='user')
+
+            _, user_subscription = verify_request(
+                api_user, platform_name, platform_id)
+
+            meta_payment = user_subscription.meta_payment
+            meta_payment['hitpay'] = request.data
+
+            serializer = UserSubscriptionSerializer(
+                user_subscription, data={"meta_payment": meta_payment}, partial=True)
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            user_subscription = serializer.save()
+
+        except ApiVerifyError as e:
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except:
+            return Response({"message": "error occerd during creating"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['POST'], url_path=r'update_paypal')
+    def update_paypal(self, request):
+        try:
+            platform_id = request.query_params.get('platform_id')
+            platform_name = request.query_params.get('platform_name')
+            api_user = request.user.api_users.get(type='user')
+
+            _, user_subscription = verify_request(
+                api_user, platform_name, platform_id)
+
+            meta_payment = user_subscription.meta_payment
+            meta_payment['paypal'] = request.data
+
+            serializer = UserSubscriptionSerializer(
+                user_subscription, data={"meta_payment": meta_payment}, partial=True)
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            user_subscription = serializer.save()
+
+        except ApiVerifyError as e:
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except:
+            return Response({"message": "error occerd during creating"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['POST'], url_path=r'update_firstdata')
+    def update_firstdata(self, request):
+        try:
+            platform_id = request.query_params.get('platform_id')
+            platform_name = request.query_params.get('platform_name')
+            api_user = request.user.api_users.get(type='user')
+
+            _, user_subscription = verify_request(
+                api_user, platform_name, platform_id)
+
+            meta_payment = user_subscription.meta_payment
+            meta_payment['firstdata'] = request.data
+
+            serializer = UserSubscriptionSerializer(
+                user_subscription, data={"meta_payment": meta_payment}, partial=True)
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            user_subscription = serializer.save()
+
+        except ApiVerifyError as e:
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except:
+            return Response({"message": "error occerd during creating"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['POST'], url_path=r'update_direct_payment', parser_classes=(MultiPartParser,))
+    def update_direct_payment(self, request):
         try:
             platform_id = request.query_params.get('platform_id')
             platform_name = request.query_params.get('platform_name')
