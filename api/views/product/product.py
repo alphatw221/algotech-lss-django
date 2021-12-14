@@ -137,25 +137,35 @@ class ProductViewSet(viewsets.ModelViewSet):
 
         return Response(self.get_serializer(product).data, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['PUT'], url_path=r'update_product')
+    @action(detail=True, methods=['PUT'], url_path=r'update_product', parser_classes=(MultiPartParser,))
     def update_product(self, request, pk=None):
         try:
             platform_id = request.query_params.get('platform_id')
             platform_name = request.query_params.get('platform_name')
             api_user = request.user.api_users.get(type='user')
 
-            _, _, product = verify_request(
+            _, user_subscription, product = verify_request(
                 api_user, platform_name, platform_id, product_id=pk)
 
+            if 'image' in request.data:
+                image = request.data['image']
+                image_path = default_storage.save(
+                    f'{user_subscription.id}/product/{product.id}/{image.name}', ContentFile(image.read()))
+
+            text = request.data['text']
+            data = json.loads(text)
+            data['image'] = image_path
+
             serializer = ProductSerializerUpdate(
-                product, data=request.data, partial=True)
+                product, data=data, partial=True)
             if not serializer.is_valid():
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             serializer.save()
 
         except ApiVerifyError as e:
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except:
+        except Exception as e:
+            print(e)
             return Response({"message": "error occerd during updating"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -170,8 +180,9 @@ class ProductViewSet(viewsets.ModelViewSet):
             _, _, product = verify_request(
                 api_user, platform_name, platform_id, product_id=pk)
 
-            if product.image:
-                default_storage.delete(product.image)
+            # TODO put it into private bucket
+            # if product.image:
+            #     default_storage.delete(product.image)
             product.delete()
         except ApiVerifyError as e:
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
