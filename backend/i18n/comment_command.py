@@ -27,8 +27,8 @@ def i18n_get_comment_command_cart(comment: CampaignComment):
 
     text = [_('COMMENT_COMMAND_CART_MESSAGE_HEADER'), '\n-----\n']
     text.extend(cart_products)
-    text.append(_('TOTAL{dollar_sign}{total}\n'
-                  ).format(total=subtotal, dollar_sign=comment.campaign.currency_sign))
+    text.append(_('-----\nTOTAL{dollar_sign}{total}\n'
+                  ).format(total="{:.2f}".format(subtotal), dollar_sign=comment.campaign.currency_sign))
     text.append(_('DETAIL{link}\n'
                   ).format(link=settings.SHOPPING_CART_URL))
 
@@ -40,7 +40,7 @@ def _i18n_get_cart_products(cart_products: list[CartProduct]):
     subtotal = 0
     count = len(cart_products)
     digits = 2 if count < 100 else len(str(count))
-    for i, cart_product in enumerate(cart_products):
+    for i, cart_product in enumerate(cart_products, 1):
         name = getattr(cart_product.campaign_product, 'name', '')
         qty = getattr(cart_product, 'qty', 0)
         total = Decimal(
@@ -51,9 +51,11 @@ def _i18n_get_cart_products(cart_products: list[CartProduct]):
                 name=name,
                 qty=qty,
                 dollar_sign=cart_product.campaign_product.currency_sign,
-                total=total
+                total="{:.2f}".format(total)
             )
         )
+        if (i < count):
+            items.append('\n')
         subtotal += total
     return items, subtotal
 
