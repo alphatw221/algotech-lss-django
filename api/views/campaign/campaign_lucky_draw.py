@@ -82,8 +82,8 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
 
         return Response(response_json, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['GET'], url_path=r'lucky_draw_comment')
-    def lucky_draw_comment(self, request, pk=None):
+    @action(detail=False, methods=['GET'], url_path=r'lucky_draw_comment')
+    def lucky_draw_comment(self, request):
         try:
             platform_id = request.query_params.get('platform_id')
             platform_name = request.query_params.get('platform_name')
@@ -115,8 +115,8 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
 
         return Response(response_json, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['GET'], url_path=r'lucky_draw_cart')
-    def lucky_draw_cart(self, request, pk=None):
+    @action(detail=False, methods=['GET'], url_path=r'lucky_draw_cart')
+    def lucky_draw_cart(self, request):
         try:
             platform_id = request.query_params.get('platform_id')
             platform_name = request.query_params.get('platform_name')
