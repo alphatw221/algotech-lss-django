@@ -47,41 +47,21 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['GET'], url_path=r'root_add_platform')
     def root_add_platform(self, request):
-
-        platform_name = request.query_params.get('platform_name')
-        platform_id = request.query_params.get('platform_id')
-        user_subscription_id = request.query_params.get('user_subscription_id')
-
-        api_user = request.user.api_users.get(type='user')
-        if not api_user:
-            return Response({"message": "no user found"}, status=status.HTTP_400_BAD_REQUEST)
-        elif api_user.status != "valid":
-            return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
-
-        if platform_name not in platform_dict:
-            return Response({"message": "no platfrom name found"}, status=status.HTTP_400_BAD_REQUEST)
-
-        if not platform_dict[platform_name].objects.filter(id=platform_id).exists():
-            return Response({"message": "no platfrom found"}, status=status.HTTP_400_BAD_REQUEST)
-
-        platform = platform_dict[platform_name].objects.get(
-            id=platform_id)
-
-        # TODO 檢查root is platform admin
-        if not api_user.user_subscriptions.filter(id=user_subscription_id).exists():
-            return Response({"message": "no user_subscription found"}, status=status.HTTP_400_BAD_REQUEST)
-
-        user_subscription = api_user.user_subscriptions.get(
-            id=user_subscription_id)
-
-        if platform.user_subscriptions.filter(id=user_subscription.id).exists():
-            return Response({"message": "platfom already in user_subscription"}, status=status.HTTP_400_BAD_REQUEST)
-
         try:
+            platform_name = request.query_params.get('platform_name')
+            platform_id = request.query_params.get('platform_id')
+
+            api_user = request.user.api_users.get(type='user')
+            platform, user_subscription = verify_request(
+                api_user, platform_name, platform_id)
+
             if platform_name == 'facebook':
                 user_subscription.facebook_pages.add(platform)
             elif platform_name == 'youtube':
                 pass
+
+        except ApiVerifyError as e:
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except:
             return Response({"message": "error occerd during process"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -89,41 +69,20 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['GET'], url_path=r'root_remove_platform')
     def root_remove_platform(self, request):
-
-        platform_name = request.query_params.get('platform_name')
-        platform_id = request.query_params.get('platform_id')
-        user_subscription_id = request.query_params.get('user_subscription_id')
-
-        api_user = request.user.api_users.get(type='user')
-        if not api_user:
-            return Response({"message": "no user found"}, status=status.HTTP_400_BAD_REQUEST)
-        elif api_user.status != "valid":
-            return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
-
-        if platform_name not in platform_dict:
-            return Response({"message": "no platfrom name found"}, status=status.HTTP_400_BAD_REQUEST)
-
-        if not platform_dict[platform_name].objects.filter(id=platform_id).exists():
-            return Response({"message": "no platfrom found"}, status=status.HTTP_400_BAD_REQUEST)
-
-        platform = platform_dict[platform_name].objects.get(
-            id=platform_id)
-
-        # TODO 檢查root is platform admin
-        if not api_user.user_subscriptions.filter(id=user_subscription_id).exists():
-            return Response({"message": "no user_subscription found"}, status=status.HTTP_400_BAD_REQUEST)
-
-        user_subscription = api_user.user_subscriptions.get(
-            id=user_subscription_id)
-
-        if not platform.user_subscriptions.filter(id=user_subscription.id).exists():
-            return Response({"message": "platfom not in user_subscription"}, status=status.HTTP_400_BAD_REQUEST)
-
         try:
+            platform_name = request.query_params.get('platform_name')
+            platform_id = request.query_params.get('platform_id')
+
+            api_user = request.user.api_users.get(type='user')
+            platform, user_subscription = verify_request(
+                api_user, platform_name, platform_id)
+
             if platform_name == 'facebook':
                 user_subscription.facebook_pages.remove(platform)
             elif platform_name == 'youtube':
                 pass
+        except ApiVerifyError as e:
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except:
             return Response({"message": "error occerd during process"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -197,42 +156,20 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['GET'], url_path=r'get_meta')
     def get_meta(self, request):
-
-        platform_id = request.query_params.get('platform_id')
-        platform_name = request.query_params.get('platform_name')
-
-        api_user = request.user.api_users.get(type='user')
-        if not api_user:
-            return Response({"message": "no user found"}, status=status.HTTP_400_BAD_REQUEST)
-        elif api_user.status != "valid":
-            return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
-
-        if platform_name not in platform_dict:
-            return Response({"message": "no platfrom name found"}, status=status.HTTP_400_BAD_REQUEST)
-
-        if not platform_dict[platform_name].objects.filter(id=platform_id).exists():
-            return Response({"message": "no platfrom found"}, status=status.HTTP_400_BAD_REQUEST)
-        platform = platform_dict[platform_name].objects.get(
-            id=platform_id)
-        if not is_admin(platform_name, api_user, platform):
-            return Response({"message": "user is not platform admin"}, status=status.HTTP_400_BAD_REQUEST)
-
-        user_subscriptions = platform.user_subscriptions.all()
-        if not user_subscriptions:
-            return Response({"message": "platform not in any user_subscription"}, status=status.HTTP_400_BAD_REQUEST)
-        user_subscription = user_subscriptions[0]
-
         try:
+            platform_id = request.query_params.get('platform_id')
+            platform_name = request.query_params.get('platform_name')
+            api_user = request.user.api_users.get(type='user')
+            _, user_subscription = verify_request(
+                api_user, platform_name, platform_id)
+
             serializer = UserSubscriptionSerializerMeta(user_subscription)
-        except:
+        except ApiVerifyError as e:
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
             return Response({"message": "error occerd during process"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
-
-    # Direct Payment
-    # HitPay
-    # PayPal
-    # First Data IPG (Credit Card)
 
     @action(detail=False, methods=['POST'], url_path=r'update_hitpay')
     def update_hitpay(self, request):
@@ -322,26 +259,22 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             _, user_subscription = verify_request(
                 api_user, platform_name, platform_id)
 
-            if 'image_1' in request.data:
-                image1 = request.data['image_1']
-                image1_path = default_storage.save(
-                    f'{user_subscription.id}/payment/{image1.name}', ContentFile(image1.read()))
-            if 'image_2' in request.data:
-                image2 = request.data['image_2']
-                image2_path = default_storage.save(
-                    f'{user_subscription.id}/payment/{image2.name}', ContentFile(image2.read()))
-            if 'image_3' in request.data:
-                image3 = request.data['image_3']
-                image3_path = default_storage.save(
-                    f'{user_subscription.id}/payment/{image3.name}', ContentFile(image3.read()))
-
             text = request.data['text']
             data = json.loads(text)
 
-            # TODO ...
+            if 'accounts' in data:
+                for account_number, account_info in data['accounts'].items():
+                    if account_number in request.data:
+                        image = request.data[account_number]
+                        image_path = default_storage.save(
+                            f'{user_subscription.id}/payment/direct_payment/{account_number}', ContentFile(image.read()))
+                        data['accounts'][account_number]['image'] = image_path
+
+            meta_payment = user_subscription.meta_payment
+            meta_payment['direct_payment'] = data
 
             serializer = UserSubscriptionSerializer(
-                user_subscription, data={"meta_payment": data}, partial=True)
+                user_subscription, data={"meta_payment": meta_payment}, partial=True)
             if not serializer.is_valid():
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             user_subscription = serializer.save()

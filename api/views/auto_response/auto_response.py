@@ -5,7 +5,21 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from api.models.facebook.facebook_page import FacebookPage
 from api.models.youtube.youtube_channel import YoutubeChannel
-from backend.api.facebook.user import api_fb_get_me_accounts
+
+from api.utils.common.verify import Verify
+from api.utils.common.verify import ApiVerifyError
+
+
+def verify_request(api_user, platform_name, platform_id, auto_response_id=None):
+    Verify.verify_user(api_user)
+    platform = Verify.get_platform(api_user, platform_name, platform_id)
+    user_subscription = Verify.get_user_subscription(platform)
+    if auto_response_id:
+        if not platform.auto_responses.filter(id=auto_response_id).exists():
+            raise ApiVerifyError('no auto_response found')
+        auto_response = platform.auto_responses.get(id=auto_response_id)
+        return platform, user_subscription, auto_response
+    return platform, user_subscription
 
 
 class AutoResponseViewSet(viewsets.ModelViewSet):
@@ -19,33 +33,18 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['GET'], url_path=r'retrieve_auto_response')
     def retrieve_auto_response(self, request, pk=None):
-
-        platform_id = request.query_params.get('platform_id')
-        platform_name = request.query_params.get('platform_name')
-
-        api_user = request.user.api_users.get(type='user')
-        if not api_user:
-            return Response({"message": "no user found"}, status=status.HTTP_400_BAD_REQUEST)
-        elif api_user.status != "valid":
-            return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
-
-        if platform_name not in self.platform_dict:
-            return Response({"message": "no platfrom name found"}, status=status.HTTP_400_BAD_REQUEST)
-
-        if not self.platform_dict[platform_name].objects.filter(id=platform_id).exists():
-            return Response({"message": "no platfrom found"}, status=status.HTTP_400_BAD_REQUEST)
-        platform = self.platform_dict[platform_name].objects.get(
-            id=platform_id)
-
-        if not is_admin(platform_name, api_user, platform):
-            return Response({"message": "user is not platform admin"}, status=status.HTTP_400_BAD_REQUEST)
-
-        if not platform.auto_responses.filter(id=pk).exists():
-            return Response({"message": "no auto_response found"}, status=status.HTTP_400_BAD_REQUEST)
-
         try:
-            auto_response = platform.auto_responses.get(id=pk)
+            platform_id = request.query_params.get('platform_id')
+            platform_name = request.query_params.get('platform_name')
+            api_user = request.user.api_users.get(type='user')
+
+            _, _, auto_response = verify_request(
+                api_user, platform_name, platform_id, auto_response_id=pk)
+
             serializer = self.get_serializer(auto_response)
+
+        except ApiVerifyError as e:
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except:
             return Response({"message": "error occerd during retriving"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -53,30 +52,19 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['GET'], url_path=r'list_auto_response')
     def list_auto_response(self, request):
-
-        platform_id = request.query_params.get('platform_id')
-        platform_name = request.query_params.get('platform_name')
-
-        api_user = request.user.api_users.get(type='user')
-        if not api_user:
-            return Response({"message": "no user found"}, status=status.HTTP_400_BAD_REQUEST)
-        elif api_user.status != "valid":
-            return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
-
-        if platform_name not in self.platform_dict:
-            return Response({"message": "no platform name found"}, status=status.HTTP_400_BAD_REQUEST)
-
-        if not self.platform_dict[platform_name].objects.filter(id=platform_id).exists():
-            return Response({"message": "no platform found"}, status=status.HTTP_400_BAD_REQUEST)
-        platform = self.platform_dict[platform_name].objects.get(
-            id=platform_id)
-
-        if not is_admin(platform_name, api_user, platform):
-            return Response({"message": "user is not platform admin"}, status=status.HTTP_400_BAD_REQUEST)
-
         try:
+            platform_id = request.query_params.get('platform_id')
+            platform_name = request.query_params.get('platform_name')
+            api_user = request.user.api_users.get(type='user')
+
+            _, platform = verify_request(
+                api_user, platform_name, platform_id)
+
             auto_responses = platform.auto_responses.all()
             serializer = self.get_serializer(auto_responses, many=True)
+
+        except ApiVerifyError as e:
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except:
             return Response({"message": "query error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -84,36 +72,24 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['POST'], url_path=r'create_auto_response')
     def create_auto_response(self, request):
-
-        platform_id = request.query_params.get('platform_id')
-        platform_name = request.query_params.get('platform_name')
-
-        api_user = request.user.api_users.get(type='user')
-        if not api_user:
-            return Response({"message": "no user found"}, status=status.HTTP_400_BAD_REQUEST)
-        elif api_user.status != "valid":
-            return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
-
-        if platform_name not in self.platform_dict:
-            return Response({"message": "no platfrom name found"}, status=status.HTTP_400_BAD_REQUEST)
-
-        if not self.platform_dict[platform_name].objects.filter(id=platform_id).exists():
-            return Response({"message": "no platfrom found"}, status=status.HTTP_400_BAD_REQUEST)
-        platform = self.platform_dict[platform_name].objects.get(
-            id=platform_id)
-
-        if not is_admin(platform_name, api_user, platform):
-            return Response({"message": "user is not platform admin"}, status=status.HTTP_400_BAD_REQUEST)
-
         try:
+            platform_id = request.query_params.get('platform_id')
+            platform_name = request.query_params.get('platform_name')
+            api_user = request.user.api_users.get(type='user')
+
+            _, platform = verify_request(
+                api_user, platform_name, platform_id)
+
             data = request.data
             data[platform_name] = platform.id
-            serializer = self.get_serializer(data=data)
 
+            serializer = self.get_serializer(data=data)
             if not serializer.is_valid():
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             serializer.save()
 
+        except ApiVerifyError as e:
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except:
             return Response({"message": "error occerd during creating"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -121,38 +97,23 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['PUT'], url_path=r'update_auto_response')
     def update_auto_response(self, request, pk=None):
-
-        platform_id = request.query_params.get('platform_id')
-        platform_name = request.query_params.get('platform_name')
-
-        api_user = request.user.api_users.get(type='user')
-        if not api_user:
-            return Response({"message": "no user found"}, status=status.HTTP_400_BAD_REQUEST)
-        elif api_user.status != "valid":
-            return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
-
-        if platform_name not in self.platform_dict:
-            return Response({"message": "no platfrom name found"}, status=status.HTTP_400_BAD_REQUEST)
-
-        if not self.platform_dict[platform_name].objects.filter(id=platform_id).exists():
-            return Response({"message": "no platfrom found"}, status=status.HTTP_400_BAD_REQUEST)
-        platform = self.platform_dict[platform_name].objects.get(
-            id=platform_id)
-
-        if not is_admin(platform_name, api_user, platform):
-            return Response({"message": "user is not platform admin"}, status=status.HTTP_400_BAD_REQUEST)
-
-        if not platform.auto_responses.filter(id=pk).exists():
-            return Response({"message": "no auto_response found"}, status=status.HTTP_400_BAD_REQUEST)
-
         try:
-            auto_responses = platform.auto_responses.get(id=pk)
+            platform_id = request.query_params.get('platform_id')
+            platform_name = request.query_params.get('platform_name')
+            api_user = request.user.api_users.get(type='user')
+
+            _, _, auto_response = verify_request(
+                api_user, platform_name, platform_id, auto_response_id=pk)
+
             serializer = self.get_serializer(
-                auto_responses, data=request.data, partial=True)
+                auto_response, data=request.data, partial=True)
+
             if not serializer.is_valid():
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             serializer.save()
 
+        except ApiVerifyError as e:
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except:
             return Response({"message": "error occerd during updating"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -160,50 +121,19 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['DELETE'], url_path=r'delete_auto_response')
     def delete_auto_response(self, request, pk=None):
-
-        platform_id = request.query_params.get('platform_id')
-        platform_name = request.query_params.get('platform_name')
-
-        api_user = request.user.api_users.get(type='user')
-        if not api_user:
-            return Response({"message": "no user found"}, status=status.HTTP_400_BAD_REQUEST)
-        elif api_user.status != "valid":
-            return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
-
-        if platform_name not in self.platform_dict:
-            return Response({"message": "no platfrom name found"}, status=status.HTTP_400_BAD_REQUEST)
-
-        if not self.platform_dict[platform_name].objects.filter(id=platform_id).exists():
-            return Response({"message": "no platfrom found"}, status=status.HTTP_400_BAD_REQUEST)
-        platform = self.platform_dict[platform_name].objects.get(
-            id=platform_id)
-
-        if not is_admin(platform_name, api_user, platform):
-            return Response({"message": "user is not platform admin"}, status=status.HTTP_400_BAD_REQUEST)
-
-        if not platform.auto_responses.filter(id=pk).exists():
-            return Response({"message": "no auto_response found"}, status=status.HTTP_400_BAD_REQUEST)
-
         try:
-            platform.auto_responses.get(id=pk).delete()
+            platform_id = request.query_params.get('platform_id')
+            platform_name = request.query_params.get('platform_name')
+            api_user = request.user.api_users.get(type='user')
+
+            _, _, auto_response = verify_request(
+                api_user, platform_name, platform_id, auto_response_id=pk)
+
+            auto_response.delete()
+
+        except ApiVerifyError as e:
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except:
             return Response({"message": "error occerd during deleting"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response({"message": "delete success"}, status=status.HTTP_200_OK)
-
-
-def is_admin(platform_name, api_user, platform):
-    try:
-        if platform_name == 'facebook':
-            status_code, response = api_fb_get_me_accounts(
-                api_user.facebook_info['token'])
-
-            for item in response['data']:
-                if item['id'] == platform.page_id:
-                    return True
-            return False
-        elif platform_name == 'youtube':
-            pass
-    except:
-        return False
-    return False
