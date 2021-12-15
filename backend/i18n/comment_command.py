@@ -27,7 +27,8 @@ def i18n_get_comment_command_cart(comment: CampaignComment):
 
     text = [_('COMMENT_COMMAND_CART_MESSAGE_HEADER'), '\n-----\n']
     text.extend(cart_products)
-    text.append(_('-----\nTOTAL{dollar_sign}{total}\n'
+    text.append('-----\n')
+    text.append(_('TOTAL{dollar_sign}{total}\n'
                   ).format(total="{:.2f}".format(subtotal), dollar_sign=comment.campaign.currency_sign))
     text.append(_('DETAIL{link}\n'
                   ).format(link=settings.SHOPPING_CART_URL))
