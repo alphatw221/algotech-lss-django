@@ -50,8 +50,8 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         try:
             platform_name = request.query_params.get('platform_name')
             platform_id = request.query_params.get('platform_id')
-
             api_user = request.user.api_users.get(type='user')
+
             platform, user_subscription = verify_request(
                 api_user, platform_name, platform_id)
 
@@ -72,8 +72,8 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         try:
             platform_name = request.query_params.get('platform_name')
             platform_id = request.query_params.get('platform_id')
-
             api_user = request.user.api_users.get(type='user')
+
             platform, user_subscription = verify_request(
                 api_user, platform_name, platform_id)
 
@@ -160,6 +160,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             platform_id = request.query_params.get('platform_id')
             platform_name = request.query_params.get('platform_name')
             api_user = request.user.api_users.get(type='user')
+
             _, user_subscription = verify_request(
                 api_user, platform_name, platform_id)
 
@@ -184,7 +185,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             meta_payment = user_subscription.meta_payment
             meta_payment['hitpay'] = request.data
 
-            serializer = UserSubscriptionSerializer(
+            serializer = UserSubscriptionSerializerMeta(
                 user_subscription, data={"meta_payment": meta_payment}, partial=True)
             if not serializer.is_valid():
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -210,7 +211,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             meta_payment = user_subscription.meta_payment
             meta_payment['paypal'] = request.data
 
-            serializer = UserSubscriptionSerializer(
+            serializer = UserSubscriptionSerializerMeta(
                 user_subscription, data={"meta_payment": meta_payment}, partial=True)
             if not serializer.is_valid():
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -236,7 +237,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             meta_payment = user_subscription.meta_payment
             meta_payment['firstdata'] = request.data
 
-            serializer = UserSubscriptionSerializer(
+            serializer = UserSubscriptionSerializerMeta(
                 user_subscription, data={"meta_payment": meta_payment}, partial=True)
             if not serializer.is_valid():
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -273,7 +274,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             meta_payment = user_subscription.meta_payment
             meta_payment['direct_payment'] = data
 
-            serializer = UserSubscriptionSerializer(
+            serializer = UserSubscriptionSerializerMeta(
                 user_subscription, data={"meta_payment": meta_payment}, partial=True)
             if not serializer.is_valid():
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -296,7 +297,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             _, user_subscription = verify_request(
                 api_user, platform_name, platform_id)
 
-            serializer = UserSubscriptionSerializer(
+            serializer = UserSubscriptionSerializerMeta(
                 user_subscription, data={"meta_logistic": request.data}, partial=True)
             if not serializer.is_valid():
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -304,8 +305,9 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
         except ApiVerifyError as e:
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except:
-            return Response({"message": "error occerd during creating"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        # except Exception as e:
+        #     print(e)
+        #     return Response({"message": "error occerd during creating"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 

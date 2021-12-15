@@ -57,7 +57,7 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
             platform_name = request.query_params.get('platform_name')
             api_user = request.user.api_users.get(type='user')
 
-            _, platform = verify_request(
+            platform, _ = verify_request(
                 api_user, platform_name, platform_id)
 
             auto_responses = platform.auto_responses.all()
@@ -65,8 +65,8 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
 
         except ApiVerifyError as e:
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except:
-            return Response({"message": "query error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        # except Exception as e:
+        #     return Response({"message": "query error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -77,7 +77,7 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
             platform_name = request.query_params.get('platform_name')
             api_user = request.user.api_users.get(type='user')
 
-            _, platform = verify_request(
+            platform, _ = verify_request(
                 api_user, platform_name, platform_id)
 
             data = request.data
