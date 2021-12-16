@@ -63,7 +63,7 @@ def url_setup(urlpatterns):
 
     router.register(r'order', order.OrderViewSet)
 
-    router.register(r'pre_order', pre_order.PreOrder)
+    router.register(r'pre_order', pre_order.PreOrderViewSet)
 
     urlpatterns += [
         path('image/upload/<filename>',
