@@ -130,6 +130,29 @@ class OrderSerializer(serializers.ModelSerializer):
     history = serializers.JSONField(default=dict)
 
 
+class OrderSerializerUpdateShipping(serializers.ModelSerializer):
+
+    class Meta:
+        model = Order
+        fields = ["shipping_first_name",
+                  "shipping_last_name",
+                  "shipping_email",
+                  "shipping_phone",
+                  "shipping_gender",
+                  "shipping_company",
+                  "shipping_postcode",
+                  "shipping_region",
+                  "shipping_location",
+                  "shipping_address_1",
+                  "shipping_address_2",
+                  "shipping_method",
+                  "shipping_status",
+                  "shipping_details",
+                  "shipping_remark",
+                  "shipping_date",
+                  "shipping_time", ]
+
+
 class OrderAdmin(admin.ModelAdmin):
     model = Order
     list_display = [field.name for field in Order._meta.fields]
