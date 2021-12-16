@@ -42,8 +42,7 @@ class OrderProduct(models.Model):
 
     type = models.CharField(max_length=255, blank=True,
                             choices=TYPE_CHOICES, default='n/a')
-    status = models.CharField(max_length=255, blank=True,
-                              choices=STATUS_CHOICES, default='valid')
+    status = models.CharField(max_length=255, blank=True, default='valid')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
