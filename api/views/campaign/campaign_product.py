@@ -6,6 +6,7 @@ from rest_framework import status, viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from api.models.campaign.campaign_product import CampaignProductSerializer
+from rest_framework.parsers import MultiPartParser
 
 import json
 from django.core.files.storage import default_storage
@@ -15,16 +16,23 @@ from api.utils.common.verify import Verify
 from api.utils.common.verify import ApiVerifyError
 
 
-def verify_request(api_user, platform_name, platform_id, campaign_id, campaign_product_id=None):
+def verify_request(api_user, platform_name, platform_id, campaign_id, campaign_product_id=None, is_fast=None):
     Verify.verify_user(api_user)
     platform = Verify.get_platform(api_user, platform_name, platform_id)
     campaign = Verify.get_campaign(platform, campaign_id)
+    user_subscription = Verify.get_user_subscription(platform)
 
     if campaign_product_id:
         if not campaign.products.filter(id=campaign_product_id).exists():
             raise ApiVerifyError('no campaign product found')
         campaign_product = campaign.products.get(id=campaign_product_id)
-        return platform, campaign, campaign_product
+        if is_fast == None:
+            return platform, campaign, campaign_product
+        else:
+            return platform, campaign, campaign_product, user_subscription
+    
+    if is_fast:
+        return platform, campaign, user_subscription
 
     return platform, campaign
 
@@ -189,3 +197,74 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
             return Response({"message": "error occerd during deleting"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response({"message": "delete success"}, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['POST'], url_path=r'fast_create', parser_classes=(MultiPartParser,))
+    def fast_create_campaign_product(self, request):
+        try:
+            platform_id = request.query_params.get('platform_id')
+            platform_name = request.query_params.get('platform_name')
+            campaign_id = request.query_params.get('campaign_id')
+            api_user = request.user.api_users.get(type='user')
+
+            _, campaign, user_subscription = verify_request(
+                api_user, platform_name, platform_id, campaign_id, is_fast=True)
+
+            text = request.data['text']
+            data = json.loads(text)
+            data['campaign'] = campaign.id
+            data['created_by'] = api_user.id
+            data['user_subscription'] = user_subscription.id
+            serializer = self.get_serializer(data=data)
+
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            fast_campaign = serializer.save()
+
+            if 'image' in request.data:
+                image = request.data['image']
+                image_path = default_storage.save(
+                    f'{user_subscription.id}/fast_campaign/{fast_campaign.id}/{image.name}', ContentFile(image.read()))
+                fast_campaign.image = image_path
+
+                fast_campaign.save()    
+
+        except ApiVerifyError as e:
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except:
+            return Response({"message": "error occerd during creating"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['PUT'], url_path=r'fast_update', parser_classes=(MultiPartParser,))
+    def fast_update_campaign_product(self, request, pk=None):
+        try:
+            platform_id = request.query_params.get('platform_id')
+            platform_name = request.query_params.get('platform_name')
+            campaign_id = request.query_params.get('campaign_id')
+            api_user = request.user.api_users.get(type='user')
+
+            _, campaign, campaign_product, user_subscription = verify_request(
+                api_user, platform_name, platform_id, campaign_id, campaign_product_id=pk, is_fast=True)
+
+            if 'image' in request.data:
+                image = request.data['image']
+                image_path = default_storage.save(
+                    f'{user_subscription.id}/fast_campaign/{campaign_product.id}/{image.name}', ContentFile(image.read()))
+
+            text = request.data['text']
+            data = json.loads(text)
+            data['image'] = image_path
+
+            serializer = CampaignProductSerializerUpdate(
+                campaign_product, data=data, partial=True)
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            serializer.save()
+
+        except ApiVerifyError as e:
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            print(e)
+            return Response({"message": "error occerd during updating"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
