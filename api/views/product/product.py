@@ -158,7 +158,7 @@ class ProductViewSet(viewsets.ModelViewSet):
             data = json.loads(text)
             data['image'] = image_path
 
-            serializer = ProductSerializerUpdate(
+            serializer = ProductSerializer(
                 product, data=data, partial=True)
             if not serializer.is_valid():
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

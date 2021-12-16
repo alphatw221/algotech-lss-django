@@ -9,6 +9,7 @@ from api.utils.common.verify import Verify
 from api.utils.common.verify import ApiVerifyError
 from rest_framework.pagination import PageNumberPagination
 from django.db import transaction
+from django.db.models import F
 
 
 def verify_buyer_request(api_user, pre_order_id):
@@ -229,28 +230,75 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
         return Response('test', status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['GET'], url_path=r'buyer_update')
-    def buyer_update_order_product(self, request, pk=None):
-        try:
-            api_user = request.user.api_users.get(type='customer')
-            campaign_product_id = request.query_params.get(
-                'campaign_product_id')
-            qty = request.query_params.get(
-                'qty') if request.query_params.get('qty') else 0
-            pre_order = verify_buyer_request(
-                api_user, pre_order_id=pk)
-            campaign_product = Verify.get_campaign_product(
-                pre_order.campaign, campaign_product_id)
+    # @action(detail=True, methods=['GET'], url_path=r'buyer_update')
+    # def buyer_update_order_product(self, request, pk=None):
+    #     try:
+    #         api_user = request.user.api_users.get(type='customer')
+    #         campaign_product_id = request.query_params.get(
+    #             'campaign_product_id')
+    #         order_product_id = request.query_params.get(
+    #             'order_product_id')
+    #         qty = request.query_params.get(
+    #             'qty') if request.query_params.get('qty') else 0
 
-            # TODO
-            # update
-            pre_order
-            campaign_product
-            qty
+    #         if not api_user:
+    #             raise ApiVerifyError("no user found")
+    #         elif api_user.status != "valid":
+    #             raise ApiVerifyError("not activated user")
+    #         if not api_user.pre_orders.filter(id=pk).exists():
+    #             raise ApiVerifyError("not pre_order found")
 
-        except ApiVerifyError as e:
-            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except:
-            return Response({"message": "error occerd during retriving"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    #         pre_order = api_user.pre_orders.select_for_update().get(id=pk)
 
-        return Response('test', status=status.HTTP_200_OK)
+    #         qty_difference = 0
+
+    #         if order_product_id:
+    #             if not pre_order.order_products.filter(id=order_product_id).exists():
+    #                 pass  # return
+    #             order_product = pre_order.order_products.select_for_update().get(
+    #                 id=order_product_id)
+    #             campaign_product = order_product.campaign_productselect_for_update()
+    #             qty_difference = qty-order_product.qty
+
+    #             if qty_difference and campaign_product.qty_for_sale < qty_difference:
+    #                 pass
+    #                 # return no enough invertory
+    #             with transaction.atomic():
+    #                 campaign_product.qty_sold = F('qty_sold')-qty_difference
+    #                 order_product.qty = qty
+    #                 pre_order.products[order_product_id]['qty'] = qty
+    #                 pre_order.total = F('total') - \
+    #                     (qty_difference*order_product.price)
+
+    #                 campaign_product.save()
+    #                 order_product.save()
+    #                 pre_order.save()
+
+    #         else:
+    #             if pre_order.order_products.filter(campaign_product=campaign_product_id).exist():
+    #                 pass  # return
+    #             # create
+    #             order_product = pre_order.order_products.get(
+    #                 campaign_product=campaign_product_id)
+
+    #         campaign_product.qty_for_sale
+    #         pre_order
+    #         campaign_product
+    #         qty
+
+    #     except ApiVerifyError as e:
+    #         return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    #     except:
+    #         return Response({"message": "error occerd during retriving"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    #     return Response('test', status=status.HTTP_200_OK)
+
+
+# from django.db import connection
+
+# with connection.cursor() as cursor:
+#     cursor.execute("LOCK TABLES %s READ", [tablename])
+#     try:
+#         ...
+#     finally:
+#         cursor.execute("UNLOCK TABLES;")

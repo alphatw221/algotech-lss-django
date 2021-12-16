@@ -86,13 +86,6 @@ class ProductSerializer(serializers.ModelSerializer):
     tag = serializers.JSONField(default=dict)
 
 
-class ProductSerializerUpdate(ProductSerializer):
-    class Meta:
-        model = Product
-        exclude = ['image']
-        read_only_fields = ['created_at', 'modified_at']
-
-
 class ProductSerializerDropdown(ProductSerializer):
     class Meta:
         model = Product
