@@ -65,8 +65,8 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
 
         except ApiVerifyError as e:
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        # except Exception as e:
-        #     return Response({"message": "query error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as e:
+            return Response({"message": "query error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 

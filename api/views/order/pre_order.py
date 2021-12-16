@@ -129,8 +129,8 @@ class PreOrderViewSet(viewsets.ModelViewSet):
                 order = serializer.save()
 
                 # update shipping info
-                serializer = OrderSerializerUpdateShipping(
-                    data=request.data)
+                serializer = OrderSerializerUpdateShipping(order,
+                                                           data=request.data, partial=True)
                 if not serializer.is_valid():
                     pass
                 order = serializer.save()
@@ -174,8 +174,8 @@ class PreOrderViewSet(viewsets.ModelViewSet):
                 order = serializer.save()
 
                 # update shipping info
-                serializer = OrderSerializerUpdateShipping(
-                    data=request.data)
+                serializer = OrderSerializerUpdateShipping(order,
+                                                           data=request.data, partial=True)
                 if not serializer.is_valid():
                     pass
                 order = serializer.save()
@@ -200,7 +200,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['GET'], url_path=r'seller_update_order_product')
+    @action(detail=True, methods=['GET'], url_path=r'seller_update')
     def seller_update_order_product(self, request, pk=None):
         try:
             platform_id = request.query_params.get('platform_id')
@@ -229,10 +229,10 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
         return Response('test', status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['GET'], url_path=r'buyer_update_order_product')
+    @action(detail=True, methods=['GET'], url_path=r'buyer_update')
     def buyer_update_order_product(self, request, pk=None):
         try:
-            api_user = request.user.api_users.get(type='user')
+            api_user = request.user.api_users.get(type='customer')
             campaign_product_id = request.query_params.get(
                 'campaign_product_id')
             qty = request.query_params.get(
