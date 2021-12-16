@@ -15,19 +15,10 @@ class OrderProduct(models.Model):
 
     TYPE_CHOICES = [
         ('n/a', 'Not available'),
-        ('order_code', 'Added from order code in campaign comment'),
-        ('cart', 'Added from cart page function'),
-        ('lucky_draw_cart_products', 'Added from lucky draw of cart product'),
-        ('lucky_draw_campaign_comments',
-         'Added from lucky draw of campaign comments'),
-        ('lucky_draw_campaign_likes', 'Added from lucky draw of campaign likes'),
-    ]
-
-    STATUS_CHOICES = [
-        ('valid', 'Valid item for order'),
-        ('ordered', 'In completed order'),
-        ('staging', 'Staging for completing an order'),
-        ('voided', 'Cannelled'),
+        ('product', 'Product from inventory'),
+        ('product-fast', 'Product from fast-add'),
+        ('lucky_draw', 'Lucky Draw from inventory'),
+        ('lucky_draw-fast', 'Lucky Draw from fast-add'),
     ]
 
     campaign = models.ForeignKey(

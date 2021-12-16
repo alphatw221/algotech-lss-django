@@ -8,3 +8,17 @@ class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all().order_by('id')
     serializer_class = OrderSerializer
     filterset_fields = []
+
+
+# retrieve
+
+# list
+
+# update_payment_and_delievery
+
+# payment_complete
+# ...update status
+# ...update payment detail
+
+# cancel
+# ...check order status staging

@@ -8,6 +8,7 @@ from rest_framework.decorators import action
 from api.utils.common.verify import Verify
 from api.utils.common.verify import ApiVerifyError
 from rest_framework.pagination import PageNumberPagination
+from django.db import transaction
 
 
 def verify_request(api_user, platform_name, platform_id, campaign_id, pre_order_id=None):
@@ -36,7 +37,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     serializer_class = PreOrderSerializer
     filterset_fields = []
 
-    @action(detail=True, methods=['GET'], url_path=r'client')
+    @action(detail=True, methods=['GET'], url_path=r'retrieve')
     def retrieve_pre_order(self, request, pk=None):
         try:
             platform_id = request.query_params.get('platform_id')
@@ -55,7 +56,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['GET'], url_path=r'client')
+    @action(detail=False, methods=['GET'], url_path=r'list')
     def list_pre_order(self, request):
         try:
             platform_id = request.query_params.get('platform_id')
@@ -97,24 +98,35 @@ class PreOrderViewSet(viewsets.ModelViewSet):
             _, _, pre_order = verify_request(
                 api_user, platform_name, platform_id, campaign_id, pre_order_id=pk)
 
-            # transaction :
-            # checkout pre_order
+            with transaction.atomic():
+                serializer = OrderSerializer(
+                    data=PreOrderSerializer(pre_order).data)
+                if not serializer.is_valid():
+                    pass
+                order = serializer.save()
 
-            serializer = OrderSerializer(
-                data=PreOrderSerializer(pre_order).data)
-            if not serializer.is_valid():
-                pass
-            order = serializer.save()
+                # TODO empty pre_order table
+                # TODO
+                # order.delievery=request.data
 
-            for order_product in pre_order.order_products.all():
-                order_product.pre_order = None
-                order_product.order = order.id
-                order_product.save()
+                for order_product in pre_order.order_products.all():
+                    order_product.pre_order = None
+                    order_product.order = order.id
+                    order_product.save()
+                serializer = OrderSerializer(order)
 
-            serializer = OrderSerializer(order)
         except ApiVerifyError as e:
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except:
             return Response({"message": "error occerd during retriving"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+# add order_product
+
+
+# update order_product
+
+
+# delete order_product
