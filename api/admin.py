@@ -4,10 +4,11 @@ from api.models.auto_response import auto_response
 from api.models.campaign import (campaign, campaign_comment,
                                  campaign_lucky_draw, campaign_product)
 from api.models.cart import cart_product
-from api.models.order import order
+from api.models.order import order, pre_order, order_product
 from api.models.product import product
 from api.models.test import sample
 from api.models.user import user, user_group, user_plan
+
 
 admin.site.register(sample.Sample, sample.SampleAdmin)
 
@@ -34,3 +35,8 @@ admin.site.register(cart_product.CartProduct,
                     cart_product.CartProductAdmin)
 
 # admin.site.register(order.Order, order.OrderAdmin)
+admin.site.register(pre_order.PreOrder,
+                    pre_order.PreOrderAdmin)
+
+admin.site.register(order_product.OrderProduct,
+                    order_product.OrderProductAdmin)

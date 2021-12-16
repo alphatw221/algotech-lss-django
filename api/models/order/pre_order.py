@@ -10,7 +10,7 @@ class PreOrder(models.Model):
         db_table = 'api_pre_order'
 
     campaign = models.ForeignKey(
-        Campaign, null=True, on_delete=models.SET_NULL, related_name='orders')
+        Campaign, null=True, on_delete=models.SET_NULL, related_name='pre_orders')
 
     customer_id = models.CharField(max_length=255, null=True, blank=True)
     customer_name = models.CharField(max_length=255, null=True, blank=True)
