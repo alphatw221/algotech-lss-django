@@ -8,6 +8,7 @@ from rest_framework import serializers
 class PreOrder(models.Model):
     class Meta:
         db_table = 'api_pre_order'
+        unique_together = ['plarform', 'customer_id', 'campaign']
 
     campaign = models.ForeignKey(
         Campaign, null=True, on_delete=models.SET_NULL, related_name='pre_orders')
@@ -116,6 +117,9 @@ class PreOrder(models.Model):
     products = models.JSONField(default=dict, null=True, blank=True)
     checkout_details = models.JSONField(default=dict, null=True, blank=True)
     history = models.JSONField(default=dict, null=True, blank=True)
+
+    lock_detail = models.JSONField(
+        default={"lock_by": None, "lock_at": None}, null=True, blank=True)
 
 
 class PreOrderSerializer(serializers.ModelSerializer):

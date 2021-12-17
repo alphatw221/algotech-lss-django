@@ -1,5 +1,7 @@
+from datetime import datetime
 from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
+from api.models.campaign.campaign_product import CampaignProduct
 from api.models.order.pre_order import PreOrder, PreOrderSerializer
 from api.models.order.order import Order, OrderSerializer, OrderSerializerUpdateShipping
 
@@ -10,6 +12,9 @@ from api.utils.common.verify import ApiVerifyError
 from rest_framework.pagination import PageNumberPagination
 from django.db import transaction
 from django.db.models import F
+
+from api.models.order.order_product import OrderProduct, OrderProductSerializer
+from django.conf import settings
 
 
 def verify_buyer_request(api_user, pre_order_id):
@@ -230,75 +235,127 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
         return Response('test', status=status.HTTP_200_OK)
 
-    # @action(detail=True, methods=['GET'], url_path=r'buyer_update')
-    # def buyer_update_order_product(self, request, pk=None):
-    #     try:
-    #         api_user = request.user.api_users.get(type='customer')
-    #         campaign_product_id = request.query_params.get(
-    #             'campaign_product_id')
-    #         order_product_id = request.query_params.get(
-    #             'order_product_id')
-    #         qty = request.query_params.get(
-    #             'qty') if request.query_params.get('qty') else 0
+    @action(detail=True, methods=['GET'], url_path=r'buyer_add')
+    def buyer_add_order_product(self, request, pk=None):
+        try:
+            api_user = request.user.api_users.get(type='customer')
+            campaign_product_id = request.query_params.get(
+                'campaign_product_id')
+            qty = request.query_params.get(
+                'qty') if request.query_params.get('qty') else 0
+            customer_id = request.query_params.get(
+                'customer_id')
+            customer_name = request.query_params.get(
+                'customer_name')
+            platform = request.query_params.get(
+                'platform')
 
-    #         if not api_user:
-    #             raise ApiVerifyError("no user found")
-    #         elif api_user.status != "valid":
-    #             raise ApiVerifyError("not activated user")
-    #         if not api_user.pre_orders.filter(id=pk).exists():
-    #             raise ApiVerifyError("not pre_order found")
+            if not api_user:
+                raise ApiVerifyError("no user found")
+            if not api_user.pre_orders.filter(id=pk).exists():
+                raise ApiVerifyError("not pre_order found")
 
-    #         pre_order = api_user.pre_orders.select_for_update().get(id=pk)
+            pre_order = api_user.pre_orders.select_for_update().get(id=pk)
 
-    #         qty_difference = 0
+            order_product = add_order_product(
+                api_user, pre_order, campaign_product_id, qty, platform, customer_id, customer_name)
 
-    #         if order_product_id:
-    #             if not pre_order.order_products.filter(id=order_product_id).exists():
-    #                 pass  # return
-    #             order_product = pre_order.order_products.select_for_update().get(
-    #                 id=order_product_id)
-    #             campaign_product = order_product.campaign_productselect_for_update()
-    #             qty_difference = qty-order_product.qty
+        except ApiVerifyError as e:
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except:
+            return Response({"message": "error occerd during retriving"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    #             if qty_difference and campaign_product.qty_for_sale < qty_difference:
-    #                 pass
-    #                 # return no enough invertory
-    #             with transaction.atomic():
-    #                 campaign_product.qty_sold = F('qty_sold')-qty_difference
-    #                 order_product.qty = qty
-    #                 pre_order.products[order_product_id]['qty'] = qty
-    #                 pre_order.total = F('total') - \
-    #                     (qty_difference*order_product.price)
+        return Response('test', status=status.HTTP_200_OK)
 
-    #                 campaign_product.save()
-    #                 order_product.save()
-    #                 pre_order.save()
+    @action(detail=True, methods=['GET'], url_path=r'buyer_update')
+    def buyer_update_order_product(self, request, pk=None):
+        try:
+            api_user = request.user.api_users.get(type='customer')
+            order_product_id = request.query_params.get(
+                'order_product_id')
+            qty = request.query_params.get('qty')
 
-    #         else:
-    #             if pre_order.order_products.filter(campaign_product=campaign_product_id).exist():
-    #                 pass  # return
-    #             # create
-    #             order_product = pre_order.order_products.get(
-    #                 campaign_product=campaign_product_id)
+            # validate user
+            if not api_user:
+                raise ApiVerifyError("no user found")
+            if not api_user.pre_orders.filter(id=pk).exists():
+                raise ApiVerifyError("not pre_order found")
 
-    #         campaign_product.qty_for_sale
-    #         pre_order
-    #         campaign_product
-    #         qty
+            # validate pk
+            pre_order = api_user.pre_orders.select_for_update().get(id=pk)
+            order_product = update_order_product(
+                api_user, pre_order, order_product_id, qty)
 
-    #     except ApiVerifyError as e:
-    #         return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-    #     except:
-    #         return Response({"message": "error occerd during retriving"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except ApiVerifyError as e:
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except:
+            return Response({"message": "error occerd during retriving"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    #     return Response('test', status=status.HTTP_200_OK)
+        return Response('test', status=status.HTTP_200_OK)
 
 
-# from django.db import connection
+def update_order_product(api_user, pre_order, order_product_id, qty):
+    # check is_lock
+    # settings.CART_LOCK_INTERVAL
+    # if "lock_by" in pre_order.lock_info:
+    #     if pre_order.lock_info["lock_by"] != api_user.id:
+    #         pass
 
-# with connection.cursor() as cursor:
-#     cursor.execute("LOCK TABLES %s READ", [tablename])
-#     try:
-#         ...
-#     finally:
-#         cursor.execute("UNLOCK TABLES;")
+    # validate qty
+
+    # validate product_id
+    if not pre_order.order_products.filter(id=order_product_id).exists():
+        raise ApiVerifyError("no order_product found")
+    order_product = pre_order.order_products.select_for_update().get(
+        id=order_product_id)
+    campaign_product = order_product.campaign_product.select_for_update()
+    qty_difference = qty-order_product.qty
+
+    if qty_difference and campaign_product.qty_for_sale < qty_difference:
+        raise ApiVerifyError("out of stock")
+    with transaction.atomic():
+        campaign_product.qty_sold = F('qty_sold')+qty_difference
+        order_product.qty = qty
+        pre_order.products[order_product_id]['qty'] = qty
+        pre_order.total = F('total') + \
+            (qty_difference*campaign_product.price)
+        pre_order.lock_detail = {
+            "lock_at": datetime.now(), "lock_by": api_user.id}
+        campaign_product.save()
+        order_product.save()
+        pre_order.save()
+    return order_product
+
+
+def add_order_product(api_user, pre_order, campaign_product_id, qty, platform, customer_id, customer_name):
+    # check is_lock
+    if pre_order.order_products.filter(campaign_product=campaign_product_id).exists():
+        raise ApiVerifyError("order_product already exists")
+
+    if not CampaignProduct.objects.filter(id=campaign_product_id).exists():
+        raise ApiVerifyError("no campaign_product found")
+    campaign_product = CampaignProduct.objects.select_for_update().get(
+        id=campaign_product_id)
+    qty_difference = qty
+    if qty_difference and campaign_product.qty_for_sale < qty_difference:
+        raise ApiVerifyError("out of stock")
+    with transaction.atomic():
+        order_product = OrderProduct.objects.select_for_update().create(campaign=campaign_product.campaign.id,
+                                                                        campaign_product=campaign_product.id,
+                                                                        pre_order=pre_order.id,
+                                                                        qty=qty,
+                                                                        customer_id=customer_id,
+                                                                        customer_name=customer_name,
+                                                                        platform=platform, type=campaign_product.type)
+        campaign_product.qty_sold = F('qty_sold')+qty_difference
+        pre_order.products[order_product.id] = {
+            "price": campaign_product.price, "qty": qty}
+        pre_order.total = F('total') + \
+            (qty_difference*campaign_product.price)
+        pre_order.lock_detail = {
+            "lock_at": datetime.now(), "lock_by": api_user.id}
+        campaign_product.save()
+        order_product.save()
+        pre_order.save()
+
+    return order_product

@@ -301,3 +301,6 @@ EMAIL_HOST_PASSWORD = 'jyhudyfbvpmewjsc'
 CRON_CLASSES = [
     # "cron.cron.TestCronJob",
 ]
+
+
+CART_LOCK_INTERVAL = 180

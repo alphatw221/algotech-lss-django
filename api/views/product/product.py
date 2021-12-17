@@ -149,14 +149,14 @@ class ProductViewSet(viewsets.ModelViewSet):
             _, user_subscription, product = verify_request(
                 api_user, platform_name, platform_id, product_id=pk)
 
+            text = request.data['text']
+            data = json.loads(text)
+
             if 'image' in request.data:
                 image = request.data['image']
                 image_path = default_storage.save(
                     f'{user_subscription.id}/product/{product.id}/{image.name}', ContentFile(image.read()))
-
-            text = request.data['text']
-            data = json.loads(text)
-            data['image'] = image_path
+                data['image'] = image_path
 
             serializer = ProductSerializer(
                 product, data=data, partial=True)
