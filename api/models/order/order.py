@@ -153,6 +153,25 @@ class OrderSerializerUpdateShipping(serializers.ModelSerializer):
                   "shipping_time", ]
 
 
+class OrderSerializerUpdatePayment(serializers.ModelSerializer):
+
+    class Meta:
+        model = Order
+        fields = ["payment_first_name",
+                  "payment_last_name",
+                  "payment_gender",
+                  "payment_company",
+                  "payment_postcode",
+                  "payment_region",
+                  "payment_location",
+                  "payment_address_1",
+                  "payment_address_2",
+                  "payment_method",
+                  "payment_status",
+                  "payment_remark",
+                  "paid_at", ]
+
+
 class OrderAdmin(admin.ModelAdmin):
     model = Order
     list_display = [field.name for field in Order._meta.fields]
