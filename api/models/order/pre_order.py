@@ -118,8 +118,7 @@ class PreOrder(models.Model):
     checkout_details = models.JSONField(default=dict, null=True, blank=True)
     history = models.JSONField(default=dict, null=True, blank=True)
 
-    lock_detail = models.JSONField(
-        default={"lock_by": None, "lock_at": None}, null=True, blank=True)
+    lock_at = models.DateTimeField(null=True, blank=True, default=None)
 
 
 class PreOrderSerializer(serializers.ModelSerializer):
