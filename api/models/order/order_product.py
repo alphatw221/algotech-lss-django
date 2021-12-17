@@ -12,7 +12,7 @@ from api.models.order.pre_order import PreOrder
 class OrderProduct(models.Model):
     class Meta:
         db_table = 'api_order_product'
-        unique_together = ['plarform', 'customer_id',
+        unique_together = ['platform', 'customer_id',
                            'campaign', 'campaign_product']
 
     TYPE_CHOICES = [

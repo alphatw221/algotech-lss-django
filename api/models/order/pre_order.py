@@ -8,7 +8,7 @@ from rest_framework import serializers
 class PreOrder(models.Model):
     class Meta:
         db_table = 'api_pre_order'
-        unique_together = ['plarform', 'customer_id', 'campaign']
+        unique_together = ['platform', 'customer_id', 'campaign']
 
     campaign = models.ForeignKey(
         Campaign, null=True, on_delete=models.SET_NULL, related_name='pre_orders')
