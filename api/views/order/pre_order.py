@@ -77,7 +77,7 @@ def verify_seller_request(api_user, platform_name, platform_id, campaign_id, pre
 
     if pre_order_id:
         if not campaign.pre_orders.filter(id=pre_order_id).exists():
-            raise ApiVerifyError('no campaign product found')
+            raise ApiVerifyError('no pre_order found')
         pre_order = campaign.pre_orders.get(id=pre_order_id)
 
         if order_product_id:
@@ -164,7 +164,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['GET'], url_path=r'seller_add')
     @api_error_handler
-    def buyer_add_order_product(self, request, pk=None):
+    def seller_add_order_product(self, request, pk=None):
         api_user, platform_id, platform_name, campaign_id, campaign_product_id, qty, customer_id, customer_name = getparams(
             request, ("platform_id", "platform_name", "campaign_id", "campaign_product_id", "qty", "customer_id", "customer_name"))
 
@@ -276,9 +276,9 @@ class PreOrderHelper():
         cls._check_platform(platform, customer_id, customer_name)
 
         with transaction.atomic():
-            order_product = OrderProduct.objects.select_for_update().create(campaign=campaign_product.campaign.id,
-                                                                            campaign_product=campaign_product.id,
-                                                                            pre_order=pre_order.id,
+            order_product = OrderProduct.objects.select_for_update().create(campaign=campaign_product.campaign,
+                                                                            campaign_product=campaign_product,
+                                                                            pre_order=pre_order,
                                                                             qty=qty,
                                                                             customer_id=customer_id,
                                                                             customer_name=customer_name,
@@ -331,6 +331,6 @@ class PreOrderHelper():
 
     @staticmethod
     def _check_stock(campaign_product, original_qty, request_qty):
-        qty_difference = request_qty-original_qty
+        qty_difference = int(request_qty)-original_qty
         if qty_difference and campaign_product.qty_for_sale < qty_difference:
             raise ApiVerifyError("out of stock")
