@@ -169,7 +169,8 @@ class OrderSerializerUpdatePayment(serializers.ModelSerializer):
                   "payment_method",
                   "payment_status",
                   "payment_remark",
-                  "paid_at", ]
+                  "paid_at",
+                  "status" ]
 
 
 class OrderAdmin(admin.ModelAdmin):
