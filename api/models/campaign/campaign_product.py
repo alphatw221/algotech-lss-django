@@ -41,12 +41,9 @@ class CampaignProduct(models.Model):
     description = models.TextField(null=True, blank=True, default=None)
     content = models.TextField(null=True, blank=True, default=None)
     remark = models.TextField(null=True, blank=True, default=None)
-    price = models.CharField(
-        max_length=255, null=True, blank=True, default='0.00')
-    price_ori = models.CharField(
-        max_length=255, null=True, blank=True, default='0.00')
-    tax = models.CharField(
-        max_length=255, null=True, blank=True, default='0.00')
+    price = models.FloatField(null=True, blank=True, default=0)
+    price_ori = models.FloatField(null=True, blank=True, default=0)
+    tax = models.FloatField(null=True, blank=True, default=0)
     currency = models.CharField(
         max_length=255, null=True, blank=True, default=None)
     currency_sign = models.CharField(
