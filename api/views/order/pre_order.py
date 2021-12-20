@@ -57,7 +57,8 @@ def verify_buyer_request(api_user, pre_order_id, platform_name=None, order_produ
             raise ApiVerifyError("no order_product found")
         order_product = pre_order.order_products.select_for_update().get(
             id=order_product_id)
-        campaign_product = order_product.campaign_product.select_for_update()
+        campaign_product = CampaignProduct.objects.select_for_update().get(
+            id=order_product.campaign_product.id)
         return pre_order, campaign_product, order_product
 
     if campaign_product_id:
@@ -85,7 +86,8 @@ def verify_seller_request(api_user, platform_name, platform_id, campaign_id, pre
                 raise ApiVerifyError("no order_product found")
             order_product = pre_order.order_products.select_for_update().get(
                 id=order_product_id)
-            campaign_product = order_product.campaign_product.select_for_update()
+            campaign_product = CampaignProduct.objects.select_for_update().get(
+                id=order_product.campaign_product.id)
             return platform, campaign, pre_order, campaign_product, order_product
 
         if campaign_product_id:
@@ -254,10 +256,10 @@ class PreOrderHelper():
             campaign_product, original_qty=order_product.qty, request_qty=qty)
 
         with transaction.atomic():
-            campaign_product.qty_sold = F('qty_sold')+qty_difference
+            campaign_product.qty_sold = campaign_product.qty_sold+qty_difference
             order_product.qty = qty
-            pre_order.products[order_product.id]['qty'] = qty
-            pre_order.total = F('total') + \
+            pre_order.products[str(order_product.id)]['qty'] = qty
+            pre_order.total = pre_order.total + \
                 (qty_difference*campaign_product.price)
             pre_order.lock_at = datetime.now()
             campaign_product.save()
@@ -271,6 +273,7 @@ class PreOrderHelper():
 
         cls._check_lock(api_user, pre_order)
         cls._check_qty(campaign_product, qty)
+        cls._check_addable(pre_order, campaign_product)
         qty_difference = cls._check_stock(
             campaign_product, original_qty=0, request_qty=qty)
         cls._check_platform(platform, customer_id, customer_name)
@@ -283,14 +286,16 @@ class PreOrderHelper():
                                                                             customer_id=customer_id,
                                                                             customer_name=customer_name,
                                                                             platform=platform, type=campaign_product.type)
-            campaign_product.qty_sold = F('qty_sold')+qty_difference
-            pre_order.products[order_product.id] = {
-                "price": campaign_product.price, "qty": qty}
-            pre_order.total = F('total') + \
+            order_product.save()
+
+            campaign_product.qty_sold = campaign_product.qty_sold+qty_difference
+            campaign_product.save()
+
+            pre_order.products.update(
+                {str(order_product.id): {"price": campaign_product.price, "qty": qty}})
+            pre_order.total = pre_order.total + \
                 (qty_difference*campaign_product.price)
             pre_order.lock_at = datetime.now()
-            campaign_product.save()
-            order_product.save()
             pre_order.save()
 
         return order_product
@@ -334,3 +339,8 @@ class PreOrderHelper():
         qty_difference = int(request_qty)-original_qty
         if qty_difference and campaign_product.qty_for_sale < qty_difference:
             raise ApiVerifyError("out of stock")
+        return qty_difference
+
+    @staticmethod
+    def _check_addable(pre_order, campaign_product):
+        pass
