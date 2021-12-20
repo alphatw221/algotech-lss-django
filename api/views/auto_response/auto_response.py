@@ -81,8 +81,10 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
                 api_user, platform_name, platform_id)
 
             data = request.data
-            data[platform_name] = platform.id
-
+            if platform_name == 'facebook':
+                data['facebook_page'] = platform.id
+            elif platform_name == 'youtube':
+                data['youtube'] = platform.id
             serializer = self.get_serializer(data=data)
             if not serializer.is_valid():
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
