@@ -87,18 +87,6 @@ class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all().order_by('id')
     serializer_class = OrderSerializer
     filterset_fields = []
-
-    @action(detail=True, methods=['GET'], url_path=r'buyer_retrieve')
-    @api_error_handler
-    def buyer_retrieve_order(self, request, pk=None):
-        api_user = request.user.api_users.get(type='customer')
-
-        order = verify_buyer_request(
-            api_user, order_id=pk)
-
-        serializer = OrderSerializer(order)
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
     
     @action(detail=True, methods=['GET'], url_path=r'seller_retrieve')
     @api_error_handler
@@ -138,6 +126,18 @@ class OrderViewSet(viewsets.ModelViewSet):
             data = serializer.data
 
         return Response(data, status=status.HTTP_200_OK)
+    
+    @action(detail=True, methods=['GET'], url_path=r'buyer_retrieve')
+    @api_error_handler
+    def buyer_retrieve_order(self, request, pk=None):
+        api_user = request.user.api_users.get(type='customer')
+
+        order = verify_buyer_request(
+            api_user, order_id=pk)
+
+        serializer = OrderSerializer(order)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['POST'], url_path=r'buyer_info')
     @api_error_handler
@@ -204,7 +204,6 @@ class OrderViewSet(viewsets.ModelViewSet):
             api_user, order_id=pk, check_info=True)
         
         pre_order = OrderHelper.cancel(api_user, order)
-
 
         return Response('order canceled', status=status.HTTP_200_OK)
 

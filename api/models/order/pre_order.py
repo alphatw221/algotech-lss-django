@@ -33,8 +33,7 @@ class PreOrder(models.Model):
         max_length=255, null=True, blank=True, default=None)
     currency_sign = models.CharField(
         max_length=255, null=True, blank=True, default='$')
-    cost = models.CharField(
-        max_length=255, null=True, blank=True, default='0.00')
+    cost = models.FloatField(null=True, blank=True, default=0)
     cost_currency = models.CharField(
         max_length=8, null=True, blank=True, default=None)
     cost_currency_sign = models.CharField(

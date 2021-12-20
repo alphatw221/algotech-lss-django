@@ -23,18 +23,14 @@ class Order(models.Model):
     image = models.CharField(max_length=255, null=True, blank=True)
     invoice_no = models.CharField(max_length=255, null=True, blank=True)
 
-    subtotal = models.CharField(
-        max_length=255, null=True, blank=True, default='0.00')
-    total = models.CharField(
-        max_length=255, null=True, blank=True, default='0.00')
-    tax = models.CharField(
-        max_length=255, null=True, blank=True, default='0.00')
+    subtotal = models.FloatField(null=True, blank=True, default=0)
+    total = models.FloatField(null=True, blank=True, default=0)
+    tax = models.FloatField(null=True, blank=True, default=0)
     currency = models.CharField(
         max_length=255, null=True, blank=True, default=None)
     currency_sign = models.CharField(
         max_length=255, null=True, blank=True, default='$')
-    cost = models.CharField(
-        max_length=255, null=True, blank=True, default='0.00')
+    cost = models.FloatField(null=True, blank=True, default=0)
     cost_currency = models.CharField(
         max_length=8, null=True, blank=True, default=None)
     cost_currency_sign = models.CharField(
