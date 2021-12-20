@@ -16,21 +16,27 @@ from django.db.models import F
 from api.models.order.order_product import OrderProduct, OrderProductSerializer
 from django.conf import settings
 
+import functools
+
 
 def getparams(request, params: tuple, seller=True):
-    if not seller:
-        return [request.user.api_users.get(type='customer')].extend([request.query_params.get(param) for param in params])
-    return [request.user.api_users.get(type='user')].extend([request.query_params.get(param) for param in params])
+    ret = [request.user.api_users.get(type='user')] if seller else [
+        request.user.api_users.get(type='customer')]
+    for param in params:
+        ret.append(request.query_params.get(param))
+    return ret
 
 
 def api_error_handler(func):
+    @functools.wraps(func)
     def wrapper(*args, **kwargs):
         try:
-            func(*args, **kwargs)
+            return func(*args, **kwargs)
         except ApiVerifyError as e:
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({"message": "error occerd during retriving"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        # except Exception as e:
+        #     print(e)
+        #     return Response({"message": str(datetime.now())+"server error."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     return wrapper
 
 
@@ -64,7 +70,7 @@ def verify_buyer_request(api_user, pre_order_id, platform_name=None, order_produ
     return pre_order
 
 
-def verify_seller_request(api_user, platform_name, platform_id, campaign_id, pre_order_id=None):
+def verify_seller_request(api_user, platform_name, platform_id, campaign_id, pre_order_id=None, order_product_id=None, campaign_product_id=None):
     Verify.verify_user(api_user)
     platform = Verify.get_platform(api_user, platform_name, platform_id)
     campaign = Verify.get_campaign(platform, campaign_id)
@@ -73,6 +79,22 @@ def verify_seller_request(api_user, platform_name, platform_id, campaign_id, pre
         if not campaign.pre_orders.filter(id=pre_order_id).exists():
             raise ApiVerifyError('no campaign product found')
         pre_order = campaign.pre_orders.get(id=pre_order_id)
+
+        if order_product_id:
+            if not pre_order.order_products.filter(id=order_product_id).exists():
+                raise ApiVerifyError("no order_product found")
+            order_product = pre_order.order_products.select_for_update().get(
+                id=order_product_id)
+            campaign_product = order_product.campaign_product.select_for_update()
+            return platform, campaign, pre_order, campaign_product, order_product
+
+        if campaign_product_id:
+            if not pre_order.campaign.products.filter(id=campaign_product_id).exists():
+                raise ApiVerifyError("no campaign_product found")
+            campaign_product = pre_order.campaign.products.select_for_update().get(
+                id=campaign_product_id)
+            return platform, campaign, pre_order, campaign_product
+
         return platform, campaign, pre_order
 
     return platform, campaign
@@ -113,12 +135,11 @@ class PreOrderViewSet(viewsets.ModelViewSet):
             api_user, platform_name, platform_id, campaign_id)
 
         queryset = campaign.pre_orders.all()
-
         # TODO filtering
-        page = PreOrderPagination.paginate_queryset(queryset)
+        page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = PreOrderSerializer(page, many=True)
-            result = PreOrderPagination.get_paginated_response(
+            result = self.get_paginated_response(
                 serializer.data)
             data = result.data
         else:
@@ -127,78 +148,46 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
         return Response(data, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['POST'], url_path=r'seller_checkout')
+    @action(detail=True, methods=['GET'], url_path=r'seller_checkout')
+    @api_error_handler
     def seller_pre_order_checkout(self, request, pk=None):
-        try:
-            platform_id = request.query_params.get('platform_id')
-            platform_name = request.query_params.get('platform_name')
-            campaign_id = request.query_params.get('campaign_id')
-            api_user = request.user.api_users.get(type='user')
 
-            _, _, pre_order = verify_seller_request(
-                api_user, platform_name, platform_id, campaign_id, pre_order_id=pk)
+        api_user, platform_id, platform_name, campaign_id = getparams(
+            request, ("platform_id", "platform_name", "campaign_id"))
 
-            with transaction.atomic():
-                serializer = OrderSerializer(
-                    data=PreOrderSerializer(pre_order).data)
-                if not serializer.is_valid():
-                    pass
-                order = serializer.save()
+        _, _, pre_order = verify_seller_request(
+            api_user, platform_name, platform_id, campaign_id, pre_order_id=pk)
 
-                # update shipping info
-                serializer = OrderSerializerUpdateShipping(order,
-                                                           data=request.data, partial=True)
-                if not serializer.is_valid():
-                    pass
-                order = serializer.save()
+        order = PreOrderHelper.checkout(api_user, pre_order)
 
-                for order_product in pre_order.order_products.all():
-                    order_product.pre_order = None
-                    order_product.order = order.id
-                    order_product.save()
+        return Response('test', status=status.HTTP_200_OK)
 
-                # empty pre_order table
-                pre_order.products = {}
-                pre_order.total = 0
-                pre_order.subtotal = 0
-                pre_order.save()
+    @action(detail=True, methods=['GET'], url_path=r'seller_add')
+    @api_error_handler
+    def buyer_add_order_product(self, request, pk=None):
+        api_user, platform_id, platform_name, campaign_id, campaign_product_id, qty, customer_id, customer_name = getparams(
+            request, ("platform_id", "platform_name", "campaign_id", "campaign_product_id", "qty", "customer_id", "customer_name"))
 
-                serializer = OrderSerializer(order)
+        _, _, pre_order, campaign_product = verify_seller_request(
+            api_user, platform_name, platform_id, campaign_id, pre_order_id=pk, campaign_product_id=campaign_product_id)
 
-        except ApiVerifyError as e:
-            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except:
-            return Response({"message": "error occerd during retriving"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        order_product = PreOrderHelper.add_product(
+            api_user, pre_order, campaign_product, qty, platform_name, customer_id, customer_name)
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response('test', status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['GET'], url_path=r'seller_update')
+    @api_error_handler
     def seller_update_order_product(self, request, pk=None):
-        try:
-            platform_id = request.query_params.get('platform_id')
-            platform_name = request.query_params.get('platform_name')
-            campaign_id = request.query_params.get('campaign_id')
-            api_user = request.user.api_users.get(type='user')
-            campaign_product_id = request.query_params.get(
-                'campaign_product_id')
-            qty = request.query_params.get(
-                'qty') if request.query_params.get('qty') else 0
-            _, campaign, pre_order = verify_seller_request(
-                api_user, platform_name, platform_id, campaign_id, pre_order_id=pk)
-            campaign_product = Verify.get_campaign_product(
-                campaign, campaign_product_id)
 
-            # TODO
-            # update
-            pre_order
-            campaign_product
-            qty
+        api_user, platform_id, platform_name, campaign_id, order_product_id, qty = getparams(
+            request, ("platform_id", "platform_name", "campaign_id", "order_product_id", "qty"))
 
-        except ApiVerifyError as e:
-            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except:
-            return Response({"message": "error occerd during retriving"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        _, _, pre_order, campaign_product, order_product = verify_seller_request(
+            api_user, platform_name, platform_id, campaign_id, pre_order_id=pk, order_product_id=order_product_id)
 
+        order_product = PreOrderHelper.update_product(
+            api_user, pre_order, order_product, campaign_product, qty)
         return Response('test', status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['GET'], url_path=r'buyer_retrieve')
@@ -260,7 +249,7 @@ class PreOrderHelper():
     @classmethod
     def update_product(cls, api_user, pre_order, order_product, campaign_product, qty):
         cls._check_lock(api_user, pre_order)
-        cls._check_qty(qty)
+        cls._check_qty(campaign_product, qty)
         qty_difference = cls._check_stock(
             campaign_product, original_qty=order_product.qty, request_qty=qty)
 
@@ -281,9 +270,10 @@ class PreOrderHelper():
     def add_product(cls, api_user, pre_order, campaign_product, qty, platform, customer_id, customer_name):
 
         cls._check_lock(api_user, pre_order)
-        cls._check_qty(qty)
+        cls._check_qty(campaign_product, qty)
         qty_difference = cls._check_stock(
             campaign_product, original_qty=0, request_qty=qty)
+        cls._check_platform(platform, customer_id, customer_name)
 
         with transaction.atomic():
             order_product = OrderProduct.objects.select_for_update().create(campaign=campaign_product.campaign.id,
@@ -328,11 +318,15 @@ class PreOrderHelper():
         return order
 
     @staticmethod
-    def _check_lock():
+    def _check_platform(platform, customer_id, customer_name):
         pass
 
     @staticmethod
-    def _check_qty():
+    def _check_lock(api_user, pre_order):
+        pass
+
+    @staticmethod
+    def _check_qty(campaign_product, qty):
         pass
 
     @staticmethod
