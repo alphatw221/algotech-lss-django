@@ -31,7 +31,7 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
     platform_dict = {'facebook': FacebookPage,
                      'youtube': YoutubeChannel}
 
-    @action(detail=True, methods=['GET'], url_path=r'retrieve_auto_response')
+    @action(detail=True, methods=['GET'], url_path=r'client')
     def retrieve_auto_response(self, request, pk=None):
         try:
             platform_id = request.query_params.get('platform_id')
@@ -50,7 +50,7 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['GET'], url_path=r'list_auto_response')
+    @action(detail=False, methods=['GET'], url_path=r'client')
     def list_auto_response(self, request):
         try:
             platform_id = request.query_params.get('platform_id')
@@ -70,7 +70,7 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['POST'], url_path=r'create_auto_response')
+    @action(detail=False, methods=['POST'], url_path=r'client')
     def create_auto_response(self, request):
         try:
             platform_id = request.query_params.get('platform_id')
@@ -95,7 +95,7 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['PUT'], url_path=r'update_auto_response')
+    @action(detail=True, methods=['PUT'], url_path=r'client')
     def update_auto_response(self, request, pk=None):
         try:
             platform_id = request.query_params.get('platform_id')
@@ -119,7 +119,7 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['DELETE'], url_path=r'delete_auto_response')
+    @action(detail=True, methods=['DELETE'], url_path=r'client')
     def delete_auto_response(self, request, pk=None):
         try:
             platform_id = request.query_params.get('platform_id')
