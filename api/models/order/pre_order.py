@@ -25,10 +25,8 @@ class PreOrder(models.Model):
     #image = models.CharField(max_length=255, null=True, blank=True)
     #invoice_no = models.CharField(max_length=255, null=True, blank=True)
 
-    subtotal = models.CharField(
-        max_length=255, null=True, blank=True, default='0.00')
-    total = models.CharField(
-        max_length=255, null=True, blank=True, default='0.00')
+    subtotal = models.FloatField(null=True, blank=True, default=0)
+    total = models.FloatField(null=True, blank=True, default=0)
     # tax = models.CharField(
     #    max_length=255, null=True, blank=True, default='0.00')
     currency = models.CharField(
