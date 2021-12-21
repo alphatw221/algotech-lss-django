@@ -173,7 +173,8 @@ DATABASES = {
         }
     }
 }
-
+MONGODB_CONNECTION_STRING = 'mongodb://lss:algo83111T%%@34.126.92.142:27017,35.240.200.4:27017,34.126.155.150:27017'
+MONGODB_DATABASE_NAME = 'lss'
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators

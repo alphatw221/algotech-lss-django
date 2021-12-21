@@ -17,6 +17,7 @@ from api.models.order.order_product import OrderProduct, OrderProductSerializer
 from django.conf import settings
 
 import functools
+from backend.pymongo.mongodb import db, client
 
 
 def getparams(request, params: tuple, seller=True):
@@ -250,55 +251,89 @@ class PreOrderHelper():
 
     @classmethod
     def update_product(cls, api_user, pre_order, order_product, campaign_product, qty):
-        cls._check_lock(api_user, pre_order)
-        cls._check_qty(campaign_product, qty)
-        qty_difference = cls._check_stock(
-            campaign_product, original_qty=order_product.qty, request_qty=qty)
+        with client.start_session() as session:
+            with session.start_transaction():
+                api_pre_order = db.api_pre_order.find_one(
+                    {"id": pre_order.id}, session=session)
+                api_order_product = db.api_order_product.find_one(
+                    {"id": order_product.id}, session=session)
+                api_campaign_product = db.api_campaign_product.find_one(
+                    {"id": campaign_product.id}, session=session)
 
-        with transaction.atomic():
-            campaign_product.qty_sold = campaign_product.qty_sold+qty_difference
-            order_product.qty = qty
-            pre_order.products[str(order_product.id)]['qty'] = qty
-            pre_order.total = pre_order.total + \
-                (qty_difference*campaign_product.price)
-            pre_order.lock_at = datetime.now()
-            campaign_product.save()
-            order_product.save()
-            pre_order.save()
+                cls._check_lock(api_user, api_pre_order)
+                qty = cls._check_qty(api_campaign_product, qty)
+                qty_difference = cls._check_stock(
+                    api_campaign_product, original_qty=api_order_product['qty'], request_qty=qty)
 
-        return order_product
+                db.api_campaign_product.update_one(
+                    {'id': campaign_product.id}, {"$inc": {'qty_sold': qty_difference}}, session=session)
+
+                db.api_order_product.update_one(
+                    {'id': order_product.id}, {"$set": {'qty': qty}}, session=session)
+
+                products = api_pre_order['products']
+                products[str(api_order_product['id'])]['qty'] = qty
+                db.api_pre_order.update_one(
+                    {'id': pre_order.id},
+                    {
+                        "$set": {
+                            "lock": datetime.now(),
+                            "products": products
+                        },
+                        "$inc": {
+                            "total": qty_difference*api_campaign_product['price'],
+                        }
+                    },
+                    session=session)
+
+        return api_order_product
 
     @classmethod
     def add_product(cls, api_user, pre_order, campaign_product, qty, platform, customer_id, customer_name):
+        with client.start_session() as session:
+            with session.start_transaction():
+                api_pre_order = db.api_pre_order.find_one(
+                    {"id": pre_order.id}, session=session)
+                api_campaign_product = db.api_campaign_product.find_one(
+                    {"id": campaign_product.id}, session=session)
 
-        cls._check_lock(api_user, pre_order)
-        cls._check_qty(campaign_product, qty)
-        cls._check_addable(pre_order, campaign_product)
-        qty_difference = cls._check_stock(
-            campaign_product, original_qty=0, request_qty=qty)
-        cls._check_platform(platform, customer_id, customer_name)
+                cls._check_lock(api_user, api_pre_order)
+                qty = cls._check_qty(api_campaign_product, qty)
+                cls._check_addable(api_pre_order, api_campaign_product)
+                qty_difference = cls._check_stock(
+                    api_campaign_product, original_qty=0, request_qty=qty)
+                cls._check_platform(platform, customer_id, customer_name)
 
-        with transaction.atomic():
-            order_product = OrderProduct.objects.select_for_update().create(campaign=campaign_product.campaign,
-                                                                            campaign_product=campaign_product,
-                                                                            pre_order=pre_order,
-                                                                            qty=qty,
-                                                                            customer_id=customer_id,
-                                                                            customer_name=customer_name,
-                                                                            platform=platform, type=campaign_product.type)
-            order_product.save()
+                api_order_product = db.api_order_product.insert_one({
+                    "campaign": api_campaign_product["campaign"],
+                    "campaign_product": api_campaign_product["id"],
+                    "pre_order": api_pre_order["id"],
+                    "qty": qty,
+                    "customer_id": customer_id,
+                    "customer_name": customer_name,
+                    "platform": platform,
+                    "type": api_campaign_product["type"]
+                }, session=session)
 
-            campaign_product.qty_sold = campaign_product.qty_sold+qty_difference
-            campaign_product.save()
+                db.api_campaign_product.update_one({"id": campaign_product.id}, {
+                                                   "$inc": {'qty_sold': qty_difference}})
 
-            pre_order.products.update(
-                {str(order_product.id): {"price": campaign_product.price, "qty": qty}})
-            pre_order.total = pre_order.total + \
-                (qty_difference*campaign_product.price)
-            pre_order.lock_at = datetime.now()
-            pre_order.save()
+                products = api_pre_order['products']
+                products[str(api_order_product['id'])]['qty'] = qty
+                db.api_pre_order.update_one(
+                    {'id': pre_order.id},
+                    {
+                        "$set": {
+                            "lock": datetime.now(),
+                            "products": products
+                        },
+                        "$inc": {
+                            "total": qty_difference*api_campaign_product['price'],
+                        }
+                    },
+                    session=session)
 
-        return order_product
+                return api_order_product
 
     @classmethod
     def checkout(cls, api_user, pre_order):
@@ -327,20 +362,27 @@ class PreOrderHelper():
         pass
 
     @staticmethod
-    def _check_lock(api_user, pre_order):
-        pass
+    def _check_lock(api_user, api_pre_order):
+        if api_user.type == 'customer':
+            return
+        if datetime.timestamp(api_pre_order['lock_at'])+settings.CART_LOCK_INTERVAL > datetime.timestamp(datetime.now()):
+            raise ApiVerifyError('cart in use')
 
     @staticmethod
-    def _check_qty(campaign_product, qty):
-        pass
+    def _check_qty(api_campaign_product, qty):
+        qty = int(qty)
+        if not qty:
+            raise ApiVerifyError('qty can not be zero or negitive')
+        return qty
 
     @staticmethod
-    def _check_stock(campaign_product, original_qty, request_qty):
+    def _check_stock(api_campaign_product, original_qty, request_qty):
         qty_difference = int(request_qty)-original_qty
-        if qty_difference and campaign_product.qty_for_sale < qty_difference:
+        if qty_difference and api_campaign_product["qty_for_sale"] < qty_difference:
             raise ApiVerifyError("out of stock")
         return qty_difference
 
     @staticmethod
-    def _check_addable(pre_order, campaign_product):
-        pass
+    def _check_addable(api_pre_order, api_campaign_product):
+        if api_campaign_product["id"] in api_pre_order["products"]:
+            raise ApiVerifyError("product already in pre_order")
