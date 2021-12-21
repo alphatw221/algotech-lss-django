@@ -18,16 +18,19 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='orderproduct',
             name='status',
-            field=models.CharField(blank=True, default='valid', max_length=255),
+            field=models.CharField(
+                blank=True, default='valid', max_length=255),
         ),
         migrations.AlterField(
             model_name='orderproduct',
             name='type',
-            field=models.CharField(blank=True, choices=[('n/a', 'Not available'), ('product', 'Product from inventory'), ('product-fast', 'Product from fast-add'), ('lucky_draw', 'Lucky Draw from inventory'), ('lucky_draw-fast', 'Lucky Draw from fast-add')], default='n/a', max_length=255),
+            field=models.CharField(blank=True, choices=[('n/a', 'Not available'), ('product', 'Product from inventory'), ('product-fast', 'Product from fast-add'),
+                                   ('lucky_draw', 'Lucky Draw from inventory'), ('lucky_draw-fast', 'Lucky Draw from fast-add')], default='n/a', max_length=255),
         ),
         migrations.AlterUniqueTogether(
             name='orderproduct',
-            unique_together={('platform', 'customer_id', 'campaign', 'campaign_product')},
+            unique_together={('platform', 'customer_id', 'campaign',
+                              'campaign_product', 'pre_order', 'order')},
         ),
         migrations.AlterUniqueTogether(
             name='preorder',

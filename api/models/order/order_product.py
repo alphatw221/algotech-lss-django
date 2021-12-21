@@ -13,8 +13,10 @@ class OrderProduct(models.Model):
     class Meta:
         db_table = 'api_order_product'
         unique_together = ['platform', 'customer_id',
-                           'campaign', 'campaign_product', 'pre_order', 'order']
+                           'campaign', 'campaign_product', 'pre_order']
 
+        # unique_together = ['customer_id',
+        #                    'campaign', 'campaign_product', 'pre_order', 'order']
     TYPE_CHOICES = [
         ('n/a', 'Not available'),
         ('product', 'Product from inventory'),

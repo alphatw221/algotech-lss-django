@@ -12,6 +12,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AlterUniqueTogether(
             name='orderproduct',
-            unique_together={('platform', 'customer_id', 'campaign', 'campaign_product', 'pre_order_id', 'order_id')},
+            unique_together={('platform', 'customer_id', 'campaign',
+                              'campaign_product', 'pre_order', 'order')},
         ),
     ]
