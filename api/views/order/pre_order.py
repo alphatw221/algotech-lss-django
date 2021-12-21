@@ -1,4 +1,5 @@
 from datetime import datetime
+from re import template
 from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
 from api.models.campaign.campaign_product import CampaignProduct
@@ -307,7 +308,8 @@ class PreOrderHelper():
                     {"$query": {}, "$orderby": {"id": -1}}, session=session)
                 id_increment = latest_api_order_product['id'] + \
                     1 if latest_api_order_product else 1
-                db.api_order_product.insert_one({
+                template = OrderProductSerializer({}).data
+                template.update({
                     "id": id_increment,
                     "campaign_id": api_campaign_product["campaign_id"],
                     "campaign_product_id": api_campaign_product["id"],
@@ -317,7 +319,8 @@ class PreOrderHelper():
                     "customer_name": customer_name,
                     "platform": platform,
                     "type": api_campaign_product["type"]
-                }, session=session)
+                })
+                db.api_order_product.insert_one(template, session=session)
 
                 db.api_campaign_product.update_one({"id": campaign_product.id}, {
                                                    "$inc": {'qty_sold': qty_difference}})
@@ -357,8 +360,10 @@ class PreOrderHelper():
                 api_order_data = api_pre_order.copy()
                 api_order_data['id'] = id_increment
                 del api_order_data['_id']
+                template = OrderSerializer({}).data
+                template.update(api_order_data)
                 db.api_order.insert_one(
-                    api_order_data, session=session)
+                    template, session=session)
 
                 db.api_order_product.update_many(
                     {"pre_order_id": api_pre_order["id"]}, {"$set": {"pre_order_id": None, "order_id": id_increment}})
