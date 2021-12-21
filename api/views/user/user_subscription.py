@@ -285,7 +285,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         # except:
         #     return Response({"message": "error occerd during creating"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(UserSubscriptionSerializerMeta(user_subscription).data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['POST'], url_path=r'update_logistic')
     def update_logistic(self, request):

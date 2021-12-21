@@ -305,7 +305,8 @@ class PreOrderHelper():
 
                 latest_api_order_product = db.api_order_product.find_one(
                     {"$query": {}, "$orderby": {"id": -1}}, session=session)
-                id_increment = latest_api_order_product['id']+1
+                id_increment = latest_api_order_product['id'] + \
+                    1 if latest_api_order_product else 1
                 db.api_order_product.insert_one({
                     "id": id_increment,
                     "campaign_id": api_campaign_product["campaign_id"],
@@ -360,7 +361,7 @@ class PreOrderHelper():
                     api_order_data, session=session)
 
                 db.api_order_product.update_many(
-                    {"pre_order_id": api_pre_order["id"]}, {"$set": {"pre_order": None, "order_id": id_increment}})
+                    {"pre_order_id": api_pre_order["id"]}, {"$set": {"pre_order_id": None, "order_id": id_increment}})
                 db.api_pre_order.update_one({"id": api_pre_order["id"]}, {
                                             "$set": {"products": {}, "total": 0, "subtotal": 0}}, session=session)
 
