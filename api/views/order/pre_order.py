@@ -161,7 +161,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         _, _, pre_order = verify_seller_request(
             api_user, platform_name, platform_id, campaign_id, pre_order_id=pk)
 
-        order = PreOrderHelper.checkout(api_user, pre_order)
+        api_order = PreOrderHelper.checkout(api_user, pre_order)
 
         return Response('test', status=status.HTTP_200_OK)
 
@@ -189,9 +189,11 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         _, _, pre_order, campaign_product, order_product = verify_seller_request(
             api_user, platform_name, platform_id, campaign_id, pre_order_id=pk, order_product_id=order_product_id)
 
-        order_product = PreOrderHelper.update_product(
+        api_order_product = PreOrderHelper.update_product(
             api_user, pre_order, order_product, campaign_product, qty)
-        return Response('test', status=status.HTTP_200_OK)
+        print(api_order_product)
+        del api_order_product['_id']
+        return Response(api_order_product, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['GET'], url_path=r'buyer_retrieve')
     @api_error_handler
@@ -246,9 +248,6 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
 class PreOrderHelper():
 
-    class PreOrderValidator():
-        pass
-
     @classmethod
     def update_product(cls, api_user, pre_order, order_product, campaign_product, qty):
         with client.start_session() as session:
@@ -272,12 +271,12 @@ class PreOrderHelper():
                     {'id': order_product.id}, {"$set": {'qty': qty}}, session=session)
 
                 products = api_pre_order['products']
-                products[str(api_order_product['id'])]['qty'] = qty
+                products[str(api_campaign_product['id'])]['qty'] = qty
                 db.api_pre_order.update_one(
                     {'id': pre_order.id},
                     {
                         "$set": {
-                            "lock": datetime.now(),
+                            "lock_at": datetime.now() if api_user.type == 'customer' else None,
                             "products": products
                         },
                         "$inc": {
@@ -304,10 +303,14 @@ class PreOrderHelper():
                     api_campaign_product, original_qty=0, request_qty=qty)
                 cls._check_platform(platform, customer_id, customer_name)
 
-                api_order_product = db.api_order_product.insert_one({
-                    "campaign": api_campaign_product["campaign"],
-                    "campaign_product": api_campaign_product["id"],
-                    "pre_order": api_pre_order["id"],
+                latest_api_order_product = db.api_order_product.find_one(
+                    {"$query": {}, "$orderby": {"id": -1}}, session=session)
+                id_increment = latest_api_order_product['id']+1
+                db.api_order_product.insert_one({
+                    "id": id_increment,
+                    "campaign_id": api_campaign_product["campaign_id"],
+                    "campaign_product_id": api_campaign_product["id"],
+                    "pre_order_id": api_pre_order["id"],
                     "qty": qty,
                     "customer_id": customer_id,
                     "customer_name": customer_name,
@@ -319,12 +322,13 @@ class PreOrderHelper():
                                                    "$inc": {'qty_sold': qty_difference}})
 
                 products = api_pre_order['products']
-                products[str(api_order_product['id'])]['qty'] = qty
+                products[str(api_campaign_product['id'])] = {
+                    "price": api_campaign_product['price'], "qty": qty}
                 db.api_pre_order.update_one(
                     {'id': pre_order.id},
                     {
                         "$set": {
-                            "lock": datetime.now(),
+                            "lock_at": datetime.now() if api_user.type == 'customer' else None,
                             "products": products
                         },
                         "$inc": {
@@ -333,29 +337,34 @@ class PreOrderHelper():
                     },
                     session=session)
 
-                return api_order_product
+        return db.api_order_product.find_one({"id": id_increment})
 
     @classmethod
     def checkout(cls, api_user, pre_order):
-        cls._check_lock(api_user, pre_order)
-        with transaction.atomic():
-            serializer = OrderSerializer(
-                data=PreOrderSerializer(pre_order).data)
-            if not serializer.is_valid():
-                pass
-            order = serializer.save()
+        with client.start_session() as session:
+            with session.start_transaction():
+                api_pre_order = db.api_pre_order.find_one(
+                    {"id": pre_order.id}, session=session)
 
-            for order_product in pre_order.order_products.all():
-                order_product.pre_order = None
-                order_product.order = order.id
-                order_product.save()
+                cls._check_lock(api_user, api_pre_order)
 
-            pre_order.products = {}
-            pre_order.total = 0
-            pre_order.subtotal = 0
-            pre_order.save()
+                latest_api_order_product = db.api_order.find_one(
+                    {"$query": {}, "$orderby": {"id": -1}}, session=session)
 
-        return order
+                id_increment = latest_api_order_product['id'] + \
+                    1 if latest_api_order_product else 1
+                api_order_data = api_pre_order.copy()
+                api_order_data['id'] = id_increment
+                del api_order_data['_id']
+                db.api_order.insert_one(
+                    api_order_data, session=session)
+
+                db.api_order_product.update_many(
+                    {"pre_order_id": api_pre_order["id"]}, {"$set": {"pre_order": None, "order_id": id_increment}})
+                db.api_pre_order.update_one({"id": api_pre_order["id"]}, {
+                                            "$set": {"products": {}, "total": 0, "subtotal": 0}}, session=session)
+
+        return db.api_order.find_one({"id": id_increment})
 
     @staticmethod
     def _check_platform(platform, customer_id, customer_name):
@@ -365,7 +374,7 @@ class PreOrderHelper():
     def _check_lock(api_user, api_pre_order):
         if api_user.type == 'customer':
             return
-        if datetime.timestamp(api_pre_order['lock_at'])+settings.CART_LOCK_INTERVAL > datetime.timestamp(datetime.now()):
+        if api_pre_order['lock_at'] and datetime.timestamp(api_pre_order['lock_at'])+settings.CART_LOCK_INTERVAL > datetime.timestamp(datetime.now()):
             raise ApiVerifyError('cart in use')
 
     @staticmethod
@@ -384,5 +393,5 @@ class PreOrderHelper():
 
     @staticmethod
     def _check_addable(api_pre_order, api_campaign_product):
-        if api_campaign_product["id"] in api_pre_order["products"]:
+        if str(api_campaign_product["id"]) in api_pre_order["products"]:
             raise ApiVerifyError("product already in pre_order")
