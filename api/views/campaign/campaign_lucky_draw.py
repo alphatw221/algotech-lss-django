@@ -13,7 +13,7 @@ from backend.campaign.campaign_lucky_draw.manager import CampaignLuckyDrawManage
 from backend.campaign.campaign_lucky_draw.event import DrawFromCampaignLikesEvent, DrawFromCampaignCommentsEvent, DrawFromCartProductsEvent
 
 from api.models.campaign.campaign import Campaign
-from api.models.campaign.campaign_product import CampaignProduct
+from api.models.campaign.campaign_lucky_draw import CampaignLuckyDraw
 
 
 def verify_request(api_user, platform_name, platform_id, campaign_id, prize_campaign_product_id, campaign_product_id=None):
@@ -48,8 +48,21 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
     # lucky_draw = CampaignLuckyDrawManager.process(
     #     c, DrawFromCartProductsEvent(c, cp), prize_cp, 1,
     # )
+    @action(detail=False, methods=['GET'], url_path=r'list_winner')
+    def list_winner(self, request):
+        try:
+            campaign_id = request.query_params.get('campaign_id')
+            winner_list = CampaignLuckyDraw.objects.filter(campaign_id=campaign_id)
 
-    @action(detail=False, methods=['GET'], url_path=r'lucky_draw_likes')
+        except ApiVerifyError as e:
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            print(str(e))
+            return Response({"message": "error occerd during draw"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response(winner_list, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['GET'], url_path=r'likes')
     def lucky_draw_likes(self, request):
         try:
             platform_id = request.query_params.get('platform_id')
@@ -82,7 +95,7 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
 
         return Response(response_json, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['GET'], url_path=r'lucky_draw_comment')
+    @action(detail=False, methods=['GET'], url_path=r'comment')
     def lucky_draw_comment(self, request):
         try:
             platform_id = request.query_params.get('platform_id')
@@ -115,7 +128,7 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
 
         return Response(response_json, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['GET'], url_path=r'lucky_draw_cart')
+    @action(detail=False, methods=['GET'], url_path=r'cart')
     def lucky_draw_cart(self, request):
         try:
             platform_id = request.query_params.get('platform_id')
