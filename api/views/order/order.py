@@ -42,7 +42,7 @@ def verify_buyer_request(api_user, order_id, check_info=None):
         raise ApiVerifyError("no user found")
     elif api_user.status != "valid":
         raise ApiVerifyError("not activated user")
-    if not Order.objects.get(customer_id=api_user.id):
+    if not Order.objects.get(customer_id=api_user.id, id=order_id):
         raise ApiVerifyError("not customer's order found")
     if check_info == None:
         return Order.objects.get(customer_id=api_user.id, id=order_id)
@@ -237,10 +237,10 @@ class OrderHelper():
         pass
     
     @classmethod
-    def cancel(api_user, order):
+    def cancel(self, api_user, order):
         with client.start_session() as session:
             with session.start_transaction():
-                api_order = db.order.find_one(
+                api_order = db.api_order.find_one(
                     {'id': order.id}, session=session)
                 
                 campaign_id = api_order['campaign_id']
@@ -270,6 +270,7 @@ class OrderHelper():
                         product_dict['price'] = price
                         total_count += (order_product['qty'] + pre_order_product['qty']) * price
                     else:
+                        # db.api_order_product.insert_one({'pre_order_id': pre_order_id, 'campaign_product_id': campaign_product_id, 'qty': order_product['qty']})
                         db.api_order_product.update_one(
                             {'pre_order_id': pre_order_id, 'campaign_product_id': campaign_product_id}, 
                             {'$set': 
@@ -282,6 +283,7 @@ class OrderHelper():
                         total_count += order_product['qty'] * price
                     products_dict[campaign_product_id] = product_dict
                 
+                print (products_dict)
                 db.api_pre_order.update_one(
                     {'id': pre_order_id},
                     {'$set': 
