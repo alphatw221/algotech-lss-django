@@ -267,9 +267,10 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
                 for account_number, account_info in data['accounts'].items():
                     if account_number in request.data:
                         image = request.data[account_number]
-                        image_path = default_storage.save(
-                            f'{user_subscription.id}/payment/direct_payment/{account_number}', ContentFile(image.read()))
-                        data['accounts'][account_number]['image'] = image_path
+                        if image:
+                            image_path = default_storage.save(
+                                f'{user_subscription.id}/payment/direct_payment/{image.name}', ContentFile(image.read()))
+                            data['accounts'][account_number]['image'] = image_path
 
             meta_payment = user_subscription.meta_payment
             meta_payment['direct_payment'] = data

@@ -135,3 +135,5 @@ class PreOrderAdmin(admin.ModelAdmin):
     model = PreOrder
     list_display = [field.name for field in PreOrder._meta.fields]
     search_fields = [field.name for field in PreOrder._meta.fields]
+
+api_pre_order_template={f.get_attname():f.get_default() if f.has_default() else None for f in PreOrder._meta.fields}
