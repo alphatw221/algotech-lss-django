@@ -149,11 +149,28 @@ class OrderSerializerUpdateShipping(serializers.ModelSerializer):
                   "shipping_time", ]
 
 
-class OrderSerializerUpdatePayment(serializers.ModelSerializer):
+class OrderSerializerUpdatePaymentShipping(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ["payment_first_name",
+        fields = ["shipping_first_name",
+                  "shipping_last_name",
+                  "shipping_email",
+                  "shipping_phone",
+                  "shipping_gender",
+                  "shipping_company",
+                  "shipping_postcode",
+                  "shipping_region",
+                  "shipping_location",
+                  "shipping_address_1",
+                  "shipping_address_2",
+                  "shipping_method",
+                  "shipping_status",
+                  "shipping_details",
+                  "shipping_remark",
+                  "shipping_date",
+                  "shipping_time",
+                  "payment_first_name",
                   "payment_last_name",
                   "payment_gender",
                   "payment_company",
@@ -166,7 +183,7 @@ class OrderSerializerUpdatePayment(serializers.ModelSerializer):
                   "payment_status",
                   "payment_remark",
                   "paid_at",
-                  "status" ]
+                  "status", ]
 
 
 class OrderAdmin(admin.ModelAdmin):
