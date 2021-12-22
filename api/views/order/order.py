@@ -1,7 +1,7 @@
 from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
 from api.models.order.pre_order import PreOrder, PreOrderSerializer
-from api.models.order.order import Order, OrderSerializer, OrderSerializerUpdatePayment, OrderSerializerUpdateShipping
+from api.models.order.order import Order, OrderSerializer, OrderSerializerUpdatePaymentShipping
 import json, pendulum
 
 from rest_framework.response import Response
@@ -12,6 +12,7 @@ from rest_framework.pagination import PageNumberPagination
 from django.db import transaction
 
 import functools
+from backend.pymongo.mongodb import db, client
 
 
 def getparams(request, params: tuple, seller=True):
@@ -36,31 +37,68 @@ def api_error_handler(func):
 
 
 def verify_buyer_request(api_user, order_id, check_info=None):
+    print (api_user.id)
     if not api_user:
         raise ApiVerifyError("no user found")
     elif api_user.status != "valid":
         raise ApiVerifyError("not activated user")
-    if not api_user.order.filter(id=order_id).exists():
-        raise ApiVerifyError("not pre_order found")
+    if not Order.objects.get(customer_id=api_user.id):
+        raise ApiVerifyError("not customer's order found")
     if check_info == None:
-        return api_user.order.get(id=order_id)
-
-    order = OrderSerializer.objects.get(id=order_id)
+        return Order.objects.get(customer_id=api_user.id, id=order_id)
+    
+    verify_message = {}
+    check_exist = False
+    #TODO 訊息彙整回傳一次
+    order = Order.objects.get(customer_id=api_user.id, id=order_id)
+    if not order.shipping_first_name:
+        check_exist = True
+        verify_message['shipping_first_name'] = 'not valid'
+    if not order.shipping_last_name:
+        check_exist = True
+        verify_message['shipping_last_name'] = 'not valid'
+    if not order.shipping_phone:
+        check_exist = True
+        verify_message['shipping_phone'] = 'not valid'
+    if not order.shipping_postcode:
+        check_exist = True
+        verify_message['shipping_postcode'] = 'not valid'
+    if not order.shipping_region:
+        check_exist = True
+        verify_message['shipping_region'] = 'not valid'
+    if not order.shipping_location:
+        check_exist = True
+        verify_message['shipping_location'] = 'not valid'
+    if not order.shipping_address_1:
+        check_exist = True
+        verify_message['shipping_address'] = 'not valid'
+    if not order.shipping_method:
+        check_exist = True
+        verify_message['shipping_method'] = 'not valid'
     if not order.payment_first_name:
-        raise ApiVerifyError("no payment first name")
+        check_exist = True
+        verify_message['payment_first_name'] = 'not valid'
     if not order.payment_last_name:
-        raise ApiVerifyError("no payment last name")
+        check_exist = True
+        verify_message['payment_last_name'] = 'not valid'
     if not order.payment_company:
-        raise ApiVerifyError("no payment company")
+        check_exist = True
+        verify_message['payment_company'] = 'not valid'
     if not order.payment_postcode:
-        raise ApiVerifyError("no payment post code")
+        check_exist = True
+        verify_message['payment_postcode'] = 'not valid'
     if not order.payment_region:
-        raise ApiVerifyError("no payment region")
+        check_exist = True
+        verify_message['payment_region'] = 'not valid'
     if not order.payment_location:
-        raise ApiVerifyError("no payment location")
+        check_exist = True
+        verify_message['payment_location'] = 'not valid'
     if not order.payment_address_1:
-        raise ApiVerifyError("no payment address")
-    return api_user.order.get(id=order_id)
+        check_exist = True
+        verify_message['payment_address'] = 'not valid'
+    if check_exist == True:
+        raise ApiVerifyError(verify_message)
+    return order
 
 
 def verify_seller_request(api_user, platform_name, platform_id, campaign_id, order_id=None):
@@ -130,6 +168,7 @@ class OrderViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['GET'], url_path=r'buyer_retrieve')
     @api_error_handler
     def buyer_retrieve_order(self, request, pk=None):
+        # 先檢查exists 才給request get
         api_user = request.user.api_users.get(type='customer')
 
         order = verify_buyer_request(
@@ -139,7 +178,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['POST'], url_path=r'buyer_info')
+    @action(detail=True, methods=['POST'], url_path=r'buyer_submit')
     @api_error_handler
     def update_buyer_order_info(self, request, pk=None):
         api_user = request.user.api_users.get(type='customer')
@@ -147,55 +186,39 @@ class OrderViewSet(viewsets.ModelViewSet):
         order = verify_buyer_request(
             api_user, order_id=pk)
         
-        serializer = OrderSerializerUpdatePayment(order, data=request.data, partial=True)
-        if not serializer.is_valid():
-            pass
-        serializer = OrderSerializerUpdateShipping(order, data=request.data, partial=True)
-        if not serializer.is_valid():
-            pass
-
-        order = serializer.save()
-        serializer = OrderSerializer(order)
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    
-    @action(detail=True, methods=['POST'], url_path=r'buyer_submit')
-    @api_error_handler
-    def buyer_update_delivery_payment_info(self, request, pk=None):
-        api_user = request.user.api_users.get(type='customer')
-
-        order = verify_buyer_request(
-            api_user, order_id=pk, check_info=True)
-        
         request.data['status'] = 'unpaid'
-        serializer = OrderSerializerUpdatePayment(order, data=request.data, partial=True)
+        serializer = OrderSerializerUpdatePaymentShipping(order, data=request.data, partial=True)
         if not serializer.is_valid():
-            pass
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        order = serializer.save()
+        serializer.save()
+
+        order = verify_buyer_request(
+            api_user, order_id=pk, check_info=True)
         serializer = OrderSerializer(order)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
     
-    @action(detail=True, methods=['POST'], url_path=r'buyer_complete')
-    @api_error_handler
-    def buyer_complete_order(self, request, pk=None):
-        api_user = request.user.api_users.get(type='customer')
+    # @action(detail=True, methods=['GET'], url_path=r'buyer_complete')
+    # @api_error_handler
+    # def buyer_complete_order(self, request, pk=None):
+    #     api_user = request.user.api_users.get(type='customer')
 
-        order = verify_buyer_request(
-            api_user, order_id=pk, check_info=True)
+    #     order = verify_buyer_request(
+    #         api_user, order_id=pk, check_info=True)
         
-        request.data['paid_at'] = pendulum.now()
-        serializer = OrderSerializerUpdatePayment(order, data=request.data, partial=True)
-        if not serializer.is_valid():
-            pass
+    #     request.data['paid_at'] = pendulum.now()
+    #     request.data['status'] = 'paid'
+    #     serializer = OrderSerializerUpdatePaymentShipping(order, data=request.data, partial=True)
+    #     if not serializer.is_valid():
+    #         pass
 
-        order = serializer.save()
-        serializer = OrderSerializer(order)
+    #     order = serializer.save()
+    #     serializer = OrderSerializer(order)
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    #     return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['POST'], url_path=r'buyer_cancel')
+    @action(detail=True, methods=['GET'], url_path=r'buyer_cancel')
     @api_error_handler
     def buyer_cancel_order(self, request, pk=None):
         api_user = request.user.api_users.get(type='customer')
@@ -214,24 +237,57 @@ class OrderHelper():
         pass
     
     @classmethod
-    def cancel(cls, api_user, order):
-        # cls._check_lock(api_user, order)
-        with transaction.atomic():
-            serializer = PreOrderSerializer(
-                data=OrderSerializer(order).data)
-            if not serializer.is_valid():
-                pass
-            pre_order = serializer.save()
+    def cancel(api_user, order):
+        with client.start_session() as session:
+            with session.start_transaction():
+                api_order = db.order.find_one(
+                    {'id': order.id}, session=session)
+                
+                campaign_id = api_order['campaign_id']
+                customer_id = api_order['customer_id']
+                pre_order_id = db.api_pre_order.find_one({'campaign_id': campaign_id, 'customer_id': customer_id})['id']
+                
+                products_dict = {}
+                total_count = 0
+                order_products = db.api_order_product.find({'campaign_id': campaign_id, 'customer_id': customer_id, 'order_id': order.id})
+                for order_product in order_products:
+                    campaign_product_id = order_product['campaign_product_id']
+                    price = db.api_campaign_product.find_one({'id': campaign_product_id})['price']
+                    product_dict = {}
 
-            for order_product in order.order_products.all():
-                order_product.order = None
-                order_product.pre_order = pre_order.id
-                order_product.save()
+                    if db.api_order_product.find({'pre_order_id': pre_order_id, 'order_id': None, 'campaign_product_id': campaign_product_id}).count() > 0:
+                        pre_order_product = db.api_order_product.find_one({'pre_order_id': pre_order_id, 'order_id': None, 'campaign_product_id': campaign_product_id})
+                        
+                        db.api_order_product.update_one(
+                            {'pre_order_id': pre_order_id, 'campaign_product_id': campaign_product_id}, 
+                            {'$set': 
+                                {'qty': order_product['qty'] + pre_order_product['qty']}
+                            }
+                        )
+                        db.api_order_product.delete_one({'order_id': order.id, 'campaign_product_id': campaign_product_id})
 
-            order.products = {}
-            order.total = 0
-            order.subtotal = 0
-            order.status = 'staging'
-            order.save()
+                        product_dict['qty'] = order_product['qty'] + pre_order_product['qty']
+                        product_dict['price'] = price
+                        total_count += (order_product['qty'] + pre_order_product['qty']) * price
+                    else:
+                        db.api_order_product.update_one(
+                            {'pre_order_id': pre_order_id, 'campaign_product_id': campaign_product_id}, 
+                            {'$set': 
+                                {'qty': order_product['qty'], 'order_id': None}
+                            }
+                        )
 
-        return pre_order
+                        product_dict['qty'] = order_product['qty']
+                        product_dict['price'] = price
+                        total_count += order_product['qty'] * price
+                    products_dict[campaign_product_id] = product_dict
+                
+                db.api_pre_order.update_one(
+                    {'id': pre_order_id},
+                    {'$set': 
+                        {'products': products_dict, 'total': total_count}
+                    }
+                )
+                db.api_order.delete_one({'id': order.id})
+
+        return pre_order_id
