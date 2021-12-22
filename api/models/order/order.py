@@ -173,3 +173,6 @@ class OrderAdmin(admin.ModelAdmin):
     model = Order
     list_display = [field.name for field in Order._meta.fields]
     search_fields = [field.name for field in Order._meta.fields]
+
+
+api_order_template={f.get_attname():f.get_default() if f.has_default() else None for f in Order._meta.fields}

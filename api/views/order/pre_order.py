@@ -1,10 +1,11 @@
 from datetime import datetime
+from platform import platform
 from re import template
 from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
 from api.models.campaign.campaign_product import CampaignProduct
 from api.models.order.pre_order import PreOrder, PreOrderSerializer
-from api.models.order.order import Order, OrderSerializer, OrderSerializerUpdateShipping
+from api.models.order.order import Order, OrderSerializer, OrderSerializerUpdateShipping,api_order_template
 
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -14,7 +15,7 @@ from rest_framework.pagination import PageNumberPagination
 from django.db import transaction
 from django.db.models import F
 
-from api.models.order.order_product import OrderProduct, OrderProductSerializer
+from api.models.order.order_product import OrderProduct, OrderProductSerializer,api_order_product_template
 from django.conf import settings
 
 import functools
@@ -22,8 +23,14 @@ from backend.pymongo.mongodb import db, client
 
 
 def getparams(request, params: tuple, seller=True):
-    ret = [request.user.api_users.get(type='user')] if seller else [
-        request.user.api_users.get(type='customer')]
+    if seller:
+        if not request.user.api_users.filter(type='user').exists():
+            raise ApiVerifyError('no api_user found')
+        ret = [request.user.api_users.get(type='user')]
+    else:
+        if not request.user.api_users.filter(type='customer').exists():
+            raise ApiVerifyError('no api_user found')
+        ret = [request.user.api_users.get(type='customer')]
     for param in params:
         ret.append(request.query_params.get(param))
     return ret
@@ -42,36 +49,37 @@ def api_error_handler(func):
     return wrapper
 
 
-def verify_buyer_request(api_user, pre_order_id, platform_name=None, order_product_id=None, campaign_product_id=None):
-    if not api_user:
-        raise ApiVerifyError("no user found")
-    elif api_user.status != "valid":
-        raise ApiVerifyError("not activated user")
-    if not api_user.pre_orders.filter(id=pre_order_id).exists():
-        raise ApiVerifyError("not pre_order found")
-    pre_order = api_user.pre_orders.get(id=pre_order_id)
+def verify_buyer_request(api_user, platform_name, campaign_id, order_product_id=None, campaign_product_id=None):
+    
+    if platform_name not in platform_dict:
+        raise ApiVerifyError("no platfrom name found")
+    
+    if platform_name=='facebook':
+        customer_id=api_user.facebook_info['id']
+    else:
+        raise ApiVerifyError('platform not support')
 
-    if platform_name:
-        if platform_name not in platform_dict:
-            raise ApiVerifyError("no platfrom name found")
+    if not PreOrder.objects.filter(platform=platform_name, customer_id=customer_id, campaign_id=campaign_id).exists():
+        raise ApiVerifyError('no pre_order found')
+    pre_order =PreOrder.objects.get(platform=platform_name, customer_id=customer_id, campaign_id=campaign_id)
+    
     if order_product_id:
         if not pre_order.order_products.filter(id=order_product_id).exists():
             raise ApiVerifyError("no order_product found")
-        order_product = pre_order.order_products.select_for_update().get(
+        order_product = pre_order.order_products.get(
             id=order_product_id)
-        campaign_product = CampaignProduct.objects.select_for_update().get(
-            id=order_product.campaign_product.id)
+        campaign_product = order_product.campaign_product
+
         return pre_order, campaign_product, order_product
 
     if campaign_product_id:
         if not pre_order.campaign.products.filter(id=campaign_product_id).exists():
             raise ApiVerifyError("no campaign_product found")
-        campaign_product = pre_order.campaign.products.select_for_update().get(
+        campaign_product = pre_order.campaign.products.get(
             id=campaign_product_id)
         return pre_order, campaign_product
 
     return pre_order
-
 
 def verify_seller_request(api_user, platform_name, platform_id, campaign_id, pre_order_id=None, order_product_id=None, campaign_product_id=None):
     Verify.verify_user(api_user)
@@ -163,22 +171,20 @@ class PreOrderViewSet(viewsets.ModelViewSet):
             api_user, platform_name, platform_id, campaign_id, pre_order_id=pk)
 
         api_order = PreOrderHelper.checkout(api_user, pre_order)
-
-        return Response('test', status=status.HTTP_200_OK)
+        return Response(api_order, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['GET'], url_path=r'seller_add')
     @api_error_handler
     def seller_add_order_product(self, request, pk=None):
-        api_user, platform_id, platform_name, campaign_id, campaign_product_id, qty, customer_id, customer_name = getparams(
-            request, ("platform_id", "platform_name", "campaign_id", "campaign_product_id", "qty", "customer_id", "customer_name"))
+        api_user, platform_id, platform_name, campaign_id, campaign_product_id, qty = getparams(
+            request, ("platform_id", "platform_name", "campaign_id", "campaign_product_id", "qty"))
 
         _, _, pre_order, campaign_product = verify_seller_request(
             api_user, platform_name, platform_id, campaign_id, pre_order_id=pk, campaign_product_id=campaign_product_id)
 
-        order_product = PreOrderHelper.add_product(
-            api_user, pre_order, campaign_product, qty, platform_name, customer_id, customer_name)
-
-        return Response('test', status=status.HTTP_200_OK)
+        api_order_product = PreOrderHelper.add_product(
+            api_user, pre_order, campaign_product, qty)
+        return Response(api_order_product, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['GET'], url_path=r'seller_update')
     @api_error_handler
@@ -192,16 +198,30 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
         api_order_product = PreOrderHelper.update_product(
             api_user, pre_order, order_product, campaign_product, qty)
-        print(api_order_product)
-        del api_order_product['_id']
         return Response(api_order_product, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['GET'], url_path=r'buyer_retrieve')
+    @action(detail=True, methods=['GET'], url_path=r'seller_delete')
     @api_error_handler
-    def buyer_retrieve_pre_order(self, request, pk=None):
-        api_user = request.user.api_users.get(type='customer')
+    def seller_delete_order_product(self, request, pk=None):
+
+        api_user, platform_id, platform_name, campaign_id, order_product_id = getparams(
+            request, ("platform_id", "platform_name", "campaign_id", "order_product_id"))
+
+        _, _, pre_order, campaign_product, order_product = verify_seller_request(
+            api_user, platform_name, platform_id, campaign_id, pre_order_id=pk, order_product_id=order_product_id)
+
+        PreOrderHelper.delete_product(
+            api_user, pre_order, order_product, campaign_product)
+        return Response({'message':"delete success"}, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['GET'], url_path=r'buyer_retrieve')
+    @api_error_handler
+    def buyer_retrieve_pre_order(self, request):
+        api_user, platform_name, campaign_id = getparams(
+            request, ("platform_name", "campaign_id"), seller=False)
+
         pre_order = verify_buyer_request(
-            api_user, pre_order_id=pk)
+            api_user, platform_name, campaign_id)
 
         serializer = PreOrderSerializer(pre_order)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -210,43 +230,51 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     @api_error_handler
     def buyer_pre_order_checkout(self, request, pk=None):
 
-        api_user = request.user.api_users.get(type='customer')
-
+        api_user, platform_name, campaign_id = getparams(
+            request, ("platform_name", "campaign_id"), seller=False)
+            
         pre_order = verify_buyer_request(
-            api_user, pre_order_id=pk)
-        order = PreOrderHelper.checkout(api_user, pre_order)
+            api_user, platform_name, campaign_id)
+        api_order = PreOrderHelper.checkout(api_user, pre_order)
+        return Response(api_order, status=status.HTTP_200_OK)
 
-        return Response('test', status=status.HTTP_200_OK)
-
-    @action(detail=True, methods=['GET'], url_path=r'buyer_add')
+    @action(detail=False, methods=['GET'], url_path=r'buyer_add')
     @api_error_handler
-    def buyer_add_order_product(self, request, pk=None):
-        api_user, campaign_product_id, platform_name, customer_id, customer_name, qty = getparams(
-            request, ("campaign_product_id", "platform_name", "customer_id", "customer_name", "qty"), seller=False)
+    def buyer_add_order_product(self, request):
+        api_user, platform_name, campaign_id, campaign_product_id, qty = getparams(
+            request, ("platform_name", "campaign_id", "campaign_product_id", "qty"), seller=False)
 
         pre_order, campaign_product = verify_buyer_request(
-            api_user, pk, platform_name=platform_name, campaign_product_id=campaign_product_id)
+            api_user, platform_name, campaign_id, campaign_product_id=campaign_product_id)
 
-        order_product = PreOrderHelper.add_product(
-            api_user, pre_order, campaign_product, qty, platform_name, customer_id, customer_name)
+        api_order_product = PreOrderHelper.add_product(api_user, pre_order, campaign_product, qty)
+        return Response(api_order_product, status=status.HTTP_200_OK)
 
-        return Response('test', status=status.HTTP_200_OK)
-
-    @action(detail=True, methods=['GET'], url_path=r'buyer_update')
+    @action(detail=False, methods=['GET'], url_path=r'buyer_update')
     @api_error_handler
-    def buyer_update_order_product(self, request, pk=None):
-        api_user, order_product_id, qty = getparams(
-            request, ("order_product_id", "qty"), seller=False)
+    def buyer_update_order_product(self, request):
+        api_user, platform_name, campaign_id, order_product_id, qty = getparams(
+            request, ("platform_name", "campaign_id", "order_product_id", "qty"), seller=False)
 
         pre_order, campaign_product, order_product = verify_buyer_request(
-            api_user, pk, order_product_id=order_product_id)
+            api_user, platform_name, campaign_id, order_product_id=order_product_id)
 
-        order_product = PreOrderHelper.update_product(
+        api_order_product = PreOrderHelper.update_product(
             api_user, pre_order, order_product, campaign_product, qty)
+        return Response(api_order_product, status=status.HTTP_200_OK)
 
-        return Response('test', status=status.HTTP_200_OK)
+    @action(detail=False, methods=['GET'], url_path=r'buyer_delete')
+    @api_error_handler
+    def buyer_delete_order_product(self, request):
+        api_user, platform_name, campaign_id, order_product_id= getparams(
+            request, ("platform_name", "campaign_id", "order_product_id"), seller=False)
 
+        pre_order, campaign_product, order_product = verify_buyer_request(
+            api_user, platform_name, campaign_id, order_product_id=order_product_id)
 
+        PreOrderHelper.delete_product(
+            api_user, pre_order, order_product, campaign_product)
+        return Response({'message':"delete success"}, status=status.HTTP_200_OK)
 class PreOrderHelper():
 
     @classmethod
@@ -266,10 +294,10 @@ class PreOrderHelper():
                     api_campaign_product, original_qty=api_order_product['qty'], request_qty=qty)
 
                 db.api_campaign_product.update_one(
-                    {'id': campaign_product.id}, {"$inc": {'qty_sold': qty_difference}}, session=session)
+                    {'id': api_campaign_product['id']}, {"$inc": {'qty_sold': qty_difference}}, session=session)
 
                 db.api_order_product.update_one(
-                    {'id': order_product.id}, {"$set": {'qty': qty}}, session=session)
+                    {'id': api_order_product['id']}, {"$set": {'qty': qty}}, session=session)
 
                 products = api_pre_order['products']
                 products[str(api_campaign_product['id'])]['qty'] = qty
@@ -286,10 +314,10 @@ class PreOrderHelper():
                     },
                     session=session)
 
-        return api_order_product
+        return db.api_order_product.find_one({"id": api_order_product['id']},{"_id":False})
 
     @classmethod
-    def add_product(cls, api_user, pre_order, campaign_product, qty, platform, customer_id, customer_name):
+    def add_product(cls, api_user, pre_order, campaign_product, qty):
         with client.start_session() as session:
             with session.start_transaction():
                 api_pre_order = db.api_pre_order.find_one(
@@ -302,22 +330,21 @@ class PreOrderHelper():
                 cls._check_addable(api_pre_order, api_campaign_product)
                 qty_difference = cls._check_stock(
                     api_campaign_product, original_qty=0, request_qty=qty)
-                cls._check_platform(platform, customer_id, customer_name)
 
                 latest_api_order_product = db.api_order_product.find_one(
                     {"$query": {}, "$orderby": {"id": -1}}, session=session)
                 id_increment = latest_api_order_product['id'] + \
                     1 if latest_api_order_product else 1
-                template = OrderProductSerializer({}).data
+                template=api_order_product_template.copy()
                 template.update({
                     "id": id_increment,
                     "campaign_id": api_campaign_product["campaign_id"],
                     "campaign_product_id": api_campaign_product["id"],
                     "pre_order_id": api_pre_order["id"],
                     "qty": qty,
-                    "customer_id": customer_id,
-                    "customer_name": customer_name,
-                    "platform": platform,
+                    "customer_id": api_pre_order['customer_id'],
+                    "customer_name": api_pre_order['customer_name'],
+                    "platform": api_pre_order['platform'],
                     "type": api_campaign_product["type"]
                 })
                 db.api_order_product.insert_one(template, session=session)
@@ -341,7 +368,43 @@ class PreOrderHelper():
                     },
                     session=session)
 
-        return db.api_order_product.find_one({"id": id_increment})
+        return db.api_order_product.find_one({"id": id_increment},{"_id":False})
+
+    @classmethod
+    def delete_product(cls, api_user, pre_order, order_product, campaign_product):
+        with client.start_session() as session:
+            with session.start_transaction():
+                api_pre_order = db.api_pre_order.find_one(
+                    {"id": pre_order.id}, session=session)
+                api_order_product = db.api_order_product.find_one(
+                    {"id": order_product.id}, session=session)
+                api_campaign_product = db.api_campaign_product.find_one(
+                    {"id": campaign_product.id}, session=session)
+
+                cls._check_lock(api_user, api_pre_order)
+
+
+                db.api_campaign_product.update_one(
+                    {'id': api_campaign_product['id']}, {"$inc": {'qty_sold': -api_order_product['qty']}}, session=session)
+
+                db.api_order_product.delete_one(
+                    {'id': api_order_product['id']}, session=session)
+
+                products = api_pre_order['products']
+                del products[str(api_campaign_product['id'])]
+                db.api_pre_order.update_one(
+                    {'id': pre_order.id},
+                    {
+                        "$set": {
+                            "lock_at": datetime.now() if api_user.type == 'customer' else None,
+                            "products": products
+                        },
+                        "$inc": {
+                            "total": -api_order_product['qty']*api_campaign_product['price'],
+                        }
+                    },
+                    session=session)
+        return True
 
     @classmethod
     def checkout(cls, api_user, pre_order):
@@ -351,26 +414,25 @@ class PreOrderHelper():
                     {"id": pre_order.id}, session=session)
 
                 cls._check_lock(api_user, api_pre_order)
+                cls._check_empty(api_pre_order)
 
                 latest_api_order_product = db.api_order.find_one(
                     {"$query": {}, "$orderby": {"id": -1}}, session=session)
-
                 id_increment = latest_api_order_product['id'] + \
                     1 if latest_api_order_product else 1
                 api_order_data = api_pre_order.copy()
                 api_order_data['id'] = id_increment
                 del api_order_data['_id']
-                template = OrderSerializer({}).data
+                template=api_order_template.copy()
                 template.update(api_order_data)
-                db.api_order.insert_one(
-                    template, session=session)
+                db.api_order.insert_one(template, session=session)
 
                 db.api_order_product.update_many(
                     {"pre_order_id": api_pre_order["id"]}, {"$set": {"pre_order_id": None, "order_id": id_increment}})
                 db.api_pre_order.update_one({"id": api_pre_order["id"]}, {
                                             "$set": {"products": {}, "total": 0, "subtotal": 0}}, session=session)
 
-        return db.api_order.find_one({"id": id_increment})
+        return db.api_order.find_one({"id": id_increment},{"_id":False})
 
     @staticmethod
     def _check_platform(platform, customer_id, customer_name):
@@ -385,6 +447,8 @@ class PreOrderHelper():
 
     @staticmethod
     def _check_qty(api_campaign_product, qty):
+        if not qty:
+            raise ApiVerifyError('please enter qty')
         qty = int(qty)
         if not qty:
             raise ApiVerifyError('qty can not be zero or negitive')
@@ -393,7 +457,7 @@ class PreOrderHelper():
     @staticmethod
     def _check_stock(api_campaign_product, original_qty, request_qty):
         qty_difference = int(request_qty)-original_qty
-        if qty_difference and api_campaign_product["qty_for_sale"] < qty_difference:
+        if qty_difference and api_campaign_product["qty_for_sale"]-api_campaign_product["qty_sold"]< qty_difference:
             raise ApiVerifyError("out of stock")
         return qty_difference
 
@@ -401,3 +465,7 @@ class PreOrderHelper():
     def _check_addable(api_pre_order, api_campaign_product):
         if str(api_campaign_product["id"]) in api_pre_order["products"]:
             raise ApiVerifyError("product already in pre_order")
+    @staticmethod
+    def _check_empty(api_pre_order):
+        if not bool(api_pre_order['products']):
+            raise ApiVerifyError('cart is empty')
