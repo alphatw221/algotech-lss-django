@@ -94,16 +94,15 @@ def verify_seller_request(api_user, platform_name, platform_id, campaign_id, pre
         if order_product_id:
             if not pre_order.order_products.filter(id=order_product_id).exists():
                 raise ApiVerifyError("no order_product found")
-            order_product = pre_order.order_products.select_for_update().get(
+            order_product = pre_order.order_products.get(
                 id=order_product_id)
-            campaign_product = CampaignProduct.objects.select_for_update().get(
-                id=order_product.campaign_product.id)
+            campaign_product = order_product.campaign_product
             return platform, campaign, pre_order, campaign_product, order_product
 
         if campaign_product_id:
             if not pre_order.campaign.products.filter(id=campaign_product_id).exists():
                 raise ApiVerifyError("no campaign_product found")
-            campaign_product = pre_order.campaign.products.select_for_update().get(
+            campaign_product = pre_order.campaign.products.get(
                 id=campaign_product_id)
             return platform, campaign, pre_order, campaign_product
 
@@ -226,9 +225,9 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         serializer = PreOrderSerializer(pre_order)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['POST'], url_path=r'buyer_checkout')
+    @action(detail=False, methods=['GET'], url_path=r'buyer_checkout')
     @api_error_handler
-    def buyer_pre_order_checkout(self, request, pk=None):
+    def buyer_pre_order_checkout(self, request):
 
         api_user, platform_name, campaign_id = getparams(
             request, ("platform_name", "campaign_id"), seller=False)
