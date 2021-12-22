@@ -32,6 +32,37 @@ class CampaignLuckyDrawEvent(ABC):
 
 
 @dataclass
+class DrawFromProductsEvent(CampaignLuckyDrawEvent):
+    campagin: Campaign
+    campagin_product: CampaignProduct
+
+    def get_source_id(self):
+        return self.campagin_product.id
+
+    def get_source_type(self):
+        return 'campagin_product'
+
+    def get_condition(self):
+        return None
+
+    def get_condition_type(self):
+        return 'lucky_draw_cart_products'
+
+    def get_candidate_set(self):
+        cart_products = orm_cart_product.filter_products(
+            self.campagin,
+            ('order_code', 'cart'),
+            ('valid',)
+        )
+        return {
+            (cart_product.platform,
+             cart_product.customer_id,
+             cart_product.customer_name)
+            for cart_product in cart_products
+        }
+
+
+@dataclass
 class DrawFromCartProductsEvent(CampaignLuckyDrawEvent):
     campagin: Campaign
     campagin_product: CampaignProduct

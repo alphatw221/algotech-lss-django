@@ -77,3 +77,14 @@ def filter_cart_products(campaign: Campaign,
             status__in=status).all()
     except Exception:
         ...
+
+
+def filter_products(campaign: Campaign,
+                    type: tuple, status: tuple) -> list[CartProduct]:
+    try:
+        return CartProduct.objects.filter(
+            campaign=campaign,
+            type__in=type,
+            status__in=status).all()
+    except Exception:
+        ...
