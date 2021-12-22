@@ -1,6 +1,4 @@
 from datetime import datetime
-from platform import platform
-from re import template
 from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
 from api.models.campaign.campaign_product import CampaignProduct
