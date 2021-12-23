@@ -75,6 +75,8 @@ def verify_buyer_request(api_user, platform_name, campaign_id, order_product_id=
             raise ApiVerifyError("no campaign_product found")
         campaign_product = pre_order.campaign.products.get(
             id=campaign_product_id)
+        if campaign_product.type=='lucky_draw' or campaign_product.type=='lucky_draw-fast':
+            raise ApiVerifyError("invalid campaign_product")
         return pre_order, campaign_product
 
     return pre_order
@@ -287,6 +289,7 @@ class PreOrderHelper():
 
                 cls._check_lock(api_user, api_pre_order)
                 qty = cls._check_qty(api_campaign_product, qty)
+                cls._check_type(api_campaign_product)
                 qty_difference = cls._check_stock(
                     api_campaign_product, original_qty=api_order_product['qty'], request_qty=qty)
 
@@ -325,6 +328,7 @@ class PreOrderHelper():
                 cls._check_lock(api_user, api_pre_order)
                 qty = cls._check_qty(api_campaign_product, qty)
                 cls._check_addable(api_pre_order, api_campaign_product)
+                cls._check_type(api_campaign_product)
                 qty_difference = cls._check_stock(
                     api_campaign_product, original_qty=0, request_qty=qty)
 
@@ -468,3 +472,11 @@ class PreOrderHelper():
     def _check_empty(api_pre_order):
         if not bool(api_pre_order['products']):
             raise ApiVerifyError('cart is empty')
+
+    @staticmethod
+    def _check_type(api_campaign_product):
+        if api_campaign_product['type']=='lucky_draw' or api_campaign_product['type']=='lucky_draw-fast':
+            api_campaign_product['price']=0
+        elif api_campaign_product['type']=='n/a':
+            raise ApiVerifyError('out of stock')
+        

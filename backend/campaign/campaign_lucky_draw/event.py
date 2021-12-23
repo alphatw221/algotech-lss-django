@@ -1,8 +1,11 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from api.models import campaign
 
 from api.models.campaign.campaign import Campaign
 from api.models.campaign.campaign_product import CampaignProduct
+from api.models.order import order_product
+from api.models.order.order_product import OrderProduct
 from api.utils.orm import campaign_comment as orm_campaign_comment
 from api.utils.orm import cart_product as orm_cart_product
 from backend.api.facebook.post import api_fb_get_post_likes
@@ -64,11 +67,11 @@ class DrawFromProductsEvent(CampaignLuckyDrawEvent):
 
 @dataclass
 class DrawFromCartProductsEvent(CampaignLuckyDrawEvent):
-    campagin: Campaign
-    campagin_product: CampaignProduct
+    campaign: Campaign
+    campaign_product: CampaignProduct
 
     def get_source_id(self):
-        return self.campagin_product.id
+        return self.campaign_product.id
 
     def get_source_type(self):
         return 'campagin_product'
@@ -80,16 +83,23 @@ class DrawFromCartProductsEvent(CampaignLuckyDrawEvent):
         return 'lucky_draw_cart_products'
 
     def get_candidate_set(self):
-        cart_products = orm_cart_product.filter_cart_products(
-            self.campagin, self.campagin_product,
-            ('order_code', 'cart'),
-            ('valid',)
-        )
+        # cart_products = orm_cart_product.filter_cart_products(
+        #     self.campagin, self.campagin_product,
+        #     ('order_code', 'cart'),
+        #     ('valid',)
+        # )
+        # return {
+        #     (cart_product.platform,
+        #      cart_product.customer_id,
+        #      cart_product.customer_name)
+        #     for cart_product in cart_products
+        # }
+        order_products = OrderProduct.objects.filter(campaign=self.campaign, campaign_product=self.campaign_product)
         return {
-            (cart_product.platform,
-             cart_product.customer_id,
-             cart_product.customer_name)
-            for cart_product in cart_products
+            (order_product.platform,
+             order_product.customer_id,
+             order_product.customer_name)
+            for order_product in order_products
         }
 
 
@@ -144,11 +154,10 @@ class DrawFromCampaignLikesEvent(ABC):
         if self.campagin.facebook_campaign and (post_id := self.campagin.facebook_campaign.get('post_id')) and \
                 self.campagin.facebook_page and (token := self.campagin.facebook_page.token):
 
-            print('okokokokokokkok')
+
             after = None
             while True:
                 response = api_fb_get_post_likes(token, post_id, after=after)
-                print(response)
                 for person in response[1]['data']:
                     candidate_set.add(
                         ('facebook', person['id'], person['name'])

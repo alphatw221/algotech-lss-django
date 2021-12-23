@@ -54,13 +54,14 @@ class Command(BaseCommand):
         cp = CampaignProduct.objects.get(id=1)
         prize_cp = CampaignProduct.objects.get(id=2)
 
-        lucky_draw = CampaignLuckyDrawManager.process(
-            c, DrawFromCampaignLikesEvent(c), prize_cp, 1,
-        )
-
         # lucky_draw = CampaignLuckyDrawManager.process(
-        #     c, DrawFromCampaignCommentsEvent(c, 'order'), prize_cp, 1,
+        #     c, DrawFromCampaignLikesEvent(c), prize_cp, 1,
         # )
+
+        keyword='testtest'
+        lucky_draw = CampaignLuckyDrawManager.process(
+            c, DrawFromCampaignCommentsEvent(c, keyword), prize_cp, 1,
+        )
 
         # lucky_draw = CampaignLuckyDrawManager.process(
         #     c, DrawFromCartProductsEvent(c, cp), prize_cp, 1,
