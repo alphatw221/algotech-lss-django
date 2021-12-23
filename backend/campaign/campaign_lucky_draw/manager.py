@@ -41,6 +41,7 @@ class CampaignLuckyDrawManager:
             try:
                 pre_order, created = PreOrder.objects.get_or_create(campaign=campaign, platform=winner[0], customer_id=winner[1], customer_name=winner[2])
                 PreOrderHelper.add_product(None, pre_order=pre_order, campaign_product=prize_campaign_product, qty=1)
+                CampaignAnnouncer.announce_lucky_draw_winner(lucky_draw, winner[2])
             except Exception as e:
                 print(e)
                 pass
