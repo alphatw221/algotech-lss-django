@@ -101,6 +101,8 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
             campaign_id = request.query_params.get('campaign_id')
             prize_campaign_product_id = request.query_params.get(
                 'prize_campaign_product_id')
+            keyword = request.query_params.get(
+                'keyword')
             qty = int(request.query_params.get('qty'))
             api_user = request.user.api_users.get(type='user')
 
@@ -109,7 +111,7 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
 
             lucky_draw = CampaignLuckyDrawManager.process(
                 campaign, DrawFromCampaignCommentsEvent(
-                    campaign, 'order'), prize_campaign_product, qty,
+                    campaign, keyword), prize_campaign_product, qty,
             )
 
             response_json = {
