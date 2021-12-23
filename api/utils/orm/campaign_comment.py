@@ -12,9 +12,6 @@ def get_latest_commented_at(campaign: Campaign, platform: str):
     except Exception:
         return 1
 
-    return campaign.meta['latest_captured_comment'] if 'latest_captured_comment'in campaign.meta else 0
-
-
 def update_or_create_comment(campaign: Campaign, platform: str,
                              comment_id: str, defaults: dict):
     try:

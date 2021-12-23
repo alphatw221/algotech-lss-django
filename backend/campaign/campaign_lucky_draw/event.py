@@ -112,9 +112,12 @@ class DrawFromCampaignLikesEvent(ABC):
 
         if self.campagin.facebook_campaign and (post_id := self.campagin.facebook_campaign.get('post_id')) and \
                 self.campagin.facebook_page and (token := self.campagin.facebook_page.token):
+
+            print('okokokokokokkok')
             after = None
             while True:
                 response = api_fb_get_post_likes(token, post_id, after=after)
+                print(response)
                 for person in response[1]['data']:
                     candidate_set.add(
                         ('facebook', person['id'], person['name'])

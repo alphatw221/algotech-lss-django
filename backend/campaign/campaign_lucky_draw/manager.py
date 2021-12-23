@@ -1,3 +1,4 @@
+from platform import platform
 import random
 from dataclasses import dataclass
 
@@ -5,7 +6,10 @@ import pendulum
 from api.models.campaign.campaign import Campaign
 from api.models.campaign.campaign_lucky_draw import CampaignLuckyDraw
 from api.models.campaign.campaign_product import CampaignProduct
+from api.models.order import pre_order
+from api.models.order.pre_order import PreOrder
 from api.utils.orm import campaign_lucky_draw
+from api.views.order.pre_order import PreOrderHelper
 from backend.campaign.campaign.announcer import (CampaignAnnouncer,
                                                  CampaignAnnouncerError)
 from backend.campaign.campaign_lucky_draw.event import CampaignLuckyDrawEvent
@@ -20,25 +24,36 @@ class CampaignLuckyDrawManager:
     @staticmethod
     def process(campaign: Campaign, event: CampaignLuckyDrawEvent,
                 prize_campaign_product: CampaignProduct, num_of_winner: int):
+
+        #create lucky_draw instance        
         lucky_draw = CampaignLuckyDrawProcessor(
             campaign, event,
             prize_campaign_product, num_of_winner
         ).process()
 
-        cart_product_requests = CampaignLuckyDrawManager._get_cart_product_requests(
-            lucky_draw, campaign, prize_campaign_product)
-        cart_product_requests, response_result = CampaignLuckyDrawManager._handle_cart_product_requests(
-            lucky_draw, event, cart_product_requests)
+        #add lucky_draw_product add to cart
+        # cart_product_requests = CampaignLuckyDrawManager._get_cart_product_requests(
+        #     lucky_draw, campaign, prize_campaign_product)
+        # cart_product_requests, response_result = CampaignLuckyDrawManager._handle_cart_product_requests(
+        #     lucky_draw, event, cart_product_requests)
 
-        lucky_draw.meta['CampaignLuckyDrawManager'] = [
-            cart_product_request.get_items_repr()
-            for cart_product_request in cart_product_requests
-        ]
-        lucky_draw.meta['announcement_history'] = {
-            'time': pendulum.now('UTC'),
-            'response_result': response_result
-        }
-        lucky_draw.save()
+        for winner in lucky_draw.winner_list:
+            try:
+                pre_order, created = PreOrder.objects.get_or_create(campaign=campaign, platform=winner[0], customer_id=winner[1], customer_name=winner[2])
+                PreOrderHelper.add_product(None, pre_order=pre_order, campaign_product=prize_campaign_product, qty=1)
+            except Exception as e:
+                print(e)
+                pass
+        #update add_to_cart reault to lucky_draw instance
+        # lucky_draw.meta['CampaignLuckyDrawManager'] = [
+        #     cart_product_request.get_items_repr()
+        #     for cart_product_request in cart_product_requests
+        # ]
+        # lucky_draw.meta['announcement_history'] = {
+        #     'time': pendulum.now('UTC'),
+        #     'response_result': response_result
+        # }
+        # lucky_draw.save()
 
         return lucky_draw
 
@@ -74,6 +89,7 @@ class CampaignLuckyDrawManager:
         for winner in lucky_draw.winner_list:
             cart_product_request = CartProductRequest(campaign, None,
                                                       winner[0], winner[1], winner[2])
+                                                      #platfrom_name, platform_id, platform_name
             cart_product_request.add_item(prize_campaign_product, 1)
             cart_product_requests.append(cart_product_request)
         return cart_product_requests

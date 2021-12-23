@@ -63,14 +63,14 @@ class Command(BaseCommand):
                 raise FacebookCaptureCommentError('Missing page_token or post_id')
 
             try:
-                return _capture_comments_helper(api_campaign, page_token, post_id)
+                return _process_comments_work(api_campaign, page_token, post_id)
             except FacebookCaptureCommentError:
                 raise
             except Exception:
                 raise FacebookCaptureCommentError('Module internal error')
 
 
-def _capture_comments_helper(campaign: Campaign, page_token: str, post_id: str):
+def _process_comments_work(api_campaign , page_token: str, post_id: str):
     def _capture_comments(since: int):
         code, data = api_fb_get_post_comments(page_token, post_id, since)
         if code // 100 != 2:
@@ -79,32 +79,32 @@ def _capture_comments_helper(campaign: Campaign, page_token: str, post_id: str):
             raise FacebookCaptureCommentError('Facebook API error')
 
         comments = data.get('data', [])
-        comments_captured = _save_comments(comments)
-        latest_commented_at = _get_latest_commented_at(comments)
+        _save_comments(comments)
+        latest_commented_at = comments[-1]['created_time']
 
-        return comments_captured, latest_commented_at
+        return comments, latest_commented_at
 
     def _handle_facebook_error(data):
         if data['error']['type'] in ('GraphMethodException', 'OAuthException'):
-            campaign.facebook_campaign['post_id'] = ''
-            campaign.facebook_campaign['remark'] = f'Facebook API error: {data["error"]}'
-            campaign.save()
+            data=api_campaign['facebook_campaign']
+            data['post_id']=''
+            data['remark']=f'Facebook API error: {data["error"]}'
+            db.api_campaign.update_one({"id",api_campaign['id']},{'facebook_campaign':data})
 
     def _save_comments(comments):
         pass
-
-    def _get_latest_commented_at(comments):
-        if len(comments) <= 1:
-            return False  # False means to stop iteration
-        return comments[-1]['created_time']
+    
+    def _get_latest_captured_at(api_campaign):
+        return api_campaign['meta']['facebook_latest_captured_at'] if api_campaign['meta']['facebook_latest_captured_at'] else 1
+    def _get_comments_count(api_campaign):
+        pass
 
     total_comments_captured = 0
-    commented_at = get_latest_commented_at(campaign, 'facebook')
-    for _ in range(settings.FACEBOOK_COMMENT_CAPTURING['MAX_CONTINUOUS_REQUEST_TIMES']):
-        comments_captured, commented_at = _capture_comments(commented_at)
-        total_comments_captured += comments_captured
-        if not commented_at:
-            break
+    commented_at = _get_latest_captured_at(api_campaign)
+    comments_captured, commented_at = _capture_comments(commented_at)
+    total_comments_captured += comments_captured
 
-    total_campaign_comments = get_comments_count(campaign, 'facebook')
+    total_campaign_comments = _get_comments_count(api_campaign)
     return f'{total_comments_captured=} {total_campaign_comments=}'
+
+

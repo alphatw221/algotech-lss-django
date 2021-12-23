@@ -51,8 +51,8 @@ class Command(BaseCommand):
 
     def lucky_draw_test(self):
         c = Campaign.objects.get(id=1)
-        cp = CampaignProduct.objects.get(id=5)
-        prize_cp = CampaignProduct.objects.get(id=7)
+        cp = CampaignProduct.objects.get(id=1)
+        prize_cp = CampaignProduct.objects.get(id=2)
 
         lucky_draw = CampaignLuckyDrawManager.process(
             c, DrawFromCampaignLikesEvent(c), prize_cp, 1,

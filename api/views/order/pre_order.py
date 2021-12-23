@@ -356,7 +356,7 @@ class PreOrderHelper():
                     {'id': pre_order.id},
                     {
                         "$set": {
-                            "lock_at": datetime.now() if api_user.type == 'customer' else None,
+                            "lock_at": datetime.now() if not api_user or api_user.type == 'customer' else None,
                             "products": products
                         },
                         "$inc": {
@@ -437,6 +437,8 @@ class PreOrderHelper():
 
     @staticmethod
     def _check_lock(api_user, api_pre_order):
+        if not api_user:
+            return
         if api_user.type == 'customer':
             return
         if api_pre_order['lock_at'] and datetime.timestamp(api_pre_order['lock_at'])+settings.CART_LOCK_INTERVAL > datetime.timestamp(datetime.now()):
