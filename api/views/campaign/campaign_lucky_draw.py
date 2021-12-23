@@ -70,9 +70,8 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
             campaign_id = request.query_params.get('campaign_id')
             prize_campaign_product_id = request.query_params.get(
                 'prize_campaign_product_id')
+            qty = int(request.query_params.get('qty'))
             api_user = request.user.api_users.get(type='user')
-            qty = request.user.api_users.get(
-                type='qty') if request.user.api_users.get(type='qty') else 1
 
             _, campaign, prize_campaign_product = verify_request(
                 api_user, platform_name, platform_id, campaign_id, prize_campaign_product_id)
@@ -83,7 +82,6 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
             )
 
             response_json = {
-                'draw_result': lucky_draw.meta['announcement_history']['response_result'],
                 'winner_list': lucky_draw.winner_list
             }
 
@@ -103,9 +101,8 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
             campaign_id = request.query_params.get('campaign_id')
             prize_campaign_product_id = request.query_params.get(
                 'prize_campaign_product_id')
+            qty = int(request.query_params.get('qty'))
             api_user = request.user.api_users.get(type='user')
-            qty = request.user.api_users.get(
-                type='qty') if request.user.api_users.get(type='qty') else 1
 
             _, campaign, prize_campaign_product = verify_request(
                 api_user, platform_name, platform_id, campaign_id, prize_campaign_product_id)
@@ -116,7 +113,6 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
             )
 
             response_json = {
-                'draw_result': lucky_draw.meta['announcement_history']['response_result'],
                 'winner_list': lucky_draw.winner_list
             }
 
@@ -138,9 +134,8 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
                 'campaign_product_id')
             prize_campaign_product_id = request.query_params.get(
                 'prize_campaign_product_id')
+            qty = int(request.query_params.get('qty'))
             api_user = request.user.api_users.get(type='user')
-            qty = request.user.api_users.get(
-                type='qty') if request.user.api_users.get(type='qty') else 1
 
             _, campaign, prize_campaign_product, campaign_product = verify_request(
                 api_user, platform_name, platform_id, campaign_id, prize_campaign_product_id, campaign_product_id = campaign_product_id)
@@ -151,7 +146,6 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
             )
 
             response_json = {
-                'draw_result': lucky_draw.meta['announcement_history']['response_result'],
                 'winner_list': lucky_draw.winner_list
             }
 
@@ -174,20 +168,18 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
                 'campaign_product_id')
             prize_campaign_product_id = request.query_params.get(
                 'prize_campaign_product_id')
+            qty = int(request.query_params.get('qty'))
             api_user = request.user.api_users.get(type='user')
-            qty = request.user.api_users.get(
-                type='qty') if request.user.api_users.get(type='qty') else 1
 
             _, campaign, prize_campaign_product, campaign_product = verify_request(
                 api_user, platform_name, platform_id, campaign_id, prize_campaign_product_id, campaign_product_id = campaign_product_id)
 
             lucky_draw = CampaignLuckyDrawManager.process(
                 campaign, DrawFromProductsEvent(
-                    campaign), prize_campaign_product, qty,
+                    campaign, campaign_product), prize_campaign_product, qty,
             )
 
             response_json = {
-                'draw_result': lucky_draw.meta['announcement_history']['response_result'],
                 'winner_list': lucky_draw.winner_list
             }
 
