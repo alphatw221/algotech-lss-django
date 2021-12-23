@@ -7,7 +7,7 @@ import json, pendulum
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from api.utils.common.verify import Verify
-from api.utils.common.verify import ApiVerifyError
+from api.utils.common.verify import ApiVerifyError, platform_dict
 from rest_framework.pagination import PageNumberPagination
 from django.db import transaction
 
@@ -16,8 +16,14 @@ from backend.pymongo.mongodb import db, client
 
 
 def getparams(request, params: tuple, seller=True):
-    ret = [request.user.api_users.get(type='user')] if seller else [
-        request.user.api_users.get(type='customer')]
+    if seller:
+        if not request.user.api_users.filter(type='user').exists():
+            raise ApiVerifyError('no api_user found')
+        ret = [request.user.api_users.get(type='user')]
+    else:
+        if not request.user.api_users.filter(type='customer').exists():
+            raise ApiVerifyError('no api_user found')
+        ret = [request.user.api_users.get(type='customer')]
     for param in params:
         ret.append(request.query_params.get(param))
     return ret
@@ -35,22 +41,23 @@ def api_error_handler(func):
         #     return Response({"message": str(datetime.now())+"server error."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     return wrapper
 
+def verify_buyer_request(api_user, platform_name, campaign_id, check_info=None):
+    if platform_name not in platform_dict:
+        raise ApiVerifyError("no platfrom name found")
+    if platform_name=='facebook':
+        customer_id=api_user.facebook_info['id']
+    else:
+        raise ApiVerifyError('platform not support')
 
-def verify_buyer_request(api_user, order_id, check_info=None):
-    print (api_user.id)
-    if not api_user:
-        raise ApiVerifyError("no user found")
-    elif api_user.status != "valid":
-        raise ApiVerifyError("not activated user")
-    if not Order.objects.get(customer_id=api_user.id, id=order_id):
-        raise ApiVerifyError("not customer's order found")
+    if not Order.objects.filter(platform=platform_name, customer_id=customer_id, campaign_id=campaign_id).exists():
+        raise ApiVerifyError('no pre_order found')
+    order =Order.objects.get(platform=platform_name, customer_id=customer_id, campaign_id=campaign_id)
     if check_info == None:
-        return Order.objects.get(customer_id=api_user.id, id=order_id)
-    
+        return order
+
     verify_message = {}
     check_exist = False
     #TODO 訊息彙整回傳一次
-    order = Order.objects.get(customer_id=api_user.id, id=order_id)
     if not order.shipping_first_name:
         check_exist = True
         verify_message['shipping_first_name'] = 'not valid'
@@ -107,9 +114,9 @@ def verify_seller_request(api_user, platform_name, platform_id, campaign_id, ord
     campaign = Verify.get_campaign(platform, campaign_id)
 
     if order_id:
-        if not campaign.order.filter(id=order_id).exists():
-            raise ApiVerifyError('no campaign product found')
-        order = campaign.order.get(id=order_id)
+        if not Order.objects.get(id=order_id):
+            raise ApiVerifyError('no order found')
+        order = Order.objects.get(id=order_id)
         return platform, campaign, order
 
     return platform, campaign
@@ -148,15 +155,15 @@ class OrderViewSet(viewsets.ModelViewSet):
         _, campaign = verify_seller_request(
             api_user, platform_name, platform_id, campaign_id)
 
-        queryset = campaign.order.all()
+        queryset = campaign.orders.all()
         # TODO filtering
         if order_by:
             queryset = queryset.order_by(order_by)
         
-        page = OrderPagination.paginate_queryset(queryset)
+        page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = OrderSerializer(page, many=True)
-            result = OrderPagination.get_paginated_response(
+            result = self.get_paginated_response(
                 serializer.data)
             data = result.data
         else:
@@ -165,14 +172,41 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         return Response(data, status=status.HTTP_200_OK)
     
+    @action(detail=True, methods=['GET'], url_path=r'seller_cancel')
+    @api_error_handler
+    def seller_cancel_order(self, request, pk=None):
+        api_user, platform_id, platform_name, campaign_id = getparams(
+            request, ("platform_id", "platform_name", "campaign_id"))
+
+        _, _, order = verify_seller_request(
+            api_user, platform_name, platform_id, campaign_id, order_id=pk)
+        
+        pre_order = OrderHelper.cancel(api_user, order)
+
+        return Response('order canceled', status=status.HTTP_200_OK)
+    
+    @action(detail=True, methods=['GET'], url_path=r'seller_delete')
+    @api_error_handler
+    def seller_delete_order(self, request, pk=None):
+        api_user, platform_id, platform_name, campaign_id = getparams(
+            request, ("platform_id", "platform_name", "campaign_id"))
+
+        _, _, order = verify_seller_request(
+            api_user, platform_name, platform_id, campaign_id, order_id=pk)
+        
+        order = OrderHelper.delete(api_user, order)
+        
+        return Response('order deleted', status=status.HTTP_200_OK)
+    
     @action(detail=True, methods=['GET'], url_path=r'buyer_retrieve')
     @api_error_handler
     def buyer_retrieve_order(self, request, pk=None):
         # 先檢查exists 才給request get
-        api_user = request.user.api_users.get(type='customer')
+        api_user, platform_name, campaign_id = getparams(
+            request, ("platform_name", "campaign_id"), seller=False)
 
         order = verify_buyer_request(
-            api_user, order_id=pk)
+            api_user, platform_name, campaign_id)
 
         serializer = OrderSerializer(order)
 
@@ -180,11 +214,12 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['POST'], url_path=r'buyer_submit')
     @api_error_handler
-    def update_buyer_order_info(self, request, pk=None):
-        api_user = request.user.api_users.get(type='customer')
+    def update_buyer_submit(self, request, pk=None):
+        api_user, platform_name, campaign_id = getparams(
+            request, ("platform_name", "campaign_id"), seller=False)
 
         order = verify_buyer_request(
-            api_user, order_id=pk)
+            api_user, platform_name, campaign_id)
         
         request.data['status'] = 'unpaid'
         serializer = OrderSerializerUpdatePaymentShipping(order, data=request.data, partial=True)
@@ -194,41 +229,25 @@ class OrderViewSet(viewsets.ModelViewSet):
         serializer.save()
 
         order = verify_buyer_request(
-            api_user, order_id=pk, check_info=True)
+            api_user, platform_name, campaign_id, check_info=True)
         serializer = OrderSerializer(order)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
     
-    # @action(detail=True, methods=['GET'], url_path=r'buyer_complete')
-    # @api_error_handler
-    # def buyer_complete_order(self, request, pk=None):
-    #     api_user = request.user.api_users.get(type='customer')
-
-    #     order = verify_buyer_request(
-    #         api_user, order_id=pk, check_info=True)
-        
-    #     request.data['paid_at'] = pendulum.now()
-    #     request.data['status'] = 'paid'
-    #     serializer = OrderSerializerUpdatePaymentShipping(order, data=request.data, partial=True)
-    #     if not serializer.is_valid():
-    #         pass
-
-    #     order = serializer.save()
-    #     serializer = OrderSerializer(order)
-
-    #     return Response(serializer.data, status=status.HTTP_200_OK)
-
-    @action(detail=True, methods=['GET'], url_path=r'buyer_cancel')
+    @action(detail=True, methods=['POST'], url_path=r'buyer_cancel')
     @api_error_handler
-    def buyer_cancel_order(self, request, pk=None):
-        api_user = request.user.api_users.get(type='customer')
-
-        order = verify_buyer_request(
-            api_user, order_id=pk, check_info=True)
+    def update_buyer_submit(self, request, pk=None):
+        api_user, platform_name, campaign_id = getparams(
+            request, ("platform_name", "campaign_id"), seller=False)
         
-        pre_order = OrderHelper.cancel(api_user, order)
+        order = verify_buyer_request(
+            api_user, platform_name, campaign_id)
+        if order.status != 'unpaid':
+            pre_order = OrderHelper.cancel(api_user, order)
 
-        return Response('order canceled', status=status.HTTP_200_OK)
+            return Response('order canceled', status=status.HTTP_200_OK)
+        else:
+            return Response('order submited, can not cancel by customer', status=status.HTTP_400_BAD_REQUEST)
 
 
 class OrderHelper():
@@ -255,9 +274,9 @@ class OrderHelper():
                     price = db.api_campaign_product.find_one({'id': campaign_product_id})['price']
                     product_dict = {}
 
-                    if db.api_order_product.find({'pre_order_id': pre_order_id, 'order_id': None, 'campaign_product_id': campaign_product_id}).count() > 0:
-                        pre_order_product = db.api_order_product.find_one({'pre_order_id': pre_order_id, 'order_id': None, 'campaign_product_id': campaign_product_id})
-                        
+                    if db.api_order_product.find({'order_id': None, 'campaign_id': campaign_id, 'campaign_product_id': campaign_product_id}).count() > 0:
+                        pre_order_product = db.api_order_product.find({'order_id': None, 'campaign_id': campaign_id, 'campaign_product_id': campaign_product_id})
+
                         db.api_order_product.update_one(
                             {'pre_order_id': pre_order_id, 'campaign_product_id': campaign_product_id}, 
                             {'$set': 
@@ -270,20 +289,17 @@ class OrderHelper():
                         product_dict['price'] = price
                         total_count += (order_product['qty'] + pre_order_product['qty']) * price
                     else:
-                        # db.api_order_product.insert_one({'pre_order_id': pre_order_id, 'campaign_product_id': campaign_product_id, 'qty': order_product['qty']})
                         db.api_order_product.update_one(
-                            {'pre_order_id': pre_order_id, 'campaign_product_id': campaign_product_id}, 
+                            {'order_id': order.id, 'campaign_product_id': campaign_product_id}, 
                             {'$set': 
-                                {'qty': order_product['qty'], 'order_id': None}
+                                {'pre_order_id': pre_order_id, 'order_id': None}
                             }
                         )
 
                         product_dict['qty'] = order_product['qty']
                         product_dict['price'] = price
                         total_count += order_product['qty'] * price
-                    products_dict[campaign_product_id] = product_dict
-                
-                print (products_dict)
+                    products_dict[str(campaign_product_id)] = product_dict
                 db.api_pre_order.update_one(
                     {'id': pre_order_id},
                     {'$set': 
@@ -293,3 +309,32 @@ class OrderHelper():
                 db.api_order.delete_one({'id': order.id})
 
         return pre_order_id
+    
+    @classmethod
+    def delete(self, api_user, order):
+        with client.start_session() as session:
+            with session.start_transaction():
+                api_order = db.api_order.find_one(
+                    {'id': order.id}, session=session)
+
+                campaign_id = api_order['campaign_id']
+                customer_id = api_order['customer_id']
+                order_id = order.id
+
+                order_products = db.api_order_product.find({'campaign_id': campaign_id, 'customer_id': customer_id, 'order_id': order_id})
+                for order_product in order_products:
+                    campaign_product_id = order_product['campaign_product_id']
+                    order_qty = order_product['qty']
+
+                    cp_product = db.api_campaign_product.find_one({'campaign_id': campaign_id, 'id': campaign_product_id})
+                    db.api_campaign_product.update_one(
+                        {'campaign_id': campaign_id, 'id': campaign_product_id},
+                        {'$set': 
+                            {'qty_sold': cp_product['qty_sold'] - order_qty}
+                        }
+                    )
+                    db.api_order_product.delete_one({'order_id': order_id, 'campaign_product_id': campaign_product_id})
+
+                db.api_order.delete_one({'id': order_id})
+
+                #TODO delete order and order_product and sold_qty minus to campaign_product
