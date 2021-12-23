@@ -3,9 +3,9 @@ from rq import Queue
 from redis import Redis
 from datetime import datetime, timedelta
 
-# redis_connection=Redis()
-# q=Queue(name='queue_name',connection=redis_connection)
-
+redis_connection=Redis()
+q1=Queue(name='q1',connection=redis_connection)
+q2=Queue(name='q2',connection=redis_connection)
 
 
 # def capture_and_process():
