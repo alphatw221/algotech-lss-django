@@ -48,14 +48,11 @@ class CampaignLuckyDrawManager:
                 result = CampaignAnnouncer.announce_lucky_draw_winner(lucky_draw, winner[2])
                 response_result.append(result)
             except Exception as e:
-                pre_order, created = PreOrder.objects.get_or_create(campaign=campaign, platform=winner[0], customer_id=winner[1], customer_name=winner[2])
-                print ('error')
-                message = PreOrderHelper.lucky_draw_error_check(pre_order=pre_order, campaign_product=prize_campaign_product)
-                print ('error')
+                print (e)
                 _json['platform'] = winner[0]
                 _json['customer_id'] = winner[1]
                 _json['customer_name'] = winner[2]
-                _json['message'] = message
+                _json['message'] = str(e)
                 error_list.append(_json)
 
         if error_list:
