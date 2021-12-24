@@ -11,6 +11,7 @@ from api.utils.common.common import *
 
 from backend.campaign.campaign_lucky_draw.manager import CampaignLuckyDrawManager
 from backend.campaign.campaign_lucky_draw.event import DrawFromCampaignLikesEvent, DrawFromCampaignCommentsEvent, DrawFromCartProductsEvent, DrawFromProductsEvent
+from backend.pymongo.mongodb import db, client
 
 
 def verify_request(api_user, platform_name, platform_id, campaign_id, prize_campaign_product_id, campaign_product_id=None):
@@ -35,6 +36,13 @@ def get_winner_json(winner_lists):
         winner['platform'] = winner_list[0]
         winner['customer_id'] = winner_list[1]
         winner['customer_name'] = winner_list[2]
+        
+        if winner_list[0] == 'facebook':
+            try:
+                winner['img_url'] = db.api_user.find_one({'id': winner_list[1]})['facebook_info']['picture']['data']['url']
+            except:
+                winner['img_url'] = ''
+
         response_list.append(winner)
 
     response_json = {

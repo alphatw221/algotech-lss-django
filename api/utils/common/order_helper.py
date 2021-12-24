@@ -1,3 +1,4 @@
+from pymongo import message
 from backend.pymongo.mongodb import db, client
 from django.conf import settings
 from datetime import datetime
@@ -167,6 +168,22 @@ class PreOrderHelper():
                                             "$set": {"products": {}, "total": 0, "subtotal": 0}}, session=session)
 
         return db.api_order.find_one({"id": id_increment},{"_id":False})
+    
+    @staticmethod
+    def lucky_draw_error_check(pre_order, campaign_product):
+        with client.start_session() as session:
+            with session.start_transaction():
+                api_pre_order = db.api_pre_order.find_one(
+                    {"id": pre_order.id}, session=session)
+                api_campaign_product = db.api_campaign_product.find_one(
+                    {"id": campaign_product.id}, session=session)
+                
+                message = []
+                if str(api_campaign_product["id"]) in api_pre_order["products"]:
+                    message.append("product already in pre_order")
+                if api_campaign_product['type']=='n/a':
+                    message.append("out of stock")
+                return message
 
     @staticmethod
     def _check_platform(platform, customer_id, customer_name):

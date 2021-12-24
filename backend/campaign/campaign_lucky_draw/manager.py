@@ -3,6 +3,7 @@ import random
 from dataclasses import dataclass
 
 import pendulum
+from django.db.utils import DatabaseError
 from api.models.campaign.campaign import Campaign
 from api.models.campaign.campaign_lucky_draw import CampaignLuckyDraw
 from api.models.campaign.campaign_product import CampaignProduct
@@ -37,24 +38,37 @@ class CampaignLuckyDrawManager:
         # cart_product_requests, response_result = CampaignLuckyDrawManager._handle_cart_product_requests(
         #     lucky_draw, event, cart_product_requests)
 
+        error_list = []
+        response_result = []
         for winner in lucky_draw.winner_list:
+            _json = {}
             try:
                 pre_order, created = PreOrder.objects.get_or_create(campaign=campaign, platform=winner[0], customer_id=winner[1], customer_name=winner[2])
                 PreOrderHelper.add_product(None, pre_order=pre_order, campaign_product=prize_campaign_product, qty=1)
-                CampaignAnnouncer.announce_lucky_draw_winner(lucky_draw, winner[2])
+                result = CampaignAnnouncer.announce_lucky_draw_winner(lucky_draw, winner[2])
+                response_result.append(result)
             except Exception as e:
-                print(e)
-                pass
+                pre_order, created = PreOrder.objects.get_or_create(campaign=campaign, platform=winner[0], customer_id=winner[1], customer_name=winner[2])
+                print ('error')
+                message = PreOrderHelper.lucky_draw_error_check(pre_order=pre_order, campaign_product=prize_campaign_product)
+                print ('error')
+                _json['platform'] = winner[0]
+                _json['customer_id'] = winner[1]
+                _json['customer_name'] = winner[2]
+                _json['message'] = message
+                error_list.append(_json)
+
+        if error_list:
+            lucky_draw.meta['error_log'] = {
+                'time': pendulum.now('UTC'),
+                'error': error_list
+            }
         #update add_to_cart reault to lucky_draw instance
-        # lucky_draw.meta['CampaignLuckyDrawManager'] = [
-        #     cart_product_request.get_items_repr()
-        #     for cart_product_request in cart_product_requests
-        # ]
-        # lucky_draw.meta['announcement_history'] = {
-        #     'time': pendulum.now('UTC'),
-        #     'response_result': response_result
-        # }
-        # lucky_draw.save()
+        lucky_draw.meta['announcement_history'] = {
+            'time': pendulum.now('UTC'),
+            'response_result': response_result
+        }
+        lucky_draw.save()
 
         return lucky_draw
 
