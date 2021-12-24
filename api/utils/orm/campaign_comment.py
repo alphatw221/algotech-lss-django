@@ -15,7 +15,7 @@ def get_latest_commented_at(campaign: Campaign, platform: str):
 def update_or_create_comment(campaign: Campaign, platform: str,
                              comment_id: str, defaults: dict):
     try:
-        CampaignComment.objects.update_or_create(
+        return CampaignComment.objects.update_or_create(
             campaign=campaign,
             platform=platform,
             comment_id=comment_id,
