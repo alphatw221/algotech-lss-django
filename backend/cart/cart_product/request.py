@@ -48,7 +48,7 @@ class CartProductRequest:
     customer_id: str = None
     customer_name: str = None
 
-    items: list[CartProductRequestItem] = field(default_factory=list)
+    items = field(default_factory=list)
     response_task = None
 
     def __repr__(self) -> str:
