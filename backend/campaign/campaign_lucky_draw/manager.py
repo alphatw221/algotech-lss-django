@@ -71,7 +71,7 @@ class CampaignLuckyDrawManager:
 
     @staticmethod
     def _handle_cart_product_requests(lucky_draw: CampaignLuckyDraw, event: CampaignLuckyDrawEvent,
-                                      cart_product_requests: list[CartProductRequest]):
+                                      cart_product_requests: list):
         response_result = []
         for cart_product_request in cart_product_requests:
             cprv = CartProductRequestValidatorLuckyDraw()

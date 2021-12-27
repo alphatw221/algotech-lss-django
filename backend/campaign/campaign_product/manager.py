@@ -19,7 +19,7 @@ class AlreadyInUseError(Exception):
 class CampaignProductManager:
     @staticmethod
     def get_campaign_products(campaign: Campaign, status: int = None,
-                              order_by: str = 'pk') -> list[CampaignProduct]:
+                              order_by: str = 'pk'):
         return campaign_product.get_campaign_products(campaign, status, order_by)
 
     @staticmethod
