@@ -15,6 +15,7 @@ from django.core.files.base import ContentFile
 from api.utils.common.verify import Verify
 from api.utils.common.verify import ApiVerifyError
 
+from django.db.models import Q
 
 def verify_request(api_user, platform_name, platform_id, campaign_id, campaign_product_id=None, is_fast=None):
     Verify.verify_user(api_user)
@@ -119,6 +120,29 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
             else:
                 serializer = self.get_serializer(campaign_products, many=True)
                 data = serializer.data
+        except ApiVerifyError as e:
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response(str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response(data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['GET'], url_path=r'list_campaign_lucky_draw_product')
+    def list_campaign_lucky_draw_product(self, request):
+        
+        try:
+            platform_id = request.query_params.get('platform_id')
+            platform_name = request.query_params.get('platform_name')
+            campaign_id = request.query_params.get('campaign_id')
+            api_user = request.user.api_users.get(type='user')
+            _, campaign = verify_request(
+                api_user, platform_name, platform_id, campaign_id)
+
+            campaign_products = campaign.products.filter(Q(type='lucky_draw') | Q(type="lucky_draw-fast"))
+
+
+            serializer = self.get_serializer(campaign_products, many=True)
+            data = serializer.data
         except ApiVerifyError as e:
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
