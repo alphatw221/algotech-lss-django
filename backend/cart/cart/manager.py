@@ -11,7 +11,7 @@ class CartManager:
     @staticmethod
     def create_cart_product_request(campaign: Campaign, platform: str,
                                     customer_id: str, customer_name: str,
-                                    items=dict[CampaignProduct, int]):
+                                    items=dict):
         cart_product_request = CartProductRequest(
             campaign, None, platform, customer_id, customer_name)
         for campaign_product, qty in items.items():
