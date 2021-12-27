@@ -285,7 +285,7 @@ DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
 GS_BUCKET_NAME = 'lss_public_bucket'
 # GCS_CREDENTIALS_FILE_PATH = "liveshowseller-b4308e2f9dc6.json"
 GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
-    "liveshowseller-b4308e2f9dc6.json"
+    os.path.join(BASE_DIR,"liveshowseller-b4308e2f9dc6.json")
 )
 GS_URL = "https://storage.googleapis.com/lss_public_bucket/"
 
