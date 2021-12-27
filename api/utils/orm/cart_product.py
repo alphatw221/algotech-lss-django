@@ -68,7 +68,7 @@ def update_cart_product_qty(cart_product: CartProduct, qty: int,
 
 def filter_cart_products(campaign: Campaign,
                          campaign_product: CampaignProduct,
-                         type: tuple, status: tuple) -> list[CartProduct]:
+                         type: tuple, status: tuple):
     try:
         return CartProduct.objects.filter(
             campaign=campaign,
@@ -80,7 +80,7 @@ def filter_cart_products(campaign: Campaign,
 
 
 def filter_products(campaign: Campaign,
-                    type: tuple, status: tuple) -> list[CartProduct]:
+                    type: tuple, status: tuple) :
     try:
         return CartProduct.objects.filter(
             campaign=campaign,
