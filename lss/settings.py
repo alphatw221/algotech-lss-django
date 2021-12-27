@@ -76,13 +76,13 @@ LOGGING = {
         'file_error': {
             'level': 'ERROR',
             'class': 'logging.FileHandler',
-            'filename': '_error.log',
+            'filename': os.path.join(BASE_DIR,'_error.log'),
             'formatter': 'standard'
         },
         'file_warning': {
             'level': 'WARNING',
             'class': 'logging.FileHandler',
-            'filename': '_warning.log',
+            'filename': os.path.join(BASE_DIR,'_warning.log'),
             'formatter': 'standard'
         },
     },
