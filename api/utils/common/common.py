@@ -4,6 +4,9 @@ from rest_framework import status
 
 import functools
 from datetime import datetime
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def getparams(request, params: tuple, seller=True):
@@ -27,7 +30,7 @@ def api_error_handler(func):
             return func(*args, **kwargs)
         except ApiVerifyError as e:
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        # except Exception as e:
-        #     print(e)
-        #     return Response({"message": str(datetime.now())+"server error."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as e:
+            logger.error(str(e))
+            return Response({"message": str(datetime.now())+"server error."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     return wrapper
