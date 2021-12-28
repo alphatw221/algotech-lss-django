@@ -282,9 +282,9 @@ CHAT_BOT_FACEBOOK = {
 }
 
 
+# google storage
 DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
 GS_BUCKET_NAME = 'lss_public_bucket'
-# GCS_CREDENTIALS_FILE_PATH = "liveshowseller-b4308e2f9dc6.json"
 GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
     os.path.join(BASE_DIR,"liveshowseller-b4308e2f9dc6.json")
 )
@@ -304,5 +304,12 @@ CRON_CLASSES = [
     # "cron.cron.TestCronJob",
 ]
 
-
+# cart lock after shopper access
 CART_LOCK_INTERVAL = 180
+
+# redis server
+REDIS_SERVER={
+    "host":"34.124.140.74",
+    "port":"6379",
+    "username":None,
+    "password":r"algo83111T%%"}

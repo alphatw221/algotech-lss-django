@@ -9,7 +9,7 @@ from backend.comment_catching.facebook.post_comment import \
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from backend.pymongo.mongodb import db,client
-from backend.python_rq.python_rq import redis_connection, q1, q2
+from backend.python_rq.python_rq import redis_connection, campaign_queue, comment_queue
 
 from api.models.campaign.campaign import Campaign
 from api.utils.orm.campaign_comment import (get_comments_count,
@@ -55,14 +55,14 @@ class Command(BaseCommand):
             try:
                 job = Job.fetch(campaign.id, connection=redis_connection)
                 if not job:
-                    q1.enqueue(campaign_job,job_id=campaign.id,args=(campaign.id,))
+                    campaign_queue.enqueue(campaign_job,job_id=campaign.id,args=(campaign.id,))
                     continue
                 job_status=job.get_status(refresh=True)
                 if  job_status in ('queued','started','deferred'):
                     continue
                 elif job_status in ('finished','failed'):
                     job.delete()
-                    q1.enqueue(campaign_job,job_id=campaign.id,args=(campaign.id,))
+                    campaign_queue.enqueue(campaign_job,job_id=campaign.id,args=(campaign.id,))
 
 
             except Exception as e:
@@ -121,7 +121,7 @@ def capture_comments_helper(campaign: Campaign, page_token: str, post_id: str):
                 'customer_name': comment['from']['name'],
                 'image': comment['from']['picture']['data']['url'],
             })
-            q2.enqueue(process_comment_job,args=(campaign.id,campaign_comment.id,order_codes_mapping))
+            comment_queue.enqueue(process_comment_job,args=(campaign.id,campaign_comment.id,order_codes_mapping))
         return len(comments)
 
     def _get_latest_commented_at(comments):
