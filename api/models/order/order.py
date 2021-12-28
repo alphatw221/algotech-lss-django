@@ -6,7 +6,6 @@ from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
 
-
 class Order(models.Model):
     campaign = models.ForeignKey(
         Campaign, null=True, on_delete=models.SET_NULL, related_name='orders')

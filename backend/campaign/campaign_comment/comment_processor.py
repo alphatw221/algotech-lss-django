@@ -65,25 +65,13 @@ class CommentProcessor:
 
         return f'{len(self.unprocessed_comments)=}'
 
-    def rq_process(self):
-        pass
     def _plugin_command(self, comment: CampaignComment):
         tp = CommandTextProcessor
         ccr = CampaginCommentResponderCommand(self.response_platforms)
         return CommentPluginCommand.process(tp, comment,
                                             self.batch_tasks_list, ccr)
 
-    def _plugin_command_rq(self, comment: CampaignComment):
-        tp = CommandTextProcessor
-        ccr = CampaginCommentResponderCommand(self.response_platforms)
-        command = tp.process(comment.message)
-        if not command:
-            return None
-
-        comment.meta['CommentPluginCommand'] = f'{command!r}'
-        if task := ccr.process(comment, command):
-            task.process()
-            return True
+    
 
     def _plugin_order_code(self, comment: CampaignComment):
         tp = OrderCodeTextProcessor
@@ -152,15 +140,57 @@ class RQCommentProcessor:
             elif platform == 'youtube' and self.campaign.youtube_channel:
                 tmp_response_platforms['youtube'] = self.campaign.youtube_channel
         self.response_platforms = tmp_response_platforms
-        
+
     def process(self):
-        for comment in self.unprocessed_comments:
-            if not self._plugin_command(comment):
-                self._plugin_order_code(comment)
-            self._mark_and_save_comment(comment)
+        if not self._rq_plugin_command():
+            self._rq_plugin_order_code()
+        self._rq_mark_and_save_comment()
 
         if self.unprocessed_comments:
             self._process_campaign_products()
             self._process_batch_tasks()
 
         return f'{len(self.unprocessed_comments)=}'
+
+    def _rq_plugin_command(self):
+        tp = CommandTextProcessor
+        ccr = CampaginCommentResponderCommand(self.response_platforms)
+        command = tp.process(self.campaign_comment.message)
+        if not command:
+            return None
+
+        self.campaign_comment.meta['CommentPluginCommand'] = f'{command!r}'
+        if task := ccr.process(self.campaign_comment, command):
+            task.process()
+            return True
+
+    def _rq_plugin_order_code(self):
+        tp = OrderCodeTextProcessor
+        cprv = CartProductRequestValidatorStandard()
+        cprp = CartProductRequestProcessorStandard(
+            check_inv=True, cart_product_type='order_code')
+        cprr = CartProductRequestResponderOrderCode(self.response_platforms)
+        # return CommentPluginOrderCode.process(self.campaign,
+        #                                       tp, comment, self.order_codes_mapping,
+        #                                       self.batch_tasks_list, cprv, cprp, cprr)
+        
+        if CommentPluginOrderCode._if_to_ignore(self.campaign, self.campaign_comment):
+            return
+
+        if cart_product_request := CommentPluginOrderCode._get_cart_product_request(
+                self.campaign, tp, self.campaign_comment, self.order_codes_mapping):
+            cprv.process(cart_product_request)
+            cprp.process(cart_product_request)
+            cprr.process(cart_product_request)
+
+        self.campaign_comment.meta['CommentPluginOrderCode'] = cart_product_request.get_items_repr()
+
+        if task := cart_product_request.response_task:
+            task.process()
+            return True
+
+    def _rq_mark_and_save_comment(self):
+        self.campaign_comment.status = 1
+        self.campaign_comment.comment.save()
+
+    
