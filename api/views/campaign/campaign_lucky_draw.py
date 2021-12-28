@@ -29,6 +29,14 @@ def verify_request(api_user, platform_name, platform_id, campaign_id, prize_camp
     return platform, campaign, prize_campaign_product
 
 
+def verify_user(api_user, platform_name, platform_id):
+    Verify.verify_user(api_user)
+    platform = Verify.get_platform(api_user, platform_name, platform_id)
+    print ('pooop')
+    if platform:
+        return True
+
+
 def get_winner_json(winner_lists):
     response_list = []
     for winner_list in winner_lists:
@@ -71,24 +79,31 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'], url_path=r'list_winner')
     @api_error_handler
     def list_winner(self, request):
+        api_user, platform_id, platform_name = getparams(
+            request, ("platform_id", "platform_name")
+        )
         campaign_id = int(request.query_params.get('campaign_id'))
+        _verify_user = verify_user(api_user, platform_name, platform_id)
 
         winner_json = {}
-        winner_json['campaign_title'] = db.api_campaign.find_one({'id': campaign_id})['title']
+        if _verify_user:
+            winner_json['campaign_title'] = db.api_campaign.find_one({'id': campaign_id})['title']
 
-        winner_infos = db.api_campaign_lucky_draw.find({'campaign_id': campaign_id})
-        winner_list = []
-        for winner_info in winner_infos:
-            if winner_info['winner_list']:
-                response = get_winner_json(winner_info['winner_list'])
-                for winner in response['winner_list']:
-                    json = {}
-                    json['name'] = winner['customer_name']
-                    json['img'] = winner['img_url']
-                    json['prize_name'] = db.api_campaign_product.find_one({'id': winner_info['prize_campaign_product_id']})['name']
-                    json['datetime'] = winner_info['created_at']
-                    winner_list.append(json)
-        winner_json['winner_list'] = winner_list
+            winner_infos = db.api_campaign_lucky_draw.find({'campaign_id': campaign_id})
+            winner_list = []
+            for winner_info in winner_infos:
+                if winner_info['winner_list']:
+                    response = get_winner_json(winner_info['winner_list'])
+                    for winner in response['winner_list']:
+                        json = {}
+                        prize_name = db.api_campaign_product.find_one({'id': winner_info['prize_campaign_product_id']})['name']
+
+                        json['name'] = winner['customer_name']
+                        json['img'] = winner['img_url']
+                        json['prize_name'] = prize_name
+                        json['datetime'] = winner_info['created_at']
+                        winner_list.append(json)
+            winner_json['winner_list'] = winner_list
 
         return Response(winner_json, status=status.HTTP_200_OK)
 
