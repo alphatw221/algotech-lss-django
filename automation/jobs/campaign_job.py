@@ -19,7 +19,7 @@ def campaign_job(campaign_id):
     print(campaign_id)
 
     for i in range(5):
-        comment_queue.enqueue(comment_job,args=(f"{campaign_id} - {i}"))
+        comment_queue.enqueue(comment_job,args=(f"{str(campaign_id)} - {str(i)}"))
     # campaign=Campaign.objects.get(id=campaign_id)
     # try:
     #     page_token = campaign.facebook_page.token

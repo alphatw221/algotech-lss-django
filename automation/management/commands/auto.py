@@ -10,6 +10,9 @@ from automation.jobs.campaign_job import campaign_job
 from datetime import datetime
 from backend.pymongo.mongodb import db,client
 
+
+class DBException(Exception):
+    """Error when capturing Facebook comments."""
 class Command(BaseCommand):
     help = ''
 
@@ -17,7 +20,6 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        # self.campaign_facebook_capture_comments()
         self.scan_live_campaign()
 
     @time_loop(settings.FACEBOOK_COMMENT_CAPTURING['REST_INTERVAL_SECONDS'])
@@ -27,20 +29,24 @@ class Command(BaseCommand):
 
         for campaign in CampaignManager.get_ordering_campaigns():
             try:
-                job = Job.fetch(campaign.id, connection=redis_connection)
-                if not job:
-                    campaign_queue.enqueue(campaign_job,job_id=campaign.id,args=(campaign.id,))
+                print(campaign.id)
+                if not Job.exists(str(campaign.id),connection=redis_connection):
+                    campaign_queue.enqueue(campaign_job,job_id=str(campaign.id),args=(campaign.id,))
                     continue
+
+                job = Job.fetch(str(campaign.id), connection=redis_connection)
                 job_status=job.get_status(refresh=True)
+                print(job_status)
                 if  job_status in ('queued','started','deferred'):
                     continue
                 elif job_status in ('finished','failed'):
                     job.delete()
-                    campaign_queue.enqueue(campaign_job,job_id=campaign.id,args=(campaign.id,))
+                    campaign_queue.enqueue(campaign_job,job_id=str(campaign.id),args=(campaign.id,))
 
-
-            except Exception as e:
+            except DBException as e:
                 print(e)
+            # except Exception as e:
+            #     print(e)
 
 
 

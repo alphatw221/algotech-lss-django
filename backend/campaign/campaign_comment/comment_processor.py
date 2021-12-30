@@ -118,7 +118,7 @@ class CommentProcessor:
 class RQCommentProcessor:
     campaign: Campaign
     campaign_comment: CampaignComment
-    order_codes_mapping: dict = {}
+    order_codes_mapping: dict = field(default_factory=dict)
     enable_order_code: bool = True
     response_platforms: list = field(default_factory=list)
     
