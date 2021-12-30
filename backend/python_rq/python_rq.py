@@ -1,3 +1,4 @@
+from django.conf import settings
 from rq import Queue
 from redis import Redis
 from django.conf import settings

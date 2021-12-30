@@ -1,99 +1,114 @@
 from decimal import Decimal
 
-from api.models.campaign.campaign_comment import CampaignComment
-from api.models.cart.cart_product import CartProduct
-from api.models.order.order import Order
 from backend.i18n._helper import lang_translate_default_en
 from backend.utils.text_processing.command_processor import Command
 from django.conf import settings
 from django.utils.translation import ugettext as _
+from backend.pymongo.mongodb import db
 
 
-@lang_translate_default_en
-def i18n_get_comment_command_response(comment: CampaignComment, command: Command, lang=None):
+def i18n_get_comment_command_response(campaign, comment, command: Command, lang='en'):
     if command == Command.CART:
-        return i18n_get_comment_command_cart(comment)
+        return i18n_get_comment_command_cart(campaign, comment)
     if command == Command.ORDER:
-        return i18n_get_comment_command_order(comment)
+        return i18n_get_comment_command_order(campaign, comment)
     return ''
 
 
-def i18n_get_comment_command_cart(comment: CampaignComment):
-    cart_products: CartProduct = CartProduct.objects.select_related('campaign_product').filter(
-        campaign=comment.campaign, customer_id=comment.customer_id, status='valid')
-    if not cart_products:
+def i18n_get_comment_command_cart(campaign, comment):
+    try:
+        pre_order = db.api_pre_order.find_one({'customer_id':comment['customer_id'],'campaign_id':comment['campaign_id'],'platform':comment['platform']})
+    except Exception:
         return _('COMMENT_COMMAND_CART_NO_CART_PRODUCT')
-    cart_products, subtotal = _i18n_get_cart_products(cart_products)
+
+    order_products=db.api_order_product.find({"pre_order_id":pre_order['id']})
+    campaign_product_dict={str(campaign_product['id']): campaign_product for campaign_product in db.api_campaign_product.find({"campaign_id":campaign['id']})}
+
+    items = _i18n_get_order_items(campaign_product_dict, order_products)
 
     text = [_('COMMENT_COMMAND_CART_MESSAGE_HEADER'), '\n-----\n']
-    text.extend(cart_products)
+    text.extend(items)
     text.append('-----\n')
     text.append(_('TOTAL{dollar_sign}{total}\n'
-                  ).format(total="{:.2f}".format(subtotal), dollar_sign=comment.campaign.currency_sign))
+                  ).format(total="{:.2f}".format(pre_order['total']), dollar_sign=campaign["currency_sign"]))
     text.append(_('DETAIL{link}\n'
                   ).format(link=settings.SHOPPING_CART_URL))
 
     return ''.join(text)
 
 
-def _i18n_get_cart_products(cart_products: list[CartProduct]):
-    items = []
-    subtotal = 0
-    count = len(cart_products)
-    digits = 2 if count < 100 else len(str(count))
-    for i, cart_product in enumerate(cart_products, 1):
-        name = getattr(cart_product.campaign_product, 'name', '')
-        qty = getattr(cart_product, 'qty', 0)
-        total = Decimal(
-            getattr(cart_product.campaign_product, 'price', '0')) * qty
-        items.append(
-            f"{str(i).zfill(digits)}. " +
-            _('ITEM_INFO{name}{qty}{dollar_sign}{total}\n').format(
-                name=name,
-                qty=qty,
-                dollar_sign=cart_product.campaign_product.currency_sign,
-                total="{:.2f}".format(total)
-            )
-        )
-        if (i < count):
-            items.append('\n')
-        subtotal += total
-    return items, subtotal
+# def _i18n_get_cart_products(campaign_product_dict, order_products):
+#     items = []
+#     count = len(order_products)
+#     digits = 2 if count < 100 else len(str(count))
+#     for i, order_product in enumerate(order_products, 1):
+#         campaign_product=campaign_product_dict[order_product['campaign_product_id']]
+#         name = getattr(campaign_product, 'name', '')
+#         qty = getattr(order_product, 'qty', 0)
+#         total = Decimal(
+#             getattr(campaign_product, 'price', '0')) * qty
+#         items.append(
+#             f"{str(i).zfill(digits)}. " +
+#             _('ITEM_INFO{name}{qty}{dollar_sign}{total}\n').format(
+#                 name=name,
+#                 qty=qty,
+#                 dollar_sign=campaign_product['currency_sign'],
+#                 total="{:.2f}".format(total)
+#             )
+#         )
+#         if (i < count):
+#             items.append('\n')
+#     return items
 
 
-def i18n_get_comment_command_order(comment: CampaignComment):
+def i18n_get_comment_command_order(campaign, comment):
     try:
-        order: Order = Order.objects.filter(campaign=comment.campaign,
-                                            customer_id=comment.customer_id).latest('created_at')
-    except Order.DoesNotExist:
+        order=db.api_order.find_one({ "$query": {"campaign_id":campaign['id'],"customer_id":comment['customer_id']}, "$orderby": { "created_at" : -1 }})
+    except Exception:
         return _('COMMENT_COMMAND_ORDER_NO_ORDER')
 
-    # TODO: codes below in function is WIP since the Order model is not finalized atm
-
+    order_products=db.api_order_product.find({"order_id":order['id']})
+    campaign_product_dict={campaign_product['id']: campaign_product for campaign_product in db.api_campaign_product.find({"campaign_id":campaign['id']})}
+    print(campaign_product_dict)
     text = [_('COMMENT_COMMAND_ORDER_MESSAGE_HEADER'), '\n-----\n']
-    text.extend(_i18n_get_order_items(order))
+
+    items = _i18n_get_order_items(campaign_product_dict, order_products)
+    text.extend(items)
     text.append(_('DELIVERY{dollar_sign}{delivery}\n'
-                  ).format(dollar_sign=order.currency_sign,
-                           delivery=order.checkout_details.get('delivery', 0)))
+                  ).format(dollar_sign=campaign["currency_sign"],
+                           delivery=order["checkout_details"].get('delivery', 0)))
     text.append(_('OPTION{dollar_sign}{option}\n'
-                  ).format(dollar_sign=order.currency_sign,
-                           option=order.checkout_details.get('option', 0)))
+                  ).format(dollar_sign=campaign["currency_sign"],
+                           option=order["checkout_details"].get('option', 0)))
     text.append(_('TOTAL{dollar_sign}{total}\n'
-                  ).format(dollar_sign=order.currency_sign,
-                           total=getattr(order, 'total', 0)))
+                  ).format(dollar_sign=campaign["currency_sign"],
+                           total=order.get('total',0)))
     text.append(_('DETAIL{link}'
                   ).format(link=settings.SHOPPING_CART_URL))
 
     return ''.join(text)
 
 
-def _i18n_get_order_items(order: Order):
-    return [
-        _('ITEM_INFO{name}{qty}{dollar_sign}{total}\n').format(
-            name=getattr(product, 'name', ''),
-            qty=getattr(product, 'qty', 0),
-            dollar_sign=order.currency_sign,
-            total=getattr(product, 'total', 0)
+def _i18n_get_order_items(campaign_product_dict, order_products):
+
+    items = []
+    count = order_products.count()
+    digits = 2 if count < 100 else len(str(count))
+    for i, order_product in enumerate(order_products, 1):
+        campaign_product=campaign_product_dict[order_product['campaign_product_id']]
+        name = getattr(campaign_product, 'name', '')
+        qty = getattr(order_product, 'qty', 0)
+        total = Decimal(
+            getattr(campaign_product, 'price', '0')) * qty
+        items.append(
+            f"{str(i).zfill(digits)}. " +
+            _('ITEM_INFO{name}{qty}{dollar_sign}{total}\n').format(
+                name=name,
+                qty=qty,
+                dollar_sign=campaign_product['currency_sign'],
+                total="{:.2f}".format(total)
+            )
         )
-        for product in order.products
-    ]
+        if (i < count):
+            items.append('\n')
+    return items

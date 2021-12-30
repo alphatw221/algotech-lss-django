@@ -31,7 +31,7 @@ class Command(BaseCommand):
             try:
                 print(campaign.id)
                 if not Job.exists(str(campaign.id),connection=redis_connection):
-                    campaign_queue.enqueue(campaign_job,job_id=str(campaign.id),args=(campaign.id,))
+                    campaign_queue.enqueue(campaign_job,job_id=str(campaign.id),args=(campaign.id,), result_ttl=10, failure_ttl=10)
                     continue
 
                 job = Job.fetch(str(campaign.id), connection=redis_connection)
@@ -41,7 +41,7 @@ class Command(BaseCommand):
                     continue
                 elif job_status in ('finished','failed'):
                     job.delete()
-                    campaign_queue.enqueue(campaign_job,job_id=str(campaign.id),args=(campaign.id,))
+                    campaign_queue.enqueue(campaign_job,job_id=str(campaign.id),args=(campaign.id,), result_ttl=10, failure_ttl=10)
 
             except DBException as e:
                 print(e)

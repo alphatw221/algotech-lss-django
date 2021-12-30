@@ -1,10 +1,14 @@
-from django.conf import settings
-from api.models.campaign.campaign import Campaign
-from api.utils.orm.campaign_comment import (get_comments_count,
-                                            get_latest_commented_at,
-                                            update_or_create_comment)
-from backend.api.facebook.post import api_fb_get_post_comments
+# from django.conf import settings
+# from api.models.campaign.campaign import Campaign
+# from api.utils.orm.campaign_comment import (get_comments_count,
+#                                             get_latest_commented_at,
+#                                             update_or_create_comment)
+# from platform import platform
 
+
+import os
+os.environ['DJANGO_SETTINGS_MODULE']='lss.settings' #for rq_job
+from backend.api.facebook.post import api_fb_get_post_comments
 from backend.python_rq.python_rq import comment_queue
 from automation.jobs.comment_job import comment_job
 
@@ -15,76 +19,72 @@ class FacebookCaptureCommentError(Exception):
 
 
 def campaign_job(campaign_id):
-
     print(campaign_id)
+    campaign=db.api_campaign.find_one({"id":campaign_id})
 
-    for i in range(5):
-        comment_queue.enqueue(comment_job,args=(f"{str(campaign_id)} - {str(i)}"))
-    # campaign=Campaign.objects.get(id=campaign_id)
-    # try:
-    #     page_token = campaign.facebook_page.token
-    #     post_id = campaign.facebook_campaign['post_id']
-    # except Exception:
-    #     raise FacebookCaptureCommentError('Missing page_token or post_id')
-    # if not page_token or not post_id:
-    #     raise FacebookCaptureCommentError('Missing page_token or post_id')
+    if campaign['facebook_page_id']:
+        facebook_page=db.api_facebook_page.find_one({"id":campaign['facebook_page_id']})
+        capture_facebook(campaign, facebook_page)
+    if campaign['youtube_channel_id']:
+        pass
+    if campaign['instagram_profile_id']:
+        pass
 
-    # try:
-    #     return capture_comments_helper(campaign, page_token, post_id)
-    # except FacebookCaptureCommentError:
-    #     raise
-    # except Exception:
-    #     raise FacebookCaptureCommentError('Module internal error')
 
-# def capture_comments_helper(campaign: Campaign, page_token: str, post_id: str):
-#     def _capture_comments(since: int):
-#         code, data = api_fb_get_post_comments(page_token, post_id, since)
-#         if code // 100 != 2:
-#             if 'error' in data:
-#                 _handle_facebook_error(data)
-#             raise FacebookCaptureCommentError('Facebook API error')
+def capture_facebook(campaign, facebook_page):
+    page_token=facebook_page['token']
+    facebook_campaign=campaign['facebook_campaign']
+    post_id=facebook_campaign['post_id']
+    since=facebook_campaign['comment_capture_since'] if facebook_campaign['comment_capture_since'] else 0
 
-#         comments = data.get('data', [])
-#         comments_captured = _save_and_enqueue_comments(comments)
-#         latest_commented_at = _get_latest_commented_at(comments)
+    campaign_products = db.api_campaign_product.find({"campaign_id":campaign['id']})
+    order_codes_mapping={campaign_product['order_code'].lower() : campaign_product
+        for campaign_product in campaign_products}
 
-#         return comments_captured, latest_commented_at
 
-#     def _handle_facebook_error(data):
-#         if data['error']['type'] in ('GraphMethodException', 'OAuthException'):
-#             campaign.facebook_campaign['post_id'] = ''
-#             campaign.facebook_campaign['remark'] = f'Facebook API error: {data["error"]}'
-#             campaign.save()
+    code, data = api_fb_get_post_comments(page_token, post_id, since)
+    print(f"page_token: {page_token}\n")
+    print(f"post_id: {post_id}\n")
+    print(f"since: {since}\n")
+    print(f"code: {code}\n")
+    # print(f"data: {data}\n")
+    if code // 100 != 2:
+        return
+        pass # handle error
 
-#     def _save_and_enqueue_comments(comments):
-#         order_codes_mapping={}
-#         if campaign.enable_order_code:
-#             order_codes_mapping={campaign_product.order_code.lower() : campaign_product
-#                 for campaign_product in campaign.products}
+    comment_capture_since=since
+    comments = data.get('data', [])
+    try:
+        for comment in comments:
+            if comment['from']['id']==facebook_page['page_id']:
+                continue
+            uni_format_comment={}
+            uni_format_comment['platform']='facebook'
+            uni_format_comment['id']=comment['id']
+            uni_format_comment['message']=comment['message']
+            uni_format_comment['created_time']=comment['created_time']
+            uni_format_comment['customer_id']=comment['from']['id']
+            uni_format_comment['customer_name']=comment['from']['name']
+            uni_format_comment['image']=comment['from']['picture']['data']['url']
+            db.api_campaign_comment.insert_one({"platform":'facebook',
+                "campaign_id":campaign['id'],
+                "comment_id":uni_format_comment['id'],
+                "message": uni_format_comment['message'],
+                "commented_at": uni_format_comment['created_time'],
+                "customer_id": uni_format_comment['customer_id'],
+                "customer_name": uni_format_comment['customer_name'],
+                "image":uni_format_comment['image']})
+            comment_queue.enqueue(comment_job,args=(campaign, 'facebook', facebook_page, uni_format_comment, order_codes_mapping), result_ttl=10, failure_ttl=10)
+            comment_capture_since=comment['created_time']
+    except Exception as e:
+        print(e)
+    if comments:
+        facebook_campaign['comment_capture_since']=comment_capture_since
+        db.api_campaign.update_one({'id':campaign['id']},{"$set":{'facebook_campaign':facebook_campaign}})
+    
 
-#         for comment in comments:
-#             campaign_comment, _=update_or_create_comment(campaign, 'facebook', comment['id'], {
-#                 'message': comment['message'],
-#                 'commented_at': comment['created_time'],
-#                 'customer_id': comment['from']['id'],
-#                 'customer_name': comment['from']['name'],
-#                 'image': comment['from']['picture']['data']['url'],
-#             })
-#             comment_queue.enqueue(comment_job,args=(campaign.id,campaign_comment.id,order_codes_mapping))
-#         return len(comments)
+def capture_youtube():
+    pass
 
-#     def _get_latest_commented_at(comments):
-#         if len(comments) <= 1:
-#             return False  # False means to stop iteration
-#         return comments[-1]['created_time']
-
-#     total_comments_captured = 0
-#     commented_at = get_latest_commented_at(campaign, 'facebook')
-#     for _ in range(settings.FACEBOOK_COMMENT_CAPTURING['MAX_CONTINUOUS_REQUEST_TIMES']):
-#         comments_captured, commented_at = _capture_comments(commented_at)
-#         total_comments_captured += comments_captured
-#         if not commented_at:
-#             break
-
-#     total_campaign_comments = get_comments_count(campaign, 'facebook')
-#     return f'{total_comments_captured=} {total_campaign_comments=}'
+def capture_instagram():
+    pass
