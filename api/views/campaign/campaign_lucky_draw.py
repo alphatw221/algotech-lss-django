@@ -32,7 +32,6 @@ def verify_request(api_user, platform_name, platform_id, campaign_id, prize_camp
 def verify_user(api_user, platform_name, platform_id):
     Verify.verify_user(api_user)
     platform = Verify.get_platform(api_user, platform_name, platform_id)
-    print ('pooop')
     if platform:
         return True
 
@@ -103,6 +102,7 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
                         json['prize_name'] = prize_name
                         json['datetime'] = winner_info['created_at']
                         winner_list.append(json)
+                    print (winner_info['id'])
             winner_json['winner_list'] = winner_list
 
         return Response(winner_json, status=status.HTTP_200_OK)
