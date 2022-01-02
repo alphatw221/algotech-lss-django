@@ -10,6 +10,11 @@ from api.utils.common.verify import ApiVerifyError, platform_dict
 from api.utils.common.common import *
 from api.utils.common.order_helper import OrderHelper
 
+from django.http import HttpResponse
+from backend.pymongo.mongodb import db
+import openpyxl, xlsxwriter, os.path, io
+from io import StringIO
+
 
 def verify_buyer_request(api_user, platform_name, campaign_id, check_info=None):
     if platform_name not in platform_dict:
@@ -167,6 +172,67 @@ class OrderViewSet(viewsets.ModelViewSet):
         order = OrderHelper.delete(api_user, order)
         
         return Response('order deleted', status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['GET'], url_path=r'report')
+    @api_error_handler
+    def seller_order_report(self, request):
+        api_user, platform_id, platform_name, campaign_id = getparams(
+            request, ("platform_id", "platform_name", "campaign_id"))
+        
+        _, _ = verify_seller_request(
+            api_user, platform_name, platform_id, campaign_id)
+        
+        column_list = ['id', 'customer_name', 'platform', 'email', 'phone', 'first_name', 'last_name', 'gender', 'total', 'tax', 'currency', 'shipping_first_name', 'shipping_last_name', 'shipping_phone', 'shipping_postcode', 'shipping_region', 'shipping_location', 'shipping_address_1', 'shipping_method']
+        campaign_title = db.api_campaign.find_one({'id': int(campaign_id)})['title']
+        print (campaign_title)
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename=' + campaign_title + '.xlsx'
+ 
+        workbook = xlsxwriter.Workbook(response, {'in_memory': True})
+        worksheet = workbook.add_worksheet()
+        header = workbook.add_format({
+            'bold': True,
+            'bg_color': '#F7F7F7',
+            'color': 'black',
+            'align': 'center',
+            'valign': 'top',
+            'border': 1
+        })
+        int_center = workbook.add_format({
+            'align': 'center'
+        })
+
+        row, column = 0, 0
+        for column_title in column_list:
+            worksheet.write(row, column, column_title, header)
+            column += 1
+        row += 1
+        column = 0
+
+        order_id_list = []
+        order_ids = db.api_order.find({'campaign_id': int(campaign_id)})
+        for order_id in order_ids:
+            order_id_list.append(order_id['id'])
+        
+        # for each order data 1 by 1
+        for order_id in order_id_list:
+            order_data = db.api_order.find_one({'id': order_id})
+
+            for column_title in column_list:
+                data = order_data[column_title]
+                if type(data) == int or type(data) == float:
+                    worksheet.write(row, column, data, int_center)
+                else:
+                    worksheet.write(row, column, data)
+                worksheet.set_column(row, column, 10)
+                column += 1
+            row += 1
+            column = 0
+            print (order_data['customer_id'])
+        
+        workbook.close()
+        
+        return response
     
     @action(detail=True, methods=['GET'], url_path=r'buyer_retrieve')
     @api_error_handler
