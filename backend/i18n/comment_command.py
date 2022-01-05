@@ -1,4 +1,5 @@
 from decimal import Decimal
+from api.models.order import order_product
 
 from backend.i18n._helper import lang_translate_default_en
 from backend.utils.text_processing.command_processor import Command
@@ -17,12 +18,15 @@ def i18n_get_comment_command_response(campaign, comment, command: Command, lang=
 
 def i18n_get_comment_command_cart(campaign, comment):
     try:
-        pre_order = db.api_pre_order.find_one({'customer_id':comment['customer_id'],'campaign_id':comment['campaign_id'],'platform':comment['platform']})
-    except Exception:
+        pre_order = db.api_pre_order.find_one({'customer_id':comment['customer_id'],'campaign_id':campaign['id'],'platform':comment['platform']})
+    except Exception as e:
+        return _('COMMENT_COMMAND_CART_NO_CART_PRODUCT')
+
+    if not pre_order['products']:
         return _('COMMENT_COMMAND_CART_NO_CART_PRODUCT')
 
     order_products=db.api_order_product.find({"pre_order_id":pre_order['id']})
-    campaign_product_dict={str(campaign_product['id']): campaign_product for campaign_product in db.api_campaign_product.find({"campaign_id":campaign['id']})}
+    campaign_product_dict={campaign_product['id']: campaign_product for campaign_product in db.api_campaign_product.find({"campaign_id":campaign['id']})}
 
     items = _i18n_get_order_items(campaign_product_dict, order_products)
 
@@ -67,9 +71,15 @@ def i18n_get_comment_command_order(campaign, comment):
     except Exception:
         return _('COMMENT_COMMAND_ORDER_NO_ORDER')
 
+    if not order:
+        return _('COMMENT_COMMAND_ORDER_NO_ORDER')
+
     order_products=db.api_order_product.find({"order_id":order['id']})
+    
+    if not order_products:
+        return _('COMMENT_COMMAND_ORDER_NO_ORDER')
+
     campaign_product_dict={campaign_product['id']: campaign_product for campaign_product in db.api_campaign_product.find({"campaign_id":campaign['id']})}
-    print(campaign_product_dict)
     text = [_('COMMENT_COMMAND_ORDER_MESSAGE_HEADER'), '\n-----\n']
 
     items = _i18n_get_order_items(campaign_product_dict, order_products)
@@ -96,10 +106,10 @@ def _i18n_get_order_items(campaign_product_dict, order_products):
     digits = 2 if count < 100 else len(str(count))
     for i, order_product in enumerate(order_products, 1):
         campaign_product=campaign_product_dict[order_product['campaign_product_id']]
-        name = getattr(campaign_product, 'name', '')
-        qty = getattr(order_product, 'qty', 0)
+        name = campaign_product.get('name','')
+        qty = order_product.get('qty',0)
         total = Decimal(
-            getattr(campaign_product, 'price', '0')) * qty
+            campaign_product.get('price', 0)) * qty
         items.append(
             f"{str(i).zfill(digits)}. " +
             _('ITEM_INFO{name}{qty}{dollar_sign}{total}\n').format(

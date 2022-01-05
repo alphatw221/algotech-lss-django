@@ -33,14 +33,11 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        campaign_job(2)        
-        # a = YoutubeChannel(id=1, page_token='GOWL4tOwjfQCIOO6iKqxjfQC')
-        # a.save()
-        
-        # column_list = ['id', 'customer_name', 'platform', 'email', 'phone', 'first_name', 'last_name', 'gender', 'total', 'tax', 'currency', 'shipping_first_name', 'shipping_last_name', 'shipping_phone', 'shipping_postcode', 'shipping_region', 'shipping_location', 'shipping_address_1', 'shipping_method']
-        # check_exist_report(1, column_list)
-        
         # self.lucky_draw_test()
+        from backend.google_cloud_monitoring.google_cloud_monitoring import CommentQueueLengthMetric
+        CommentQueueLengthMetric.create_metric_descriptor()
+        # CommentQueueLengthMetric.write_time_series(10)
+        # CommentQueueLengthMetric.delete_metric_descriptor()
 
     def campaign_test(self):
         cs = CampaignManager.get_active_campaigns()

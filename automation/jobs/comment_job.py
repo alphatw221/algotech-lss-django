@@ -5,7 +5,7 @@ try:
     django.setup()
 except Exception:
     pass
-from api.utils.common.order_helper import PreOrderHelper
+from api.utils.common.order_helper import PreOrderHelper, PreOrderErrors
 
 from backend.utils.text_processing.command_processor import \
     CommandTextProcessor

@@ -21,6 +21,7 @@ django-cors-headers = "^3.10.0"
 django-storages = {extras = ["google"], version = "^1.12.3"}
 google-cloud-storage = "^1.43.0"
 XlsxWriter = "^3.0.2"
+google-cloud-monitoring = "^2.8.0"
 openpyxl = "^3.0.9"
 rq = "^1.10.1"
 

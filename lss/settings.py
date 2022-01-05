@@ -290,6 +290,9 @@ GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
 )
 GS_URL = "https://storage.googleapis.com/lss_public_bucket/"
 
+# google monitoring
+GCP_PROJECT_ID = "liveshowseller"
+
 # mail app
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'

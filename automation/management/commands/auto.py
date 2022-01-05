@@ -3,13 +3,14 @@ import pendulum
 from automation.utils.timeloop import time_loop
 from backend.campaign.campaign.manager import CampaignManager
 from django.core.management.base import BaseCommand
-from backend.python_rq.python_rq import redis_connection, campaign_queue
+from backend.python_rq.python_rq import redis_connection, campaign_queue, comment_queue
 from rq.job import Job
 from automation.jobs.campaign_job import campaign_job
 
 from datetime import datetime
 from backend.pymongo.mongodb import db,client
 
+from backend.google_cloud_monitoring.google_cloud_monitoring import CommentQueueLengthMetric
 
 class Command(BaseCommand):
     help = ''
@@ -25,6 +26,7 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(
             f'{pendulum.now()} - scan_live_campaign Module'))
 
+        CommentQueueLengthMetric.write_time_series(len(comment_queue.jobs))
         for campaign in CampaignManager.get_ordering_campaigns():
             try:
                 print(campaign.id)
@@ -43,3 +45,12 @@ class Command(BaseCommand):
 
             except Exception as e:
                 print(e)
+
+
+
+
+
+
+
+
+
