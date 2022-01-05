@@ -30,7 +30,11 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.lucky_draw_test()
+        # self.lucky_draw_test()
+        from backend.google_cloud_monitoring.google_cloud_monitoring import CommentQueueLengthMetric
+        CommentQueueLengthMetric.create_metric_descriptor()
+        # CommentQueueLengthMetric.write_time_series(10)
+        # CommentQueueLengthMetric.delete_metric_descriptor()
 
     def campaign_test(self):
         cs = CampaignManager.get_active_campaigns()
