@@ -1,4 +1,3 @@
-
 import pprint
 
 from api.models.campaign.campaign import Campaign
@@ -9,7 +8,7 @@ from backend.api.facebook.page import *
 from backend.api.facebook.post import *
 from backend.api.facebook.user import *
 from backend.campaign.campaign.manager import CampaignManager
-from backend.campaign.campaign_comment.comment_processor import *
+# from backend.campaign.campaign_comment.comment_processor import *
 from backend.campaign.campaign_lucky_draw.event import (
     DrawFromCampaignCommentsEvent, DrawFromCampaignLikesEvent,
     DrawFromCartProductsEvent)
@@ -21,6 +20,10 @@ from backend.cart.cart.manager import CartManager
 from backend.cart.cart_product.request import CartProductRequest
 from backend.comment_catching.facebook.post_comment import *
 from django.core.management.base import BaseCommand
+from api.views.order.order_report import *
+from backend.pymongo.mongodb import db
+from api.models.youtube.youtube_channel import YoutubeChannel
+from automation.jobs.campaign_job import *
 
 
 class Command(BaseCommand):
@@ -30,7 +33,14 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.lucky_draw_test()
+        campaign_job(2)        
+        # a = YoutubeChannel(id=1, page_token='GOWL4tOwjfQCIOO6iKqxjfQC')
+        # a.save()
+        
+        # column_list = ['id', 'customer_name', 'platform', 'email', 'phone', 'first_name', 'last_name', 'gender', 'total', 'tax', 'currency', 'shipping_first_name', 'shipping_last_name', 'shipping_phone', 'shipping_postcode', 'shipping_region', 'shipping_location', 'shipping_address_1', 'shipping_method']
+        # check_exist_report(1, column_list)
+        
+        # self.lucky_draw_test()
 
     def campaign_test(self):
         cs = CampaignManager.get_active_campaigns()
@@ -54,20 +64,20 @@ class Command(BaseCommand):
         cp = CampaignProduct.objects.get(id=1)
         prize_cp = CampaignProduct.objects.get(id=2)
 
-        lucky_draw = CampaignLuckyDrawManager.process(
-            c, DrawFromCampaignLikesEvent(c), prize_cp, 1,
-        )
+        # lucky_draw = CampaignLuckyDrawManager.process(
+        #     c, DrawFromCampaignLikesEvent(c), prize_cp, 1,
+        # )
 
         # keyword='testtest'
         # lucky_draw = CampaignLuckyDrawManager.process(
         #     c, DrawFromCampaignCommentsEvent(c, keyword), prize_cp, 1,
         # )
 
-        # lucky_draw = CampaignLuckyDrawManager.process(
-        #     c, DrawFromCartProductsEvent(c, cp), prize_cp, 1,
-        # )
+        lucky_draw = CampaignLuckyDrawManager.process(
+            c, DrawFromCartProductsEvent(c, cp), prize_cp, 1,
+        )
 
-        print(lucky_draw)
+        print(lucky_draw.__dict__)
 
     def cart_product_test(self):
         c = Campaign.objects.get(id=1)

@@ -16,6 +16,31 @@ import openpyxl, xlsxwriter, os.path, io
 from io import StringIO
 
 
+def get_title_map():
+    title_map = {
+            'id': 'id',
+            'customer_name': 'Customer Name',
+            'platform': 'Platform',
+            'email': 'E-mail',
+            'phone': 'Phone',
+            'first_name': 'First Name',
+            'last_name': 'Last Name',
+            'gender': 'Gender',
+            'total': 'Total',
+            'tax': 'Tax',
+            'currency': 'Currency',
+            'shipping_first_name': 'Shipping First Name',
+            'shipping_last_name': 'Shipping Last Name',
+            'shipping_phone': 'Shipping Phone',
+            'shipping_postcode': 'Postcode',
+            'shipping_region': 'Region',
+            'shipping_location': 'Location',
+            'shipping_address_1': 'Shipping Address 1',
+            'shipping_method': 'Shipping Method'
+        }
+    return title_map
+
+
 def verify_buyer_request(api_user, platform_name, campaign_id, check_info=None):
     if platform_name not in platform_dict:
         raise ApiVerifyError("no platfrom name found")
@@ -176,15 +201,15 @@ class OrderViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'], url_path=r'report')
     @api_error_handler
     def seller_order_report(self, request):
-        api_user, platform_id, platform_name, campaign_id = getparams(
-            request, ("platform_id", "platform_name", "campaign_id"))
+        api_user, platform_id, platform_name, campaign_id, column_list = getparams(
+            request, ("platform_id", "platform_name", "campaign_id", "column_list"))
         
         _, _ = verify_seller_request(
             api_user, platform_name, platform_id, campaign_id)
         
-        column_list = ['id', 'customer_name', 'platform', 'email', 'phone', 'first_name', 'last_name', 'gender', 'total', 'tax', 'currency', 'shipping_first_name', 'shipping_last_name', 'shipping_phone', 'shipping_postcode', 'shipping_region', 'shipping_location', 'shipping_address_1', 'shipping_method']
+        column_list = column_list.split(',')
+        title_map = get_title_map()
         campaign_title = db.api_campaign.find_one({'id': int(campaign_id)})['title']
-        print (campaign_title)
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         response['Content-Disposition'] = 'attachment; filename=' + campaign_title + '.xlsx'
  
@@ -201,10 +226,18 @@ class OrderViewSet(viewsets.ModelViewSet):
         int_center = workbook.add_format({
             'align': 'center'
         })
-
-        row, column = 0, 0
+        title_form = workbook.add_format({
+            'align': 'center',
+            'bold': True,
+            'font_size': 18
+        })
+        
+        worksheet.merge_range(0, 0, 0, len(column_list) - 1, campaign_title + ' Order Report', title_form)
+        row, column = 1, 0
         for column_title in column_list:
-            worksheet.write(row, column, column_title, header)
+            worksheet.write(row, column, title_map[column_title], header)
+            if len(column_title) >= 8:
+                    worksheet.set_column(column, column, len(title_map[column_title]) + 2)
             column += 1
         row += 1
         column = 0
@@ -214,22 +247,25 @@ class OrderViewSet(viewsets.ModelViewSet):
         for order_id in order_ids:
             order_id_list.append(order_id['id'])
         
+        total_count = 0
+        num_col_total = 0
         # for each order data 1 by 1
         for order_id in order_id_list:
             order_data = db.api_order.find_one({'id': order_id})
 
             for column_title in column_list:
-                data = order_data[column_title]
-                if type(data) == int or type(data) == float:
-                    worksheet.write(row, column, data, int_center)
+                col_data = order_data[column_title]
+                if column_title == 'total':
+                    total_count += col_data
+                    num_col_total = column
+                if type(col_data) == int or type(col_data) == float:
+                    worksheet.write(row, column, col_data, int_center)
                 else:
-                    worksheet.write(row, column, data)
-                worksheet.set_column(row, column, 10)
+                    worksheet.write(row, column, col_data)
                 column += 1
             row += 1
             column = 0
-            print (order_data['customer_id'])
-        
+        worksheet.write(row , num_col_total, total_count, int_center)
         workbook.close()
         
         return response

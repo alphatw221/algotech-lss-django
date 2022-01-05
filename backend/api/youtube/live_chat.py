@@ -5,7 +5,7 @@ from django.conf import settings
 def api_youtube_get_live_chat_comment(page_token: str, live_chat_id: str, max_results: int):
     params = {
         "key": settings.YOUTUBE_API_KEY,
-        "masResults": max_results,
+        "maxResults": max_results,
         "part": "id,snippet,authorDetails",
         "liveChatId": live_chat_id,
         "pageToken": page_token

@@ -11,8 +11,6 @@ from datetime import datetime
 from backend.pymongo.mongodb import db,client
 
 
-class DBException(Exception):
-    """Error when capturing Facebook comments."""
 class Command(BaseCommand):
     help = ''
 
@@ -43,16 +41,5 @@ class Command(BaseCommand):
                     job.delete()
                     campaign_queue.enqueue(campaign_job,job_id=str(campaign.id),args=(campaign.id,), result_ttl=10, failure_ttl=10)
 
-            except DBException as e:
+            except Exception as e:
                 print(e)
-            # except Exception as e:
-            #     print(e)
-
-
-
-
-
-
-
-
-

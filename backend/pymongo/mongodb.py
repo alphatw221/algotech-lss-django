@@ -1,7 +1,7 @@
 from pymongo import MongoClient
 from django.conf import settings
 
-from automation.management.commands.auto import DBException
+# from automation.management.commands.auto import DBException
 # from lss import settings_rq as settings
 
 client = MongoClient(settings.MONGODB_CONNECTION_STRING)

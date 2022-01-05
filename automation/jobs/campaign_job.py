@@ -1,43 +1,56 @@
-# from django.conf import settings
-# from api.models.campaign.campaign import Campaign
-# from api.utils.orm.campaign_comment import (get_comments_count,
-#                                             get_latest_commented_at,
-#                                             update_or_create_comment)
-# from platform import platform
-
-
 import os
-os.environ['DJANGO_SETTINGS_MODULE']='lss.settings' #for rq_job
+import django
+try:
+    os.environ['DJANGO_SETTINGS_MODULE']='lss.settings' #for rq_job
+    django.setup()
+except Exception:
+    pass
+
 from backend.api.facebook.post import api_fb_get_post_comments
+from backend.api.youtube.live_chat import api_youtube_get_live_chat_comment
 from backend.python_rq.python_rq import comment_queue
 from automation.jobs.comment_job import comment_job
 
 from backend.pymongo.mongodb import db,client
 
-class FacebookCaptureCommentError(Exception):
-    """Error when capturing Facebook comments."""
-
-
 def campaign_job(campaign_id):
-    print(campaign_id)
-    campaign=db.api_campaign.find_one({"id":campaign_id})
+    try:
+        print(f"campaign_id: {campaign_id}\n")
+        campaign=db.api_campaign.find_one({"id":campaign_id})
+        try:
+            if campaign['facebook_page_id']:
+                facebook_page=db.api_facebook_page.find_one({"id":campaign['facebook_page_id']})
+                capture_facebook(campaign, facebook_page)
+        except Exception:
+            pass
 
-    if campaign['facebook_page_id']:
-        facebook_page=db.api_facebook_page.find_one({"id":campaign['facebook_page_id']})
-        capture_facebook(campaign, facebook_page)
-    if campaign['youtube_channel_id']:
-        pass
-    if campaign['instagram_profile_id']:
+        try:
+            if campaign['youtube_channel_id']:
+                youtube_channel = db.api_youtube_channel.find_one({'id': campaign['youtube_channel_id']})
+                capture_youtube(campaign, youtube_channel)
+        except Exception:
+            pass
+
+        try:
+            if campaign['instagram_profile_id']:
+                pass
+        except Exception:
+            pass
+
+    except Exception:
         pass
 
 
 def capture_facebook(campaign, facebook_page):
     page_token=facebook_page['token']
     facebook_campaign=campaign['facebook_campaign']
-    post_id=facebook_campaign['post_id']
-    since=facebook_campaign['comment_capture_since'] if facebook_campaign['comment_capture_since'] else 0
+    post_id=facebook_campaign.get('post_id','')
+    since=facebook_campaign.get('comment_capture_since', 1)
 
-    campaign_products = db.api_campaign_product.find({"campaign_id":campaign['id']})
+    if not page_token or not post_id:
+        return
+
+    campaign_products = db.api_campaign_product.find({"campaign_id":campaign['id'], "$or":[ {"type":"product"}, {"type":"product-fast"}]})
     order_codes_mapping={campaign_product['order_code'].lower() : campaign_product
         for campaign_product in campaign_products}
 
@@ -47,44 +60,105 @@ def capture_facebook(campaign, facebook_page):
     print(f"post_id: {post_id}\n")
     print(f"since: {since}\n")
     print(f"code: {code}\n")
-    # print(f"data: {data}\n")
-    if code // 100 != 2:
+
+    if code // 100 != 2 and 'error' in data and data['error']['type'] in ('GraphMethodException', 'OAuthException'):
+        facebook_campaign['post_id'] = ''
+        facebook_campaign['remark'] = f'Facebook API error: {data["error"]}'
+        db.api_campaign.update_one({'id':campaign['id']},{'$set':{"facebook_campaign", facebook_campaign}})
         return
-        pass # handle error
 
     comment_capture_since=since
     comments = data.get('data', [])
+
+    if len(comments) == 1 and comments[0]['created_time'] == since:
+        return
+
     try:
         for comment in comments:
             if comment['from']['id']==facebook_page['page_id']:
                 continue
-            uni_format_comment={}
-            uni_format_comment['platform']='facebook'
-            uni_format_comment['id']=comment['id']
-            uni_format_comment['message']=comment['message']
-            uni_format_comment['created_time']=comment['created_time']
-            uni_format_comment['customer_id']=comment['from']['id']
-            uni_format_comment['customer_name']=comment['from']['name']
-            uni_format_comment['image']=comment['from']['picture']['data']['url']
-            db.api_campaign_comment.insert_one({"platform":'facebook',
+            uni_format_comment={
+                'platform': 'facebook',
+                'id': comment['id'],
                 "campaign_id":campaign['id'],
-                "comment_id":uni_format_comment['id'],
-                "message": uni_format_comment['message'],
-                "commented_at": uni_format_comment['created_time'],
-                "customer_id": uni_format_comment['customer_id'],
-                "customer_name": uni_format_comment['customer_name'],
-                "image":uni_format_comment['image']})
+                'message': comment['message'],
+                "created_time": comment['created_time'], 
+                "customer_id": comment['from']['id'], 
+                "customer_name": comment['from']['name'], 
+                "image": comment['from']['picture']['data']['url']}
+            db.api_campaign_comment.insert_one(uni_format_comment)
             comment_queue.enqueue(comment_job,args=(campaign, 'facebook', facebook_page, uni_format_comment, order_codes_mapping), result_ttl=10, failure_ttl=10)
             comment_capture_since=comment['created_time']
-    except Exception as e:
-        print(e)
-    if comments:
+    except Exception:
         facebook_campaign['comment_capture_since']=comment_capture_since
         db.api_campaign.update_one({'id':campaign['id']},{"$set":{'facebook_campaign':facebook_campaign}})
     
 
-def capture_youtube():
-    pass
+def capture_youtube(campaign, youtube_channel):
+    page_token = youtube_channel['page_token']
+    youtube_campaign = campaign['youtube_campaign']
+    live_chat_id = youtube_campaign['live_chat_id']
+    next_page_token = ''
+    try: 
+        next_page_token = youtube_campaign['next_page_token']
+    except:
+        pass
+    
+    if not page_token or not live_chat_id:
+        return
+    
+    campaign_products = db.api_campaign_product.find({"campaign_id":campaign['id'], "$or":[ {"type":"product"}, {"type":"product-fast"}]})
+    order_codes_mapping = {campaign_product['order_code'].lower() : campaign_product
+        for campaign_product in campaign_products}
+    
+    if next_page_token != '':
+        page_token = next_page_token
+
+    code, data = api_youtube_get_live_chat_comment(page_token, live_chat_id, 100)
+    if code // 100 != 2 and 'error' in data:
+        youtube_campaign['remark'] = f'Facebook API error: {data["error"]["message"]}'
+        db.api_campaign.update_one({'id':campaign['id']},{'$set':{"facebook_campaign", youtube_campaign}})
+        return
+    
+    next_page_token = data['nextPageToken']
+    comments = data.get('items', [])
+    is_failed = False
+    latest_comment_time = ''
+    try:
+        for comment in comments:
+            try:
+                is_failed = youtube_campaign['is_failed']
+                latest_comment_time = youtube_campaign['latest_comment_time']
+            except:
+                pass
+            
+            if is_failed == True and comment['snippet']['publishedAt'] > latest_comment_time:
+                pass
+                print ('pooop')
+            else:
+                uni_format_comment={
+                    'platform': 'youtube',
+                    'id': comment['id'],
+                    "campaign_id":campaign['id'],
+                    'message': comment['snippet']['displayMessage'],
+                    "created_time": comment['snippet']['publishedAt'], 
+                    "customer_id": comment['snippet']['liveChatId'], 
+                    "customer_name": comment['authorDetails']['displayName'], 
+                    "image": comment['authorDetails']['profileImageUrl']
+                }
+                db.api_campaign_comment.insert_one(uni_format_comment)
+                #TODO YT comment job
+
+        youtube_campaign['next_page_token'] = next_page_token
+        youtube_campaign['is_failed'] = False 
+        db.api_campaign.update_one({'id': campaign['id']}, {"$set":{'youtube_campaign': youtube_campaign}})
+    except Exception:
+        lastest_comment_time = db.api_campaign_comment.find_one({'platform': 'youtube'}, sort=[('created_time', -1)])['created_time']
+        youtube_campaign['is_failed'] = True
+        youtube_campaign['latest_comment_time'] = lastest_comment_time
+        db.api_campaign.update_one({'id': campaign['id']}, {"$set":{'youtube_campaign': youtube_campaign}})
+        return
+
 
 def capture_instagram():
     pass
