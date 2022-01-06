@@ -70,11 +70,13 @@ def capture_facebook(campaign, facebook_page):
     comment_capture_since=since
     comments = data.get('data', [])
 
+    print(f"number of comments: {len(comments)}")
     if len(comments) == 1 and comments[0]['created_time'] == since:
         return
 
     try:
         for comment in comments:
+            print(comment['message'])
             if comment['from']['id']==facebook_page['page_id']:
                 continue
             uni_format_comment={
@@ -89,75 +91,78 @@ def capture_facebook(campaign, facebook_page):
             db.api_campaign_comment.insert_one(uni_format_comment)
             comment_queue.enqueue(comment_job,args=(campaign, 'facebook', facebook_page, uni_format_comment, order_codes_mapping), result_ttl=10, failure_ttl=10)
             comment_capture_since=comment['created_time']
-    except Exception:
-        facebook_campaign['comment_capture_since']=comment_capture_since
-        db.api_campaign.update_one({'id':campaign['id']},{"$set":{'facebook_campaign':facebook_campaign}})
+    except Exception as e:
+        print(e)
+
+    facebook_campaign['comment_capture_since']=comment_capture_since
+    db.api_campaign.update_one({'id':campaign['id']},{"$set":{'facebook_campaign':facebook_campaign}})
     
 
 def capture_youtube(campaign, youtube_channel):
-    page_token = youtube_channel['page_token']
-    youtube_campaign = campaign['youtube_campaign']
-    live_chat_id = youtube_campaign['live_chat_id']
-    next_page_token = ''
-    try: 
-        next_page_token = youtube_campaign['next_page_token']
-    except:
-        pass
+    pass
+    # page_token = youtube_channel['page_token']
+    # youtube_campaign = campaign['youtube_campaign']
+    # live_chat_id = youtube_campaign['live_chat_id']
+    # next_page_token = ''
+    # try: 
+    #     next_page_token = youtube_campaign['next_page_token']
+    # except:
+    #     pass
     
-    if not page_token or not live_chat_id:
-        return
+    # if not page_token or not live_chat_id:
+    #     return
     
-    campaign_products = db.api_campaign_product.find({"campaign_id":campaign['id'], "$or":[ {"type":"product"}, {"type":"product-fast"}]})
-    order_codes_mapping = {campaign_product['order_code'].lower() : campaign_product
-        for campaign_product in campaign_products}
+    # campaign_products = db.api_campaign_product.find({"campaign_id":campaign['id'], "$or":[ {"type":"product"}, {"type":"product-fast"}]})
+    # order_codes_mapping = {campaign_product['order_code'].lower() : campaign_product
+    #     for campaign_product in campaign_products}
     
-    if next_page_token != '':
-        page_token = next_page_token
+    # if next_page_token != '':
+    #     page_token = next_page_token
 
-    code, data = api_youtube_get_live_chat_comment(page_token, live_chat_id, 100)
-    if code // 100 != 2 and 'error' in data:
-        youtube_campaign['remark'] = f'Facebook API error: {data["error"]["message"]}'
-        db.api_campaign.update_one({'id':campaign['id']},{'$set':{"facebook_campaign", youtube_campaign}})
-        return
+    # code, data = api_youtube_get_live_chat_comment(page_token, live_chat_id, 100)
+    # if code // 100 != 2 and 'error' in data:
+    #     youtube_campaign['remark'] = f'Facebook API error: {data["error"]["message"]}'
+    #     db.api_campaign.update_one({'id':campaign['id']},{'$set':{"facebook_campaign", youtube_campaign}})
+    #     return
     
-    next_page_token = data['nextPageToken']
-    comments = data.get('items', [])
-    is_failed = False
-    latest_comment_time = ''
-    try:
-        for comment in comments:
-            try:
-                is_failed = youtube_campaign['is_failed']
-                latest_comment_time = youtube_campaign['latest_comment_time']
-            except:
-                pass
+    # next_page_token = data['nextPageToken']
+    # comments = data.get('items', [])
+    # is_failed = False
+    # latest_comment_time = ''
+    # try:
+    #     for comment in comments:
+    #         try:
+    #             is_failed = youtube_campaign['is_failed']
+    #             latest_comment_time = youtube_campaign['latest_comment_time']
+    #         except:
+    #             pass
             
-            if is_failed == True and comment['snippet']['publishedAt'] > latest_comment_time:
-                pass
-                print ('pooop')
-            else:
-                uni_format_comment={
-                    'platform': 'youtube',
-                    'id': comment['id'],
-                    "campaign_id":campaign['id'],
-                    'message': comment['snippet']['displayMessage'],
-                    "created_time": comment['snippet']['publishedAt'], 
-                    "customer_id": comment['snippet']['liveChatId'], 
-                    "customer_name": comment['authorDetails']['displayName'], 
-                    "image": comment['authorDetails']['profileImageUrl']
-                }
-                db.api_campaign_comment.insert_one(uni_format_comment)
-                #TODO YT comment job
+    #         if is_failed == True and comment['snippet']['publishedAt'] > latest_comment_time:
+    #             pass
+    #             print ('pooop')
+    #         else:
+    #             uni_format_comment={
+    #                 'platform': 'youtube',
+    #                 'id': comment['id'],
+    #                 "campaign_id":campaign['id'],
+    #                 'message': comment['snippet']['displayMessage'],
+    #                 "created_time": comment['snippet']['publishedAt'], 
+    #                 "customer_id": comment['snippet']['liveChatId'], 
+    #                 "customer_name": comment['authorDetails']['displayName'], 
+    #                 "image": comment['authorDetails']['profileImageUrl']
+    #             }
+    #             db.api_campaign_comment.insert_one(uni_format_comment)
+    #             #TODO YT comment job
 
-        youtube_campaign['next_page_token'] = next_page_token
-        youtube_campaign['is_failed'] = False 
-        db.api_campaign.update_one({'id': campaign['id']}, {"$set":{'youtube_campaign': youtube_campaign}})
-    except Exception:
-        lastest_comment_time = db.api_campaign_comment.find_one({'platform': 'youtube'}, sort=[('created_time', -1)])['created_time']
-        youtube_campaign['is_failed'] = True
-        youtube_campaign['latest_comment_time'] = lastest_comment_time
-        db.api_campaign.update_one({'id': campaign['id']}, {"$set":{'youtube_campaign': youtube_campaign}})
-        return
+    #     youtube_campaign['next_page_token'] = next_page_token
+    #     youtube_campaign['is_failed'] = False 
+    #     db.api_campaign.update_one({'id': campaign['id']}, {"$set":{'youtube_campaign': youtube_campaign}})
+    # except Exception:
+    #     lastest_comment_time = db.api_campaign_comment.find_one({'platform': 'youtube'}, sort=[('created_time', -1)])['created_time']
+    #     youtube_campaign['is_failed'] = True
+    #     youtube_campaign['latest_comment_time'] = lastest_comment_time
+    #     db.api_campaign.update_one({'id': campaign['id']}, {"$set":{'youtube_campaign': youtube_campaign}})
+    #     return
 
 
 def capture_instagram():

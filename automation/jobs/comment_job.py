@@ -27,6 +27,8 @@ def comment_job(campaign, platform_name, platform, comment, order_codes_mapping)
             command_responding(platform_name, platform, campaign, comment, command)
             return
 
+        # print(order_codes_mapping)
+
         for order_code, campaign_product in order_codes_mapping.items():
             qty = OrderCodeTextProcessor.process(comment['message'], order_code)
             if qty is not None:
@@ -37,14 +39,21 @@ def comment_job(campaign, platform_name, platform, comment, order_codes_mapping)
             return
 
         pre_order = db.api_pre_order.find_one({'customer_id':comment['customer_id'], 'campaign_id':campaign['id'], 'platform':comment['platform']})
+
+        print(pre_order)
+
         if not pre_order:
+
+            print("creating pre_order")
             increment_id=get_incremented_filed(collection_name="api_pre_order",field_name="id")
+
+            print(f"increment_id {increment_id}")
             template=api_pre_order_template.copy()
             template.update({
                 "id": increment_id,
                 'customer_id':comment['customer_id'],
                 'customer_name':comment['customer_name'],
-                'customer_img':comment['customer_image'],
+                'customer_img':comment['image'],
                 'campaign_id':campaign['id'],
                 'platform':comment['platform']
             })
@@ -55,7 +64,8 @@ def comment_job(campaign, platform_name, platform, comment, order_codes_mapping)
         print(f"state: {state}")
         comment_responding(platform_name, platform, pre_order, comment, campaign_product, qty, state)
 
-    except Exception:
+    except Exception as e:
+        print(e)
         pass
 
 def command_responding(platform_name, platform, campaign, comment, command):
