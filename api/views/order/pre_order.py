@@ -79,7 +79,6 @@ class PreOrderPagination(PageNumberPagination):
 
     page_query_param = 'page'
     page_size_query_param = 'page_size'
-    page_size = 1
 
 
 class PreOrderViewSet(viewsets.ModelViewSet):
@@ -113,8 +112,11 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
         queryset = campaign.pre_orders.all()
 
-        # if search:
-        #     queryset = queryset.filter(Q(id__icontains=search) | Q(customer_id__icontains=search) | Q(phone__icontains=search))
+        if search:
+            if search.isnumeric():
+                queryset = queryset.filter(Q(id=int(search)) | Q(customer_id__icontains=search) | Q(phone__icontains=search))
+            else:
+                queryset = queryset.filter(Q(customer_id__icontains=search) | Q(phone__icontains=search))
 
         page = self.paginate_queryset(queryset)
         if page is not None:

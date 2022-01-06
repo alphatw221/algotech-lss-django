@@ -32,6 +32,6 @@ def api_error_handler(func):
         except ApiVerifyError as e:
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         # except Exception as e:
-        #     ApiLogEntry.write_entry(str(datetime.now()) + str(e))
+        #     ApiLogEntry.write3_entry(str(datetime.now()) + str(e))
         #     return Response({"message": str(datetime.now())+"server error."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     return wrapper
