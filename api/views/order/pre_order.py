@@ -79,6 +79,7 @@ class PreOrderPagination(PageNumberPagination):
 
     page_query_param = 'page'
     page_size_query_param = 'page_size'
+    page_size = 1
 
 
 class PreOrderViewSet(viewsets.ModelViewSet):
@@ -86,6 +87,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     queryset = PreOrder.objects.all().order_by('id')
     serializer_class = PreOrderSerializer
     filterset_fields = []
+    pagination_class = PreOrderPagination
 
     @action(detail=True, methods=['GET'], url_path=r'seller_retrieve')
     @api_error_handler
@@ -111,8 +113,8 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
         queryset = campaign.pre_orders.all()
 
-        if search:
-            queryset = queryset.filter(Q(id__icontains=search) | Q(customer_id__icontains=search) | Q(phone__icontains=search))
+        # if search:
+        #     queryset = queryset.filter(Q(id__icontains=search) | Q(customer_id__icontains=search) | Q(phone__icontains=search))
 
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -125,6 +127,14 @@ class PreOrderViewSet(viewsets.ModelViewSet):
             data = serializer.data
 
         return Response(data, status=status.HTTP_200_OK)
+
+        # if queryset.exists():
+        #     page = self.paginate_queryset(queryset)
+        #     if page is not None:
+        #         serialized = VideoSerializer(page, many=True)
+        #         return self.get_paginated_response(serialized.data)
+        # return Response(status=http_status.HTTP_404_NOT_FOUND)
+
 
     @action(detail=True, methods=['GET'], url_path=r'seller_checkout')
     @api_error_handler
