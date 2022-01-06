@@ -114,9 +114,9 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
         if search:
             if search.isnumeric():
-                queryset = queryset.filter(Q(id=int(search)) | Q(customer_id__icontains=search) | Q(phone__icontains=search))
+                queryset = queryset.filter(Q(id=int(search)) | Q(customer_name__icontains=search) | Q(phone__icontains=search))
             else:
-                queryset = queryset.filter(Q(customer_id__icontains=search) | Q(phone__icontains=search))
+                queryset = queryset.filter(Q(customer_name__icontains=search) | Q(phone__icontains=search))
 
         page = self.paginate_queryset(queryset)
         if page is not None:
