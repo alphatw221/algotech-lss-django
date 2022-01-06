@@ -34,10 +34,13 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # self.lucky_draw_test()
-        from backend.google_cloud_monitoring.google_cloud_monitoring import CommentQueueLengthMetric
-        CommentQueueLengthMetric.create_metric_descriptor()
+        # from backend.google_cloud_monitoring.google_cloud_monitoring import CommentQueueLengthMetric
+        # CommentQueueLengthMetric.create_metric_descriptor()
         # CommentQueueLengthMetric.write_time_series(10)
         # CommentQueueLengthMetric.delete_metric_descriptor()
+        from backend.google_cloud_logging.google_cloud_logging import ApiLogEntry
+
+        ApiLogEntry.write_entry('hellow world')
 
     def campaign_test(self):
         cs = CampaignManager.get_active_campaigns()
