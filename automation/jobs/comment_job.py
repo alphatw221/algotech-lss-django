@@ -43,6 +43,8 @@ def comment_job(campaign, platform_name, platform, comment, order_codes_mapping)
             template.update({
                 "id": increment_id,
                 'customer_id':comment['customer_id'],
+                'customer_name':comment['customer_name'],
+                'customer_img':comment['customer_image'],
                 'campaign_id':campaign['id'],
                 'platform':comment['platform']
             })

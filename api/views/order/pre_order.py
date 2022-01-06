@@ -10,7 +10,7 @@ from api.utils.common.verify import ApiVerifyError, platform_dict
 from api.utils.common.common import *
 from api.utils.common.order_helper import PreOrderHelper
 
-
+from django.db.models import Q
 def verify_buyer_request(api_user, platform_name, campaign_id, order_product_id=None, campaign_product_id=None):
     
     if platform_name not in platform_dict:
@@ -103,14 +103,17 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'], url_path=r'seller_list')
     @api_error_handler
     def seller_list_pre_order(self, request):
-        api_user, platform_id, platform_name, campaign_id = getparams(
-            request, ("platform_id", "platform_name", "campaign_id"))
+        api_user, platform_id, platform_name, campaign_id, search = getparams(
+            request, ("platform_id", "platform_name", "campaign_id", "search"))
 
         _, campaign = verify_seller_request(
             api_user, platform_name, platform_id, campaign_id)
 
         queryset = campaign.pre_orders.all()
-        # TODO filtering
+
+        if search:
+            queryset = queryset.filter(Q(id__icontains=search) | Q(customer_id__icontains=search) | Q(phone__icontains=search))
+
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = PreOrderSerializer(page, many=True)
