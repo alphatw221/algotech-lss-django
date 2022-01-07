@@ -105,7 +105,12 @@ class PreOrderHelper():
                     "customer_id": api_pre_order['customer_id'],
                     "customer_name": api_pre_order['customer_name'],
                     "platform": api_pre_order['platform'],
-                    "type": api_campaign_product["type"]
+                    "type": api_campaign_product["type"],
+                    "name" : api_campaign_product["name"],
+                    "price" : api_campaign_product["price"],
+                    "currency" : api_campaign_product["currency"],
+                    "currency_sign" : api_campaign_product["currency_sign"],
+                    "image" : api_campaign_product["image"],
                 })
                 db.api_order_product.insert_one(template, session=session)
 
@@ -269,7 +274,7 @@ class PreOrderHelper():
                     if not api_campaign_product['customer_removable']:
                         return RequestState.INVALID_REMOVE_NOT_ALLOWED
                     #delete
-                    cls.delete_product_by_comment(api_pre_order, api_campaign_product, qty)
+                    cls.delete_product_by_comment(api_pre_order, api_campaign_product)
                     return RequestState.DELETED
                 else:
                     return RequestState.INVALID_NEGATIVE_QTY
@@ -295,7 +300,12 @@ class PreOrderHelper():
                     "customer_id": api_pre_order['customer_id'],
                     "customer_name": api_pre_order['customer_name'],
                     "platform": api_pre_order['platform'],
-                    "type": api_campaign_product["type"]
+                    "type": api_campaign_product["type"],
+                    "name" : api_campaign_product["name"],
+                    "price" : api_campaign_product["price"],
+                    "currency" : api_campaign_product["currency"],
+                    "currency_sign" : api_campaign_product["currency_sign"],
+                    "image" : api_campaign_product["image"],
                 })
                 db.api_order_product.insert_one(template, session=session)
 
@@ -347,7 +357,7 @@ class PreOrderHelper():
                     },
                     session=session)
     @classmethod
-    def delete_product_by_comment(cls, api_pre_order, api_campaign_product, qty):
+    def delete_product_by_comment(cls, api_pre_order, api_campaign_product):
         with client.start_session() as session:
             with session.start_transaction():
                 api_order_product = db.api_order_product.find_one(

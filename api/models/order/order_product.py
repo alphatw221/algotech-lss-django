@@ -22,6 +22,18 @@ class OrderProduct(models.Model):
         ('lucky_draw', 'Lucky Draw from inventory'),
         ('lucky_draw-fast', 'Lucky Draw from fast-add'),
     ]
+    
+    ##inhereted from campaign_product
+    name = models.CharField(max_length=255, null=True,
+                            blank=True, default=None)
+    price = models.FloatField(null=True, blank=True, default=0)
+    currency = models.CharField(
+        max_length=255, null=True, blank=True, default=None)
+    currency_sign = models.CharField(
+        max_length=255, null=True, blank=True, default='$')
+    image = models.CharField(
+        max_length=256, null=True, blank=True, default=None)
+    ##
 
     campaign = models.ForeignKey(
         Campaign, blank=True, null=True, on_delete=models.SET_NULL, related_name='order_products')
@@ -49,6 +61,9 @@ class OrderProduct(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     meta = models.JSONField(null=True, blank=True, default=dict)
+
+
+    
 
 
 class OrderProductSerializer(serializers.ModelSerializer):

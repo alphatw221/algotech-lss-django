@@ -26,9 +26,8 @@ def i18n_get_comment_command_cart(campaign, comment):
         return _('COMMENT_COMMAND_CART_NO_CART_PRODUCT')
 
     order_products=db.api_order_product.find({"pre_order_id":pre_order['id']})
-    campaign_product_dict={campaign_product['id']: campaign_product for campaign_product in db.api_campaign_product.find({"campaign_id":campaign['id']})}
 
-    items = _i18n_get_order_items(campaign_product_dict, order_products)
+    items = _i18n_get_order_items(order_products)
 
     text = [_('COMMENT_COMMAND_CART_MESSAGE_HEADER'), '\n-----\n']
     text.extend(items)
@@ -79,10 +78,9 @@ def i18n_get_comment_command_order(campaign, comment):
     if not order_products:
         return _('COMMENT_COMMAND_ORDER_NO_ORDER')
 
-    campaign_product_dict={campaign_product['id']: campaign_product for campaign_product in db.api_campaign_product.find({"campaign_id":campaign['id']})}
     text = [_('COMMENT_COMMAND_ORDER_MESSAGE_HEADER'), '\n-----\n']
 
-    items = _i18n_get_order_items(campaign_product_dict, order_products)
+    items = _i18n_get_order_items(order_products)
     text.extend(items)
     text.append(_('DELIVERY{dollar_sign}{delivery}\n'
                   ).format(dollar_sign=campaign["currency_sign"],
@@ -99,23 +97,22 @@ def i18n_get_comment_command_order(campaign, comment):
     return ''.join(text)
 
 
-def _i18n_get_order_items(campaign_product_dict, order_products):
+def _i18n_get_order_items(order_products):
 
     items = []
     count = order_products.count()
     digits = 2 if count < 100 else len(str(count))
     for i, order_product in enumerate(order_products, 1):
-        campaign_product=campaign_product_dict[order_product['campaign_product_id']]
-        name = campaign_product.get('name','')
+        name = order_product.get('name','')
         qty = order_product.get('qty',0)
         total = Decimal(
-            campaign_product.get('price', 0)) * qty
+            order_product.get('price', 0)) * qty
         items.append(
             f"{str(i).zfill(digits)}. " +
             _('ITEM_INFO{name}{qty}{dollar_sign}{total}\n').format(
                 name=name,
                 qty=qty,
-                dollar_sign=campaign_product['currency_sign'],
+                dollar_sign=order_product.get('currency_sign', "$"),
                 total="{:.2f}".format(total)
             )
         )

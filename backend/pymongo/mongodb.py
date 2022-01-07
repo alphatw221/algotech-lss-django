@@ -14,7 +14,7 @@ def get_incremented_filed(collection_name, field_name):
             doc=db.auto_increment.find_one({"collection_name":collection_name, "field_name":field_name}, session=session)
             increased_number=doc['number']+1
             db.auto_increment.update_one({"collection_name":collection_name, "field_name":field_name},{"$set":{"number":increased_number}}, session=session)
-    return increased_number
+    return int(increased_number)
 
     # try:
     #     with client.start_session() as session:

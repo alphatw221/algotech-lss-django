@@ -19,7 +19,7 @@ from backend.api.facebook.post import (api_fb_post_page_comment_on_comment,
 from api.models.order.pre_order import api_pre_order_template
 from backend.pymongo.mongodb import db, client, get_incremented_filed
 from bson.objectid import ObjectId
-
+from api.utils.common.verify import ApiVerifyError
 def comment_job(campaign, platform_name, platform, comment, order_codes_mapping):
     try:
         command = CommandTextProcessor.process(comment['message'])
@@ -48,6 +48,8 @@ def comment_job(campaign, platform_name, platform, comment, order_codes_mapping)
             increment_id=get_incremented_filed(collection_name="api_pre_order",field_name="id")
 
             print(f"increment_id {increment_id}")
+            print(f"type of increment_id: {type(increment_id)}")
+
             template=api_pre_order_template.copy()
             template.update({
                 "id": increment_id,
@@ -57,16 +59,17 @@ def comment_job(campaign, platform_name, platform, comment, order_codes_mapping)
                 'campaign_id':campaign['id'],
                 'platform':comment['platform']
             })
-            _id=db.api_pre_order.insert_one(template)
-            pre_order = db.api_pre_order.find_one({'_id': ObjectId(_id)})
+            _id=db.api_pre_order.insert_one(template).inserted_id
+            pre_order = db.api_pre_order.find_one(_id)
 
         state = PreOrderHelper.add_or_update_by_comment(pre_order, order_placement[0], order_placement[1])
         print(f"state: {state}")
         comment_responding(platform_name, platform, pre_order, comment, campaign_product, qty, state)
-
-    except Exception as e:
-        print(e)
+    except ApiVerifyError:
         pass
+    # except Exception as e:
+    #     print(e)
+    #     pass
 
 def command_responding(platform_name, platform, campaign, comment, command):
     if platform_name == 'facebook':
