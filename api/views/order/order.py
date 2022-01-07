@@ -12,7 +12,7 @@ from api.utils.common.order_helper import OrderHelper
 
 from django.http import HttpResponse
 from backend.pymongo.mongodb import db
-import openpyxl, xlsxwriter, os.path, io
+import xlsxwriter, os.path, io
 from io import StringIO
 
 

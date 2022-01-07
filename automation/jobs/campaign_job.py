@@ -74,11 +74,13 @@ def capture_facebook(campaign, facebook_page):
     comment_capture_since=since
     comments = data.get('data', [])
 
+    print(f"number of comments: {len(comments)}")
     if len(comments) == 1 and comments[0]['created_time'] == since:
         return
 
     try:
         for comment in comments:
+            print(comment['message'])
             if comment['from']['id']==facebook_page['page_id']:
                 continue
             uni_format_comment={
@@ -93,9 +95,11 @@ def capture_facebook(campaign, facebook_page):
             db.api_campaign_comment.insert_one(uni_format_comment)
             comment_queue.enqueue(comment_job,args=(campaign, 'facebook', facebook_page, uni_format_comment, order_codes_mapping), result_ttl=10, failure_ttl=10)
             comment_capture_since=comment['created_time']
-    except Exception:
-        facebook_campaign['comment_capture_since']=comment_capture_since
-        db.api_campaign.update_one({'id':campaign['id']},{"$set":{'facebook_campaign':facebook_campaign}})
+    except Exception as e:
+        print(e)
+
+    facebook_campaign['comment_capture_since']=comment_capture_since
+    db.api_campaign.update_one({'id':campaign['id']},{"$set":{'facebook_campaign':facebook_campaign}})
     
 
 def capture_youtube(campaign, youtube_channel):

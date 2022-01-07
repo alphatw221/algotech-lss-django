@@ -12,6 +12,7 @@ class Order(models.Model):
 
     customer_id = models.CharField(max_length=255, null=True, blank=True)
     customer_name = models.CharField(max_length=255, null=True, blank=True)
+    customer_img = models.CharField(max_length=255, null=True, blank=True)
     email = models.CharField(max_length=255, null=True, blank=True)
     phone = models.CharField(max_length=255, null=True, blank=True)
     first_name = models.CharField(max_length=255, null=True, blank=True)

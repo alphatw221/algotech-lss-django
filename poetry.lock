@@ -305,6 +305,31 @@ pyopenssl = ["pyopenssl (>=20.0.0)"]
 reauth = ["pyu2f (>=0.1.5)"]
 
 [[package]]
+name = "google-cloud-appengine-logging"
+version = "1.1.0"
+description = ""
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+google-api-core = {version = ">=1.22.2,<3.0.0dev", extras = ["grpc"]}
+packaging = ">=14.3"
+proto-plus = ">=1.15.0"
+
+[[package]]
+name = "google-cloud-audit-log"
+version = "0.2.0"
+description = "Google Cloud Audit Protos"
+category = "main"
+optional = false
+python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*"
+
+[package.dependencies]
+googleapis-common-protos = ">=1.52.0"
+protobuf = ">=3.6.0"
+
+[[package]]
 name = "google-cloud-core"
 version = "2.2.1"
 description = "Google Cloud API client core library"
@@ -318,6 +343,22 @@ google-auth = ">=1.24.0,<3.0dev"
 
 [package.extras]
 grpc = ["grpcio (>=1.8.2,<2.0dev)"]
+
+[[package]]
+name = "google-cloud-logging"
+version = "2.7.0"
+description = "Stackdriver Logging API client library"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+google-api-core = {version = ">=1.26.0,<3.0.0dev", extras = ["grpc"]}
+google-cloud-appengine-logging = ">=0.1.0,<2.0.0dev"
+google-cloud-audit-log = ">=0.1.0,<1.0.0dev"
+google-cloud-core = ">=1.4.1,<3.0.0dev"
+grpc-google-iam-v1 = ">=0.12.3,<0.13dev"
+proto-plus = ">=1.15.0"
 
 [[package]]
 name = "google-cloud-monitoring"
@@ -386,10 +427,23 @@ optional = false
 python-versions = ">=3.6"
 
 [package.dependencies]
+grpcio = {version = ">=1.0.0", optional = true, markers = "extra == \"grpc\""}
 protobuf = ">=3.12.0"
 
 [package.extras]
 grpc = ["grpcio (>=1.0.0)"]
+
+[[package]]
+name = "grpc-google-iam-v1"
+version = "0.12.3"
+description = "GRPC library for the google-iam-v1 service"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+googleapis-common-protos = {version = ">=1.5.2,<2.0.0dev", extras = ["grpc"]}
+grpcio = ">=1.0.0,<2.0.0dev"
 
 [[package]]
 name = "grpcio"
@@ -463,7 +517,7 @@ et-xmlfile = "*"
 name = "packaging"
 version = "21.0"
 description = "Core utilities for Python packages"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -598,7 +652,7 @@ rsa = ["cryptography"]
 name = "pyparsing"
 version = "2.4.7"
 description = "Python parsing module"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
 
@@ -770,7 +824,7 @@ python-versions = ">=3.4"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "6c9e67ff5045e934e7f19e6db06e85665fbc1332aa25d459ac60e4a2dd9e643e"
+content-hash = "2a253b8d22b948c949efe68864ce2b4ed0406ff63205e1b006f4c3a6df3eefee"
 
 [metadata.files]
 asgiref = [
@@ -866,9 +920,21 @@ google-auth = [
     {file = "google-auth-2.3.3.tar.gz", hash = "sha256:d83570a664c10b97a1dc6f8df87e5fdfff012f48f62be131e449c20dfc32630e"},
     {file = "google_auth-2.3.3-py2.py3-none-any.whl", hash = "sha256:a348a50b027679cb7dae98043ac8dbcc1d7951f06d8387496071a1e05a2465c0"},
 ]
+google-cloud-appengine-logging = [
+    {file = "google-cloud-appengine-logging-1.1.0.tar.gz", hash = "sha256:91fe9b0833f6e1a46293dcc0e483716372c9ff4a95ebe51276c5f0092cb9defd"},
+    {file = "google_cloud_appengine_logging-1.1.0-py2.py3-none-any.whl", hash = "sha256:438bdd8e4497368764d86f14b0eae295fc8a41f5a5b83fce89ae5a71067882d2"},
+]
+google-cloud-audit-log = [
+    {file = "google-cloud-audit-log-0.2.0.tar.gz", hash = "sha256:d0852f525ad65705f9fbff6288be4493e1449a7906fb5e01bd71c8d1e424d1fc"},
+    {file = "google_cloud_audit_log-0.2.0-py2.py3-none-any.whl", hash = "sha256:ecc7f5f2168ad4014331d6397fcea3750b2d41900f0ef6d1081cd78b3a6420e9"},
+]
 google-cloud-core = [
     {file = "google-cloud-core-2.2.1.tar.gz", hash = "sha256:476d1f71ab78089e0638e0aaf34bfdc99bab4fce8f4170ba6321a5243d13c5c7"},
     {file = "google_cloud_core-2.2.1-py2.py3-none-any.whl", hash = "sha256:ab6cee07791afe4e210807ceeab749da6a076ab16d496ac734bf7e6ffea27486"},
+]
+google-cloud-logging = [
+    {file = "google-cloud-logging-2.7.0.tar.gz", hash = "sha256:5a4ad2832be3b86c8f0fb57b2d382a1f67218137c6f6051372647ac5147d6421"},
+    {file = "google_cloud_logging-2.7.0-py2.py3-none-any.whl", hash = "sha256:12937a7d5079c2c2dcd7d4ec2f9825848e9f53f41f5a71e825040962365b62b0"},
 ]
 google-cloud-monitoring = [
     {file = "google-cloud-monitoring-2.8.0.tar.gz", hash = "sha256:2a25f7535f21cdeabfccb07fe4a75eae5a47bb36b82025537755b37d3376da46"},
@@ -930,6 +996,9 @@ google-resumable-media = [
 googleapis-common-protos = [
     {file = "googleapis-common-protos-1.53.0.tar.gz", hash = "sha256:a88ee8903aa0a81f6c3cec2d5cf62d3c8aa67c06439b0496b49048fb1854ebf4"},
     {file = "googleapis_common_protos-1.53.0-py2.py3-none-any.whl", hash = "sha256:f6d561ab8fb16b30020b940e2dd01cd80082f4762fa9f3ee670f4419b4b8dbd0"},
+]
+grpc-google-iam-v1 = [
+    {file = "grpc-google-iam-v1-0.12.3.tar.gz", hash = "sha256:0bfb5b56f648f457021a91c0df0db4934b6e0c300bd0f2de2333383fe958aa72"},
 ]
 grpcio = [
     {file = "grpcio-1.43.0-cp310-cp310-linux_armv7l.whl", hash = "sha256:a4e786a8ee8b30b25d70ee52cda6d1dbba2a8ca2f1208d8e20ed8280774f15c8"},

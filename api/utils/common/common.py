@@ -4,6 +4,7 @@ from rest_framework import status
 
 import functools
 from datetime import datetime
+from backend.google_cloud_logging.google_cloud_logging import ApiLogEntry
 import logging
 
 logger = logging.getLogger(__name__)
@@ -30,7 +31,7 @@ def api_error_handler(func):
             return func(*args, **kwargs)
         except ApiVerifyError as e:
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            logger.error(str(e))
-            return Response({"message": str(datetime.now())+"server error."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        # except Exception as e:
+        #     ApiLogEntry.write3_entry(str(datetime.now()) + str(e))
+        #     return Response({"message": str(datetime.now())+"server error."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     return wrapper
