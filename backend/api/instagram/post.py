@@ -23,3 +23,11 @@ def api_ig_get_post_comments(page_token: str, post_id: str):
     # }
     ret = FacebookApiCaller(f'{post_id}/comments', bearer_token=page_token).get()
     return ret
+
+def api_ig_post_page_message_on_comment(page_token: str, comment_id: str, message: dict):
+    data = {
+        "message": message
+    }
+    ret = FacebookApiCaller(f'{comment_id}/replies', bearer_token=page_token,
+                            data=data).post()
+    return ret
