@@ -251,6 +251,9 @@ FACEBOOK_APP_CREDS = {
     "app_secret": "e36ab1560c8d85cbc413e07fb7232f99",
 }
 
+# Instagram 
+INSTAGRAM_API_URL = "https://graph.instagram.com"
+
 # Youtube
 YOUTUBE_API_URL = "https://www.googleapis.com/youtube/v3"
 YOUTUBE_API_KEY = "AIzaSyDcsngr4WwNI5HUi9CNMLVRgCx5YdTaaA0"
