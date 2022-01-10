@@ -40,3 +40,26 @@
 
 #         # ret = cls.IPGApiCaller("connect/gateway/processing",data=data).post()
 #         # print(ret)
+
+
+# class node:
+#     number=None
+#     left:node = None
+#     right:node = None
+
+
+# class solution:
+
+#     sum=0
+
+#     def h(node, l):
+#         if not node:
+#             return
+#         if not node.left and node.right and l:
+#             sum += node.number
+#         else:
+#             h(node.right,False)
+#             h(node.left,True)
+
+
+

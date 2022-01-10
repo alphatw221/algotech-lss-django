@@ -102,6 +102,9 @@ class Order(models.Model):
 
     platform = models.CharField(max_length=255, blank=True,
                                 choices=settings.SUPPORTED_PLATFORMS, default='n/a')
+
+
+                                
     type = models.CharField(max_length=255, null=True, blank=True)
     status = models.CharField(max_length=255, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
