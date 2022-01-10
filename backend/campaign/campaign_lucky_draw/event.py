@@ -67,12 +67,19 @@ class DrawFromProductsEvent(CampaignLuckyDrawEvent):
         winner_set = set()
         if self.unrepeat == 'True':
             winner_set = get_winner_set(self.campaign.id)
+        
+        page_id = ''
+        if self.campaign.facebook_page_id:
+            page_id = db.api_facebook_page.find_one({'id': self.campaign.facebook_page_id})['page_id']
 
         candidate_set = set()
         for cart_product in cart_products:
-            candidate_set.add(
-                (cart_product.platform, cart_product.customer_id, cart_product.customer_name)
-            )
+            if cart_product.customer_id == page_id:
+                pass
+            else:
+                candidate_set.add(
+                    (cart_product.platform, cart_product.customer_id, cart_product.customer_name)
+                )
 
         if self.unrepeat == 'True':
             candidate_set = get_final_set(candidate_set, winner_set, self.winner_num)
@@ -117,11 +124,18 @@ class DrawFromCartProductsEvent(CampaignLuckyDrawEvent):
         if self.unrepeat == 'True':
             winner_set = get_winner_set(self.campaign.id)
         
+        page_id = ''
+        if self.campaign.facebook_page_id:
+            page_id = db.api_facebook_page.find_one({'id': self.campaign.facebook_page_id})['page_id']
+        
         candidate_set = set()
         for order_product in order_products:
-            candidate_set.add(
-                (order_product.platform, order_product.customer_id, order_product.customer_name)
-            )
+            if order_product.customer_id == page_id:
+                pass
+            else:
+                candidate_set.add(
+                    (order_product.platform, order_product.customer_id, order_product.customer_name)
+                )
         
         if self.unrepeat == 'True':
             candidate_set = get_final_set(candidate_set, winner_set, self.winner_num)
@@ -156,12 +170,19 @@ class DrawFromCampaignCommentsEvent(ABC):
         winner_set = set()
         if self.unrepeat == 'True':
             winner_set = get_winner_set(self.campaign.id)
+        
+        page_id = ''
+        if self.campaign.facebook_page_id:
+            page_id = db.api_facebook_page.find_one({'id': self.campaign.facebook_page_id})['page_id']
 
         candidate_set = set()
         for campaign_comment in campaign_comments:
-            candidate_set.add(
-                (campaign_comment['platform'], campaign_comment['customer_id'], campaign_comment['customer_name'])
-            )
+            if (campaign_comment['customer_id'] == page_id):
+                pass
+            else:
+                candidate_set.add(
+                    (campaign_comment['platform'], campaign_comment['customer_id'], campaign_comment['customer_name'])
+                )
         
         if self.unrepeat == 'True':
             candidate_set = get_final_set(candidate_set, winner_set, self.winner_num)
@@ -197,17 +218,27 @@ class DrawFromCampaignLikesEvent(ABC):
         if self.campaign.facebook_campaign and (post_id := self.campaign.facebook_campaign.get('post_id')) and \
                 self.campaign.facebook_page and (token := self.campaign.facebook_page.token):
             after = None
+
+            page_id = ''
+            # remove facebook campaign itself
+            if self.campaign.facebook_page_id:
+                page_id = db.api_facebook_page.find_one({'id': self.campaign.facebook_page_id})['page_id']
+            
             while True:
                 response = api_fb_get_post_likes(token, post_id, after=after)
                 for person in response[1]['data']:
-                    candidate_set.add(
-                        ('facebook', person['id'], person['name'])
-                    )
+                    if (person['id'] == page_id):
+                        pass
+                    else:
+                        candidate_set.add(
+                            ('facebook', person['id'], person['name'])
+                        )
                 try:
                     after = response[1]['paging']['cursors']['after']
                 except Exception:
                     break
-        
+
+            #TODO remove campaign itself
         if self.unrepeat == 'True':
             candidate_set = get_final_set(candidate_set, winner_set, self.winner_num)
         

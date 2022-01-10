@@ -24,6 +24,7 @@ from api.views.cart import cart_product
 
 from api.views.order import order
 from api.views.order import pre_order
+from api.views.dashboard import dashboard
 
 from api.views.image import image
 from django.views.decorators.csrf import csrf_exempt
@@ -64,6 +65,8 @@ def url_setup(urlpatterns):
     router.register(r'order', order.OrderViewSet)
 
     router.register(r'pre_order', pre_order.PreOrderViewSet)
+
+    router.register(r'dashboard', dashboard.DashboardViewSet)
 
     urlpatterns += [
         path('image/upload/<filename>',
