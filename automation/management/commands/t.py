@@ -38,9 +38,7 @@ class Command(BaseCommand):
         # CommentQueueLengthMetric.create_metric_descriptor()
         # CommentQueueLengthMetric.write_time_series(10)
         # CommentQueueLengthMetric.delete_metric_descriptor()
-        from backend.google_cloud_logging.google_cloud_logging import ApiLogEntry
-
-        ApiLogEntry.write_entry('hellow world')
+        self.ipg_test()
 
     def campaign_test(self):
         cs = CampaignManager.get_active_campaigns()
@@ -104,3 +102,18 @@ class Command(BaseCommand):
             customer_name, product_name, lang='zh-hant'))
         print(i18n_get_campaign_announcement_lucky_draw_winner(
             customer_name, product_name, lang='zh-hans'))
+
+
+    def ipg_test(self):
+        from api.views.payment._payment import IPG_Helper
+        chargetotal=10
+        currency='702'
+        timezone = "Asia/Singapore"
+        IPG_Helper.create_payment(timezone, chargetotal, currency)
+
+        
+
+# $stringToHash = $this->storeId . $this->txndatetime . $this->chargetotal . $this->currency . $this->sharedSecret;
+#         $ascii = bin2hex($stringToHash);
+
+#         return hash("sha256", $ascii);

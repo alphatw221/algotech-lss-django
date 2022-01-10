@@ -1,0 +1,42 @@
+
+# from dataclasses import dataclass
+# from backend.api._api_caller import RestApiJsonCaller
+# import datetime
+# import hashlib
+
+
+#     # domain_url: str = "https://test.ipg-online.com/connect/gateway/processing"3
+
+# class IPG_Helper:
+
+#     @dataclass
+#     class IPGApiCaller(RestApiJsonCaller):
+#         domain_url: str = "https://test.ipg-online.com"
+
+#     storename="4530042983"
+#     sharedSecret="Xe33QM7UTs"
+#     responseSuccessURL = "http://104.199.211.63/api/test"
+#     responseFailURL = "http://104.199.211.63/api/test"
+
+#     @classmethod
+#     def create_payment(cls, timezone, chargetotal, currency):
+#         txndatetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+#         payment_hash=hashlib.sha256((cls.storename + str(txndatetime) + str(chargetotal) + cls.sharedSecret).encode('utf-8')).hexdigest()
+#         data={
+#             "storename":cls.storename,
+#             "txntype":"sale",
+#             "mode":"payonly",
+#             "timezone":timezone,
+#             "txndatetime": txndatetime,
+#             "hash_algorithm":"SHA256",
+#             "hash":payment_hash,
+#             "chargetotal":chargetotal,
+#             "currency":currency,
+#             "responseSuccessURL":cls.responseSuccessURL,
+#             "responseFailURL":cls.responseFailURL
+#         }
+#         print(data)
+#         # this->storeId . $this->txndatetime . $this->chargetotal . $this->currency . $this->sharedSecret;
+
+#         # ret = cls.IPGApiCaller("connect/gateway/processing",data=data).post()
+#         # print(ret)
