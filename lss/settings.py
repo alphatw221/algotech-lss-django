@@ -321,4 +321,4 @@ REDIS_SERVER={
     "username":None,
     "password":r"algo83111T%%"}
 
-APPEND_SLASH=False
+# APPEND_SLASH=False
