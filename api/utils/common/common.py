@@ -23,6 +23,12 @@ def getparams(request, params: tuple, seller=True):
         ret.append(request.query_params.get(param))
     return ret
 
+def getdata(request, data: tuple):
+    ret = []
+    for d in data:
+        ret.append(request.data.get(d))
+    return ret
+
 
 def api_error_handler(func):
     @functools.wraps(func)

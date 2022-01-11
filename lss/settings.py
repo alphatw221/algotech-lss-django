@@ -321,3 +321,6 @@ REDIS_SERVER={
     "port":"6379",
     "username":None,
     "password":r"algo83111T%%"}
+
+# gcp load balancer
+GCP_API_LOADBALANCER_URL="http://127.0.0.1:8000"

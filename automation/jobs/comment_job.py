@@ -57,7 +57,8 @@ def comment_job(campaign, platform_name, platform, comment, order_codes_mapping)
                 'customer_name':comment['customer_name'],
                 'customer_img':comment['image'],
                 'campaign_id':campaign['id'],
-                'platform':comment['platform']
+                'platform':comment['platform'],
+                'platform_id':platform['id']
             })
             _id=db.api_pre_order.insert_one(template).inserted_id
             pre_order = db.api_pre_order.find_one(_id)

@@ -181,23 +181,20 @@ class PreOrderHelper():
                 cls._check_lock(api_user, api_pre_order)
                 cls._check_empty(api_pre_order)
 
-                latest_api_order_product = db.api_order.find_one(
-                    {"$query": {}, "$orderby": {"id": -1}}, session=session)
-                id_increment = latest_api_order_product['id'] + \
-                    1 if latest_api_order_product else 1
+                increment_id = get_incremented_filed(collection_name="api_order", field_name="id")
                 api_order_data = api_pre_order.copy()
-                api_order_data['id'] = id_increment
+                api_order_data['id'] = increment_id
                 del api_order_data['_id']
                 template=api_order_template.copy()
                 template.update(api_order_data)
                 db.api_order.insert_one(template, session=session)
 
                 db.api_order_product.update_many(
-                    {"pre_order_id": api_pre_order["id"]}, {"$set": {"pre_order_id": None, "order_id": id_increment}})
+                    {"pre_order_id": api_pre_order["id"]}, {"$set": {"pre_order_id": None, "order_id": increment_id}})
                 db.api_pre_order.update_one({"id": api_pre_order["id"]}, {
                                             "$set": {"products": {}, "total": 0, "subtotal": 0}}, session=session)
 
-        return db.api_order.find_one({"id": id_increment},{"_id":False})
+        return db.api_order.find_one({"id": increment_id},{"_id":False})
 
     @staticmethod
     def _check_platform(platform, customer_id, customer_name):
