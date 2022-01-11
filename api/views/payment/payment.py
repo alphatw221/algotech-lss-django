@@ -70,8 +70,13 @@ class PaymentViewSet(viewsets.GenericViewSet):
     
     @action(detail=False, methods=['POST'], url_path=r'hit_pay_webhook')
     def hit_pay_webhook(self, request):
-        api_user, payment_id, payment_request_id, phone, amount, currency, status, reference_number, hmac = getparams(
-            request, ("payment_id", "payment_request_id", "phone", "amount", "currency", "status", "reference_number", "hmac"))
+        payment_id = request.query_params.get('payment_id')
+        payment_request_id = request.query_params.get('payment_request_id')
+        amount = request.query_params.get('amount')
+        status = request.query_params.get('status')
+        reference_number = request.query_params.get('reference_number')
+        hmac = request.query_params.get('hmac')
+        
         hitpay_dict, info_dict = {}, {}
         secret_salt = '2MUizyJj429NIoOMmTXedyICmbwS1rt6Wph7cGqzG99IkmCV6nUCQ22lRVCB0Rgu'
 
