@@ -71,33 +71,32 @@ class PaymentViewSet(viewsets.GenericViewSet):
     
     @action(detail=False, methods=['POST'], url_path=r'hit_pay_webhook', parser_classes=(MultiPartParser, FormParser))
     def hit_pay_webhook(self, request):
-        payment_id = request.query_params.get('payment_id')
-        payment_request_id = request.query_params.get('payment_request_id')[0]
-        amount = request.query_params.get('amount')
-        status = request.query_params.get('status')
-        reference_number = request.query_params.get('reference_number')[0]
-        hmac = request.query_params.get('hmac')
+        # headers = {
+        #     'X-BUSINESS-API-KEY': '64044c7551b232cbf23b32d9b21e30ff1f4c5b42068c8c59864f161cad6af21b',
+        #     'Content-Type': 'application/x-www-form-urlencoded',
+        #     'X-Requested-With': 'XMLHttpRequest'
+        # }
+        # ret = HitPay_Helper.HitPayApiCaller(f'/{payment_request_id}', headers=headers).get()
+        data_dict = request.data.dict()
+        payment_id = data_dict['payment_id']
+        payment_request_id = data_dict['payment_request_id']
+        amount = data_dict['amount']
+        status = data_dict['status']
+        reference_number = data_dict['reference_number']
+        hmac = data_dict['hmac']
+        secret_salt = '2MUizyJj429NIoOMmTXedyICmbwS1rt6Wph7cGqzG99IkmCV6nUCQ22lRVCB0Rgu'
 
-        headers = {
-            'X-BUSINESS-API-KEY': '64044c7551b232cbf23b32d9b21e30ff1f4c5b42068c8c59864f161cad6af21b',
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'X-Requested-With': 'XMLHttpRequest'
-        }
-        ret = HitPay_Helper.HitPayApiCaller(f'/{payment_request_id}', headers=headers).get()
-        print (ret)
+        hitpay_dict, info_dict = {}, {}
 
-        # hitpay_dict, info_dict = {}, {}
-        # secret_salt = '2MUizyJj429NIoOMmTXedyICmbwS1rt6Wph7cGqzG99IkmCV6nUCQ22lRVCB0Rgu'
+        info_dict['payment_id'] = payment_id
+        info_dict['payment_request_id'] = payment_request_id
+        hitpay_dict['hitpay'] = info_dict
+        total = int(db.api_order.find_one({'id': int(reference_number)})['total'])
 
-        # info_dict['payment_id'] = payment_id
-        # info_dict['payment_request_id'] = payment_request_id
-        # hitpay_dict['hitpay'] = info_dict
-        # total = int(db.api_order.find_one({'id': int(reference_number)})['total'])
-
-        # if status == 'completed' and total == int(amount) and hmac == secret_salt:
-        #     db.api_order.update_one(
-        #         { 'id': int(reference_number) },
-        #         { '$set': {'status': 'paid', 'checkout_details': hitpay_dict} }
-        #     )
+        if status == 'completed' and total == int(amount):
+            db.api_order.update_one(
+                { 'id': int(reference_number) },
+                { '$set': {'status': 'paid', 'checkout_details': hitpay_dict} }
+            )
 
         return Response('request')
