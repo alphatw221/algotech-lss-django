@@ -1,8 +1,7 @@
-
-# from dataclasses import dataclass
-# from backend.api._api_caller import RestApiJsonCaller
-# import datetime
-# import hashlib
+from dataclasses import dataclass
+from backend.api._api_caller import RestApiJsonCaller
+import datetime
+import hashlib
 
 
 #     # domain_url: str = "https://test.ipg-online.com/connect/gateway/processing"3
@@ -40,3 +39,11 @@
 
 #         # ret = cls.IPGApiCaller("connect/gateway/processing",data=data).post()
 #         # print(ret)
+
+
+class HitPay_Helper:
+
+    @dataclass
+    class HitPayApiCaller(RestApiJsonCaller):
+        # domain_url: str = "https://api.hit-pay.com/v1/payment-requests"
+        domain_url: str = "https://api.sandbox.hit-pay.com/v1/payment-requests"
