@@ -13,7 +13,6 @@ from backend.pymongo.mongodb import db
 
 class PaymentViewSet(viewsets.GenericViewSet):
     queryset = User.objects.none()
-    permission_classes = [IsAdminUser | IsAuthenticated]
 
     @action(detail=False, methods=['GET'])
     def test(self, request, *args, **kwargs):
@@ -38,7 +37,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
 
     #     return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['GET'], url_path=r'hit_pay')
+    @action(detail=False, methods=['GET'], url_path=r'hit_pay', permission_classes=(IsAuthenticated,))
     def hit_pay(self, request):
         api_user, order_id = getparams(
             request, ("order_id", ))
