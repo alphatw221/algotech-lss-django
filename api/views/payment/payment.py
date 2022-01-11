@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.core.files.storage import default_storage
+from rest_framework.parsers import MultiPartParser
 
 from api.utils.common.common import api_error_handler, getparams, ApiVerifyError
 from api.views.payment._payment import HitPay_Helper
@@ -68,7 +69,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
 
         return Response(ret)
     
-    @action(detail=False, methods=['POST'], url_path=r'hit_pay_webhook')
+    @action(detail=False, methods=['POST'], url_path=r'hit_pay_webhook', parser_classes=(MultiPartParser,))
     def hit_pay_webhook(self, request):
         payment_id = request.query_params.get('payment_id')
         payment_request_id = request.query_params.get('payment_request_id')
@@ -76,6 +77,9 @@ class PaymentViewSet(viewsets.GenericViewSet):
         status = request.query_params.get('status')
         reference_number = request.query_params.get('reference_number')
         hmac = request.query_params.get('hmac')
+
+        print ('-----------------------')
+        print (request.data)
         
         hitpay_dict, info_dict = {}, {}
         secret_salt = '2MUizyJj429NIoOMmTXedyICmbwS1rt6Wph7cGqzG99IkmCV6nUCQ22lRVCB0Rgu'
