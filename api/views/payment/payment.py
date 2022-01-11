@@ -54,7 +54,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             'email': email,
             'name': name,
             'redirect_url': 'https://www.google.com/',
-            'webhook': 'http://172.22.221.181/api/payment/hit_pay_webhook',
+            'webhook': 'https:/otdaoltset.algotech.app/api/payment/hit_pay_webhook',
             'amount': amount,
             'currency': currency,
             'reference_number': order_id,
