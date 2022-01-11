@@ -78,22 +78,22 @@ class PaymentViewSet(viewsets.GenericViewSet):
 
         return Response(data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['GET'], url_path=r'ipg_payment_success')
-    @api_error_handler
-    def get_ipg_order_data(self, request, pk=None):
+    # @action(detail=False, methods=['GET'], url_path=r'ipg_payment_success')
+    # @api_error_handler
+    # def get_ipg_order_data(self, request, pk=None):
         
-        api_user, order_id = getparams(
-            request, ("order_id", ), seller=False)
+    #     api_user, order_id = getparams(
+    #         request, ("order_id", ), seller=False)
 
 
-        # OrderMetaModel::api_update($order_id, 'payment_info', $request->post('ipgTransactionId'));
-        # OrderMetaModel::api_update($order_id, 'payment_info_ccbrand', $request->post('ccbrand'));
-        # OrderMetaModel::api_update($order_id, 'payment_info_cardnumber', $request->post('cardnumber'));
-        # OrderMetaModel::api_update($order_id, 'payment_method', 'First Data IPG');
+    #     # OrderMetaModel::api_update($order_id, 'payment_info', $request->post('ipgTransactionId'));
+    #     # OrderMetaModel::api_update($order_id, 'payment_info_ccbrand', $request->post('ccbrand'));
+    #     # OrderMetaModel::api_update($order_id, 'payment_info_cardnumber', $request->post('cardnumber'));
+    #     # OrderMetaModel::api_update($order_id, 'payment_method', 'First Data IPG');
 
-        # (new OrderController)->checkout_process($campaign_id, $fb_psid, $order_id);
-        # (new EmailController)->send_order($order_id);
-        # return redirect()->route('page_confirmation', ['campaign_id' => $campaign_id, 'order_id' => $order_id]);
+    #     # (new OrderController)->checkout_process($campaign_id, $fb_psid, $order_id);
+    #     # (new EmailController)->send_order($order_id);
+    #     # return redirect()->route('page_confirmation', ['campaign_id' => $campaign_id, 'order_id' => $order_id]);
 
 
-        return Response(data, status=status.HTTP_200_OK)
+    #     return Response(data, status=status.HTTP_200_OK)
