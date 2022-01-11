@@ -286,7 +286,6 @@ CHAT_BOT_FACEBOOK = {
     'VERIFY_TOKEN': 'ALGOTECHLSSMESSENGER'
 }
 
-
 # google storage
 DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
 GS_BUCKET_NAME = 'lss_public_bucket'
@@ -321,3 +320,5 @@ REDIS_SERVER={
     "port":"6379",
     "username":None,
     "password":r"algo83111T%%"}
+
+APPEND_SLASH=False
