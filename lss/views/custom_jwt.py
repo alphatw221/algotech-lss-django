@@ -8,13 +8,15 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token = super().get_token(user)
         auth_user_id = token['user_id']
         del token['user_id']
+        seller = None
+        customer = None
         if user.api_users.filter(type='user').exists():
             seller = user.api_users.get(type='user')
             name = seller.name
 
         if user.api_users.filter(type='customer').exists():
             customer = user.api_users.get(type='customer')
-            name = seller.name
+            name = customer.name
 
         token['data'] = {
             'auth_user_id': auth_user_id,
@@ -36,13 +38,15 @@ class CustomTokenRefreshSerializer(TokenRefreshSerializer):
         token = super().get_token(user)
         auth_user_id = token['user_id']
         del token['user_id']
+        seller = None
+        customer = None
         if user.api_users.filter(type='user').exists():
             seller = user.api_users.get(type='user')
             name = seller.name
 
         if user.api_users.filter(type='customer').exists():
             customer = user.api_users.get(type='customer')
-            name = seller.name
+            name = customer.name
 
         token['data'] = {
             'auth_user_id': auth_user_id,
@@ -64,13 +68,15 @@ class CustomTokenVerifySerializer(TokenVerifySerializer):
         token = super().get_token(user)
         auth_user_id = token['user_id']
         del token['user_id']
+        seller = None
+        customer = None
         if user.api_users.filter(type='user').exists():
             seller = user.api_users.get(type='user')
             name = seller.name
 
         if user.api_users.filter(type='customer').exists():
             customer = user.api_users.get(type='customer')
-            name = seller.name
+            name = customer.name
 
         token['data'] = {
             'auth_user_id': auth_user_id,
