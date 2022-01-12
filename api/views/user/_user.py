@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from api.utils.common.verify import ApiVerifyError
 from backend.api.facebook.user import api_fb_get_me_login
-
+from lss.views.custom_jwt import CustomTokenObtainPairSerializer
 
 def login_helper(request, user_type='user'):
 
@@ -62,7 +62,9 @@ def login_helper(request, user_type='user'):
     auth_user.last_login = datetime.now()
     auth_user.save()
 
-    refresh = RefreshToken.for_user(auth_user)
+    # refresh = RefreshToken.for_user(auth_user)
+
+    refresh = CustomTokenObtainPairSerializer.get_token(auth_user)
 
     ret = {
         'refresh': str(refresh),
