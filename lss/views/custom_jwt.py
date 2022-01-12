@@ -20,8 +20,8 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         token['data'] = {
             'auth_user_id': auth_user_id,
-            'seller_id': seller.id if seller else None,
-            'customer_id': customer.id if customer else None,
+            'seller_id': seller.id if seller else "",
+            'customer_id': customer.id if customer else "",
             'name': name,
         }
 
@@ -50,8 +50,8 @@ class CustomTokenRefreshSerializer(TokenRefreshSerializer):
 
         token['data'] = {
             'auth_user_id': auth_user_id,
-            'seller_id': seller.id if seller else None,
-            'customer_id': customer.id if customer else None,
+            'seller_id': seller.id if seller else "",
+            'customer_id': customer.id if customer else "",
             'name': name,
         }
 
@@ -80,8 +80,8 @@ class CustomTokenVerifySerializer(TokenVerifySerializer):
 
         token['data'] = {
             'auth_user_id': auth_user_id,
-            'seller_id': seller.id if seller else None,
-            'customer_id': customer.id if customer else None,
+            'seller_id': seller.id if seller else "",
+            'customer_id': customer.id if customer else "",
             'name': name,
         }
 
