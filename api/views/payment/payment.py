@@ -26,41 +26,43 @@ class PaymentViewSet(viewsets.GenericViewSet):
     @action(detail=False, methods=['GET'], url_path=r'get_ipg_order_data', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def get_ipg_order_data(self, request, pk=None):
-        api_user, order_id = getparams(
-            request, ("order_id", ), seller=False)
 
-        if not api_user:
-            raise ApiVerifyError("no user found")
+        order_id = request.query_params.get('order_id')
 
         if not Order.objects.filter(id=order_id).exists():
             raise ApiVerifyError("no order_id found")
-        
         order = Order.objects.get(id=order_id)
+
         platform_class = platform_dict.get(order.platform, None)
 
         if not platform_class.objects.filter(id=order.platform_id).exists():
             raise ApiVerifyError("no platform found")
-        
         platform = platform_class.objects.get(id=order.platform_id)
         user_subscriptions = platform.user_subscriptions.all()
+
         if not user_subscriptions:
             raise ApiVerifyError("platform not in any user_subscription")
         user_subscription = user_subscriptions[0]
+        
+        firstdata = user_subscription.meta_payment.get('firstdata')
 
-        ipg = user_subscription.meta_payment['ipg']
+        if not firstdata:
+            raise ApiVerifyError('no firstdata credential')
 
-        storename = ipg['store_name']
+        firstdata['is_ipg']
+
+        storename = firstdata['ipg_storeId']
         txndatetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         chargetotal = order.total
-        shared_secret = ipg['shared_secret']
+        shared_secret = firstdata['ipg_sharedSecret']
         payment_hash=hashlib.sha256((storename + str(txndatetime) + str(chargetotal) + shared_secret).encode('utf-8')).hexdigest()
-        currency = ipg['currency']
+        currency = firstdata['ipg_currency']
 
         data={
-            "storename":ipg['storename'],
+            "storename":storename,
             "txntype":"sale",
             "mode":"payonly",
-            "timezone":"Asia/Singapore", #TODO
+            "timezone":firstdata['ipg_timezone'],
             "txndatetime": txndatetime,
             "hash_algorithm":"SHA256",
             "hash":payment_hash,
@@ -74,12 +76,12 @@ class PaymentViewSet(viewsets.GenericViewSet):
 
     @action(detail=False, methods=['GET'], url_path=r'ipg_payment_success')
     @api_error_handler
-    def get_ipg_order_data(self, request, pk=None):
+    def ipg_payment_success(self, request, pk=None):
         
         print(request)
         return HttpResponseRedirect(redirect_to='https://www.google.com')
-        _, order_id = getparams(
-            request, ("order_id", ), seller=False)
+
+        order_id = request.query_params.get('order_id')
 
         print(f"order_id {order_id}")
 
@@ -99,7 +101,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
 
     @action(detail=False, methods=['GET'], url_path=r'ipg_payment_fail')
     @api_error_handler
-    def get_ipg_order_data(self, request, pk=None):
+    def ipg_payment_fail(self, request, pk=None):
         
         print(request)
         return HttpResponseRedirect(redirect_to='https://www.google.com')
@@ -123,3 +125,4 @@ class PaymentViewSet(viewsets.GenericViewSet):
 
 
         return Response(data, status=status.HTTP_200_OK)
+
