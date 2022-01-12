@@ -321,4 +321,12 @@ REDIS_SERVER={
     "username":None,
     "password":r"algo83111T%%"}
 
+PAYPAL_CONFIG = {
+    "mode": "sandbox",
+    "client_id": "ASABJtviIflIhkeEH4QBeYuhQoN7RWcPsC6fN-TXIfzhMQ2UDK1raOVd3xBWAmItoAg2WRgI4Nbpde8J",  # it's sandbox
+    "client_secret": "EFEGnvXwP8DsSUYF5zoQ5ZkaArtlpzAlgpWJOwBlHRMUP6NwAq8-KmnTv087ihZrAIlyg5VtKo73Wj54",  # it's sandbox
+    "complete_url": "http://127.0.0.1:8000/api/payment/paypal_payment_complete_check",
+    "cancel_url": "http://127.0.0.1:8000/cancel"
+}
+
 # APPEND_SLASH=False
