@@ -40,69 +40,69 @@ class PreOrder(models.Model):
     cost_currency_sign = models.CharField(
         max_length=255, null=True, blank=True, default='$')
 
-    # payment_first_name = models.CharField(
-    #     max_length=64, blank=True, default='')
-    # payment_last_name = models.CharField(
-    #     max_length=64, blank=True, default='')
-    # payment_gender = models.CharField(
-    #     max_length=8, blank=True, default='')
-    # payment_company = models.CharField(
-    #     max_length=64, blank=True, default='')
-    # payment_postcode = models.CharField(
-    #     max_length=10, blank=True, default='')
-    # payment_region = models.CharField(
-    #     max_length=32, blank=True, default='')
-    # payment_location = models.CharField(
-    #     max_length=32, blank=True, default='')
-    # payment_address_1 = models.CharField(
-    #     max_length=128, blank=True, default='')
-    # payment_address_2 = models.CharField(
-    #     max_length=128, blank=True, default='')
-    # payment_method = models.CharField(
-    #     max_length=32, blank=True, default='')
-    # payment_status = models.CharField(
-    #     max_length=16, blank=True, default='')
-    # payment_remark = models.TextField(
-    #     blank=True, default='')
-    # paid_at = models.DateTimeField(
-    #     blank=True, null=True, default=None)
+    payment_first_name = models.CharField(
+        max_length=64, blank=True, default='')
+    payment_last_name = models.CharField(
+        max_length=64, blank=True, default='')
+    payment_gender = models.CharField(
+        max_length=8, blank=True, default='')
+    payment_company = models.CharField(
+        max_length=64, blank=True, default='')
+    payment_postcode = models.CharField(
+        max_length=10, blank=True, default='')
+    payment_region = models.CharField(
+        max_length=32, blank=True, default='')
+    payment_location = models.CharField(
+        max_length=32, blank=True, default='')
+    payment_address_1 = models.CharField(
+        max_length=128, blank=True, default='')
+    payment_address_2 = models.CharField(
+        max_length=128, blank=True, default='')
+    payment_method = models.CharField(
+        max_length=32, blank=True, default='')
+    payment_status = models.CharField(
+        max_length=16, blank=True, default='')
+    payment_remark = models.TextField(
+        blank=True, default='')
+    paid_at = models.DateTimeField(
+        blank=True, null=True, default=None)
 
-    # shipping_first_name = models.CharField(
-    #     max_length=64, blank=True, default='')
-    # shipping_last_name = models.CharField(
-    #     max_length=64, blank=True, default='')
-    # shipping_email = models.CharField(
-    #     max_length=128, blank=True, default='')
-    # shipping_phone = models.CharField(
-    #     max_length=64, blank=True, default='')
-    # shipping_gender = models.CharField(
-    #     max_length=8, blank=True, default='')
-    # shipping_company = models.CharField(
-    #     max_length=64, blank=True, default='')
-    # shipping_postcode = models.CharField(
-    #     max_length=10, blank=True, default='')
-    # shipping_region = models.CharField(
-    #     max_length=32, blank=True, default='')
-    # shipping_location = models.CharField(
-    #     max_length=32, blank=True, default='')
-    # shipping_address_1 = models.CharField(
-    #     max_length=128, blank=True, default='')
-    # shipping_address_2 = models.CharField(
-    #     max_length=128, blank=True, default='')
-    # shipping_method = models.CharField(
-    #     max_length=32, blank=True, default='')
-    # shipping_status = models.CharField(
-    #     max_length=16, blank=True, default='')
-    # shipping_details = models.TextField(
-    #     blank=True, default='')
-    # shipping_remark = models.TextField(
-    #     blank=True, default='')
-    # shipping_date = models.DateField(
-    #     blank=True, null=True, default=None)
-    # shipping_time = models.TimeField(
-    #     blank=True, null=True, default=None)
-    # tracking = models.CharField(
-    #     max_length=32, blank=True, default='')
+    shipping_first_name = models.CharField(
+        max_length=64, blank=True, default='')
+    shipping_last_name = models.CharField(
+        max_length=64, blank=True, default='')
+    shipping_email = models.CharField(
+        max_length=128, blank=True, default='')
+    shipping_phone = models.CharField(
+        max_length=64, blank=True, default='')
+    shipping_gender = models.CharField(
+        max_length=8, blank=True, default='')
+    shipping_company = models.CharField(
+        max_length=64, blank=True, default='')
+    shipping_postcode = models.CharField(
+        max_length=10, blank=True, default='')
+    shipping_region = models.CharField(
+        max_length=32, blank=True, default='')
+    shipping_location = models.CharField(
+        max_length=32, blank=True, default='')
+    shipping_address_1 = models.CharField(
+        max_length=128, blank=True, default='')
+    shipping_address_2 = models.CharField(
+        max_length=128, blank=True, default='')
+    shipping_method = models.CharField(
+        max_length=32, blank=True, default='')
+    shipping_status = models.CharField(
+        max_length=16, blank=True, default='')
+    shipping_details = models.TextField(
+        blank=True, default='')
+    shipping_remark = models.TextField(
+        blank=True, default='')
+    shipping_date = models.DateField(
+        blank=True, null=True, default=None)
+    shipping_time = models.TimeField(
+        blank=True, null=True, default=None)
+    tracking = models.CharField(
+        max_length=32, blank=True, default='')
 
     platform = models.CharField(max_length=255, blank=True,
                                 choices=settings.SUPPORTED_PLATFORMS, default='n/a')
@@ -131,6 +131,42 @@ class PreOrderSerializer(serializers.ModelSerializer):
     products = serializers.JSONField(default=dict)
     checkout_details = serializers.JSONField(default=dict)
     history = serializers.JSONField(default=dict)
+
+
+class PreOrderSerializerUpdatePaymentShipping(serializers.ModelSerializer):
+
+    class Meta:
+        model = PreOrder
+        fields = ["shipping_first_name",
+                  "shipping_last_name",
+                  "shipping_email",
+                  "shipping_phone",
+                  "shipping_gender",
+                  "shipping_company",
+                  "shipping_postcode",
+                  "shipping_region",
+                  "shipping_location",
+                  "shipping_address_1",
+                  "shipping_address_2",
+                  "shipping_method",
+                  "shipping_status",
+                  "shipping_details",
+                  "shipping_remark",
+                  "shipping_date",
+                  "shipping_time",
+                  "payment_first_name",
+                  "payment_last_name",
+                  "payment_gender",
+                  "payment_company",
+                  "payment_postcode",
+                  "payment_region",
+                  "payment_location",
+                  "payment_address_1",
+                  "payment_address_2",
+                  "payment_method",
+                  "payment_status",
+                  "payment_remark",
+                ]
 
 
 class PreOrderAdmin(admin.ModelAdmin):

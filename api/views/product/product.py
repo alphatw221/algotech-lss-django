@@ -13,6 +13,7 @@ from django.core.files.base import ContentFile
 
 from api.utils.common.verify import Verify
 from api.utils.common.verify import ApiVerifyError
+from api.utils.common.common import *
 
 
 def verify_request(api_user, platform_name, platform_id, product_id=None):
@@ -50,189 +51,155 @@ class ProductViewSet(viewsets.ModelViewSet):
     pagination_class = ProductPagination
 
     @action(detail=True, methods=['GET'], url_path=r'retrieve_product')
+    @api_error_handler
     def retrieve_product(self, request, pk=None):
-        try:
-            platform_id = request.query_params.get('platform_id')
-            platform_name = request.query_params.get('platform_name')
-            api_user = request.user.api_users.get(type='user')
+        platform_id = request.query_params.get('platform_id')
+        platform_name = request.query_params.get('platform_name')
+        api_user = request.user.api_users.get(type='user')
 
-            _, _, product = verify_request(
-                api_user, platform_name, platform_id, product_id=pk)
+        _, _, product = verify_request(
+            api_user, platform_name, platform_id, product_id=pk)
 
-            serializer = self.get_serializer(product)
-        except ApiVerifyError as e:
-            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except:
-            return Response({"message": "error occerd during retriving"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        serializer = self.get_serializer(product)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET'], url_path=r'list_product')
+    @api_error_handler
     def list_product(self, request):
-        try:
-            platform_id = request.query_params.get('platform_id')
-            platform_name = request.query_params.get('platform_name')
-            order_by = request.query_params.get('order_by')
-            product_status = request.query_params.get('status')
-            key_word = request.query_params.get('key_word')
-            api_user = request.user.api_users.get(type='user')
+        platform_id = request.query_params.get('platform_id')
+        platform_name = request.query_params.get('platform_name')
+        order_by = request.query_params.get('order_by')
+        product_status = request.query_params.get('status')
+        key_word = request.query_params.get('key_word')
+        api_user = request.user.api_users.get(type='user')
 
-            _, user_subscription = verify_request(
-                api_user, platform_name, platform_id)
+        _, user_subscription = verify_request(
+            api_user, platform_name, platform_id)
 
-            queryset = user_subscription.products.all()
-            if product_status:
-                queryset = queryset.filter(status=product_status)
-            if key_word:
-                queryset = queryset.filter(name__icontains=key_word)
-            if order_by:
-                queryset = queryset.order_by(order_by)
+        queryset = user_subscription.products.all()
+        if product_status:
+            queryset = queryset.filter(status=product_status)
+        if key_word:
+            queryset = queryset.filter(name__icontains=key_word)
+        if order_by:
+            queryset = queryset.order_by(order_by)
 
-            page = self.paginate_queryset(queryset)
-            if page is not None:
-                serializer = self.get_serializer(page, many=True)
-                result = self.get_paginated_response(serializer.data)
-                data = result.data
-            else:
-                serializer = self.get_serializer(queryset, many=True)
-                data = serializer.data
-
-        except ApiVerifyError as e:
-            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({"message": "query error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            result = self.get_paginated_response(serializer.data)
+            data = result.data
+        else:
+            serializer = self.get_serializer(queryset, many=True)
+            data = serializer.data
 
         return Response(data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['POST'], url_path=r'create_product', parser_classes=(MultiPartParser,))
+    @api_error_handler
     def create_product(self, request):
-        try:
-            platform_id = request.query_params.get('platform_id')
-            platform_name = request.query_params.get('platform_name')
-            api_user = request.user.api_users.get(type='user')
+        platform_id = request.query_params.get('platform_id')
+        platform_name = request.query_params.get('platform_name')
+        api_user = request.user.api_users.get(type='user')
 
-            _, user_subscription = verify_request(
-                api_user, platform_name, platform_id)
+        _, user_subscription = verify_request(
+            api_user, platform_name, platform_id)
 
-            text = request.data['text']
-            data = json.loads(text)
-            data['user_subscription'] = user_subscription.id
-            serializer = self.get_serializer(data=data)
+        text = request.data['text']
+        data = json.loads(text)
+        data['user_subscription'] = user_subscription.id
+        serializer = self.get_serializer(data=data)
 
-            if not serializer.is_valid():
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            product = serializer.save()
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        product = serializer.save()
 
-            if 'image' in request.data:
-                image = request.data['image']
-                image_path = default_storage.save(
-                    f'{user_subscription.id}/product/{product.id}/{image.name}', ContentFile(image.read()))
-                product.image = image_path
+        if 'image' in request.data:
+            image = request.data['image']
+            image_path = default_storage.save(
+                f'{user_subscription.id}/product/{product.id}/{image.name}', ContentFile(image.read()))
+            product.image = image_path
 
-                product.save()
-
-        except ApiVerifyError as e:
-            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        # except Exception as e:
-        #     print(e)
-        #     return Response({"message": "error occerd during creating"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            product.save()
 
         return Response(self.get_serializer(product).data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['PUT'], url_path=r'update_product', parser_classes=(MultiPartParser,))
+    @api_error_handler
     def update_product(self, request, pk=None):
-        try:
-            platform_id = request.query_params.get('platform_id')
-            platform_name = request.query_params.get('platform_name')
-            api_user = request.user.api_users.get(type='user')
+        platform_id = request.query_params.get('platform_id')
+        platform_name = request.query_params.get('platform_name')
+        api_user = request.user.api_users.get(type='user')
 
-            _, user_subscription, product = verify_request(
-                api_user, platform_name, platform_id, product_id=pk)
+        _, user_subscription, product = verify_request(
+            api_user, platform_name, platform_id, product_id=pk)
 
-            text = request.data['text']
-            data = json.loads(text)
+        text = request.data['text']
+        data = json.loads(text)
 
-            if 'image' in request.data:
-                image = request.data['image']
-                image_path = default_storage.save(
-                    f'{user_subscription.id}/product/{product.id}/{image.name}', ContentFile(image.read()))
-                data['image'] = image_path
+        if 'image' in request.data:
+            image = request.data['image']
+            image_path = default_storage.save(
+                f'{user_subscription.id}/product/{product.id}/{image.name}', ContentFile(image.read()))
+            data['image'] = image_path
 
-            serializer = ProductSerializer(
-                product, data=data, partial=True)
-            if not serializer.is_valid():
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            serializer.save()
-
-        except ApiVerifyError as e:
-            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            print(e)
-            return Response({"message": "error occerd during updating"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        serializer = ProductSerializer(
+            product, data=data, partial=True)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['DELETE'], url_path=r'delete_product')
+    @api_error_handler
     def delete_product(self, request, pk=None):
-        try:
-            platform_id = request.query_params.get('platform_id')
-            platform_name = request.query_params.get('platform_name')
-            api_user = request.user.api_users.get(type='user')
+        platform_id = request.query_params.get('platform_id')
+        platform_name = request.query_params.get('platform_name')
+        api_user = request.user.api_users.get(type='user')
 
-            _, _, product = verify_request(
-                api_user, platform_name, platform_id, product_id=pk)
+        _, _, product = verify_request(
+            api_user, platform_name, platform_id, product_id=pk)
 
-            # TODO put it into private bucket
-            # if product.image:
-            #     default_storage.delete(product.image)
-            product.delete()
-        except ApiVerifyError as e:
-            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except:
-            return Response({"message": "error occerd during deleting"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        # TODO put it into private bucket
+        # if product.image:
+        #     default_storage.delete(product.image)
+        product.delete()
 
         return Response({"message": "delete success"}, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['POST'], url_path=r'update_image',  parser_classes=(MultiPartParser,))
+    @api_error_handler
     def update_image(self, request, pk=None):
-        try:
-            platform_id = request.query_params.get('platform_id')
-            platform_name = request.query_params.get('platform_name')
-            api_user = request.user.api_users.get(type='user')
+        platform_id = request.query_params.get('platform_id')
+        platform_name = request.query_params.get('platform_name')
+        api_user = request.user.api_users.get(type='user')
 
-            _, user_subscription, product = verify_request(
-                api_user, platform_name, platform_id, product_id=pk)
+        _, user_subscription, product = verify_request(
+            api_user, platform_name, platform_id, product_id=pk)
 
-            if 'image' in request.data:
-                image = request.data['image']
-                image_path = default_storage.save(
-                    f'{user_subscription.id}/product/{product.id}/{image.name}', ContentFile(image.read()))
-                product.image = image_path
-                product.save()
-        except ApiVerifyError as e:
-            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except:
-            return Response({"message": "error occerd during updating"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        if 'image' in request.data:
+            image = request.data['image']
+            image_path = default_storage.save(
+                f'{user_subscription.id}/product/{product.id}/{image.name}', ContentFile(image.read()))
+            product.image = image_path
+            product.save()
 
         return Response(product.image, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET'], url_path=r'product_dropdown')
+    @api_error_handler
     def product_dropdown(self, request):
-        try:
-            platform_id = request.query_params.get('platform_id')
-            platform_name = request.query_params.get('platform_name')
-            api_user = request.user.api_users.get(type='user')
+        platform_id = request.query_params.get('platform_id')
+        platform_name = request.query_params.get('platform_name')
+        api_user = request.user.api_users.get(type='user')
 
-            _, user_subscription = verify_request(
-                api_user, platform_name, platform_id)
+        _, user_subscription = verify_request(
+            api_user, platform_name, platform_id)
 
-            products = user_subscription.products.filter(
-                status='enabled').all()
-            serializer = ProductSerializerDropdown(products, many=True)
-
-        except ApiVerifyError as e:
-            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except:
-            return Response({"message": "query error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        products = user_subscription.products.filter(
+            status='enabled').all()
+        serializer = ProductSerializerDropdown(products, many=True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)

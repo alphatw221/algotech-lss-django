@@ -50,7 +50,7 @@ def verify_buyer_request(api_user, platform_name, campaign_id, check_info=None):
         raise ApiVerifyError('platform not support')
 
     if not Order.objects.filter(platform=platform_name, customer_id=customer_id, campaign_id=campaign_id).exists():
-        raise ApiVerifyError('no pre_order found')
+        raise ApiVerifyError('no order found')
     order =Order.objects.get(platform=platform_name, customer_id=customer_id, campaign_id=campaign_id)
     if check_info == None:
         return order

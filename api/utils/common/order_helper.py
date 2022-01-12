@@ -9,6 +9,7 @@ from api.models.order.order import api_order_template
 from api.models.order.order_product import api_order_product_template
 from api.utils.common.verify import ApiVerifyError, platform_dict
 from backend.cart.cart_product.request import RequestState
+from api.utils.common.common import *
 
 class PreOrderErrors():
 
@@ -39,6 +40,7 @@ class PreOrderErrors():
 class PreOrderHelper():
 
     @classmethod
+    @api_error_handler
     def update_product(cls, api_user, pre_order, order_product, campaign_product, qty):
         with client.start_session() as session:
             with session.start_transaction():
@@ -79,6 +81,7 @@ class PreOrderHelper():
         return db.api_order_product.find_one({"id": api_order_product['id']},{"_id":False})
 
     @classmethod
+    @api_error_handler
     def add_product(cls, api_user, pre_order, campaign_product, qty):
         with client.start_session() as session:
             with session.start_transaction():
@@ -136,6 +139,7 @@ class PreOrderHelper():
         return db.api_order_product.find_one({"id": increment_id},{"_id":False})
 
     @classmethod
+    @api_error_handler
     def delete_product(cls, api_user, pre_order, order_product, campaign_product):
         with client.start_session() as session:
             with session.start_transaction():
@@ -172,6 +176,7 @@ class PreOrderHelper():
         return True
 
     @classmethod
+    @api_error_handler
     def checkout(cls, api_user, pre_order):
         with client.start_session() as session:
             with session.start_transaction():
@@ -243,6 +248,7 @@ class PreOrderHelper():
 
 
     @classmethod
+    @api_error_handler
     def add_or_update_by_comment(cls, api_pre_order, api_campaign_product, qty):
         try:
             if not api_campaign_product['status']:
@@ -280,6 +286,7 @@ class PreOrderHelper():
             return e.state
 
     @classmethod
+    @api_error_handler
     def add_product_by_comment(cls, api_pre_order, api_campaign_product, qty):
         with client.start_session() as session:
             with session.start_transaction():
@@ -325,6 +332,7 @@ class PreOrderHelper():
                     session=session)
 
     @classmethod
+    @api_error_handler
     def update_product_by_comment(cls, api_pre_order, api_campaign_product, qty):
         with client.start_session() as session:
             with session.start_transaction():
@@ -354,6 +362,7 @@ class PreOrderHelper():
                     },
                     session=session)
     @classmethod
+    @api_error_handler
     def delete_product_by_comment(cls, api_pre_order, api_campaign_product):
         with client.start_session() as session:
             with session.start_transaction():
@@ -387,6 +396,7 @@ class OrderHelper():
         pass
     
     @classmethod
+    @api_error_handler
     def cancel(self, api_user, order):
         with client.start_session() as session:
             with session.start_transaction():
@@ -442,6 +452,7 @@ class OrderHelper():
         return pre_order_id
     
     @classmethod
+    @api_error_handler 
     def delete(self, api_user, order):
         with client.start_session() as session:
             with session.start_transaction():

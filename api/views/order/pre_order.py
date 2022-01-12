@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 
-from api.models.order.pre_order import PreOrder, PreOrderSerializer
+from api.models.order.pre_order import PreOrder, PreOrderSerializer, PreOrderSerializerUpdatePaymentShipping
 from api.utils.common.verify import Verify
 from api.utils.common.verify import ApiVerifyError, platform_dict
 from api.utils.common.common import api_error_handler
@@ -185,6 +185,29 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         PreOrderHelper.delete_product(
             api_user, pre_order, order_product, campaign_product)
         return Response({'message':"delete success"}, status=status.HTTP_200_OK)
+    
+    #Derecks CODE !!
+    
+    # @action(detail=True, methods=['POST'], url_path=r'delivery_info')
+    # @api_error_handler
+    # def update_buyer_submit(self, request, pk=None):
+    #     api_user, platform_name, campaign_id = getparams(
+    #         request, ("platform_name", "campaign_id"), seller=False)
+
+    #     pre_order = verify_buyer_request(
+    #         api_user, platform_name, campaign_id)
+        
+    #     # request.data['status'] = 'unpaid'
+    #     serializer = PreOrderSerializerUpdatePaymentShipping(pre_order, data=request.data, partial=True)
+    #     if not serializer.is_valid():
+    #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    #     serializer.save()
+
+    #     pre_order = verify_buyer_request(
+    #         api_user, platform_name, campaign_id, check_info=True)
+    #     serializer = PreOrderSerializer(pre_order)
+
+    #     return Response(serializer.data, status=status.HTTP_200_OK)
 
     #------------------buyer---------------------------------------------------------------------------
     @action(detail=True, methods=['GET'], url_path=r'buyer_retrieve')
