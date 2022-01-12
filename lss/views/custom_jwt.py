@@ -7,7 +7,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def get_token(cls, user):
         token = super().get_token(user)
         auth_user_id = token['user_id']
-        del token['user_id']
+        # del token['user_id']
         seller = None
         customer = None
         if user.api_users.filter(type='user').exists():
@@ -37,7 +37,7 @@ class CustomTokenRefreshSerializer(TokenRefreshSerializer):
     def get_token(cls, user):
         token = super().get_token(user)
         auth_user_id = token['user_id']
-        del token['user_id']
+        # del token['user_id']
         seller = None
         customer = None
         if user.api_users.filter(type='user').exists():
@@ -67,7 +67,7 @@ class CustomTokenVerifySerializer(TokenVerifySerializer):
     def get_token(cls, user):
         token = super().get_token(user)
         auth_user_id = token['user_id']
-        del token['user_id']
+        # del token['user_id']
         seller = None
         customer = None
         if user.api_users.filter(type='user').exists():
