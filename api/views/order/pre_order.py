@@ -4,14 +4,14 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 
-from api.models.order.pre_order import PreOrder, PreOrderSerializer
+from api.models.order.pre_order import PreOrder, PreOrderSerializer, PreOrderSerializerUpdatePaymentShipping
 from api.utils.common.verify import Verify
 from api.utils.common.verify import ApiVerifyError, platform_dict
 from api.utils.common.common import *
 from api.utils.common.order_helper import PreOrderHelper
 
 from django.db.models import Q
-def verify_buyer_request(api_user, platform_name, campaign_id, order_product_id=None, campaign_product_id=None):
+def verify_buyer_request(api_user, platform_name, campaign_id, order_product_id=None, campaign_product_id=None, check_info=None):
     
     if platform_name not in platform_dict:
         raise ApiVerifyError("no platfrom name found")
@@ -43,6 +43,59 @@ def verify_buyer_request(api_user, platform_name, campaign_id, order_product_id=
             raise ApiVerifyError("invalid campaign_product")
         return pre_order, campaign_product
 
+    if check_info == None:
+        return pre_order
+
+    verify_message = {}
+    check_exist = False
+    #TODO 訊息彙整回傳一次
+    if not pre_order.shipping_first_name:
+        check_exist = True
+        verify_message['shipping_first_name'] = 'not valid'
+    if not pre_order.shipping_last_name:
+        check_exist = True
+        verify_message['shipping_last_name'] = 'not valid'
+    if not pre_order.shipping_phone:
+        check_exist = True
+        verify_message['shipping_phone'] = 'not valid'
+    if not pre_order.shipping_postcode:
+        check_exist = True
+        verify_message['shipping_postcode'] = 'not valid'
+    if not pre_order.shipping_region:
+        check_exist = True
+        verify_message['shipping_region'] = 'not valid'
+    if not pre_order.shipping_location:
+        check_exist = True
+        verify_message['shipping_location'] = 'not valid'
+    if not pre_order.shipping_address_1:
+        check_exist = True
+        verify_message['shipping_address'] = 'not valid'
+    if not pre_order.shipping_method:
+        check_exist = True
+        verify_message['shipping_method'] = 'not valid'
+    if not pre_order.payment_first_name:
+        check_exist = True
+        verify_message['payment_first_name'] = 'not valid'
+    if not pre_order.payment_last_name:
+        check_exist = True
+        verify_message['payment_last_name'] = 'not valid'
+    if not pre_order.payment_company:
+        check_exist = True
+        verify_message['payment_company'] = 'not valid'
+    if not pre_order.payment_postcode:
+        check_exist = True
+        verify_message['payment_postcode'] = 'not valid'
+    if not pre_order.payment_region:
+        check_exist = True
+        verify_message['payment_region'] = 'not valid'
+    if not pre_order.payment_location:
+        check_exist = True
+        verify_message['payment_location'] = 'not valid'
+    if not pre_order.payment_address_1:
+        check_exist = True
+        verify_message['payment_address'] = 'not valid'
+    if check_exist == True:
+        raise ApiVerifyError(verify_message)
     return pre_order
 
 def verify_seller_request(api_user, platform_name, platform_id, campaign_id, pre_order_id=None, order_product_id=None, campaign_product_id=None):
@@ -191,6 +244,27 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         PreOrderHelper.delete_product(
             api_user, pre_order, order_product, campaign_product)
         return Response({'message':"delete success"}, status=status.HTTP_200_OK)
+    
+    @action(detail=True, methods=['POST'], url_path=r'delivery_info')
+    @api_error_handler
+    def update_buyer_submit(self, request, pk=None):
+        api_user, platform_name, campaign_id = getparams(
+            request, ("platform_name", "campaign_id"), seller=False)
+
+        pre_order = verify_buyer_request(
+            api_user, platform_name, campaign_id)
+        
+        # request.data['status'] = 'unpaid'
+        serializer = PreOrderSerializerUpdatePaymentShipping(pre_order, data=request.data, partial=True)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
+
+        pre_order = verify_buyer_request(
+            api_user, platform_name, campaign_id, check_info=True)
+        serializer = PreOrderSerializer(pre_order)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET'], url_path=r'buyer_retrieve')
     @api_error_handler
