@@ -39,6 +39,7 @@ def url_setup(urlpatterns):
     urlpatterns += [
         path('test/', test.test, name='test'),
         path('test-api/<path>/', test.test_api, name='test_api'),
+        path('test_error/', test.test_error, name='test_error'),
     ]
     router.register(r'sample', test.SampleViewSet)
 

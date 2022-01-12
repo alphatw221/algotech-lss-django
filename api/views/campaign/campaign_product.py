@@ -14,6 +14,7 @@ from django.core.files.base import ContentFile
 
 from api.utils.common.verify import Verify
 from api.utils.common.verify import ApiVerifyError
+from api.utils.common.common import *
 
 from django.db.models import Q
 
@@ -61,234 +62,195 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
     pagination_class = CampaignProductPagination
 
     @action(detail=True, methods=['GET'], url_path=r'retrieve_campaign_product')
+    @api_error_handler
     def retrieve_campaign_product(self, request, pk=None):
-        try:
-            platform_id = request.query_params.get('platform_id')
-            platform_name = request.query_params.get('platform_name')
-            campaign_id = request.query_params.get('campaign_id')
-            api_user = request.user.api_users.get(type='user')
+        platform_id = request.query_params.get('platform_id')
+        platform_name = request.query_params.get('platform_name')
+        campaign_id = request.query_params.get('campaign_id')
+        api_user = request.user.api_users.get(type='user')
 
-            _, _, campaign_product = verify_request(
-                api_user, platform_name, platform_id, campaign_id, campaign_product_id=pk)
+        _, _, campaign_product = verify_request(
+            api_user, platform_name, platform_id, campaign_id, campaign_product_id=pk)
 
-            serializer = self.get_serializer(campaign_product)
-        except ApiVerifyError as e:
-            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except:
-            return Response({"message": "error occerd during retriving"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        serializer = self.get_serializer(campaign_product)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET'], url_path=r'list_campaign_product')
+    @api_error_handler
     def list_campaign_product(self, request):
-        try:
-            platform_id = request.query_params.get('platform_id')
-            platform_name = request.query_params.get('platform_name')
-            campaign_id = request.query_params.get('campaign_id')
-            order_by = request.query_params.get('order_by')
-            product_status = request.query_params.get('status')
-            type = request.query_params.get('type')
-            key_word = request.query_params.get('key_word')
-            api_user = request.user.api_users.get(type='user')
-            _, campaign = verify_request(
-                api_user, platform_name, platform_id, campaign_id)
-            print(campaign)
-            campaign_products = campaign.products.all()
+        platform_id = request.query_params.get('platform_id')
+        platform_name = request.query_params.get('platform_name')
+        campaign_id = request.query_params.get('campaign_id')
+        order_by = request.query_params.get('order_by')
+        product_status = request.query_params.get('status')
+        type = request.query_params.get('type')
+        key_word = request.query_params.get('key_word')
+        api_user = request.user.api_users.get(type='user')
+        _, campaign = verify_request(
+            api_user, platform_name, platform_id, campaign_id)
+        print(campaign)
+        campaign_products = campaign.products.all()
 
-            if product_status:
-                campaign_products = campaign_products.filter(
-                    status=product_status)
-            if type:
-                campaign_products = campaign_products.filter(
-                    type=type)
-            if key_word:
-                campaign_products = campaign_products.filter(
-                    name__icontains=key_word)
-            if order_by:
-                campaign_products = campaign_products.order_by(order_by)
+        if product_status:
+            campaign_products = campaign_products.filter(
+                status=product_status)
+        if type:
+            campaign_products = campaign_products.filter(
+                type=type)
+        if key_word:
+            campaign_products = campaign_products.filter(
+                name__icontains=key_word)
+        if order_by:
+            campaign_products = campaign_products.order_by(order_by)
 
-            if request.query_params.get('page'):
-                page = self.paginate_queryset(campaign_products)
-                if page is not None:
-                    serializer = self.get_serializer(page, many=True)
-                    result = self.get_paginated_response(serializer.data)
-                    data = result.data
-                else:
-                    serializer = self.get_serializer(
-                        campaign_products, many=True)
-                    data = serializer.data
+        if request.query_params.get('page'):
+            page = self.paginate_queryset(campaign_products)
+            if page is not None:
+                serializer = self.get_serializer(page, many=True)
+                result = self.get_paginated_response(serializer.data)
+                data = result.data
             else:
-                serializer = self.get_serializer(campaign_products, many=True)
+                serializer = self.get_serializer(
+                    campaign_products, many=True)
                 data = serializer.data
-        except ApiVerifyError as e:
-            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response(str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        else:
+            serializer = self.get_serializer(campaign_products, many=True)
+            data = serializer.data
 
         return Response(data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET'], url_path=r'list_campaign_lucky_draw_product')
+    @api_error_handler
     def list_campaign_lucky_draw_product(self, request):
-        
-        try:
-            platform_id = request.query_params.get('platform_id')
-            platform_name = request.query_params.get('platform_name')
-            campaign_id = request.query_params.get('campaign_id')
-            api_user = request.user.api_users.get(type='user')
-            _, campaign = verify_request(
-                api_user, platform_name, platform_id, campaign_id)
+        platform_id = request.query_params.get('platform_id')
+        platform_name = request.query_params.get('platform_name')
+        campaign_id = request.query_params.get('campaign_id')
+        api_user = request.user.api_users.get(type='user')
+        _, campaign = verify_request(
+            api_user, platform_name, platform_id, campaign_id)
 
-            campaign_products = campaign.products.filter(Q(type='lucky_draw') | Q(type="lucky_draw-fast"))
+        campaign_products = campaign.products.filter(Q(type='lucky_draw') | Q(type="lucky_draw-fast"))
 
 
-            serializer = self.get_serializer(campaign_products, many=True)
-            data = serializer.data
-        except ApiVerifyError as e:
-            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response(str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        serializer = self.get_serializer(campaign_products, many=True)
+        data = serializer.data
 
         return Response(data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['POST'], url_path=r'create_campaign_product')
+    @api_error_handler
     def create_campaign_product(self, request):
-        try:
-            platform_id = request.query_params.get('platform_id')
-            platform_name = request.query_params.get('platform_name')
-            campaign_id = request.query_params.get('campaign_id')
-            api_user = request.user.api_users.get(type='user')
+        platform_id = request.query_params.get('platform_id')
+        platform_name = request.query_params.get('platform_name')
+        campaign_id = request.query_params.get('campaign_id')
+        api_user = request.user.api_users.get(type='user')
 
-            _, campaign = verify_request(
-                api_user, platform_name, platform_id, campaign_id)
+        _, campaign = verify_request(
+            api_user, platform_name, platform_id, campaign_id)
 
-            data = request.data
-            data['campaign'] = campaign.id
-            data['created_by'] = api_user.id
-            serializer = self.get_serializer(data=data)
+        data = request.data
+        data['campaign'] = campaign.id
+        data['created_by'] = api_user.id
+        serializer = self.get_serializer(data=data)
 
-            if not serializer.is_valid():
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            serializer.save()
-
-        except ApiVerifyError as e:
-            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except:
-            return Response({"message": "error occerd during creating"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['PUT'], url_path=r'update_campaign_product')
+    @api_error_handler
     def update_campaign_product(self, request, pk=None):
-        try:
-            platform_id = request.query_params.get('platform_id')
-            platform_name = request.query_params.get('platform_name')
-            campaign_id = request.query_params.get('campaign_id')
-            api_user = request.user.api_users.get(type='user')
+        platform_id = request.query_params.get('platform_id')
+        platform_name = request.query_params.get('platform_name')
+        campaign_id = request.query_params.get('campaign_id')
+        api_user = request.user.api_users.get(type='user')
 
-            _, _, campaign_product = verify_request(
-                api_user, platform_name, platform_id, campaign_id, campaign_product_id=pk)
+        _, _, campaign_product = verify_request(
+            api_user, platform_name, platform_id, campaign_id, campaign_product_id=pk)
 
-            serializer = CampaignProductSerializerUpdate(
-                campaign_product, data=request.data, partial=True)
-            if not serializer.is_valid():
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            serializer.save()
+        serializer = CampaignProductSerializerUpdate(
+            campaign_product, data=request.data, partial=True)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
 
-        except ApiVerifyError as e:
-            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        # except Exception as e:
-        #     print(e)
-        #     return Response({"message": "error occerd during updating"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['DELETE'], url_path=r'delete_campaign_product')
+    @api_error_handler
     def delete_campaign_product(self, request, pk=None):
-        try:
-            platform_id = request.query_params.get('platform_id')
-            platform_name = request.query_params.get('platform_name')
-            campaign_id = request.query_params.get('campaign_id')
-            api_user = request.user.api_users.get(type='user')
+        platform_id = request.query_params.get('platform_id')
+        platform_name = request.query_params.get('platform_name')
+        campaign_id = request.query_params.get('campaign_id')
+        api_user = request.user.api_users.get(type='user')
 
-            _, _, campaign_product = verify_request(
-                api_user, platform_name, platform_id, campaign_id, campaign_product_id=pk)
+        _, _, campaign_product = verify_request(
+            api_user, platform_name, platform_id, campaign_id, campaign_product_id=pk)
 
-            campaign_product.delete()
-
-        except ApiVerifyError as e:
-            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except:
-            return Response({"message": "error occerd during deleting"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        campaign_product.delete()
 
         return Response({"message": "delete success"}, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['POST'], url_path=r'fast_create', parser_classes=(MultiPartParser,))
+    @api_error_handler
     def fast_create_campaign_product(self, request):
-        try:
-            platform_id = request.query_params.get('platform_id')
-            platform_name = request.query_params.get('platform_name')
-            campaign_id = request.query_params.get('campaign_id')
-            api_user = request.user.api_users.get(type='user')
+        platform_id = request.query_params.get('platform_id')
+        platform_name = request.query_params.get('platform_name')
+        campaign_id = request.query_params.get('campaign_id')
+        api_user = request.user.api_users.get(type='user')
 
-            _, campaign, user_subscription = verify_request(
-                api_user, platform_name, platform_id, campaign_id, is_fast=True)
+        _, campaign, user_subscription = verify_request(
+            api_user, platform_name, platform_id, campaign_id, is_fast=True)
 
-            text = request.data['text']
-            data = json.loads(text)
-            data['campaign'] = campaign.id
-            data['created_by'] = api_user.id
-            data['user_subscription'] = user_subscription.id
-            serializer = self.get_serializer(data=data)
+        text = request.data['text']
+        data = json.loads(text)
+        data['campaign'] = campaign.id
+        data['created_by'] = api_user.id
+        data['user_subscription'] = user_subscription.id
+        serializer = self.get_serializer(data=data)
 
-            if not serializer.is_valid():
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            fast_campaign = serializer.save()
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        fast_campaign = serializer.save()
 
-            if 'image' in request.data:
-                image = request.data['image']
-                image_path = default_storage.save(
-                    f'{user_subscription.id}/fast_campaign/{fast_campaign.id}/{image.name}', ContentFile(image.read()))
-                fast_campaign.image = image_path
+        if 'image' in request.data:
+            image = request.data['image']
+            image_path = default_storage.save(
+                f'{user_subscription.id}/fast_campaign/{fast_campaign.id}/{image.name}', ContentFile(image.read()))
+            fast_campaign.image = image_path
 
-                fast_campaign.save()    
-
-        except ApiVerifyError as e:
-            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except:
-            return Response({"message": "error occerd during creating"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            fast_campaign.save()    
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['PUT'], url_path=r'fast_update', parser_classes=(MultiPartParser,))
+    @api_error_handler
     def fast_update_campaign_product(self, request, pk=None):
-        try:
-            platform_id = request.query_params.get('platform_id')
-            platform_name = request.query_params.get('platform_name')
-            campaign_id = request.query_params.get('campaign_id')
-            api_user = request.user.api_users.get(type='user')
+        platform_id = request.query_params.get('platform_id')
+        platform_name = request.query_params.get('platform_name')
+        campaign_id = request.query_params.get('campaign_id')
+        api_user = request.user.api_users.get(type='user')
 
-            _, campaign, campaign_product, user_subscription = verify_request(
-                api_user, platform_name, platform_id, campaign_id, campaign_product_id=pk, is_fast=True)
+        _, campaign, campaign_product, user_subscription = verify_request(
+            api_user, platform_name, platform_id, campaign_id, campaign_product_id=pk, is_fast=True)
 
-            if 'image' in request.data:
-                image = request.data['image']
-                image_path = default_storage.save(
-                    f'{user_subscription.id}/fast_campaign/{campaign_product.id}/{image.name}', ContentFile(image.read()))
+        if 'image' in request.data:
+            image = request.data['image']
+            image_path = default_storage.save(
+                f'{user_subscription.id}/fast_campaign/{campaign_product.id}/{image.name}', ContentFile(image.read()))
 
-            text = request.data['text']
-            data = json.loads(text)
-            data['image'] = image_path
+        text = request.data['text']
+        data = json.loads(text)
+        data['image'] = image_path
 
-            serializer = CampaignProductSerializerUpdate(
-                campaign_product, data=data, partial=True)
-            if not serializer.is_valid():
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            serializer.save()
-
-        except ApiVerifyError as e:
-            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            print(e)
-            return Response({"message": "error occerd during updating"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        serializer = CampaignProductSerializerUpdate(
+            campaign_product, data=data, partial=True)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
 
         return Response(serializer.data, status=status.HTTP_200_OK)

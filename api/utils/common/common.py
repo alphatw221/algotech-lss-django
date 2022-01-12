@@ -2,10 +2,10 @@ from api.utils.common.verify import ApiVerifyError
 from rest_framework.response import Response
 from rest_framework import status
 
-import functools
 from datetime import datetime
 from backend.google_cloud_logging.google_cloud_logging import ApiLogEntry
-import logging
+import functools, logging, traceback
+from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger(__name__)
 
@@ -36,8 +36,17 @@ def api_error_handler(func):
         try:
             return func(*args, **kwargs)
         except ApiVerifyError as e:
+            # ApiLogEntry.write_entry(str(datetime.now()) + ' - ' +  traceback.format_exc())
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        # except Exception as e:
-        #     ApiLogEntry.write3_entry(str(datetime.now()) + str(e))
-        #     return Response({"message": str(datetime.now())+"server error."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except KeyError as e:
+            # ApiLogEntry.write_entry(str(datetime.now()) + ' - ' +  traceback.format_exc())
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except ObjectDoesNotExist as e:
+            print(traceback.format_exc())
+            # ApiLogEntry.write_entry(str(datetime.now()) + ' - ' +  traceback.format_exc())
+            return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as e:
+            print(traceback.format_exc())
+            # ApiLogEntry.write_entry(str(datetime.now()) + ' - ' +  traceback.format_exc())
+            return Response({"message": str(datetime.now())+"server error."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     return wrapper

@@ -7,6 +7,7 @@ from rest_framework.decorators import action
 from backend.cart.cart.manager import CartManager
 from api.utils.common.verify import Verify
 from api.utils.common.verify import ApiVerifyError
+from api.utils.common.common import *
 
 
 def verify_seller_request(api_user, platform_name, platform_id, campaign_id, campaign_product_id=None, cart_product_id=None):
@@ -52,117 +53,93 @@ class CartProductViewSet(viewsets.ModelViewSet):
     filterset_fields = []
 
     @action(detail=True, methods=['GET'], url_path=r'seller_retrieve_cart_product')
+    @api_error_handler
     def seller_retrieve_cart_product(self, request, pk=None):
-        try:
-            platform_id = request.query_params.get('platform_id')
-            platform_name = request.query_params.get('platform_name')
-            campaign_id = request.query_params.get('campaign_id')
-            api_user = request.user.api_users.get(type='user')
+        platform_id = request.query_params.get('platform_id')
+        platform_name = request.query_params.get('platform_name')
+        campaign_id = request.query_params.get('campaign_id')
+        api_user = request.user.api_users.get(type='user')
 
-            _, _, cart_product = verify_seller_request(
-                api_user, platform_name, platform_id, campaign_id, cart_product_id=pk)
+        _, _, cart_product = verify_seller_request(
+            api_user, platform_name, platform_id, campaign_id, cart_product_id=pk)
 
-            serializer = self.get_serializer(cart_product)
-        except ApiVerifyError as e:
-            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except:
-            return Response({"message": "error occerd during retriving"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        serializer = self.get_serializer(cart_product)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET'], url_path=r'seller_list_cart_product')
+    @api_error_handler
     def seller_list_cart_product(self, request):
-        try:
-            platform_id = request.query_params.get('platform_id')
-            platform_name = request.query_params.get('platform_name')
-            campaign_id = request.query_params.get('campaign_id')
-            api_user = request.user.api_users.get(type='user')
-            _, campaign = verify_seller_request(
-                api_user, platform_name, platform_id, campaign_id)
-            # TODO fillter
-            campaign_products = campaign.cart_products.all()
-            serializer = self.get_serializer(campaign_products, many=True)
-
-        except ApiVerifyError as e:
-            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except:
-            return Response({"message": "query error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        platform_id = request.query_params.get('platform_id')
+        platform_name = request.query_params.get('platform_name')
+        campaign_id = request.query_params.get('campaign_id')
+        api_user = request.user.api_users.get(type='user')
+        _, campaign = verify_seller_request(
+            api_user, platform_name, platform_id, campaign_id)
+        # TODO fillter
+        campaign_products = campaign.cart_products.all()
+        serializer = self.get_serializer(campaign_products, many=True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET'], url_path=r'seller_create_cart_product')
+    @api_error_handler
     def seller_create_cart_product(self, request):
-        try:
-            platform_id = request.query_params.get('platform_id')
-            platform_name = request.query_params.get('platform_name')
-            campaign_id = request.query_params.get('campaign_id')
-            campaign_product_id = request.query_params.get(
-                'campaign_product_id')
-            qty = int(request.query_params.get('qty'))
-            platform_user_id = request.query_params.get('platform_user_id')
-            platform_user_name = request.query_params.get('platform_user_name')
-            api_user = request.user.api_users.get(type='user')
+        platform_id = request.query_params.get('platform_id')
+        platform_name = request.query_params.get('platform_name')
+        campaign_id = request.query_params.get('campaign_id')
+        campaign_product_id = request.query_params.get(
+            'campaign_product_id')
+        qty = int(request.query_params.get('qty'))
+        platform_user_id = request.query_params.get('platform_user_id')
+        platform_user_name = request.query_params.get('platform_user_name')
+        api_user = request.user.api_users.get(type='user')
 
-            _, campaign, campaign_product = verify_seller_request(
-                api_user, platform_name, platform_id, campaign_id, campaign_product_id=campaign_product_id)
+        _, campaign, campaign_product = verify_seller_request(
+            api_user, platform_name, platform_id, campaign_id, campaign_product_id=campaign_product_id)
 
-            cart_product_request = CartManager.create_cart_product_request(
-                campaign, platform_name, platform_user_id, platform_user_name, {
-                    campaign_product: qty,
-                }
-            )
-            cart_product_request = CartManager.process(cart_product_request)
-            print(cart_product_request)
-        except ApiVerifyError as e:
-            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        # except Exception as e:
-        #     print(str(e))
-        #     return Response({"message": "error occerd during creating"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        cart_product_request = CartManager.create_cart_product_request(
+            campaign, platform_name, platform_user_id, platform_user_name, {
+                campaign_product: qty,
+            }
+        )
+        cart_product_request = CartManager.process(cart_product_request)
+        print(cart_product_request)
 
         return Response('test', status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['PUT'], url_path=r'seller_update_cart_product')
+    @api_error_handler
     def seller_update_cart_product(self, request, pk=None):
-        try:
-            platform_id = request.query_params.get('platform_id')
-            platform_name = request.query_params.get('platform_name')
-            campaign_id = request.query_params.get('campaign_id')
-            api_user = request.user.api_users.get(type='user')
+        platform_id = request.query_params.get('platform_id')
+        platform_name = request.query_params.get('platform_name')
+        campaign_id = request.query_params.get('campaign_id')
+        api_user = request.user.api_users.get(type='user')
 
-            _, _, cart_product = verify_seller_request(
-                api_user, platform_name, platform_id, campaign_id, cart_product_id=pk)
+        _, _, cart_product = verify_seller_request(
+            api_user, platform_name, platform_id, campaign_id, cart_product_id=pk)
 
-            # TODO 檢查庫存 狀態
-            serializer = CartProductSerializerUpdate(
-                cart_product, data=request.data, partial=True)
-            if not serializer.is_valid():
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            serializer.save()
-
-        except ApiVerifyError as e:
-            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except:
-            return Response({"message": "error occerd during updating"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        # TODO 檢查庫存 狀態
+        serializer = CartProductSerializerUpdate(
+            cart_product, data=request.data, partial=True)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['DELETE'], url_path=r'seller_delete_cart_product')
+    @api_error_handler
     def seller_delete_cart_product(self, request, pk=None):
-        try:
-            platform_id = request.query_params.get('platform_id')
-            platform_name = request.query_params.get('platform_name')
-            campaign_id = request.query_params.get('campaign_id')
-            api_user = request.user.api_users.get(type='user')
+        platform_id = request.query_params.get('platform_id')
+        platform_name = request.query_params.get('platform_name')
+        campaign_id = request.query_params.get('campaign_id')
+        api_user = request.user.api_users.get(type='user')
 
-            _, _, cart_product = verify_seller_request(
-                api_user, platform_name, platform_id, campaign_id, cart_product_id=pk)
+        _, _, cart_product = verify_seller_request(
+            api_user, platform_name, platform_id, campaign_id, cart_product_id=pk)
 
-            cart_product.delete()
-
-        except ApiVerifyError as e:
-            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except:
-            return Response({"message": "error occerd during deleting"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        cart_product.delete()
 
         return Response({"message": "delete success"}, status=status.HTTP_200_OK)
 
@@ -171,29 +148,24 @@ class CartProductViewSet(viewsets.ModelViewSet):
         pass
 
     @action(detail=False, methods=['POST'], url_path=r'buyer_create_cart_product')
+    @api_error_handler
     def buyer_create_cart_product(self, request):
-        try:
-            campaign_id = request.query_params.get('campaign_id')
-            campaign_product_id = request.query_params.get(
-                'campaign_product_id')
-            api_user = request.user.api_users.get(type='customer')
+        campaign_id = request.query_params.get('campaign_id')
+        campaign_product_id = request.query_params.get(
+            'campaign_product_id')
+        api_user = request.user.api_users.get(type='customer')
 
-            campaign, campaign_product = verify_buyer_request(
-                api_user, campaign_id, campaign_product_id)
+        campaign, campaign_product = verify_buyer_request(
+            api_user, campaign_id, campaign_product_id)
 
-            # TODO 檢查庫存 狀態
-            data = request.data
-            data['campaign'] = campaign_id
-            data['campaign_product'] = campaign_product_id
-            serializer = CartProductSerializerCreate(data=data)
+        # TODO 檢查庫存 狀態
+        data = request.data
+        data['campaign'] = campaign_id
+        data['campaign_product'] = campaign_product_id
+        serializer = CartProductSerializerCreate(data=data)
 
-            if not serializer.is_valid():
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            serializer.save()
-
-        except ApiVerifyError as e:
-            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except:
-            return Response({"message": "error occerd during creating"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
 
         return Response(serializer.data, status=status.HTTP_200_OK)

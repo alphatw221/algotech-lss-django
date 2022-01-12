@@ -7,12 +7,26 @@ from django.conf import settings
 from api.models.test.sample import Sample, SampleSerializer
 
 from django.core.files.storage import default_storage
+from api.utils.common.common import * 
+from backend.pymongo.mongodb import db
+import traceback
+from api.models.order.pre_order import PreOrder
 
 
 @api_view(['GET'])
 def test(request):
 
     return Response('test accomplished')
+
+
+@api_view(['GET'])
+@api_error_handler
+def test_error(request):
+
+    a = PreOrder.objects.get(id=14)
+    print (a)
+
+    return Response('test error accomplished')
 
 
 @api_view(['GET'])

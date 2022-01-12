@@ -8,6 +8,7 @@ from api.models.youtube.youtube_channel import YoutubeChannel
 
 from api.utils.common.verify import Verify
 from api.utils.common.verify import ApiVerifyError
+from api.utils.common.common import *
 
 
 def verify_request(api_user, platform_name, platform_id, auto_response_id=None):
@@ -32,110 +33,85 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
                      'youtube': YoutubeChannel}
 
     @action(detail=True, methods=['GET'], url_path=r'retrieve_auto_response')
+    @api_error_handler
     def retrieve_auto_response(self, request, pk=None):
-        try:
-            platform_id = request.query_params.get('platform_id')
-            platform_name = request.query_params.get('platform_name')
-            api_user = request.user.api_users.get(type='user')
+        platform_id = request.query_params.get('platform_id')
+        platform_name = request.query_params.get('platform_name')
+        api_user = request.user.api_users.get(type='user')
 
-            _, _, auto_response = verify_request(
-                api_user, platform_name, platform_id, auto_response_id=pk)
+        _, _, auto_response = verify_request(
+            api_user, platform_name, platform_id, auto_response_id=pk)
 
-            serializer = self.get_serializer(auto_response)
-
-        except ApiVerifyError as e:
-            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except:
-            return Response({"message": "error occerd during retriving"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        serializer = self.get_serializer(auto_response)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET'], url_path=r'list_auto_response')
+    @api_error_handler
     def list_auto_response(self, request):
-        try:
-            platform_id = request.query_params.get('platform_id')
-            platform_name = request.query_params.get('platform_name')
-            api_user = request.user.api_users.get(type='user')
+        platform_id = request.query_params.get('platform_id')
+        platform_name = request.query_params.get('platform_name')
+        api_user = request.user.api_users.get(type='user')
 
-            platform, _ = verify_request(
-                api_user, platform_name, platform_id)
+        platform, _ = verify_request(
+            api_user, platform_name, platform_id)
 
-            auto_responses = platform.auto_responses.all()
-            serializer = self.get_serializer(auto_responses, many=True)
-
-        except ApiVerifyError as e:
-            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({"message": "query error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        auto_responses = platform.auto_responses.all()
+        serializer = self.get_serializer(auto_responses, many=True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['POST'], url_path=r'create_auto_response')
+    @api_error_handler
     def create_auto_response(self, request):
-        try:
-            platform_id = request.query_params.get('platform_id')
-            platform_name = request.query_params.get('platform_name')
-            api_user = request.user.api_users.get(type='user')
+        platform_id = request.query_params.get('platform_id')
+        platform_name = request.query_params.get('platform_name')
+        api_user = request.user.api_users.get(type='user')
 
-            platform, _ = verify_request(
-                api_user, platform_name, platform_id)
+        platform, _ = verify_request(
+            api_user, platform_name, platform_id)
 
-            data = request.data
-            if platform_name == 'facebook':
-                data['facebook_page'] = platform.id
-            elif platform_name == 'youtube':
-                data['youtube'] = platform.id
-            serializer = self.get_serializer(data=data)
-            if not serializer.is_valid():
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            serializer.save()
-
-        except ApiVerifyError as e:
-            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except:
-            return Response({"message": "error occerd during creating"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        data = request.data
+        if platform_name == 'facebook':
+            data['facebook_page'] = platform.id
+        elif platform_name == 'youtube':
+            data['youtube'] = platform.id
+        serializer = self.get_serializer(data=data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['PUT'], url_path=r'update_auto_response')
+    @api_error_handler
     def update_auto_response(self, request, pk=None):
-        try:
-            platform_id = request.query_params.get('platform_id')
-            platform_name = request.query_params.get('platform_name')
-            api_user = request.user.api_users.get(type='user')
+        platform_id = request.query_params.get('platform_id')
+        platform_name = request.query_params.get('platform_name')
+        api_user = request.user.api_users.get(type='user')
 
-            _, _, auto_response = verify_request(
-                api_user, platform_name, platform_id, auto_response_id=pk)
+        _, _, auto_response = verify_request(
+            api_user, platform_name, platform_id, auto_response_id=pk)
 
-            serializer = self.get_serializer(
-                auto_response, data=request.data, partial=True)
+        serializer = self.get_serializer(
+            auto_response, data=request.data, partial=True)
 
-            if not serializer.is_valid():
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            serializer.save()
-
-        except ApiVerifyError as e:
-            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except:
-            return Response({"message": "error occerd during updating"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['DELETE'], url_path=r'delete_auto_response')
+    @api_error_handler
     def delete_auto_response(self, request, pk=None):
-        try:
-            platform_id = request.query_params.get('platform_id')
-            platform_name = request.query_params.get('platform_name')
-            api_user = request.user.api_users.get(type='user')
+        platform_id = request.query_params.get('platform_id')
+        platform_name = request.query_params.get('platform_name')
+        api_user = request.user.api_users.get(type='user')
 
-            _, _, auto_response = verify_request(
-                api_user, platform_name, platform_id, auto_response_id=pk)
+        _, _, auto_response = verify_request(
+            api_user, platform_name, platform_id, auto_response_id=pk)
 
-            auto_response.delete()
-
-        except ApiVerifyError as e:
-            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except:
-            return Response({"message": "error occerd during deleting"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        auto_response.delete()
 
         return Response({"message": "delete success"}, status=status.HTTP_200_OK)

@@ -321,10 +321,8 @@ REDIS_SERVER={
     "username":None,
     "password":r"algo83111T%%"}
 
-<<<<<<< HEAD
 # gcp load balancer
 GCP_API_LOADBALANCER_URL="http://127.0.0.1:8000"
-=======
 PAYPAL_CONFIG = {
     "mode": "sandbox",
     "client_id": "ASABJtviIflIhkeEH4QBeYuhQoN7RWcPsC6fN-TXIfzhMQ2UDK1raOVd3xBWAmItoAg2WRgI4Nbpde8J",  # it's sandbox
@@ -334,4 +332,3 @@ PAYPAL_CONFIG = {
 }
 
 # APPEND_SLASH=False
->>>>>>> 3e674ca09b2ffb0e96be34fcd77d4ca643692ad6
