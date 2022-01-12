@@ -25,6 +25,7 @@ google-cloud-monitoring = "^2.8.0"
 openpyxl = "^3.0.9"
 rq = "^1.10.1"
 google-cloud-logging = "^2.7.0"
+paypalrestsdk = "^1.13.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

@@ -286,7 +286,6 @@ CHAT_BOT_FACEBOOK = {
     'VERIFY_TOKEN': 'ALGOTECHLSSMESSENGER'
 }
 
-
 # google storage
 DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
 GS_BUCKET_NAME = 'lss_public_bucket'
@@ -322,5 +321,17 @@ REDIS_SERVER={
     "username":None,
     "password":r"algo83111T%%"}
 
+<<<<<<< HEAD
 # gcp load balancer
 GCP_API_LOADBALANCER_URL="http://127.0.0.1:8000"
+=======
+PAYPAL_CONFIG = {
+    "mode": "sandbox",
+    "client_id": "ASABJtviIflIhkeEH4QBeYuhQoN7RWcPsC6fN-TXIfzhMQ2UDK1raOVd3xBWAmItoAg2WRgI4Nbpde8J",  # it's sandbox
+    "client_secret": "EFEGnvXwP8DsSUYF5zoQ5ZkaArtlpzAlgpWJOwBlHRMUP6NwAq8-KmnTv087ihZrAIlyg5VtKo73Wj54",  # it's sandbox
+    "complete_url": "http://127.0.0.1:8000/api/payment/paypal_payment_complete_check",
+    "cancel_url": "http://127.0.0.1:8000/cancel"
+}
+
+# APPEND_SLASH=False
+>>>>>>> 3e674ca09b2ffb0e96be34fcd77d4ca643692ad6

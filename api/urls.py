@@ -25,6 +25,7 @@ from api.views.cart import cart_product
 from api.views.order import order
 from api.views.order import pre_order
 from api.views.dashboard import dashboard
+from api.views.payment import payment
 
 from api.views.image import image
 from api.views.payment import payment
