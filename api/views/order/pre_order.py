@@ -193,7 +193,8 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         api_user, pre_order, order_product, campaign_product, qty = Verify.PreOrderApi.FromBuyer.verify(request, pk)
         data_dict = {
             'campaign_id': pre_order.campaign_id,
-            'platform': pre_order.platform
+            'platform': pre_order.platform,
+            'platform_id': pre_order.platform_id
         }
 
         return Response(data_dict, status=status.HTTP_200_OK)
