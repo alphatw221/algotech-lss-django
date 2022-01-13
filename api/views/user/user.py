@@ -1,7 +1,8 @@
 import re
+from sys import platform
 from django.http.response import HttpResponse
 from rest_framework import serializers, status, viewsets
-from rest_framework.decorators import action
+from rest_framework.decorators import action, permission_classes
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from api.models.user.user import User, UserSerializer
 from api.utils.common.common import api_error_handler
@@ -15,6 +16,7 @@ from api.models.facebook.facebook_page import FacebookPage
 from datetime import datetime
 from api.models.user.user_subscription import UserSubscription, UserSubscriptionSerializerSimplify
 
+platform_info_dict={'facebook':'facebook_info', 'youtube':'youtube_info', 'instagram':'instagram_info'}
 
 class UserViewSet(viewsets.ModelViewSet):
     # permission_classes = (IsAuthenticated,)
@@ -111,3 +113,23 @@ class UserViewSet(viewsets.ModelViewSet):
                     page_id=page_id, name=page_name, token=page_token, token_update_at=datetime.now(), token_update_by=api_user.facebook_info['id'], image=item['image'])
 
         return Response(response, status=status.HTTP_200_OK)
+
+
+
+    @action(detail=False, methods=['GET'], url_path=r'profile_image', permission_classes=(IsAuthenticated,))
+    def get_profile_image(self, request, pk=None):
+
+        platform_name = request.query_params.get('platform_name')
+        if not platform_name in platform_info_dict:
+            raise ApiVerifyError('not support platform')
+
+        picture = ""
+        auth_user = request.user
+        if auth_user.api_users.filter(type='user').exists():
+            api_user = auth_user.api_users.get(type='user')
+            picture = getattr(api_user,platform_info_dict[platform_name]).get('picture','')
+        elif auth_user.api_users.filter(type='customer').exists():
+            api_user = auth_user.api_users.get(type='customer')
+            picture = getattr(api_user,platform_info_dict[platform_name]).get('picture','')
+
+        return Response(picture, status=status.HTTP_200_OK)
