@@ -16,7 +16,6 @@ from api.utils.error_handle.error_handler.api_error_handler import api_error_han
 class PreOrderHelper():
 
     @classmethod
-    @api_error_handler
     def update_product(cls, api_user, pre_order, order_product, campaign_product, qty):
         with client.start_session() as session:
             with session.start_transaction():
@@ -58,7 +57,6 @@ class PreOrderHelper():
         return db.api_order_product.find_one({"id": api_order_product['id']},{"_id":False})
 
     @classmethod
-    @api_error_handler
     def add_product(cls, api_user, pre_order, campaign_product, qty):
         with client.start_session() as session:
             with session.start_transaction():
@@ -127,7 +125,6 @@ class PreOrderHelper():
         return db.api_order_product.find_one({"id": increment_id},{"_id":False})
 
     @classmethod
-    @api_error_handler
     def delete_product(cls, api_user, pre_order, order_product, campaign_product):
         with client.start_session() as session:
             with session.start_transaction():
@@ -164,7 +161,6 @@ class PreOrderHelper():
         return True
 
     @classmethod
-    @api_error_handler
     def checkout(cls, api_user, pre_order):
         with client.start_session() as session:
             with session.start_transaction():
