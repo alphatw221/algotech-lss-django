@@ -9,8 +9,8 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         auth_user_id = token['user_id']
         seller = None
         customer = None
-        seller_image = None
-        customer_image = None
+        seller_image = ""
+        customer_image = ""
 
         if user.api_users.filter(type='user').exists():
             seller = user.api_users.get(type='user')
@@ -42,7 +42,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             'seller_image': seller_image,
             'customer_image': customer_image
         }
-
+        print(token['data'])
         return token
 
 
@@ -57,8 +57,8 @@ class CustomTokenRefreshSerializer(TokenRefreshSerializer):
         auth_user_id = token['user_id']
         seller = None
         customer = None
-        seller_image = None
-        customer_image = None
+        seller_image = ""
+        customer_image = ""
 
         if user.api_users.filter(type='user').exists():
             seller = user.api_users.get(type='user')
@@ -105,8 +105,8 @@ class CustomTokenVerifySerializer(TokenVerifySerializer):
         auth_user_id = token['user_id']
         seller = None
         customer = None
-        seller_image = None
-        customer_image = None
+        seller_image = ""
+        customer_image = ""
 
         if user.api_users.filter(type='user').exists():
             seller = user.api_users.get(type='user')

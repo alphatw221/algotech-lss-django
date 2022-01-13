@@ -122,7 +122,17 @@ class PreOrderHelper():
 
                 products = api_pre_order['products']
                 products[str(api_campaign_product['id'])] = {
-                    "price": api_campaign_product['price'], "qty": qty}
+                    "order_product_id":increment_id,
+                    "name" : api_campaign_product["name"],
+                    "image" : api_campaign_product["image"],
+                    "price" : api_campaign_product["price"],
+                    "type": api_campaign_product["type"],
+                    
+                    "currency" : api_campaign_product["currency"],
+                    "currency_sign" : api_campaign_product["currency_sign"],
+                    
+                    "qty": qty
+                }
                 db.api_pre_order.update_one(
                     {'id': pre_order.id},
                     {
@@ -317,8 +327,20 @@ class PreOrderHelper():
                                                    "$inc": {'qty_sold': qty_difference}})
 
                 products = api_pre_order['products']
+
                 products[str(api_campaign_product['id'])] = {
-                    "price": api_campaign_product['price'], "qty": qty}
+                    "order_product_id":increment_id,
+                    "name" : api_campaign_product["name"],
+                    "image" : api_campaign_product["image"],
+                    "price" : api_campaign_product["price"],
+                    "type": api_campaign_product["type"],
+                    
+                    "currency" : api_campaign_product["currency"],
+                    "currency_sign" : api_campaign_product["currency_sign"],
+                    
+                    "qty": qty
+                }
+
                 db.api_pre_order.update_one(
                     {'id': api_pre_order['id']},
                     {
