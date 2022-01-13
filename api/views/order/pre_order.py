@@ -8,13 +8,13 @@ from rest_framework.pagination import PageNumberPagination
 from api.models.order.pre_order import PreOrder, PreOrderSerializer, PreOrderSerializerUpdatePaymentShipping
 from api.utils.common.verify import Verify
 from api.utils.common.verify import ApiVerifyError, platform_dict
-from api.utils.common.common import api_error_handler
 
 from api.utils.common.order_helper import PreOrderHelper
 from backend.pymongo.mongodb import db
 
 from django.db.models import Q
 
+from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 # from api.utils.common.common import getparams
 
 # def verify_buyer_request(api_user, platform_name, campaign_id, order_product_id=None, campaign_product_id=None):

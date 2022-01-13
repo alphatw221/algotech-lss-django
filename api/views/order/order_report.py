@@ -3,7 +3,7 @@ from api.utils.common.verify import Verify
 from backend.pymongo.mongodb import db
 import openpyxl
 import xlsxwriter, os.path 
-
+from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 
 def verify_request(api_user, platform_name, platform_id, campaign_id):
     Verify.verify_user(api_user)

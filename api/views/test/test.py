@@ -12,7 +12,7 @@ from backend.pymongo.mongodb import db
 import traceback
 from api.models.order.pre_order import PreOrder
 
-
+from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 @api_view(['GET'])
 def test(request):
 

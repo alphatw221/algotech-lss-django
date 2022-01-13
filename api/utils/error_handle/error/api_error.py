@@ -1,0 +1,2 @@
+class ApiVerifyError(Exception):
+    pass

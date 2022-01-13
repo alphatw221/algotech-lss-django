@@ -12,6 +12,7 @@ from backend.pymongo.mongodb import db
 from dateutil.relativedelta import relativedelta
 import datetime, operator
 
+from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 
 def verify_seller_request(api_user):
     Verify.verify_user(api_user)

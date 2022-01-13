@@ -9,33 +9,9 @@ from api.models.order.order import api_order_template
 from api.models.order.order_product import api_order_product_template
 from api.utils.common.verify import ApiVerifyError, platform_dict
 from backend.cart.cart_product.request import RequestState
-from api.utils.common.common import *
+from api.utils.error_handle.error.pre_order_error import PreOrderErrors
 
-class PreOrderErrors():
-
-    class PreOrderException(Exception):
-        pass
-
-    class UnderStock(PreOrderException):
-        state=RequestState.INSUFFICIENT_INV
-
-    class ProductNotActivated(PreOrderException):
-        state=RequestState.INVALID_PRODUCT_NOT_ACTIVATED
-
-    class ExceedMaxOrderAmount(PreOrderException):
-        state=RequestState.INVALID_EXCEED_MAX_ORDER_AMOUNT
-
-    class RemoveNotAllowed(PreOrderException):
-        state=RequestState.INVALID_REMOVE_NOT_ALLOWED
-
-    class EditNotAllowed(PreOrderException):
-        state=RequestState.INVALID_EDIT_NOT_ALLOWED
-
-    class NegativeQty(PreOrderException):
-        state=RequestState.INVALID_NEGATIVE_QTY
-
-    class AddZeroQty(PreOrderException):
-        state=RequestState.INVALID_ADD_ZERO_QTY
+from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 
 class PreOrderHelper():
 
@@ -65,6 +41,7 @@ class PreOrderHelper():
 
                 products = api_pre_order['products']
                 products[str(api_campaign_product['id'])]['qty'] = qty
+                products[str(api_campaign_product['id'])]['subtotal'] = float(qty*api_order_product['price'])
                 db.api_pre_order.update_one(
                     {'id': pre_order.id},
                     {
@@ -73,7 +50,7 @@ class PreOrderHelper():
                             "products": products
                         },
                         "$inc": {
-                            "total": qty_difference*api_campaign_product['price'],
+                            "subtotal": qty_difference*api_campaign_product['price'],
                         }
                     },
                     session=session)
@@ -131,7 +108,8 @@ class PreOrderHelper():
                     "currency" : api_campaign_product["currency"],
                     "currency_sign" : api_campaign_product["currency_sign"],
                     
-                    "qty": qty
+                    "qty": qty,
+                    "subtotal":float(qty*api_campaign_product["price"])
                 }
                 db.api_pre_order.update_one(
                     {'id': pre_order.id},
@@ -141,7 +119,7 @@ class PreOrderHelper():
                             "products": products
                         },
                         "$inc": {
-                            "total": qty_difference*api_campaign_product['price'],
+                            "subtotal": qty_difference*api_campaign_product['price'],
                         }
                     },
                     session=session)
@@ -179,7 +157,7 @@ class PreOrderHelper():
                             "products": products
                         },
                         "$inc": {
-                            "total": -api_order_product['qty']*api_campaign_product['price'],
+                            "subtotal": -api_order_product['qty']*api_campaign_product['price'],
                         }
                     },
                     session=session)
@@ -338,7 +316,8 @@ class PreOrderHelper():
                     "currency" : api_campaign_product["currency"],
                     "currency_sign" : api_campaign_product["currency_sign"],
                     
-                    "qty": qty
+                    "qty": qty,
+                    "subtotal":float(qty*api_campaign_product["price"])
                 }
 
                 db.api_pre_order.update_one(
@@ -348,7 +327,7 @@ class PreOrderHelper():
                             "products": products
                         },
                         "$inc": {
-                            "total": qty_difference*api_campaign_product['price'],
+                            "subtotal": qty_difference*api_campaign_product['price'],
                         }
                     },
                     session=session)
@@ -372,6 +351,7 @@ class PreOrderHelper():
 
                 products = api_pre_order['products']
                 products[str(api_campaign_product['id'])]['qty'] = qty
+                products[str(api_campaign_product['id'])]['subtotal'] = float(qty*api_order_product['price'])
                 db.api_pre_order.update_one(
                     {'id': api_pre_order['id']},
                     {
@@ -379,7 +359,7 @@ class PreOrderHelper():
                             "products": products
                         },
                         "$inc": {
-                            "total": qty_difference*api_campaign_product['price'],
+                            "subtotal": qty_difference*api_campaign_product['price'],
                         }
                     },
                     session=session)
@@ -406,7 +386,7 @@ class PreOrderHelper():
                             "products": products
                         },
                         "$inc": {
-                            "total": -api_order_product['qty']*api_campaign_product['price'],
+                            "subtotal": -api_order_product['qty']*api_campaign_product['price'],
                         }
                     },
                     session=session)

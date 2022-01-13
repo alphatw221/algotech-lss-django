@@ -5,7 +5,6 @@ from rest_framework import serializers, status, viewsets
 from rest_framework.decorators import action, permission_classes
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from api.models.user.user import User, UserSerializer
-from api.utils.common.common import api_error_handler
 from api.utils.common.verify import ApiVerifyError
 from api.views.user._user import login_helper
 from backend.api.facebook.user import api_fb_get_accounts_from_user
@@ -16,6 +15,7 @@ from api.models.facebook.facebook_page import FacebookPage
 from datetime import datetime
 from api.models.user.user_subscription import UserSubscription, UserSubscriptionSerializerSimplify
 
+from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 platform_info_dict={'facebook':'facebook_info', 'youtube':'youtube_info', 'instagram':'instagram_info'}
 
 class UserViewSet(viewsets.ModelViewSet):
