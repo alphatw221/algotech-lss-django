@@ -187,6 +187,17 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         return Response({'message':"delete success"}, status=status.HTTP_200_OK)
     
     #------------------buyer---------------------------------------------------------------------------
+    @action(detail=True, methods=['GET'], url_path=r'campaign_info')
+    @api_error_handler
+    def get_campaign_info(self, request, pk=None):
+        api_user, pre_order, order_product, campaign_product, qty = Verify.PreOrderApi.FromBuyer.verify(request, pk)
+        data_dict = {
+            'campaign_id': pre_order.campaign_id,
+            'platform': pre_order.platform
+        }
+
+        return Response(data_dict, status=status.HTTP_200_OK)
+
     @action(detail=True, methods=['POST'], url_path=r'delivery_info')
     @api_error_handler
     def update_buyer_submit(self, request, pk=None):
