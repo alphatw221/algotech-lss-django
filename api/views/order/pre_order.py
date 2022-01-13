@@ -9,6 +9,7 @@ from api.utils.common.verify import Verify
 from api.utils.common.verify import ApiVerifyError, platform_dict
 from api.utils.common.common import *
 from api.utils.common.order_helper import PreOrderHelper
+from backend.pymongo.mongodb import db
 
 from django.db.models import Q
 def verify_buyer_request(api_user, platform_name, campaign_id, order_product_id=None, campaign_product_id=None, check_info=None):
@@ -22,6 +23,8 @@ def verify_buyer_request(api_user, platform_name, campaign_id, order_product_id=
         raise ApiVerifyError('platform not support')
 
     if not PreOrder.objects.filter(platform=platform_name, customer_id=customer_id, campaign_id=campaign_id).exists():
+        print ('customer_id')
+        print (customer_id)
         raise ApiVerifyError('no pre_order found')
     pre_order =PreOrder.objects.get(platform=platform_name, customer_id=customer_id, campaign_id=campaign_id)
     
@@ -129,7 +132,6 @@ def verify_seller_request(api_user, platform_name, platform_id, campaign_id, pre
 
 
 class PreOrderPagination(PageNumberPagination):
-
     page_query_param = 'page'
     page_size_query_param = 'page_size'
 
@@ -250,7 +252,6 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     def update_buyer_submit(self, request, pk=None):
         api_user, platform_name, campaign_id = getparams(
             request, ("platform_name", "campaign_id"), seller=False)
-
         pre_order = verify_buyer_request(
             api_user, platform_name, campaign_id)
         
