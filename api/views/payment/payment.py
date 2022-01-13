@@ -1,16 +1,24 @@
+import json
+
 from rest_framework import views, viewsets, status
 import paypalrestsdk
+from django.core.files.base import ContentFile
 from django.http import HttpResponseRedirect
 from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework import views, viewsets, status
+from rest_framework.decorators import action, api_view, permission_classes, parser_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.core.files.storage import default_storage
-from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.parsers import MultiPartParser, FormParser, FileUploadParser
 
+import api
+from api.utils.common.common import api_error_handler, getdata, getparams, ApiVerifyError
 from api.utils.common.common import getdata, getparams
 from api.models.order.order import Order
+from api.models.user import user
 from api.models.user.user_subscription import UserSubscription
 from api.models.facebook.facebook_page import FacebookPage
 from api.models.youtube.youtube_channel import YoutubeChannel
@@ -19,7 +27,10 @@ from api.models.instagram.instagram_profile import InstagramProfile
 import datetime
 import hashlib
 from django.http import HttpResponseRedirect
+from api.models.user.user_subscription import UserSubscriptionSerializerMeta
+from api.utils.common.common import api_error_handler, getparams, ApiVerifyError
 from api.views.payment._payment import HitPay_Helper
+from api.views.user.user_subscription import verify_request
 from backend.pymongo.mongodb import db
 
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
@@ -50,7 +61,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         if not user_subscriptions:
             raise ApiVerifyError("platform not in any user_subscription")
         user_subscription = user_subscriptions[0]
-        
+
         firstdata = user_subscription.meta_payment.get('firstdata')
 
         if not firstdata:
@@ -84,7 +95,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
     @action(detail=False, methods=['GET'], url_path=r'ipg_payment_success')
     @api_error_handler
     def ipg_payment_success(self, request, pk=None):
-        
+
         print(request)
         return HttpResponseRedirect(redirect_to='https://www.google.com')
 
@@ -93,8 +104,8 @@ class PaymentViewSet(viewsets.GenericViewSet):
         print(f"order_id {order_id}")
 
         approval_code, oid, refnumber, trancaction_status, txndate_processed, ipgTransactionId, fail_reason, response_hash = getdata(request, ("approval_code", "oid", "refnumber", "status", "txndate_processed", "ipgTransactionId", "fail_reason", "response_hash"))
-        
-        
+
+
         print(f"approval_code {approval_code}")
         print(f"oid {oid}")
         print(f"refnumber {refnumber}")
@@ -103,18 +114,18 @@ class PaymentViewSet(viewsets.GenericViewSet):
         print(f"ipgTransactionId {ipgTransactionId}")
         print(f"fail_reason {fail_reason}")
         print(f"response_hash {response_hash}")
-        
+
         return HttpResponseRedirect(redirect_to='https://www.google.com')
 
     @action(detail=False, methods=['GET'], url_path=r'ipg_payment_fail')
     @api_error_handler
     def ipg_payment_fail(self, request, pk=None):
-        
+
         print(request)
         return HttpResponseRedirect(redirect_to='https://www.google.com')
         approval_code, oid, refnumber, trancaction_status, approval_code, txndate_processed, ipgTransactionId, fail_reason, response_hash = getdata(request, ("approval_code", "oid", "refnumber", "status", "approval_code", "txndate_processed", "ipgTransactionId", "fail_reason", "response_hash"))
-        
-    
+
+
         # OrderMetaModel::api_update($order_id, 'payment_info', $request->post('ipgTransactionId'));
         # OrderMetaModel::api_update($order_id, 'payment_info_ccbrand', $request->post('ccbrand'));
         # OrderMetaModel::api_update($order_id, 'payment_info_cardnumber', $request->post('cardnumber'));
@@ -126,6 +137,15 @@ class PaymentViewSet(viewsets.GenericViewSet):
 
 
         return Response(data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['POST'])
+    def direct_payment(self, request, *args, **kwargs):
+        platform_name = request.GET["platform_name"]
+        platform_id = request.GET["platform_id"]
+        return Response({
+            'platform_name': platform_name,
+            'platform_id': platform_id
+        })
 
     @action(detail=False, methods=['POST'], url_path=r"paypal_payment_create")
     def paypal_payment_create(self, request, *args, **kwargs):
@@ -283,7 +303,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         hmac = data_dict['hmac']
         secret_salt = '2MUizyJj429NIoOMmTXedyICmbwS1rt6Wph7cGqzG99IkmCV6nUCQ22lRVCB0Rgu'
 
-       
+
 
         hitpay_dict, info_dict = {}, {}
 
@@ -299,3 +319,59 @@ class PaymentViewSet(viewsets.GenericViewSet):
             )
 
         return Response('request')
+
+
+    @action(detail=False, methods=['PUT'], url_path=r'buyser_receipt_upload', parser_classes=(MultiPartParser,))
+    def buyser_receipt_upload(self, request):
+        try:
+            image = request.data["image"]
+            if not image:
+                raise ApiVerifyError("no image found")
+            order_id = request.data["order_id"]
+            print(f"order_id: {order_id}")
+            if not Order.objects.filter(id=order_id).exists():
+                raise ApiVerifyError("no order found")
+
+            order = Order.objects.get(id=order_id)
+
+            # api_user = request.user.api_users.get(type='user')
+            api_user = user.User.objects.get(id=12)
+            print(api_user)
+            platform_name = order.platform
+            print(f"platform_name: {platform_name}")
+            platform_id = order.platform_id
+            print(f"platform_id: {platform_id}")
+            campaign_id = order.campaign_id
+
+            _, user_subscription = verify_request(
+                api_user, platform_name, platform_id)
+
+            image_path = default_storage.save(
+                f'{user_subscription.id}/order/{order.id}/receipt/{image.name}', ContentFile(image.read()))
+            print(image_path)
+            order.image = settings.GS_URL + image_path
+            order.save()
+            return Response({"message": "upload succeed"}, status=status.HTTP_200_OK)
+        except Exception as e:
+            print(e)
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['GET'], url_path=r'get_direct_payment_info')
+    def get_direct_payment_info(self, request):
+        try:
+            order_id = request.GET["order_id"]
+            if not Order.objects.filter(id=order_id).exists():
+                raise ApiVerifyError("no order found")
+            meta_payment = Order.objects.get(id=order_id).campaign.meta_payment
+            meta_payment = json.loads(json.dumps(meta_payment))
+            print(meta_payment)
+            data = {
+                "is_general_payment": meta_payment["is_general_payment"],
+                "direct_payment": meta_payment["direct_payment"]
+            }
+            return Response(data, status=status.HTTP_200_OK)
+        except Exception as e:
+            print(e)
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
