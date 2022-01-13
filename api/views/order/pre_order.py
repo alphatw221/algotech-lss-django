@@ -11,6 +11,7 @@ from api.utils.common.verify import ApiVerifyError, platform_dict
 from api.utils.common.common import api_error_handler
 
 from api.utils.common.order_helper import PreOrderHelper
+from backend.pymongo.mongodb import db
 
 from django.db.models import Q
 
@@ -81,7 +82,6 @@ from django.db.models import Q
 
 
 class PreOrderPagination(PageNumberPagination):
-
     page_query_param = 'page'
     page_size_query_param = 'page_size'
 
@@ -186,30 +186,21 @@ class PreOrderViewSet(viewsets.ModelViewSet):
             api_user, pre_order, order_product, campaign_product)
         return Response({'message':"delete success"}, status=status.HTTP_200_OK)
     
-    #Derecks CODE !!
-    
-    # @action(detail=True, methods=['POST'], url_path=r'delivery_info')
-    # @api_error_handler
-    # def update_buyer_submit(self, request, pk=None):
-    #     api_user, platform_name, campaign_id = getparams(
-    #         request, ("platform_name", "campaign_id"), seller=False)
-
-    #     pre_order = verify_buyer_request(
-    #         api_user, platform_name, campaign_id)
-        
-    #     # request.data['status'] = 'unpaid'
-    #     serializer = PreOrderSerializerUpdatePaymentShipping(pre_order, data=request.data, partial=True)
-    #     if not serializer.is_valid():
-    #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    #     serializer.save()
-
-    #     pre_order = verify_buyer_request(
-    #         api_user, platform_name, campaign_id, check_info=True)
-    #     serializer = PreOrderSerializer(pre_order)
-
-    #     return Response(serializer.data, status=status.HTTP_200_OK)
-
     #------------------buyer---------------------------------------------------------------------------
+    @action(detail=True, methods=['POST'], url_path=r'delivery_info')
+    @api_error_handler
+    def update_buyer_submit(self, request, pk=None):
+        api_user, pre_order, order_product, campaign_product, qty = Verify.PreOrderApi.FromBuyer.verify(request, pk)
+        pick_up_note = {'pick_up_note' : request.data['description']}
+        request.data['meta'] = pick_up_note
+        serializer = PreOrderSerializerUpdatePaymentShipping(pre_order, data=request.data, partial=True)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
+        pre_order = PreOrder.objects.get(id=pk)
+        verify_message = Verify.PreOrderApi.FromBuyer.verify_delivery_info(pre_order)
+        return Response(verify_message, status=status.HTTP_200_OK)
+    
     @action(detail=True, methods=['GET'], url_path=r'buyer_retrieve')
     @api_error_handler
     def buyer_retrieve_pre_order(self, request, pk=None):

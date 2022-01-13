@@ -166,6 +166,8 @@ class PreOrderSerializerUpdatePaymentShipping(serializers.ModelSerializer):
                   "payment_method",
                   "payment_status",
                   "payment_remark",
+                  "remark",
+                  "meta",
                 ]
 
 

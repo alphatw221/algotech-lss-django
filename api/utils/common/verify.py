@@ -165,6 +165,60 @@ class Verify():
                         raise ApiVerifyError("invalid campaign_product")
 
                 return api_user, pre_order, order_product, campaign_product, qty
+            
+            @staticmethod
+            def verify_delivery_info(pre_order):
+                verify_message = {}
+                check_exist = False
+                #TODO 訊息彙整回傳一次
+                if not pre_order.shipping_first_name:
+                    check_exist = True
+                    verify_message['shipping_first_name'] = 'not valid'
+                if not pre_order.shipping_last_name:
+                    check_exist = True
+                    verify_message['shipping_last_name'] = 'not valid'
+                if not pre_order.shipping_phone:
+                    check_exist = True
+                    verify_message['shipping_phone'] = 'not valid'
+                if not pre_order.shipping_postcode:
+                    check_exist = True
+                    verify_message['shipping_postcode'] = 'not valid'
+                if not pre_order.shipping_region:
+                    check_exist = True
+                    verify_message['shipping_region'] = 'not valid'
+                if not pre_order.shipping_location:
+                    check_exist = True
+                    verify_message['shipping_location'] = 'not valid'
+                if not pre_order.shipping_address_1:
+                    check_exist = True
+                    verify_message['shipping_address'] = 'not valid'
+                if not pre_order.shipping_method:
+                    check_exist = True
+                    verify_message['shipping_method'] = 'not valid'
+                if not pre_order.payment_first_name:
+                    check_exist = True
+                    verify_message['payment_first_name'] = 'not valid'
+                if not pre_order.payment_last_name:
+                    check_exist = True
+                    verify_message['payment_last_name'] = 'not valid'
+                if not pre_order.payment_company:
+                    check_exist = True
+                    verify_message['payment_company'] = 'not valid'
+                if not pre_order.payment_postcode:
+                    check_exist = True
+                    verify_message['payment_postcode'] = 'not valid'
+                if not pre_order.payment_region:
+                    check_exist = True
+                    verify_message['payment_region'] = 'not valid'
+                if not pre_order.payment_location:
+                    check_exist = True
+                    verify_message['payment_location'] = 'not valid'
+                if not pre_order.payment_address_1:
+                    check_exist = True
+                    verify_message['payment_address'] = 'not valid'
+                if check_exist == True:
+                    raise ApiVerifyError(verify_message)
+                return verify_message
 
 
         class FromSeller(VerifyRequestFromWhome):
