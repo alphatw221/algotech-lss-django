@@ -191,10 +191,12 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     @api_error_handler
     def get_campaign_info(self, request, pk=None):
         api_user, pre_order, order_product, campaign_product, qty = Verify.PreOrderApi.FromBuyer.verify(request, pk)
+        campaign = db.api_campaign.find_one({'id': pre_order.campaign_id})
         data_dict = {
             'campaign_id': pre_order.campaign_id,
             'platform': pre_order.platform,
-            'platform_id': pre_order.platform_id
+            'platform_id': pre_order.platform_id,
+            'meta_logistic': campaign['meta_logistic']
         }
 
         return Response(data_dict, status=status.HTTP_200_OK)
