@@ -39,8 +39,8 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             'seller_id': seller.id if seller else "",
             'customer_id': customer.id if customer else "",
             'name': name,
-            'seller_image': seller_image,
-            'customer_image': customer_image
+            # 'seller_image': seller_image,
+            # 'customer_image': customer_image
         }
         print(token['data'])
         return token
@@ -87,8 +87,8 @@ class CustomTokenRefreshSerializer(TokenRefreshSerializer):
             'seller_id': seller.id if seller else "",
             'customer_id': customer.id if customer else "",
             'name': name,
-            'seller_image': seller_image,
-            'customer_image': customer_image
+            # 'seller_image': seller_image,
+            # 'customer_image': customer_image
         }
 
         return token
@@ -135,8 +135,8 @@ class CustomTokenVerifySerializer(TokenVerifySerializer):
             'seller_id': seller.id if seller else "",
             'customer_id': customer.id if customer else "",
             'name': name,
-            'seller_image': seller_image,
-            'customer_image': customer_image
+            # 'seller_image': seller_image,
+            # 'customer_image': customer_image
         }
 
         return token
