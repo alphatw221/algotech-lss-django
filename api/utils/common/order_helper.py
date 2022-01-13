@@ -36,7 +36,7 @@ class PreOrderHelper():
                     {'id': api_campaign_product['id']}, {"$inc": {'qty_sold': qty_difference}}, session=session)
 
                 db.api_order_product.update_one(
-                    {'id': api_order_product['id']}, {"$set": {'qty': qty}}, session=session)
+                    {'id': api_order_product['id']}, {"$set": {'qty': qty,'subtotal': float(qty*api_campaign_product["price"])}}, session=session)
 
                 products = api_pre_order['products']
                 products[str(api_campaign_product['id'])]['qty'] = qty
@@ -89,6 +89,7 @@ class PreOrderHelper():
                     "currency" : api_campaign_product["currency"],
                     "currency_sign" : api_campaign_product["currency_sign"],
                     "image" : api_campaign_product["image"],
+                    "subtotal":float(qty*api_campaign_product["price"])
                 })
                 db.api_order_product.insert_one(template, session=session)
 
@@ -294,6 +295,7 @@ class PreOrderHelper():
                     "currency" : api_campaign_product["currency"],
                     "currency_sign" : api_campaign_product["currency_sign"],
                     "image" : api_campaign_product["image"],
+                    "subtotal":float(qty*api_campaign_product["price"])
                 })
                 db.api_order_product.insert_one(template, session=session)
 
@@ -343,7 +345,7 @@ class PreOrderHelper():
                     {'id': api_campaign_product['id']}, {"$inc": {'qty_sold': qty_difference}}, session=session)
 
                 db.api_order_product.update_one(
-                    {'id': api_order_product['id']}, {"$set": {'qty': qty}}, session=session)
+                    {'id': api_order_product['id']}, {"$set": {'qty': qty,'subtotal': float(qty*api_campaign_product["price"])}}, session=session)
 
                 products = api_pre_order['products']
                 products[str(api_campaign_product['id'])]['qty'] = qty
