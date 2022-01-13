@@ -67,6 +67,7 @@ class PreOrder(models.Model):
     paid_at = models.DateTimeField(
         blank=True, null=True, default=None)
 
+    shipping_cost = models.FloatField(null=True, blank=True, default=0)
     shipping_first_name = models.CharField(
         max_length=64, blank=True, default='')
     shipping_last_name = models.CharField(
