@@ -14,6 +14,8 @@ from django.conf import settings
 from django.core.files.storage import default_storage
 from rest_framework.parsers import MultiPartParser, FormParser, FileUploadParser
 
+import api
+from api.utils.common.common import getdata, getparams, ApiVerifyError
 from api.utils.common.common import getdata, getparams
 from api.models.order.order import Order
 from api.models.user import user
@@ -26,6 +28,7 @@ import datetime
 import hashlib
 from django.http import HttpResponseRedirect
 from api.models.user.user_subscription import UserSubscriptionSerializerMeta
+from api.utils.common.common import getparams, ApiVerifyError
 from api.utils.common.common import getparams
 from api.views.payment._payment import HitPay_Helper
 from api.views.user.user_subscription import verify_request
@@ -323,33 +326,43 @@ class PaymentViewSet(viewsets.GenericViewSet):
     @action(detail=False, methods=['PUT'], url_path=r'buyser_receipt_upload', parser_classes=(MultiPartParser,))
     def buyser_receipt_upload(self, request):
         try:
+            meta_data = {
+                "last_five_digit": {},
+                "receipt_image": {}
+            }
             image = request.data["image"]
-            if not image:
-                raise ApiVerifyError("no image found")
+            print(f"image: {image}")
+            # if not image:
+            #     raise ApiVerifyError("no image found")
             order_id = request.data["order_id"]
+            last_five_digit = request.data["last_five_digit"]
             print(f"order_id: {order_id}")
+            print(f"last_five_digit: {last_five_digit}")
             if not Order.objects.filter(id=order_id).exists():
                 raise ApiVerifyError("no order found")
 
             order = Order.objects.get(id=order_id)
 
             # api_user = request.user.api_users.get(type='user')
-            api_user = user.User.objects.get(id=12)
+            api_user = Order.objects.get(id=order_id).campaign.created_by
             print(api_user)
             platform_name = order.platform
             print(f"platform_name: {platform_name}")
             platform_id = order.platform_id
             print(f"platform_id: {platform_id}")
-            campaign_id = order.campaign_id
-
             _, user_subscription = verify_request(
                 api_user, platform_name, platform_id)
 
-            image_path = default_storage.save(
-                f'{user_subscription.id}/order/{order.id}/receipt/{image.name}', ContentFile(image.read()))
-            print(image_path)
-            order.image = settings.GS_URL + image_path
+            if image != "undefined":
+                image_path = default_storage.save(
+                    f'{user_subscription.id}/order/{order.id}/receipt/{image.name}', ContentFile(image.read()))
+                image_path = settings.GS_URL + image_path
+                meta_data["receipt_image"] = image_path
+            if last_five_digit != "":
+                meta_data["last_five_digit"] = last_five_digit
+            order.meta = meta_data
             order.save()
+            print(meta_data)
             return Response({"message": "upload succeed"}, status=status.HTTP_200_OK)
         except Exception as e:
             print(e)
