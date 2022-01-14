@@ -225,7 +225,7 @@ class Verify():
             def verify(request, pk=None):
                 api_user, platform_id, platform_name, campaign_id, campaign_product_id, qty, order_product_id, search= getparams(
                 request, ("platform_id", "platform_name", "campaign_id", "campaign_product_id", "qty", "order_product_id", "search"))
-
+                print (api_user)
                 Verify.verify_user(api_user)
                 platform = Verify.get_platform(api_user, platform_name, platform_id)
                 campaign = Verify.get_campaign_from_platform(platform, campaign_id)
