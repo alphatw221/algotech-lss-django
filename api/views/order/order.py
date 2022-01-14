@@ -274,7 +274,7 @@ class OrderViewSet(viewsets.ModelViewSet):
     @api_error_handler
     def buyer_retrieve_order(self, request, pk=None):
 
-          # OPERATION_CODE_NAME: AGILE
+        # OPERATION_CODE_NAME: AGILE
         if request.user.id in settings.ADMIN_LIST:
             order = Order.objects.get(id=pk)
             serializer = OrderSerializer(order)
