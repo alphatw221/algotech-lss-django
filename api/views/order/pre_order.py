@@ -15,71 +15,6 @@ from backend.pymongo.mongodb import db
 from django.db.models import Q
 
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
-# from api.utils.common.common import getparams
-
-# def verify_buyer_request(api_user, platform_name, campaign_id, order_product_id=None, campaign_product_id=None):
-    
-#     if platform_name not in platform_dict:
-#         raise ApiVerifyError("no platfrom name found")
-    
-#     if platform_name=='facebook':
-#         customer_id=api_user.facebook_info['id']
-#     else:
-#         raise ApiVerifyError('platform not support')
-
-#     if not PreOrder.objects.filter(platform=platform_name, customer_id=customer_id, campaign_id=campaign_id).exists():
-#         raise ApiVerifyError('no pre_order found')
-#     pre_order =PreOrder.objects.get(platform=platform_name, customer_id=customer_id, campaign_id=campaign_id)
-    
-#     if order_product_id:
-#         if not pre_order.order_products.filter(id=order_product_id).exists():
-#             raise ApiVerifyError("no order_product found")
-#         order_product = pre_order.order_products.get(
-#             id=order_product_id)
-#         campaign_product = order_product.campaign_product
-
-#         return pre_order, campaign_product, order_product
-
-#     if campaign_product_id:
-#         if not pre_order.campaign.products.filter(id=campaign_product_id).exists():
-#             raise ApiVerifyError("no campaign_product found")
-#         campaign_product = pre_order.campaign.products.get(
-#             id=campaign_product_id)
-#         if campaign_product.type=='lucky_draw' or campaign_product.type=='lucky_draw-fast':
-#             raise ApiVerifyError("invalid campaign_product")
-#         return pre_order, campaign_product
-
-#     return pre_order
-
-# def verify_seller_request(api_user, platform_name, platform_id, campaign_id, pre_order_id=None, order_product_id=None, campaign_product_id=None):
-#     Verify.verify_user(api_user)
-#     platform = Verify.get_platform(api_user, platform_name, platform_id)
-#     campaign = Verify.get_campaign(platform, campaign_id)
-
-#     if pre_order_id:
-#         if not campaign.pre_orders.filter(id=pre_order_id).exists():
-#             raise ApiVerifyError('no pre_order found')
-#         pre_order = campaign.pre_orders.get(id=pre_order_id)
-
-#         if order_product_id:
-#             if not pre_order.order_products.filter(id=order_product_id).exists():
-#                 raise ApiVerifyError("no order_product found")
-#             order_product = pre_order.order_products.get(
-#                 id=order_product_id)
-#             campaign_product = order_product.campaign_product
-#             return platform, campaign, pre_order, campaign_product, order_product
-
-#         if campaign_product_id:
-#             if not pre_order.campaign.products.filter(id=campaign_product_id).exists():
-#                 raise ApiVerifyError("no campaign_product found")
-#             campaign_product = pre_order.campaign.products.get(
-#                 id=campaign_product_id)
-#             return platform, campaign, pre_order, campaign_product
-
-#         return platform, campaign, pre_order
-
-#     return platform, campaign
-
 
 class PreOrderPagination(PageNumberPagination):
     page_query_param = 'page'
@@ -96,11 +31,6 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['GET'], url_path=r'seller_retrieve')
     @api_error_handler
     def seller_retrieve_pre_order(self, request, pk=None):
-        # api_user, platform_id, platform_name, campaign_id = getparams(
-        #     request, ("platform_id", "platform_name", "campaign_id"))
-
-        # _, _, pre_order = verify_seller_request(
-        #     api_user, platform_name, platform_id, campaign_id, pre_order_id=pk)
         api_user, platform, campaign, pre_order, order_product, campaign_product, qty, search = Verify.PreOrderApi.FromSeller.verify(request)
         serializer = PreOrderSerializer(pre_order)
 
@@ -136,11 +66,6 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     @api_error_handler
     def seller_pre_order_checkout(self, request, pk=None):
 
-        # api_user, platform_id, platform_name, campaign_id = getparams(
-        #     request, ("platform_id", "platform_name", "campaign_id"))
-
-        # _, _, pre_order = verify_seller_request(
-        #     api_user, platform_name, platform_id, campaign_id, pre_order_id=pk)
         api_user, platform, campaign, pre_order, order_product, campaign_product, qty, search = Verify.PreOrderApi.FromSeller.verify(request)
         api_order = PreOrderHelper.checkout(api_user, pre_order)
         return Response(api_order, status=status.HTTP_200_OK)
@@ -148,11 +73,6 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['GET'], url_path=r'seller_add')
     @api_error_handler
     def seller_add_order_product(self, request, pk=None):
-        # api_user, platform_id, platform_name, campaign_id, campaign_product_id, qty = getparams(
-        #     request, ("platform_id", "platform_name", "campaign_id", "campaign_product_id", "qty"))
-
-        # _, _, pre_order, campaign_product = verify_seller_request(
-        #     api_user, platform_name, platform_id, campaign_id, pre_order_id=pk, campaign_product_id=campaign_product_id)
         api_user, platform, campaign, pre_order, order_product, campaign_product, qty, search = Verify.PreOrderApi.FromSeller.verify(request)
         api_order_product = PreOrderHelper.add_product(
             api_user, pre_order, campaign_product, qty)
@@ -161,12 +81,6 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['GET'], url_path=r'seller_update')
     @api_error_handler
     def seller_update_order_product(self, request, pk=None):
-
-        # api_user, platform_id, platform_name, campaign_id, order_product_id, qty = getparams(
-        #     request, ("platform_id", "platform_name", "campaign_id", "order_product_id", "qty"))
-
-        # _, _, pre_order, campaign_product, order_product = verify_seller_request(
-        #     api_user, platform_name, platform_id, campaign_id, pre_order_id=pk, order_product_id=order_product_id)
         api_user, platform, campaign, pre_order, order_product, campaign_product, qty, search = Verify.PreOrderApi.FromSeller.verify(request)
         api_order_product = PreOrderHelper.update_product(
             api_user, pre_order, order_product, campaign_product, qty)
@@ -175,12 +89,6 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['GET'], url_path=r'seller_delete')
     @api_error_handler
     def seller_delete_order_product(self, request, pk=None):
-
-        # api_user, platform_id, platform_name, campaign_id, order_product_id = getparams(
-        #     request, ("platform_id", "platform_name", "campaign_id", "order_product_id"))
-
-        # _, _, pre_order, campaign_product, order_product = verify_seller_request(
-        #     api_user, platform_name, platform_id, campaign_id, pre_order_id=pk, order_product_id=order_product_id)
         api_user, platform, campaign, pre_order, order_product, campaign_product, qty, search = Verify.PreOrderApi.FromSeller.verify(request)
         PreOrderHelper.delete_product(
             api_user, pre_order, order_product, campaign_product)

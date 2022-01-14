@@ -63,7 +63,7 @@ class OrderProduct(models.Model):
     meta = models.JSONField(null=True, blank=True, default=dict)
 
 
-    
+    subtotal = models.FloatField(null=True, blank=True, default=0)
 
 
 class OrderProductSerializer(serializers.ModelSerializer):

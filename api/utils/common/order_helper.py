@@ -16,7 +16,6 @@ from api.utils.error_handle.error_handler.api_error_handler import api_error_han
 class PreOrderHelper():
 
     @classmethod
-    @api_error_handler
     def update_product(cls, api_user, pre_order, order_product, campaign_product, qty):
         with client.start_session() as session:
             with session.start_transaction():
@@ -37,7 +36,7 @@ class PreOrderHelper():
                     {'id': api_campaign_product['id']}, {"$inc": {'qty_sold': qty_difference}}, session=session)
 
                 db.api_order_product.update_one(
-                    {'id': api_order_product['id']}, {"$set": {'qty': qty}}, session=session)
+                    {'id': api_order_product['id']}, {"$set": {'qty': qty,'subtotal': float(qty*api_campaign_product["price"])}}, session=session)
 
                 products = api_pre_order['products']
                 products[str(api_campaign_product['id'])]['qty'] = qty
@@ -58,7 +57,6 @@ class PreOrderHelper():
         return db.api_order_product.find_one({"id": api_order_product['id']},{"_id":False})
 
     @classmethod
-    @api_error_handler
     def add_product(cls, api_user, pre_order, campaign_product, qty):
         with client.start_session() as session:
             with session.start_transaction():
@@ -91,6 +89,7 @@ class PreOrderHelper():
                     "currency" : api_campaign_product["currency"],
                     "currency_sign" : api_campaign_product["currency_sign"],
                     "image" : api_campaign_product["image"],
+                    "subtotal":float(qty*api_campaign_product["price"])
                 })
                 db.api_order_product.insert_one(template, session=session)
 
@@ -127,7 +126,6 @@ class PreOrderHelper():
         return db.api_order_product.find_one({"id": increment_id},{"_id":False})
 
     @classmethod
-    @api_error_handler
     def delete_product(cls, api_user, pre_order, order_product, campaign_product):
         with client.start_session() as session:
             with session.start_transaction():
@@ -164,7 +162,6 @@ class PreOrderHelper():
         return True
 
     @classmethod
-    @api_error_handler
     def checkout(cls, api_user, pre_order):
         with client.start_session() as session:
             with session.start_transaction():
@@ -298,6 +295,7 @@ class PreOrderHelper():
                     "currency" : api_campaign_product["currency"],
                     "currency_sign" : api_campaign_product["currency_sign"],
                     "image" : api_campaign_product["image"],
+                    "subtotal":float(qty*api_campaign_product["price"])
                 })
                 db.api_order_product.insert_one(template, session=session)
 
@@ -347,7 +345,7 @@ class PreOrderHelper():
                     {'id': api_campaign_product['id']}, {"$inc": {'qty_sold': qty_difference}}, session=session)
 
                 db.api_order_product.update_one(
-                    {'id': api_order_product['id']}, {"$set": {'qty': qty}}, session=session)
+                    {'id': api_order_product['id']}, {"$set": {'qty': qty,'subtotal': float(qty*api_campaign_product["price"])}}, session=session)
 
                 products = api_pre_order['products']
                 products[str(api_campaign_product['id'])]['qty'] = qty

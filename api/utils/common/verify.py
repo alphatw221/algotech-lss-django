@@ -7,6 +7,8 @@ from api.models.instagram.instagram_profile import InstagramProfile
 from api.models.order.order import Order
 from api.models.order.pre_order import PreOrder
 
+from api.utils.error_handle.error.api_error import ApiVerifyError
+
 def getparams(request, params: tuple, with_user=True, seller=True):
     ret=[]
     if with_user:
@@ -24,9 +26,6 @@ def getparams(request, params: tuple, with_user=True, seller=True):
 
 platform_dict = {'facebook':FacebookPage, 'youtube':YoutubeChannel, 'instagram':InstagramProfile}
 
-
-class ApiVerifyError(Exception):
-    pass
 
 
 class VerifyRequestFromWhome(ABC):
