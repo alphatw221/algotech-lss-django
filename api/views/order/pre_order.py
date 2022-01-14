@@ -4,8 +4,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
+from api.models.campaign.campaign import Campaign
+from api.models.order.order_product import OrderProduct
 
 from api.models.order.pre_order import PreOrder, PreOrderSerializer, PreOrderSerializerUpdatePaymentShipping
+from api.utils.common.common import getparams
 from api.utils.common.verify import Verify
 from api.utils.common.verify import ApiVerifyError, platform_dict
 
@@ -98,6 +101,20 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['GET'], url_path=r'campaign_info')
     @api_error_handler
     def get_campaign_info(self, request, pk=None):
+
+        # OPERATION_CODE_NAME: AGILE
+        if request.user.id==1:
+            pre_order=PreOrder.objects.get(id=pk)
+            campaign = db.api_campaign.find_one({'id': pre_order.campaign_id})
+            data_dict = {
+                'campaign_id': pre_order.campaign_id,
+                'platform': pre_order.platform,
+                'platform_id': pre_order.platform_id,
+                'meta_logistic': campaign['meta_logistic']
+            }
+
+            return Response(data_dict, status=status.HTTP_200_OK)
+
         api_user, pre_order, order_product, campaign_product, qty = Verify.PreOrderApi.FromBuyer.verify(request, pk)
         campaign = db.api_campaign.find_one({'id': pre_order.campaign_id})
         data_dict = {
@@ -112,6 +129,20 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['POST'], url_path=r'delivery_info')
     @api_error_handler
     def update_buyer_submit(self, request, pk=None):
+
+        # OPERATION_CODE_NAME: AGILE
+        if request.user.id==1:
+            pre_order=PreOrder.objects.get(id=pk)
+            pick_up_note = {'pick_up_note' : request.data['description']}
+            request.data['meta'] = pick_up_note
+            serializer = PreOrderSerializerUpdatePaymentShipping(pre_order, data=request.data, partial=True)
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            serializer.save()
+            pre_order = PreOrder.objects.get(id=pk)
+            verify_message = Verify.PreOrderApi.FromBuyer.verify_delivery_info(pre_order)
+            return Response(verify_message, status=status.HTTP_200_OK)
+
         api_user, pre_order, order_product, campaign_product, qty = Verify.PreOrderApi.FromBuyer.verify(request, pk)
         pick_up_note = {'pick_up_note' : request.data['description']}
         request.data['meta'] = pick_up_note
@@ -126,6 +157,13 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['GET'], url_path=r'buyer_retrieve')
     @api_error_handler
     def buyer_retrieve_pre_order(self, request, pk=None):
+
+        #OPERATION_CODE_NAME: AGILE
+        if request.user.id==1:
+            pre_order=PreOrder.objects.get(id=pk)
+            serializer = PreOrderSerializer(pre_order)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
         api_user, pre_order, order_product, campaign_product, qty = Verify.PreOrderApi.FromBuyer.verify(request, pk)
         serializer = PreOrderSerializer(pre_order)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -133,6 +171,13 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['GET'], url_path=r'buyer_checkout')
     @api_error_handler
     def buyer_pre_order_checkout(self, request, pk=None):
+
+        #OPERATION_CODE_NAME: AGILE
+        if request.user.id==1:
+            pre_order=PreOrder.objects.get(id=pk)
+            api_order = PreOrderHelper.checkout(None, pre_order)
+            return Response(api_order, status=status.HTTP_200_OK)
+
         api_user, pre_order, order_product, campaign_product, qty = Verify.PreOrderApi.FromBuyer.verify(request, pk)
         api_order = PreOrderHelper.checkout(api_user, pre_order)
         return Response(api_order, status=status.HTTP_200_OK)
@@ -140,6 +185,15 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['GET'], url_path=r'buyer_add')
     @api_error_handler
     def buyer_add_order_product(self, request, pk=None):
+
+         #OPERATION_CODE_NAME: AGILE
+        if request.user.id==1:
+            campaign_product_id, qty = getparams(request, ('campaign_product_id', 'qty'),with_user=False)
+            campaign_product = Campaign.objects.get(id=campaign_product_id)
+            pre_order=PreOrder.objects.get(id=pk)
+            api_order_product = PreOrderHelper.add_product(None, pre_order, campaign_product, qty)
+            return Response(api_order_product, status=status.HTTP_200_OK)
+
         api_user, pre_order, order_product, campaign_product, qty = Verify.PreOrderApi.FromBuyer.verify(request, pk)
         api_order_product = PreOrderHelper.add_product(api_user, pre_order, campaign_product, qty)
         return Response(api_order_product, status=status.HTTP_200_OK)
@@ -147,6 +201,16 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['GET'], url_path=r'buyer_update')
     @api_error_handler
     def buyer_update_order_product(self, request, pk=None):
+
+        # OPERATION_CODE_NAME: AGILE
+        if request.user.id==1:
+            order_product_id, qty = getparams(request, ('order_product_id', 'qty'),with_user=False)
+            order_product = OrderProduct.objects.get(id=order_product_id)
+            pre_order=PreOrder.objects.get(id=pk)
+            api_order_product = PreOrderHelper.update_product(
+                None, pre_order, order_product, order_product.campaign_product, qty)
+            return Response(api_order_product, status=status.HTTP_200_OK)
+            
         api_user, pre_order, order_product, campaign_product, qty = Verify.PreOrderApi.FromBuyer.verify(request, pk)
         api_order_product = PreOrderHelper.update_product(
             api_user, pre_order, order_product, campaign_product, qty)
@@ -155,6 +219,17 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['GET'], url_path=r'buyer_delete')
     @api_error_handler
     def buyer_delete_order_product(self, request, pk=None):
+
+        # OPERATION_CODE_NAME: AGILE
+        if request.user.id==1:
+            order_product_id, = getparams(request, ('order_product_id',),with_user=False)
+            order_product = OrderProduct.objects.get(id=order_product_id)
+            pre_order=PreOrder.objects.get(id=pk)
+            PreOrderHelper.delete_product(
+                None, pre_order, order_product, order_product.campaign_product)
+            return Response({'message':"delete success"}, status=status.HTTP_200_OK)
+
+
         api_user, pre_order, order_product, campaign_product, qty = Verify.PreOrderApi.FromBuyer.verify(request, pk)
         PreOrderHelper.delete_product(
             api_user, pre_order, order_product, campaign_product)

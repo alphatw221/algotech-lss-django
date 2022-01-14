@@ -45,7 +45,7 @@ class PreOrderHelper():
                     {'id': pre_order.id},
                     {
                         "$set": {
-                            "lock_at": datetime.now() if api_user.type == 'customer' else None,
+                            "lock_at": datetime.now() if api_user and api_user.type == 'customer' else None,
                             "products": products
                         },
                         "$inc": {
@@ -114,7 +114,7 @@ class PreOrderHelper():
                     {'id': pre_order.id},
                     {
                         "$set": {
-                            "lock_at": datetime.now() if not api_user or api_user.type == 'customer' else None,
+                            "lock_at": datetime.now() if api_user and api_user.type == 'customer' else None,
                             "products": products
                         },
                         "$inc": {
@@ -151,7 +151,7 @@ class PreOrderHelper():
                     {'id': pre_order.id},
                     {
                         "$set": {
-                            "lock_at": datetime.now() if api_user.type == 'customer' else None,
+                            "lock_at": datetime.now() if api_user and api_user.type == 'customer' else None,
                             "products": products
                         },
                         "$inc": {

@@ -15,7 +15,7 @@ from django.core.files.storage import default_storage
 from rest_framework.parsers import MultiPartParser, FormParser, FileUploadParser
 
 import api
-from api.utils.common.common import api_error_handler, getdata, getparams, ApiVerifyError
+from api.utils.common.common import getdata, getparams
 from api.utils.common.common import getdata, getparams
 from api.models.order.order import Order
 from api.models.user import user
@@ -28,13 +28,14 @@ import datetime
 import hashlib
 from django.http import HttpResponseRedirect
 from api.models.user.user_subscription import UserSubscriptionSerializerMeta
-from api.utils.common.common import api_error_handler, getparams, ApiVerifyError
+from api.utils.common.common import getparams
 from api.views.payment._payment import HitPay_Helper
 from api.views.user.user_subscription import verify_request
 from backend.pymongo.mongodb import db
 
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 from api.utils.error_handle.error.api_error import ApiVerifyError
+
 
 platform_dict = {'facebook':FacebookPage, 'youtube':YoutubeChannel, 'instagram':InstagramProfile}
 

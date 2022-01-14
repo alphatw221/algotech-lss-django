@@ -1,14 +1,4 @@
-from api.utils.common.verify import ApiVerifyError
-from rest_framework.response import Response
-from rest_framework import status
-
-from datetime import datetime
-from backend.google_cloud_logging.google_cloud_logging import ApiLogEntry
-import functools, logging, traceback
-from django.core.exceptions import ObjectDoesNotExist
-from api.utils.common.order_helper import PreOrderErrors
-logger = logging.getLogger(__name__)
-
+from api.utils.error_handle.error.api_error import ApiVerifyError
 
 def getparams(request, params: tuple, with_user=True, seller=True):
     ret=[]
@@ -31,29 +21,3 @@ def getdata(request, data: tuple):
         ret.append(request.data.get(d, None))
     return ret
 
-
-# def api_error_handler(func):
-#     @functools.wraps(func)
-#     def wrapper(*args, **kwargs):
-#         try:
-#             return func(*args, **kwargs)
-#         except ApiVerifyError as e:
-#             print(traceback.format_exc())
-#             # ApiLogEntry.write_entry(str(datetime.now()) + ' - ' +  traceback.format_exc())
-#             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-#         except KeyError as e:
-#             print(traceback.format_exc())
-#             # ApiLogEntry.write_entry(str(datetime.now()) + ' - ' +  traceback.format_exc())
-#             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-#         except ObjectDoesNotExist as e:
-#             print(traceback.format_exc())
-#             # ApiLogEntry.write_entry(str(datetime.now()) + ' - ' +  traceback.format_exc())
-#             return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-#         except PreOrderErrors.PreOrderException as e:
-#             print(traceback.format_exc())
-#             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-#         except Exception as e:
-#             print(traceback.format_exc())
-#             # ApiLogEntry.write_entry(str(datetime.now()) + ' - ' +  traceback.format_exc())
-#             return Response({"message": str(datetime.now())+"server error."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-#     return wrapper
