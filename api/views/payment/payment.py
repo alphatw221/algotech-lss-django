@@ -66,6 +66,9 @@ class PaymentViewSet(viewsets.GenericViewSet):
 
         firstdata = user_subscription.meta_payment.get('firstdata')
 
+
+        #TODO  取campaign meta_payment
+
         if not firstdata:
             raise ApiVerifyError('no firstdata credential')
 

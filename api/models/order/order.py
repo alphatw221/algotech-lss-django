@@ -107,7 +107,7 @@ class Order(models.Model):
     platform_id = models.IntegerField(blank=True, null=True, default=None)
 
     type = models.CharField(max_length=255, null=True, blank=True)
-    status = models.CharField(max_length=255, null=True, blank=True)
+    status = models.CharField(max_length=255, null=True, blank=True, default='proceed')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
