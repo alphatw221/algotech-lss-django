@@ -4,7 +4,6 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 
 from api.models.order.order import Order, OrderSerializer
-from api.utils.common.verify import ApiVerifyError
 from api.utils.common.verify import Verify
 from api.utils.common.common import *
 
@@ -13,6 +12,7 @@ from dateutil.relativedelta import relativedelta
 import datetime, operator
 
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
+from api.utils.common.common import getparams
 
 def verify_seller_request(api_user):
     Verify.verify_user(api_user)
@@ -168,6 +168,49 @@ class DashboardViewSet(viewsets.ModelViewSet):
                 campaignRank = dict(sorted(campaignRank.items(), key=operator.itemgetter(1), reverse=True))
 
         return Response(campaignRank, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['GET'], url_path=r'campaign_manage_order')
+    @api_error_handler
+    def seller_total_sales(self, request):
+        api_user, platform, campaign, pre_order, order_product, campaign_product, qty, search = Verify.PreOrderApi.FromSeller.verify(request)
+        is_user = verify_seller_request(api_user)
+        campaign_id = campaign.id
+        
+        manage_order = {}
+        if is_user:
+            pre_order_qty, order_qty, close_rate, uncheckout_rate, complete_sales, comment_count = 0, 0, 0, 0, 0, 0
+            pre_order_datas = db.api_pre_order.find({'campaign_id': campaign_id})
+            for pre_order_data in pre_order_datas:
+                for key, val in pre_order_data['products'].items():
+                    pre_order_qty += val['qty']
+            order_datas = db.api_order.find({'campaign_id': campaign_id, 'status': 'complete'})
+            for order_data in order_datas:
+                for key, val in order_data['products'].items():
+                    order_qty += val['qty']
+            # 商品數量成交量
+            # close_rate = order_qty / (order_qty + pre_order_qty)
+            pre_order_count = db.api_pre_order.find({'campaign_id': campaign_id}).count()
+            order_complete_count = db.api_order.find({'campaign_id': campaign_id, 'status': 'complete'}).count()
+            order_proceed_count = db.api_order.find({'campaign_id': campaign_id, 'status': 'proceed'}).count()
+            order_datas = db.api_order.find({'campaign_id': campaign_id, 'status': 'complete'})
+            comment_count = db.api_campaign_comment.find({'campaign_id': campaign_id}).count()
+            for order_data in order_datas:
+                for key, val in order_data['products'].items():
+                    # 完成訂單總金額
+                    complete_sales += val['subtotal']
+            # 訂單成交量
+            close_rate = order_complete_count / (order_complete_count + pre_order_count) * 100
+            # 未完成付款
+            uncheckout_rate = order_proceed_count / (order_complete_count + order_proceed_count) * 100
+            
+            manage_order['close_rate'] = close_rate
+            manage_order['complete_sales'] = complete_sales
+            manage_order['uncheckout_rate'] = uncheckout_rate
+            manage_order['comment_count'] = comment_count
+            manage_order['cart_qty'] = pre_order_qty
+            manage_order['order_qty'] = order_qty
+
+        return Response(manage_order, status=status.HTTP_200_OK)
                 
                 
                 

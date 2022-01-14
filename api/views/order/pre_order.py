@@ -138,8 +138,6 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         # OPERATION_CODE_NAME: AGILE
         if request.user.id in settings.ADMIN_LIST:
             pre_order=PreOrder.objects.get(id=pk)
-            pick_up_note = {'pick_up_note' : request.data['description']}
-            request.data['meta'] = pick_up_note
             serializer = PreOrderSerializerUpdatePaymentShipping(pre_order, data=request.data, partial=True)
             if not serializer.is_valid():
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -149,8 +147,6 @@ class PreOrderViewSet(viewsets.ModelViewSet):
             return Response(verify_message, status=status.HTTP_200_OK)
 
         api_user, pre_order, order_product, campaign_product, qty = Verify.PreOrderApi.FromBuyer.verify(request, pk)
-        pick_up_note = {'pick_up_note' : request.data['description']}
-        request.data['meta'] = pick_up_note
         serializer = PreOrderSerializerUpdatePaymentShipping(pre_order, data=request.data, partial=True)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
