@@ -302,7 +302,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         order = verify_buyer_request(
             api_user, platform_name, campaign_id)
         
-        request.data['status'] = 'unpaid'
+        request.data['status'] = 'complete'
         serializer = OrderSerializerUpdatePaymentShipping(order, data=request.data, partial=True)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
