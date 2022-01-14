@@ -20,6 +20,9 @@ from django.db.models import Q
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 
 from django.conf import settings
+import traceback
+from api.utils.error_handle.error.pre_order_error import PreOrderErrors
+from django.core.exceptions import ObjectDoesNotExist
 
 class PreOrderPagination(PageNumberPagination):
     page_query_param = 'page'
@@ -198,6 +201,64 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         api_user, pre_order, order_product, campaign_product, qty = Verify.PreOrderApi.FromBuyer.verify(request, pk)
         api_order_product = PreOrderHelper.add_product(api_user, pre_order, campaign_product, qty)
         return Response(api_order_product, status=status.HTTP_200_OK)
+
+
+    @action(detail=True, methods=['POST'], url_path=r'buyer_bulk_add')
+    @api_error_handler
+    def buyer_buld_add_order_product(self, request, pk=None):
+        error_message={}
+
+         #OPERATION_CODE_NAME: AGILE
+        if request.user.id in settings.ADMIN_LIST:
+            pre_order=PreOrder.objects.get(id=pk)
+            for campaign_product_id,qty in request.data.items():
+                try:
+                    campaign_product_id = int(campaign_product_id)
+                    campaign_product = pre_order.campaign.products.get(id=campaign_product_id)
+                    PreOrderHelper.add_product(None, pre_order, campaign_product, qty)
+                except KeyError as e:
+                    print(e)
+                    error_message[campaign_product_id]=str(e)
+                except ObjectDoesNotExist as e:
+                    print(e)
+                    error_message[campaign_product_id]=str(e)
+                except PreOrderErrors.PreOrderException as e:
+                    print(e)
+                    error_message[campaign_product_id]=str(e)
+
+                except ApiVerifyError as e:
+                    print(e)
+                    error_message[campaign_product_id]=str(e)
+                except Exception as e:
+                    print(e)
+                    error_message[campaign_product_id]="server error"
+
+            if error_message.em:
+                return Response(error_message, status=status.HTTP_400_BAD_REQUEST)
+
+            return Response('success', status=status.HTTP_200_OK)
+
+        api_user = Verify.get_customer_user(request)
+        pre_order=PreOrder.objects.get(id=pk)
+        for campaign_product_id,qty in request.data.items():
+            try:
+                Verify.user_match_order(api_user, pre_order)
+                campaign_product_id = int(campaign_product_id)
+                campaign_product = pre_order.campaign.products.get(id=campaign_product_id)
+                api_order_product = PreOrderHelper.add_product(api_user, pre_order, campaign_product, qty)
+            except ApiVerifyError as e:
+                print(e)
+                error_message[campaign_product_id]=str(e)
+            except Exception as e:
+                print(e)
+                error_message[campaign_product_id]="server error"
+
+
+        if error_message:
+            return Response(error_message, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response('success', status=status.HTTP_200_OK)
+
 
     @action(detail=True, methods=['GET'], url_path=r'buyer_update')
     @api_error_handler

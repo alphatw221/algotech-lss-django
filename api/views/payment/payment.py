@@ -14,8 +14,7 @@ from django.conf import settings
 from django.core.files.storage import default_storage
 from rest_framework.parsers import MultiPartParser, FormParser, FileUploadParser
 
-import api
-from api.utils.common.common import getdata, getparams, ApiVerifyError
+
 from api.utils.common.common import getdata, getparams
 from api.models.order.order import Order
 from api.models.user import user
@@ -28,8 +27,7 @@ import datetime
 import hashlib
 from django.http import HttpResponseRedirect
 from api.models.user.user_subscription import UserSubscriptionSerializerMeta
-from api.utils.common.common import getparams, ApiVerifyError
-from api.utils.common.common import getparams
+from api.utils.common.verify import Verify
 from api.views.payment._payment import HitPay_Helper
 from api.views.user.user_subscription import verify_request
 from backend.pymongo.mongodb import db
@@ -65,6 +63,9 @@ class PaymentViewSet(viewsets.GenericViewSet):
         user_subscription = user_subscriptions[0]
 
         firstdata = user_subscription.meta_payment.get('firstdata')
+
+
+        #TODO  取campaign meta_payment
 
         if not firstdata:
             raise ApiVerifyError('no firstdata credential')
@@ -369,7 +370,20 @@ class PaymentViewSet(viewsets.GenericViewSet):
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=False, methods=['GET'], url_path=r'get_direct_payment_info')
+    @api_error_handler
     def get_direct_payment_info(self, request):
+
+        api_user, order_id = getparams(request,('order_id',), seller=False)
+
+        order=Verify.get_order(order_id)
+        Verify.user_match_order(api_user, order)
+        meta_payment = order.campaign.meta_payment
+        data = {
+            "is_general_payment": meta_payment.get("is_general_payment",0),
+            "direct_payment": meta_payment.get("direct_payment","")
+        }
+
+        return Response(data, status=status.HTTP_200_OK)
         try:
             order_id = request.GET["order_id"]
             if not Order.objects.filter(id=order_id).exists():

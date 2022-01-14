@@ -63,6 +63,18 @@ class Verify():
         return False
 
     @staticmethod
+    def get_customer_user(request):
+        if not request.user.api_users.filter(type='customer').exists():
+            raise ApiVerifyError('no api_user found')
+        return request.user.api_users.get(type='customer')
+
+    @staticmethod
+    def get_seller_user(request):
+        if not request.user.api_users.filter(type='user').exists():
+            raise ApiVerifyError('no api_user found')
+        return request.user.api_users.get(type='user')
+        
+    @staticmethod
     def verify_user(api_user):
         if not api_user:
             raise ApiVerifyError("no user found")
@@ -88,6 +100,12 @@ class Verify():
         if not PreOrder.objects.filter(id=pre_order_id).exists():
             raise ApiVerifyError('no pre_order found')
         return PreOrder.objects.get(id=pre_order_id)
+
+    @staticmethod
+    def get_order(order_id):
+        if not Order.objects.filter(id=order_id).exists():
+            raise ApiVerifyError('no pre_order found')
+        return Order.objects.get(id=order_id)
 
     @staticmethod
     def get_user_subscription(platform):
@@ -140,7 +158,7 @@ class Verify():
     @staticmethod
     def user_match_pre_order(api_user, pre_order):
         pass
-    
+
     @staticmethod
     def user_match_order(api_user, order):
         pass
