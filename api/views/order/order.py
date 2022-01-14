@@ -14,6 +14,7 @@ from django.http import HttpResponse
 from backend.pymongo.mongodb import db
 import xlsxwriter, os.path, io
 from io import StringIO
+from django.conf import settings
 
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 def get_title_map():
@@ -272,6 +273,15 @@ class OrderViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['GET'], url_path=r'buyer_retrieve')
     @api_error_handler
     def buyer_retrieve_order(self, request, pk=None):
+
+          # OPERATION_CODE_NAME: AGILE
+        if request.user.id in settings.ADMIN_LIST:
+            order = Order.objects.get(id=pk)
+            serializer = OrderSerializer(order)
+
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+
         # 先檢查exists 才給request get
         api_user, platform_name, campaign_id = getparams(
             request, ("platform_name", "campaign_id"), seller=False)

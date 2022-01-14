@@ -19,6 +19,8 @@ from django.db.models import Q
 
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 
+from django.conf import settings
+
 class PreOrderPagination(PageNumberPagination):
     page_query_param = 'page'
     page_size_query_param = 'page_size'
@@ -105,7 +107,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     def get_campaign_info(self, request, pk=None):
 
         # OPERATION_CODE_NAME: AGILE
-        if request.user.id==1:
+        if request.user.id in settings.ADMIN_LIST:
             pre_order=PreOrder.objects.get(id=pk)
             campaign = db.api_campaign.find_one({'id': pre_order.campaign_id})
             data_dict = {
@@ -134,7 +136,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     def update_buyer_submit(self, request, pk=None):
 
         # OPERATION_CODE_NAME: AGILE
-        if request.user.id==1:
+        if request.user.id in settings.ADMIN_LIST:
             pre_order=PreOrder.objects.get(id=pk)
             pick_up_note = {'pick_up_note' : request.data['description']}
             request.data['meta'] = pick_up_note
@@ -162,7 +164,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     def buyer_retrieve_pre_order(self, request, pk=None):
 
         #OPERATION_CODE_NAME: AGILE
-        if request.user.id==1:
+        if request.user.id in settings.ADMIN_LIST:
             pre_order=PreOrder.objects.get(id=pk)
             serializer = PreOrderSerializer(pre_order)
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -176,7 +178,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     def buyer_pre_order_checkout(self, request, pk=None):
 
         #OPERATION_CODE_NAME: AGILE
-        if request.user.id==1:
+        if request.user.id in settings.ADMIN_LIST:
             pre_order=PreOrder.objects.get(id=pk)
             api_order = PreOrderHelper.checkout(None, pre_order)
             return Response(api_order, status=status.HTTP_200_OK)
@@ -190,7 +192,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     def buyer_add_order_product(self, request, pk=None):
 
          #OPERATION_CODE_NAME: AGILE
-        if request.user.id==1:
+        if request.user.id in settings.ADMIN_LIST:
             campaign_product_id, qty = getparams(request, ('campaign_product_id', 'qty'),with_user=False)
             campaign_product = Campaign.objects.get(id=campaign_product_id)
             pre_order=PreOrder.objects.get(id=pk)
@@ -206,7 +208,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     def buyer_update_order_product(self, request, pk=None):
 
         # OPERATION_CODE_NAME: AGILE
-        if request.user.id==1:
+        if request.user.id in settings.ADMIN_LIST:
             order_product_id, qty = getparams(request, ('order_product_id', 'qty'),with_user=False)
             order_product = OrderProduct.objects.get(id=order_product_id)
             pre_order=PreOrder.objects.get(id=pk)
@@ -224,7 +226,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     def buyer_delete_order_product(self, request, pk=None):
 
         # OPERATION_CODE_NAME: AGILE
-        if request.user.id==1:
+        if request.user.id in settings.ADMIN_LIST:
             order_product_id, = getparams(request, ('order_product_id',),with_user=False)
             order_product = OrderProduct.objects.get(id=order_product_id)
             pre_order=PreOrder.objects.get(id=pk)
