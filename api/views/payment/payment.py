@@ -14,8 +14,6 @@ from django.conf import settings
 from django.core.files.storage import default_storage
 from rest_framework.parsers import MultiPartParser, FormParser, FileUploadParser
 
-import api
-from api.utils.common.common import getdata, getparams
 from api.utils.common.common import getdata, getparams
 from api.models.order.order import Order
 from api.models.user import user

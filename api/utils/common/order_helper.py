@@ -400,15 +400,13 @@ class OrderHelper():
     def cancel(self, api_user, order):
         with client.start_session() as session:
             with session.start_transaction():
-                api_order = db.api_order.find_one(
-                    {'id': order.id}, session=session)
-                
+                api_order = db.api_order.find_one({'id': order.id}, session=session)
                 campaign_id = api_order['campaign_id']
                 customer_id = api_order['customer_id']
                 pre_order_id = db.api_pre_order.find_one({'campaign_id': campaign_id, 'customer_id': customer_id})['id']
-                
                 products_dict = {}
                 total_count = 0
+
                 order_products = db.api_order_product.find({'campaign_id': campaign_id, 'customer_id': customer_id, 'order_id': order.id})
                 for order_product in order_products:
                     campaign_product_id = order_product['campaign_product_id']
@@ -417,7 +415,6 @@ class OrderHelper():
 
                     if db.api_order_product.find({'order_id': None, 'campaign_id': campaign_id, 'campaign_product_id': campaign_product_id, "customer_id": customer_id}).count() > 0:
                         pre_order_product = db.api_order_product.find({'order_id': None, 'campaign_id': campaign_id, 'campaign_product_id': campaign_product_id, "customer_id": customer_id})
-
                         db.api_order_product.update_one(
                             {'pre_order_id': pre_order_id, 'campaign_product_id': campaign_product_id}, 
                             {'$set': 
@@ -425,9 +422,9 @@ class OrderHelper():
                             }
                         )
                         db.api_order_product.delete_one({'order_id': order.id, 'campaign_product_id': campaign_product_id})
-
-                        product_dict['qty'] = order_product['qty'] + pre_order_product['qty']
-                        product_dict['price'] = price
+                        product_key = ['order_product_id', 'name', 'image', 'price', 'type', 'currency', 'currency_sign', 'qty', 'subtotal']
+                        product_val = [pre_order_product['id'], pre_order_product['name'], pre_order_product['image'], pre_order_product['price'], pre_order_product['type'], pre_order_product['currency'], pre_order_product['currency_sign'], order_product['qty'] + pre_order_product['qty'], order_product['subtotal'] + pre_order_product['subtotal']]
+                        product_dict = dict(zip(product_key, product_val))
                         total_count += (order_product['qty'] + pre_order_product['qty']) * price
                     else:
                         db.api_order_product.update_one(
@@ -436,19 +433,20 @@ class OrderHelper():
                                 {'pre_order_id': pre_order_id, 'order_id': None}
                             }
                         )
-
-                        product_dict['qty'] = order_product['qty']
-                        product_dict['price'] = price
+                        product_key = ['order_product_id', 'name', 'image', 'price', 'type', 'currency', 'currency_sign', 'qty', 'subtotal']
+                        product_val = [order_product['id'], order_product['name'], order_product['image'], order_product['price'], order_product['type'], order_product['currency'], order_product['currency_sign'], order_product['qty'], order_product['subtotal']]
+                        product_dict = dict(zip(product_key, product_val))
                         total_count += order_product['qty'] * price
                     products_dict[str(campaign_product_id)] = product_dict
+
+                pre_order_key = ['shipping_first_name', 'shipping_last_name', 'shipping_email', 'shipping_phone', 'shipping_address_1', 'shipping_location', 'shipping_region', 'shipping_postcode', 'shipping_cost', 'products', 'subtotal']
+                pre_order_val = ['', '', '', '', '', '', '', '', 0, products_dict, total_count]
+                pre_order_dict = dict(zip(pre_order_key, pre_order_val))
                 db.api_pre_order.update_one(
                     {'id': pre_order_id},
-                    {'$set': 
-                        {'products': products_dict, 'total': total_count}
-                    }
+                    {'$set': pre_order_dict }
                 )
                 db.api_order.delete_one({'id': order.id})
-
         return pre_order_id
     
     @classmethod
