@@ -283,11 +283,11 @@ class OrderViewSet(viewsets.ModelViewSet):
 
 
         # 先檢查exists 才給request get
-        api_user, platform_name, campaign_id = getparams(
-            request, ("platform_name", "campaign_id"), seller=False)
+        api_user, = getparams(
+            request, (), seller=False)
 
-        order = verify_buyer_request(
-            api_user, platform_name, campaign_id)
+        order = Order.objects.get(id = pk)
+        Verify.user_match_pre_order(api_user, order)
 
         serializer = OrderSerializer(order)
 

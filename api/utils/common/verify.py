@@ -140,6 +140,10 @@ class Verify():
     @staticmethod
     def user_match_pre_order(api_user, pre_order):
         pass
+    
+    @staticmethod
+    def user_match_order(api_user, order):
+        pass
 
     class PreOrderApi():
 
