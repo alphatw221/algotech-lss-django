@@ -155,6 +155,8 @@ class PreOrderSerializerUpdatePaymentShipping(serializers.ModelSerializer):
                   "shipping_remark",
                   "shipping_date",
                   "shipping_time",
+                  "shipping_cost",
+                  "total",
                   "payment_first_name",
                   "payment_last_name",
                   "payment_gender",
