@@ -191,7 +191,7 @@ class DashboardViewSet(viewsets.ModelViewSet):
         is_user = verify_seller_request(api_user)
         campaign_id = campaign.id
         user_id = int(api_user.id)
-
+        
         manage_order = {}
         if is_user:
             campaign_datas = db.api_campaign.find({'created_by_id': user_id})
@@ -249,8 +249,8 @@ class DashboardViewSet(viewsets.ModelViewSet):
             manage_order['comment_count'] = comment_count
             manage_order['cart_qty'] = pre_order_qty
             manage_order['order_qty'] = order_qty
-            manage_order['close_rate_raise'] = campaign_order_average_close_rate
-            manage_order['uncheckout_rate_raise'] = campaign_order_average_uncheck_rate
+            manage_order['close_rate_raise'] = close_rate - campaign_order_average_close_rate
+            manage_order['uncheckout_rate_raise'] = uncheckout_rate - campaign_order_average_uncheck_rate
             manage_order['campaign_sales_raise'] = complete_sales / campaign_sales_average
             manage_order['comment_count_raise'] = comment_count / comment_count_average
 
