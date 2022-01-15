@@ -74,14 +74,14 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     @api_error_handler
     def seller_pre_order_checkout(self, request, pk=None):
 
-        api_user, platform, campaign, pre_order, order_product, campaign_product, qty, search = Verify.PreOrderApi.FromSeller.verify(request)
+        api_user, platform, campaign, pre_order, order_product, campaign_product, qty, search = Verify.PreOrderApi.FromSeller.verify(request,pk)
         api_order = PreOrderHelper.checkout(api_user, pre_order)
         return Response(api_order, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['GET'], url_path=r'seller_add')
     @api_error_handler
     def seller_add_order_product(self, request, pk=None):
-        api_user, platform, campaign, pre_order, order_product, campaign_product, qty, search = Verify.PreOrderApi.FromSeller.verify(request)
+        api_user, platform, campaign, pre_order, order_product, campaign_product, qty, search = Verify.PreOrderApi.FromSeller.verify(request, pk)
         api_order_product = PreOrderHelper.add_product(
             api_user, pre_order, campaign_product, qty)
         return Response(api_order_product, status=status.HTTP_200_OK)
@@ -89,7 +89,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['GET'], url_path=r'seller_update')
     @api_error_handler
     def seller_update_order_product(self, request, pk=None):
-        api_user, platform, campaign, pre_order, order_product, campaign_product, qty, search = Verify.PreOrderApi.FromSeller.verify(request)
+        api_user, platform, campaign, pre_order, order_product, campaign_product, qty, search = Verify.PreOrderApi.FromSeller.verify(request, pk)
         api_order_product = PreOrderHelper.update_product(
             api_user, pre_order, order_product, campaign_product, qty)
         return Response(api_order_product, status=status.HTTP_200_OK)
@@ -97,7 +97,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['GET'], url_path=r'seller_delete')
     @api_error_handler
     def seller_delete_order_product(self, request, pk=None):
-        api_user, platform, campaign, pre_order, order_product, campaign_product, qty, search = Verify.PreOrderApi.FromSeller.verify(request)
+        api_user, platform, campaign, pre_order, order_product, campaign_product, qty, search = Verify.PreOrderApi.FromSeller.verify(request, pk)
         PreOrderHelper.delete_product(
             api_user, pre_order, order_product, campaign_product)
         return Response({'message':"delete success"}, status=status.HTTP_200_OK)
