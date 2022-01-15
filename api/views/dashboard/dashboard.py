@@ -272,9 +272,6 @@ class DashboardViewSet(viewsets.ModelViewSet):
         pre_orders_queryset = campaign.pre_orders.all().order_by('created_at')
 
         orders_queryset = campaign.orders.all().order_by('created_at')
-
-        
-
         # if search:
         #     if search.isnumeric():
         #         pre_orders_queryset = pre_orders_queryset.filter(Q(id=int(search)) | Q(customer_name__icontains=search) | Q(phone__icontains=search))
@@ -306,8 +303,6 @@ class DashboardViewSet(viewsets.ModelViewSet):
         except IndexError:
             pass
         
-        # PreOrderSerializer(pre_orders_queryset[pre_order_index]).data
-        # OrderSerializer(orders_queryset[order_index]).data
         if order_index==len(orders_queryset):
             for i in range(pre_order_index,len(pre_orders_queryset)):
                     merge_list.append({"type":"pre_order","data":PreOrderSerializer(pre_orders_queryset[pre_order_index]).data})
@@ -319,7 +314,21 @@ class DashboardViewSet(viewsets.ModelViewSet):
                     order_index+=1
 
         
-        print(merge_list)
 
         return Response(merge_list, status=status.HTTP_200_OK)
             
+
+    @action(detail=False, methods=['GET'], url_path=r'edit_allow_checkout')
+    @api_error_handler
+    def campaign_edit_allow_checkout(self, request):
+
+        api_user, platform_id, platform_name, campaign_id, _status=getparams(request, ('platform_id', 'platform_name', 'campaign_id', 'status'))
+
+        Verify.verify_user(api_user)
+        platform = Verify.get_platform(api_user, platform_name, platform_id)
+        campaign = Verify.get_campaign_from_platform(platform, campaign_id)
+
+        campaign.meta['allow_checkout']=1 if int(_status) else 0
+        campaign.save()
+
+        return Response({"allow_checkout":campaign.meta['allow_checkout']}, status=status.HTTP_200_OK)

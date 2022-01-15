@@ -170,6 +170,7 @@ class PreOrderHelper():
 
                 cls._check_lock(api_user, api_pre_order)
                 cls._check_empty(api_pre_order)
+                cls._check_allow_checkout(pre_order.campaign)
 
                 increment_id = get_incremented_filed(collection_name="api_order", field_name="id")
                 api_order_data = api_pre_order.copy()
@@ -223,6 +224,12 @@ class PreOrderHelper():
     def _check_empty(api_pre_order):
         if not bool(api_pre_order['products']):
             raise PreOrderErrors.PreOrderException('cart is empty')
+
+    @staticmethod
+    def _check_allow_checkout(campaign):
+        if not campaign.meta['allow_checkout']:
+            raise PreOrderErrors.PreOrderException('check out not allow')
+
 
     @staticmethod
     def _check_type(api_campaign_product):
