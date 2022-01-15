@@ -170,6 +170,25 @@ class ProductViewSet(viewsets.ModelViewSet):
 
         return Response({"message": "delete success"}, status=status.HTTP_200_OK)
 
+    @action(detail=True, methods=['GET'], url_path=r'archive_product')
+    @api_error_handler
+    def archive_product(self, request, pk=None):
+        platform_id = request.query_params.get('platform_id')
+        platform_name = request.query_params.get('platform_name')
+        api_user = request.user.api_users.get(type='user')
+        data = request.data
+
+        _, _, product = verify_request(
+            api_user, platform_name, platform_id, product_id=pk)
+
+        serializer = ProductSerializer(
+            product, data=data, partial=True)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
+
+        return Response({"message": "product archive success"}, status=status.HTTP_200_OK)
+
     @action(detail=True, methods=['POST'], url_path=r'update_image',  parser_classes=(MultiPartParser,))
     @api_error_handler
     def update_image(self, request, pk=None):
