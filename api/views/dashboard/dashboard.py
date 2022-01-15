@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 
 from api.models.order.order import Order, OrderSerializer
+from api.models.order.pre_order import PreOrder, PreOrderSerializer
 from api.utils.common.verify import Verify
 from api.utils.common.common import *
 
@@ -13,6 +14,20 @@ import datetime, operator
 
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 from api.utils.common.common import getparams
+from django.db.models import Q
+from rest_framework.pagination import PageNumberPagination
+
+from django.core.paginator import Paginator
+from django.shortcuts import render
+
+# class PreOrderPagination(PageNumberPagination):
+#     page_query_param = 'page'
+#     page_size_query_param = 'page_size'
+
+# class OrderPagination(PageNumberPagination):
+#     page_query_param = 'page'
+#     page_size_query_param = 'page_size'
+
 
 def verify_seller_request(api_user):
     Verify.verify_user(api_user)
@@ -214,5 +229,68 @@ class DashboardViewSet(viewsets.ModelViewSet):
                 
                 
                 
-                
+    
+    @action(detail=False, methods=['GET'], url_path=r'order_list')
+    @api_error_handler
+    def get_merge_order_list(self, request):
+
+        api_user, platform_id, platform_name, campaign_id, search, page=getparams(request, ('platform_id', 'platform_name', 'campaign_id', 'search', 'page'))
+
+        Verify.verify_user(api_user)
+        platform = Verify.get_platform(api_user, platform_name, platform_id)
+        campaign = Verify.get_campaign_from_platform(platform, campaign_id)
+
+        pre_orders_queryset = campaign.pre_orders.all().order_by('created_at')
+
+        orders_queryset = campaign.orders.all().order_by('created_at')
+
+        
+
+        # if search:
+        #     if search.isnumeric():
+        #         pre_orders_queryset = pre_orders_queryset.filter(Q(id=int(search)) | Q(customer_name__icontains=search) | Q(phone__icontains=search))
+        #         orders_queryset = orders_queryset.filter(Q(id=int(search)) | Q(customer_name__icontains=search) | Q(phone__icontains=search))
+        #     else:
+        #         pre_orders_queryset = pre_orders_queryset.filter(Q(customer_name__icontains=search) | Q(phone__icontains=search))
+        #         orders_queryset = orders_queryset.filter(Q(id=int(search)) | Q(customer_name__icontains=search) | Q(phone__icontains=search))
+
+
+        # pre_order_paginator = Paginator(pre_orders_queryset, 10) # Show 25 contacts per page.
+        # pre_order_list = pre_order_paginator.get_page(page)
+
+        # order_paginator = Paginator(pre_orders_queryset, 10)
+        # order_list = order_paginator.get_page(page)
+
+        merge_list=[]
+
+        order_index=0
+        pre_order_index=0
+        try:
+            for i in range(len(pre_orders_queryset)+len(orders_queryset)):
+                if orders_queryset[order_index].created_at>=pre_orders_queryset[pre_order_index].created_at:
+                    
+                    merge_list.append({"type":"order","data":OrderSerializer(orders_queryset[order_index]).data})
+                    order_index+=1
+                else:
+                    merge_list.append({"type":"pre_order","data":PreOrderSerializer(pre_orders_queryset[pre_order_index]).data})
+                    pre_order_index+=1
+        except IndexError:
+            pass
+        
+        # PreOrderSerializer(pre_orders_queryset[pre_order_index]).data
+        # OrderSerializer(orders_queryset[order_index]).data
+        if order_index==len(orders_queryset):
+            for i in range(pre_order_index,len(pre_orders_queryset)):
+                    merge_list.append({"type":"pre_order","data":PreOrderSerializer(pre_orders_queryset[pre_order_index]).data})
+                    pre_order_index+=1
+
+        else:
+            for i in range(order_index,len(orders_queryset)):
+                    merge_list.append({"type":"order","data":OrderSerializer(orders_queryset[order_index]).data})
+                    order_index+=1
+
+        
+        print(merge_list)
+
+        return Response(merge_list, status=status.HTTP_200_OK)
             
