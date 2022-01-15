@@ -190,9 +190,36 @@ class DashboardViewSet(viewsets.ModelViewSet):
         api_user, platform, campaign, pre_order, order_product, campaign_product, qty, search = Verify.PreOrderApi.FromSeller.verify(request)
         is_user = verify_seller_request(api_user)
         campaign_id = campaign.id
-        
+        user_id = int(api_user.id)
+
         manage_order = {}
         if is_user:
+            campaign_datas = db.api_campaign.find({'created_by_id': user_id})
+            campaign_order_complete_count, campaign_order_proceed_count, campaign_pre_order_count, campaign_count = 0, 0, 0, 0
+            campaign_order_total_uncheck_rate, campaign_order_total_close_rate, campaign_id_list, campaing_sales_total = 0, 0, [], 0
+            for campaign_data in campaign_datas:
+                campaign_order_complete_count = db.api_order.find({'campaign_id': campaign_data['id'], 'status': 'complete'}).count()
+                campaign_order_proceed_count = db.api_order.find({'campaign_id': campaign_data['id'], 'status': 'proceed'}).count()
+                campaign_pre_order_count = db.api_pre_order.find({'campaign_id': campaign_data['id']}).count()
+                campaign_id_list.append(campaign_data['id'])
+               
+                campaign_order_total_uncheck_rate += campaign_order_complete_count / (campaign_order_complete_count + campaign_order_proceed_count) * 100        
+                campaign_order_total_close_rate += campaign_order_complete_count / (campaign_order_complete_count + campaign_pre_order_count) * 100
+                campaign_count += 1
+
+            campaign_order_average_uncheck_rate = campaign_order_total_uncheck_rate / campaign_count
+            campaign_order_average_close_rate = campaign_order_total_close_rate / campaign_count       
+            
+            order_datas = db.api_order.find({'campaign_id': {'$in': campaign_id_list}})
+            for order_data in order_datas:
+                for key, val in order_data['products'].items():
+                    
+                    campaing_sales_total += val['subtotal']
+            # 總campaign完成訂單總金額平均
+            campaign_sales_average = campaing_sales_total / campaign_count
+            comment_count_average = db.api_campaign_comment.find({'campaign_id': {'$in': campaign_id_list}}).count() / campaign_count
+
+            # manage order
             pre_order_qty, order_qty, close_rate, uncheckout_rate, complete_sales, comment_count = 0, 0, 0, 0, 0, 0
             pre_order_datas = db.api_pre_order.find({'campaign_id': campaign_id})
             for pre_order_data in pre_order_datas:
@@ -202,8 +229,6 @@ class DashboardViewSet(viewsets.ModelViewSet):
             for order_data in order_datas:
                 for key, val in order_data['products'].items():
                     order_qty += val['qty']
-            # 商品數量成交量
-            # close_rate = order_qty / (order_qty + pre_order_qty)
             pre_order_count = db.api_pre_order.find({'campaign_id': campaign_id}).count()
             order_complete_count = db.api_order.find({'campaign_id': campaign_id, 'status': 'complete'}).count()
             order_proceed_count = db.api_order.find({'campaign_id': campaign_id, 'status': 'proceed'}).count()
@@ -224,6 +249,10 @@ class DashboardViewSet(viewsets.ModelViewSet):
             manage_order['comment_count'] = comment_count
             manage_order['cart_qty'] = pre_order_qty
             manage_order['order_qty'] = order_qty
+            manage_order['close_rate_raise'] = campaign_order_average_close_rate
+            manage_order['uncheckout_rate_raise'] = campaign_order_average_uncheck_rate
+            manage_order['campaign_sales_raise'] = complete_sales / campaign_sales_average
+            manage_order['comment_count_raise'] = comment_count / comment_count_average
 
         return Response(manage_order, status=status.HTTP_200_OK)
                 
