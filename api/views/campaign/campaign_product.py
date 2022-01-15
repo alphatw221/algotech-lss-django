@@ -262,12 +262,12 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['GET'], url_path=r'buyer_list_campaign_product')
     @api_error_handler
-    def list_campaign_product(self, request):
+    def buyer_list_campaign_product(self, request):
         api_user, pre_order_id = getparams(request,('pre_order_id',), seller=False)
         pre_order=Verify.get_pre_order(pre_order_id)
         Verify.user_match_pre_order(api_user, pre_order)
 
-        campaign_products = pre_order.campaign.products.all()
+        campaign_products = pre_order.campaign.products.filter(Q(type='product') | Q(type="product-fast"))
         serializer = self.get_serializer(campaign_products, many=True)
         data = serializer.data
 
