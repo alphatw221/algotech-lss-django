@@ -13,9 +13,13 @@ def i18n_get_request_response(state, api_campaign_product, qty, lang=None):
 
 
 @lang_translate_default_en
-def i18n_get_additional_text(lang=None):
+def i18n_get_additional_text(pre_order, lang=None):
+    link = settings.SHOPPING_CART_URL + '/' + str(pre_order['id'])
+
+    print(f"pre_order_id:{pre_order['id']}")
+    print(f"link: {link}")
     shopping_cart_info = _('SHOPPING_CART_INFO{link}'
-                           ).format(link=settings.SHOPPING_CART_URL)
+                           ).format(link=link)
     more_info_in_pm_notice = _('MORE_INFO_IN_PM_NOTICE')
     return shopping_cart_info, more_info_in_pm_notice
 
@@ -24,9 +28,9 @@ def _i18n_get_response_content(state, api_campaign_product, qty):
 
     if state == RequestState.INVALID_EXCEED_MAX_ORDER_AMOUNT:
         return _('INVALID_EXCEED_MAX_ORDER_AMOUNT{order_code}{max_order_amount}').format(
-                order_code=api_campaign_product['order_code'],
-                max_order_amount=api_campaign_product['max_order_amount'],
-            )
+            order_code=api_campaign_product['order_code'],
+            max_order_amount=api_campaign_product['max_order_amount'],
+        )
     else:
         if state == RequestState.ADDED:
             result = _('ADDED')
@@ -48,10 +52,10 @@ def _i18n_get_response_content(state, api_campaign_product, qty):
             result = _('N/A')
 
         return _('ITEM_INFO{order_code}{qty}{result}').format(
-                order_code=api_campaign_product['order_code'],
-                qty=qty,
-                result=result
-            )
+            order_code=api_campaign_product['order_code'],
+            qty=qty,
+            result=result
+        )
 
 
 def _i18n_get_items_info(request):

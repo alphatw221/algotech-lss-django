@@ -18,14 +18,18 @@ def i18n_get_comment_command_response(campaign, comment, command: Command, lang=
 
 def i18n_get_comment_command_cart(campaign, comment):
     try:
-        pre_order = db.api_pre_order.find_one({'customer_id':comment['customer_id'],'campaign_id':campaign['id'],'platform':comment['platform']})
+        pre_order = db.api_pre_order.find_one(
+            {'customer_id': comment['customer_id'], 'campaign_id': campaign['id'], 'platform': comment['platform']})
     except Exception as e:
         return _('COMMENT_COMMAND_CART_NO_CART_PRODUCT')
 
+    if not pre_order:
+        return _('COMMENT_COMMAND_CART_NO_CART_PRODUCT')
     if not pre_order['products']:
         return _('COMMENT_COMMAND_CART_NO_CART_PRODUCT')
 
-    order_products=db.api_order_product.find({"pre_order_id":pre_order['id']})
+    order_products = db.api_order_product.find(
+        {"pre_order_id": pre_order['id']})
 
     items = _i18n_get_order_items(order_products)
 
@@ -33,9 +37,9 @@ def i18n_get_comment_command_cart(campaign, comment):
     text.extend(items)
     text.append('-----\n')
     text.append(_('TOTAL{dollar_sign}{total}\n'
-                  ).format(total="{:.2f}".format(pre_order['total']), dollar_sign=campaign["currency_sign"]))
+                  ).format(total="{:.2f}".format(pre_order['subtotal']), dollar_sign=campaign["currency_sign"]))
     text.append(_('DETAIL{link}\n'
-                  ).format(link=settings.SHOPPING_CART_URL))
+                  ).format(link=settings.SHOPPING_CART_URL + '/' + str(pre_order['id'])))
 
     return ''.join(text)
 
@@ -66,15 +70,16 @@ def i18n_get_comment_command_cart(campaign, comment):
 
 def i18n_get_comment_command_order(campaign, comment):
     try:
-        order=db.api_order.find_one({ "$query": {"campaign_id":campaign['id'],"customer_id":comment['customer_id']}, "$orderby": { "created_at" : -1 }})
+        order = db.api_order.find_one({"$query": {
+                                      "campaign_id": campaign['id'], "customer_id": comment['customer_id']}, "$orderby": {"created_at": -1}})
     except Exception:
         return _('COMMENT_COMMAND_ORDER_NO_ORDER')
 
     if not order:
         return _('COMMENT_COMMAND_ORDER_NO_ORDER')
 
-    order_products=db.api_order_product.find({"order_id":order['id']})
-    
+    order_products = db.api_order_product.find({"order_id": order['id']})
+
     if not order_products:
         return _('COMMENT_COMMAND_ORDER_NO_ORDER')
 
@@ -90,7 +95,7 @@ def i18n_get_comment_command_order(campaign, comment):
                            option=order["checkout_details"].get('option', 0)))
     text.append(_('TOTAL{dollar_sign}{total}\n'
                   ).format(dollar_sign=campaign["currency_sign"],
-                           total=order.get('total',0)))
+                           total=order.get('total', 0)))
     text.append(_('DETAIL{link}'
                   ).format(link=settings.SHOPPING_CART_URL))
 
@@ -103,8 +108,8 @@ def _i18n_get_order_items(order_products):
     count = order_products.count()
     digits = 2 if count < 100 else len(str(count))
     for i, order_product in enumerate(order_products, 1):
-        name = order_product.get('name','')
-        qty = order_product.get('qty',0)
+        name = order_product.get('name', '')
+        qty = order_product.get('qty', 0)
         total = Decimal(
             order_product.get('price', 0)) * qty
         items.append(

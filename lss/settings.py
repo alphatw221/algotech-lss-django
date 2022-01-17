@@ -31,7 +31,7 @@ DEBUG = True
 
 # ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0',
 #                  "gipassl.algotech.app", '104.199.211.63']
-ALLOWED_HOSTS = ['*']   #Auto Scale testing
+ALLOWED_HOSTS = ['*']  # Auto Scale testing
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 CORS_ORIGIN_ALLOW_ALL = True
@@ -79,13 +79,13 @@ LOGGING = {
         'file_error': {
             'level': 'ERROR',
             'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR,'_error.log'),
+            'filename': os.path.join(BASE_DIR, '_error.log'),
             'formatter': 'standard'
         },
         'file_warning': {
             'level': 'WARNING',
             'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR,'_warning.log'),
+            'filename': os.path.join(BASE_DIR, '_warning.log'),
             'formatter': 'standard'
         },
     },
@@ -235,8 +235,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 
 # Live Show Seller info
-WEB_SERVER_URL = "https://place_holder_lss"
-SHOPPING_CART_URL = f"{WEB_SERVER_URL}/place_holder_cart"
+WEB_SERVER_URL = "http://localhost/algotech_lss/public"
+SHOPPING_CART_URL = f"{WEB_SERVER_URL}/buyer_login_cart"
 SUPPORTED_PLATFORMS = [
     ("n/a", "No specific platform"),
     ("facebook", "Facebook"),
@@ -253,7 +253,7 @@ FACEBOOK_APP_CREDS = {
     "app_secret": "e36ab1560c8d85cbc413e07fb7232f99",
 }
 
-# Instagram 
+# Instagram
 INSTAGRAM_API_URL = "https://graph.instagram.com"
 
 # Youtube
@@ -290,7 +290,7 @@ CHAT_BOT_FACEBOOK = {
 DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
 GS_BUCKET_NAME = 'lss_public_bucket'
 GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
-    os.path.join(BASE_DIR,"liveshowseller-b4308e2f9dc6.json")
+    os.path.join(BASE_DIR, "liveshowseller-b4308e2f9dc6.json")
 )
 GS_URL = "https://storage.googleapis.com/lss_public_bucket/"
 
@@ -315,15 +315,15 @@ CRON_CLASSES = [
 CART_LOCK_INTERVAL = 180
 
 # redis server
-REDIS_SERVER={
-    "host":"34.124.140.74",
-    "port":"6379",
-    "username":None,
-    "password":r"algo83111T%%"}
+REDIS_SERVER = {
+    "host": "34.124.140.74",
+    "port": "6379",
+    "username": None,
+    "password": r"algo83111T%%"}
 
 
 # gcp load balancer
-GCP_API_LOADBALANCER_URL="http://127.0.0.1:8000"
+GCP_API_LOADBALANCER_URL = "http://127.0.0.1:8000"
 
 # paypal settings
 PAYPAL_CONFIG = {
@@ -338,4 +338,4 @@ PAYPAL_CONFIG = {
 
 
 # OPERATION_CODE_NAME: AGILE
-ADMIN_LIST=[1,]
+ADMIN_LIST = [1, ]

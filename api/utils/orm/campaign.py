@@ -15,7 +15,7 @@ def get_active_campaign_now():
 def get_ordering_campaign_now():
     try:
         return Campaign.objects.filter(
-            ordering_start_at__lt=pendulum.now(),
+            start_at__lt=pendulum.now(),
             end_at__gt=pendulum.now(),
         )
     except Exception:
