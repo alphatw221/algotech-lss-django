@@ -208,7 +208,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         campaign_product = db.api_campaign_product.find_one({'id': _id})
         campaign_product.pop('_id', None)
 
-        return Response({'message':campaign_product}, status=status.HTTP_200_OK)
+        return Response(campaign_product, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['GET'], url_path=r'archive_product')
     @api_error_handler
