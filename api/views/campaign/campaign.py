@@ -1,4 +1,10 @@
+import json
+
+from django.conf import settings
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 from rest_framework import status, viewsets
+from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from api.models.campaign.campaign import Campaign, CampaignSerializer, CampaignSerializerRetreive, CampaignSerializerCreate
 from rest_framework.pagination import PageNumberPagination
@@ -80,10 +86,9 @@ class CampaignViewSet(viewsets.ModelViewSet):
         else:
             serializer = self.get_serializer(campaigns, many=True)
             data = serializer.data
-
         return Response(data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['POST'], url_path=r'create_campaign')
+    @action(detail=False, methods=['POST'], url_path=r'create_campaign', parser_classes=(MultiPartParser,))
     @api_error_handler
     def create_campaign(self, request):
         platform_name = request.query_params.get('platform_name')
@@ -91,23 +96,34 @@ class CampaignViewSet(viewsets.ModelViewSet):
         api_user = request.user.api_users.get(type='user')
 
         platform = verify_request(api_user, platform_name, platform_id)
-
         print(platform)
-        data = request.data
-        data['created_by'] = api_user.id
-        # TODO 之後要改寫
-        data['facebook_page'] = platform.id if platform_name == 'facebook' else None
-        data['youtube_channel'] = platform.id if platform_name == 'youtube' else None
-        data['instagram_profile'] = platform.id if platform_name == 'instagram' else None
-        serializer = CampaignSerializerCreate(data=data)
+        json_data = json.loads(request.data["data"])
+        json_data['created_by'] = api_user.id
+        json_data['facebook_page'] = platform.id if platform_name == 'facebook' else None
+        json_data['youtube_channel'] = platform.id if platform_name == 'youtube' else None
+        json_data['instagram_profile'] = platform.id if platform_name == 'instagram' else None
+        serializer = CampaignSerializerCreate(data=json_data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        campaign = serializer.save()
 
+        for key, value in request.data.items():
+            if "account" in key:
+                account_number = key.split("_")[1]
+                image_path = default_storage.save(
+                    f'/campaign/{campaign.id}/payment/direct_payment/accounts/{account_number}/{value.name}',
+                    ContentFile(value.read()))
+                print(f"image_path: {image_path}")
+                json_data["meta_payment"]["sg"]["direct_payment"]["accounts"][account_number]["image"] = image_path
+        serializer = self.get_serializer(
+            campaign, data=json_data, partial=True)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         serializer.save()
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['PUT'], url_path=r'update_campaign')
+    @action(detail=True, methods=['PUT'], url_path=r'update_campaign', parser_classes=(MultiPartParser,))
     @api_error_handler
     def update_campaign(self, request, pk=None):
         platform_name = request.query_params.get('platform_name')
@@ -117,8 +133,16 @@ class CampaignViewSet(viewsets.ModelViewSet):
         _, campaign = verify_request(
             api_user, platform_name, platform_id, campaign_id=pk)
 
+        json_data = json.loads(request.data["data"])
+        for key, value in request.data.items():
+            if "account" in key:
+                account_number = key.split("_")[1]
+                image_path = default_storage.save(
+                    f'/campaign/{campaign.id}/payment/direct_payment/accounts/{account_number}/{value.name}', ContentFile(value.read()))
+                print(f"image_path: {image_path}")
+                json_data["meta_payment"]["sg"]["direct_payment"]["accounts"][account_number]["image"] = image_path
         serializer = self.get_serializer(
-            campaign, data=request.data, partial=True)
+            campaign, data=json_data, partial=True)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         serializer.save()
