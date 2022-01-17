@@ -181,26 +181,26 @@ class ProductViewSet(viewsets.ModelViewSet):
         order_code = request.query_params.get('order_code')
         max_order_amount = request.query_params.get('max_order_amount')
         qty_for_sale = request.query_params.get('qty_for_sale')
-        customer_removable = request.query_params.get('customer_removable')
-        customer_editable = request.query_params.get('customer_editable')
+        customer_removable = 1 if request.query_params.get('customer_removable') == "1" else 0
+        customer_editable = 1 if request.query_params.get('customer_editable') == "1" else 0
 
         _, _, product = verify_request(
             api_user, platform_name, platform_id, product_id=pk)
         
-        p_datas, _id = db.api_campaign_product.find().sort([('id', -1)]).limit(1), 0
+        p_datas, _id = db.api_campaign_product.find().sort([('id', -1)]).limit(1)
         for p in p_datas:
             _id = int(p['id']) + 1
 
         product_dict = product.__dict__
-        print (product_dict)
         product_dict['product_id'] = int(product_dict['id'])
         product_dict['order_code'] = order_code
         product_dict['max_order_amount'] = int(max_order_amount)
         product_dict['qty_for_sale'] = int(qty_for_sale)
         product_dict['qty_sold'] = 0
-        product_dict['customer_removable'] = customer_removable
-        product_dict['customer_editable'] = customer_editable
+        product_dict['customer_removable'] = bool(customer_removable)
+        product_dict['customer_editable'] = bool(customer_editable)
         product_dict['campaign_id'] = int(campaign_id)
+        product_dict['status'] = 0
         product_dict.pop('_state', None)
         product_dict.pop('id', None)
 
