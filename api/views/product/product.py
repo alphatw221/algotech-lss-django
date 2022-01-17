@@ -1,3 +1,4 @@
+import imp
 from logging import exception
 from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated
@@ -7,6 +8,7 @@ from api.models.product.product import Product, ProductSerializer, ProductSerial
 from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser
 from backend.pymongo.mongodb import db
+from backend.pymongo.mongodb import get_incremented_filed
 
 import json
 from django.core.files.storage import default_storage
@@ -187,7 +189,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         _, _, product = verify_request(
             api_user, platform_name, platform_id, product_id=pk)
         
-        p_datas, _id = db.api_campaign_product.find().sort([('id', -1)]).limit(1)
+        p_datas, _id = db.api_campaign_product.find({'campaign_id': int(campaign_id)}).sort([('id', -1)]).limit(1)
         for p in p_datas:
             _id = int(p['id']) + 1
 
