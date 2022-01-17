@@ -189,7 +189,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         _, _, product = verify_request(
             api_user, platform_name, platform_id, product_id=pk)
         
-        p_datas, _id = db.api_campaign_product.find({'campaign_id': int(campaign_id)}).sort([('id', -1)]).limit(1)
+        p_datas, _id = db.api_campaign_product.find({'campaign_id': int(campaign_id)}).sort([('id', -1)]).limit(1), 0
         for p in p_datas:
             _id = int(p['id']) + 1
 
