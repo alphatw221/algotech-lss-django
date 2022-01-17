@@ -205,8 +205,10 @@ class ProductViewSet(viewsets.ModelViewSet):
         product_dict.pop('id', None)
 
         db.api_campaign_product.update({'id': _id}, {'$set': product_dict}, upsert=True)
+        campaign_product = db.api_campaign_product.find_one({'id': _id})
+        campaign_product.pop('_id', None)
 
-        return Response({"message": "campaign prudcut success"}, status=status.HTTP_200_OK)
+        return Response({'message':campaign_product}, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['GET'], url_path=r'archive_product')
     @api_error_handler
