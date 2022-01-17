@@ -37,6 +37,7 @@ def comment_job(campaign, platform_name, platform, comment, order_codes_mapping)
                 comment['message'], order_code)
             if qty is not None:
                 order_placement = (campaign_product, qty)
+                print(campaign_product['name'])
                 break
 
         if not order_placement:
@@ -66,8 +67,14 @@ def comment_job(campaign, platform_name, platform, comment, order_codes_mapping)
                 'platform': comment['platform'],
                 'platform_id': platform['id']
             })
-            _id = db.api_pre_order.insert_one(template).inserted_id
-            pre_order = db.api_pre_order.find_one(_id)
+            
+            try:
+                _id = db.api_pre_order.insert_one(template).inserted_id
+                pre_order = db.api_pre_order.find_one(_id)
+            except Exception as e:
+                print(e)
+                print('new pre_order error!!!!!')
+                return
 
         state = PreOrderHelper.add_or_update_by_comment(
             pre_order, order_placement[0], order_placement[1])

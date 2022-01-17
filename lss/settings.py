@@ -236,7 +236,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # Live Show Seller info
 WEB_SERVER_URL = "http://localhost/algotech_lss/public"
-SHOPPING_CART_URL = f"{WEB_SERVER_URL}/buyer_login_cart"
+SHOPPING_CART_URL = f"{WEB_SERVER_URL}/buyer/login_to_cart"
 SUPPORTED_PLATFORMS = [
     ("n/a", "No specific platform"),
     ("facebook", "Facebook"),

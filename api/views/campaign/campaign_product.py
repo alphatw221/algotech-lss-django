@@ -178,6 +178,7 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         serializer.save()
 
+        # serializer = CampaignProductSerializer(campai)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 

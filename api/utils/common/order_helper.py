@@ -141,6 +141,7 @@ class PreOrderHelper():
                     {"id": campaign_product.id}, session=session)
 
                 cls._check_lock(api_user, api_pre_order)
+                cls._check_removeable(api_user, api_campaign_product)
 
                 db.api_campaign_product.update_one(
                     {'id': api_campaign_product['id']}, {"$inc": {'qty_sold': -api_order_product['qty']}}, session=session)
@@ -220,6 +221,13 @@ class PreOrderHelper():
         if qty_difference and api_campaign_product["qty_for_sale"]-api_campaign_product["qty_sold"] < qty_difference:
             raise PreOrderErrors.UnderStock("out of stock")
         return qty_difference
+
+    @staticmethod
+    def _check_removeable(api_user, api_campaign_product):
+        if api_user.type=="user":
+            return
+        if not api_campaign_product['customer_removable']:
+            raise PreOrderErrors.RemoveNotAllowed("not removable")
 
     @staticmethod
     def _check_addable(api_pre_order, api_campaign_product):
