@@ -261,25 +261,24 @@ class PaymentViewSet(viewsets.GenericViewSet):
     @action(detail=False, methods=['GET'], url_path=r'hit_pay', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def hit_pay(self, request):
-        api_user, pre_order_id = getparams(
-            request, ("pre_order_id", ))
+        api_user, order_id = getparams(
+            request, ("order_id", ))
 
-        print (pre_order_id)
         user_data = db.api_user.find_one({'id': api_user.id})
         name = user_data['name']
         email = user_data['email']
-        order_data = db.api_pre_order.find_one({'id': int(pre_order_id)})
+        order_data = db.api_order.find_one({'id': int(order_id)})
         currency = order_data['currency']
         amount = order_data['total']
 
         params = {
             'email': email,
             'name': name,
-            'redirect_url': 'https://www.google.com/',
+            'redirect_url': 'http://104.199.211.63/algotech_lss/public/buyer/order/' + order_id + '/confirmation',
             'webhook': 'http://104.199.211.63/api/payment/hit_pay_webhook/',
             'amount': amount,
             'currency': currency,
-            'reference_number': pre_order_id,
+            'reference_number': order_id,
         }
         headers = {
             'X-BUSINESS-API-KEY': '64044c7551b232cbf23b32d9b21e30ff1f4c5b42068c8c59864f161cad6af21b',
@@ -289,19 +288,13 @@ class PaymentViewSet(viewsets.GenericViewSet):
         code, ret = HitPay_Helper.HitPayApiCaller(headers=headers,
                             params=params).post()
         if code != 201:
-            db.api_pre_order.update_one({'id': int(pre_order_id)}, {'$set': {'meta': {'payment_id': ret['id']}}}) 
             raise ('hitpay got wrong')
+        db.api_order.update_one({'id': int(order_id)}, {'$set': {'meta': {'payment_id': ret['id']}}}) 
 
         return Response(ret['url'])
 
     @action(detail=False, methods=['POST'], url_path=r'hit_pay_webhook', parser_classes=(MultiPartParser, FormParser))
     def hit_pay_webhook(self, request):
-        # headers = {
-        #     'X-BUSINESS-API-KEY': '64044c7551b232cbf23b32d9b21e30ff1f4c5b42068c8c59864f161cad6af21b',
-        #     'Content-Type': 'application/x-www-form-urlencoded',
-        #     'X-Requested-With': 'XMLHttpRequest'
-        # }
-        # ret = HitPay_Helper.HitPayApiCaller(f'/{payment_request_id}', headers=headers).get()
         data_dict = request.data.dict()
         payment_id = data_dict['payment_id']
         payment_request_id = data_dict['payment_request_id']
@@ -310,10 +303,8 @@ class PaymentViewSet(viewsets.GenericViewSet):
         reference_number = data_dict['reference_number']
         hmac = data_dict['hmac']
         secret_salt = '2MUizyJj429NIoOMmTXedyICmbwS1rt6Wph7cGqzG99IkmCV6nUCQ22lRVCB0Rgu'
-        print (data_dict)
 
         hitpay_dict, info_dict = {}, {}
-
         info_dict['payment_id'] = payment_id
         info_dict['payment_request_id'] = payment_request_id
         hitpay_dict['hitpay'] = info_dict
