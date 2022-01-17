@@ -200,7 +200,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         product_dict['qty_sold'] = 0
         product_dict['customer_removable'] = customer_removable
         product_dict['customer_editable'] = customer_editable
-        product_dict['campaign_id'] = campaign_id
+        product_dict['campaign_id'] = int(campaign_id)
         product_dict.pop('_state', None)
         product_dict.pop('id', None)
 
