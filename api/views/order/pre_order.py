@@ -101,6 +101,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         platform = Verify.get_platform(api_user, platform_name, platform_id)
         campaign = Verify.get_campaign_from_platform(platform, campaign_id)
         pre_order = Verify.get_pre_order_from_campaign(campaign, pk)
+
         campaign_product = Verify.get_campaign_product_from_pre_order(pre_order, campaign_product_id)
         # api_user, platform, campaign, pre_order, order_product, campaign_product, qty, search = Verify.PreOrderApi.FromSeller.verify(request, pk)
         api_order_product = PreOrderHelper.add_product(
@@ -191,17 +192,24 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         verify_message = Verify.PreOrderApi.FromBuyer.verify_delivery_info(pre_order)
         return Response(verify_message, status=status.HTTP_200_OK)
     
+
+
+    # --------------------------------------------------------------------------------------------------------
     @action(detail=True, methods=['GET'], url_path=r'buyer_retrieve')
     @api_error_handler
     def buyer_retrieve_pre_order(self, request, pk=None):
 
         #OPERATION_CODE_NAME: AGILE
-        if request.user.id in settings.ADMIN_LIST:
-            pre_order=PreOrder.objects.get(id=pk)
-            serializer = PreOrderSerializer(pre_order)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+        # if request.user.id in settings.ADMIN_LIST:
+        #     pre_order=PreOrder.objects.get(id=pk)
+        #     serializer = PreOrderSerializer(pre_order)
+        #     return Response(serializer.data, status=status.HTTP_200_OK)
 
-        api_user, pre_order, order_product, campaign_product, qty = Verify.PreOrderApi.FromBuyer.verify(request, pk)
+        api_user, = getparams(request, (), with_user=True, seller=False)
+        pre_order=Verify.get_pre_order(pk)
+        Verify.user_match_pre_order(api_user, pre_order)
+
+        # api_user, pre_order, order_product, campaign_product, qty = Verify.PreOrderApi.FromBuyer.verify(request, pk)
         serializer = PreOrderSerializer(pre_order)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -210,12 +218,16 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     def buyer_pre_order_checkout(self, request, pk=None):
 
         #OPERATION_CODE_NAME: AGILE
-        if request.user.id in settings.ADMIN_LIST:
-            pre_order=PreOrder.objects.get(id=pk)
-            api_order = PreOrderHelper.checkout(None, pre_order)
-            return Response(api_order, status=status.HTTP_200_OK)
+        # if request.user.id in settings.ADMIN_LIST:
+        #     pre_order=PreOrder.objects.get(id=pk)
+        #     api_order = PreOrderHelper.checkout(None, pre_order)
+        #     return Response(api_order, status=status.HTTP_200_OK)
 
-        api_user, pre_order, order_product, campaign_product, qty = Verify.PreOrderApi.FromBuyer.verify(request, pk)
+        api_user, = getparams(request, (), with_user=True, seller=False)
+        pre_order=Verify.get_pre_order(pk)
+        Verify.user_match_pre_order(api_user, pre_order)
+
+        # api_user, pre_order, order_product, campaign_product, qty = Verify.PreOrderApi.FromBuyer.verify(request, pk)
         api_order = PreOrderHelper.checkout(api_user, pre_order)
         return Response(api_order, status=status.HTTP_200_OK)
 
@@ -224,14 +236,19 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     def buyer_add_order_product(self, request, pk=None):
 
          #OPERATION_CODE_NAME: AGILE
-        if request.user.id in settings.ADMIN_LIST:
-            campaign_product_id, qty = getparams(request, ('campaign_product_id', 'qty'),with_user=False)
-            campaign_product = Campaign.objects.get(id=campaign_product_id)
-            pre_order=PreOrder.objects.get(id=pk)
-            api_order_product = PreOrderHelper.add_product(None, pre_order, campaign_product, qty)
-            return Response(api_order_product, status=status.HTTP_200_OK)
+        # if request.user.id in settings.ADMIN_LIST:
+        #     campaign_product_id, qty = getparams(request, ('campaign_product_id', 'qty'),with_user=False)
+        #     campaign_product = Campaign.objects.get(id=campaign_product_id)
+        #     pre_order=PreOrder.objects.get(id=pk)
+        #     api_order_product = PreOrderHelper.add_product(None, pre_order, campaign_product, qty)
+        #     return Response(api_order_product, status=status.HTTP_200_OK)
 
-        api_user, pre_order, order_product, campaign_product, qty = Verify.PreOrderApi.FromBuyer.verify(request, pk)
+        api_user, campaign_product_id, qty = getparams(request, ('campaign_product_id', 'qty'), with_user=True, seller=False)
+        pre_order=Verify.get_pre_order(pk)
+        Verify.user_match_pre_order(api_user, pre_order)
+        campaign_product = Verify.get_campaign_product_from_pre_order(pre_order, campaign_product_id)
+
+        # api_user, pre_order, order_product, campaign_product, qty = Verify.PreOrderApi.FromBuyer.verify(request, pk)
         api_order_product = PreOrderHelper.add_product(api_user, pre_order, campaign_product, qty)
         return Response(api_order_product, status=status.HTTP_200_OK)
 
@@ -242,40 +259,42 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         error_message={}
 
          #OPERATION_CODE_NAME: AGILE
-        if request.user.id in settings.ADMIN_LIST:
-            pre_order=PreOrder.objects.get(id=pk)
-            for campaign_product_id,qty in request.data.items():
-                try:
-                    campaign_product_id = int(campaign_product_id)
-                    campaign_product = pre_order.campaign.products.get(id=campaign_product_id)
-                    PreOrderHelper.add_product(None, pre_order, campaign_product, qty)
-                except KeyError as e:
-                    print(e)
-                    error_message[campaign_product_id]=str(e)
-                except ObjectDoesNotExist as e:
-                    print(e)
-                    error_message[campaign_product_id]=str(e)
-                except PreOrderErrors.PreOrderException as e:
-                    print(e)
-                    error_message[campaign_product_id]=str(e)
+        # if request.user.id in settings.ADMIN_LIST:
+        #     pre_order=PreOrder.objects.get(id=pk)
+        #     for campaign_product_id,qty in request.data.items():
+        #         try:
+        #             campaign_product_id = int(campaign_product_id)
+        #             campaign_product = pre_order.campaign.products.get(id=campaign_product_id)
+        #             PreOrderHelper.add_product(None, pre_order, campaign_product, qty)
+        #         except KeyError as e:
+        #             print(e)
+        #             error_message[campaign_product_id]=str(e)
+        #         except ObjectDoesNotExist as e:
+        #             print(e)
+        #             error_message[campaign_product_id]=str(e)
+        #         except PreOrderErrors.PreOrderException as e:
+        #             print(e)
+        #             error_message[campaign_product_id]=str(e)
 
-                except ApiVerifyError as e:
-                    print(e)
-                    error_message[campaign_product_id]=str(e)
-                except Exception as e:
-                    print(e)
-                    error_message[campaign_product_id]="server error"
+        #         except ApiVerifyError as e:
+        #             print(e)
+        #             error_message[campaign_product_id]=str(e)
+        #         except Exception as e:
+        #             print(e)
+        #             error_message[campaign_product_id]="server error"
 
-            if error_message.em:
-                return Response(error_message, status=status.HTTP_400_BAD_REQUEST)
+        #     if error_message.em:
+        #         return Response(error_message, status=status.HTTP_400_BAD_REQUEST)
 
-            return Response('success', status=status.HTTP_200_OK)
+        #     return Response('success', status=status.HTTP_200_OK)
 
+        
         api_user = Verify.get_customer_user(request)
         pre_order=PreOrder.objects.get(id=pk)
+        Verify.user_match_pre_order(api_user, pre_order)
+
         for campaign_product_id,qty in request.data.items():
             try:
-                Verify.user_match_order(api_user, pre_order)
                 campaign_product_id = int(campaign_product_id)
                 campaign_product = pre_order.campaign.products.get(id=campaign_product_id)
                 api_order_product = PreOrderHelper.add_product(api_user, pre_order, campaign_product, qty)
@@ -298,17 +317,20 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     def buyer_update_order_product(self, request, pk=None):
 
         # OPERATION_CODE_NAME: AGILE
-        if request.user.id in settings.ADMIN_LIST:
-            order_product_id, qty = getparams(request, ('order_product_id', 'qty'),with_user=False)
-            order_product = OrderProduct.objects.get(id=order_product_id)
-            pre_order=PreOrder.objects.get(id=pk)
-            api_order_product = PreOrderHelper.update_product(
-                None, pre_order, order_product, order_product.campaign_product, qty)
-            return Response(api_order_product, status=status.HTTP_200_OK)
+        # if request.user.id in settings.ADMIN_LIST:
+        #     order_product_id, qty = getparams(request, ('order_product_id', 'qty'),with_user=False)
+        #     order_product = OrderProduct.objects.get(id=order_product_id)
+        #     pre_order=PreOrder.objects.get(id=pk)
+        #     api_order_product = PreOrderHelper.update_product(
+        #         None, pre_order, order_product, order_product.campaign_product, qty)
+        #     return Response(api_order_product, status=status.HTTP_200_OK)
             
-        api_user, pre_order, order_product, campaign_product, qty = Verify.PreOrderApi.FromBuyer.verify(request, pk)
+        api_user, order_product_id, qty = getparams(request, ('order_product_id', 'qty'), with_user=True, seller=False)
+        pre_order=Verify.get_pre_order(pk)
+        Verify.user_match_pre_order(api_user, pre_order)
+        order_product = Verify.get_order_product_from_pre_order(pre_order, order_product_id)
         api_order_product = PreOrderHelper.update_product(
-            api_user, pre_order, order_product, campaign_product, qty)
+            api_user, pre_order, order_product, order_product.campaign_product, qty)
         return Response(api_order_product, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['GET'], url_path=r'buyer_delete')
@@ -316,16 +338,18 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     def buyer_delete_order_product(self, request, pk=None):
 
         # OPERATION_CODE_NAME: AGILE
-        if request.user.id in settings.ADMIN_LIST:
-            order_product_id, = getparams(request, ('order_product_id',),with_user=False)
-            order_product = OrderProduct.objects.get(id=order_product_id)
-            pre_order=PreOrder.objects.get(id=pk)
-            PreOrderHelper.delete_product(
-                None, pre_order, order_product, order_product.campaign_product)
-            return Response({'message':"delete success"}, status=status.HTTP_200_OK)
+        # if request.user.id in settings.ADMIN_LIST:
+        #     order_product_id, = getparams(request, ('order_product_id',),with_user=False)
+        #     order_product = OrderProduct.objects.get(id=order_product_id)
+        #     pre_order=PreOrder.objects.get(id=pk)
+        #     PreOrderHelper.delete_product(
+        #         None, pre_order, order_product, order_product.campaign_product)
+        #     return Response({'message':"delete success"}, status=status.HTTP_200_OK)
 
-
-        api_user, pre_order, order_product, campaign_product, qty = Verify.PreOrderApi.FromBuyer.verify(request, pk)
+        api_user, order_product_id = getparams(request, ('order_product_id',), with_user=True, seller=False)
+        pre_order=Verify.get_pre_order(pk)
+        Verify.user_match_pre_order(api_user, pre_order)
+        order_product = Verify.get_order_product_from_pre_order(pre_order, order_product_id)
         PreOrderHelper.delete_product(
-            api_user, pre_order, order_product, campaign_product)
+            api_user, pre_order, order_product, order_product.campaign_product)
         return Response({'message':"delete success"}, status=status.HTTP_200_OK)

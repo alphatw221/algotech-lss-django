@@ -127,7 +127,7 @@ class PreOrderHelper():
                             }
                         },
                         session=session)
-            except Exception as e:
+            except pymongo_errors.OperationFailure as e:
                 raise pymongo_errors.PyMongoError("server busy, please try again later")
         return db.api_order_product.find_one({"id": increment_id}, {"_id": False})
 
@@ -166,7 +166,7 @@ class PreOrderHelper():
                             }
                         },
                         session=session)
-            except Exception as e:
+            except pymongo_errors.OperationFailure as e:
                 raise pymongo_errors.PyMongoError("server busy, please try again later")
         return True
 
@@ -195,7 +195,7 @@ class PreOrderHelper():
                         {"pre_order_id": api_pre_order["id"]}, {"$set": {"pre_order_id": None, "order_id": increment_id}})
                     db.api_pre_order.update_one({"id": api_pre_order["id"]}, {
                                                 "$set": {"products": {}, "total": 0, "subtotal": 0}}, session=session)
-            except Exception as e:
+            except pymongo_errors.OperationFailure as e:
                 raise pymongo_errors.PyMongoError("server busy, please try again later")
         return db.api_order.find_one({"id": increment_id}, {"_id": False})
 
