@@ -95,8 +95,6 @@ class Verify():
     
     @staticmethod
     def get_pre_order(pre_order_id):
-        print(pre_order_id)
-        print(type(pre_order_id))
         if not PreOrder.objects.filter(id=pre_order_id).exists():
             raise ApiVerifyError('no pre_order found')
         return PreOrder.objects.get(id=pre_order_id)
@@ -121,7 +119,7 @@ class Verify():
             raise ApiVerifyError("no campaign found")
         campaign = platform.campaigns.get(id=campaign_id)
         return campaign
-
+    
     @staticmethod
     def get_campaign_from_platform(platform, campaign_id):
         if not platform.campaigns.filter(id=campaign_id).exists():

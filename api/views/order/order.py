@@ -293,27 +293,27 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['POST'], url_path=r'buyer_submit')
-    @api_error_handler
-    def update_buyer_submit(self, request, pk=None):
-        api_user, platform_name, campaign_id = getparams(
-            request, ("platform_name", "campaign_id"), seller=False)
+    # @action(detail=True, methods=['POST'], url_path=r'buyer_submit')
+    # @api_error_handler
+    # def update_buyer_submit(self, request, pk=None):
+    #     api_user, platform_name, campaign_id = getparams(
+    #         request, ("platform_name", "campaign_id"), seller=False)
 
-        order = verify_buyer_request(
-            api_user, platform_name, campaign_id)
+    #     order = verify_buyer_request(
+    #         api_user, platform_name, campaign_id)
         
-        request.data['status'] = 'complete'
-        serializer = OrderSerializerUpdatePaymentShipping(order, data=request.data, partial=True)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    #     request.data['status'] = 'complete'
+    #     serializer = OrderSerializerUpdatePaymentShipping(order, data=request.data, partial=True)
+    #     if not serializer.is_valid():
+    #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        serializer.save()
+    #     serializer.save()
 
-        order = verify_buyer_request(
-            api_user, platform_name, campaign_id, check_info=True)
-        serializer = OrderSerializer(order)
+    #     order = verify_buyer_request(
+    #         api_user, platform_name, campaign_id, check_info=True)
+    #     serializer = OrderSerializer(order)
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    #     return Response(serializer.data, status=status.HTTP_200_OK)
     
     @action(detail=True, methods=['POST'], url_path=r'buyer_cancel')
     @api_error_handler
