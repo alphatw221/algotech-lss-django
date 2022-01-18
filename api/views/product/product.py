@@ -172,6 +172,21 @@ class ProductViewSet(viewsets.ModelViewSet):
         product.delete()
 
         return Response({"message": "delete success"}, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['DELETE'], url_path=r'delete_multiple_product')
+    @api_error_handler
+    def delete_product(self, request, pk=None):
+        platform_id = request.query_params.get('platform_id')
+        platform_name = request.query_params.get('platform_name')
+        api_user = request.user.api_users.get(type='user')
+
+        _, _ = verify_request(
+            api_user, platform_name, platform_id)
+        
+        product_list = request.data['product_list']
+        db.api_product.update_many({'id': {'$in': product_list}}, {'$set': {'status': 'archived'}})
+
+        return Response({"message": "delete multiple products success"}, status=status.HTTP_200_OK)
         
     @action(detail=True, methods=['GET'], url_path=r'update_product_to_campaign')
     @api_error_handler
