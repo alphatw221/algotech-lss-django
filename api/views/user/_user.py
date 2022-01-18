@@ -15,7 +15,7 @@ def login_helper(request, user_type='user'):
     facebook_user_token = request.data.get('accessToken')
     status_code, response = api_fb_get_me_login(facebook_user_token)
     if status_code / 100 != 2:
-        raise Exception #TODO ...
+        raise ApiVerifyError("facebook user token invalid")
         
     facebook_id = response['id']
     facebook_name = response['name']
