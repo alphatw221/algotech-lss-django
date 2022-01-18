@@ -62,134 +62,141 @@ class PreOrderHelper():
     @classmethod
     def add_product(cls, api_user, pre_order, campaign_product, qty):
         with client.start_session() as session:
-            with session.start_transaction():
-                api_pre_order = db.api_pre_order.find_one(
-                    {"id": pre_order.id}, session=session)
-                api_campaign_product = db.api_campaign_product.find_one(
-                    {"id": campaign_product.id}, session=session)
+            try:
+                with session.start_transaction():
+                    api_pre_order = db.api_pre_order.find_one(
+                        {"id": pre_order.id}, session=session)
+                    api_campaign_product = db.api_campaign_product.find_one(
+                        {"id": campaign_product.id}, session=session)
 
-                cls._check_lock(api_user, api_pre_order)
-                qty = cls._check_qty(api_campaign_product, qty)
-                cls._check_addable(api_pre_order, api_campaign_product)
-                cls._check_type(api_campaign_product)
-                qty_difference = cls._check_stock(
-                    api_campaign_product, original_qty=0, request_qty=qty)
+                    cls._check_lock(api_user, api_pre_order)
+                    qty = cls._check_qty(api_campaign_product, qty)
+                    cls._check_addable(api_pre_order, api_campaign_product)
+                    cls._check_type(api_campaign_product)
+                    qty_difference = cls._check_stock(
+                        api_campaign_product, original_qty=0, request_qty=qty)
 
-                increment_id = get_incremented_filed(
-                    collection_name='api_order_product', field_name='id')
-                template = api_order_product_template.copy()
-                template.update({
-                    "id": increment_id,
-                    "campaign_id": api_campaign_product["campaign_id"],
-                    "campaign_product_id": api_campaign_product["id"],
-                    "pre_order_id": api_pre_order["id"],
-                    "qty": qty,
-                    "customer_id": api_pre_order['customer_id'],
-                    "customer_name": api_pre_order['customer_name'],
-                    "platform": api_pre_order['platform'],
-                    "type": api_campaign_product["type"],
-                    "name": api_campaign_product["name"],
-                    "price": api_campaign_product["price"],
-                    "currency": api_campaign_product["currency"],
-                    "currency_sign": api_campaign_product["currency_sign"],
-                    "image": api_campaign_product["image"],
-                    "subtotal": float(qty*api_campaign_product["price"])
-                })
-                db.api_order_product.insert_one(template, session=session)
+                    increment_id = get_incremented_filed(
+                        collection_name='api_order_product', field_name='id')
+                    template = api_order_product_template.copy()
+                    template.update({
+                        "id": increment_id,
+                        "campaign_id": api_campaign_product["campaign_id"],
+                        "campaign_product_id": api_campaign_product["id"],
+                        "pre_order_id": api_pre_order["id"],
+                        "qty": qty,
+                        "customer_id": api_pre_order['customer_id'],
+                        "customer_name": api_pre_order['customer_name'],
+                        "platform": api_pre_order['platform'],
+                        "type": api_campaign_product["type"],
+                        "name": api_campaign_product["name"],
+                        "price": api_campaign_product["price"],
+                        "currency": api_campaign_product["currency"],
+                        "currency_sign": api_campaign_product["currency_sign"],
+                        "image": api_campaign_product["image"],
+                        "subtotal": float(qty*api_campaign_product["price"])
+                    })
+                    db.api_order_product.insert_one(template, session=session)
 
-                db.api_campaign_product.update_one({"id": campaign_product.id}, {
-                                                   "$inc": {'qty_sold': qty_difference}})
+                    db.api_campaign_product.update_one({"id": campaign_product.id}, {
+                                                    "$inc": {'qty_sold': qty_difference}})
 
-                products = api_pre_order['products']
-                products[str(api_campaign_product['id'])] = {
-                    "order_product_id": increment_id,
-                    "name": api_campaign_product["name"],
-                    "image": api_campaign_product["image"],
-                    "price": api_campaign_product["price"],
-                    "type": api_campaign_product["type"],
+                    products = api_pre_order['products']
+                    products[str(api_campaign_product['id'])] = {
+                        "order_product_id": increment_id,
+                        "name": api_campaign_product["name"],
+                        "image": api_campaign_product["image"],
+                        "price": api_campaign_product["price"],
+                        "type": api_campaign_product["type"],
 
-                    "currency": api_campaign_product["currency"],
-                    "currency_sign": api_campaign_product["currency_sign"],
+                        "currency": api_campaign_product["currency"],
+                        "currency_sign": api_campaign_product["currency_sign"],
 
-                    "qty": qty,
-                    "subtotal": float(qty*api_campaign_product["price"])
-                }
-                db.api_pre_order.update_one(
-                    {'id': pre_order.id},
-                    {
-                        "$set": {
-                            "lock_at": datetime.now() if api_user and api_user.type == 'customer' else None,
-                            "products": products
+                        "qty": qty,
+                        "subtotal": float(qty*api_campaign_product["price"])
+                    }
+                    db.api_pre_order.update_one(
+                        {'id': pre_order.id},
+                        {
+                            "$set": {
+                                "lock_at": datetime.now() if api_user and api_user.type == 'customer' else None,
+                                "products": products
+                            },
+                            "$inc": {
+                                "subtotal": qty_difference*api_campaign_product['price'],
+                            }
                         },
-                        "$inc": {
-                            "subtotal": qty_difference*api_campaign_product['price'],
-                        }
-                    },
-                    session=session)
-
+                        session=session)
+            except Exception as e:
+                raise pymongo_errors.PyMongoError("server busy, please try again later")
         return db.api_order_product.find_one({"id": increment_id}, {"_id": False})
 
     @classmethod
     def delete_product(cls, api_user, pre_order, order_product, campaign_product):
         with client.start_session() as session:
-            with session.start_transaction():
-                api_pre_order = db.api_pre_order.find_one(
-                    {"id": pre_order.id}, session=session)
-                api_order_product = db.api_order_product.find_one(
-                    {"id": order_product.id}, session=session)
-                api_campaign_product = db.api_campaign_product.find_one(
-                    {"id": campaign_product.id}, session=session)
+            try:
+                with session.start_transaction():
+                    api_pre_order = db.api_pre_order.find_one(
+                        {"id": pre_order.id}, session=session)
+                    api_order_product = db.api_order_product.find_one(
+                        {"id": order_product.id}, session=session)
+                    api_campaign_product = db.api_campaign_product.find_one(
+                        {"id": campaign_product.id}, session=session)
 
-                cls._check_lock(api_user, api_pre_order)
-                cls._check_removeable(api_user, api_campaign_product)
+                    cls._check_lock(api_user, api_pre_order)
+                    cls._check_removeable(api_user, api_campaign_product)
 
-                db.api_campaign_product.update_one(
-                    {'id': api_campaign_product['id']}, {"$inc": {'qty_sold': -api_order_product['qty']}}, session=session)
+                    db.api_campaign_product.update_one(
+                        {'id': api_campaign_product['id']}, {"$inc": {'qty_sold': -api_order_product['qty']}}, session=session)
 
-                db.api_order_product.delete_one(
-                    {'id': api_order_product['id']}, session=session)
+                    db.api_order_product.delete_one(
+                        {'id': api_order_product['id']}, session=session)
 
-                products = api_pre_order['products']
-                del products[str(api_campaign_product['id'])]
-                db.api_pre_order.update_one(
-                    {'id': pre_order.id},
-                    {
-                        "$set": {
-                            "lock_at": datetime.now() if api_user and api_user.type == 'customer' else None,
-                            "products": products
+                    products = api_pre_order['products']
+                    del products[str(api_campaign_product['id'])]
+                    db.api_pre_order.update_one(
+                        {'id': pre_order.id},
+                        {
+                            "$set": {
+                                "lock_at": datetime.now() if api_user and api_user.type == 'customer' else None,
+                                "products": products
+                            },
+                            "$inc": {
+                                "subtotal": -api_order_product['qty']*api_campaign_product['price'],
+                            }
                         },
-                        "$inc": {
-                            "subtotal": -api_order_product['qty']*api_campaign_product['price'],
-                        }
-                    },
-                    session=session)
+                        session=session)
+            except Exception as e:
+                raise pymongo_errors.PyMongoError("server busy, please try again later")
         return True
 
     @classmethod
     def checkout(cls, api_user, pre_order):
         with client.start_session() as session:
-            with session.start_transaction():
-                api_pre_order = db.api_pre_order.find_one(
-                    {"id": pre_order.id}, session=session)
+            try:
+                with session.start_transaction():
+                    api_pre_order = db.api_pre_order.find_one(
+                        {"id": pre_order.id}, session=session)
 
-                cls._check_lock(api_user, api_pre_order)
-                cls._check_empty(api_pre_order)
-                cls._check_allow_checkout(pre_order.campaign)
+                    cls._check_lock(api_user, api_pre_order)
+                    cls._check_empty(api_pre_order)
+                    cls._check_allow_checkout(pre_order.campaign)
 
-                increment_id = get_incremented_filed(
-                    collection_name="api_order", field_name="id")
-                api_order_data = api_pre_order.copy()
-                api_order_data['id'] = increment_id
-                del api_order_data['_id']
-                template = api_order_template.copy()
-                template.update(api_order_data)
-                db.api_order.insert_one(template, session=session)
+                    increment_id = get_incremented_filed(
+                        collection_name="api_order", field_name="id")
+                    api_order_data = api_pre_order.copy()
+                    api_order_data['id'] = increment_id
+                    del api_order_data['_id']
+                    template = api_order_template.copy()
+                    template.update(api_order_data)
+                    db.api_order.insert_one(template, session=session)
 
-                db.api_order_product.update_many(
-                    {"pre_order_id": api_pre_order["id"]}, {"$set": {"pre_order_id": None, "order_id": increment_id}})
-                db.api_pre_order.update_one({"id": api_pre_order["id"]}, {
-                                            "$set": {"products": {}, "total": 0, "subtotal": 0}}, session=session)
-
+                    db.api_order_product.update_many(
+                        {"pre_order_id": api_pre_order["id"]}, {"$set": {"pre_order_id": None, "order_id": increment_id}})
+                    db.api_pre_order.update_one({"id": api_pre_order["id"]}, {
+                                                "$set": {"products": {}, "total": 0, "subtotal": 0}}, session=session)
+            except Exception as e:
+                raise pymongo_errors.PyMongoError("server busy, please try again later")
         return db.api_order.find_one({"id": increment_id}, {"_id": False})
 
     @staticmethod
@@ -242,7 +249,7 @@ class PreOrderHelper():
 
     @staticmethod
     def _check_allow_checkout(campaign):
-        if not campaign.meta['allow_checkout']:
+        if not campaign.meta.get('allow_checkout', 0):
             raise PreOrderErrors.PreOrderException('check out not allow')
 
     @staticmethod
