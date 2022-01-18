@@ -16,7 +16,7 @@ from api.utils.common.order_helper import PreOrderHelper
 from backend.pymongo.mongodb import db
 
 from django.db.models import Q
-
+import datetime
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 
 from django.conf import settings
@@ -171,6 +171,8 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['POST'], url_path=r'delivery_info')
     @api_error_handler
     def update_buyer_submit(self, request, pk=None):
+        date_list = request.data['shipping_date'].split('-')
+        request.data['shipping_date'] = datetime.date(int(date_list[0]), int(date_list[1]), int(date_list[2]))
 
         # OPERATION_CODE_NAME: AGILE
         if request.user.id in settings.ADMIN_LIST:
@@ -184,15 +186,17 @@ class PreOrderViewSet(viewsets.ModelViewSet):
             return Response(verify_message, status=status.HTTP_200_OK)
 
         api_user, pre_order, order_product, campaign_product, qty = Verify.PreOrderApi.FromBuyer.verify(request, pk)
+
+        
+
         serializer = PreOrderSerializerUpdatePaymentShipping(pre_order, data=request.data, partial=True)
         if not serializer.is_valid():
+            print (serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         serializer.save()
         pre_order = PreOrder.objects.get(id=pk)
         verify_message = Verify.PreOrderApi.FromBuyer.verify_delivery_info(pre_order)
         return Response(verify_message, status=status.HTTP_200_OK)
-    
-
 
     # --------------------------------------------------------------------------------------------------------
     @action(detail=True, methods=['GET'], url_path=r'buyer_retrieve')

@@ -22,6 +22,8 @@ class Product(models.Model):
 
     name = models.CharField(
         max_length=255, null=True, blank=True, default=None)
+    category = models.CharField(
+        max_length=255, null=True, blank=True, default=None)
     excerpt = models.TextField(null=True, blank=True, default=None)
     description = models.TextField(null=True, blank=True, default=None)
     content = models.TextField(null=True, blank=True, default=None)
