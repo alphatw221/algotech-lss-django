@@ -372,6 +372,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             if last_five_digit != "":
                 meta_data["last_five_digit"] = last_five_digit
             order.meta = meta_data
+            order.status = "complete"
             order.save()
             print(meta_data)
             return Response({"message": "upload succeed"}, status=status.HTTP_200_OK)
