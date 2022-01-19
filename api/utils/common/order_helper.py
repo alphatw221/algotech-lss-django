@@ -194,6 +194,7 @@ class PreOrderHelper():
                     api_order_data = api_pre_order.copy()
                     api_order_data['id'] = increment_id
                     del api_order_data['_id']
+                    api_order_data['created_at'] = datetime.utcnow()
                     template = api_order_template.copy()
                     template.update(api_order_data)
                     db.api_order.insert_one(template, session=session)

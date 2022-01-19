@@ -88,7 +88,7 @@ class ProductSerializer(serializers.ModelSerializer):
 class ProductSerializerDropdown(ProductSerializer):
     class Meta:
         model = Product
-        fields = ['id', 'name', 'image']
+        fields = ['id', 'name', 'image', 'order_code']
         read_only_fields = ['created_at', 'modified_at']
 
 

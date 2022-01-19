@@ -292,14 +292,15 @@ class DashboardViewSet(viewsets.ModelViewSet):
         order_index=0
         pre_order_index=0
         try:
-            for i in range(len(pre_orders_queryset)+len(orders_queryset)):
-                if orders_queryset[order_index].created_at>=pre_orders_queryset[pre_order_index].created_at:
-                    
-                    merge_list.append({"type":"order","data":OrderSerializer(orders_queryset[order_index]).data})
-                    order_index+=1
-                else:
-                    merge_list.append({"type":"pre_order","data":PreOrderSerializer(pre_orders_queryset[pre_order_index]).data})
-                    pre_order_index+=1
+            if orders_queryset[0] and pre_orders_queryset[0]:
+                for i in range(len(pre_orders_queryset)+len(orders_queryset)):
+                    if orders_queryset[order_index].created_at>=pre_orders_queryset[pre_order_index].created_at:
+                        
+                        merge_list.append({"type":"order","data":OrderSerializer(orders_queryset[order_index]).data})
+                        order_index+=1
+                    else:
+                        merge_list.append({"type":"pre_order","data":PreOrderSerializer(pre_orders_queryset[pre_order_index]).data})
+                        pre_order_index+=1
         except IndexError:
             pass
         
