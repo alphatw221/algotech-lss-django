@@ -34,6 +34,12 @@ from backend.pymongo.mongodb import db
 
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 from api.utils.error_handle.error.api_error import ApiVerifyError
+106
+
+import hmac
+import hashlib
+import base64
+
 
 
 platform_dict = {'facebook':FacebookPage, 'youtube':YoutubeChannel, 'instagram':InstagramProfile}
@@ -47,15 +53,17 @@ class PaymentViewSet(viewsets.GenericViewSet):
 
         order_id = request.query_params.get('order_id')
 
-        if not Order.objects.filter(id=order_id).exists():
-            raise ApiVerifyError("no order_id found")
-        order = Order.objects.get(id=order_id)
+        order = Verify.get_order(order_id)
 
-        platform_class = platform_dict.get(order.platform, None)
+        if not order.platform in platform_dict:
+            raise ApiVerifyError("platform not supported")
+
+        platform_class = platform_dict.get(order.platform)
 
         if not platform_class.objects.filter(id=order.platform_id).exists():
             raise ApiVerifyError("no platform found")
         platform = platform_class.objects.get(id=order.platform_id)
+
         user_subscriptions = platform.user_subscriptions.all()
 
         if not user_subscriptions:
@@ -70,30 +78,36 @@ class PaymentViewSet(viewsets.GenericViewSet):
         if not firstdata:
             raise ApiVerifyError('no firstdata credential')
 
-        firstdata['is_ipg']
+        credential = {
+            # Mandatory
+            "chargetotal" : order.total,
+            "checkoutoption" : "combinedpage",
+            "currency" : firstdata['ipg_currency'],
+            "hash_algorithm" : "SHA256",
+            "storename" : firstdata['ipg_storeId'],
+            "timezone" : firstdata['ipg_timezone'],
+            "txndatetime" : datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "txntype" : "sale",
 
-        storename = firstdata['ipg_storeId']
-        txndatetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        chargetotal = order.total
-        shared_secret = firstdata['ipg_sharedSecret']
-        payment_hash=hashlib.sha256((storename + str(txndatetime) + str(chargetotal) + shared_secret).encode('utf-8')).hexdigest()
-        currency = firstdata['ipg_currency']
-
-        data={
-            "storename":storename,
-            "txntype":"sale",
-            "mode":"payonly",
-            "timezone":firstdata['ipg_timezone'],
-            "txndatetime": txndatetime,
-            "hash_algorithm":"SHA256",
-            "hash":payment_hash,
-            "chargetotal":chargetotal,
-            "currency":currency,
-            "responseSuccessURL":settings.GCP_API_LOADBALANCER_URL + f"/api/payment/ipg_payment_success?order_id={order_id}",
-            "responseFailURL":settings.GCP_API_LOADBALANCER_URL + f"/api/payment/ipg_payment_fail?order_id={order_id}"
+            # Optional:
+            # paymentMethod :"M",
+            "responseFailURL" : settings.GCP_API_LOADBALANCER_URL + f"/api/payment/ipg_payment_fail?order_id={order_id}",
+            "responseSuccessURL" : settings.GCP_API_LOADBALANCER_URL + f"/api/payment/ipg_payment_success?order_id={order_id}",
+            "mode" : "payonly",
         }
+        
+        before_hashing_string = "|".join([str(value) for key,value in credential.items()])
 
-        return Response(data, status=status.HTTP_200_OK)
+        sharedsecret=firstdata['ipg_sharedSecret']
+
+        dig = hmac.new(str.encode(sharedsecret), msg=str.encode(before_hashing_string), digestmod=hashlib.sha256).digest()
+        hashExtended = base64.b64encode(dig).decode()  
+
+        credential['hashExtended'] = hashExtended
+
+
+        return Response(credential, status=status.HTTP_200_OK)
+
 
     @action(detail=False, methods=['GET'], url_path=r'ipg_payment_success')
     @api_error_handler
@@ -102,6 +116,9 @@ class PaymentViewSet(viewsets.GenericViewSet):
         print(request)
         return HttpResponseRedirect(redirect_to='https://www.google.com')
 
+        # ‘response_hash’
+        # resopnse code
+        # approval_code|chargetotal|currency|txndatetime|storename
         order_id = request.query_params.get('order_id')
 
         print(f"order_id {order_id}")

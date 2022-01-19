@@ -12,6 +12,7 @@ from backend.cart.cart_product.request import RequestState
 from api.utils.error_handle.error.pre_order_error import PreOrderErrors
 
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
+from api.utils.error_handle.error_handler.add_or_update_by_comment_error_handler import add_or_update_by_comment_error_handler
 from pymongo import errors as pymongo_errors
 
 
@@ -279,190 +280,189 @@ class PreOrderHelper():
             raise PreOrderErrors.UnderStock('out of stock')
 
     @classmethod
-    @api_error_handler
+    @add_or_update_by_comment_error_handler
     def add_or_update_by_comment(cls, api_pre_order, api_campaign_product, qty):
-        try:
-            if not api_campaign_product['status']:
-                return RequestState.INVALID_PRODUCT_NOT_ACTIVATED
-            if api_campaign_product['max_order_amount'] and \
-                    qty > api_campaign_product['max_order_amount']:
-                return RequestState.INVALID_EXCEED_MAX_ORDER_AMOUNT
+        # try:
+        if not api_campaign_product['status']:
+            return RequestState.INVALID_PRODUCT_NOT_ACTIVATED
+        if api_campaign_product['max_order_amount'] and \
+                qty > api_campaign_product['max_order_amount']:
+            return RequestState.INVALID_EXCEED_MAX_ORDER_AMOUNT
 
-            if str(api_campaign_product['id']) not in api_pre_order['products']:
-                if qty > 0:
-                    if cls.add_product_by_comment(
-                            api_pre_order, api_campaign_product, qty):
-                        return RequestState.ADDED
-                    return None
-                elif qty == 0:
-                    return RequestState.INVALID_ADD_ZERO_QTY
-                else:
-                    return RequestState.INVALID_NEGATIVE_QTY
-
+        if str(api_campaign_product['id']) not in api_pre_order['products']:
+            if qty > 0:
+                cls.add_product_by_comment(
+                        api_pre_order, api_campaign_product, qty)
+                return RequestState.ADDED
+                # return None
+            elif qty == 0:
+                return RequestState.INVALID_ADD_ZERO_QTY
             else:
-                if qty > 0:
-                    if not api_campaign_product['customer_editable']:
-                        return RequestState.INVALID_EDIT_NOT_ALLOWED
+                return RequestState.INVALID_NEGATIVE_QTY
 
-                    if cls.update_product_by_comment(
-                            api_pre_order, api_campaign_product, qty):
-                        return RequestState.UPDATED
-                    return None
-                elif qty == 0:
-                    if not api_campaign_product['customer_removable']:
-                        return RequestState.INVALID_REMOVE_NOT_ALLOWED
-                    # delete
-                    if cls.delete_product_by_comment(
-                            api_pre_order, api_campaign_product):
-                        return RequestState.DELETED
-                    return None
-                else:
-                    return RequestState.INVALID_NEGATIVE_QTY
+        else:
+            if qty > 0:
+                if not api_campaign_product['customer_editable']:
+                    return RequestState.INVALID_EDIT_NOT_ALLOWED
 
-        except PreOrderErrors.PreOrderException as e:
-            return e.state
+                cls.update_product_by_comment(api_pre_order, api_campaign_product, qty)
+                return RequestState.UPDATED
+                # return None
+            elif qty == 0:
+                if not api_campaign_product['customer_removable']:
+                    return RequestState.INVALID_REMOVE_NOT_ALLOWED
+                # delete
+                cls.delete_product_by_comment(
+                        api_pre_order, api_campaign_product)
+                return RequestState.DELETED
+                # return None
+            else:
+                return RequestState.INVALID_NEGATIVE_QTY
+
+        # except PreOrderErrors.PreOrderException as e:
+        #     return e.state
 
     @classmethod
-    @api_error_handler
+    # @api_error_handler
     def add_product_by_comment(cls, api_pre_order, api_campaign_product, qty):
         with client.start_session() as session:
-            try:
-                with session.start_transaction():
-                    qty_difference = cls._check_stock(
-                        api_campaign_product, original_qty=0, request_qty=qty)
+            # try:
+            with session.start_transaction():
+                qty_difference = cls._check_stock(
+                    api_campaign_product, original_qty=0, request_qty=qty)
 
-                    increment_id = get_incremented_filed(
-                        collection_name="api_order_product", field_name="id")
-                    template = api_order_product_template.copy()
-                    template.update({
-                        "id": increment_id,
-                        "campaign_id": api_campaign_product["campaign_id"],
-                        "campaign_product_id": api_campaign_product["id"],
-                        "pre_order_id": api_pre_order["id"],
-                        "qty": qty,
-                        "customer_id": api_pre_order['customer_id'],
-                        "customer_name": api_pre_order['customer_name'],
-                        "platform": api_pre_order['platform'],
-                        "type": api_campaign_product["type"],
-                        "name": api_campaign_product["name"],
-                        "price": api_campaign_product["price"],
-                        "currency": api_campaign_product["currency"],
-                        "currency_sign": api_campaign_product["currency_sign"],
-                        "image": api_campaign_product["image"],
-                        "subtotal": float(qty*api_campaign_product["price"])
-                    })
-                    db.api_order_product.insert_one(template, session=session)
+                increment_id = get_incremented_filed(
+                    collection_name="api_order_product", field_name="id")
+                template = api_order_product_template.copy()
+                template.update({
+                    "id": increment_id,
+                    "campaign_id": api_campaign_product["campaign_id"],
+                    "campaign_product_id": api_campaign_product["id"],
+                    "pre_order_id": api_pre_order["id"],
+                    "qty": qty,
+                    "customer_id": api_pre_order['customer_id'],
+                    "customer_name": api_pre_order['customer_name'],
+                    "platform": api_pre_order['platform'],
+                    "type": api_campaign_product["type"],
+                    "name": api_campaign_product["name"],
+                    "price": api_campaign_product["price"],
+                    "currency": api_campaign_product["currency"],
+                    "currency_sign": api_campaign_product["currency_sign"],
+                    "image": api_campaign_product["image"],
+                    "subtotal": float(qty*api_campaign_product["price"])
+                })
+                db.api_order_product.insert_one(template, session=session)
 
-                    db.api_campaign_product.update_one({"id": api_campaign_product['id']}, {
-                        "$inc": {'qty_sold': qty_difference}})
+                db.api_campaign_product.update_one({"id": api_campaign_product['id']}, {
+                    "$inc": {'qty_sold': qty_difference}})
 
-                    products = api_pre_order['products']
+                products = api_pre_order['products']
 
-                    products[str(api_campaign_product['id'])] = {
-                        "order_product_id": increment_id,
-                        "name": api_campaign_product["name"],
-                        "image": api_campaign_product["image"],
-                        "price": api_campaign_product["price"],
-                        "type": api_campaign_product["type"],
+                products[str(api_campaign_product['id'])] = {
+                    "order_product_id": increment_id,
+                    "name": api_campaign_product["name"],
+                    "image": api_campaign_product["image"],
+                    "price": api_campaign_product["price"],
+                    "type": api_campaign_product["type"],
 
-                        "currency": api_campaign_product["currency"],
-                        "currency_sign": api_campaign_product["currency_sign"],
+                    "currency": api_campaign_product["currency"],
+                    "currency_sign": api_campaign_product["currency_sign"],
 
-                        "qty": qty,
-                        "subtotal": float(qty*api_campaign_product["price"])
-                    }
+                    "qty": qty,
+                    "subtotal": float(qty*api_campaign_product["price"])
+                }
 
-                    db.api_pre_order.update_one(
-                        {'id': api_pre_order['id']},
-                        {
-                            "$set": {
-                                "products": products
-                            },
-                            "$inc": {
-                                "subtotal": qty_difference*api_campaign_product['price'],
-                            }
+                db.api_pre_order.update_one(
+                    {'id': api_pre_order['id']},
+                    {
+                        "$set": {
+                            "products": products
                         },
-                        session=session)
-                    return True
-            except pymongo_errors.PyMongoError as e:
-                print(e)
-                print('pymongo error!!!!')
-                return False
+                        "$inc": {
+                            "subtotal": qty_difference*api_campaign_product['price'],
+                        }
+                    },
+                    session=session)
+                # return True
+            # except pymongo_errors.PyMongoError as e:
+            #     print(e)
+            #     print('pymongo error!!!!')
+            #     return False
 
     @classmethod
-    @api_error_handler
+    # @api_error_handler
     def update_product_by_comment(cls, api_pre_order, api_campaign_product, qty):
 
         with client.start_session() as session:
-            try:
-                with session.start_transaction():
-                    api_order_product = db.api_order_product.find_one(
-                        {"pre_order_id": api_pre_order['id'], "campaign_product_id": api_campaign_product['id']}, session=session)
+            # try:
+            with session.start_transaction():
+                api_order_product = db.api_order_product.find_one(
+                    {"pre_order_id": api_pre_order['id'], "campaign_product_id": api_campaign_product['id']}, session=session)
 
-                    qty_difference = cls._check_stock(
-                        api_campaign_product, original_qty=api_order_product['qty'], request_qty=qty)
+                qty_difference = cls._check_stock(
+                    api_campaign_product, original_qty=api_order_product['qty'], request_qty=qty)
 
-                    db.api_campaign_product.update_one(
-                        {'id': api_campaign_product['id']}, {"$inc": {'qty_sold': qty_difference}}, session=session)
+                db.api_campaign_product.update_one(
+                    {'id': api_campaign_product['id']}, {"$inc": {'qty_sold': qty_difference}}, session=session)
 
-                    db.api_order_product.update_one(
-                        {'id': api_order_product['id']}, {"$set": {'qty': qty, 'subtotal': float(qty*api_campaign_product["price"])}}, session=session)
+                db.api_order_product.update_one(
+                    {'id': api_order_product['id']}, {"$set": {'qty': qty, 'subtotal': float(qty*api_campaign_product["price"])}}, session=session)
 
-                    products = api_pre_order['products']
-                    products[str(api_campaign_product['id'])
-                                ]['qty'] = qty
-                    products[str(api_campaign_product['id'])]['subtotal'] = float(
-                        qty*api_order_product['price'])
-                    db.api_pre_order.update_one(
-                        {'id': api_pre_order['id']},
-                        {
-                            "$set": {
-                                "products": products
-                            },
-                            "$inc": {
-                                "subtotal": qty_difference*api_campaign_product['price'],
-                            }
+                products = api_pre_order['products']
+                products[str(api_campaign_product['id'])
+                            ]['qty'] = qty
+                products[str(api_campaign_product['id'])]['subtotal'] = float(
+                    qty*api_order_product['price'])
+                db.api_pre_order.update_one(
+                    {'id': api_pre_order['id']},
+                    {
+                        "$set": {
+                            "products": products
                         },
-                        session=session)
-                    return True
-            except pymongo_errors.PyMongoError as e:
-                print(e)
-                print('pymongo error!!!!')
-                return False
+                        "$inc": {
+                            "subtotal": qty_difference*api_campaign_product['price'],
+                        }
+                    },
+                    session=session)
+                # return True
+            # except pymongo_errors.PyMongoError as e:
+            #     print(e)
+            #     print('pymongo error!!!!')
+            #     return False
 
     @classmethod
-    @api_error_handler
+    # @api_error_handler
     def delete_product_by_comment(cls, api_pre_order, api_campaign_product):
         with client.start_session() as session:
-            try:
-                with session.start_transaction():
-                    api_order_product = db.api_order_product.find_one(
-                        {"pre_order_id": api_pre_order['id'], "campaign_product_id": api_campaign_product['id']}, session=session)
+            # try:
+            with session.start_transaction():
+                api_order_product = db.api_order_product.find_one(
+                    {"pre_order_id": api_pre_order['id'], "campaign_product_id": api_campaign_product['id']}, session=session)
 
-                    db.api_campaign_product.update_one(
-                        {'id': api_campaign_product['id']}, {"$inc": {'qty_sold': -api_order_product['qty']}}, session=session)
+                db.api_campaign_product.update_one(
+                    {'id': api_campaign_product['id']}, {"$inc": {'qty_sold': -api_order_product['qty']}}, session=session)
 
-                    db.api_order_product.delete_one(
-                        {'id': api_order_product['id']}, session=session)
+                db.api_order_product.delete_one(
+                    {'id': api_order_product['id']}, session=session)
 
-                    products = api_pre_order['products']
-                    del products[str(api_campaign_product['id'])]
-                    db.api_pre_order.update_one(
-                        {'id': api_pre_order['id']},
-                        {
-                            "$set": {
-                                "products": products
-                            },
-                            "$inc": {
-                                "subtotal": -api_order_product['qty']*api_campaign_product['price'],
-                            }
+                products = api_pre_order['products']
+                del products[str(api_campaign_product['id'])]
+                db.api_pre_order.update_one(
+                    {'id': api_pre_order['id']},
+                    {
+                        "$set": {
+                            "products": products
                         },
-                        session=session)
-                return True
-            except pymongo_errors.PyMongoError as e:
-                print(e)
-                print('error!!!!!!')
-                return False
+                        "$inc": {
+                            "subtotal": -api_order_product['qty']*api_campaign_product['price'],
+                        }
+                    },
+                    session=session)
+                # return True
+            # except pymongo_errors.PyMongoError as e:
+            #     print(e)
+            #     print('error!!!!!!')
+            #     return False
 
 
 class OrderHelper():

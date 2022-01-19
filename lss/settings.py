@@ -323,7 +323,7 @@ REDIS_SERVER = {
 
 
 # gcp load balancer
-GCP_API_LOADBALANCER_URL = "http://127.0.0.1:8000"
+GCP_API_LOADBALANCER_URL = "https://gipassl.algotech.app"
 
 # paypal settings
 PAYPAL_CONFIG = {
