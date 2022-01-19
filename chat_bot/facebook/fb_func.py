@@ -8,8 +8,8 @@ from api.models.facebook.facebook_page import FacebookPage
 from backend.api.facebook.chat_bot import api_fb_post_page_message_chat_bot
 
 
-def get_auto_response(message):
-    output_msg = AutoResponse.objects.get(input_msg = message).output_msg
+def get_auto_response(fb_id, message):
+    output_msg = AutoResponse.objects.get(facebook_page_id = fb_id, input_msg = message).output_msg
     return output_msg
 
 
@@ -33,7 +33,7 @@ def handleTextMessage(page_id, sender_id, message):
         ).count()
 
         if comment_count > 0:
-            outout_msg = get_auto_response(message['text'])
+            outout_msg = get_auto_response(fb_id, message['text'])
             page_token = FacebookPage.objects.get(page_id = page_id).token
             response = {'text': outout_msg}
             api_fb_post_page_message_chat_bot(page_token, sender_id, response)
