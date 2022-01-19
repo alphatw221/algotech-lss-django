@@ -106,7 +106,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         credential['hashExtended'] = hashExtended
 
 
-        return Response(credential, status=status.HTTP_200_OK)
+        return Response({"url":"https://test.ipg-online.com/connect/gateway/processing","credential":credential}, status=status.HTTP_200_OK)
 
 
     @action(detail=False, methods=['GET'], url_path=r'ipg_payment_success')
