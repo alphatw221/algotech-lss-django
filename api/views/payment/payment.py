@@ -349,7 +349,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
 
             if image != "undefined":
                 image_path = default_storage.save(
-                    f'user_subscription/{user_subscription.id}/campaign/{order.campaign.id}/order/{order.id}/receipt/{image.name}', ContentFile(image.read()))
+                    f'/user_subscription/{user_subscription.id}/campaign/{order.campaign.id}/order/{order.id}/receipt/{image.name}', ContentFile(image.read()))
                 image_path = settings.GS_URL + image_path
                 meta_data["receipt_image"] = image_path
             if last_five_digit != "":
