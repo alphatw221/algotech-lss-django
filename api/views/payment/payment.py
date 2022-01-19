@@ -338,8 +338,6 @@ class PaymentViewSet(viewsets.GenericViewSet):
                 raise ApiVerifyError("no order found")
 
             order = Order.objects.get(id=order_id)
-
-            # api_user = request.user.api_users.get(type='user')
             api_user = Order.objects.get(id=order_id).campaign.created_by
             print(api_user)
             platform_name = order.platform
@@ -351,7 +349,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
 
             if image != "undefined":
                 image_path = default_storage.save(
-                    f'{user_subscription.id}/order/{order.id}/receipt/{image.name}', ContentFile(image.read()))
+                    f'user_subscription/{user_subscription.id}/campaign/{order.campaign.id}/order/{order.id}/receipt/{image.name}', ContentFile(image.read()))
                 image_path = settings.GS_URL + image_path
                 meta_data["receipt_image"] = image_path
             if last_five_digit != "":
@@ -369,14 +367,20 @@ class PaymentViewSet(viewsets.GenericViewSet):
     def get_direct_payment_info(self, request):
 
         api_user, order_id = getparams(request,('order_id',), seller=False)
+        if not Order.objects.filter(id=order_id).exists():
+            raise ApiVerifyError("no order found")
 
-        order=Verify.get_order(order_id)
+        order = Verify.get_order(order_id)
         Verify.user_match_order(api_user, order)
         meta_payment = order.campaign.meta_payment
-        data = {
-            "is_general_payment": meta_payment.get("is_general_payment",0),
-            "direct_payment": meta_payment.get("direct_payment","")
-        }
+        print(meta_payment)
+        data = {}
+        for key, values in meta_payment.items():
+            data[key] = values["direct_payment"]
+        # data = {
+        #     "is_general_payment": meta_payment.get("is_general_payment",0),
+        #     "direct_payment": meta_payment.get("direct_payment","")
+        # }
 
         return Response(data, status=status.HTTP_200_OK)
         try:

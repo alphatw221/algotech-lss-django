@@ -20,7 +20,7 @@ from api.models.order.pre_order import api_pre_order_template
 from backend.pymongo.mongodb import db, client, get_incremented_filed
 from bson.objectid import ObjectId
 from api.utils.common.verify import ApiVerifyError
-
+from datetime import datetime
 
 def comment_job(campaign, platform_name, platform, comment, order_codes_mapping):
     try:
@@ -65,7 +65,8 @@ def comment_job(campaign, platform_name, platform, comment, order_codes_mapping)
                 'customer_img': comment['image'],
                 'campaign_id': campaign['id'],
                 'platform': comment['platform'],
-                'platform_id': platform['id']
+                'platform_id': platform['id'],
+                'created_at': datetime.utcnow()
             })
             
             try:
