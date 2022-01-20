@@ -139,6 +139,9 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
 
         adjust_price_history = pre_order.history.get('adjust_price',[])
+
+        if pre_order.subtotal+adjust_difference < 0:
+            adjust_difference = -pre_order.subtotal
         adjust_price_history.append({"original_subtotal":pre_order.subtotal, "adjusted_amount":adjust_difference, "adjusted_subtotal": pre_order.subtotal+adjust_difference, "adjusted_at":datetime.datetime.utcnow(), "adjusted_by":api_user.id})
         pre_order.history['adjust_price']=adjust_price_history
         pre_order.subtotal = pre_order.subtotal+adjust_difference
