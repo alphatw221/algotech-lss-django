@@ -86,11 +86,12 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
         order_by = request.query_params.get('order_by')
         product_status = request.query_params.get('status')
         type = request.query_params.get('type')
+        # exclude = request.query_params.get('exclude')
         key_word = request.query_params.get('key_word')
         api_user = request.user.api_users.get(type='user')
         _, campaign = verify_request(
             api_user, platform_name, platform_id, campaign_id)
-        print(campaign)
+        # print(campaign)
         campaign_products = campaign.products.all()
 
         if product_status:
@@ -98,7 +99,7 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
                 status=product_status)
         if type:
             campaign_products = campaign_products.filter(
-                type=type)
+                type__icontains=type)
         if key_word:
             campaign_products = campaign_products.filter(
                 name__icontains=key_word)
