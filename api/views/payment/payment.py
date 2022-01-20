@@ -86,7 +86,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             "hash_algorithm" : "SHA256",
             "storename" : firstdata['ipg_storeId'],
             "timezone" : firstdata['ipg_timezone'],
-            "txndatetime" : datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "txndatetime" : datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
             "txntype" : "sale",
 
             # Optional:

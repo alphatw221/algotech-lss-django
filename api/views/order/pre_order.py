@@ -8,7 +8,7 @@ from api.models.campaign.campaign import Campaign
 from api.models.order.order_product import OrderProduct
 
 from api.models.order.pre_order import PreOrder, PreOrderSerializer, PreOrderSerializerUpdatePaymentShipping
-from api.utils.common.common import getparams
+from api.utils.common.common import getdata, getparams
 from api.utils.common.verify import Verify
 from api.utils.common.verify import ApiVerifyError, platform_dict
 
@@ -39,12 +39,11 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['GET'], url_path=r'seller_retrieve')
     @api_error_handler
     def seller_retrieve_pre_order(self, request, pk=None):
-        api_user, platform_id, platform_name, campaign_id = getparams(request, ('platform_id', 'platform_name', 'campaign_id'), seller=True)
+        api_user, platform_id, platform_name = getparams(request, ('platform_id', 'platform_name'), seller=True)
 
         platform = Verify.get_platform(api_user, platform_name, platform_id)
-        campaign = Verify.get_campaign_from_platform(platform, campaign_id)
-        pre_order = Verify.get_pre_order_from_campaign(campaign, pk)
-        # api_user, platform, campaign, pre_order, order_product, campaign_product, qty, search = Verify.PreOrderApi.FromSeller.verify(request, pk)
+        pre_order=Verify.get_pre_order(pk)
+        Verify.get_campaign_from_platform(platform, pre_order.campaign.id)
         serializer = PreOrderSerializer(pre_order)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -57,7 +56,6 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
         platform = Verify.get_platform(api_user, platform_name, platform_id)
         campaign = Verify.get_campaign_from_platform(platform, campaign_id)
-        # api_user, platform, campaign, pre_order, order_product, campaign_product, qty, search = Verify.PreOrderApi.FromSeller.verify(request)
         queryset = campaign.pre_orders.all()
 
         if search:
@@ -84,26 +82,24 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     @api_error_handler
     def seller_pre_order_checkout(self, request, pk=None):
 
-        api_user, platform_id, platform_name, campaign_id = getparams(request, ('platform_id', 'platform_name', 'campaign_id'), seller=True)
+        api_user, platform_id, platform_name = getparams(request, ('platform_id', 'platform_name'), seller=True)
 
         platform = Verify.get_platform(api_user, platform_name, platform_id)
-        campaign = Verify.get_campaign_from_platform(platform, campaign_id)
-        pre_order = Verify.get_pre_order_from_campaign(campaign, pk)
-        # api_user, platform, campaign, pre_order, order_product, campaign_product, qty, search = Verify.PreOrderApi.FromSeller.verify(request,pk)
+        pre_order = Verify.get_pre_order(pk)
+        Verify.get_campaign_from_platform(platform, pre_order.campaign.id)
         api_order = PreOrderHelper.checkout(api_user, pre_order)
         return Response(api_order, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['GET'], url_path=r'seller_add')
     @api_error_handler
     def seller_add_order_product(self, request, pk=None):
-        api_user, platform_id, platform_name, campaign_id, campaign_product_id, qty = getparams(request, ('platform_id', 'platform_name', 'campaign_id', 'campaign_product_id', 'qty'), seller=True)
+        api_user, platform_id, platform_name, campaign_product_id, qty = getparams(request, ('platform_id', 'platform_name', 'campaign_product_id', 'qty'), seller=True)
 
         platform = Verify.get_platform(api_user, platform_name, platform_id)
-        campaign = Verify.get_campaign_from_platform(platform, campaign_id)
-        pre_order = Verify.get_pre_order_from_campaign(campaign, pk)
+        pre_order = Verify.get_pre_order(pk)
+        Verify.get_campaign_from_platform(platform, pre_order.campaign.id)
 
         campaign_product = Verify.get_campaign_product_from_pre_order(pre_order, campaign_product_id)
-        # api_user, platform, campaign, pre_order, order_product, campaign_product, qty, search = Verify.PreOrderApi.FromSeller.verify(request, pk)
         api_order_product = PreOrderHelper.add_product(
             api_user, pre_order, campaign_product, qty)
         return Response(api_order_product, status=status.HTTP_200_OK)
@@ -111,25 +107,57 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['GET'], url_path=r'seller_update')
     @api_error_handler
     def seller_update_order_product(self, request, pk=None):
-        api_user, platform_id, platform_name, campaign_id, order_product_id, qty = getparams(request, ('platform_id', 'platform_name', 'campaign_id', 'order_product_id', 'qty'), seller=True)
+        api_user, platform_id, platform_name, order_product_id, qty = getparams(request, ('platform_id', 'platform_name', 'order_product_id', 'qty'), seller=True)
 
         platform = Verify.get_platform(api_user, platform_name, platform_id)
-        campaign = Verify.get_campaign_from_platform(platform, campaign_id)
-        pre_order = Verify.get_pre_order_from_campaign(campaign, pk)
+        pre_order = Verify.get_pre_order(pk)
+        Verify.get_campaign_from_platform(platform, pre_order.campaign.id)
+
         order_product = Verify.get_order_product_from_pre_order(pre_order, order_product_id)
-        # api_user, platform, campaign, pre_order, order_product, campaign_product, qty, search = Verify.PreOrderApi.FromSeller.verify(request, pk)
         api_order_product = PreOrderHelper.update_product(
             api_user, pre_order, order_product, order_product.campaign_product, qty)
         return Response(api_order_product, status=status.HTTP_200_OK)
 
+    @action(detail=True, methods=['PUT'], url_path=r'seller_adjust')
+    @api_error_handler
+    def seller_update_order_product(self, request, pk=None):
+        api_user, platform_id, platform_name = getparams(request, ('platform_id', 'platform_name'), with_user=True ,seller=True)
+
+        adjust_price, free_delievery = getdata(request,('adjust_price', 'free_delievery'))
+
+        platform = Verify.get_platform(api_user, platform_name, platform_id)
+        pre_order = Verify.get_pre_order(pk)
+        Verify.get_campaign_from_platform(platform, pre_order.campaign.id)
+
+        if adjust_price or adjust_price>=0:
+            adjust_price_history = pre_order.history.get('adjust_price',[])
+            adjust_price_history.append({"original_subtotal":pre_order.subtotal, "adjust_subtotal": adjust_price, "adjust_at":datetime.datetime.utcnow(), "adjust_by":api_user.id})
+            pre_order.history['adjust_price']=adjust_price_history
+            pre_order.subtotal = adjust_price
+
+        if free_delievery==1:
+            free_delievery_history = pre_order.history.get('free_delievery',[])
+            free_delievery_history.append({"original_total":pre_order.total, "adjust_total": pre_order.subtotal, "adjust_at":datetime.datetime.utcnow(), "adjust_by":api_user.id})
+            pre_order.history['free_delievery']=free_delievery_history
+            pre_order.total = pre_order.subtotal
+        elif free_delievery==0:
+            free_delievery_history = pre_order.history.get('free_delievery',[])
+            free_delievery_history.append({"original_total":pre_order.total, "adjust_total": pre_order.total+pre_order.shipping_cost, "adjust_at":datetime.datetime.utcnow(), "adjust_by":api_user.id})
+            pre_order.history['free_delievery']=free_delievery_history
+            pre_order.total = pre_order.total+pre_order.shipping_cost
+
+        pre_order.save()
+        
+        return Response(PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
     @action(detail=True, methods=['GET'], url_path=r'seller_delete')
     @api_error_handler
     def seller_delete_order_product(self, request, pk=None):
-        api_user, platform_id, platform_name, campaign_id, order_product_id = getparams(request, ('platform_id', 'platform_name', 'campaign_id', 'order_product_id'), seller=True)
+        api_user, platform_id, platform_name, order_product_id = getparams(request, ('platform_id', 'platform_name', 'order_product_id'), seller=True)
 
         platform = Verify.get_platform(api_user, platform_name, platform_id)
-        campaign = Verify.get_campaign_from_platform(platform, campaign_id)
-        pre_order = Verify.get_pre_order_from_campaign(campaign, pk)
+        pre_order = Verify.get_pre_order(pk)
+        Verify.get_campaign_from_platform(platform, pre_order.campaign.id)
+
         order_product = Verify.get_order_product_from_pre_order(pre_order, order_product_id)
         # api_user, platform, campaign, pre_order, order_product, campaign_product, qty, search = Verify.PreOrderApi.FromSeller.verify(request, pk)
         PreOrderHelper.delete_product(
