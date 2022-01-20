@@ -155,7 +155,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
             shipping_cost = pre_order.shipping_cost if pre_order.shipping_cost else 0
             pre_order.total = pre_order.subtotal+shipping_cost
 
-        pre_order.free_delievery = free_delivery
+        pre_order.free_delivery = free_delivery
         pre_order.save()
         
         return Response(PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
