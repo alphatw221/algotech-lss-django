@@ -120,6 +120,11 @@ class PreOrder(models.Model):
 
     lock_at = models.DateTimeField(null=True, blank=True, default=None)
 
+    adjust_title = models.CharField(
+        max_length=255, null=True, blank=True, default=None)
+    adjust_price = models.FloatField(null=True, blank=True, default=None)
+    free_delievery = models.BooleanField(
+        blank=False, null=True, default=False)
 
 class PreOrderSerializer(serializers.ModelSerializer):
 

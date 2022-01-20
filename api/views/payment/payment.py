@@ -80,28 +80,29 @@ class PaymentViewSet(viewsets.GenericViewSet):
 
         credential = {
             # Mandatory
+            
+            "txntype" : "sale",
+            "timezone" : firstdata['ipg_timezone'],
+            "txndatetime" : datetime.datetime.utcnow().strftime("%Y:%m:%d-%H:%M:%S"),
+            "hash_algorithm" : "SHA256",
+            "storename" : firstdata['ipg_storeId'],
             "chargetotal" : order.total,
             "checkoutoption" : "combinedpage",
             "currency" : firstdata['ipg_currency'],
-            "hash_algorithm" : "SHA256",
-            "storename" : firstdata['ipg_storeId'],
-            "timezone" : firstdata['ipg_timezone'],
-            "txndatetime" : datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
-            "txntype" : "sale",
 
             # Optional:
             # paymentMethod :"M",
-            "responseFailURL" : settings.GCP_API_LOADBALANCER_URL + f"/api/payment/ipg_payment_fail?order_id={order_id}",
-            "responseSuccessURL" : settings.GCP_API_LOADBALANCER_URL + f"/api/payment/ipg_payment_success?order_id={order_id}",
-            "mode" : "payonly",
+            # "responseFailURL" : settings.GCP_API_LOADBALANCER_URL + f"/api/payment/ipg_payment_fail?order_id={order_id}",
+            # "responseSuccessURL" : settings.GCP_API_LOADBALANCER_URL + f"/api/payment/ipg_payment_success?order_id={order_id}",
+            # "mode" : "payonly",
         }
         
         before_hashing_string = "|".join([str(value) for key,value in credential.items()])
-
+        print(before_hashing_string)
         sharedsecret=firstdata['ipg_sharedSecret']
 
-        dig = hmac.new(str.encode(sharedsecret), msg=str.encode(before_hashing_string), digestmod=hashlib.sha256).digest()
-        hashExtended = base64.b64encode(dig).decode()  
+        dig = hmac.new(sharedsecret.encode(), msg=before_hashing_string.encode(), digestmod=hashlib.sha256).digest()
+        hashExtended = base64.b64encode(dig)
 
         credential['hashExtended'] = hashExtended
 
