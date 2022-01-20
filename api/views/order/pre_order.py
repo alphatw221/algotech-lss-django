@@ -187,8 +187,6 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
         api_user, pre_order, order_product, campaign_product, qty = Verify.PreOrderApi.FromBuyer.verify(request, pk)
 
-        
-
         serializer = PreOrderSerializerUpdatePaymentShipping(pre_order, data=request.data, partial=True)
         if not serializer.is_valid():
             print (serializer.errors)

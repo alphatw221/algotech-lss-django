@@ -12,7 +12,7 @@ from api.utils.common.order_helper import OrderHelper
 
 from django.http import HttpResponse
 from backend.pymongo.mongodb import db
-import xlsxwriter, os.path, io
+import xlsxwriter, os.path, io, datetime
 from io import StringIO
 from django.conf import settings
 
@@ -269,6 +269,39 @@ class OrderViewSet(viewsets.ModelViewSet):
         workbook.close()
         
         return response
+    
+    #TODO transfer to campaign or payment 
+    @action(detail=True, methods=['POST'], url_path=r'delivery_info')
+    @api_error_handler
+    def update_order_info(self, request, pk=None):
+        date_list = request.data['shipping_date'].split('-')
+        request.data['shipping_date'] = datetime.date(int(date_list[0]), int(date_list[1]), int(date_list[2]))
+
+        # OPERATION_CODE_NAME: AGILE
+        if request.user.id in settings.ADMIN_LIST:
+            pre_order=Order.objects.get(id=pk)
+            serializer = OrderSerializerUpdatePaymentShipping(pre_order, data=request.data, partial=True)
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            serializer.save()
+            pre_order = Order.objects.get(id=pk)
+            verify_message = Verify.PreOrderApi.FromBuyer.verify_delivery_info(pre_order)
+            return Response(verify_message, status=status.HTTP_200_OK)
+
+        api_user, platform_id, platform_name, campaign_id = getparams(
+            request, ("platform_id", "platform_name", "campaign_id"))
+        _, _, order = verify_seller_request(
+            api_user, platform_name, platform_id, campaign_id, order_id=pk)
+
+        serializer = OrderSerializerUpdatePaymentShipping(order, data=request.data, partial=True)
+        if not serializer.is_valid():
+            print (serializer.errors)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
+        order = Order.objects.get(id=pk)
+        verify_message = Verify.PreOrderApi.FromBuyer.verify_delivery_info(order)
+
+        return Response(verify_message, status=status.HTTP_200_OK)
     
     @action(detail=True, methods=['GET'], url_path=r'buyer_retrieve')
     @api_error_handler
