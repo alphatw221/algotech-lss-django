@@ -66,5 +66,5 @@ class HitPay_Helper:
 
     @dataclass
     class HitPayApiCaller(RestApiJsonCaller):
-        # domain_url: str = "https://api.hit-pay.com/v1/payment-requests"
-        domain_url: str = "https://api.sandbox.hit-pay.com/v1/payment-requests"
+        domain_url: str = "https://api.hit-pay.com/v1/payment-requests"
+        # domain_url: str = "https://api.sandbox.hit-pay.com/v1/payment-requests"

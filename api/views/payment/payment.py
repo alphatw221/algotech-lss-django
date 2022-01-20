@@ -285,7 +285,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         name = user_data['name']
         email = user_data['email']
         order_data = db.api_order.find_one({'id': int(order_id)})
-        currency = order_data['currency']
+        currency = 'SGD' if not order_data['currency'] else order_data['currency']
         amount = order_data['total']
 
         params = {
@@ -305,7 +305,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         code, ret = HitPay_Helper.HitPayApiCaller(headers=headers,
                             params=params).post()
         if code != 201:
-            raise ('hitpay got wrong')
+            raise Exception('hitpay got wrong')
         db.api_order.update_one({'id': int(order_id)}, {'$set': {'meta': {'payment_id': ret['id']}}}) 
 
         return Response(ret['url'])
@@ -372,6 +372,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             if last_five_digit != "":
                 meta_data["last_five_digit"] = last_five_digit
             order.meta = meta_data
+            order.status = "complete"
             order.save()
             print(meta_data)
             return Response({"message": "upload succeed"}, status=status.HTTP_200_OK)
