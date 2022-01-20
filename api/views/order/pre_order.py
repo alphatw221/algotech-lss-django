@@ -120,7 +120,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['PUT'], url_path=r'seller_adjust')
     @api_error_handler
-    def seller_update_order_product(self, request, pk=None):
+    def seller_adjust(self, request, pk=None):
         api_user, platform_id, platform_name = getparams(request, ('platform_id', 'platform_name'), with_user=True ,seller=True)
 
         adjust_price, free_delievery = getdata(request,('adjust_price', 'free_delievery'))
