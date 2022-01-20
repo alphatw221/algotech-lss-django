@@ -129,22 +129,30 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         pre_order = Verify.get_pre_order(pk)
         Verify.get_campaign_from_platform(platform, pre_order.campaign.id)
 
-        if adjust_price or adjust_price>=0:
-            adjust_price_history = pre_order.history.get('adjust_price',[])
-            adjust_price_history.append({"original_subtotal":pre_order.subtotal, "adjust_subtotal": adjust_price, "adjust_at":datetime.datetime.utcnow(), "adjust_by":api_user.id})
-            pre_order.history['adjust_price']=adjust_price_history
-            pre_order.subtotal = adjust_price
+        if type(adjust_price) not in [int, float] or type(free_delievery) != int:
+            raise ApiVerifyError("request data error")
+
+        if adjust_price <0:
+            raise ApiVerifyError("adjust_price less than zero")
+
+        adjust_price_history = pre_order.history.get('adjust_price',[])
+        adjust_price_history.append({"original_subtotal":pre_order.subtotal, "adjusted_subtotal": adjust_price, "adjusted_at":datetime.datetime.utcnow(), "adjusted_by":api_user.id})
+        pre_order.history['adjust_price']=adjust_price_history
+        pre_order.subtotal = adjust_price
 
         if free_delievery==1:
             free_delievery_history = pre_order.history.get('free_delievery',[])
-            free_delievery_history.append({"original_total":pre_order.total, "adjust_total": pre_order.subtotal, "adjust_at":datetime.datetime.utcnow(), "adjust_by":api_user.id})
+            free_delievery_history.append({"original_total":pre_order.total, "adjusted_total": pre_order.subtotal, "adjusted_at":datetime.datetime.utcnow(), "adjusted_by":api_user.id})
             pre_order.history['free_delievery']=free_delievery_history
             pre_order.total = pre_order.subtotal
         elif free_delievery==0:
             free_delievery_history = pre_order.history.get('free_delievery',[])
-            free_delievery_history.append({"original_total":pre_order.total, "adjust_total": pre_order.total+pre_order.shipping_cost, "adjust_at":datetime.datetime.utcnow(), "adjust_by":api_user.id})
+            free_delievery_history.append({"original_total":pre_order.total, "adjusted_total": pre_order.subtotal+pre_order.shipping_cost, "adjusted_at":datetime.datetime.utcnow(), "adjusted_by":api_user.id})
             pre_order.history['free_delievery']=free_delievery_history
-            pre_order.total = pre_order.total+pre_order.shipping_cost
+            shipping_cost = pre_order.shipping_cost if pre_order.shipping_cost else 0
+            pre_order.total = pre_order.subtotal+shipping_cost
+        else:
+            raise ApiVerifyError("free_delievery value error")
 
         pre_order.save()
         

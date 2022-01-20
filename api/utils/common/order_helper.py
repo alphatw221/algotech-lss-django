@@ -33,7 +33,7 @@ class PreOrderHelper():
                     cls._check_lock(api_user, api_pre_order)
                     qty = cls._check_qty(api_campaign_product, qty)
                     cls._check_type(api_campaign_product)
-                    cls._check_editable(api_campaign_product)
+                    cls._check_editable(api_user,api_campaign_product)
 
                     qty_difference = cls._check_stock(
                         api_campaign_product, original_qty=api_order_product['qty'], request_qty=qty)
