@@ -78,31 +78,84 @@ class PaymentViewSet(viewsets.GenericViewSet):
         if not firstdata:
             raise ApiVerifyError('no firstdata credential')
 
+
+        # $stringToHash = $this->storeId . $this->txndatetime . $this->chargetotal . $this->currency . $this->sharedSecret;
+        # $ascii = bin2hex($stringToHash);
+
+        # return hash("sha256", $ascii);
+
+        # <input type="hidden" name="storename" value="{{ $ipg->storeId }}"/>
+        # <input type="hidden" name="txntype" value="sale"/>
+        # <input type="hidden" name="mode" value="payonly"/>
+        # <input type="hidden" name="timezone" value="{{ $ipg->timezone }}"/>
+        # <input type="hidden" name="txndatetime" value="{{ $ipg->txndatetime() }}"/>
+        # <input type="hidden" name="responseSuccessURL" value="{{ route('customer_order_ipg_success', ['fb_psid' => $fb_psid, 'order_id' => $order['id'], 'campaign_id' => $campaign_id]) }}"/>
+        # <input type="hidden" name="responseFailURL" value="{{ route('customer_order_ipg_fail', ['fb_psid' => $fb_psid, 'order_id' => $order['id']]) }}"/>
+        # <input type="hidden" name="hash_algorithm" value="SHA256"/>
+        # <input type="hidden" name="hash" value="{{ $ipg->createHash() }}"/>
+        # <input type="hidden" name="chargetotal" value="{{ $order['total'] }}">
+        # <input type="hidden" name="currency" value="{{ $ipg->currency }}"/>
+
+        # storeId = firstdata['ipg_storeId']
+        # txndatetime = datetime.datetime.utcnow().strftime("%Y:%m:%d-%H:%M:%S")
+        # chargetotal = order.total
+        # currency = firstdata['ipg_currency']
+        # sharedSecret = firstdata['ipg_sharedSecret']
+        # before_hashing_string = storeId+txndatetime+str(chargetotal)+currency+sharedSecret
+        # print(before_hashing_string)
+        # ascii = before_hashing_string.encode('utf-8').hex()
+        # print(type(ascii))
+        # _hash = hashlib.sha256(ascii.encode()).hexdigest()
+        # credential = {
+
+        #     "storename" : storeId,
+        #     "txntype" : "sale",
+        #     "mode" : "payonly",
+        #     "timezone" : firstdata['ipg_timezone'],
+        #     "txndatetime" : datetime.datetime.utcnow().strftime("%Y:%m:%d-%H:%M:%S"),
+        #     "responseFailURL" : settings.GCP_API_LOADBALANCER_URL + f"/api/payment/ipg_payment_fail?order_id={order_id}",
+        #     "responseSuccessURL" : settings.GCP_API_LOADBALANCER_URL + f"/api/payment/ipg_payment_success?order_id={order_id}",
+        #     "hash_algorithm" : "SHA256",
+        #     "hash": _hash,
+        #     "chargetotal" : order.total,
+        #     "currency" : firstdata['ipg_currency'],
+
+        # }
+        # return Response({"url":"https://test.ipg-online.com/connect/gateway/processing","credential":credential}, status=status.HTTP_200_OK)
+
+
         credential = {
-            # Mandatory
-            
-            "txntype" : "sale",
-            "timezone" : firstdata['ipg_timezone'],
-            "txndatetime" : datetime.datetime.utcnow().strftime("%Y:%m:%d-%H:%M:%S"),
-            "hash_algorithm" : "SHA256",
-            "storename" : firstdata['ipg_storeId'],
             "chargetotal" : order.total,
             "checkoutoption" : "combinedpage",
             "currency" : firstdata['ipg_currency'],
+            
+            "hash_algorithm" : "HMACSHA256",
 
-            # Optional:
-            # paymentMethod :"M",
+            # "mode" : "payonly",
+
+            "paymentMethod" :"M",
+
             # "responseFailURL" : settings.GCP_API_LOADBALANCER_URL + f"/api/payment/ipg_payment_fail?order_id={order_id}",
             # "responseSuccessURL" : settings.GCP_API_LOADBALANCER_URL + f"/api/payment/ipg_payment_success?order_id={order_id}",
-            # "mode" : "payonly",
+
+            "storename" : firstdata['ipg_storeId'],
+
+            "timezone" : firstdata['ipg_timezone'],
+            "txndatetime" : datetime.datetime.utcnow().strftime("%Y:%m:%d-%H:%M:%S"),
+            "txntype" : "sale",
+            
         }
         
+        # before_hashing_string = "".join([str(value) for key,value in credential.items()])
         before_hashing_string = "|".join([str(value) for key,value in credential.items()])
+
         print(before_hashing_string)
         sharedsecret=firstdata['ipg_sharedSecret']
 
         dig = hmac.new(sharedsecret.encode(), msg=before_hashing_string.encode(), digestmod=hashlib.sha256).digest()
-        hashExtended = base64.b64encode(dig)
+        print(dig)
+        print(type(dig))
+        hashExtended = base64.b64encode(dig).decode()
 
         credential['hashExtended'] = hashExtended
 
