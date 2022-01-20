@@ -133,14 +133,17 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         if type(adjust_price) not in [int, float] or type(free_delivery) != bool:
             raise ApiVerifyError("request data error")
 
-        if adjust_price !=0:
+        last_adjust = pre_order.adjust_price if pre_order.adjust_price else 0
 
-            adjust_price_history = pre_order.history.get('adjust_price',[])
-            adjust_price_history.append({"original_subtotal":pre_order.subtotal, "adjusted_amount":adjust_price, "adjusted_subtotal": pre_order.subtotal+adjust_price, "adjusted_at":datetime.datetime.utcnow(), "adjusted_by":api_user.id})
-            pre_order.history['adjust_price']=adjust_price_history
-            pre_order.subtotal = pre_order.subtotal+adjust_price
-            pre_order.adjusted_price = adjust_price
-            pre_order.adjust_title = adjust_title
+        adjust_difference = adjust_price - last_adjust
+
+
+        adjust_price_history = pre_order.history.get('adjust_price',[])
+        adjust_price_history.append({"original_subtotal":pre_order.subtotal, "adjusted_amount":adjust_difference, "adjusted_subtotal": pre_order.subtotal+adjust_difference, "adjusted_at":datetime.datetime.utcnow(), "adjusted_by":api_user.id})
+        pre_order.history['adjust_price']=adjust_price_history
+        pre_order.subtotal = pre_order.subtotal+adjust_difference
+        pre_order.adjust_price = adjust_price
+        pre_order.adjust_title = adjust_title
 
         if free_delivery:
             free_delievery_history = pre_order.history.get('free_delievery',[])
