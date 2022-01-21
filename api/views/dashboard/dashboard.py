@@ -207,17 +207,28 @@ class DashboardViewSet(viewsets.ModelViewSet):
                 campaign_order_total_close_rate += campaign_order_complete_count / (campaign_order_complete_count + campaign_pre_order_count) * 100
                 campaign_count += 1
 
-            campaign_order_average_uncheck_rate = campaign_order_total_uncheck_rate / campaign_count
-            campaign_order_average_close_rate = campaign_order_total_close_rate / campaign_count       
-            
+            campaign_order_average_uncheck_rate, campaign_order_average_close_rate, campaign_sales_average, comment_count_average = 0, 0 , 0, 0
+            try:
+                campaign_order_average_uncheck_rate = campaign_order_total_uncheck_rate / campaign_count
+            except:
+                campaign_order_average_uncheck_rate = 0
+            try:
+                campaign_order_average_close_rate = campaign_order_total_close_rate / campaign_count       
+            except:
+                campaign_order_average_close_rate = 0
+
             order_datas = db.api_order.find({'campaign_id': {'$in': campaign_id_list}})
             for order_data in order_datas:
                 for key, val in order_data['products'].items():
-                    
                     campaing_sales_total += val['subtotal']
-            # 總campaign完成訂單總金額平均
-            campaign_sales_average = campaing_sales_total / campaign_count
-            comment_count_average = db.api_campaign_comment.find({'campaign_id': {'$in': campaign_id_list}}).count() / campaign_count
+            try:   # 總campaign完成訂單總金額平均
+                campaign_sales_average = campaing_sales_total / campaign_count
+            except:
+                campaign_sales_average = 0
+            try:
+                comment_count_average = db.api_campaign_comment.find({'campaign_id': {'$in': campaign_id_list}}).count() / campaign_count
+            except:
+                comment_count_average = 0
 
             # manage order
             pre_order_qty, order_qty, close_rate, uncheckout_rate, complete_sales, comment_count = 0, 0, 0, 0, 0, 0
@@ -251,9 +262,14 @@ class DashboardViewSet(viewsets.ModelViewSet):
             manage_order['order_qty'] = order_qty
             manage_order['close_rate_raise'] = close_rate - campaign_order_average_close_rate
             manage_order['uncheckout_rate_raise'] = uncheckout_rate - campaign_order_average_uncheck_rate
-            manage_order['campaign_sales_raise'] = complete_sales / campaign_sales_average
-            manage_order['comment_count_raise'] = comment_count / comment_count_average
-
+            try:
+                manage_order['campaign_sales_raise'] = complete_sales / campaign_sales_average
+            except:
+                manage_order['campaign_sales_raise'] = 0
+            try:
+                manage_order['comment_count_raise'] = comment_count / comment_count_average
+            except:
+                manage_order['comment_count_raise'] = 0
         return Response(manage_order, status=status.HTTP_200_OK)
                 
                 
