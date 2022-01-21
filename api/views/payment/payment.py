@@ -141,7 +141,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             "storename" : firstdata['ipg_storeId'],
 
             "timezone" : firstdata['ipg_timezone'],
-            "txndatetime" : datetime.datetime.utcnow().strftime("%Y:%m:%d-%H:%M:%S"),
+            "txndatetime" : datetime.datetime.now().strftime("%Y:%m:%d-%H:%M:%S"),
             "txntype" : "sale",
             
         }
@@ -152,11 +152,12 @@ class PaymentViewSet(viewsets.GenericViewSet):
         print(before_hashing_string)
         sharedsecret=firstdata['ipg_sharedSecret']
 
+        print(sharedsecret.encode())
         dig = hmac.new(sharedsecret.encode(), msg=before_hashing_string.encode(), digestmod=hashlib.sha256).digest()
         print(dig)
         print(type(dig))
         hashExtended = base64.b64encode(dig).decode()
-
+        print(hashExtended)
         credential['hashExtended'] = hashExtended
 
 
