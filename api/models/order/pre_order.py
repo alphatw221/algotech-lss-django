@@ -122,7 +122,7 @@ class PreOrder(models.Model):
 
     adjust_title = models.CharField(
         max_length=255, null=True, blank=True, default=None)
-    adjust_price = models.FloatField(null=True, blank=True, default=None)
+    adjust_price = models.FloatField(null=True, blank=True, default=0)
     free_delivery = models.BooleanField(
         blank=False, null=True, default=False)
 
