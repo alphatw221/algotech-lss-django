@@ -203,7 +203,7 @@ class PreOrderHelper():
                     db.api_order_product.update_many(
                         {"pre_order_id": api_pre_order["id"]}, {"$set": {"pre_order_id": None, "order_id": increment_id}})
                     db.api_pre_order.update_one({"id": api_pre_order["id"]}, {
-                                                "$set": {"products": {}, "total": 0, "subtotal": 0}}, session=session)
+                                                "$set": {"products": {}, "total": 0, "subtotal": 0, "adjust_price":0, "adjust_title":"", "free_delivery":False, "history":{}}}, session=session)
             except pymongo_errors.PyMongoError as e:
                 print(e)
                 raise pymongo_errors.PyMongoError("server busy, please try again later")
