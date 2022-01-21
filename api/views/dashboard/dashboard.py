@@ -249,10 +249,17 @@ class DashboardViewSet(viewsets.ModelViewSet):
                 for key, val in order_data['products'].items():
                     # 完成訂單總金額
                     complete_sales += val['subtotal']
+            close_rate, uncheckout_rate = 0, 0
             # 訂單成交量
-            close_rate = order_complete_count / (order_complete_count + pre_order_count) * 100
+            try:
+                close_rate = order_complete_count / (order_complete_count + pre_order_count) * 100
+            except:
+                close_rate = 0
             # 未完成付款
-            uncheckout_rate = order_proceed_count / (order_complete_count + order_proceed_count) * 100
+            try:
+                uncheckout_rate = order_proceed_count / (order_complete_count + order_proceed_count) * 100
+            except:
+                uncheckout_rate = 0
             
             manage_order['close_rate'] = close_rate
             manage_order['complete_sales'] = complete_sales
