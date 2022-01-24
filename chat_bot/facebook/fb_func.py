@@ -2,14 +2,17 @@ from api.models.campaign.campaign import Campaign
 from api.models.campaign.campaign_comment import CampaignComment
 from api.models.facebook.facebook_page import FacebookPage 
 from api.models.auto_response.auto_response import AutoResponse
-import pendulum
+import pendulum, re
 
 from api.models.facebook.facebook_page import FacebookPage
+from backend.pymongo.mongodb import db
 from backend.api.facebook.chat_bot import api_fb_post_page_message_chat_bot
 
 
 def get_auto_response(fb_id, message):
-    output_msg = AutoResponse.objects.get(facebook_page_id = fb_id, input_msg = message).output_msg
+    rgx = re.compile('.*' + message + '.*', re.IGNORECASE)
+    output_msg = db.api_auto_reply.find_one({'facebook_page_id': fb_id, 'input_msg': rgx})['output_msg']
+    # output_msg = AutoResponse.objects.get(facebook_page_id = fb_id, input_msg = message).output_msg
     return output_msg
 
 
