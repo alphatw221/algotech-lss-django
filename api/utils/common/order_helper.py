@@ -190,6 +190,8 @@ class PreOrderHelper():
                     cls._check_empty(api_pre_order)
                     cls._check_allow_checkout(api_user, pre_order.campaign)
 
+                    api_pre_order['total']=api_pre_order['subtotal']+api_pre_order['shipping_cost']+api_pre_order['adjust_price']
+
                     increment_id = get_incremented_filed(
                         collection_name="api_order", field_name="id")
                     api_order_data = api_pre_order.copy()
@@ -203,7 +205,7 @@ class PreOrderHelper():
                     db.api_order_product.update_many(
                         {"pre_order_id": api_pre_order["id"]}, {"$set": {"pre_order_id": None, "order_id": increment_id}})
                     db.api_pre_order.update_one({"id": api_pre_order["id"]}, {
-                                                "$set": {"products": {}, "total": 0, "subtotal": 0}}, session=session)
+                                                "$set": {"products": {}, "total": 0, "subtotal": 0, "adjust_price":0, "adjust_title":"", "free_delivery":False, "history":{}}}, session=session)
             except pymongo_errors.PyMongoError as e:
                 print(e)
                 raise pymongo_errors.PyMongoError("server busy, please try again later")

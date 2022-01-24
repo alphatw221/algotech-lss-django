@@ -23,13 +23,14 @@ from api.utils.common.verify import ApiVerifyError
 from datetime import datetime
 from api.utils.error_handle.error_handler.comment_job_error_handler import comment_job_error_handler
 
+
 @comment_job_error_handler
 def comment_job(campaign, platform_name, platform, comment, order_codes_mapping):
     # try:
     command = CommandTextProcessor.process(comment['message'])
     if command:
         command_responding(platform_name, platform,
-                            campaign, comment, command)
+                           campaign, comment, command)
         return
 
     # print(order_codes_mapping)
@@ -43,6 +44,7 @@ def comment_job(campaign, platform_name, platform, comment, order_codes_mapping)
             break
 
     if not order_placement:
+        print('no order_placement')
         return
 
     pre_order = db.api_pre_order.find_one(
@@ -70,7 +72,7 @@ def comment_job(campaign, platform_name, platform, comment, order_codes_mapping)
             'platform_id': platform['id'],
             'created_at': datetime.utcnow()
         })
-        
+
         try:
             _id = db.api_pre_order.insert_one(template).inserted_id
             pre_order = db.api_pre_order.find_one(_id)
@@ -87,7 +89,7 @@ def comment_job(campaign, platform_name, platform, comment, order_codes_mapping)
         return
     print(f"state: {state}")
     comment_responding(platform_name, platform, pre_order,
-                        comment, campaign_product, qty, state)
+                       comment, campaign_product, qty, state)
     # except ApiVerifyError:
     #     pass
     # except Exception as e:
@@ -96,6 +98,7 @@ def comment_job(campaign, platform_name, platform, comment, order_codes_mapping)
 
 
 def command_responding(platform_name, platform, campaign, comment, command):
+    return
     if platform_name == 'facebook':
         text = i18n_get_comment_command_response(
             campaign, comment, command, lang=platform['lang'])
@@ -108,6 +111,7 @@ def command_responding(platform_name, platform, campaign, comment, command):
 
 
 def comment_responding(platform_name, platform, pre_order, comment, campaign_product, qty, state):
+    return
     if platform_name == 'facebook':
         text = i18n_get_request_response(
             state, campaign_product, qty, lang=platform['lang'])
