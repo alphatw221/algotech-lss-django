@@ -11,7 +11,10 @@ from backend.api.facebook.chat_bot import api_fb_post_page_message_chat_bot
 
 def get_auto_response(fb_id, message):
     message_list = message.split(' ')
-    output_msg = db.api_auto_reply.find_one({'facebook_page_id': fb_id, 'input_msg': {'$in': message_list}})['output_msg']
+    print (message_list)
+    output_msg = db.api_auto_response.find_one({'facebook_page_id': fb_id, 'input_msg': {'$in': message_list}})['output_msg']
+    print ('output')
+    print (output_msg)
     # output_msg = AutoResponse.objects.get(facebook_page_id = fb_id, input_msg = message).output_msg
     return output_msg
 
