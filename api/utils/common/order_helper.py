@@ -190,6 +190,8 @@ class PreOrderHelper():
                     cls._check_empty(api_pre_order)
                     cls._check_allow_checkout(api_user, pre_order.campaign)
 
+                    api_pre_order['total']=api_pre_order['subtotal']+api_pre_order['shipping_cost']+api_pre_order['adjust_price']
+
                     increment_id = get_incremented_filed(
                         collection_name="api_order", field_name="id")
                     api_order_data = api_pre_order.copy()
