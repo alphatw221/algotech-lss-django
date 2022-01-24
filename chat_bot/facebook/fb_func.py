@@ -2,14 +2,17 @@ from api.models.campaign.campaign import Campaign
 from api.models.campaign.campaign_comment import CampaignComment
 from api.models.facebook.facebook_page import FacebookPage 
 from api.models.auto_response.auto_response import AutoResponse
-import pendulum
+import pendulum, re
 
 from api.models.facebook.facebook_page import FacebookPage
+from backend.pymongo.mongodb import db
 from backend.api.facebook.chat_bot import api_fb_post_page_message_chat_bot
 
 
 def get_auto_response(fb_id, message):
-    output_msg = AutoResponse.objects.get(facebook_page_id = fb_id, input_msg = message).output_msg
+    message_list = message.split(' ')
+    output_msg = db.api_auto_reply.find_one({'facebook_page_id': fb_id, 'input_msg': {'$in': message_list}})['output_msg']
+    # output_msg = AutoResponse.objects.get(facebook_page_id = fb_id, input_msg = message).output_msg
     return output_msg
 
 
@@ -22,7 +25,7 @@ def handleTextMessage(page_id, sender_id, message):
                 facebook_page_id = fb_id,
                 ordering_start_at__lt = pendulum.now(),
                 end_at__gt = pendulum.now(),
-            ).latest('ordering_start_at').id
+            ).latest('start_at').id
         except Exception:
             campaign_id = -1
         
