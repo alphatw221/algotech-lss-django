@@ -220,7 +220,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         last_report_download_at = campaign.meta.get('last_report_download_at',None)
         if last_report_download_at and datetime.datetime.timestamp(last_report_download_at)+settings.ORDER_REPORT_DOWNLOAD_INTERVAL > datetime.datetime.timestamp(datetime.datetime.now()):
             raise ApiVerifyError('frequently download')
-        campaign.meta['last_report_download_at']=datetime.datetime.now()
+        campaign.meta['last_report_download_at']=datetime.datetime.now() 
         campaign.save()
 
         column_list = column_list.split(',')
