@@ -136,7 +136,13 @@ class PaymentViewSet(viewsets.GenericViewSet):
 
     @action(detail=False, methods=['GET'], url_path=r'ipg_payment_success')
     @api_error_handler
-    def ipg_payment_success(self, request, pk=None):
+    def ipg_payment_success(self, request):
+
+        order_id, = getparams(request, ('order_id'), with_user=False)
+        order = Verify.get_order(order_id)
+
+        order.meta['ipg_success']=request.data
+        order.save()
 
         print(request)
         return HttpResponseRedirect(redirect_to='https://www.google.com')
@@ -166,6 +172,12 @@ class PaymentViewSet(viewsets.GenericViewSet):
     @api_error_handler
     def ipg_payment_fail(self, request, pk=None):
 
+        order_id, = getparams(request, ('order_id'), with_user=False)
+        order = Verify.get_order(order_id)
+
+        order.meta['ipg_fail']=request.data
+        order.save()
+        
         print(request)
         return HttpResponseRedirect(redirect_to='https://www.google.com')
         approval_code, oid, refnumber, trancaction_status, approval_code, txndate_processed, ipgTransactionId, fail_reason, response_hash = getdata(request, ("approval_code", "oid", "refnumber", "status", "approval_code", "txndate_processed", "ipgTransactionId", "fail_reason", "response_hash"))
