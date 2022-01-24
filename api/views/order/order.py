@@ -180,11 +180,13 @@ class OrderViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['GET'], url_path=r'seller_cancel')
     @api_error_handler
     def seller_cancel_order(self, request, pk=None):
-        api_user, platform_id, platform_name, campaign_id = getparams(
-            request, ("platform_id", "platform_name", "campaign_id"))
 
-        _, _, order = verify_seller_request(
-            api_user, platform_name, platform_id, campaign_id, order_id=pk)
+        api_user, platform_id, platform_name = getparams(
+            request, ("platform_id", "platform_name"),with_user=True, seller=True)
+
+        platform = Verify.get_platform(api_user, platform_name, platform_id)
+        order=Verify.get_order(pk)
+        Verify.get_campaign_from_platform(platform, order.campaign.id)
         
         pre_order = OrderHelper.cancel(api_user, order)
 
@@ -193,11 +195,13 @@ class OrderViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['GET'], url_path=r'seller_delete')
     @api_error_handler
     def seller_delete_order(self, request, pk=None):
-        api_user, platform_id, platform_name, campaign_id = getparams(
-            request, ("platform_id", "platform_name", "campaign_id"))
 
-        _, _, order = verify_seller_request(
-            api_user, platform_name, platform_id, campaign_id, order_id=pk)
+        api_user, platform_id, platform_name = getparams(
+            request, ("platform_id", "platform_name"),with_user=True, seller=True)
+
+        platform = Verify.get_platform(api_user, platform_name, platform_id)
+        order=Verify.get_order(pk)
+        Verify.get_campaign_from_platform(platform, order.campaign.id)
         
         order = OrderHelper.delete(api_user, order)
         
@@ -313,11 +317,11 @@ class OrderViewSet(viewsets.ModelViewSet):
     def buyer_retrieve_order(self, request, pk=None):
 
         # OPERATION_CODE_NAME: AGILE
-        if request.user.id in settings.ADMIN_LIST:
-            order = Order.objects.get(id=pk)
-            serializer = OrderSerializer(order)
+        # if request.user.id in settings.ADMIN_LIST:
+        #     order = Order.objects.get(id=pk)
+        #     serializer = OrderSerializer(order)
 
-            return Response(serializer.data, status=status.HTTP_200_OK)
+        #     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
         # 先檢查exists 才給request get
@@ -356,11 +360,19 @@ class OrderViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['POST'], url_path=r'buyer_cancel')
     @api_error_handler
     def update_buyer_submit(self, request, pk=None):
-        api_user, platform_name, campaign_id = getparams(
-            request, ("platform_name", "campaign_id"), seller=False)
+
+
+        api_user, = getparams(
+            request, (), seller=False)
+
+        order = Order.objects.get(id = pk)
+        Verify.user_match_pre_order(api_user, order)
+
+        # api_user, platform_name, campaign_id = getparams(
+        #     request, ("platform_name", "campaign_id"), seller=False)
         
-        order = verify_buyer_request(
-            api_user, platform_name, campaign_id)
+        # order = verify_buyer_request(
+        #     api_user, platform_name, campaign_id)
         if order.status != 'unpaid':
             pre_order = OrderHelper.cancel(api_user, order)
 
