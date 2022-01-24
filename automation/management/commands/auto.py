@@ -8,9 +8,10 @@ from rq.job import Job
 from automation.jobs.campaign_job import campaign_job
 
 from datetime import datetime
-from backend.pymongo.mongodb import db,client
+from backend.pymongo.mongodb import db, client
 
 from backend.google_cloud_monitoring.google_cloud_monitoring import CommentQueueLengthMetric
+
 
 class Command(BaseCommand):
     help = ''
@@ -21,7 +22,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.scan_live_campaign()
 
-    @time_loop(settings.FACEBOOK_COMMENT_CAPTURING['REST_INTERVAL_SECONDS'])
+    # @time_loop(settings.FACEBOOK_COMMENT_CAPTURING['REST_INTERVAL_SECONDS'])
+    @time_loop(40)
     def scan_live_campaign(self):
         self.stdout.write(self.style.SUCCESS(
             f'{pendulum.now()} - scan_live_campaign Module'))
@@ -30,27 +32,21 @@ class Command(BaseCommand):
         for campaign in CampaignManager.get_ordering_campaigns():
             try:
                 print(campaign.id)
-                if not Job.exists(str(campaign.id),connection=redis_connection):
-                    campaign_queue.enqueue(campaign_job,job_id=str(campaign.id),args=(campaign.id,), result_ttl=10, failure_ttl=10)
+                if not Job.exists(str(campaign.id), connection=redis_connection):
+                    campaign_queue.enqueue(campaign_job, job_id=str(campaign.id), args=(
+                        campaign.id,), result_ttl=10, failure_ttl=10)
                     continue
 
                 job = Job.fetch(str(campaign.id), connection=redis_connection)
-                job_status=job.get_status(refresh=True)
+                job_status = job.get_status(refresh=True)
                 print(job_status)
-                if  job_status in ('queued','started','deferred'):
+                if job_status in ('queued', 'started', 'deferred'):
                     continue
                     # job.delete()
-                elif job_status in ('finished','failed'):
+                elif job_status in ('finished', 'failed'):
                     job.delete()
-                    campaign_queue.enqueue(campaign_job,job_id=str(campaign.id),args=(campaign.id,), result_ttl=10, failure_ttl=10)
+                    campaign_queue.enqueue(campaign_job, job_id=str(campaign.id), args=(
+                        campaign.id,), result_ttl=10, failure_ttl=10)
 
             except Exception as e:
                 print(e)
-
-
-
-
-
-
-
-
