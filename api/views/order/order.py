@@ -213,9 +213,16 @@ class OrderViewSet(viewsets.ModelViewSet):
         api_user, platform_id, platform_name, campaign_id, column_list = getparams(
             request, ("platform_id", "platform_name", "campaign_id", "column_list"))
         
-        _, _ = verify_seller_request(
+        platform, campaign = verify_seller_request(
             api_user, platform_name, platform_id, campaign_id)
         
+        #check_download_at:
+        last_report_download_at = campaign.meta.get('last_report_download_at',None)
+        if last_report_download_at and datetime.datetime.timestamp(last_report_download_at)+settings.ORDER_REPORT_DOWNLOAD_INTERVAL > datetime.datetime.timestamp(datetime.datetime.now()):
+            raise ApiVerifyError('frequently download')
+        campaign.meta['last_report_download_at']=datetime.datetime.now() 
+        campaign.save()
+
         column_list = column_list.split(',')
         title_map = get_title_map()
         campaign_title = db.api_campaign.find_one({'id': int(campaign_id)})['title']
