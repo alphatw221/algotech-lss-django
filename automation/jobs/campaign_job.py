@@ -61,7 +61,7 @@ def capture_facebook(campaign, facebook_page):
     order_codes_mapping = {campaign_product['order_code'].lower(): campaign_product
                            for campaign_product in campaign_products}
 
-    print(order_codes_mapping)
+    # print(order_codes_mapping)
 
     code, data = api_fb_get_post_comments(page_token, post_id, since)
     print(f"page_token: {page_token}\n")
