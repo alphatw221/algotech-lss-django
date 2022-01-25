@@ -142,10 +142,12 @@ class PaymentViewSet(viewsets.GenericViewSet):
         order = Verify.get_order(order_id)
 
         order.meta['ipg_success']=request.data
+        order.status="complete"
         order.save()
 
         print(request)
-        return HttpResponseRedirect(redirect_to='https://www.google.com')
+        # return HttpResponseRedirect(redirect_to='https://www.google.com')
+        return HttpResponseRedirect(redirect_to=settings.WEB_SERVER_URL+f'/buyer/order/{order.id}/confirmation')
 
         # ‘response_hash’
         # resopnse code
@@ -179,7 +181,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         order.save()
         
         print(request)
-        return HttpResponseRedirect(redirect_to='https://www.google.com')
+        return HttpResponseRedirect(redirect_to=settings.WEB_SERVER_URL+f'/buyer/order/{order.id}/confirmation')
         approval_code, oid, refnumber, trancaction_status, approval_code, txndate_processed, ipgTransactionId, fail_reason, response_hash = getdata(request, ("approval_code", "oid", "refnumber", "status", "approval_code", "txndate_processed", "ipgTransactionId", "fail_reason", "response_hash"))
 
 
