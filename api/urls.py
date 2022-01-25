@@ -29,6 +29,7 @@ from api.views.payment import payment
 
 from api.views.image import image
 from api.views.payment import payment
+from api.views.youtube import youtube_channel
 from django.views.decorators.csrf import csrf_exempt
 
 
@@ -73,6 +74,8 @@ def url_setup(urlpatterns):
 
     router.register(r'payment', payment.PaymentViewSet)
 
+    router.register(r'youtube', youtube_channel.YoutubeViewSet)
+    
     urlpatterns += [
         path('image/upload/<filename>',
              image.upload, name='file_upload'),

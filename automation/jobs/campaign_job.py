@@ -165,7 +165,9 @@ def capture_youtube(campaign, youtube_channel):
                     "image": comment['authorDetails']['profileImageUrl']
                 }
                 db.api_campaign_comment.insert_one(uni_format_comment)
-                # TODO YT comment job
+                
+                # comment_queue.enqueue(comment_job, args=(campaign, 'youtube', youtube_channel,
+                #                   uni_format_comment, order_codes_mapping), result_ttl=10, failure_ttl=10)
 
         youtube_campaign['next_page_token'] = next_page_token
         youtube_campaign['is_failed'] = False
