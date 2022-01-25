@@ -206,7 +206,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             'platform_id': platform_id
         })
 
-    @action(detail=False, methods=['POST'], url_path=r"paypal_payment_create")
+    @action(detail=False, methods=['GET'], url_path=r"paypal_payment_create", permission_classes=(IsAuthenticated,))
     def paypal_payment_create(self, request, *args, **kwargs):
         """
 
@@ -221,21 +221,32 @@ class PaymentViewSet(viewsets.GenericViewSet):
         }
 
         """
+        api_user, order_id = getparams(
+            request, ("order_id",), seller=False)
+        # customer_user = Verify.get_customer_user(request)
+        order_object = Verify.get_order(order_id)
+        currency = 'SGD' if not order_object.currency else order_object.currency
+        amount = order_object.total
+        print(order_object)
 
         # get request post data  = request.data
         # data is json, example:
-        # [{
-        #     "item_list": {
-        #         "items": [{
-        #             "name": "Cake",
-        #             "price": "8.00",
-        #             "currency": "SGD",
-        #             "quantity": 1}]},
-        #     "amount": {
-        #         "total": "8.00",
-        #         "currency": "SGD"},
-        #     "description": "This is the payment transaction description."
-        # }]
+        data = [{
+            "item_list": {
+                # "items": [
+                #     {
+                #         # "name": "Cake",
+                #         # "price": "8.00",
+                #         "currency": currency,
+                #         # "quantity": 1
+                #     }
+                # ]
+            },
+            "amount": {
+                "total": amount,
+                "currency": currency},
+            "description": "This is the payment transaction description."
+        }]
         paypalrestsdk.configure({
             "mode": settings.PAYPAL_CONFIG["mode"],
             "client_id": settings.PAYPAL_CONFIG["client_id"],
@@ -247,10 +258,10 @@ class PaymentViewSet(viewsets.GenericViewSet):
             "payer": {
                 "payment_method": "paypal"},
             "redirect_urls": {
-                "return_url": settings.PAYPAL_CONFIG["complete_url"],
-                "cancel_url": settings.PAYPAL_CONFIG["cancel_url"]
+                "return_url": settings.PAYPAL_CONFIG["complete_url"] + f"?order_id={order_id}",
+                "cancel_url": f"{settings.LOCAL_API_SERVER}/buyer/order/{order_id}/confirmation"
             },
-            "transactions": request.data
+            "transactions": data
         })
         if payment.create():
             print("Payment created successfully")
@@ -282,15 +293,18 @@ class PaymentViewSet(viewsets.GenericViewSet):
 
         paymentId = request.GET["paymentId"]
         payer_id = request.GET["PayerID"]
+        order_id = request.GET["order_id"]
         payment = paypalrestsdk.Payment.find(paymentId)
-
         if payment.execute({"payer_id": payer_id}):
             print("Payment execute successfully")
-            return Response({
-                "status": 202,
-                "message": "Payment execute successfully"
-            })
-            # return HttpResponseRedirect("https://liveshowseller.com/")
+            order_object = Verify.get_order(order_id)
+            order_object.status = "complete"
+            order_object.save()
+            # return Response({
+            #     "status": 202,
+            #     "message": "Payment execute successfully"
+            # })
+            return HttpResponseRedirect(f"http://localhost:8000/buyer/order/{order_object.id}/confirmation")
         else:
             print(payment.error)  # Error Hash
             return Response(payment.error)
