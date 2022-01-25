@@ -327,14 +327,13 @@ REDIS_SERVER = {
 
 # gcp load balancer
 GCP_API_LOADBALANCER_URL = "https://gipassl.algotech.app"
-
+LOCAL_API_SERVER = "http://localhost:8001"
 # paypal settings
 PAYPAL_CONFIG = {
     "mode": "sandbox",
     "client_id": "ASABJtviIflIhkeEH4QBeYuhQoN7RWcPsC6fN-TXIfzhMQ2UDK1raOVd3xBWAmItoAg2WRgI4Nbpde8J",  # it's sandbox
     "client_secret": "EFEGnvXwP8DsSUYF5zoQ5ZkaArtlpzAlgpWJOwBlHRMUP6NwAq8-KmnTv087ihZrAIlyg5VtKo73Wj54",  # it's sandbox
-    "complete_url": "http://127.0.0.1:8000/api/payment/paypal_payment_complete_check",
-    "cancel_url": "http://127.0.0.1:8000/cancel"
+    "complete_url": f"{LOCAL_API_SERVER}/api/payment/paypal_payment_complete_check",
 }
 
 # APPEND_SLASH=False
