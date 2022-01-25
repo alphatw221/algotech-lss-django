@@ -265,8 +265,8 @@ class DashboardViewSet(viewsets.ModelViewSet):
             manage_order['complete_sales'] = complete_sales
             manage_order['uncheckout_rate'] = uncheckout_rate
             manage_order['comment_count'] = comment_count
-            manage_order['cart_qty'] = pre_order_qty
-            manage_order['order_qty'] = order_qty
+            manage_order['cart_qty'] = pre_order_count
+            manage_order['order_qty'] = order_complete_count
             manage_order['close_rate_raise'] = close_rate - campaign_order_average_close_rate
             manage_order['uncheckout_rate_raise'] = uncheckout_rate - campaign_order_average_uncheck_rate
             try:
@@ -292,7 +292,7 @@ class DashboardViewSet(viewsets.ModelViewSet):
         platform = Verify.get_platform(api_user, platform_name, platform_id)
         campaign = Verify.get_campaign_from_platform(platform, campaign_id)
 
-        pre_orders_queryset = campaign.pre_orders.all().order_by('created_at')
+        pre_orders_queryset = campaign.pre_orders.exclude(subtotal=0).order_by('created_at')
 
         orders_queryset = campaign.orders.all().order_by('created_at')
         # if search:
@@ -322,6 +322,8 @@ class DashboardViewSet(viewsets.ModelViewSet):
                         merge_list.append({"type":"order","data":OrderSerializer(orders_queryset[order_index]).data})
                         order_index+=1
                     else:
+                        # if not pre_orders_queryset[pre_order_index].products:
+                        #     continue
                         merge_list.append({"type":"pre_order","data":PreOrderSerializer(pre_orders_queryset[pre_order_index]).data})
                         pre_order_index+=1
         except IndexError:
@@ -329,13 +331,15 @@ class DashboardViewSet(viewsets.ModelViewSet):
         
         if order_index==len(orders_queryset):
             for i in range(pre_order_index,len(pre_orders_queryset)):
-                    merge_list.append({"type":"pre_order","data":PreOrderSerializer(pre_orders_queryset[pre_order_index]).data})
-                    pre_order_index+=1
+                # if not pre_orders_queryset[pre_order_index].products:
+                #             continue
+                merge_list.append({"type":"pre_order","data":PreOrderSerializer(pre_orders_queryset[pre_order_index]).data})
+                pre_order_index+=1
 
         else:
             for i in range(order_index,len(orders_queryset)):
-                    merge_list.append({"type":"order","data":OrderSerializer(orders_queryset[order_index]).data})
-                    order_index+=1
+                merge_list.append({"type":"order","data":OrderSerializer(orders_queryset[order_index]).data})
+                order_index+=1
 
         
 

@@ -186,15 +186,26 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['DELETE'], url_path=r'delete_campaign_product')
     @api_error_handler
     def delete_campaign_product(self, request, pk=None):
-        platform_id = request.query_params.get('platform_id')
-        platform_name = request.query_params.get('platform_name')
-        campaign_id = request.query_params.get('campaign_id')
-        api_user = request.user.api_users.get(type='user')
 
-        _, _, campaign_product = verify_request(
-            api_user, platform_name, platform_id, campaign_id, campaign_product_id=pk)
+
+        api_user, platform_id, platform_name, campaign_id = getparams(request,("platform_id", "platform_name", "campaign_id"), with_user=True, seller=True)
+
+        platform = Verify.get_platform(api_user, platform_name, platform_id)
+        campaign = Verify.get_campaign_from_platform(platform, campaign_id)
+        campaign_product = Verify.get_campaign_product_from_campaign(campaign, pk)
 
         campaign_product.delete()
+
+        # Verify.get_campaign_product_from_campaign(campaign, pk)
+        # platform_id = request.query_params.get('platform_id')
+        # platform_name = request.query_params.get('platform_name')
+        # campaign_id = request.query_params.get('campaign_id')
+        # api_user = request.user.api_users.get(type='user')
+
+        # _, _, campaign_product = verify_request(
+        #     api_user, platform_name, platform_id, campaign_id, campaign_product_id=pk)
+
+        # campaign_product.delete()
 
         return Response({"message": "delete success"}, status=status.HTTP_200_OK)
     

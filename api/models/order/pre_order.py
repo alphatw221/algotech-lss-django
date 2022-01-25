@@ -11,7 +11,7 @@ class PreOrder(models.Model):
         unique_together = ['platform', 'customer_id', 'campaign']
 
     campaign = models.ForeignKey(
-        Campaign, null=True, on_delete=models.SET_NULL, related_name='pre_orders')
+        Campaign, null=True, on_delete=models.CASCADE, related_name='pre_orders')
 
     customer_id = models.CharField(max_length=255, null=True, blank=True)
     customer_name = models.CharField(max_length=255, null=True, blank=True)

@@ -43,8 +43,9 @@ def facebook_receive(request):
                         ...
                 elif postback := webhook_event.get('postback'):
                     print(postback, time_of_event)
-            except Exception:
-                ...
+            except Exception as e:
+                import traceback
+                print (traceback.format_exc())
 
         return HttpResponse('EVENT_RECEIVED', status=200)
     else:

@@ -56,7 +56,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
         platform = Verify.get_platform(api_user, platform_name, platform_id)
         campaign = Verify.get_campaign_from_platform(platform, campaign_id)
-        queryset = campaign.pre_orders.all()
+        queryset = campaign.pre_orders.exclude(subtotal=0).order_by('id')
 
         if search:
             if search.isnumeric():
