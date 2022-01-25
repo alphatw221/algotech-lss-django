@@ -38,23 +38,26 @@ def verify_user(api_user, platform_name, platform_id):
 
 def get_winner_json(winner_lists):
     response_list = []
-    for winner_list in winner_lists:
-        winner = {}
-        winner['platform'] = winner_list[0]
-        winner['customer_id'] = winner_list[1]
-        winner['customer_name'] = winner_list[2]
-        
-        if winner_list[0] == 'facebook':
-            try:
-                winner['img_url'] = db.api_user.find_one({'id': winner_list[1]})['facebook_info']['picture']['data']['url']
-            except:
-                winner['img_url'] = ''
+    try:
+        if (len(winner_lists[0]) == 3):
+            for winner_list in winner_lists:
+                winner = {}
+                winner['platform'] = winner_list[0]
+                winner['customer_id'] = winner_list[1]
+                winner['customer_name'] = winner_list[2]
+                
+                if winner_list[0] == 'facebook':
+                    try:
+                        winner['img_url'] = db.api_user.find_one({'id': winner_list[1]})['facebook_info']['picture']['data']['url']
+                    except:
+                        winner['img_url'] = ''
 
-        response_list.append(winner)
-
-    response_json = {
-        'winner_list': response_list
-    }
+                response_list.append(winner)
+            response_json = { 'winner_list': response_list }
+        else:
+            response_json = { 'winner_list': [] }
+    except:
+        response_json = { 'winner_list': [] }
     return response_json
 
 
