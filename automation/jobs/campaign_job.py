@@ -28,15 +28,18 @@ def campaign_job(campaign_id):
         except Exception:
             pass
 
-        # try:
-        #     if campaign['youtube_channel_id']:
-        #         youtube_channel = db.api_youtube_channel.find_one({'id': campaign['youtube_channel_id']})
-        #         capture_youtube(campaign, youtube_channel)
-        # except Exception:
-        #     pass
+        try:
+            if campaign['youtube_channel_id']:
+                youtube_channel = db.api_youtube_channel.find_one(
+                    {'id': campaign['youtube_channel_id']})
+                capture_youtube(campaign, youtube_channel)
+        except Exception as e:
+            print(f"youtube error: {e}")
+            pass
 
         try:
             if campaign['instagram_profile_id']:
+                print('123456789456123')
                 instagram_post = db.api_instagram_profile.find_one(
                     {'id': int(campaign['instagram_profile_id'])})
                 capture_instagram(campaign, instagram_post)
@@ -70,6 +73,7 @@ def capture_facebook(campaign, facebook_page):
     print(f"post_id: {post_id}\n")
     print(f"since: {since}\n")
     print(f"code: {code}\n")
+    print("platform: facebook\n")
 
     if code // 100 != 2 and 'error' in data and data['error']['type'] in ('GraphMethodException', 'OAuthException'):
         facebook_campaign['post_id'] = ''
@@ -134,6 +138,13 @@ def capture_youtube(campaign, youtube_channel):
 
     code, data = api_youtube_get_live_chat_comment(
         page_token, live_chat_id, 100)
+
+    print(f"page_token: {page_token}\n")
+    print(f"live_chat_id: {live_chat_id}\n")
+    print(f"next_page_token: {next_page_token}\n")
+    print(f"code: {code}\n")
+    print("platform: youtube\n")
+
     if code // 100 != 2 and 'error' in data:
         youtube_campaign['remark'] = f'Facebook API error: {data["error"]["message"]}'
         db.api_campaign.update_one({'id': campaign['id']}, {
@@ -142,9 +153,12 @@ def capture_youtube(campaign, youtube_channel):
 
     next_page_token = data['nextPageToken']
     comments = data.get('items', [])
+    print(f"number of comments: {len(comments)}")
+
     is_failed, latest_comment_time = False, ''
     try:
         for comment in comments:
+            print(comment['message'])
             try:
                 is_failed = youtube_campaign['is_failed']
                 latest_comment_time = youtube_campaign['latest_comment_time']
@@ -165,7 +179,7 @@ def capture_youtube(campaign, youtube_channel):
                     "image": comment['authorDetails']['profileImageUrl']
                 }
                 db.api_campaign_comment.insert_one(uni_format_comment)
-                
+
                 # comment_queue.enqueue(comment_job, args=(campaign, 'youtube', youtube_channel,
                 #                   uni_format_comment, order_codes_mapping), result_ttl=10, failure_ttl=10)
 
@@ -197,6 +211,12 @@ def capture_instagram(campaign, instagram_post):
                            for campaign_product in campaign_products}
 
     code, data = api_ig_get_post_comments(page_token, post_id)
+
+    print(f"page_token: {page_token}\n")
+    print(f"post_id: {post_id}\n")
+    print(f"code: {code}\n")
+    print("platform: instagram\n")
+
     if code // 100 != 2 and 'error' in data and data['error']['type'] in ('GraphMethodException', 'OAuthException'):
         instagram_campaign['post_id'] = post_id
         instagram_campaign['remark'] = f'Instagram API error: {data["error"]}'
@@ -205,9 +225,12 @@ def capture_instagram(campaign, instagram_post):
         return
 
     comments = data.get('data', [])
+    print(f"number of comments: {len(comments)}")
     is_failed, latest_comment_time = False, ''
     try:
         for comment in comments:
+            print(comment['text'])
+            # print(comment)
             try:
                 is_failed = instagram_campaign['is_failed']
                 latest_comment_time = instagram_campaign['latest_comment_time']
@@ -237,11 +260,14 @@ def capture_instagram(campaign, instagram_post):
                     "customer_name": from_info[1]['from']['username'],
                     "image": img_url}
                 db.api_campaign_comment.insert_one(uni_format_comment)
-            # TODO comment queue job
+                comment_queue.enqueue(comment_job, args=(campaign, 'instagram', instagram_post,
+                                                         uni_format_comment, order_codes_mapping), result_ttl=10, failure_ttl=10)
+
         instagram_campaign['is_failed'] = False
         db.api_campaign.update_one({'id': campaign['id']}, {
                                    "$set": {'instagram_campaign': instagram_campaign}})
-    except Exception:
+    except Exception as e:
+        print(e)
         lastest_comment_time = db.api_campaign_comment.find_one(
             {'platform': 'instagram'}, sort=[('created_time', -1)])['created_time']
         instagram_campaign['is_failed'] = True
