@@ -12,10 +12,16 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from datetime import datetime
 
+from backend.pymongo.mongodb import db
 from api.utils.common.verify import Verify
 from api.utils.common.verify import ApiVerifyError
 from api.utils.common.common import *
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
+
+
+def verify_seller_request(api_user):
+    Verify.verify_user(api_user)
+    return True
 
 def verify_request(api_user, platform_name, platform_id, campaign_id=None):
     Verify.verify_user(api_user)
@@ -161,3 +167,38 @@ class CampaignViewSet(viewsets.ModelViewSet):
         campaign.delete()
 
         return Response({"message": "delete success"}, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['GET'], url_path=r'ig_comment')
+    @api_error_handler
+    def seller_total_revenue(self, request):
+        api_user = request.user.api_users.get(type='user')
+        campaign_id = request.query_params.get('campaign_id')
+        comment_id = request.query_params.get('comment_id')
+        comments_list = []
+
+        is_user = verify_seller_request(api_user)
+        if is_user:
+            if int(comment_id) == 0:
+                comment_datas = db.api_campaign_comment.find({'campaign_id': int(campaign_id)})
+                for comment_data in comment_datas:
+                    commentJson = {}
+                    commentJson['customer_name'] = comment_data['customer_name']
+                    commentJson['id'] = comment_data['id']                        
+                    commentJson['message'] = comment_data['message']
+                    commentJson['created_at'] = comment_data['created_time']
+                    commentJson['image'] = comment_data['image']
+                    comments_list.append(commentJson)
+            else:
+                last_time = db.api_campaign_comment.find_one({'campaign_id': int(campaign_id), 'id': comment_id})['created_time']
+                print (last_time)
+                comment_datas = db.api_campaign_comment.find({'campaign_id': int(campaign_id), 'created_time': {'$lt': last_time}})
+                for comment_data in comment_datas:
+                    commentJson = {}
+                    commentJson['customer_name'] = comment_data['customer_name']
+                    commentJson['id'] = comment_data['id']                        
+                    commentJson['message'] = comment_data['message']
+                    commentJson['created_at'] = comment_data['created_time']
+                    commentJson['image'] = comment_data['image']
+                    comments_list.append(commentJson)
+
+        return Response(comments_list, status=status.HTTP_200_OK)
