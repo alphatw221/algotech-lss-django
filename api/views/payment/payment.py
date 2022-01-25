@@ -344,8 +344,8 @@ class PaymentViewSet(viewsets.GenericViewSet):
         params = {
             'email': email,
             'name': name,
-            'redirect_url': 'http://104.199.211.63/algotech_lss/public/buyer/order/' + order_id + '/confirmation',
-            'webhook': 'http://104.199.211.63/api/payment/hit_pay_webhook/',
+            'redirect_url': 'https://v1login.liveshowseller.com/buyer/order/' + order_id + '/confirmation',
+            'webhook': 'https://gipassl.algotech.app/api/payment/hit_pay_webhook/',
             'amount': amount,
             'currency': currency,
             'reference_number': order_id,

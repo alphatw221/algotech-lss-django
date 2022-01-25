@@ -25,7 +25,7 @@ from backend.pymongo.mongodb import db
 from api.models.youtube.youtube_channel import YoutubeChannel
 from automation.jobs.campaign_job import *
 
-
+from backend.api.youtube.viedo import api_youtube_get_video_info
 class Command(BaseCommand):
     help = ''
 
@@ -38,7 +38,8 @@ class Command(BaseCommand):
         # CommentQueueLengthMetric.create_metric_descriptor()
         # CommentQueueLengthMetric.write_time_series(10)
         # CommentQueueLengthMetric.delete_metric_descriptor()
-        self.ipg_test()
+        # self.ipg_test()
+        self.youtube_test()
 
     def campaign_test(self):
         cs = CampaignManager.get_active_campaigns()
@@ -111,7 +112,8 @@ class Command(BaseCommand):
         timezone = "Asia/Singapore"
         IPG_Helper.create_payment(timezone, chargetotal, currency)
 
-        
+    def youtube_test(self):
+        ret, code = api_youtube_get_video_info("5qap5aO4i9A")
 
 # $stringToHash = $this->storeId . $this->txndatetime . $this->chargetotal . $this->currency . $this->sharedSecret;
 #         $ascii = bin2hex($stringToHash);
