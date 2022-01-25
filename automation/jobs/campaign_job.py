@@ -35,13 +35,15 @@ def campaign_job(campaign_id):
         # except Exception:
         #     pass
 
-        # try:
-        #     if campaign['instagram_profile_id']:
-        #         instagram_post = db.api_instagram_profile.find_one({'id': int(campaign['instagram_profile_id'])})
-        #         capture_instagram(campaign, instagram_post)
+        try:
+            if campaign['instagram_profile_id']:
+                instagram_post = db.api_instagram_profile.find_one(
+                    {'id': int(campaign['instagram_profile_id'])})
+                capture_instagram(campaign, instagram_post)
 
-        # except Exception:
-        #     pass
+        except Exception as e:
+            print(e)
+            pass
 
     except Exception:
         pass

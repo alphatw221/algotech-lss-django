@@ -98,7 +98,7 @@ def comment_job(campaign, platform_name, platform, comment, order_codes_mapping)
 
 
 def command_responding(platform_name, platform, campaign, comment, command):
-    return
+    # return
     if platform_name == 'facebook':
         text = i18n_get_comment_command_response(
             campaign, comment, command, lang=platform['lang'])
@@ -111,7 +111,7 @@ def command_responding(platform_name, platform, campaign, comment, command):
 
 
 def comment_responding(platform_name, platform, pre_order, comment, campaign_product, qty, state):
-    return
+    # return
     if platform_name == 'facebook':
         text = i18n_get_request_response(
             state, campaign_product, qty, lang=platform['lang'])

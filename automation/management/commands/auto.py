@@ -22,8 +22,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.scan_live_campaign()
 
-    # @time_loop(settings.FACEBOOK_COMMENT_CAPTURING['REST_INTERVAL_SECONDS'])
-    @time_loop(40)
+    @time_loop(settings.FACEBOOK_COMMENT_CAPTURING['REST_INTERVAL_SECONDS'])
+    # @time_loop(40)
     def scan_live_campaign(self):
         self.stdout.write(self.style.SUCCESS(
             f'{pendulum.now()} - scan_live_campaign Module'))
