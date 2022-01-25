@@ -19,6 +19,7 @@ from backend.cart.cart_product.request_processor import \
     CartProductRequestProcessorLuckyDraw
 from backend.cart.cart_product.request_validator import \
     CartProductRequestValidatorLuckyDraw
+from backend.pymongo.mongodb import db
 
 
 class CampaignLuckyDrawManager:
@@ -38,8 +39,11 @@ class CampaignLuckyDrawManager:
         # cart_product_requests, response_result = CampaignLuckyDrawManager._handle_cart_product_requests(
         #     lucky_draw, event, cart_product_requests)
 
-        error_list = []
         response_result = []
+        print ('lucky_draw------------')
+        print (lucky_draw.__dict__)
+        if (len(lucky_draw.winner_list) == 0):
+            return lucky_draw
         for winner in lucky_draw.winner_list:
             _json = {}
             try:
@@ -47,25 +51,13 @@ class CampaignLuckyDrawManager:
                 PreOrderHelper.add_product(None, pre_order=pre_order, campaign_product=prize_campaign_product, qty=1)
                 result = CampaignAnnouncer.announce_lucky_draw_winner(lucky_draw, winner[2])
                 response_result.append(result)
+                lucky_draw.meta['announcement_history'] = {
+                    'time': pendulum.now('UTC'),
+                    'response_result': response_result
+                }
+                lucky_draw.save()
             except Exception as e:
                 print (e)
-                _json['platform'] = winner[0]
-                _json['customer_id'] = winner[1]
-                _json['customer_name'] = winner[2]
-                _json['message'] = str(e)
-                error_list.append(_json)
-
-        if error_list:
-            lucky_draw.meta['error_log'] = {
-                'time': pendulum.now('UTC'),
-                'error': error_list
-            }
-        #update add_to_cart reault to lucky_draw instance
-        lucky_draw.meta['announcement_history'] = {
-            'time': pendulum.now('UTC'),
-            'response_result': response_result
-        }
-        lucky_draw.save()
 
         return lucky_draw
 
