@@ -265,8 +265,8 @@ class DashboardViewSet(viewsets.ModelViewSet):
             manage_order['complete_sales'] = complete_sales
             manage_order['uncheckout_rate'] = uncheckout_rate
             manage_order['comment_count'] = comment_count
-            manage_order['cart_qty'] = pre_order_qty
-            manage_order['order_qty'] = order_qty
+            manage_order['cart_qty'] = pre_order_count
+            manage_order['order_qty'] = order_complete_count
             manage_order['close_rate_raise'] = close_rate - campaign_order_average_close_rate
             manage_order['uncheckout_rate_raise'] = uncheckout_rate - campaign_order_average_uncheck_rate
             try:
