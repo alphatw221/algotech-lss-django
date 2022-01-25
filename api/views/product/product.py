@@ -147,8 +147,8 @@ class ProductViewSet(viewsets.ModelViewSet):
             image_path = default_storage.save(
                 f'{user_subscription.id}/product/{product.id}/{image.name}', ContentFile(image.read()))
             data['image'] = image_path
-        else:
-            data['image'] = ""
+        # else:
+        #     data['image'] = ""
             
         serializer = ProductSerializer(
             product, data=data, partial=True)
