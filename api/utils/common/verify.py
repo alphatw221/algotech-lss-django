@@ -129,7 +129,7 @@ class Verify():
 
 
     @staticmethod
-    def get_campaign_product(campaign, campaign_product_id):
+    def get_campaign_product_from_campaign(campaign, campaign_product_id):
         if not campaign.products.filter(id=campaign_product_id).exists():
             raise ApiVerifyError('no campaign product found')
         campaign_product = campaign.products.get(id=campaign_product_id)

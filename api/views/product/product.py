@@ -119,8 +119,8 @@ class ProductViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         product = serializer.save()
 
-        if 'image' in request.data:
-            image = request.data['image']
+        image = request.data.get('image',None)
+        if image:
             image_path = default_storage.save(
                 f'{user_subscription.id}/product/{product.id}/{image.name}', ContentFile(image.read()))
             product.image = image_path
@@ -142,12 +142,14 @@ class ProductViewSet(viewsets.ModelViewSet):
         text = request.data['text']
         data = json.loads(text)
 
-        if 'image' in request.data:
-            image = request.data['image']
+        image = request.data.get('image',None)
+        if image:
             image_path = default_storage.save(
                 f'{user_subscription.id}/product/{product.id}/{image.name}', ContentFile(image.read()))
             data['image'] = image_path
-
+        # else:
+        #     data['image'] = ""
+            
         serializer = ProductSerializer(
             product, data=data, partial=True)
         if not serializer.is_valid():

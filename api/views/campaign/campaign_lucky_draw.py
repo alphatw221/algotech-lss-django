@@ -18,11 +18,11 @@ def verify_request(api_user, platform_name, platform_id, campaign_id, prize_camp
     Verify.verify_user(api_user)
     platform = Verify.get_platform(api_user, platform_name, platform_id)
     campaign = Verify.get_campaign(platform, campaign_id)
-    prize_campaign_product = Verify.get_campaign_product(
+    prize_campaign_product = Verify.get_campaign_product_from_campaign(
         campaign, prize_campaign_product_id)
 
     if campaign_product_id:
-        campaign_product_id = Verify.get_campaign_product(
+        campaign_product_id = Verify.get_campaign_product_from_campaign(
             campaign, campaign_product_id)
         return platform, campaign, prize_campaign_product, campaign_product_id
 
