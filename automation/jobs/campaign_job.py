@@ -15,6 +15,10 @@ from automation.jobs.comment_job import comment_job
 
 from backend.pymongo.mongodb import db, client
 
+import time
+import datetime
+import dateutil
+
 
 def campaign_job(campaign_id):
     try:
@@ -118,7 +122,13 @@ def capture_facebook(campaign, facebook_page):
 def capture_youtube(campaign, youtube_channel):
     page_token = youtube_channel['page_token']
     youtube_campaign = campaign['youtube_campaign']
-    live_chat_id = youtube_campaign['live_chat_id']
+
+    # live_chat_id = youtube_campaign.get('live_chat_id')
+    live_chat_id = youtube_campaign.get('live_video_id')
+
+    # if not live_chat_id:
+    #     live_video_id = youtube_campaign.get('live_video_id')
+
     next_page_token = ''
     try:
         next_page_token = youtube_campaign['next_page_token']
@@ -155,35 +165,44 @@ def capture_youtube(campaign, youtube_channel):
     comments = data.get('items', [])
     print(f"number of comments: {len(comments)}")
 
-    is_failed, latest_comment_time = False, ''
+    if not comments:
+        return
+    # is_failed, latest_comment_time = False,
+
+    is_failed = youtube_campaign.get('is_failed')
+    latest_comment_time = youtube_campaign.get('latest_comment_time', 1)
+
     try:
         for comment in comments:
-            print(comment['message'])
-            try:
-                is_failed = youtube_campaign['is_failed']
-                latest_comment_time = youtube_campaign['latest_comment_time']
-            except:
-                pass
+            print(comment['snippet']['displayMessage'])
+            print(comment['snippet']['publishedAt'])
 
-            if is_failed == True and comment['snippet']['publishedAt'] > latest_comment_time:
-                pass
-            else:
-                uni_format_comment = {
-                    'platform': 'youtube',
-                    'id': comment['id'],
-                    "campaign_id": campaign['id'],
-                    'message': comment['snippet']['displayMessage'],
-                    "created_time": comment['snippet']['publishedAt'],
-                    "customer_id": comment['snippet']['liveChatId'],
-                    "customer_name": comment['authorDetails']['displayName'],
-                    "image": comment['authorDetails']['profileImageUrl']
-                }
-                db.api_campaign_comment.insert_one(uni_format_comment)
+            dateutil.parse_date
+            comment_time_stamp = dateutil.parser.parse(
+                comment['snippet']['publishedAt']).timestamp()
 
-                # comment_queue.enqueue(comment_job, args=(campaign, 'youtube', youtube_channel,
-                #                   uni_format_comment, order_codes_mapping), result_ttl=10, failure_ttl=10)
+            print(f"comment_time_stamp: {comment_time_stamp}")
+            if is_failed and comment_time_stamp > latest_comment_time:
+                continue
 
-        youtube_campaign['next_page_token'] = next_page_token
+            uni_format_comment = {
+                'platform': 'youtube',
+                'id': comment['id'],
+                "campaign_id": campaign['id'],
+                'message': comment['snippet']['displayMessage'],
+                "created_time": comment_time_stamp,
+                "customer_id": comment['snippet']['liveChatId'],
+                "customer_name": comment['authorDetails']['displayName'],
+                "image": comment['authorDetails']['profileImageUrl']
+            }
+            db.api_campaign_comment.insert_one(uni_format_comment)
+
+            # comment_queue.enqueue(comment_job, args=(campaign, 'youtube', youtube_channel,
+            #                   uni_format_comment, order_codes_mapping), result_ttl=10, failure_ttl=10)
+
+        youtube_campaign['next_page_token'] = data.get('nextPageToken', "")
+        youtube_campaign['latest_comment_time'] = dateutil.parser.parse(
+            comments[-1]['snippet']['publishedAt']).timestamp()
         youtube_campaign['is_failed'] = False
         db.api_campaign.update_one({'id': campaign['id']}, {
                                    "$set": {'youtube_campaign': youtube_campaign}})
