@@ -38,8 +38,9 @@ class Command(BaseCommand):
         # CommentQueueLengthMetric.create_metric_descriptor()
         # CommentQueueLengthMetric.write_time_series(10)
         # CommentQueueLengthMetric.delete_metric_descriptor()
+        campaign_job(53)
         # self.ipg_test()
-        self.youtube_test()
+        # self.youtube_test()
 
     def campaign_test(self):
         cs = CampaignManager.get_active_campaigns()
@@ -114,6 +115,9 @@ class Command(BaseCommand):
 
     def youtube_test(self):
         ret, code = api_youtube_get_video_info("5qap5aO4i9A")
+
+        print(f"code :{code}")
+        print(f"ret :{ret}")
 
 # $stringToHash = $this->storeId . $this->txndatetime . $this->chargetotal . $this->currency . $this->sharedSecret;
 #         $ascii = bin2hex($stringToHash);
