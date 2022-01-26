@@ -180,7 +180,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
         is_user = verify_seller_request(api_user)
         if is_user:
             if int(comment_id) == 0:
-                comment_datas = db.api_campaign_comment.find({'campaign_id': int(campaign_id), 'platform': platform})
+                comment_datas = db.api_campaign_comment.find({'campaign_id': int(campaign_id), 'platform': 'instagram'})
                 for comment_data in comment_datas:
                     commentJson = {}
                     commentJson['customer_name'] = comment_data['customer_name']
@@ -190,9 +190,9 @@ class CampaignViewSet(viewsets.ModelViewSet):
                     commentJson['image'] = comment_data['image']
                     comments_list.append(commentJson)
             else:
-                last_time = db.api_campaign_comment.find_one({'campaign_id': int(campaign_id), 'id': comment_id, 'platform': platform})['created_time']
+                last_time = db.api_campaign_comment.find_one({'campaign_id': int(campaign_id), 'id': comment_id, 'platform': 'instagram'})['created_time']
                 print (last_time)
-                comment_datas = db.api_campaign_comment.find({'campaign_id': int(campaign_id), 'created_time': {'$lt': last_time}, 'platform': platform})
+                comment_datas = db.api_campaign_comment.find({'campaign_id': int(campaign_id), 'created_time': {'$lt': last_time}, 'platform': 'instagram'})
                 for comment_data in comment_datas:
                     commentJson = {}
                     commentJson['customer_name'] = comment_data['customer_name']
