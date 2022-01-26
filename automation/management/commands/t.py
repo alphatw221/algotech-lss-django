@@ -116,6 +116,9 @@ class Command(BaseCommand):
     def youtube_test(self):
         ret, code = api_youtube_get_video_info("5qap5aO4i9A")
 
+        print(f"code :{code}")
+        print(f"ret :{ret}")
+
 # $stringToHash = $this->storeId . $this->txndatetime . $this->chargetotal . $this->currency . $this->sharedSecret;
 #         $ascii = bin2hex($stringToHash);
 
