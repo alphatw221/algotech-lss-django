@@ -177,7 +177,6 @@ def capture_youtube(campaign, youtube_channel):
             print(comment['snippet']['displayMessage'])
             print(comment['snippet']['publishedAt'])
 
-
             comment_time_stamp = parser.parse(
                 comment['snippet']['publishedAt']).timestamp()
 
@@ -198,7 +197,7 @@ def capture_youtube(campaign, youtube_channel):
             db.api_campaign_comment.insert_one(uni_format_comment)
 
             comment_queue.enqueue(comment_job, args=(campaign, 'youtube', youtube_channel,
-                              uni_format_comment, order_codes_mapping), result_ttl=10, failure_ttl=10)
+                                                     uni_format_comment, order_codes_mapping), result_ttl=10, failure_ttl=10)
 
         youtube_campaign['next_page_token'] = data.get('nextPageToken', "")
         youtube_campaign['latest_comment_time'] = parser.parse(
@@ -208,9 +207,10 @@ def capture_youtube(campaign, youtube_channel):
                                    "$set": {'youtube_campaign': youtube_campaign}})
     except Exception as e:
         latest_campaign_comment = db.api_campaign_comment.find_one(
-            {'platform': 'youtube', 'campaign_id':campaign['id']}, sort=[('created_time', -1)])
+            {'platform': 'youtube', 'campaign_id': campaign['id']}, sort=[('created_time', -1)])
         youtube_campaign['is_failed'] = True
-        youtube_campaign['latest_comment_time'] = latest_campaign_comment['created_time'] if latest_campaign_comment else 1
+        youtube_campaign['latest_comment_time'] = parser.parse(
+            latest_campaign_comment['created_time']).timestamp() if latest_campaign_comment else 1
         db.api_campaign.update_one({'id': campaign['id']}, {
                                    "$set": {'youtube_campaign': youtube_campaign}})
         return
@@ -288,12 +288,12 @@ def capture_instagram(campaign, instagram_post):
                     db.api_campaign_comment.insert_one(uni_format_comment)
                 else:
                     continue
-                    
+
             # TODO comment queue job
         instagram_campaign['is_failed'] = False
         instagram_campaign['last_create'] = created_at
         db.api_campaign.update_one({'id': campaign['id']}, {
-                                "$set": {'instagram_campaign': instagram_campaign}})
+            "$set": {'instagram_campaign': instagram_campaign}})
     except Exception:
         lastest_comment_time = db.api_campaign_comment.find_one(
             {'platform': 'instagram'}, sort=[('created_time', -1)])['created_time']
