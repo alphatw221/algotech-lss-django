@@ -205,7 +205,8 @@ def capture_youtube(campaign, youtube_channel):
                 "created_time": comment_time_stamp,
                 "customer_id": comment['snippet']['liveChatId'],
                 "customer_name": comment['authorDetails']['displayName'],
-                "image": comment['authorDetails']['profileImageUrl']
+                "image": comment['authorDetails']['profileImageUrl'],
+                "live_chat_id":live_chat_id
             }
             db.api_campaign_comment.insert_one(uni_format_comment)
 
@@ -267,6 +268,7 @@ def capture_instagram(campaign, instagram_post):
         created_at = ''
         count = 0
         for comment in comments:
+            print(comment['text'])
             count += 1
             if count == 1:
                 created_at = comment['timestamp']
