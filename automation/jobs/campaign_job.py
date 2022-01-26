@@ -206,9 +206,6 @@ def capture_instagram(campaign, instagram_post):
         since = instagram_campaign['last_create']
     except:
         since = ''
-    print ('since')
-    print (since)
-
     if not page_token or not post_id:
         return
 
@@ -271,7 +268,6 @@ def capture_instagram(campaign, instagram_post):
                         "image": img_url}
                     db.api_campaign_comment.insert_one(uni_format_comment)
                 else:
-                    print (';ppppppppppppppppp')
                     continue
                     
             # TODO comment queue job
