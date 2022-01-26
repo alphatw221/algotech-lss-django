@@ -68,7 +68,7 @@ class YoutubeCampaignSerializer(serializers.Serializer):
     live_video_id = serializers.CharField(required=False, default="")
     live_chat_id = serializers.CharField(required=False, default="")
     is_failed = serializers.BooleanField(required=False, default=False)
-    latest_comment_time = serializers.CharField(required=False, default="")
+    latest_comment_time = serializers.FloatField(required=False, default=0)
     remark = serializers.CharField(required=False, default="")
 
 

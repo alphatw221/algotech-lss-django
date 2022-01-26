@@ -17,7 +17,7 @@ from backend.pymongo.mongodb import db, client
 
 import time
 import datetime
-import dateutil
+from dateutil import parser
 
 
 def campaign_job(campaign_id):
@@ -177,8 +177,8 @@ def capture_youtube(campaign, youtube_channel):
             print(comment['snippet']['displayMessage'])
             print(comment['snippet']['publishedAt'])
 
-            dateutil.parse_date
-            comment_time_stamp = dateutil.parser.parse(
+
+            comment_time_stamp = parser.parse(
                 comment['snippet']['publishedAt']).timestamp()
 
             print(f"comment_time_stamp: {comment_time_stamp}")
@@ -197,20 +197,20 @@ def capture_youtube(campaign, youtube_channel):
             }
             db.api_campaign_comment.insert_one(uni_format_comment)
 
-            # comment_queue.enqueue(comment_job, args=(campaign, 'youtube', youtube_channel,
-            #                   uni_format_comment, order_codes_mapping), result_ttl=10, failure_ttl=10)
+            comment_queue.enqueue(comment_job, args=(campaign, 'youtube', youtube_channel,
+                              uni_format_comment, order_codes_mapping), result_ttl=10, failure_ttl=10)
 
         youtube_campaign['next_page_token'] = data.get('nextPageToken', "")
-        youtube_campaign['latest_comment_time'] = dateutil.parser.parse(
+        youtube_campaign['latest_comment_time'] = parser.parse(
             comments[-1]['snippet']['publishedAt']).timestamp()
         youtube_campaign['is_failed'] = False
         db.api_campaign.update_one({'id': campaign['id']}, {
                                    "$set": {'youtube_campaign': youtube_campaign}})
-    except Exception:
-        lastest_comment_time = db.api_campaign_comment.find_one(
-            {'platform': 'youtube'}, sort=[('created_time', -1)])['created_time']
+    except Exception as e:
+        latest_campaign_comment = db.api_campaign_comment.find_one(
+            {'platform': 'youtube', 'campaign_id':campaign['id']}, sort=[('created_time', -1)])
         youtube_campaign['is_failed'] = True
-        youtube_campaign['latest_comment_time'] = lastest_comment_time
+        youtube_campaign['latest_comment_time'] = latest_campaign_comment['created_time'] if latest_campaign_comment else 1
         db.api_campaign.update_one({'id': campaign['id']}, {
                                    "$set": {'youtube_campaign': youtube_campaign}})
         return

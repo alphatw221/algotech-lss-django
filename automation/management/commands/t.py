@@ -26,6 +26,7 @@ from api.models.youtube.youtube_channel import YoutubeChannel
 from automation.jobs.campaign_job import *
 
 from backend.api.youtube.viedo import api_youtube_get_video_info
+from automation.jobs.campaign_job import campaign_job
 class Command(BaseCommand):
     help = ''
 
@@ -38,7 +39,7 @@ class Command(BaseCommand):
         # CommentQueueLengthMetric.create_metric_descriptor()
         # CommentQueueLengthMetric.write_time_series(10)
         # CommentQueueLengthMetric.delete_metric_descriptor()
-        campaign_job(53)
+        self.campaign_test()
         # self.ipg_test()
         # self.youtube_test()
 
@@ -119,6 +120,8 @@ class Command(BaseCommand):
         print(f"code :{code}")
         print(f"ret :{ret}")
 
+    def campaign_test(self):
+        campaign_job(53)
 # $stringToHash = $this->storeId . $this->txndatetime . $this->chargetotal . $this->currency . $this->sharedSecret;
 #         $ascii = bin2hex($stringToHash);
 
