@@ -28,7 +28,7 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(
             f'{pendulum.now()} - scan_live_campaign Module'))
 
-        CommentQueueLengthMetric.write_time_series(len(comment_queue.jobs))
+        # CommentQueueLengthMetric.write_time_series(len(comment_queue.jobs))
         for campaign in CampaignManager.get_ordering_campaigns():
             try:
                 print(campaign.id)
@@ -41,6 +41,7 @@ class Command(BaseCommand):
                 job_status = job.get_status(refresh=True)
                 print(job_status)
                 if job_status in ('queued', 'started', 'deferred'):
+                    # job.delete()
                     continue
                     # job.delete()
                 elif job_status in ('finished', 'failed'):
