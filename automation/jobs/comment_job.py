@@ -47,13 +47,15 @@ def comment_job(campaign, platform_name, platform, comment, order_codes_mapping)
         print('no order_placement')
         return
 
-    pre_order = db.api_pre_order.find_one(
-        {'customer_id': comment['customer_id'], 'campaign_id': campaign['id'], 'platform': comment['platform']})
-
-    # print(pre_order)
+    # temperory solution
+    if platform_name =='instagram':
+        pre_order = db.api_pre_order.find_one(
+            {'customer_name': comment['customer_name'], 'campaign_id': campaign['id'], 'platform': comment['platform']})
+    else:
+        pre_order = db.api_pre_order.find_one(
+            {'customer_id': comment['customer_id'], 'campaign_id': campaign['id'], 'platform': comment['platform']})
 
     if not pre_order:
-
         print("creating pre_order")
         increment_id = get_incremented_filed(
             collection_name="api_pre_order", field_name="id")
