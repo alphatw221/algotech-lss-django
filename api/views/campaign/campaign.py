@@ -106,7 +106,11 @@ class CampaignViewSet(viewsets.ModelViewSet):
         json_data = json.loads(request.data["data"])
         json_data['created_by'] = api_user.id
         json_data['facebook_page'] = platform.id if platform_name == 'facebook' else None
-        json_data['youtube_channel'] = platform.id if platform_name == 'youtube' else None
+
+        #TODO
+        # json_data['youtube_channel'] = platform.id if platform_name == 'youtube' else None
+        json_data['youtube_channel'] = 1
+        
         json_data['instagram_profile'] = platform.id if platform_name == 'instagram' else None
         serializer = CampaignSerializerCreate(data=json_data)
         if not serializer.is_valid():
