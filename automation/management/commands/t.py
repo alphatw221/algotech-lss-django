@@ -38,8 +38,9 @@ class Command(BaseCommand):
         # CommentQueueLengthMetric.create_metric_descriptor()
         # CommentQueueLengthMetric.write_time_series(10)
         # CommentQueueLengthMetric.delete_metric_descriptor()
+        campaign_job(53)
         # self.ipg_test()
-        self.youtube_test()
+        # self.youtube_test()
 
     def campaign_test(self):
         cs = CampaignManager.get_active_campaigns()

@@ -187,6 +187,13 @@ def capture_instagram(campaign, instagram_post):
     page_token = instagram_post['token']
     instagram_campaign = campaign['instagram_campaign']
     post_id = instagram_campaign['live_media_id']
+    since = ''
+    try:
+        since = instagram_campaign['last_create']
+    except:
+        since = ''
+    print ('since')
+    print (since)
 
     if not page_token or not post_id:
         return
@@ -207,7 +214,12 @@ def capture_instagram(campaign, instagram_post):
     comments = data.get('data', [])
     is_failed, latest_comment_time = False, ''
     try:
+        created_at = ''
+        count = 0
         for comment in comments:
+            count += 1
+            if count == 1:
+                created_at = comment['timestamp']
             try:
                 is_failed = instagram_campaign['is_failed']
                 latest_comment_time = instagram_campaign['latest_comment_time']
@@ -226,21 +238,26 @@ def capture_instagram(campaign, instagram_post):
                     img_url == ''
                 if profile_img_url[0] == 200:
                     img_url = profile_img_url[1]['profile_picture_url']
-
-                uni_format_comment = {
-                    'platform': 'instagram',
-                    'id': comment['id'],
-                    "campaign_id": campaign['id'],
-                    'message': comment['text'],
-                    "created_time": comment['timestamp'],
-                    "customer_id": comment['id'],
-                    "customer_name": from_info[1]['from']['username'],
-                    "image": img_url}
-                db.api_campaign_comment.insert_one(uni_format_comment)
+                if (since < comment['timestamp']):
+                    uni_format_comment = {
+                        'platform': 'instagram',
+                        'id': comment['id'],
+                        "campaign_id": campaign['id'],
+                        'message': comment['text'],
+                        "created_time": comment['timestamp'],
+                        "customer_id": comment['id'],
+                        "customer_name": from_info[1]['from']['username'],
+                        "image": img_url}
+                    db.api_campaign_comment.insert_one(uni_format_comment)
+                else:
+                    print (';ppppppppppppppppp')
+                    continue
+                    
             # TODO comment queue job
         instagram_campaign['is_failed'] = False
+        instagram_campaign['last_create'] = created_at
         db.api_campaign.update_one({'id': campaign['id']}, {
-                                   "$set": {'instagram_campaign': instagram_campaign}})
+                                "$set": {'instagram_campaign': instagram_campaign}})
     except Exception:
         lastest_comment_time = db.api_campaign_comment.find_one(
             {'platform': 'instagram'}, sort=[('created_time', -1)])['created_time']
