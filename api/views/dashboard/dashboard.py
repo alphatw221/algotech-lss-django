@@ -49,13 +49,14 @@ class DashboardViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['GET'], url_path=r'total_sales')
     @api_error_handler
-    def seller_total_sales(self, request):
+    def total_sales(self, request):
         api_user = request.user.api_users.get(type='user')
         is_user = verify_seller_request(api_user)
         total_sales = 0
 
         if is_user:
             user_id = api_user.id
+            print (user_id)
             campaign_id_list = get_camaign_list(user_id)
             
             order_datas = db.api_order.find({'campaign_id': {'$in': campaign_id_list}})
