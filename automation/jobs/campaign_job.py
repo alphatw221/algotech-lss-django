@@ -301,7 +301,9 @@ def capture_instagram(campaign, instagram_post):
                 else:
                     continue
 
-            # TODO comment queue job
+            comment_queue.enqueue(comment_job, args=(campaign, 'instagram', instagram_post,
+                                                     uni_format_comment, order_codes_mapping), result_ttl=10, failure_ttl=10)
+
         instagram_campaign['is_failed'] = False
         instagram_campaign['last_create'] = created_at
         db.api_campaign.update_one({'id': campaign['id']}, {
