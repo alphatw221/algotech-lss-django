@@ -39,7 +39,9 @@ class YoutubeViewSet(viewsets.GenericViewSet):
         if not count:
             count = 20
 
-        comments = db.api_campaign_comment.find({"campaign_id":int(campaign_id),"platform":"youtube"},{'_id': False}).limit(count)
+        # comments = db.api_campaign_comment.find({"campaign_id":int(campaign_id),"platform":"youtube"},{'_id': False}).limit(count)
+
+        comments = db.api_campaign_comment.find({"campaign_id":int(campaign_id),"platform":"facebook"},{'_id': False}).limit(count)
 
         comments_str = dumps(comments)
         comments_json = loads(comments_str)
