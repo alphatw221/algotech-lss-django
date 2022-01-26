@@ -75,7 +75,7 @@ class DrawFromProductsEvent(CampaignLuckyDrawEvent):
         candidate_set = set()
         for cart_product in cart_products:
             if cart_product.customer_id == page_id:
-                pass
+                continue
             else:
                 candidate_set.add(
                     (cart_product.platform, cart_product.customer_id, cart_product.customer_name)
@@ -131,7 +131,7 @@ class DrawFromCartProductsEvent(CampaignLuckyDrawEvent):
         candidate_set = set()
         for order_product in order_products:
             if order_product.customer_id == page_id:
-                pass
+                continue
             else:
                 candidate_set.add(
                     (order_product.platform, order_product.customer_id, order_product.customer_name)
@@ -178,7 +178,7 @@ class DrawFromCampaignCommentsEvent(ABC):
         candidate_set = set()
         for campaign_comment in campaign_comments:
             if (campaign_comment['customer_id'] == page_id):
-                pass
+                continue
             else:
                 candidate_set.add(
                     (campaign_comment['platform'], campaign_comment['customer_id'], campaign_comment['customer_name'])
@@ -228,7 +228,7 @@ class DrawFromCampaignLikesEvent(ABC):
                 response = api_fb_get_post_likes(token, post_id, after=after)
                 for person in response[1]['data']:
                     if (person['id'] == page_id):
-                        pass
+                        continue
                     else:
                         candidate_set.add(
                             ('facebook', person['id'], person['name'])
@@ -264,7 +264,7 @@ def get_final_set(candidate_set, winner_set, winner_num):
             exclusive_set.add(candidate[1]) 
     print ('exclusive_set')
     print (exclusive_set)
-    if (len(exclusive_set) < winner_num):
+    if (len(exclusive_set) <= winner_num):
         exclusive_set = candidate_set
     candidate_set = exclusive_set
 
