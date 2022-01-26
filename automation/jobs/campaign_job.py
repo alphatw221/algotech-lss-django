@@ -18,9 +18,10 @@ from backend.pymongo.mongodb import db, client
 import time
 import datetime
 from dateutil import parser
-
+from backend.api.youtube.viedo import api_youtube_get_video_info
 
 def campaign_job(campaign_id):
+
     try:
         print(f"campaign_id: {campaign_id}\n")
         campaign = db.api_campaign.find_one({"id": campaign_id})
@@ -123,17 +124,32 @@ def capture_youtube(campaign, youtube_channel):
     page_token = youtube_channel['page_token']
     youtube_campaign = campaign['youtube_campaign']
 
-    # live_chat_id = youtube_campaign.get('live_chat_id')
-    live_chat_id = youtube_campaign.get('live_video_id')
+    
+    # live_chat_id = youtube_campaign.get('live_video_id')
 
-    # if not live_chat_id:
-    #     live_video_id = youtube_campaign.get('live_video_id')
+    live_chat_id = youtube_campaign.get('live_chat_id')
+    if not live_chat_id:
+        live_video_id = youtube_campaign.get('live_video_id')
+        if not live_video_id:
+            print('no live_video_id')
+            return
+        code, data = api_youtube_get_video_info(live_video_id)
+        if code // 100 != 2:
+            print("video info error")
+            return
+        items = data.get("items")
+        if not items:
+            print("no items")
+            return
+        liveStreamingDetails = items[0].get('liveStreamingDetails')
+        if not liveStreamingDetails:
+            print("no liveStreamingDetails")
+            return
+        live_chat_id = liveStreamingDetails.get('activeLiveChatId')
+        youtube_campaign['live_chat_id'] = live_chat_id
 
-    next_page_token = ''
-    try:
-        next_page_token = youtube_campaign['next_page_token']
-    except:
-        pass
+
+    next_page_token = youtube_campaign.get('next_page_token',"")
 
     if not page_token or not live_chat_id:
         return
@@ -143,11 +159,8 @@ def capture_youtube(campaign, youtube_channel):
     order_codes_mapping = {campaign_product['order_code'].lower(): campaign_product
                            for campaign_product in campaign_products}
 
-    if next_page_token != '':
-        page_token = next_page_token
-
     code, data = api_youtube_get_live_chat_comment(
-        page_token, live_chat_id, 100)
+        next_page_token, live_chat_id, 100)
 
     print(f"page_token: {page_token}\n")
     print(f"live_chat_id: {live_chat_id}\n")
@@ -158,7 +171,7 @@ def capture_youtube(campaign, youtube_channel):
     if code // 100 != 2 and 'error' in data:
         youtube_campaign['remark'] = f'Facebook API error: {data["error"]["message"]}'
         db.api_campaign.update_one({'id': campaign['id']}, {
-                                   '$set': {"facebook_campaign", youtube_campaign}})
+                                   '$set': {"youtube_campaign", youtube_campaign}})
         return
 
     next_page_token = data['nextPageToken']
@@ -175,12 +188,11 @@ def capture_youtube(campaign, youtube_channel):
     try:
         for comment in comments:
             print(comment['snippet']['displayMessage'])
-            print(comment['snippet']['publishedAt'])
 
             comment_time_stamp = parser.parse(
                 comment['snippet']['publishedAt']).timestamp()
 
-            print(f"comment_time_stamp: {comment_time_stamp}")
+            # print(f"comment_time_stamp: {comment_time_stamp}")
             if is_failed and comment_time_stamp > latest_comment_time:
                 continue
 
@@ -206,11 +218,11 @@ def capture_youtube(campaign, youtube_channel):
         db.api_campaign.update_one({'id': campaign['id']}, {
                                    "$set": {'youtube_campaign': youtube_campaign}})
     except Exception as e:
+        print(e)
         latest_campaign_comment = db.api_campaign_comment.find_one(
             {'platform': 'youtube', 'campaign_id': campaign['id']}, sort=[('created_time', -1)])
         youtube_campaign['is_failed'] = True
-        youtube_campaign['latest_comment_time'] = parser.parse(
-            latest_campaign_comment['created_time']).timestamp() if latest_campaign_comment else 1
+        youtube_campaign['latest_comment_time'] = latest_campaign_comment['created_time'] if latest_campaign_comment else 1
         db.api_campaign.update_one({'id': campaign['id']}, {
                                    "$set": {'youtube_campaign': youtube_campaign}})
         return
