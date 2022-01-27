@@ -201,7 +201,7 @@ def capture_youtube(campaign, youtube_channel):
                 "campaign_id": campaign['id'],
                 'message': comment['snippet']['displayMessage'],
                 "created_time": comment_time_stamp,
-                "customer_id": None,
+                "customer_id": comment['authorDetails']['channelId'],
                 "customer_name": comment['authorDetails']['displayName'],
                 "image": comment['authorDetails']['profileImageUrl'],
                 "live_chat_id":live_chat_id
