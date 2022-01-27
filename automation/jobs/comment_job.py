@@ -48,9 +48,13 @@ def comment_job(campaign, platform_name, platform, comment, order_codes_mapping)
         return
 
     # temperory solution
-    if platform_name =='instagram':
+    if platform_name == 'instagram':
         pre_order = db.api_pre_order.find_one(
             {'customer_name': comment['customer_name'], 'campaign_id': campaign['id'], 'platform': comment['platform']})
+    elif platform_name == 'youtube':
+        pre_order = db.api_pre_order.find_one(
+            {'customer_name': comment['customer_name'], 'campaign_id': campaign['id'], 'platform': comment['platform']})
+
     else:
         pre_order = db.api_pre_order.find_one(
             {'customer_id': comment['customer_id'], 'campaign_id': campaign['id'], 'platform': comment['platform']})
