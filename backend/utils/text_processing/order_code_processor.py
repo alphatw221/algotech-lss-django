@@ -10,7 +10,7 @@ class OrderCodeTextProcessor(TextProcessor):
     def process(text: str, order_code: str):
         if not text or not order_code:
             return None
-
+        text = text.lower()
         text_after_order_code = OrderCodeTextProcessor._get_text_after_order_code(
             text, order_code)
         if not text_after_order_code:
