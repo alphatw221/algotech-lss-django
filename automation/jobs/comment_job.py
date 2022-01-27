@@ -139,5 +139,6 @@ def comment_responding(platform_name, platform, pre_order, comment, campaign_pro
         code, ret = api_youtube_post_live_chat_comment(access_token, live_chat_id, text)
 
         print(f"youtube post comment response code: {code}")
+        print(ret)
     elif platform_name == 'instagram':
         return
