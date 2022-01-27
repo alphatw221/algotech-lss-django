@@ -40,4 +40,22 @@ def send_email():
 
     except Exception:
         ...
+
+
+def send_Email(mail_list):
+    try:
+        subject = mail_list[1]
+        message = mail_list[2]
+        recipient = mail_list[0]
+        send_mail(subject, message, settings.EMAIL_HOST_USER, [recipient], fail_silently = False)
         
+        # mail_info = Mail.objects.get(id = mail.id)
+        # mail_info.sent_at = pendulum.now()
+        # mail_info.result = 'success'
+        # mail_info.save()
+
+        print(f'{pendulum.now()} - {mail_list[0]} - {"success"}')
+        time.sleep(0.5)
+
+    except Exception:
+        raise
