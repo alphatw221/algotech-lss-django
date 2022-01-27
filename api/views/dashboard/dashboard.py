@@ -81,7 +81,6 @@ class DashboardViewSet(viewsets.ModelViewSet):
 
             order_datas = db.api_order.find({'campaign_id': {'$in': campaign_id_list}})
             for order_data in order_datas:
-                print (order_data['total'])
                 total_revenue += order_data['total']
         revenueJson = { 'total_revenue': total_revenue }
         
@@ -111,8 +110,10 @@ class DashboardViewSet(viewsets.ModelViewSet):
                 products = order_data['products']
                 for key, val in products.items():
                     order_total += val['qty'] 
-        
-            total_pending = 1 - order_total / (pre_order_total + order_total)
+            try:
+                total_pending = 1 - order_total / (pre_order_total + order_total)
+            except:
+                total_pending = 0
         pendingJson = { 'total_pending': '{:.2%}'.format(total_pending) }
     
         return Response(pendingJson, status=status.HTTP_200_OK)
