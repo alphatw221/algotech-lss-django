@@ -309,7 +309,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         # api_user, = getparams(request, (), with_user=True, seller=False)
         # pre_order=Verify.get_pre_order(pk)
         # Verify.user_match_pre_order(api_user, pre_order)
-
+        
         api_user = None
         pre_order=Verify.get_pre_order(pk)
 

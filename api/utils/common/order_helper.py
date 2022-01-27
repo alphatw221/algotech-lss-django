@@ -276,6 +276,7 @@ class PreOrderHelper():
     def _check_allow_checkout(api_user, campaign):
         if not api_user:
             return
+            #return
         if api_user.type=="user":
             return
         if not campaign.meta.get('allow_checkout', 1):
