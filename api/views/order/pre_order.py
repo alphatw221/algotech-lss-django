@@ -381,8 +381,10 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         pre_order=Verify.get_pre_order(pk)
         order_product=OrderProduct.objects.get(id = order_product_id)
 
+        # api_order_product = PreOrderHelper.update_product(
+        #     api_user, pre_order, order_product, order_product.campaign_product, qty)
         api_order_product = PreOrderHelper.update_product(
-            api_user, pre_order, order_product, order_product.campaign_product, qty)
+            pre_order, order_product, order_product.campaign_product, qty)
         return Response(api_order_product, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['GET'], url_path=r'buyer_delete')
