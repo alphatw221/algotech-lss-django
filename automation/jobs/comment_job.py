@@ -128,7 +128,7 @@ def comment_responding(platform_name, platform, pre_order, comment, campaign_pro
             platform['token'], comment['id'], text+shopping_cart_info)
     elif platform_name == 'youtube':
         customer_name =comment['customer_name']
-        text = f"@{customer_name}"+ " test test test "+f"{settings.WEB_SERVER_URL}/buyer/cart/{pre_order.id}"
+        text = f"@{customer_name}"+ " test test test "+f"{settings.WEB_SERVER_URL}/buyer/cart/{pre_order['id']}"
         live_chat_id = comment.get("live_chat_id")
         if not live_chat_id:
             return
