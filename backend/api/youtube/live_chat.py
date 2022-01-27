@@ -8,7 +8,7 @@ def api_youtube_get_live_chat_comment(page_token: str, live_chat_id: str, max_re
         "maxResults": max_results,
         "part": "id,snippet,authorDetails",
         "liveChatId": live_chat_id,
-        "pageToken": page_token
+        "pageToken": page_token     
     }
     ret = YoutubeApiCaller('liveChat/messages', params=params).get()
     return ret
@@ -27,7 +27,7 @@ def api_youtube_post_live_chat_comment(access_token: str, live_chat_id: str, tex
     }
 
     params = {
-        "key": settings.YOUTUBE_API_KEY,
+        # "key": api_key,
         "part": "id,snippet",
     }
 

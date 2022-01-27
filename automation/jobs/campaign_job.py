@@ -296,7 +296,7 @@ def capture_instagram(campaign, instagram_post):
                         'message': comment['text'],
                         "created_time": comment['timestamp'],
                         # "customer_id": comment['id'],
-                        "customer_id": None,
+                        "customer_id": from_info[1]['from']['username'],
                         "customer_name": from_info[1]['from']['username'],
                         "image": img_url}
                     db.api_campaign_comment.insert_one(uni_format_comment)
