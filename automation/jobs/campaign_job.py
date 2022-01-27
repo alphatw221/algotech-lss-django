@@ -204,7 +204,7 @@ def capture_youtube(campaign, youtube_channel):
                 "customer_id": comment['authorDetails']['channelId'],
                 "customer_name": comment['authorDetails']['displayName'],
                 "image": comment['authorDetails']['profileImageUrl'],
-                "live_chat_id":live_chat_id
+                "live_chat_id": live_chat_id
             }
             db.api_campaign_comment.insert_one(uni_format_comment)
 
@@ -248,7 +248,7 @@ def capture_instagram(campaign, instagram_post):
     code, data = api_ig_get_post_comments(page_token, post_id)
 
     print(f"page_token: {page_token}\n")
-    print(f"post_id: {post_id}\n")
+    print(f"0.  : {post_id}\n")
     print(f"code: {code}\n")
     print("platform: instagram\n")
 
