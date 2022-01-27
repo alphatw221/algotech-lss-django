@@ -16,6 +16,8 @@ from backend.pymongo.mongodb import db
 import xlsxwriter, os.path, io, datetime
 from io import StringIO
 from django.conf import settings
+from dateutil import parser
+
 
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 def get_title_map():
@@ -353,18 +355,56 @@ class OrderViewSet(viewsets.ModelViewSet):
         #     api_user, platform_name, campaign_id)
         platform_name, campaign_id = getparams(
             request, ("platform_name", "campaign_id"), with_user=False, seller=False)
-        order = Order.objects.get(id = pk)
 
-        request.data['status'] = 'complete'
-        serializer = OrderSerializerUpdatePaymentShipping(order, data=request.data, partial=True)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        # request.data['status'] = 'complete'
+        # serializer = OrderSerializerUpdatePaymentShipping(order, data=request.data, partial=True)
+        # if not serializer.is_valid():
+        #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # serializer.save()
 
-        serializer.save()
-        print (order.shipping_email)
+        db.api_order.update_one({'id': int(pk)}, {'$set': {'status': 'complete'}})
+        print (campaign_id)
+        order_data = db.api_order.find_one({'id': int(pk)})
+        facebook_page_id = db.api_campaign.find_one({'id': int(campaign_id)})['facebook_page_id']
+        campaign_title = db.api_campaign.find_one({'id': int(campaign_id)})['title']
+        meta_logistic = db.api_campaign.find_one({'id': int(campaign_id)})['meta_logistic']
+        store_name = db.api_facebook_page.find_one({'id': int(facebook_page_id)})['name']
+        meta = order_data['meta']
+        products = order_data['products']
+        order_email = order_data['shipping_email']
+
+        mail_subject = '[LSS] '+ store_name + ' order confirmation'
+        mail_content = 'Order # ' + str(pk) + '\n\n'
+        mail_content+= campaign_title + '\n--------------------------------------------\n'
+        mail_content+= 'FB Name: ' + order_data['customer_name'] + '\n'
+        mail_content+= 'Delivery To: \n' 
+        mail_content+= order_data['shipping_first_name'] + ' ' + order_data['shipping_last_name'] + '\n'
+        mail_content+= order_data['shipping_phone'] + '\n'
+        if 'pick_up_store' in meta:
+            mail_content+= 'Pick up store:' + meta['pick_up_store'] + ', ' + meta['pick_up_store_address'] + '\n'
+            mail_content+= 'Pick up date: ' + meta['pick_up_date'] + '\n\n'
+        mail_content+= '\n --- Summary --- \n\n'
+        mail_content+= 'Item                   Price Qty Total\n'
+
+        for key, val in products.items():
+            mail_content+= products[key]['name'] + '      $' + str(products[key]['price']) + '    ' + str(products[key]['qty']) + '   ' + '$' + str(products[key]['subtotal']) + '\n'
+        mail_content+= 'Delivery Charge                 ' 
+        if order_data['free_delivery'] == False:
+            mail_content+= '$' +  str("%.2f" % float(meta_logistic['delivery_charge'])) + '\n\n\n'
+        else:
+            mail_content+= '$0\n\n\n'
+        mail_content+= 'Total                                $' + str(order_data['total'])
+        email_list = []
+        email_list.append(order_email)
+        email_list.append(mail_subject)
+        email_list.append(mail_content)
+
+        send_Email(email_list)
 
         # order = verify_buyer_request(
         #     api_user, platform_name, campaign_id, check_info=True)
+        order = Order.objects.get(id = pk)
         serializer = OrderSerializer(order)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -372,8 +412,6 @@ class OrderViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['POST'], url_path=r'buyer_cancel')
     @api_error_handler
     def update_buyer_cancel(self, request, pk=None):
-
-
         # api_user, = getparams(
         #     request, (), seller=False)
         api_user = None
