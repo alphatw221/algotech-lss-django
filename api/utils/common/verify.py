@@ -57,6 +57,11 @@ class Verify():
                         return True
                 return False
             elif platform_name == 'youtube':
+                # return api_user.youtube_info[''] == platform.xxx
+                return True
+            elif platform_name == 'instagram':
+                # api_user.instagram_info['']
+
                 return True
         except Exception as e:
             return False

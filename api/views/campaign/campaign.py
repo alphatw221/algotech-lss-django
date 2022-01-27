@@ -102,6 +102,8 @@ class CampaignViewSet(viewsets.ModelViewSet):
         api_user = request.user.api_users.get(type='user')
 
         platform = verify_request(api_user, platform_name, platform_id)
+        # TODO check platform in user_subscription
+        
         print(platform)
         json_data = json.loads(request.data["data"])
         json_data['created_by'] = api_user.id

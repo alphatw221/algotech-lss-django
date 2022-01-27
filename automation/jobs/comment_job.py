@@ -1,5 +1,6 @@
 import os
 import django
+from django.conf import settings
 try:
     os.environ['DJANGO_SETTINGS_MODULE'] = 'lss.settings'  # for rq_job
     django.setup()
@@ -16,6 +17,8 @@ from backend.i18n.cart_product_request import (i18n_get_additional_text,
                                                i18n_get_request_response)
 from backend.api.facebook.post import (api_fb_post_page_comment_on_comment,
                                        api_fb_post_page_message_on_comment)
+from backend.api.youtube.live_chat import api_youtube_post_live_chat_comment
+
 from api.models.order.pre_order import api_pre_order_template
 from backend.pymongo.mongodb import db, client, get_incremented_filed
 from bson.objectid import ObjectId
@@ -96,11 +99,6 @@ def comment_job(campaign, platform_name, platform, comment, order_codes_mapping)
     print(f"state: {state}")
     comment_responding(platform_name, platform, pre_order,
                        comment, campaign_product, qty, state)
-    # except ApiVerifyError:
-    #     pass
-    # except Exception as e:
-    #     print(e)
-    #     pass
 
 
 def command_responding(platform_name, platform, campaign, comment, command):
@@ -129,6 +127,11 @@ def comment_responding(platform_name, platform, pre_order, comment, campaign_pro
         api_fb_post_page_message_on_comment(
             platform['token'], comment['id'], text+shopping_cart_info)
     elif platform_name == 'youtube':
-        return
+        text = f"@{comment['authorDetails']['displayName']}"+""+f"{settings.WEB_SERVER_URL}/buyer/cart/{pre_order.id}"
+        live_chat_id = comment.get("live_chat_id")
+        if not live_chat_id:
+            return
+        api_youtube_post_live_chat_comment(" ", live_chat_id, text)
+
     elif platform_name == 'instagram':
         return

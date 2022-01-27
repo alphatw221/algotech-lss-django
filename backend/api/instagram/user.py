@@ -2,6 +2,13 @@ from backend.api.facebook._fb_api_caller import FacebookApiCaller, InstagramApiC
 from django.conf import settings
 
 
+def api_ig_get_user_content(token: str, user_id: str):
+    params = {
+        'fields': 'id,username'
+    }
+    ret = FacebookApiCaller(user_id, bearer_token=token, params=params).get()
+    return ret
+
 def api_ig_get_bussiness_id(token: str):
     params = {
         'fields': 'instagram_business_account'
