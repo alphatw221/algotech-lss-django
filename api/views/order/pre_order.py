@@ -308,9 +308,12 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     @api_error_handler
     def buyer_pre_order_checkout(self, request, pk=None):
 
-        api_user, = getparams(request, (), with_user=True, seller=False)
+        # api_user, = getparams(request, (), with_user=True, seller=False)
+        # pre_order=Verify.get_pre_order(pk)
+        # Verify.user_match_pre_order(api_user, pre_order)
+
+        api_user = None
         pre_order=Verify.get_pre_order(pk)
-        Verify.user_match_pre_order(api_user, pre_order)
 
         api_order = PreOrderHelper.checkout(api_user, pre_order)
         return Response(api_order, status=status.HTTP_200_OK)
@@ -320,10 +323,15 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     def buyer_add_order_product(self, request, pk=None):
 
 
-        api_user, campaign_product_id, qty = getparams(request, ('campaign_product_id', 'qty'), with_user=True, seller=False)
+        # api_user, campaign_product_id, qty = getparams(request, ('campaign_product_id', 'qty'), with_user=True, seller=False)
+        # pre_order=Verify.get_pre_order(pk)
+        # Verify.user_match_pre_order(api_user, pre_order)
+        # campaign_product = Verify.get_campaign_product_from_pre_order(pre_order, campaign_product_id)
+
+
+        api_user = None
         pre_order=Verify.get_pre_order(pk)
-        Verify.user_match_pre_order(api_user, pre_order)
-        campaign_product = Verify.get_campaign_product_from_pre_order(pre_order, campaign_product_id)
+        campaign_product = pre_order.campaign.products
 
         api_order_product = PreOrderHelper.add_product(api_user, pre_order, campaign_product, qty)
         return Response(api_order_product, status=status.HTTP_200_OK)
@@ -373,7 +381,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         api_user = None
         order_product_id, qty = getparams(request, ('order_product_id', 'qty'), with_user=False, seller=False)
         pre_order=Verify.get_pre_order(pk)
-        order_product = Verify.get_order_product_from_pre_order(pre_order, order_product_id)
+        order_product=OrderProduct.objects.get(id = order_product_id)
 
         api_order_product = PreOrderHelper.update_product(
             api_user, pre_order, order_product, order_product.campaign_product, qty)
