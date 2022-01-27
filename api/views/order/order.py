@@ -10,6 +10,7 @@ from api.utils.common.verify import ApiVerifyError, platform_dict
 from api.utils.common.common import getparams
 from api.utils.common.order_helper import OrderHelper
 
+from mail.sender.sender import *
 from django.http import HttpResponse
 from backend.pymongo.mongodb import db
 import xlsxwriter, os.path, io, datetime
@@ -332,9 +333,9 @@ class OrderViewSet(viewsets.ModelViewSet):
 
 
         # 先檢查exists 才給request get
-        api_user, = getparams(
-            request, (), seller=False)
-
+        # api_user, = getparams(
+        #     request, (), seller=False)
+        api_user=None
         order = Order.objects.get(id = pk)
         Verify.user_match_pre_order(api_user, order)
 
@@ -352,10 +353,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         #     api_user, platform_name, campaign_id)
         platform_name, campaign_id = getparams(
             request, ("platform_name", "campaign_id"), with_user=False, seller=False)
-        
         order = Order.objects.get(id = pk)
-
-
 
         request.data['status'] = 'complete'
         serializer = OrderSerializerUpdatePaymentShipping(order, data=request.data, partial=True)
@@ -363,21 +361,22 @@ class OrderViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         serializer.save()
+        print (order.shipping_email)
 
-        order = verify_buyer_request(
-            api_user, platform_name, campaign_id, check_info=True)
+        # order = verify_buyer_request(
+        #     api_user, platform_name, campaign_id, check_info=True)
         serializer = OrderSerializer(order)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     @action(detail=True, methods=['POST'], url_path=r'buyer_cancel')
     @api_error_handler
-    def update_buyer_submit(self, request, pk=None):
+    def update_buyer_cancel(self, request, pk=None):
 
 
-        api_user, = getparams(
-            request, (), seller=False)
-
+        # api_user, = getparams(
+        #     request, (), seller=False)
+        api_user = None
         order = Order.objects.get(id = pk)
         Verify.user_match_pre_order(api_user, order)
 
