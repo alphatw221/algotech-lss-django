@@ -20,6 +20,7 @@ import datetime
 from dateutil import parser
 from backend.api.youtube.viedo import api_youtube_get_video_info
 
+
 def campaign_job(campaign_id):
 
     try:
@@ -124,7 +125,6 @@ def capture_youtube(campaign, youtube_channel):
     page_token = youtube_channel['page_token']
     youtube_campaign = campaign['youtube_campaign']
 
-    
     # live_chat_id = youtube_campaign.get('live_video_id')
 
     live_chat_id = youtube_campaign.get('live_chat_id')
@@ -148,8 +148,7 @@ def capture_youtube(campaign, youtube_channel):
         live_chat_id = liveStreamingDetails.get('activeLiveChatId')
         youtube_campaign['live_chat_id'] = live_chat_id
 
-
-    next_page_token = youtube_campaign.get('next_page_token',"")
+    next_page_token = youtube_campaign.get('next_page_token', "")
 
     if not page_token or not live_chat_id:
         return
@@ -202,7 +201,7 @@ def capture_youtube(campaign, youtube_channel):
                 "campaign_id": campaign['id'],
                 'message': comment['snippet']['displayMessage'],
                 "created_time": comment_time_stamp,
-                "customer_id": comment['snippet']['liveChatId'],
+                "customer_id": None,
                 "customer_name": comment['authorDetails']['displayName'],
                 "image": comment['authorDetails']['profileImageUrl'],
                 "live_chat_id":live_chat_id
