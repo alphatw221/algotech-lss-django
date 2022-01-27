@@ -243,6 +243,8 @@ class PreOrderHelper():
 
     @staticmethod
     def _check_removeable(api_user, api_campaign_product):
+        if not api_user:
+            return
         if api_user.type=="user":
             return
         if not api_campaign_product['customer_removable']:
@@ -250,6 +252,8 @@ class PreOrderHelper():
 
     @staticmethod
     def _check_editable(api_user, api_campaign_product):
+        if not api_user:
+            return
         if api_user.type=="user":
             return
         if not api_campaign_product.get('customer_editable',False):
@@ -269,6 +273,8 @@ class PreOrderHelper():
 
     @staticmethod
     def _check_allow_checkout(api_user, campaign):
+        if not api_user:
+            return
         if api_user.type=="user":
             return
         if not campaign.meta.get('allow_checkout', 1):

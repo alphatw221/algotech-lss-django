@@ -331,7 +331,8 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
         api_user = None
         pre_order=Verify.get_pre_order(pk)
-        campaign_product = pre_order.campaign.products
+        campaign_product_id, qty = getparams(request, ('campaign_product_id', 'qty'), with_user=False, seller=False)
+        campaign_product = pre_order.campaign.products.get(id = campaign_product_id)
 
         api_order_product = PreOrderHelper.add_product(api_user, pre_order, campaign_product, qty)
         return Response(api_order_product, status=status.HTTP_200_OK)
@@ -381,6 +382,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         api_user = None
         order_product_id, qty = getparams(request, ('order_product_id', 'qty'), with_user=False, seller=False)
         pre_order=Verify.get_pre_order(pk)
+        
         order_product=OrderProduct.objects.get(id = order_product_id)
 
         api_order_product = PreOrderHelper.update_product(
@@ -399,7 +401,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         api_user = None
         order_product_id, = getparams(request, ('order_product_id',), with_user=False, seller=False)
         pre_order=Verify.get_pre_order(pk)
-        order_product = Verify.get_order_product_from_pre_order(pre_order, order_product_id)
+        order_product = OrderProduct.objects.get(id=order_product_id)
 
 
         PreOrderHelper.delete_product(
