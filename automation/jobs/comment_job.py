@@ -132,12 +132,12 @@ def comment_responding(platform_name, platform, pre_order, comment, campaign_pro
         live_chat_id = comment.get("live_chat_id")
         if not live_chat_id:
             return
-        access_token = platform.get('access_token')
-        api_key = platform.get('api_key')
-        if not access_token or not api_key:
-            print("no access token or api key")
+        access_token = platform.get('page_token')
+
+        if not access_token :
+            print("no access token")
             return
-        code, ret = api_youtube_post_live_chat_comment(api_key, access_token, live_chat_id, text)
+        code, ret = api_youtube_post_live_chat_comment(access_token, live_chat_id, text)
 
         print(f"youtube post comment response code: {code}")
         print(ret)
