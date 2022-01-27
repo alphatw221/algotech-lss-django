@@ -44,12 +44,11 @@ def campaign_job(campaign_id):
 
         try:
             if campaign['instagram_profile_id']:
-                # instagram_post = db.api_instagram_profile.find_one(
-                #     {'id': int(campaign['instagram_profile_id'])})
-                if not facebook_page:
-                    facebook_page = db.api_facebook_page.find_one({"id": campaign['facebook_page_id']})
-                capture_instagram(campaign, facebook_page)
-
+                instagram_post = db.api_instagram_profile.find_one(
+                    {'id': int(campaign['instagram_profile_id'])})
+                # if not facebook_page:
+                #     facebook_page = db.api_facebook_page.find_one({"id": campaign['facebook_page_id']})
+                capture_instagram(campaign, instagram_post)
         except Exception as e:
             print(e)
             pass
