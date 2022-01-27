@@ -1,5 +1,6 @@
 import os
 import django
+from django.conf import settings
 try:
     os.environ['DJANGO_SETTINGS_MODULE'] = 'lss.settings'  # for rq_job
     django.setup()
@@ -122,11 +123,11 @@ def comment_responding(platform_name, platform, pre_order, comment, campaign_pro
         api_fb_post_page_message_on_comment(
             platform['token'], comment['id'], text+shopping_cart_info)
     elif platform_name == 'youtube':
-        text = "123456"
+        text = f"@{comment['authorDetails']['displayName']}"+""+f"{settings.WEB_SERVER_URL}/buyer/cart/{pre_order.id}"
         live_chat_id = comment.get("live_chat_id")
         if not live_chat_id:
             return
-        api_youtube_post_live_chat_comment("token here ", live_chat_id, text)
-        
+        api_youtube_post_live_chat_comment(" ", live_chat_id, text)
+
     elif platform_name == 'instagram':
         return
