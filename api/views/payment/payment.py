@@ -415,12 +415,12 @@ class PaymentViewSet(viewsets.GenericViewSet):
             print(f"platform_name: {platform_name}")
             platform_id = order.platform_id
             print(f"platform_id: {platform_id}")
-            _, user_subscription = verify_request(
-                api_user, platform_name, platform_id)
+            # _, user_subscription = verify_request(
+            #     api_user, platform_name, platform_id)
 
             if image != "undefined":
                 image_path = default_storage.save(
-                    f'user_subscription/{user_subscription.id}/campaign/{order.campaign.id}/order/{order.id}/receipt/{image.name}', ContentFile(image.read()))
+                    f'campaign/{order.campaign.id}/order/{order.id}/receipt/{image.name}', ContentFile(image.read()))
                 image_path = settings.GS_URL + image_path
                 meta_data["receipt_image"] = image_path
             if last_five_digit != "":
@@ -477,36 +477,16 @@ class PaymentViewSet(viewsets.GenericViewSet):
     @action(detail=False, methods=['GET'], url_path=r'get_direct_payment_info')
     @api_error_handler
     def get_direct_payment_info(self, request):
-
-        api_user, order_id = getparams(request,('order_id',), seller=False)
-        if not Order.objects.filter(id=order_id).exists():
-            raise ApiVerifyError("no order found")
-
-        order = Verify.get_order(order_id)
-        Verify.user_match_order(api_user, order)
-        meta_payment = order.campaign.meta_payment
-        print(meta_payment)
-        data = {}
-        for key, values in meta_payment.items():
-            data[key] = values["direct_payment"]
-        # data = {
-        #     "is_general_payment": meta_payment.get("is_general_payment",0),
-        #     "direct_payment": meta_payment.get("direct_payment","")
-        # }
-
-        return Response(data, status=status.HTTP_200_OK)
         try:
-            order_id = request.GET["order_id"]
+            api_user, order_id = getparams(request,('order_id',), seller=False)
             if not Order.objects.filter(id=order_id).exists():
                 raise ApiVerifyError("no order found")
-            meta_payment = Order.objects.get(id=order_id).campaign.meta_payment
+
+            order = Verify.get_order(order_id)
+            Verify.user_match_order(api_user, order)
+            meta_payment = order.campaign.meta_payment
             meta_payment = json.loads(json.dumps(meta_payment))
-            print(meta_payment)
-            data = {
-                "is_general_payment": meta_payment["is_general_payment"],
-                "direct_payment": meta_payment["direct_payment"]
-            }
-            return Response(data, status=status.HTTP_200_OK)
+            return Response(meta_payment, status=status.HTTP_200_OK)
         except Exception as e:
             print(e)
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
