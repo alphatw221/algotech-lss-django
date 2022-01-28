@@ -300,11 +300,10 @@ def capture_instagram(campaign, instagram_post):
                         "customer_name": from_info[1]['from']['username'],
                         "image": img_url}
                     db.api_campaign_comment.insert_one(uni_format_comment)
+                    comment_queue.enqueue(comment_job, args=(campaign, 'instagram', instagram_post,
+                                                     uni_format_comment, order_codes_mapping), result_ttl=10, failure_ttl=10)
                 else:
                     continue
-
-            comment_queue.enqueue(comment_job, args=(campaign, 'instagram', instagram_post,
-                                                     uni_format_comment, order_codes_mapping), result_ttl=10, failure_ttl=10)
 
         instagram_campaign['is_failed'] = False
         instagram_campaign['last_create'] = created_at
