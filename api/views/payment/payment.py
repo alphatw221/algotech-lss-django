@@ -381,7 +381,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         hitpay_dict['hitpay'] = info_dict
         total = int(db.api_order.find_one({'id': int(reference_number)})['total'])
 
-        if status == 'completed' and total == int(amount):
+        if status == 'completed' and float(total) == float(amount):
             db.api_order.update_one(
                 { 'id': int(reference_number) },
                 { '$set': {'status': 'complete', 'checkout_details': hitpay_dict} }
