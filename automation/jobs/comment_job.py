@@ -134,7 +134,7 @@ def comment_responding(platform_name, platform, pre_order, comment, campaign_pro
                                                                          lang=platform['lang'])
 
         customer_name =comment['customer_name']
-        text = f"@{customer_name}"+ text+shopping_cart_info
+        text = f"@{customer_name}"+ text+f"Shopping Cart: {settings.WEB_SERVER_URL}/buyer/cart/{pre_order['id']}"
         live_chat_id = comment.get("live_chat_id")
         if not live_chat_id:
             return
