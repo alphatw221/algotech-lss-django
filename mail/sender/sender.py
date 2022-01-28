@@ -3,6 +3,7 @@ from django.conf import settings
 from django.core.mail import send_mail
 import pendulum, time
 from mail.sender.mail_info import MailInfo
+from api.utils.error_handle.error.api_error import ApiVerifyError
 
 
 # convert email list to save in mongo
@@ -58,4 +59,4 @@ def send_Email(mail_list):
         time.sleep(0.5)
 
     except Exception:
-        raise
+        raise ApiVerifyError('email address wrong format')
