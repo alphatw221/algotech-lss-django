@@ -127,13 +127,18 @@ def comment_responding(platform_name, platform, pre_order, comment, campaign_pro
         api_fb_post_page_message_on_comment(
             platform['token'], comment['id'], text+shopping_cart_info)
     elif platform_name == 'youtube':
+        text = i18n_get_request_response(
+        state, campaign_product, qty, lang=platform['lang'])
+
+        shopping_cart_info, info_in_pm_notice = i18n_get_additional_text(pre_order,
+                                                                         lang=platform['lang'])
+
         customer_name =comment['customer_name']
-        text = f"@{customer_name}"+ " test test test "+f"{settings.WEB_SERVER_URL}/buyer/cart/{pre_order['id']}"
+        text = f"@{customer_name}"+ text+info_in_pm_notice
         live_chat_id = comment.get("live_chat_id")
         if not live_chat_id:
             return
         access_token = platform.get('page_token')
-
         if not access_token :
             print("no access token")
             return
