@@ -384,7 +384,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         if status == 'completed' and total == int(amount):
             db.api_order.update_one(
                 { 'id': int(reference_number) },
-                { '$set': {'status': 'paid', 'checkout_details': hitpay_dict} }
+                { '$set': {'status': 'complete', 'checkout_details': hitpay_dict} }
             )
 
         return Response('request')
