@@ -468,17 +468,6 @@ class PaymentViewSet(viewsets.GenericViewSet):
             # _, user_subscription = verify_request(
             #     api_user, platform_name, platform_id)
 
-            if image != "undefined":
-                image_path = default_storage.save(
-                    f'campaign/{order.campaign.id}/order/{order.id}/receipt/{image.name}', ContentFile(image.read()))
-                image_path = settings.GS_URL + image_path
-                meta_data["receipt_image"] = image_path
-            if last_five_digit != "":
-                meta_data["last_five_digit"] = last_five_digit
-            order.meta = meta_data
-            order.status = "complete"
-            order.save()
-
             order_data = db.api_order.find_one({'id': int(order_id)})
             campaign_id = order_data['campaign_id']
             order_data = db.api_order.find_one({'id': int(order_id)})
@@ -525,6 +514,17 @@ class PaymentViewSet(viewsets.GenericViewSet):
             email_list.append(mail_content)
 
             send_Email(email_list)
+
+            if image != "undefined":
+                image_path = default_storage.save(
+                    f'campaign/{order.campaign.id}/order/{order.id}/receipt/{image.name}', ContentFile(image.read()))
+                image_path = settings.GS_URL + image_path
+                meta_data["receipt_image"] = image_path
+            if last_five_digit != "":
+                meta_data["last_five_digit"] = last_five_digit
+            order.meta = meta_data
+            order.status = "complete"
+            order.save()
 
             print(meta_data)
             return Response({"message": "upload succeed"}, status=status.HTTP_200_OK)
