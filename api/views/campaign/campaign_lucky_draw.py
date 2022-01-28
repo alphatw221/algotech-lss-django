@@ -54,6 +54,18 @@ def get_winner_json(winner_lists):
 
                 response_list.append(winner)
             response_json = { 'winner_list': response_list }
+        # elif (len(winner_lists[0]) > 5):
+        #     for winner in winner_lists:
+        #         # print ('winner')
+        #         # print (winner)
+        #         winnerJson = {}
+        #         winner_info = db.api_user.find_one({'facebook_info.id': winner})
+        #         winnerJson['platform'] = 'facebook'
+        #         winnerJson['customer_id'] = winner
+        #         winnerJson['customer_name'] = winner_info['name']
+        #         winnerJson['customer_id'] = winner_info['picture']
+        #         response_list.append(winnerJson)
+        #     response_json = { 'winner_list': response_list }
         else:
             response_json = { 'winner_list': [] }
     except:

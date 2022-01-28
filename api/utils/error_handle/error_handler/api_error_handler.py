@@ -17,7 +17,7 @@ def api_error_handler(func):
         try:
             return func(*args, **kwargs)
         except ApiVerifyError as e:
-            # print(traceback.format_exc())
+            print(traceback.format_exc())
             # ApiLogEntry.write_entry(str(datetime.now()) + ' - ' +  traceback.format_exc())
             print('error is raised')
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)

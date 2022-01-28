@@ -58,11 +58,12 @@ class DrawFromProductsEvent(CampaignLuckyDrawEvent):
         return 'lucky_draw_products'
 
     def get_candidate_set(self):
-        cart_products = orm_cart_product.filter_products(
-            self.campaign,
-            ('order_code', 'cart'),
-            ('valid',)
-        )
+        # cart_products = orm_cart_product.filter_products(
+        #     self.campaign,
+        #     ('order_code', 'cart'),
+        #     ('valid',)
+        # )
+        cart_products = db.api_order.find({'campaign_id': self.campaign.id})
 
         winner_set = set()
         if self.unrepeat == 'True':
@@ -74,13 +75,12 @@ class DrawFromProductsEvent(CampaignLuckyDrawEvent):
 
         candidate_set = set()
         for cart_product in cart_products:
-            if cart_product.customer_id == page_id:
+            if cart_product['customer_id'] == page_id:
                 continue
             else:
                 candidate_set.add(
-                    (cart_product.platform, cart_product.customer_id, cart_product.customer_name)
+                    (cart_product['platform'], cart_product['customer_id'], cart_product['customer_name'])
                 )
-
         if self.unrepeat == 'True':
             candidate_set = get_final_set(candidate_set, winner_set, self.winner_num)
         
@@ -107,19 +107,7 @@ class DrawFromCartProductsEvent(CampaignLuckyDrawEvent):
         return 'lucky_draw_cart_products'
 
     def get_candidate_set(self):
-        # cart_products = orm_cart_product.filter_cart_products(
-        #     self.campaign, self.campaign_product,
-        #     ('order_code', 'cart'),
-        #     ('valid',)
-        # )
-        # return {
-        #     (cart_product.platform,
-        #      cart_product.customer_id,
-        #      cart_product.customer_name)
-        #     for cart_product in cart_products
-        # }
         order_products = OrderProduct.objects.filter(campaign=self.campaign, campaign_product=self.campaign_product)
-
         winner_set = set()
         if self.unrepeat == 'True':
             winner_set = get_winner_set(self.campaign.id)
@@ -130,6 +118,8 @@ class DrawFromCartProductsEvent(CampaignLuckyDrawEvent):
         
         candidate_set = set()
         for order_product in order_products:
+            print ('order_product')
+            print (order_product)
             if order_product.customer_id == page_id:
                 continue
             else:
@@ -261,7 +251,7 @@ def get_final_set(candidate_set, winner_set, winner_num):
     exclusive_set = set()
     for candidate in candidate_set:
         if not candidate[1] in winner_set:
-            exclusive_set.add(candidate[1]) 
+            exclusive_set.add(candidate) 
     print ('exclusive_set')
     print (exclusive_set)
     if (len(exclusive_set) <= winner_num):

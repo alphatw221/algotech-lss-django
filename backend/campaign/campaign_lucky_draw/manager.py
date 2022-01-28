@@ -40,8 +40,6 @@ class CampaignLuckyDrawManager:
         #     lucky_draw, event, cart_product_requests)
 
         response_result = []
-        print ('lucky_draw------------')
-        print (lucky_draw.__dict__)
         if (len(lucky_draw.winner_list) == 0):
             return lucky_draw
         for winner in lucky_draw.winner_list:
