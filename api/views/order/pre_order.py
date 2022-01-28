@@ -389,7 +389,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
         # api_order_product = PreOrderHelper.update_product(
         #     api_user, pre_order, order_product, order_product.campaign_product, qty)
-        api_order_product = PreOrderHelper.update_product(
+        api_order_product = PreOrderHelper.update_product(api_user,
             pre_order, order_product, order_product.campaign_product, qty)
         return Response(api_order_product, status=status.HTTP_200_OK)
 
