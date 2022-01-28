@@ -48,7 +48,9 @@ def get_winner_json(winner_lists):
                 
                 if winner_list[0] == 'facebook':
                     try:
-                        winner['img_url'] = db.api_user.find_one({'id': winner_list[1]})['facebook_info']['picture']['data']['url']
+                        winner_datas = db.api_user.find({'facebook_info.id': winner_list[1]})
+                        for winner_data in winner_datas:
+                            winner['img_url'] = winner_data['facebook_info']['picture']
                     except:
                         winner['img_url'] = ''
 
