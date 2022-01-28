@@ -1,3 +1,4 @@
+import json
 from math import perm
 import re
 from rest_framework import viewsets, status
@@ -297,10 +298,13 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         # Verify.user_match_pre_order(api_user, pre_order)
 
         pre_order=Verify.get_pre_order(pk)
-
+        shopping_note = pre_order.campaign.meta_payment["sg"]["shopping_note"]
 
         serializer = PreOrderSerializer(pre_order)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+
+        data = json.loads(json.dumps(serializer.data))
+        data["shopping_note"] = shopping_note
+        return Response(data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['GET'], url_path=r'buyer_checkout')
     @api_error_handler
@@ -385,7 +389,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
         # api_order_product = PreOrderHelper.update_product(
         #     api_user, pre_order, order_product, order_product.campaign_product, qty)
-        api_order_product = PreOrderHelper.update_product(
+        api_order_product = PreOrderHelper.update_product(api_user,
             pre_order, order_product, order_product.campaign_product, qty)
         return Response(api_order_product, status=status.HTTP_200_OK)
 

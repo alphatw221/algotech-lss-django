@@ -19,7 +19,7 @@ from pymongo import errors as pymongo_errors
 class PreOrderHelper():
 
     @classmethod
-    def update_product(cls, pre_order, order_product, campaign_product, qty):
+    def update_product(cls, api_user, pre_order, order_product, campaign_product, qty):
         with client.start_session() as session:
             try:
                 with session.start_transaction():
@@ -30,10 +30,10 @@ class PreOrderHelper():
                     api_campaign_product = db.api_campaign_product.find_one(
                         {"id": campaign_product.id}, session=session)
 
-                    # cls._check_lock(api_user, api_pre_order)
+                    cls._check_lock(api_user, api_pre_order)
                     qty = cls._check_qty(api_campaign_product, qty)
                     cls._check_type(api_campaign_product)
-                    # cls._check_editable(api_user,api_campaign_product)
+                    cls._check_editable(api_user,api_campaign_product)
 
                     qty_difference = cls._check_stock(
                         api_campaign_product, original_qty=api_order_product['qty'], request_qty=qty)
