@@ -381,26 +381,36 @@ class OrderViewSet(viewsets.ModelViewSet):
         mail_content+= 'Delivery To: \n' 
         mail_content+= order_data['shipping_first_name'] + ' ' + order_data['shipping_last_name'] + '\n\n'
         mail_content+= order_data['shipping_phone'] + '\n\n'
-        if 'pick_up_store' in meta:
-            mail_content+= 'Pick up store:' + meta['pick_up_store'] + ', ' + meta['pick_up_store_address'] + '\n'
+        
+        if order_data['shipping_method'] == 'in_store':
+            mail_content+= 'Shipping way: ' + order_data['shipping_method'] + '\n'
+            mail_content+= 'Pick up store: ' + meta['pick_up_store'] + ', ' + meta['pick_up_store_address'] + '\n'
             mail_content+= 'Pick up date: ' + meta['pick_up_date'] + '\n'
-        mail_content+= '\n --- Summary --- \n\n'
-        mail_content+= 'Price Qty Total   Item\n'
-
+        else:
+            mail_content+= 'Shipping way: ' + order_data['shipping_method'] + '\n'
+            mail_content+= 'Shipping address: ' + order_data['shipping_address_1'] + ', ' + order_data['shipping_location'] + ', ' + order_data['shipping_region'] + '\n'
+            mail_content+= 'Shipping date: ' + order_data['shipping_date'].strftime('%m/%d/%Y') + '\n'
+           
+        mail_content+= '\n--------- Summary -----------\n'
+        mail_content+= 'Price  Qty  Total    Item\n'
+        mail_content+= '-----------------------------\n'
         for key, val in products.items():
-            mail_content+= '$' + str(products[key]['price']) + '    ' + str(products[key]['qty']) + '    $' + str(products[key]['subtotal']) + ' ' + products[key]['name'] + '\n'
-        mail_content+= '\nDelivery Charge  ' 
-        if order_data['free_delivery'] == False:
+            mail_content+= '$' + str(products[key]['price']) + '  ' + str(products[key]['qty']).zfill(3) + '  $' + str(products[key]['subtotal']) + '    ' + products[key]['name'] + '\n'
+        
+        mail_content+= '\nDelivery Charge: ' 
+        if order_data['free_delivery'] == False or order_data['shipping_method'] != 'in_store':
             mail_content+= '$' +  str("%.2f" % float(meta_logistic['delivery_charge'])) + '\n\n'
         else:
             mail_content+= '$0\n\n'
-        mail_content+= 'Total  $' + str(order_data['total'])
-        email_list = []
-        email_list.append(order_email)
-        email_list.append(mail_subject)
-        email_list.append(mail_content)
+        mail_content+= 'Total          : $' + str("%.2f" % float(order_data['total']))
 
-        send_Email(email_list)
+        print (mail_content)
+        # email_list = []
+        # email_list.append(order_email)
+        # email_list.append(mail_subject)
+        # email_list.append(mail_content)
+
+        # send_Email(email_list)
 
         # order = verify_buyer_request(
         #     api_user, platform_name, campaign_id, check_info=True)

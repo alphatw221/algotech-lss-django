@@ -381,11 +381,13 @@ class PaymentViewSet(viewsets.GenericViewSet):
         hitpay_dict['hitpay'] = info_dict
         total = int(db.api_order.find_one({'id': int(reference_number)})['total'])
 
-        if status == 'completed' and total == int(amount):
-            db.api_order.update_one(
-                { 'id': int(reference_number) },
-                { '$set': {'status': 'paid', 'checkout_details': hitpay_dict} }
-            )
+        # if status == 'completed' and float(total) == float(amount):
+        print ('reference_number')
+        print (reference_number)
+        db.api_order.update_one(
+            { 'id': int(reference_number) },
+            { '$set': {'status': 'complete', 'checkout_details': hitpay_dict} }
+        )
 
         return Response('request')
 
@@ -447,20 +449,28 @@ class PaymentViewSet(viewsets.GenericViewSet):
             mail_content+= 'Delivery To: \n' 
             mail_content+= order_data['shipping_first_name'] + ' ' + order_data['shipping_last_name'] + '\n\n'
             mail_content+= order_data['shipping_phone'] + '\n\n'
-            if 'pick_up_store' in meta:
-                mail_content+= 'Pick up store:' + meta['pick_up_store'] + ', ' + meta['pick_up_store_address'] + '\n'
+            
+            if order_data['shipping_method'] == 'in_store':
+                mail_content+= 'Shipping way: ' + order_data['shipping_method'] + '\n'
+                mail_content+= 'Pick up store: ' + meta['pick_up_store'] + ', ' + meta['pick_up_store_address'] + '\n'
                 mail_content+= 'Pick up date: ' + meta['pick_up_date'] + '\n'
-            mail_content+= '\n --- Summary --- \n\n'
-            mail_content+= 'Price Qty Total   Item\n'
-
+            else:
+                mail_content+= 'Shipping way: ' + order_data['shipping_method'] + '\n'
+                mail_content+= 'Shipping address: ' + order_data['shipping_address_1'] + ', ' + order_data['shipping_location'] + ', ' + order_data['shipping_region'] + '\n'
+                mail_content+= 'Shipping date: ' + order_data['shipping_date'].strftime('%m/%d/%Y') + '\n'
+            
+            mail_content+= '\n--------- Summary -----------\n'
+            mail_content+= 'Price  Qty  Total    Item\n'
+            mail_content+= '-----------------------------\n'
             for key, val in products.items():
-                mail_content+= '$' + str(products[key]['price']) + '    ' + str(products[key]['qty']) + '    $' + str(products[key]['subtotal']) + ' ' + products[key]['name'] + '\n'
-            mail_content+= '\nDelivery Charge  ' 
-            if order_data['free_delivery'] == False:
+                mail_content+= '$' + str(products[key]['price']) + '  ' + str(products[key]['qty']).zfill(3) + '  $' + str(products[key]['subtotal']) + '    ' + products[key]['name'] + '\n'
+            
+            mail_content+= '\nDelivery Charge: ' 
+            if order_data['free_delivery'] == False or order_data['shipping_method'] != 'in_store':
                 mail_content+= '$' +  str("%.2f" % float(meta_logistic['delivery_charge'])) + '\n\n'
             else:
                 mail_content+= '$0\n\n'
-            mail_content+= 'Total  $' + str(order_data['total'])
+            mail_content+= 'Total          : $' + str("%.2f" % float(order_data['total']))
             email_list = []
             email_list.append(order_email)
             email_list.append(mail_subject)
