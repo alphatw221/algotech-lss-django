@@ -261,7 +261,7 @@ def get_final_set(candidate_set, winner_set, winner_num):
     exclusive_set = set()
     for candidate in candidate_set:
         if not candidate[1] in winner_set:
-            exclusive_set.add(candidate[1]) 
+            exclusive_set.add(candidate) 
     print ('exclusive_set')
     print (exclusive_set)
     if (len(exclusive_set) <= winner_num):
