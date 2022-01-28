@@ -31,6 +31,7 @@ from api.utils.common.verify import Verify
 from api.views.payment._payment import HitPay_Helper
 from api.views.user.user_subscription import verify_request
 from backend.pymongo.mongodb import db
+from mail.sender.sender import *
 
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 from api.utils.error_handle.error.api_error import ApiVerifyError
@@ -414,12 +415,12 @@ class PaymentViewSet(viewsets.GenericViewSet):
             print(f"platform_name: {platform_name}")
             platform_id = order.platform_id
             print(f"platform_id: {platform_id}")
-            _, user_subscription = verify_request(
-                api_user, platform_name, platform_id)
+            # _, user_subscription = verify_request(
+            #     api_user, platform_name, platform_id)
 
             if image != "undefined":
                 image_path = default_storage.save(
-                    f'user_subscription/{user_subscription.id}/campaign/{order.campaign.id}/order/{order.id}/receipt/{image.name}', ContentFile(image.read()))
+                    f'campaign/{order.campaign.id}/order/{order.id}/receipt/{image.name}', ContentFile(image.read()))
                 image_path = settings.GS_URL + image_path
                 meta_data["receipt_image"] = image_path
             if last_five_digit != "":
@@ -427,6 +428,46 @@ class PaymentViewSet(viewsets.GenericViewSet):
             order.meta = meta_data
             order.status = "complete"
             order.save()
+
+            order_data = db.api_order.find_one({'id': int(order_id)})
+            campaign_id = order_data['campaign_id']
+            order_data = db.api_order.find_one({'id': int(order_id)})
+            facebook_page_id = db.api_campaign.find_one({'id': int(campaign_id)})['facebook_page_id']
+            campaign_title = db.api_campaign.find_one({'id': int(campaign_id)})['title']
+            meta_logistic = db.api_campaign.find_one({'id': int(campaign_id)})['meta_logistic']
+            store_name = db.api_facebook_page.find_one({'id': int(facebook_page_id)})['name']
+            meta = order_data['meta']
+            products = order_data['products']
+            order_email = order_data['shipping_email']
+
+            mail_subject = '[LSS] '+ store_name + ' order confirmation'
+            mail_content = 'Order # ' + str(order_id) + '\n\n'
+            mail_content+= campaign_title + '\n--------------------------------------------\n'
+            mail_content+= 'FB Name: ' + order_data['customer_name'] + '\n\n'
+            mail_content+= 'Delivery To: \n' 
+            mail_content+= order_data['shipping_first_name'] + ' ' + order_data['shipping_last_name'] + '\n\n'
+            mail_content+= order_data['shipping_phone'] + '\n\n'
+            if 'pick_up_store' in meta:
+                mail_content+= 'Pick up store:' + meta['pick_up_store'] + ', ' + meta['pick_up_store_address'] + '\n'
+                mail_content+= 'Pick up date: ' + meta['pick_up_date'] + '\n'
+            mail_content+= '\n --- Summary --- \n\n'
+            mail_content+= 'Price Qty Total   Item\n'
+
+            for key, val in products.items():
+                mail_content+= '$' + str(products[key]['price']) + '    ' + str(products[key]['qty']) + '    $' + str(products[key]['subtotal']) + ' ' + products[key]['name'] + '\n'
+            mail_content+= '\nDelivery Charge  ' 
+            if order_data['free_delivery'] == False:
+                mail_content+= '$' +  str("%.2f" % float(meta_logistic['delivery_charge'])) + '\n\n'
+            else:
+                mail_content+= '$0\n\n'
+            mail_content+= 'Total  $' + str(order_data['total'])
+            email_list = []
+            email_list.append(order_email)
+            email_list.append(mail_subject)
+            email_list.append(mail_content)
+
+            send_Email(email_list)
+
             print(meta_data)
             return Response({"message": "upload succeed"}, status=status.HTTP_200_OK)
         except Exception as e:
@@ -436,36 +477,16 @@ class PaymentViewSet(viewsets.GenericViewSet):
     @action(detail=False, methods=['GET'], url_path=r'get_direct_payment_info')
     @api_error_handler
     def get_direct_payment_info(self, request):
-
-        api_user, order_id = getparams(request,('order_id',), seller=False)
-        if not Order.objects.filter(id=order_id).exists():
-            raise ApiVerifyError("no order found")
-
-        order = Verify.get_order(order_id)
-        Verify.user_match_order(api_user, order)
-        meta_payment = order.campaign.meta_payment
-        print(meta_payment)
-        data = {}
-        for key, values in meta_payment.items():
-            data[key] = values["direct_payment"]
-        # data = {
-        #     "is_general_payment": meta_payment.get("is_general_payment",0),
-        #     "direct_payment": meta_payment.get("direct_payment","")
-        # }
-
-        return Response(data, status=status.HTTP_200_OK)
         try:
-            order_id = request.GET["order_id"]
+            api_user, order_id = getparams(request,('order_id',), seller=False)
             if not Order.objects.filter(id=order_id).exists():
                 raise ApiVerifyError("no order found")
-            meta_payment = Order.objects.get(id=order_id).campaign.meta_payment
+
+            order = Verify.get_order(order_id)
+            Verify.user_match_order(api_user, order)
+            meta_payment = order.campaign.meta_payment
             meta_payment = json.loads(json.dumps(meta_payment))
-            print(meta_payment)
-            data = {
-                "is_general_payment": meta_payment["is_general_payment"],
-                "direct_payment": meta_payment["direct_payment"]
-            }
-            return Response(data, status=status.HTTP_200_OK)
+            return Response(meta_payment, status=status.HTTP_200_OK)
         except Exception as e:
             print(e)
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)

@@ -36,9 +36,9 @@ class OrderProduct(models.Model):
     ##
 
     campaign = models.ForeignKey(
-        Campaign, blank=True, null=True, on_delete=models.SET_NULL, related_name='order_products')
+        Campaign, blank=True, null=True, on_delete=models.DO_NOTHING, related_name='order_products')
     campaign_product = models.ForeignKey(
-        CampaignProduct, blank=True, null=True, on_delete=models.SET_NULL, related_name='order_products')
+        CampaignProduct, blank=True, null=True, on_delete=models.DO_NOTHING, related_name='order_products')
     campaign_comment = models.ForeignKey(
         CampaignComment, blank=True, null=True, on_delete=models.SET_NULL, related_name='order_products')
     order = models.ForeignKey(

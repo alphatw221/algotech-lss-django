@@ -377,24 +377,24 @@ class OrderViewSet(viewsets.ModelViewSet):
         mail_subject = '[LSS] '+ store_name + ' order confirmation'
         mail_content = 'Order # ' + str(pk) + '\n\n'
         mail_content+= campaign_title + '\n--------------------------------------------\n'
-        mail_content+= 'FB Name: ' + order_data['customer_name'] + '\n'
+        mail_content+= 'FB Name: ' + order_data['customer_name'] + '\n\n'
         mail_content+= 'Delivery To: \n' 
-        mail_content+= order_data['shipping_first_name'] + ' ' + order_data['shipping_last_name'] + '\n'
-        mail_content+= order_data['shipping_phone'] + '\n'
+        mail_content+= order_data['shipping_first_name'] + ' ' + order_data['shipping_last_name'] + '\n\n'
+        mail_content+= order_data['shipping_phone'] + '\n\n'
         if 'pick_up_store' in meta:
             mail_content+= 'Pick up store:' + meta['pick_up_store'] + ', ' + meta['pick_up_store_address'] + '\n'
-            mail_content+= 'Pick up date: ' + meta['pick_up_date'] + '\n\n'
+            mail_content+= 'Pick up date: ' + meta['pick_up_date'] + '\n'
         mail_content+= '\n --- Summary --- \n\n'
-        mail_content+= 'Item                   Price Qty Total\n'
+        mail_content+= 'Price Qty Total   Item\n'
 
         for key, val in products.items():
-            mail_content+= products[key]['name'] + '      $' + str(products[key]['price']) + '    ' + str(products[key]['qty']) + '   ' + '$' + str(products[key]['subtotal']) + '\n'
-        mail_content+= 'Delivery Charge                 ' 
+            mail_content+= '$' + str(products[key]['price']) + '    ' + str(products[key]['qty']) + '    $' + str(products[key]['subtotal']) + ' ' + products[key]['name'] + '\n'
+        mail_content+= '\nDelivery Charge  ' 
         if order_data['free_delivery'] == False:
-            mail_content+= '$' +  str("%.2f" % float(meta_logistic['delivery_charge'])) + '\n\n\n'
+            mail_content+= '$' +  str("%.2f" % float(meta_logistic['delivery_charge'])) + '\n\n'
         else:
-            mail_content+= '$0\n\n\n'
-        mail_content+= 'Total                                $' + str(order_data['total'])
+            mail_content+= '$0\n\n'
+        mail_content+= 'Total  $' + str(order_data['total'])
         email_list = []
         email_list.append(order_email)
         email_list.append(mail_subject)
