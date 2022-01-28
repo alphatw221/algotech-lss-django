@@ -194,7 +194,13 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
         campaign = Verify.get_campaign_from_platform(platform, campaign_id)
         campaign_product = Verify.get_campaign_product_from_campaign(campaign, pk)
 
-        campaign_product.delete()
+
+        #soft delete:
+        campaign_product.campaign = None
+        campaign_product.save()
+
+        #hard delete:
+        # campaign_product.delete()
 
         # Verify.get_campaign_product_from_campaign(campaign, pk)
         # platform_id = request.query_params.get('platform_id')
