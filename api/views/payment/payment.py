@@ -478,7 +478,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         # _, user_subscription = verify_request(
         #     api_user, platform_name, platform_id)
 
-        mail_format(order_id)
+        # mail_format(order_id)
         
 
         if image != "undefined":
