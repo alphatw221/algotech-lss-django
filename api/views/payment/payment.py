@@ -139,7 +139,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
     @api_error_handler
     def ipg_payment_success(self, request):
 
-        order_id, = getparams(request, ('order_id'), with_user=False)
+        order_id, = getparams(request, ('order_id',), with_user=False)
         order = Verify.get_order(order_id)
 
         order.meta['ipg_success']=request.data
@@ -175,7 +175,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
     @api_error_handler
     def ipg_payment_fail(self, request, pk=None):
 
-        order_id, = getparams(request, ('order_id'), with_user=False)
+        order_id, = getparams(request, ('order_id',), with_user=False)
         order = Verify.get_order(order_id)
 
         order.meta['ipg_fail']=request.data
