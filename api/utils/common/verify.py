@@ -107,7 +107,7 @@ class Verify():
     @staticmethod
     def get_order(order_id):
         if not Order.objects.filter(id=order_id).exists():
-            raise ApiVerifyError('no pre_order found')
+            raise ApiVerifyError('no order found')
         return Order.objects.get(id=order_id)
 
     @staticmethod
