@@ -226,11 +226,12 @@ class PaymentViewSet(viewsets.GenericViewSet):
             request, ("order_id",), seller=False)
         # customer_user = Verify.get_customer_user(request)
         order_object = Verify.get_order(order_id)
-        currency = 'SGD' if not order_object.currency else order_object.currency
-        amount = order_object.total
-        print(order_object)
 
-        # get request post data  = request.data
+        amount = order_object.total
+        campaign_obj = order_object.campaign
+        currency = 'SGD' if not order_object.currency else order_object.currency
+        # currency = campaign_obj.meta_payment["sg"]["paypal"]["paypal_currency"]
+
         # data is json, example:
         data = [{
             "item_list": {
@@ -248,12 +249,18 @@ class PaymentViewSet(viewsets.GenericViewSet):
                 "currency": currency},
             "description": "This is the payment transaction description."
         }]
+        # sanbox mode
         paypalrestsdk.configure({
             "mode": settings.PAYPAL_CONFIG["mode"],
             "client_id": settings.PAYPAL_CONFIG["client_id"],
             "client_secret": settings.PAYPAL_CONFIG["client_secret"]
         })
-
+        # live mode
+        # paypalrestsdk.configure({
+        #     "mode": "live",
+        #     "client_id": campaign_obj.meta_payment["sg"]["paypal"]["paypal_clientId"],
+        #     "client_secret": campaign_obj.meta_payment["sg"]["paypal"]["paypal_secret"]
+        # })
         payment = paypalrestsdk.Payment({
             "intent": "sale",
             "payer": {
@@ -286,25 +293,31 @@ class PaymentViewSet(viewsets.GenericViewSet):
 
     @action(detail=False, methods=['GET'], url_path=r"paypal_payment_complete_check")
     def paypal_payment_complete_check(self, request, *args, **kwargs):
+
+        paymentId = request.GET["paymentId"]
+        payer_id = request.GET["PayerID"]
+        order_id = request.GET["order_id"]
+        order_object = Verify.get_order(order_id)
+        campaign_obj = order_object.campaign
+
+        # sandbox mode
         paypalrestsdk.configure({
             "mode": settings.PAYPAL_CONFIG["mode"],
             "client_id": settings.PAYPAL_CONFIG["client_id"],
             "client_secret": settings.PAYPAL_CONFIG["client_secret"]
         })
+        # live mode
+        # paypalrestsdk.configure({
+        #     "mode": "live",
+        #     "client_id": campaign_obj.meta_payment["sg"]["paypal"]["paypal_clientId"],
+        #     "client_secret": campaign_obj.meta_payment["sg"]["paypal"]["paypal_secret"]
+        # })
 
-        paymentId = request.GET["paymentId"]
-        payer_id = request.GET["PayerID"]
-        order_id = request.GET["order_id"]
         payment = paypalrestsdk.Payment.find(paymentId)
         if payment.execute({"payer_id": payer_id}):
             print("Payment execute successfully")
-            order_object = Verify.get_order(order_id)
             order_object.status = "complete"
             order_object.save()
-            # return Response({
-            #     "status": 202,
-            #     "message": "Payment execute successfully"
-            # })
             return HttpResponseRedirect(f"http://localhost:8000/buyer/order/{order_object.id}/confirmation")
         else:
             print(payment.error)  # Error Hash
