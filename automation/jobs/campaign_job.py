@@ -27,10 +27,6 @@ def campaign_job(campaign_id):
         print(f"campaign_id: {campaign_id}\n")
         campaign = db.api_campaign.find_one({"id": campaign_id})
 
-        if not campaign['meta'].get('allow_checkout', 1):
-            print('not allow checkout')
-            return 
-
         try:
             if campaign['facebook_page_id']:
                 facebook_page = db.api_facebook_page.find_one(
