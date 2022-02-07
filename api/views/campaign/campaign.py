@@ -62,6 +62,16 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @action(detail=True, methods=['GET'], url_path=r'retrieve_campaign_buyer')
+    @api_error_handler
+    def retrieve_campaign_buyer(self, request, pk=None):
+        campaign_data = db.api_campaign.find_one({'id': int(pk)})
+        campaign_data.pop('_id', None)
+        print (campaign_data)
+        # serializer = Campaign.objects.get(id=pk)
+
+        return Response(campaign_data, status=status.HTTP_200_OK)
+
     @action(detail=False, methods=['GET'], url_path=r'list_campaign')
     @api_error_handler
     def list_campaign(self, request):
