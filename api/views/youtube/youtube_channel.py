@@ -41,7 +41,7 @@ class YoutubeViewSet(viewsets.GenericViewSet):
 
         # comments = db.api_campaign_comment.find({"campaign_id":int(campaign_id),"platform":"youtube"},{'_id': False}).limit(count)
 
-        comments = db.api_campaign_comment.find({"campaign_id":int(campaign_id),"platform":"youtube", "created_time":{"$gt":int(since_timestamp)}},{'_id': False}).limit(count)
+        comments = db.api_campaign_comment.find({"campaign_id":int(campaign_id),"platform":"youtube", "created_time":{"$gt":int(float(since_timestamp))}},{'_id': False}).limit(count)
 
         comments_str = dumps(comments)
         comments_json = loads(comments_str)
