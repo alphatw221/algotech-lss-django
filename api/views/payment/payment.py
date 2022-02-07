@@ -441,96 +441,93 @@ class PaymentViewSet(viewsets.GenericViewSet):
 
 
     @action(detail=False, methods=['PUT'], url_path=r'buyser_receipt_upload', parser_classes=(MultiPartParser,))
+    @api_error_handler
     def buyser_receipt_upload(self, request):
-        try:
-            meta_data = {
-                "last_five_digit": {},
-                "receipt_image": {}
-            }
-            image = request.data["image"]
-            print(f"image: {image}")
-            # if not image:
-            #     raise ApiVerifyError("no image found")
-            order_id = request.data["order_id"]
-            last_five_digit = request.data["last_five_digit"]
-            print(f"order_id: {order_id}")
-            print(f"last_five_digit: {last_five_digit}")
-            if not Order.objects.filter(id=order_id).exists():
-                raise ApiVerifyError("no order found")
+        meta_data = {
+            "last_five_digit": {},
+            "receipt_image": {}
+        }
+        image = request.data["image"]
+        print(f"image: {image}")
+        # if not image:
+        #     raise ApiVerifyError("no image found")
+        order_id = request.data["order_id"]
+        last_five_digit = request.data["last_five_digit"]
+        print(f"order_id: {order_id}")
+        print(f"last_five_digit: {last_five_digit}")
+        if not Order.objects.filter(id=order_id).exists():
+            raise ApiVerifyError("no order found")
 
-            order = Order.objects.get(id=order_id)
-            api_user = Order.objects.get(id=order_id).campaign.created_by
-            print(api_user)
-            platform_name = order.platform
-            print(f"platform_name: {platform_name}")
-            platform_id = order.platform_id
-            print(f"platform_id: {platform_id}")
-            # _, user_subscription = verify_request(
-            #     api_user, platform_name, platform_id)
+        order = Order.objects.get(id=order_id)
+        api_user = Order.objects.get(id=order_id).campaign.created_by
+        print(api_user)
+        platform_name = order.platform
+        print(f"platform_name: {platform_name}")
+        platform_id = order.platform_id
+        print(f"platform_id: {platform_id}")
+        # _, user_subscription = verify_request(
+        #     api_user, platform_name, platform_id)
 
-            if image != "undefined":
-                image_path = default_storage.save(
-                    f'campaign/{order.campaign.id}/order/{order.id}/receipt/{image.name}', ContentFile(image.read()))
-                image_path = settings.GS_URL + image_path
-                meta_data["receipt_image"] = image_path
-            if last_five_digit != "":
-                meta_data["last_five_digit"] = last_five_digit
-            order.meta = meta_data
-            order.status = "complete"
-            order.save()
+        order_data = db.api_order.find_one({'id': int(order_id)})
+        campaign_id = order_data['campaign_id']
+        order_data = db.api_order.find_one({'id': int(order_id)})
+        facebook_page_id = db.api_campaign.find_one({'id': int(campaign_id)})['facebook_page_id']
+        campaign_title = db.api_campaign.find_one({'id': int(campaign_id)})['title']
+        meta_logistic = db.api_campaign.find_one({'id': int(campaign_id)})['meta_logistic']
+        store_name = db.api_facebook_page.find_one({'id': int(facebook_page_id)})['name']
+        meta = order_data['meta']
+        products = order_data['products']
+        order_email = order_data['shipping_email']
 
-            order_data = db.api_order.find_one({'id': int(order_id)})
-            campaign_id = order_data['campaign_id']
-            order_data = db.api_order.find_one({'id': int(order_id)})
-            facebook_page_id = db.api_campaign.find_one({'id': int(campaign_id)})['facebook_page_id']
-            campaign_title = db.api_campaign.find_one({'id': int(campaign_id)})['title']
-            meta_logistic = db.api_campaign.find_one({'id': int(campaign_id)})['meta_logistic']
-            store_name = db.api_facebook_page.find_one({'id': int(facebook_page_id)})['name']
-            meta = order_data['meta']
-            products = order_data['products']
-            order_email = order_data['shipping_email']
+        mail_subject = '[LSS] '+ store_name + ' order confirmation'
+        mail_content = 'Order # ' + str(order_id) + '\n\n'
+        mail_content+= campaign_title + '\n--------------------------------------------\n'
+        mail_content+= 'FB Name: ' + order_data['customer_name'] + '\n\n'
+        mail_content+= 'Delivery To: \n'
+        mail_content+= order_data['shipping_first_name'] + ' ' + order_data['shipping_last_name'] + '\n\n'
+        mail_content+= order_data['shipping_phone'] + '\n\n'
 
-            mail_subject = '[LSS] '+ store_name + ' order confirmation'
-            mail_content = 'Order # ' + str(order_id) + '\n\n'
-            mail_content+= campaign_title + '\n--------------------------------------------\n'
-            mail_content+= 'FB Name: ' + order_data['customer_name'] + '\n\n'
-            mail_content+= 'Delivery To: \n' 
-            mail_content+= order_data['shipping_first_name'] + ' ' + order_data['shipping_last_name'] + '\n\n'
-            mail_content+= order_data['shipping_phone'] + '\n\n'
-            
-            if order_data['shipping_method'] == 'in_store':
-                mail_content+= 'Shipping way: ' + order_data['shipping_method'] + '\n'
-                mail_content+= 'Pick up store: ' + meta['pick_up_store'] + ', ' + meta['pick_up_store_address'] + '\n'
-                mail_content+= 'Pick up date: ' + meta['pick_up_date'] + '\n'
-            else:
-                mail_content+= 'Shipping way: ' + order_data['shipping_method'] + '\n'
-                mail_content+= 'Shipping address: ' + order_data['shipping_address_1'] + ', ' + order_data['shipping_location'] + ', ' + order_data['shipping_region'] + '\n'
-                mail_content+= 'Shipping date: ' + order_data['shipping_date'].strftime('%m/%d/%Y') + '\n'
-            
-            mail_content+= '\n--------- Summary -----------\n'
-            mail_content+= 'Price  Qty  Total    Item\n'
-            mail_content+= '-----------------------------\n'
-            for key, val in products.items():
-                mail_content+= '$' + str(products[key]['price']) + '  ' + str(products[key]['qty']).zfill(3) + '  $' + str(products[key]['subtotal']) + '    ' + products[key]['name'] + '\n'
-            
-            mail_content+= '\nDelivery Charge: ' 
-            if order_data['free_delivery'] == False or order_data['shipping_method'] != 'in_store':
-                mail_content+= '$' +  str("%.2f" % float(meta_logistic['delivery_charge'])) + '\n\n'
-            else:
-                mail_content+= '$0\n\n'
-            mail_content+= 'Total          : $' + str("%.2f" % float(order_data['total']))
-            email_list = []
-            email_list.append(order_email)
-            email_list.append(mail_subject)
-            email_list.append(mail_content)
+        if order_data['shipping_method'] == 'in_store':
+            mail_content+= 'Shipping way: ' + order_data['shipping_method'] + '\n'
+            mail_content+= 'Pick up store: ' + meta['pick_up_store'] + ', ' + meta['pick_up_store_address'] + '\n'
+            mail_content+= 'Pick up date: ' + meta['pick_up_date'] + '\n'
+        else:
+            mail_content+= 'Shipping way: ' + order_data['shipping_method'] + '\n'
+            mail_content+= 'Shipping address: ' + order_data['shipping_address_1'] + ', ' + order_data['shipping_location'] + ', ' + order_data['shipping_region'] + '\n'
+            mail_content+= 'Shipping date: ' + order_data['shipping_date'].strftime('%m/%d/%Y') + '\n'
 
-            send_Email(email_list)
+        mail_content+= '\n--------- Summary -----------\n'
+        mail_content+= 'Price  Qty  Total    Item\n'
+        mail_content+= '-----------------------------\n'
+        for key, val in products.items():
+            mail_content+= '$' + str(products[key]['price']) + '  ' + str(products[key]['qty']).zfill(3) + '  $' + str(products[key]['subtotal']) + '    ' + products[key]['name'] + '\n'
 
-            print(meta_data)
-            return Response({"message": "upload succeed"}, status=status.HTTP_200_OK)
-        except Exception as e:
-            print(e)
-            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        mail_content+= '\nDelivery Charge: '
+        if order_data['free_delivery'] == False or order_data['shipping_method'] != 'in_store':
+            mail_content+= '$' +  str("%.2f" % float(meta_logistic['delivery_charge'])) + '\n\n'
+        else:
+            mail_content+= '$0\n\n'
+        mail_content+= 'Total          : $' + str("%.2f" % float(order_data['total']))
+        email_list = []
+        email_list.append(order_email)
+        email_list.append(mail_subject)
+        email_list.append(mail_content)
+
+        send_Email(email_list)
+
+        if image != "undefined":
+            image_path = default_storage.save(
+                f'campaign/{order.campaign.id}/order/{order.id}/receipt/{image.name}', ContentFile(image.read()))
+            image_path = settings.GS_URL + image_path
+            meta_data["receipt_image"] = image_path
+        if last_five_digit != "":
+            meta_data["last_five_digit"] = last_five_digit
+        order.meta = meta_data
+        order.status = "complete"
+        order.save()
+
+        print(meta_data)
+        return Response({"message": "upload succeed"}, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET'], url_path=r'get_direct_payment_info')
     @api_error_handler
