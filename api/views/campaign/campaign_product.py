@@ -213,6 +213,7 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
 
         # campaign_product.delete()
 
+        return Response({"message": "campaign product deletion not support"}, status=status.HTTP_400_BAD_REQUEST)
         return Response({"message": "delete success"}, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['POST'], url_path=r'fast_create', parser_classes=(MultiPartParser,))
