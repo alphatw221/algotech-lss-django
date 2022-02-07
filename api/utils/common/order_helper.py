@@ -170,7 +170,7 @@ class PreOrderHelper():
                                 "products": products
                             },
                             "$inc": {
-                                "subtotal": -api_order_product['qty']*api_campaign_product['price'],
+                                "subtotal": -api_order_product['qty']*api_order_product['price'],
                             }
                         },
                         session=session)
@@ -187,6 +187,7 @@ class PreOrderHelper():
                     api_pre_order = db.api_pre_order.find_one(
                         {"id": pre_order.id}, session=session)
 
+                    # cls._check_allow_checkout(api_user, pre_order.campaign)
                     cls._check_lock(api_user, api_pre_order)
                     cls._check_empty(api_pre_order)
 
@@ -463,7 +464,7 @@ class PreOrderHelper():
                             "products": products
                         },
                         "$inc": {
-                            "subtotal": -api_order_product['qty']*api_campaign_product['price'],
+                            "subtotal": -api_order_product['qty']*api_order_product['price'],
                         }
                     },
                     session=session)
