@@ -113,7 +113,7 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
                     for winner in response['winner_list']:
                         json = {}
                         prize_name = db.api_campaign_product.find_one({'id': winner_info['prize_campaign_product_id']})['name']
-                        print (winner)
+                        # print (winner)
 
                         json['name'] = winner['customer_name']
                         try:
@@ -123,7 +123,7 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
                         json['prize_name'] = prize_name
                         json['datetime'] = winner_info['created_at']
                         winner_list.append(json)
-                    print (winner_info['id'])
+                    # print (winner_info['id'])
             winner_json['winner_list'] = winner_list
 
         return Response(winner_json, status=status.HTTP_200_OK)

@@ -268,6 +268,9 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         # OPERATION_CODE_NAME: AGILE
         # if request.user.id in settings.ADMIN_LIST:
         pre_order=PreOrder.objects.get(id=pk)
+        # pre_meta = pre_order.meta
+        # pre_meta.update(request.data['meta'])
+        # request.data['meta'] = pre_meta
         serializer = PreOrderSerializerUpdatePaymentShipping(pre_order, data=request.data, partial=True)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -59,15 +59,18 @@ def mail_format(order_id):
     mail_content+= order_data['shipping_first_name'] + ' ' + order_data['shipping_last_name'] + '\n\n'
     mail_content+= order_data['shipping_phone'] + '\n\n'
     
-    if order_data['shipping_method'] == 'in_store':
-        mail_content+= 'Shipping way: ' + order_data['shipping_method'] + '\n'
-        mail_content+= 'Pick up store: ' + meta['pick_up_store'] + ', ' + meta['pick_up_store_address'] + '\n'
-        mail_content+= 'Pick up date: ' + meta['pick_up_date'] + '\n'
-    else:
-        mail_content+= 'Shipping way: ' + order_data['shipping_method'] + '\n'
-        mail_content+= 'Shipping address: ' + order_data['shipping_address_1'] + ', ' + order_data['shipping_location'] + ', ' + order_data['shipping_region'] + '\n'
-        mail_content+= 'Shipping date: ' + order_data['shipping_date'].strftime('%m/%d/%Y') + '\n'
-    
+    try:
+        if order_data['shipping_method'] == 'in_store':
+            mail_content+= 'Shipping way: ' + order_data['shipping_method'] + '\n'
+            mail_content+= 'Pick up store: ' + meta['pick_up_store'] + ', ' + meta['pick_up_store_address'] + '\n'
+            mail_content+= 'Pick up date: ' + meta['pick_up_date'] + '\n'
+        else:
+            mail_content+= 'Shipping way: ' + order_data['shipping_method'] + '\n'
+            mail_content+= 'Shipping address: ' + order_data['shipping_address_1'] + ', ' + order_data['shipping_location'] + ', ' + order_data['shipping_region'] + '\n'
+            mail_content+= 'Shipping date: ' + order_data['shipping_date'].strftime('%m/%d/%Y') + '\n'
+    except:
+        pass
+
     mail_content+= '\n--------- Summary -----------\n'
     mail_content+= 'Price  Qty  Total    Item\n'
     mail_content+= '-----------------------------\n'
@@ -418,7 +421,8 @@ class PaymentViewSet(viewsets.GenericViewSet):
                             params=params).post()
         if code != 201:
             raise Exception('hitpay got wrong')
-        db.api_order.update_one({'id': int(order_id)}, {'$set': {'meta': {'payment_id': ret['id']}}}) 
+        #TODO record payment not replace    
+        # db.api_order.update_one({'id': int(order_id)}, {'$set': {'meta': {'payment_id': ret['id']}}}) 
 
         return Response(ret['url'])
 
@@ -445,7 +449,6 @@ class PaymentViewSet(viewsets.GenericViewSet):
             { 'id': int(reference_number) },
             { '$set': {'status': 'complete', 'checkout_details': hitpay_dict} }
         )
-
         mail_format(reference_number)    
         return Response('hitpay succed')
 
@@ -478,7 +481,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         # _, user_subscription = verify_request(
         #     api_user, platform_name, platform_id)
 
-        # mail_format(order_id)
+        mail_format(order_id)
         if image != "undefined":
             image_path = default_storage.save(
                 f'campaign/{order.campaign.id}/order/{order.id}/receipt/{image.name}', ContentFile(image.read()))

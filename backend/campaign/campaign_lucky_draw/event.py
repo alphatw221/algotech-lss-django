@@ -63,7 +63,8 @@ class DrawFromProductsEvent(CampaignLuckyDrawEvent):
         #     ('order_code', 'cart'),
         #     ('valid',)
         # )
-        cart_products = db.api_order.find({'campaign_id': self.campaign.id})
+        order_datas = db.api_order.find({'campaign_id': self.campaign.id})
+        pre_order_datas = db.api_pre_order.find({'campaign_id': self.campaign.id})
 
         winner_set = set()
         if self.unrepeat == 'True':
@@ -74,12 +75,19 @@ class DrawFromProductsEvent(CampaignLuckyDrawEvent):
             page_id = db.api_facebook_page.find_one({'id': self.campaign.facebook_page_id})['page_id']
 
         candidate_set = set()
-        for cart_product in cart_products:
-            if cart_product['customer_id'] == page_id:
+        for order_data in order_datas:
+            if order_data['customer_id'] == page_id:
                 continue
             else:
                 candidate_set.add(
-                    (cart_product['platform'], cart_product['customer_id'], cart_product['customer_name'])
+                    (order_data['platform'], order_data['customer_id'], order_data['customer_name'])
+                )
+        for order_data in pre_order_datas:
+            if order_data['customer_id'] == page_id:
+                continue
+            else:
+                candidate_set.add(
+                    (order_data['platform'], order_data['customer_id'], order_data['customer_name'])
                 )
         if self.unrepeat == 'True':
             candidate_set = get_final_set(candidate_set, winner_set, self.winner_num)
@@ -156,7 +164,8 @@ class DrawFromCampaignCommentsEvent(ABC):
         campaign_comments = orm_campaign_comment.get_keyword_campaign_comments(
             self.campaign, self.keyword,
         )
-
+        # campaign_comments = db.api_campaign_comment.find({'campaign_id': self.campaign.id, 'message': {'$regex': '.*[' + self.keyword + '].*'}})
+        
         winner_set = set()
         if self.unrepeat == 'True':
             winner_set = get_winner_set(self.campaign.id)
@@ -167,12 +176,16 @@ class DrawFromCampaignCommentsEvent(ABC):
 
         candidate_set = set()
         for campaign_comment in campaign_comments:
+            print ('campaign_comment')
+            print (campaign_comment)
             if (campaign_comment['customer_id'] == page_id):
                 continue
             else:
                 candidate_set.add(
                     (campaign_comment['platform'], campaign_comment['customer_id'], campaign_comment['customer_name'])
                 )
+        print ('candidate_set')
+        print (candidate_set)
         
         if self.unrepeat == 'True':
             candidate_set = get_final_set(candidate_set, winner_set, self.winner_num)
