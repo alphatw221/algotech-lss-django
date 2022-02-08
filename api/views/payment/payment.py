@@ -454,8 +454,8 @@ class PaymentViewSet(viewsets.GenericViewSet):
     @api_error_handler
     def buyser_receipt_upload(self, request):
         meta_data = {
-            "last_five_digit": {},
-            "receipt_image": {}
+            "last_five_digit": "",
+            "receipt_image": ""
         }
         image = request.data["image"]
         print(f"image: {image}")
@@ -479,20 +479,18 @@ class PaymentViewSet(viewsets.GenericViewSet):
         #     api_user, platform_name, platform_id)
 
         # mail_format(order_id)
-        
-
         if image != "undefined":
             image_path = default_storage.save(
                 f'campaign/{order.campaign.id}/order/{order.id}/receipt/{image.name}', ContentFile(image.read()))
             image_path = settings.GS_URL + image_path
             meta_data["receipt_image"] = image_path
-        if last_five_digit != "":
+        if last_five_digit:
             meta_data["last_five_digit"] = last_five_digit
         order.meta = meta_data
+        order.payment_method = "Direct Payment"
         order.status = "complete"
         order.save()
 
-        print(meta_data)
         return Response({"message": "upload succeed"}, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET'], url_path=r'get_direct_payment_info')

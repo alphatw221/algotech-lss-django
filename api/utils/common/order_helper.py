@@ -187,7 +187,7 @@ class PreOrderHelper():
                     api_pre_order = db.api_pre_order.find_one(
                         {"id": pre_order.id}, session=session)
 
-                    # cls._check_allow_checkout(api_user, pre_order.campaign)
+                    cls._check_allow_checkout(api_user, pre_order.campaign)
                     cls._check_lock(api_user, api_pre_order)
                     cls._check_empty(api_pre_order)
 
