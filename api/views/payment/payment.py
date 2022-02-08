@@ -400,6 +400,8 @@ class PaymentViewSet(viewsets.GenericViewSet):
         name = user_data['name']
         email = user_data['email']
         order_data = db.api_order.find_one({'id': int(order_id)})
+        if not order_data:
+            raise ApiVerifyError('no order found')
         currency = 'SGD' if not order_data['currency'] else order_data['currency']
         amount = order_data['total']
 
@@ -449,6 +451,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             { 'id': int(reference_number) },
             { '$set': {'status': 'complete', 'checkout_details': hitpay_dict} }
         )
+        print ('opopoppopopopopoopopop')
         mail_format(reference_number)    
         return Response('hitpay succed')
 
