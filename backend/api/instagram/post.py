@@ -1,4 +1,4 @@
-from backend.api.facebook._fb_api_caller import FacebookApiCaller
+from backend.api.facebook._fb_api_caller import FacebookApiCaller, FacebookApiV12Caller
 
 
 def get_ig_post_id_list(token: str, bussiness_id: str):
@@ -24,11 +24,12 @@ def api_ig_get_post_comments(page_token: str, post_id: str):
     ret = FacebookApiCaller(f'{post_id}/comments', bearer_token=page_token).get()
     return ret
 
-def api_ig_get_after_post_comments(page_token: str, post_id: str, page_after: str):
+def api_ig_get_after_post_comments(page_token: str, post_id: str, after_page: str):
     params = {
-        'limit': 25, 'after': page_after,
+        'limit': 25, 'after': after_page,
+        'pretty': 0
     }
-    ret = FacebookApiCaller(f'{post_id}/comments', bearer_token=page_token).get()
+    ret = FacebookApiV12Caller(f'{post_id}/comments', bearer_token=page_token, params=params).get()
     return ret
 
 def api_ig_post_page_message_on_comment(page_token: str, comment_id: str, message: dict):
