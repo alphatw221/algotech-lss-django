@@ -33,7 +33,7 @@ def campaign_job(campaign_id):
                 capture_facebook(campaign, facebook_page)
         except Exception:
             pass
-
+        print("-------------------------------------------------------------------------")
         try:
             if campaign['youtube_channel_id']:
                 youtube_channel = db.api_youtube_channel.find_one(
@@ -42,7 +42,7 @@ def campaign_job(campaign_id):
         except Exception as e:
             print(f"youtube error: {e}")
             pass
-
+        print("-------------------------------------------------------------------------")
         try:
             if campaign['instagram_profile_id']:
                 instagram_post = db.api_instagram_profile.find_one(
@@ -53,7 +53,7 @@ def campaign_job(campaign_id):
         except Exception as e:
             print(e)
             pass
-
+        print("-------------------------------------------------------------------------")
     except Exception:
         pass
 
@@ -92,13 +92,16 @@ def capture_facebook(campaign, facebook_page):
     comments = data.get('data', [])
 
     print(f"number of comments: {len(comments)}")
-    if len(comments) == 1 and comments[0]['created_time'] == since:
+    if comments and int(comments[-1]['created_time']) == since:
+        print(f"since")
+        print()
         return
 
     try:
         for comment in comments:
             print(comment['message'])
             if comment['from']['id'] == facebook_page['page_id']:
+                comment_capture_since = comment['created_time']
                 continue
             uni_format_comment = {
                 'platform': 'facebook',
@@ -135,7 +138,9 @@ def capture_youtube(campaign, youtube_channel):
             return
         code, data = api_youtube_get_video_info(live_video_id)
         if code // 100 != 2:
+
             print("video info error")
+            print(data)
             return
         items = data.get("items")
         if not items:
@@ -301,7 +306,7 @@ def capture_instagram(campaign, instagram_post):
                         "image": img_url}
                     db.api_campaign_comment.insert_one(uni_format_comment)
                     comment_queue.enqueue(comment_job, args=(campaign, 'instagram', instagram_post,
-                                                     uni_format_comment, order_codes_mapping), result_ttl=10, failure_ttl=10)
+                                                             uni_format_comment, order_codes_mapping), result_ttl=10, failure_ttl=10)
                 else:
                     continue
 

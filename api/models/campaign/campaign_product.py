@@ -24,7 +24,7 @@ class CampaignProduct(models.Model):
     ]
 
     campaign = models.ForeignKey(
-        Campaign, on_delete=models.SET_NULL, related_name='products')
+        Campaign, null=True, on_delete=models.SET_NULL, related_name='products')
 
     created_by = models.ForeignKey(
         User, null=True, on_delete=models.SET_NULL, related_name='campaign_products')
