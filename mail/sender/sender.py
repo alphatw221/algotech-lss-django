@@ -59,4 +59,6 @@ def send_Email(mail_list):
         time.sleep(0.5)
 
     except Exception:
-        raise ApiVerifyError('email address wrong format')
+        #TODO writing error in order meta 
+        pass
+        # raise ApiVerifyError('email address wrong format')

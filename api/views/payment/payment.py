@@ -59,15 +59,18 @@ def mail_format(order_id):
     mail_content+= order_data['shipping_first_name'] + ' ' + order_data['shipping_last_name'] + '\n\n'
     mail_content+= order_data['shipping_phone'] + '\n\n'
     
-    if order_data['shipping_method'] == 'in_store':
-        mail_content+= 'Shipping way: ' + order_data['shipping_method'] + '\n'
-        mail_content+= 'Pick up store: ' + meta['pick_up_store'] + ', ' + meta['pick_up_store_address'] + '\n'
-        mail_content+= 'Pick up date: ' + meta['pick_up_date'] + '\n'
-    else:
-        mail_content+= 'Shipping way: ' + order_data['shipping_method'] + '\n'
-        mail_content+= 'Shipping address: ' + order_data['shipping_address_1'] + ', ' + order_data['shipping_location'] + ', ' + order_data['shipping_region'] + '\n'
-        mail_content+= 'Shipping date: ' + order_data['shipping_date'].strftime('%m/%d/%Y') + '\n'
-    
+    try:
+        if order_data['shipping_method'] == 'in_store':
+            mail_content+= 'Shipping way: ' + order_data['shipping_method'] + '\n'
+            mail_content+= 'Pick up store: ' + meta['pick_up_store'] + ', ' + meta['pick_up_store_address'] + '\n'
+            mail_content+= 'Pick up date: ' + meta['pick_up_date'] + '\n'
+        else:
+            mail_content+= 'Shipping way: ' + order_data['shipping_method'] + '\n'
+            mail_content+= 'Shipping address: ' + order_data['shipping_address_1'] + ', ' + order_data['shipping_location'] + ', ' + order_data['shipping_region'] + '\n'
+            mail_content+= 'Shipping date: ' + order_data['shipping_date'].strftime('%m/%d/%Y') + '\n'
+    except:
+        pass
+
     mail_content+= '\n--------- Summary -----------\n'
     mail_content+= 'Price  Qty  Total    Item\n'
     mail_content+= '-----------------------------\n'
@@ -397,6 +400,8 @@ class PaymentViewSet(viewsets.GenericViewSet):
         name = user_data['name']
         email = user_data['email']
         order_data = db.api_order.find_one({'id': int(order_id)})
+        if not order_data:
+            raise ApiVerifyError('no order found')
         currency = 'SGD' if not order_data['currency'] else order_data['currency']
         amount = order_data['total']
 
@@ -418,7 +423,8 @@ class PaymentViewSet(viewsets.GenericViewSet):
                             params=params).post()
         if code != 201:
             raise Exception('hitpay got wrong')
-        db.api_order.update_one({'id': int(order_id)}, {'$set': {'meta': {'payment_id': ret['id']}}}) 
+        #TODO record payment not replace    
+        # db.api_order.update_one({'id': int(order_id)}, {'$set': {'meta': {'payment_id': ret['id']}}}) 
 
         return Response(ret['url'])
 
@@ -445,7 +451,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             { 'id': int(reference_number) },
             { '$set': {'status': 'complete', 'checkout_details': hitpay_dict} }
         )
-
+        print ('opopoppopopopopoopopop')
         mail_format(reference_number)    
         return Response('hitpay succed')
 
@@ -454,8 +460,8 @@ class PaymentViewSet(viewsets.GenericViewSet):
     @api_error_handler
     def buyser_receipt_upload(self, request):
         meta_data = {
-            "last_five_digit": {},
-            "receipt_image": {}
+            "last_five_digit": "",
+            "receipt_image": ""
         }
         image = request.data["image"]
         print(f"image: {image}")
@@ -478,21 +484,19 @@ class PaymentViewSet(viewsets.GenericViewSet):
         # _, user_subscription = verify_request(
         #     api_user, platform_name, platform_id)
 
-        # mail_format(order_id)
-        
-
+        mail_format(order_id)
         if image != "undefined":
             image_path = default_storage.save(
                 f'campaign/{order.campaign.id}/order/{order.id}/receipt/{image.name}', ContentFile(image.read()))
             image_path = settings.GS_URL + image_path
             meta_data["receipt_image"] = image_path
-        if last_five_digit != "":
+        if last_five_digit:
             meta_data["last_five_digit"] = last_five_digit
         order.meta = meta_data
+        order.payment_method = "Direct Payment"
         order.status = "complete"
         order.save()
 
-        print(meta_data)
         return Response({"message": "upload succeed"}, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET'], url_path=r'get_direct_payment_info')
