@@ -20,6 +20,8 @@ from datetime import datetime
 from django.db.models import Q
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 
+from api.utils.common.common import getdata, getparams
+
 def verify_request(api_user, platform_name, platform_id, campaign_id, campaign_product_id=None, is_fast=None):
     Verify.verify_user(api_user)
     platform = Verify.get_platform(api_user, platform_name, platform_id)
@@ -166,15 +168,16 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['PUT'], url_path=r'update_campaign_product')
     @api_error_handler
     def update_campaign_product(self, request, pk=None):
-        platform_id = request.query_params.get('platform_id')
-        platform_name = request.query_params.get('platform_name')
-        campaign_id = request.query_params.get('campaign_id')
-        api_user = request.user.api_users.get(type='user')
 
-        platform, campaign, campaign_product = verify_request(
-            api_user, platform_name, platform_id, campaign_id, campaign_product_id=pk)
 
-        if datetime.now()>campaign.start_at:
+        api_user, platform_id, platform_name, campaign_id = getparams(request, ("platform_id","platform_name","campaign_id"), with_user=True, seller=True)
+        
+        platform = Verify.get_platform(api_user, platform_name, platform_id)
+        campaign = Verify.get_campaign_from_platform(platform, campaign_id)
+        campaign_product = Verify.get_campaign_product_from_campaign(campaign, pk)
+
+       
+        if campaign.start_at and datetime.timestamp(datetime.now())>datetime.timestamp(campaign.start_at):
             raise ApiVerifyError('campaign product not editable after starting campaign')
 
         serializer = CampaignProductSerializerUpdate(
@@ -191,16 +194,15 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
     @api_error_handler
     def delete_campaign_product(self, request, pk=None):
 
-
         api_user, platform_id, platform_name, campaign_id = getparams(request,("platform_id", "platform_name", "campaign_id"), with_user=True, seller=True)
 
         platform = Verify.get_platform(api_user, platform_name, platform_id)
         campaign = Verify.get_campaign_from_platform(platform, campaign_id)
         campaign_product = Verify.get_campaign_product_from_campaign(campaign, pk)
 
-        if datetime.now()>campaign.start_at:
+        if campaign.start_at and datetime.timestamp(datetime.now())>datetime.timestamp(campaign.start_at):
             raise ApiVerifyError('campaign product not deletable after starting campaign')
-
+        
         #soft delete:
         campaign_product.campaign = None
         campaign_product.save()
