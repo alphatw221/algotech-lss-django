@@ -92,12 +92,11 @@ def capture_facebook(campaign, facebook_page):
     comment_capture_since = since
     comments = data.get('data', [])
 
-    print(f"number of comments: {len(comments)}")
     if comments and int(comments[-1]['created_time']) == since:
-        print(f"since")
-        print()
+        print(f"number of comments: {0}")
         return
 
+    print(f"number of comments: {len(comments)}")
     try:
         for comment in comments:
             print(comment['message'])
@@ -270,7 +269,7 @@ def capture_instagram(campaign, instagram_post):
 
     comments = data.get('data', [])
     page_after = data['paging']['cursors']['after']
-    print (f"number of comments: {len(comments)}")
+    print(f"number of comments: {len(comments)}")
     is_failed, latest_comment_time = False, ''
     try:
         created_at = ''
