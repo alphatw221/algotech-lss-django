@@ -16,6 +16,7 @@ from api.utils.common.verify import Verify
 from api.utils.common.verify import ApiVerifyError
 from api.utils.common.common import *
 
+from datetime import datetime
 from django.db.models import Q
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 
@@ -170,8 +171,11 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
         campaign_id = request.query_params.get('campaign_id')
         api_user = request.user.api_users.get(type='user')
 
-        _, _, campaign_product = verify_request(
+        platform, campaign, campaign_product = verify_request(
             api_user, platform_name, platform_id, campaign_id, campaign_product_id=pk)
+
+        if datetime.now()>campaign.start_at:
+            raise ApiVerifyError('campaign product not editable after starting campaign')
 
         serializer = CampaignProductSerializerUpdate(
             campaign_product, data=request.data, partial=True)
@@ -194,6 +198,8 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
         campaign = Verify.get_campaign_from_platform(platform, campaign_id)
         campaign_product = Verify.get_campaign_product_from_campaign(campaign, pk)
 
+        if datetime.now()>campaign.start_at:
+            raise ApiVerifyError('campaign product not deletable after starting campaign')
 
         #soft delete:
         campaign_product.campaign = None
@@ -213,7 +219,6 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
 
         # campaign_product.delete()
 
-        return Response({"message": "campaign product deletion not support"}, status=status.HTTP_400_BAD_REQUEST)
         return Response({"message": "delete success"}, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['POST'], url_path=r'fast_create', parser_classes=(MultiPartParser,))
