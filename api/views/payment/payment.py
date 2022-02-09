@@ -1,7 +1,5 @@
-import json
-
 from rest_framework import views, viewsets, status
-import paypalrestsdk
+import paypalrestsdk, json
 from django.core.files.base import ContentFile
 from django.http import HttpResponseRedirect
 from rest_framework.decorators import action, api_view, permission_classes
@@ -14,7 +12,6 @@ from django.conf import settings
 from django.core.files.storage import default_storage
 from rest_framework.parsers import MultiPartParser, FormParser, FileUploadParser
 
-
 from api.utils.common.common import getdata, getparams
 from api.models.order.order import Order
 from api.models.user import user
@@ -22,6 +19,9 @@ from api.models.user.user_subscription import UserSubscription
 from api.models.facebook.facebook_page import FacebookPage
 from api.models.youtube.youtube_channel import YoutubeChannel
 from api.models.instagram.instagram_profile import InstagramProfile
+from django.conf import settings
+from django.core.mail import send_mail as django_send_mail
+import pendulum, time
 
 import datetime
 import hashlib
@@ -38,58 +38,24 @@ from api.utils.error_handle.error.api_error import ApiVerifyError
 106
 
 import hmac, hashlib, base64, binascii
+from backend.i18n.payment_comfirm_mail import i18n_get_mail_content, i18n_get_mail_subject
+from api.utils.error_handle.error_handler.email_error_handle import email_error_handler
 
-
-def mail_format(order_id):
+@email_error_handler
+def send_email(order_id):
     order_data = db.api_order.find_one({'id': int(order_id)})
     campaign_id = order_data['campaign_id']
-    facebook_page_id = db.api_campaign.find_one({'id': int(campaign_id)})['facebook_page_id']
-    campaign_title = db.api_campaign.find_one({'id': int(campaign_id)})['title']
-    meta_logistic = db.api_campaign.find_one({'id': int(campaign_id)})['meta_logistic']
-    store_name = db.api_facebook_page.find_one({'id': int(facebook_page_id)})['name']
-    meta = order_data['meta']
-    products = order_data['products']
-    order_email = order_data['shipping_email']
+    campaign_data = db.api_campaign.find_one({'id': int(campaign_id)})
+    facebook_page_id = campaign_data['facebook_page_id']
+    shop_name = db.api_facebook_page.find_one({'id': int(facebook_page_id)})['name']
+    customer_email = order_data['shipping_email']
 
-    mail_subject = '[LSS] '+ store_name + ' order confirmation'
-    mail_content = 'Order # ' + str(order_id) + '\n\n'
-    mail_content+= campaign_title + '\n--------------------------------------------\n'
-    mail_content+= 'FB Name: ' + order_data['customer_name'] + '\n\n'
-    mail_content+= 'Delivery To: \n' 
-    mail_content+= order_data['shipping_first_name'] + ' ' + order_data['shipping_last_name'] + '\n\n'
-    mail_content+= order_data['shipping_phone'] + '\n\n'
-    
-    try:
-        if order_data['shipping_method'] == 'in_store':
-            mail_content+= 'Shipping way: ' + order_data['shipping_method'] + '\n'
-            mail_content+= 'Pick up store: ' + meta['pick_up_store'] + ', ' + meta['pick_up_store_address'] + '\n'
-            mail_content+= 'Pick up date: ' + meta['pick_up_date'] + '\n'
-        else:
-            mail_content+= 'Shipping way: ' + order_data['shipping_method'] + '\n'
-            mail_content+= 'Shipping address: ' + order_data['shipping_address_1'] + ', ' + order_data['shipping_location'] + ', ' + order_data['shipping_region'] + '\n'
-            mail_content+= 'Shipping date: ' + order_data['shipping_date'].strftime('%m/%d/%Y') + '\n'
-    except:
-        pass
+    mail_subject = i18n_get_mail_subject(shop_name)
+    mail_content = i18n_get_mail_content(order_id, campaign_data, order_data)
 
-    mail_content+= '\n--------- Summary -----------\n'
-    mail_content+= 'Price  Qty  Total    Item\n'
-    mail_content+= '-----------------------------\n'
-    for key, val in products.items():
-        mail_content+= '$' + str(products[key]['price']) + '  ' + str(products[key]['qty']).zfill(3) + '  $' + str(products[key]['subtotal']) + '    ' + products[key]['name'] + '\n'
-    
-    mail_content+= '\nDelivery Charge: ' 
-    if order_data['free_delivery'] == False or order_data['shipping_method'] != 'in_store':
-        mail_content+= '$' +  str("%.2f" % float(meta_logistic['delivery_charge'])) + '\n\n'
-    else:
-        mail_content+= '$0\n\n'
-    mail_content+= 'Total          : $' + str("%.2f" % float(order_data['total']))
-    email_list = []
-    email_list.append(order_email)
-    email_list.append(mail_subject)
-    email_list.append(mail_content)
-
-    send_Email(email_list)
-    return True
+    django_send_mail(mail_subject, mail_content, settings.EMAIL_HOST_USER, [customer_email], fail_silently = False)
+    print(f'{pendulum.now()} - {customer_email} - {"success"}')
+  
 
 platform_dict = {'facebook':FacebookPage, 'youtube':YoutubeChannel, 'instagram':InstagramProfile}
 
@@ -423,7 +389,8 @@ class PaymentViewSet(viewsets.GenericViewSet):
                             params=params).post()
         if code != 201:
             raise Exception('hitpay got wrong')
-        #TODO record payment not replace    
+        #TODO record payment not replace   
+        db.api_order.find_one () 
         # db.api_order.update_one({'id': int(order_id)}, {'$set': {'meta': {'payment_id': ret['id']}}}) 
 
         return Response(ret['url'])
@@ -435,7 +402,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         payment_request_id = data_dict['payment_request_id']
         amount = data_dict['amount']
         status = data_dict['status']
-        reference_number = data_dict['reference_number']
+        order_id = data_dict['reference_number']
         hmac = data_dict['hmac']
         secret_salt = '2MUizyJj429NIoOMmTXedyICmbwS1rt6Wph7cGqzG99IkmCV6nUCQ22lRVCB0Rgu'
 
@@ -443,16 +410,16 @@ class PaymentViewSet(viewsets.GenericViewSet):
         info_dict['payment_id'] = payment_id
         info_dict['payment_request_id'] = payment_request_id
         hitpay_dict['hitpay'] = info_dict
-        total = int(db.api_order.find_one({'id': int(reference_number)})['total'])
+        total = int(db.api_order.find_one({'id': int(order_id)})['total'])
 
         #TODO change to real checking way
         # if status == 'completed' and float(total) == float(amount):
         db.api_order.update_one(
-            { 'id': int(reference_number) },
+            { 'id': int(order_id) },
             { '$set': {'status': 'complete', 'checkout_details': hitpay_dict} }
         )
-        print ('opopoppopopopopoopopop')
-        mail_format(reference_number)    
+
+        send_email(order_id)    
         return Response('hitpay succed')
 
 
@@ -484,7 +451,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         # _, user_subscription = verify_request(
         #     api_user, platform_name, platform_id)
 
-        mail_format(order_id)
+        send_email(order_id)
         if image != "undefined":
             image_path = default_storage.save(
                 f'campaign/{order.campaign.id}/order/{order.id}/receipt/{image.name}', ContentFile(image.read()))
