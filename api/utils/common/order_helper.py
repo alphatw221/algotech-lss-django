@@ -274,10 +274,7 @@ class PreOrderHelper():
 
     @staticmethod
     def _check_allow_checkout(api_user, campaign):
-        if not api_user:
-            return
-            #return
-        if api_user.type=="user":
+        if api_user and api_user.type=="user":
             return
         if not campaign.meta.get('allow_checkout', 1):
             raise PreOrderErrors.PreOrderException('check out not allow')
