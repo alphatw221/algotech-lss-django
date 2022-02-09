@@ -23,7 +23,7 @@ def handleTextMessage(page_id, sender_id, message):
         try:
             campaign_id = Campaign.objects.filter(
                 facebook_page_id = fb_id,
-                ordering_start_at__lt = pendulum.now(),
+                start_at__lt = pendulum.now(),
                 end_at__gt = pendulum.now(),
             ).latest('start_at').id
         except Exception:

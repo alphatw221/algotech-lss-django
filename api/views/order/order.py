@@ -25,8 +25,8 @@ def get_title_map():
             'id': 'id',
             'customer_name': 'Customer Name',
             'platform': 'Platform',
-            'email': 'E-mail',
-            'phone': 'Phone',
+            'shipping_email': 'E-mail',
+            'shipping_phone': 'Phone',
             'first_name': 'First Name',
             'last_name': 'Last Name',
             'gender': 'Gender',
@@ -214,7 +214,7 @@ class OrderViewSet(viewsets.ModelViewSet):
     @api_error_handler
     def seller_order_report(self, request):
         api_user, platform_id, platform_name, campaign_id, column_list = getparams(
-            request, ("platform_id", "platform_name", "campaign_id", "column_list"))
+            request, ("platform_id", "platform_name", "campaign_id", "column_list"), with_user=True, seller=True)
         
         platform, campaign = verify_seller_request(
             api_user, platform_name, platform_id, campaign_id)
@@ -258,6 +258,14 @@ class OrderViewSet(viewsets.ModelViewSet):
             if len(column_title) >= 8:
                     worksheet.set_column(column, column, len(title_map[column_title]) + 2)
             column += 1
+        
+        product_column_dict = {}
+        campaign_products = db.api_campaign_product.find({'campaign_id': int(campaign_id)})
+        for campaign_product in campaign_products:
+            worksheet.write(row, column, campaign_product['name'], header)
+            product_column_dict[str(campaign_product['id'])] = column
+            column += 1
+        
         row += 1
         column = 0
 
@@ -282,6 +290,11 @@ class OrderViewSet(viewsets.ModelViewSet):
                 else:
                     worksheet.write(row, column, col_data)
                 column += 1
+            
+            products = order_data['products']
+            for campaing_product_id_str, product in products.items():
+                worksheet.write(row, product_column_dict[campaing_product_id_str], product['qty'])
+                
             row += 1
             column = 0
         worksheet.write(row , num_col_total, total_count, int_center)
@@ -355,7 +368,6 @@ class OrderViewSet(viewsets.ModelViewSet):
         #     api_user, platform_name, campaign_id)
         platform_name, campaign_id = getparams(
             request, ("platform_name", "campaign_id"), with_user=False, seller=False)
-
         
         # request.data['status'] = 'complete'
         # serializer = OrderSerializerUpdatePaymentShipping(order, data=request.data, partial=True)
@@ -364,53 +376,6 @@ class OrderViewSet(viewsets.ModelViewSet):
         # serializer.save()
 
         db.api_order.update_one({'id': int(pk)}, {'$set': {'status': 'complete'}})
-        print (campaign_id)
-        order_data = db.api_order.find_one({'id': int(pk)})
-        facebook_page_id = db.api_campaign.find_one({'id': int(campaign_id)})['facebook_page_id']
-        campaign_title = db.api_campaign.find_one({'id': int(campaign_id)})['title']
-        meta_logistic = db.api_campaign.find_one({'id': int(campaign_id)})['meta_logistic']
-        store_name = db.api_facebook_page.find_one({'id': int(facebook_page_id)})['name']
-        meta = order_data['meta']
-        products = order_data['products']
-        order_email = order_data['shipping_email']
-
-        mail_subject = '[LSS] '+ store_name + ' order confirmation'
-        mail_content = 'Order # ' + str(pk) + '\n\n'
-        mail_content+= campaign_title + '\n--------------------------------------------\n'
-        mail_content+= 'FB Name: ' + order_data['customer_name'] + '\n\n'
-        mail_content+= 'Delivery To: \n' 
-        mail_content+= order_data['shipping_first_name'] + ' ' + order_data['shipping_last_name'] + '\n\n'
-        mail_content+= order_data['shipping_phone'] + '\n\n'
-        
-        if order_data['shipping_method'] == 'in_store':
-            mail_content+= 'Shipping way: ' + order_data['shipping_method'] + '\n'
-            mail_content+= 'Pick up store: ' + meta['pick_up_store'] + ', ' + meta['pick_up_store_address'] + '\n'
-            mail_content+= 'Pick up date: ' + meta['pick_up_date'] + '\n'
-        else:
-            mail_content+= 'Shipping way: ' + order_data['shipping_method'] + '\n'
-            mail_content+= 'Shipping address: ' + order_data['shipping_address_1'] + ', ' + order_data['shipping_location'] + ', ' + order_data['shipping_region'] + '\n'
-            mail_content+= 'Shipping date: ' + order_data['shipping_date'].strftime('%m/%d/%Y') + '\n'
-           
-        mail_content+= '\n--------- Summary -----------\n'
-        mail_content+= 'Price  Qty  Total    Item\n'
-        mail_content+= '-----------------------------\n'
-        for key, val in products.items():
-            mail_content+= '$' + str(products[key]['price']) + '  ' + str(products[key]['qty']).zfill(3) + '  $' + str(products[key]['subtotal']) + '    ' + products[key]['name'] + '\n'
-        
-        mail_content+= '\nDelivery Charge: ' 
-        if order_data['free_delivery'] == False or order_data['shipping_method'] != 'in_store':
-            mail_content+= '$' +  str("%.2f" % float(meta_logistic['delivery_charge'])) + '\n\n'
-        else:
-            mail_content+= '$0\n\n'
-        mail_content+= 'Total          : $' + str("%.2f" % float(order_data['total']))
-
-        print (mail_content)
-        # email_list = []
-        # email_list.append(order_email)
-        # email_list.append(mail_subject)
-        # email_list.append(mail_content)
-
-        # send_Email(email_list)
 
         # order = verify_buyer_request(
         #     api_user, platform_name, campaign_id, check_info=True)

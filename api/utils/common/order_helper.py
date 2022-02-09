@@ -170,7 +170,7 @@ class PreOrderHelper():
                                 "products": products
                             },
                             "$inc": {
-                                "subtotal": -api_order_product['qty']*api_campaign_product['price'],
+                                "subtotal": -api_order_product['qty']*api_order_product['price'],
                             }
                         },
                         session=session)
@@ -187,9 +187,9 @@ class PreOrderHelper():
                     api_pre_order = db.api_pre_order.find_one(
                         {"id": pre_order.id}, session=session)
 
+                    cls._check_allow_checkout(api_user, pre_order.campaign)
                     cls._check_lock(api_user, api_pre_order)
                     cls._check_empty(api_pre_order)
-                    cls._check_allow_checkout(api_user, pre_order.campaign)
 
                     api_pre_order['total']=api_pre_order['subtotal']+api_pre_order['shipping_cost']+api_pre_order['adjust_price']
 
@@ -274,10 +274,7 @@ class PreOrderHelper():
 
     @staticmethod
     def _check_allow_checkout(api_user, campaign):
-        if not api_user:
-            return
-            #return
-        if api_user.type=="user":
+        if api_user and api_user.type=="user":
             return
         if not campaign.meta.get('allow_checkout', 1):
             raise PreOrderErrors.PreOrderException('check out not allow')
@@ -464,7 +461,7 @@ class PreOrderHelper():
                             "products": products
                         },
                         "$inc": {
-                            "subtotal": -api_order_product['qty']*api_campaign_product['price'],
+                            "subtotal": -api_order_product['qty']*api_order_product['price'],
                         }
                     },
                     session=session)

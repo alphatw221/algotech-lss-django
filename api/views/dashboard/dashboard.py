@@ -201,7 +201,7 @@ class DashboardViewSet(viewsets.ModelViewSet):
             campaign_order_total_uncheck_rate, campaign_order_total_close_rate, campaign_id_list, campaing_sales_total = 0, 0, [], 0
             for campaign_data in campaign_datas:
                 campaign_order_complete_count = db.api_order.find({'campaign_id': campaign_data['id'], 'status': 'complete'}).count()
-                campaign_order_proceed_count = db.api_order.find({'campaign_id': campaign_data['id'], 'status': 'proceed'}).count()
+                campaign_order_proceed_count = db.api_order.find({'campaign_id': campaign_data['id'], 'status': 'review'}).count()
                 campaign_pre_order_count = db.api_pre_order.find({'campaign_id': campaign_data['id']}).count()
                 campaign_id_list.append(campaign_data['id'])
                
@@ -244,7 +244,7 @@ class DashboardViewSet(viewsets.ModelViewSet):
                     order_qty += val['qty']
             pre_order_count = db.api_pre_order.find({'campaign_id': campaign_id}).count()
             order_complete_count = db.api_order.find({'campaign_id': campaign_id, 'status': 'complete'}).count()
-            order_proceed_count = db.api_order.find({'campaign_id': campaign_id, 'status': 'proceed'}).count()
+            order_proceed_count = db.api_order.find({'campaign_id': campaign_id, 'status': 'review'}).count()
             order_datas = db.api_order.find({'campaign_id': campaign_id, 'status': 'complete'})
             comment_count = db.api_campaign_comment.find({'campaign_id': campaign_id}).count()
             for order_data in order_datas:

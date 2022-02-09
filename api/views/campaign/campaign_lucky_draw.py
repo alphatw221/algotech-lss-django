@@ -48,12 +48,26 @@ def get_winner_json(winner_lists):
                 
                 if winner_list[0] == 'facebook':
                     try:
-                        winner['img_url'] = db.api_user.find_one({'id': winner_list[1]})['facebook_info']['picture']['data']['url']
+                        winner_datas = db.api_user.find({'facebook_info.id': winner_list[1]})
+                        for winner_data in winner_datas:
+                            winner['img_url'] = winner_data['facebook_info']['picture']
                     except:
                         winner['img_url'] = ''
 
                 response_list.append(winner)
             response_json = { 'winner_list': response_list }
+        # elif (len(winner_lists[0]) > 5):
+        #     for winner in winner_lists:
+        #         # print ('winner')
+        #         # print (winner)
+        #         winnerJson = {}
+        #         winner_info = db.api_user.find_one({'facebook_info.id': winner})
+        #         winnerJson['platform'] = 'facebook'
+        #         winnerJson['customer_id'] = winner
+        #         winnerJson['customer_name'] = winner_info['name']
+        #         winnerJson['customer_id'] = winner_info['picture']
+        #         response_list.append(winnerJson)
+        #     response_json = { 'winner_list': response_list }
         else:
             response_json = { 'winner_list': [] }
     except:
@@ -99,13 +113,17 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
                     for winner in response['winner_list']:
                         json = {}
                         prize_name = db.api_campaign_product.find_one({'id': winner_info['prize_campaign_product_id']})['name']
+                        # print (winner)
 
                         json['name'] = winner['customer_name']
-                        json['img'] = winner['img_url']
+                        try:
+                            json['img'] = winner['img_url']
+                        except:
+                            json['img'] = ''
                         json['prize_name'] = prize_name
                         json['datetime'] = winner_info['created_at']
                         winner_list.append(json)
-                    print (winner_info['id'])
+                    # print (winner_info['id'])
             winner_json['winner_list'] = winner_list
 
         return Response(winner_json, status=status.HTTP_200_OK)

@@ -7,7 +7,7 @@ except Exception:
     pass
 
 from backend.api.facebook.post import api_fb_get_post_comments
-from backend.api.instagram.post import api_ig_get_post_comments
+from backend.api.instagram.post import api_ig_get_post_comments, api_ig_get_after_post_comments
 from backend.api.instagram.user import api_ig_get_id_from, api_ig_get_profile_picture
 from backend.api.youtube.live_chat import api_youtube_get_live_chat_comment
 from backend.python_rq.python_rq import comment_queue
@@ -26,6 +26,7 @@ def campaign_job(campaign_id):
     try:
         print(f"campaign_id: {campaign_id}\n")
         campaign = db.api_campaign.find_one({"id": campaign_id})
+
         try:
             if campaign['facebook_page_id']:
                 facebook_page = db.api_facebook_page.find_one(
@@ -237,7 +238,7 @@ def capture_instagram(campaign, instagram_post):
     page_token = instagram_post['token']
     instagram_campaign = campaign['instagram_campaign']
     post_id = instagram_campaign['live_media_id']
-    since = ''
+    since, after_page = '', instagram_campaign['after_page']
     try:
         since = instagram_campaign['last_create']
     except:
@@ -249,8 +250,11 @@ def capture_instagram(campaign, instagram_post):
         {"campaign_id": campaign['id'], "$or": [{"type": "product"}, {"type": "product-fast"}]})
     order_codes_mapping = {campaign_product['order_code'].lower(): campaign_product
                            for campaign_product in campaign_products}
-
-    code, data = api_ig_get_post_comments(page_token, post_id)
+    code, data = '', ''
+    if after_page == '':
+        code, data = api_ig_get_post_comments(page_token, post_id)
+    else:
+        code, data = api_ig_get_after_post_comments(page_token, post_id)
 
     print(f"page_token: {page_token}\n")
     print(f"0.  : {post_id}\n")
@@ -265,7 +269,8 @@ def capture_instagram(campaign, instagram_post):
         return
 
     comments = data.get('data', [])
-    print(f"number of comments: {len(comments)}")
+    page_after = data['paging']['cursors']['after']
+    print (f"number of comments: {len(comments)}")
     is_failed, latest_comment_time = False, ''
     try:
         created_at = ''
@@ -309,9 +314,9 @@ def capture_instagram(campaign, instagram_post):
                                                              uni_format_comment, order_codes_mapping), result_ttl=10, failure_ttl=10)
                 else:
                     continue
-
         instagram_campaign['is_failed'] = False
         instagram_campaign['last_create'] = created_at
+        instagram_campaign['page_after'] = page_after
         db.api_campaign.update_one({'id': campaign['id']}, {
             "$set": {'instagram_campaign': instagram_campaign}})
     except Exception:

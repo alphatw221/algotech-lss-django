@@ -78,8 +78,6 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
         return Response(data, status=status.HTTP_200_OK)
 
-
-
     @action(detail=True, methods=['GET'], url_path=r'seller_checkout', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def seller_pre_order_checkout(self, request, pk=None):
@@ -270,6 +268,9 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         # OPERATION_CODE_NAME: AGILE
         # if request.user.id in settings.ADMIN_LIST:
         pre_order=PreOrder.objects.get(id=pk)
+        # pre_meta = pre_order.meta
+        # pre_meta.update(request.data['meta'])
+        # request.data['meta'] = pre_meta
         serializer = PreOrderSerializerUpdatePaymentShipping(pre_order, data=request.data, partial=True)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -298,13 +299,13 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         # Verify.user_match_pre_order(api_user, pre_order)
 
         pre_order=Verify.get_pre_order(pk)
-        shopping_note = pre_order.campaign.meta_payment["sg"]["shopping_note"]
+        # shopping_note = pre_order.campaign.meta_payment["sg"]["shopping_note"]
 
         serializer = PreOrderSerializer(pre_order)
-
-        data = json.loads(json.dumps(serializer.data))
-        data["shopping_note"] = shopping_note
-        return Response(data, status=status.HTTP_200_OK)
+        # data = serializer.data
+        # data = json.loads(json.dumps(serializer.data))
+        # data["shopping_note"] = shopping_note
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['GET'], url_path=r'buyer_checkout')
     @api_error_handler
@@ -411,3 +412,11 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         PreOrderHelper.delete_product(
             api_user, pre_order, order_product, order_product.campaign_product)
         return Response({'message':"delete success"}, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['GET'], url_path=r'campaign_prodcut_list')
+    @api_error_handler
+    def buyer_campaign_prodcut_list(self, request, pk=None):
+        pre_order = Verify.get_pre_order(pk)
+        campaign_products = pre_order.campaign.products.values()
+        return Response(campaign_products, status=status.HTTP_200_OK)
+

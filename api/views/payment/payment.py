@@ -1,7 +1,5 @@
-import json
-
 from rest_framework import views, viewsets, status
-import paypalrestsdk
+import paypalrestsdk, json
 from django.core.files.base import ContentFile
 from django.http import HttpResponseRedirect
 from rest_framework.decorators import action, api_view, permission_classes
@@ -14,7 +12,6 @@ from django.conf import settings
 from django.core.files.storage import default_storage
 from rest_framework.parsers import MultiPartParser, FormParser, FileUploadParser
 
-
 from api.utils.common.common import getdata, getparams
 from api.models.order.order import Order
 from api.models.user import user
@@ -22,6 +19,9 @@ from api.models.user.user_subscription import UserSubscription
 from api.models.facebook.facebook_page import FacebookPage
 from api.models.youtube.youtube_channel import YoutubeChannel
 from api.models.instagram.instagram_profile import InstagramProfile
+from django.conf import settings
+from django.core.mail import send_mail as django_send_mail
+import pendulum, time
 
 import datetime
 import hashlib
@@ -37,11 +37,25 @@ from api.utils.error_handle.error_handler.api_error_handler import api_error_han
 from api.utils.error_handle.error.api_error import ApiVerifyError
 106
 
-import hmac
-import hashlib
-import base64
-import binascii
+import hmac, hashlib, base64, binascii
+from backend.i18n.payment_comfirm_mail import i18n_get_mail_content, i18n_get_mail_subject
+from api.utils.error_handle.error_handler.email_error_handle import email_error_handler
 
+@email_error_handler
+def send_email(order_id):
+    order_data = db.api_order.find_one({'id': int(order_id)})
+    campaign_id = order_data['campaign_id']
+    campaign_data = db.api_campaign.find_one({'id': int(campaign_id)})
+    facebook_page_id = campaign_data['facebook_page_id']
+    shop_name = db.api_facebook_page.find_one({'id': int(facebook_page_id)})['name']
+    customer_email = order_data['shipping_email']
+
+    mail_subject = i18n_get_mail_subject(shop_name)
+    mail_content = i18n_get_mail_content(order_id, campaign_data, order_data)
+
+    django_send_mail(mail_subject, mail_content, settings.EMAIL_HOST_USER, [customer_email], fail_silently = False)
+    print(f'{pendulum.now()} - {customer_email} - {"success"}')
+  
 
 platform_dict = {'facebook':FacebookPage, 'youtube':YoutubeChannel, 'instagram':InstagramProfile}
 
@@ -139,7 +153,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
     @api_error_handler
     def ipg_payment_success(self, request):
 
-        order_id, = getparams(request, ('order_id'), with_user=False)
+        order_id, = getparams(request, ('order_id',), with_user=False)
         order = Verify.get_order(order_id)
 
         order.meta['ipg_success']=request.data
@@ -175,7 +189,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
     @api_error_handler
     def ipg_payment_fail(self, request, pk=None):
 
-        order_id, = getparams(request, ('order_id'), with_user=False)
+        order_id, = getparams(request, ('order_id',), with_user=False)
         order = Verify.get_order(order_id)
 
         order.meta['ipg_fail']=request.data
@@ -226,11 +240,12 @@ class PaymentViewSet(viewsets.GenericViewSet):
             request, ("order_id",), seller=False)
         # customer_user = Verify.get_customer_user(request)
         order_object = Verify.get_order(order_id)
-        currency = 'SGD' if not order_object.currency else order_object.currency
-        amount = order_object.total
-        print(order_object)
 
-        # get request post data  = request.data
+        amount = order_object.total
+        campaign_obj = order_object.campaign
+        currency = 'SGD' if not order_object.currency else order_object.currency
+        # currency = campaign_obj.meta_payment["sg"]["paypal"]["paypal_currency"]
+
         # data is json, example:
         data = [{
             "item_list": {
@@ -248,12 +263,18 @@ class PaymentViewSet(viewsets.GenericViewSet):
                 "currency": currency},
             "description": "This is the payment transaction description."
         }]
+        # sanbox mode
         paypalrestsdk.configure({
             "mode": settings.PAYPAL_CONFIG["mode"],
             "client_id": settings.PAYPAL_CONFIG["client_id"],
             "client_secret": settings.PAYPAL_CONFIG["client_secret"]
         })
-
+        # live mode
+        # paypalrestsdk.configure({
+        #     "mode": "live",
+        #     "client_id": campaign_obj.meta_payment["sg"]["paypal"]["paypal_clientId"],
+        #     "client_secret": campaign_obj.meta_payment["sg"]["paypal"]["paypal_secret"]
+        # })
         payment = paypalrestsdk.Payment({
             "intent": "sale",
             "payer": {
@@ -286,25 +307,31 @@ class PaymentViewSet(viewsets.GenericViewSet):
 
     @action(detail=False, methods=['GET'], url_path=r"paypal_payment_complete_check")
     def paypal_payment_complete_check(self, request, *args, **kwargs):
+
+        paymentId = request.GET["paymentId"]
+        payer_id = request.GET["PayerID"]
+        order_id = request.GET["order_id"]
+        order_object = Verify.get_order(order_id)
+        campaign_obj = order_object.campaign
+
+        # sandbox mode
         paypalrestsdk.configure({
             "mode": settings.PAYPAL_CONFIG["mode"],
             "client_id": settings.PAYPAL_CONFIG["client_id"],
             "client_secret": settings.PAYPAL_CONFIG["client_secret"]
         })
+        # live mode
+        # paypalrestsdk.configure({
+        #     "mode": "live",
+        #     "client_id": campaign_obj.meta_payment["sg"]["paypal"]["paypal_clientId"],
+        #     "client_secret": campaign_obj.meta_payment["sg"]["paypal"]["paypal_secret"]
+        # })
 
-        paymentId = request.GET["paymentId"]
-        payer_id = request.GET["PayerID"]
-        order_id = request.GET["order_id"]
         payment = paypalrestsdk.Payment.find(paymentId)
         if payment.execute({"payer_id": payer_id}):
             print("Payment execute successfully")
-            order_object = Verify.get_order(order_id)
             order_object.status = "complete"
             order_object.save()
-            # return Response({
-            #     "status": 202,
-            #     "message": "Payment execute successfully"
-            # })
             return HttpResponseRedirect(f"http://localhost:8000/buyer/order/{order_object.id}/confirmation")
         else:
             print(payment.error)  # Error Hash
@@ -339,6 +366,8 @@ class PaymentViewSet(viewsets.GenericViewSet):
         name = user_data['name']
         email = user_data['email']
         order_data = db.api_order.find_one({'id': int(order_id)})
+        if not order_data:
+            raise ApiVerifyError('no order found')
         currency = 'SGD' if not order_data['currency'] else order_data['currency']
         amount = order_data['total']
 
@@ -360,7 +389,9 @@ class PaymentViewSet(viewsets.GenericViewSet):
                             params=params).post()
         if code != 201:
             raise Exception('hitpay got wrong')
-        db.api_order.update_one({'id': int(order_id)}, {'$set': {'meta': {'payment_id': ret['id']}}}) 
+        #TODO record payment not replace   
+        db.api_order.find_one () 
+        # db.api_order.update_one({'id': int(order_id)}, {'$set': {'meta': {'payment_id': ret['id']}}}) 
 
         return Response(ret['url'])
 
@@ -371,7 +402,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         payment_request_id = data_dict['payment_request_id']
         amount = data_dict['amount']
         status = data_dict['status']
-        reference_number = data_dict['reference_number']
+        order_id = data_dict['reference_number']
         hmac = data_dict['hmac']
         secret_salt = '2MUizyJj429NIoOMmTXedyICmbwS1rt6Wph7cGqzG99IkmCV6nUCQ22lRVCB0Rgu'
 
@@ -379,110 +410,61 @@ class PaymentViewSet(viewsets.GenericViewSet):
         info_dict['payment_id'] = payment_id
         info_dict['payment_request_id'] = payment_request_id
         hitpay_dict['hitpay'] = info_dict
-        total = int(db.api_order.find_one({'id': int(reference_number)})['total'])
+        total = int(db.api_order.find_one({'id': int(order_id)})['total'])
 
+        #TODO change to real checking way
         # if status == 'completed' and float(total) == float(amount):
-        print ('reference_number')
-        print (reference_number)
         db.api_order.update_one(
-            { 'id': int(reference_number) },
+            { 'id': int(order_id) },
             { '$set': {'status': 'complete', 'checkout_details': hitpay_dict} }
         )
 
-        return Response('request')
+        send_email(order_id)    
+        return Response('hitpay succed')
 
 
     @action(detail=False, methods=['PUT'], url_path=r'buyser_receipt_upload', parser_classes=(MultiPartParser,))
+    @api_error_handler
     def buyser_receipt_upload(self, request):
-        try:
-            meta_data = {
-                "last_five_digit": {},
-                "receipt_image": {}
-            }
-            image = request.data["image"]
-            print(f"image: {image}")
-            # if not image:
-            #     raise ApiVerifyError("no image found")
-            order_id = request.data["order_id"]
-            last_five_digit = request.data["last_five_digit"]
-            print(f"order_id: {order_id}")
-            print(f"last_five_digit: {last_five_digit}")
-            if not Order.objects.filter(id=order_id).exists():
-                raise ApiVerifyError("no order found")
+        meta_data = {
+            "last_five_digit": "",
+            "receipt_image": ""
+        }
+        image = request.data["image"]
+        print(f"image: {image}")
+        # if not image:
+        #     raise ApiVerifyError("no image found")
+        order_id = request.data["order_id"]
+        last_five_digit = request.data["last_five_digit"]
+        print(f"order_id: {order_id}")
+        print(f"last_five_digit: {last_five_digit}")
+        if not Order.objects.filter(id=order_id).exists():
+            raise ApiVerifyError("no order found")
 
-            order = Order.objects.get(id=order_id)
-            api_user = Order.objects.get(id=order_id).campaign.created_by
-            print(api_user)
-            platform_name = order.platform
-            print(f"platform_name: {platform_name}")
-            platform_id = order.platform_id
-            print(f"platform_id: {platform_id}")
-            # _, user_subscription = verify_request(
-            #     api_user, platform_name, platform_id)
+        order = Order.objects.get(id=order_id)
+        api_user = Order.objects.get(id=order_id).campaign.created_by
+        print(api_user)
+        platform_name = order.platform
+        print(f"platform_name: {platform_name}")
+        platform_id = order.platform_id
+        print(f"platform_id: {platform_id}")
+        # _, user_subscription = verify_request(
+        #     api_user, platform_name, platform_id)
 
-            if image != "undefined":
-                image_path = default_storage.save(
-                    f'campaign/{order.campaign.id}/order/{order.id}/receipt/{image.name}', ContentFile(image.read()))
-                image_path = settings.GS_URL + image_path
-                meta_data["receipt_image"] = image_path
-            if last_five_digit != "":
-                meta_data["last_five_digit"] = last_five_digit
-            order.meta = meta_data
-            order.status = "complete"
-            order.save()
+        send_email(order_id)
+        if image != "undefined":
+            image_path = default_storage.save(
+                f'campaign/{order.campaign.id}/order/{order.id}/receipt/{image.name}', ContentFile(image.read()))
+            image_path = settings.GS_URL + image_path
+            meta_data["receipt_image"] = image_path
+        if last_five_digit:
+            meta_data["last_five_digit"] = last_five_digit
+        order.meta = meta_data
+        order.payment_method = "Direct Payment"
+        order.status = "complete"
+        order.save()
 
-            order_data = db.api_order.find_one({'id': int(order_id)})
-            campaign_id = order_data['campaign_id']
-            order_data = db.api_order.find_one({'id': int(order_id)})
-            facebook_page_id = db.api_campaign.find_one({'id': int(campaign_id)})['facebook_page_id']
-            campaign_title = db.api_campaign.find_one({'id': int(campaign_id)})['title']
-            meta_logistic = db.api_campaign.find_one({'id': int(campaign_id)})['meta_logistic']
-            store_name = db.api_facebook_page.find_one({'id': int(facebook_page_id)})['name']
-            meta = order_data['meta']
-            products = order_data['products']
-            order_email = order_data['shipping_email']
-
-            mail_subject = '[LSS] '+ store_name + ' order confirmation'
-            mail_content = 'Order # ' + str(order_id) + '\n\n'
-            mail_content+= campaign_title + '\n--------------------------------------------\n'
-            mail_content+= 'FB Name: ' + order_data['customer_name'] + '\n\n'
-            mail_content+= 'Delivery To: \n' 
-            mail_content+= order_data['shipping_first_name'] + ' ' + order_data['shipping_last_name'] + '\n\n'
-            mail_content+= order_data['shipping_phone'] + '\n\n'
-            
-            if order_data['shipping_method'] == 'in_store':
-                mail_content+= 'Shipping way: ' + order_data['shipping_method'] + '\n'
-                mail_content+= 'Pick up store: ' + meta['pick_up_store'] + ', ' + meta['pick_up_store_address'] + '\n'
-                mail_content+= 'Pick up date: ' + meta['pick_up_date'] + '\n'
-            else:
-                mail_content+= 'Shipping way: ' + order_data['shipping_method'] + '\n'
-                mail_content+= 'Shipping address: ' + order_data['shipping_address_1'] + ', ' + order_data['shipping_location'] + ', ' + order_data['shipping_region'] + '\n'
-                mail_content+= 'Shipping date: ' + order_data['shipping_date'].strftime('%m/%d/%Y') + '\n'
-            
-            mail_content+= '\n--------- Summary -----------\n'
-            mail_content+= 'Price  Qty  Total    Item\n'
-            mail_content+= '-----------------------------\n'
-            for key, val in products.items():
-                mail_content+= '$' + str(products[key]['price']) + '  ' + str(products[key]['qty']).zfill(3) + '  $' + str(products[key]['subtotal']) + '    ' + products[key]['name'] + '\n'
-            
-            mail_content+= '\nDelivery Charge: ' 
-            if order_data['free_delivery'] == False or order_data['shipping_method'] != 'in_store':
-                mail_content+= '$' +  str("%.2f" % float(meta_logistic['delivery_charge'])) + '\n\n'
-            else:
-                mail_content+= '$0\n\n'
-            mail_content+= 'Total          : $' + str("%.2f" % float(order_data['total']))
-            email_list = []
-            email_list.append(order_email)
-            email_list.append(mail_subject)
-            email_list.append(mail_content)
-
-            send_Email(email_list)
-
-            print(meta_data)
-            return Response({"message": "upload succeed"}, status=status.HTTP_200_OK)
-        except Exception as e:
-            print(e)
-            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"message": "upload succeed"}, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET'], url_path=r'get_direct_payment_info')
     @api_error_handler
