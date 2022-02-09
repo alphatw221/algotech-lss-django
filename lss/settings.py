@@ -247,6 +247,7 @@ SUPPORTED_PLATFORMS = [
 
 # Facebook
 FACEBOOK_API_URL = "https://graph.facebook.com"
+FACEBOOK_API_URL_V12 = "https://graph.facebook.com/v12.0/"
 FACEBOOK_APP_CREDS = {
     "name": "Live Show Seller - Algotech",
     "app_id": "967598017063136",

@@ -233,11 +233,15 @@ def capture_instagram(campaign, instagram_post):
     page_token = instagram_post['token']
     instagram_campaign = campaign['instagram_campaign']
     post_id = instagram_campaign['live_media_id']
-    since, after_page = '', instagram_campaign['after_page']
+    since, after_page = '', ''
     try:
         since = instagram_campaign['last_create']
     except:
         since = ''
+    try:
+        after_page = instagram_campaign['page_after']
+    except:
+        after_page = ''
     if not page_token or not post_id:
         return
 
@@ -249,7 +253,7 @@ def capture_instagram(campaign, instagram_post):
     if after_page == '':
         code, data = api_ig_get_post_comments(page_token, post_id)
     else:
-        code, data = api_ig_get_after_post_comments(page_token, post_id)
+        code, data = api_ig_get_after_post_comments(page_token, post_id, after_page)
 
     print(f"page_token: {page_token}\n")
     print(f"post_id: {post_id}\n")
@@ -264,7 +268,10 @@ def capture_instagram(campaign, instagram_post):
         return
 
     comments = data.get('data', [])
-    page_after = data['paging']['cursors']['after']
+    try:
+        page_after = data['paging']['cursors']['after']
+    except:
+        page_after = ''
     print (f"number of comments: {len(comments)}")
     is_failed, latest_comment_time = False, ''
     try:
