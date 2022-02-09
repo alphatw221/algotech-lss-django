@@ -317,7 +317,7 @@ CRON_CLASSES = [
 # cart lock after shopper access
 CART_LOCK_INTERVAL = 180
 
-#order report download interval
+# order report download interval
 ORDER_REPORT_DOWNLOAD_INTERVAL = 180
 
 # redis server

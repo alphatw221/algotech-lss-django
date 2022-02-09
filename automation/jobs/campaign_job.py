@@ -34,7 +34,7 @@ def campaign_job(campaign_id):
                 capture_facebook(campaign, facebook_page)
         except Exception:
             pass
-
+        print("-------------------------------------------------------------------------")
         try:
             if campaign['youtube_channel_id']:
                 youtube_channel = db.api_youtube_channel.find_one(
@@ -43,7 +43,7 @@ def campaign_job(campaign_id):
         except Exception as e:
             print(f"youtube error: {e}")
             pass
-
+        print("-------------------------------------------------------------------------")
         try:
             if campaign['instagram_profile_id']:
                 instagram_post = db.api_instagram_profile.find_one(
@@ -54,7 +54,7 @@ def campaign_job(campaign_id):
         except Exception as e:
             print(e)
             pass
-
+        print("-------------------------------------------------------------------------")
     except Exception:
         pass
 
@@ -92,14 +92,16 @@ def capture_facebook(campaign, facebook_page):
     comment_capture_since = since
     comments = data.get('data', [])
 
-    print(f"number of comments: {len(comments)}")
-    if len(comments) == 1 and comments[0]['created_time'] == since:
+    if comments and int(comments[-1]['created_time']) == since:
+        print(f"number of comments: {0}")
         return
 
+    print(f"number of comments: {len(comments)}")
     try:
         for comment in comments:
             print(comment['message'])
             if comment['from']['id'] == facebook_page['page_id']:
+                comment_capture_since = comment['created_time']
                 continue
             uni_format_comment = {
                 'platform': 'facebook',
@@ -136,7 +138,9 @@ def capture_youtube(campaign, youtube_channel):
             return
         code, data = api_youtube_get_video_info(live_video_id)
         if code // 100 != 2:
+
             print("video info error")
+            print(data)
             return
         items = data.get("items")
         if not items:
@@ -205,7 +209,7 @@ def capture_youtube(campaign, youtube_channel):
                 "customer_id": comment['authorDetails']['channelId'],
                 "customer_name": comment['authorDetails']['displayName'],
                 "image": comment['authorDetails']['profileImageUrl'],
-                "live_chat_id":live_chat_id
+                "live_chat_id": live_chat_id
             }
             db.api_campaign_comment.insert_one(uni_format_comment)
 
@@ -255,10 +259,11 @@ def capture_instagram(campaign, instagram_post):
     if page_after == '':
         code, data = api_ig_get_post_comments(page_token, post_id)
     else:
-        code, data = api_ig_get_after_post_comments(page_token, post_id, page_after)
+        code, data = api_ig_get_after_post_comments(
+            page_token, post_id, page_after)
 
     print(f"page_token: {page_token}\n")
-    print(f"post_id: {post_id}\n")
+    print(f"0.  : {post_id}\n")
     print(f"code: {code}\n")
     print("platform: instagram\n")
 
@@ -274,7 +279,7 @@ def capture_instagram(campaign, instagram_post):
         page_after = data['paging']['cursors']['after']
     except:
         pass
-    print (f"number of comments: {len(comments)}")
+    print(f"number of comments: {len(comments)}")
     is_failed, latest_comment_time = False, ''
     try:
         created_at = ''
@@ -319,7 +324,7 @@ def capture_instagram(campaign, instagram_post):
                             "image": img_url}
                         db.api_campaign_comment.insert_one(uni_format_comment)
                         comment_queue.enqueue(comment_job, args=(campaign, 'instagram', instagram_post,
-                                                        uni_format_comment, order_codes_mapping), result_ttl=10, failure_ttl=10)
+                                                                 uni_format_comment, order_codes_mapping), result_ttl=10, failure_ttl=10)
                     else:
                         continue
                 page_after_index = count
