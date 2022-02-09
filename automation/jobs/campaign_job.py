@@ -279,8 +279,9 @@ def capture_instagram(campaign, instagram_post):
     try:
         created_at = ''
         count = 0
+        # for i in range(page_after_index, len(comments)): 
+        #     comment = comments[i]
         for comment in comments:
-            print(comment['text'])
             count += 1
             if page_after_index > count:
                 continue
