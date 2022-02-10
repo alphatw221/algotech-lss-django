@@ -1,6 +1,5 @@
 import os
 import django
-from api.utils.error_handle.error_handler.capture_platform_error_handler import capture_platform_error_handler
 try:
     os.environ['DJANGO_SETTINGS_MODULE'] = 'lss.settings'  # for rq_job
     django.setup()
@@ -20,40 +19,34 @@ import time
 import datetime
 from dateutil import parser
 from backend.api.youtube.viedo import api_youtube_get_video_info
+from api.utils.error_handle.error_handler.campaign_job_error_handler import campaign_job_error_handler
+from api.utils.error_handle.error_handler.capture_platform_error_handler import capture_platform_error_handler
 
-
+@campaign_job_error_handler
 def campaign_job(campaign_id):
 
-    try:
-        print(f"campaign_id: {campaign_id}\n")
-        campaign = db.api_campaign.find_one({"id": campaign_id})
+    print(f"campaign_id: {campaign_id}\n")
+    campaign = db.api_campaign.find_one({"id": campaign_id})
+    print("-------------------------------------------------------------------------\n")
+    print("Facebook:\n")
+    capture_facebook(campaign)
+    print("-------------------------------------------------------------------------\n")
+    print("Youtube:\n")
+    capture_youtube(campaign)
+    print("-------------------------------------------------------------------------\n")
+    print("Instagram:\n")
+    capture_instagram(campaign)
+    print("-------------------------------------------------------------------------\n")
 
-        try:
-            if campaign['facebook_page_id']:
-                facebook_page = db.api_facebook_page.find_one(
-                    {"id": campaign['facebook_page_id']})
-                capture_facebook(campaign, facebook_page)
-        except Exception:
-            pass
-        print("-------------------------------------------------------------------------")
-        capture_youtube(campaign)
-        print("-------------------------------------------------------------------------")
-        try:
-            if campaign['instagram_profile_id']:
-                instagram_post = db.api_instagram_profile.find_one(
-                    {'id': int(campaign['instagram_profile_id'])})
-                # if not facebook_page:
-                #     facebook_page = db.api_facebook_page.find_one({"id": campaign['facebook_page_id']})
-                capture_instagram(campaign, instagram_post)
-        except Exception as e:
-            print(e)
-            pass
-        print("-------------------------------------------------------------------------")
-    except Exception:
-        pass
+@capture_platform_error_handler
+def capture_facebook(campaign):
 
+    if not campaign['facebook_page_id']:
+        return
 
-def capture_facebook(campaign, facebook_page):
+    facebook_page = db.api_facebook_page.find_one(
+        {"id": campaign['facebook_page_id']})
+
     page_token = facebook_page['token']
     facebook_campaign = campaign['facebook_campaign']
     post_id = facebook_campaign.get('post_id', '')
@@ -70,11 +63,9 @@ def capture_facebook(campaign, facebook_page):
     # print(order_codes_mapping)
 
     code, data = api_fb_get_post_comments(page_token, post_id, since)
-    print(f"page_token: {page_token}\n")
     print(f"post_id: {post_id}\n")
     print(f"since: {since}\n")
     print(f"code: {code}\n")
-    print("platform: facebook\n")
 
     if code // 100 != 2 and 'error' in data and data['error']['type'] in ('GraphMethodException', 'OAuthException'):
         facebook_campaign['post_id'] = ''
@@ -171,11 +162,9 @@ def capture_youtube(campaign):
     code, data = api_youtube_get_live_chat_comment(
         next_page_token, live_chat_id, 100)
 
-    print(f"page_token: {token}\n")
     print(f"live_chat_id: {live_chat_id}\n")
     print(f"next_page_token: {next_page_token}\n")
     print(f"code: {code}\n")
-    print("platform: youtube\n")
 
     if code // 100 != 2 and 'error' in data:
         youtube_campaign['remark'] = f'Facebook API error: {data["error"]["message"]}'
@@ -237,8 +226,15 @@ def capture_youtube(campaign):
                                    "$set": {'youtube_campaign': youtube_campaign}})
         return
 
+@capture_platform_error_handler
+def capture_instagram(campaign):
 
-def capture_instagram(campaign, instagram_post):
+    if not campaign['instagram_profile_id']:
+        return
+
+    instagram_post = db.api_instagram_profile.find_one(
+        {'id': int(campaign['instagram_profile_id'])})
+
     page_token = instagram_post['token']
     instagram_campaign = campaign['instagram_campaign']
     post_id = instagram_campaign['live_media_id']
@@ -268,9 +264,8 @@ def capture_instagram(campaign, instagram_post):
             page_token, post_id, page_after)
 
     print(f"page_token: {page_token}\n")
-    print(f"0.  : {post_id}\n")
+    print(f"live_media_id  : {post_id}\n")
     print(f"code: {code}\n")
-    print("platform: instagram\n")
 
     if code // 100 != 2 and 'error' in data and data['error']['type'] in ('GraphMethodException', 'OAuthException'):
         instagram_campaign['post_id'] = post_id
