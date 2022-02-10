@@ -22,6 +22,19 @@ from backend.api.youtube.viedo import api_youtube_get_video_info
 from api.utils.error_handle.error_handler.campaign_job_error_handler import campaign_job_error_handler
 from api.utils.error_handle.error_handler.capture_platform_error_handler import capture_platform_error_handler
 
+class OrderCodesMappingSingleton:
+
+    order_codes_mapping = None
+
+    @classmethod
+    def get_mapping(cls, campaign_id):
+        if cls.order_codes_mapping == None:
+            campaign_products = db.api_campaign_product.find(
+                {"campaign_id": campaign_id, "$or": [{"type": "product"}, {"type": "product-fast"}]})
+            cls.order_codes_mapping = {campaign_product['order_code'].lower(): campaign_product
+                                for campaign_product in campaign_products}
+        return cls.order_codes_mapping
+
 @campaign_job_error_handler
 def campaign_job(campaign_id):
 
@@ -55,12 +68,11 @@ def capture_facebook(campaign):
     if not page_token or not post_id:
         return
 
-    campaign_products = db.api_campaign_product.find(
-        {"campaign_id": campaign['id'], "$or": [{"type": "product"}, {"type": "product-fast"}]})
-    order_codes_mapping = {campaign_product['order_code'].lower(): campaign_product
-                           for campaign_product in campaign_products}
-
-    # print(order_codes_mapping)
+    # campaign_products = db.api_campaign_product.find(
+    #     {"campaign_id": campaign['id'], "$or": [{"type": "product"}, {"type": "product-fast"}]})
+    # order_codes_mapping = {campaign_product['order_code'].lower(): campaign_product
+    #                        for campaign_product in campaign_products}
+    order_codes_mapping = OrderCodesMappingSingleton.get_mapping(campaign['id'])
 
     code, data = api_fb_get_post_comments(page_token, post_id, since)
     print(f"post_id: {post_id}")
@@ -154,10 +166,11 @@ def capture_youtube(campaign):
     if not token or not live_chat_id:
         return
 
-    campaign_products = db.api_campaign_product.find(
-        {"campaign_id": campaign['id'], "$or": [{"type": "product"}, {"type": "product-fast"}]})
-    order_codes_mapping = {campaign_product['order_code'].lower(): campaign_product
-                           for campaign_product in campaign_products}
+    # campaign_products = db.api_campaign_product.find(
+    #     {"campaign_id": campaign['id'], "$or": [{"type": "product"}, {"type": "product-fast"}]})
+    # order_codes_mapping = {campaign_product['order_code'].lower(): campaign_product
+    #                        for campaign_product in campaign_products}
+    order_codes_mapping = OrderCodesMappingSingleton.get_mapping(campaign['id'])
 
     code, data = api_youtube_get_live_chat_comment(
         next_page_token, live_chat_id, 100)
@@ -252,10 +265,12 @@ def capture_instagram(campaign):
     if not page_token or not post_id:
         return
 
-    campaign_products = db.api_campaign_product.find(
-        {"campaign_id": campaign['id'], "$or": [{"type": "product"}, {"type": "product-fast"}]})
-    order_codes_mapping = {campaign_product['order_code'].lower(): campaign_product
-                           for campaign_product in campaign_products}
+    # campaign_products = db.api_campaign_product.find(
+    #     {"campaign_id": campaign['id'], "$or": [{"type": "product"}, {"type": "product-fast"}]})
+    # order_codes_mapping = {campaign_product['order_code'].lower(): campaign_product
+    #                        for campaign_product in campaign_products}
+    order_codes_mapping = OrderCodesMappingSingleton.get_mapping(campaign['id'])
+    
     code, data = '', ''
     if page_after == '':
         code, data = api_ig_get_post_comments(page_token, post_id)
@@ -263,7 +278,6 @@ def capture_instagram(campaign):
         code, data = api_ig_get_after_post_comments(
             page_token, post_id, page_after)
 
-    print(f"page_token: {page_token}")
     print(f"live_media_id  : {post_id}")
     print(f"code: {code}")
 
