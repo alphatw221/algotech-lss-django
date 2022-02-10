@@ -247,6 +247,7 @@ SUPPORTED_PLATFORMS = [
 
 # Facebook
 FACEBOOK_API_URL = "https://graph.facebook.com"
+FACEBOOK_API_URL_V12 = "https://graph.facebook.com/v12.0/"
 FACEBOOK_APP_CREDS = {
     "name": "Live Show Seller - Algotech",
     "app_id": "967598017063136",
@@ -301,12 +302,12 @@ GCP_PROJECT_ID = "liveshowseller"
 
 # mail app
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
+EMAIL_HOST = 'mail.liveshowseller.com' ## smtp.gmail.com
+EMAIL_PORT = 465
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
-EMAIL_HOST_USER = 'derekhwang@accoladeglobal.net' ## noreply@liveshowseller.com
-EMAIL_HOST_PASSWORD = 'jyhudyfbvpmewjsc'
+EMAIL_HOST_USER = 'noreply@liveshowseller.com' ## derekhwang@accoladeglobal.net
+EMAIL_HOST_PASSWORD = 'bq5^82DrrpQ4' ## jyhudyfbvpmewjsc
 
 # cron app
 CRON_CLASSES = [
@@ -316,7 +317,7 @@ CRON_CLASSES = [
 # cart lock after shopper access
 CART_LOCK_INTERVAL = 180
 
-#order report download interval
+# order report download interval
 ORDER_REPORT_DOWNLOAD_INTERVAL = 180
 
 # redis server
