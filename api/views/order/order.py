@@ -22,17 +22,16 @@ from dateutil import parser
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 def get_title_map():
     title_map = {
-            'id': 'id',
+            'id': 'Id',
+            'created_at': 'Order Date',
             'customer_name': 'Customer Name',
             'platform': 'Platform',
             'shipping_email': 'E-mail',
             'shipping_phone': 'Phone',
             'first_name': 'First Name',
             'last_name': 'Last Name',
-            'gender': 'Gender',
             'total': 'Total',
-            'tax': 'Tax',
-            'currency': 'Currency',
+            'payment_method': 'Payment Method',
             'shipping_first_name': 'Shipping First Name',
             'shipping_last_name': 'Shipping Last Name',
             'shipping_phone': 'Shipping Phone',
@@ -40,7 +39,14 @@ def get_title_map():
             'shipping_region': 'Region',
             'shipping_location': 'Location',
             'shipping_address_1': 'Shipping Address 1',
-            'shipping_method': 'Shipping Method'
+            'shipping_method': 'Shipping Method',
+            'pick_up_date': 'Pick Up Date',
+            'pick_up_store': 'Pick Up Store',
+            'shipping_remark': 'Remark',
+            'status': 'Payment Status',
+            'last_five_digit': 'Payment Record',
+            'payment_card_type': 'Payment Card Type',
+            'payment_card_number': 'Payment Card Number'
         }
     return title_map
 
@@ -220,11 +226,11 @@ class OrderViewSet(viewsets.ModelViewSet):
             api_user, platform_name, platform_id, campaign_id)
         
         #check_download_at:
-        last_report_download_at = campaign.meta.get('last_report_download_at',None)
-        if last_report_download_at and datetime.datetime.timestamp(last_report_download_at)+settings.ORDER_REPORT_DOWNLOAD_INTERVAL > datetime.datetime.timestamp(datetime.datetime.now()):
-            raise ApiVerifyError('frequently download')
-        campaign.meta['last_report_download_at']=datetime.datetime.now() 
-        campaign.save()
+        # last_report_download_at = campaign.meta.get('last_report_download_at',None)
+        # if last_report_download_at and datetime.datetime.timestamp(last_report_download_at)+settings.ORDER_REPORT_DOWNLOAD_INTERVAL > datetime.datetime.timestamp(datetime.datetime.now()):
+        #     raise ApiVerifyError('frequently download')
+        # campaign.meta['last_report_download_at']=datetime.datetime.now() 
+        # campaign.save()
 
         column_list = column_list.split(',')
         title_map = get_title_map()
@@ -248,11 +254,27 @@ class OrderViewSet(viewsets.ModelViewSet):
         title_form = workbook.add_format({
             'align': 'center',
             'bold': True,
-            'font_size': 18
+            'font_size': 18,
+            'border': 1
+        })
+        info_form = workbook.add_format({
+            'align': 'center',
+            'bold': True,
+            'font_size': 13,
+            'border': 1
         })
         
-        worksheet.merge_range(0, 0, 0, len(column_list) - 1, campaign_title + ' Order Report', title_form)
-        row, column = 1, 0
+        products_count = 0
+        campaign_products = db.api_campaign_product.find({'campaign_id': int(campaign_id)})
+        for campaign_product in campaign_products:
+            products_count += 1
+        worksheet.merge_range(0, 0, 0, len(column_list) + products_count - 1, campaign_title + ' Order Report', title_form)
+        worksheet.merge_range(1, 0, 1, 5, 'Contact Info', info_form)
+        worksheet.merge_range(1, 6, 1, 13, 'Delivery Info', info_form)
+        worksheet.merge_range(1, 14, 1, 19, 'Payment Info', info_form)
+        worksheet.merge_range(1, 20, 1, 20 + products_count - 1, 'Order Info', info_form)
+
+        row, column = 2, 0
         for column_title in column_list:
             worksheet.write(row, column, title_map[column_title], header)
             if len(column_title) >= 8:
@@ -265,7 +287,6 @@ class OrderViewSet(viewsets.ModelViewSet):
             worksheet.write(row, column, campaign_product['name'], header)
             product_column_dict[str(campaign_product['id'])] = column
             column += 1
-        
         row += 1
         column = 0
 
@@ -281,14 +302,27 @@ class OrderViewSet(viewsets.ModelViewSet):
             order_data = db.api_order.find_one({'id': order_id})
 
             for column_title in column_list:
-                col_data = order_data[column_title]
-                if column_title == 'total':
-                    total_count += col_data
-                    num_col_total = column
-                if type(col_data) == int or type(col_data) == float:
-                    worksheet.write(row, column, col_data, int_center)
-                else:
+                if column_title in ['pick_up_date', 'pick_up_store', 'last_five_digit']:
+                    col_data = ''
+                    try:
+                        col_data = order_data['meta'][column_title]
+                    except:
+                        col_data = ''
                     worksheet.write(row, column, col_data)
+                elif column_title == 'created_at':
+                    col_data = order_data[column_title].strftime("%Y-%m-%d")
+                    worksheet.write(row, column, col_data)
+                elif column_title in ['payment_card_type', 'payment_card_number']:
+                    worksheet.write(row, column, '')
+                else:
+                    col_data = order_data[column_title]
+                    if column_title == 'total':
+                        total_count += col_data
+                        num_col_total = column
+                    if type(col_data) == int or type(col_data) == float:
+                        worksheet.write(row, column, col_data, int_center)
+                    else:
+                        worksheet.write(row, column, col_data)
                 column += 1
             
             products = order_data['products']
