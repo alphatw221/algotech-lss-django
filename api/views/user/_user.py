@@ -1,6 +1,11 @@
 from datetime import datetime
 import string
 import random
+
+import requests
+from django.http import HttpResponse
+
+from api.models.campaign.campaign import Campaign
 from api.models.user.user import User
 from django.contrib.auth.models import User as AuthUser
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -8,6 +13,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from api.utils.common.verify import ApiVerifyError
 from backend.api.facebook.user import api_fb_get_me_login
+from backend.api.youtube.user import api_google_get_me
 from lss.views.custom_jwt import CustomTokenObtainPairSerializer
 from backend.api.instagram.user import *
 
@@ -75,18 +81,38 @@ def facebook_login_helper(request, user_type='user'):
     return Response(ret, status=status.HTTP_200_OK)
 
 
-def youtube_login_helper(request, user_type='customer'):
+def google_login_helper(request, user_type='customer'):
+    code = request.GET.get("code")
+    campaign_id = request.GET.get("state")
 
-    youtube_user_token = request.data.get('accessToken')
-
+    response = requests.post(
+        url="https://accounts.google.com/o/oauth2/token",
+        data={
+            "code": code,
+            "client_id": "536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com",
+            "client_secret": "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",
+            "redirect_uri": "http://localhost:8001/api/user/google_user_callback",
+            "grant_type": "authorization_code"
+        }
+    )
+    if not response.status_code / 100 == 2:
+        return HttpResponse(f"NOT OK")
+    access_token = response.json().get("access_token")
+    campaign_object = Campaign.objects.get(id=campaign_id)
+    campaign_object.youtube_campaign["access_token"] = access_token
+    campaign_object.save()
+    print(response.json())
+    return HttpResponse(f"OK")
     #//--------------------------------
 
-    #youtube api here
-        
-    youtube_id = "response['id']"
-    youtube_name = ""
-    youtube_picture = ""
-    email = ""
+    #google api here
+
+    if response.status_code / 100 != 2:
+        raise ApiVerifyError("google user token invalid")
+    google_id = response["id"]
+    google_name = response["name"]
+    google_picture = response["picture"]
+    email = response["email"]
 
     # //-------------------------------
     api_user_exists = User.objects.filter(
@@ -106,25 +132,25 @@ def youtube_login_helper(request, user_type='customer'):
     elif scenario2:
         api_user = User.objects.get(email=email, type=user_type)
         auth_user = AuthUser.objects.create_user(
-            youtube_name, email, ''.join(random.choice(string.ascii_letters+string.digits) for _ in range(8)))
+            google_name, email, ''.join(random.choice(string.ascii_letters+string.digits) for _ in range(8)))
         api_user.auth_user = auth_user
     elif scenario3:
         auth_user = AuthUser.objects.get(email=email)
         api_user = User.objects.create(
-            name=youtube_name, email=email, type=user_type, status='new', auth_user=auth_user)
+            name=google_name, email=email, type=user_type, status='new', auth_user=auth_user)
     else:  # scenario4
         auth_user = AuthUser.objects.create_user(
-            youtube_name, email, ''.join(random.choice(string.ascii_letters+string.digits) for _ in range(8)))
+            google_name, email, ''.join(random.choice(string.ascii_letters+string.digits) for _ in range(8)))
         api_user = User.objects.create(
-            name=youtube_name, email=email, type=user_type, status='new', auth_user=auth_user)
+            name=google_name, email=email, type=user_type, status='new', auth_user=auth_user)
 
     if user_type=='user' and api_user.status != 'valid':
         raise ApiVerifyError('account not activated')
 
-    api_user.youtube_info["token"] = youtube_user_token
-    api_user.youtube_info["id"] = youtube_id
-    api_user.youtube_info["name"] = youtube_name
-    api_user.youtube_info["picture"] = youtube_picture
+    api_user.google_info["token"] = google_user_token
+    api_user.google_info["id"] = google_id
+    api_user.google_info["name"] = google_name
+    api_user.google_info["picture"] = google_picture
     api_user.save()
 
     auth_user.last_login = datetime.now()

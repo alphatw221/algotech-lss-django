@@ -6,7 +6,7 @@ from rest_framework.decorators import action, permission_classes
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from api.models.user.user import User, UserSerializer
 from api.utils.common.verify import ApiVerifyError
-from api.views.user._user import facebook_login_helper, youtube_login_helper
+from api.views.user._user import facebook_login_helper, google_login_helper
 from backend.api.facebook.user import api_fb_get_accounts_from_user
 from backend.api.facebook.page import api_fb_get_page_picture
 from rest_framework.response import Response
@@ -34,10 +34,15 @@ class UserViewSet(viewsets.ModelViewSet):
     def user_login(self, request, pk=None):
         return facebook_login_helper(request, user_type='user')
 
-    @action(detail=False, methods=['POST'], url_path=r'youtube_customer_login')
+    @action(detail=False, methods=['GET'], url_path=r'google_customer_callback')
     @api_error_handler
-    def youtube_customer_login(self, request):
-        return youtube_login_helper(request, user_type='customer')
+    def google_customer_callback(self, request):
+        return google_login_helper(request, user_type='customer')
+
+    @action(detail=False, methods=['GET'], url_path=r'google_user_callback')
+    @api_error_handler
+    def google_user_callback(self, request):
+        return google_login_helper(request, user_type='user')
 
 
     @api_error_handler
