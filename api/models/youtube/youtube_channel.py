@@ -9,8 +9,7 @@ class YoutubeChannel(models.Model):
         db_table = 'api_youtube_channel'
 
     # channel_id = models.CharField(max_length=255, null=True, blank=True)
-    page_token = models.CharField(max_length=255, null=True, blank=True)
-    # live_chat_id = models.CharField(max_length=255, null=True, blank=True)
+    # token = models.CharField(max_length=255, null=True, blank=True)
     name = models.CharField(max_length=255, null=True, blank=True)
     remark = models.TextField(null=True, blank=True, default=None)
     image = models.CharField(max_length=512, null=True, blank=True)
@@ -28,6 +27,8 @@ class YoutubeChannel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    token_update_by = models.CharField(max_length=255, null=True, blank=True)
+    token_update_at = models.DateTimeField(null=True)
     meta = models.JSONField(null=True, blank=True, default=dict)
     payment_meta = models.JSONField(null=True, blank=True, default=dict)
 

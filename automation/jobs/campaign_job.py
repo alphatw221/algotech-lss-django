@@ -1,5 +1,6 @@
 import os
 import django
+from api.utils.error_handle.error_handler.capture_platform_error_handler import capture_platform_error_handler
 try:
     os.environ['DJANGO_SETTINGS_MODULE'] = 'lss.settings'  # for rq_job
     django.setup()
@@ -35,14 +36,7 @@ def campaign_job(campaign_id):
         except Exception:
             pass
         print("-------------------------------------------------------------------------")
-        try:
-            if campaign['youtube_channel_id']:
-                youtube_channel = db.api_youtube_channel.find_one(
-                    {'id': campaign['youtube_channel_id']})
-                capture_youtube(campaign, youtube_channel)
-        except Exception as e:
-            print(f"youtube error: {e}")
-            pass
+        capture_youtube(campaign)
         print("-------------------------------------------------------------------------")
         try:
             if campaign['instagram_profile_id']:
@@ -123,10 +117,21 @@ def capture_facebook(campaign, facebook_page):
     db.api_campaign.update_one({'id': campaign['id']}, {
                                "$set": {'facebook_campaign': facebook_campaign}})
 
+@capture_platform_error_handler
+def capture_youtube(campaign):
 
-def capture_youtube(campaign, youtube_channel):
-    page_token = youtube_channel['page_token']
+    # if not campaign['youtube_channel_id']:
+    #     return
+
+    youtube_channel = db.api_youtube_channel.find_one(
+                {'id': campaign['youtube_channel_id']})
+    # token = youtube_channel['token']
+
     youtube_campaign = campaign['youtube_campaign']
+    token = youtube_campaign.get('access_token')
+
+    if not token:
+        return
 
     # live_chat_id = youtube_campaign.get('live_video_id')
 
@@ -155,7 +160,7 @@ def capture_youtube(campaign, youtube_channel):
 
     next_page_token = youtube_campaign.get('next_page_token', "")
 
-    if not page_token or not live_chat_id:
+    if not token or not live_chat_id:
         return
 
     campaign_products = db.api_campaign_product.find(
@@ -166,7 +171,7 @@ def capture_youtube(campaign, youtube_channel):
     code, data = api_youtube_get_live_chat_comment(
         next_page_token, live_chat_id, 100)
 
-    print(f"page_token: {page_token}\n")
+    print(f"page_token: {token}\n")
     print(f"live_chat_id: {live_chat_id}\n")
     print(f"next_page_token: {next_page_token}\n")
     print(f"code: {code}\n")
