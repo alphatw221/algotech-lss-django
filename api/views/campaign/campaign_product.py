@@ -177,8 +177,8 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
         campaign_product = Verify.get_campaign_product_from_campaign(campaign, pk)
 
        
-        if campaign.start_at and datetime.timestamp(datetime.now())>datetime.timestamp(campaign.start_at):
-            raise ApiVerifyError('campaign product not editable after starting campaign')
+        if "price" in request.data and campaign.start_at and datetime.timestamp(datetime.now())>datetime.timestamp(campaign.start_at):
+            raise ApiVerifyError('price not editable after starting campaign')
 
         serializer = CampaignProductSerializerUpdate(
             campaign_product, data=request.data, partial=True)
