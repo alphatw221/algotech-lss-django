@@ -55,7 +55,7 @@ def send_email(order_id):
     customer_email = order_data['shipping_email']
 
     mail_subject = i18n_get_mail_subject(shop_name)
-    mail_content = i18n_get_mail_content(order_id, campaign_data, order_data)
+    mail_content = i18n_get_mail_content(order_id, campaign_data, order_data, shop_name)
     
     send_smtp_mail(customer_email, mail_subject, mail_content)
 
@@ -244,8 +244,9 @@ class PaymentViewSet(viewsets.GenericViewSet):
 
         amount = order_object.total
         campaign_obj = order_object.campaign
-        currency = 'SGD' if not order_object.currency else order_object.currency
-        # currency = campaign_obj.meta_payment["sg"]["paypal"]["paypal_currency"]
+        currency = campaign_obj.meta_payment["sg"]["paypal"]["paypal_currency"]
+        if not currency:
+            currency = 'SGD' if not order_object.currency else order_object.currency
 
         # data is json, example:
         data = [{
@@ -264,25 +265,24 @@ class PaymentViewSet(viewsets.GenericViewSet):
                 "currency": currency},
             "description": "This is the payment transaction description."
         }]
-        # sanbox mode
-        paypalrestsdk.configure({
-            "mode": settings.PAYPAL_CONFIG["mode"],
-            "client_id": settings.PAYPAL_CONFIG["client_id"],
-            "client_secret": settings.PAYPAL_CONFIG["client_secret"]
-        })
-        # live mode
+        # 之前寫死
         # paypalrestsdk.configure({
-        #     "mode": "live",
-        #     "client_id": campaign_obj.meta_payment["sg"]["paypal"]["paypal_clientId"],
-        #     "client_secret": campaign_obj.meta_payment["sg"]["paypal"]["paypal_secret"]
+        #     "mode": settings.PAYPAL_CONFIG["mode"],
+        #     "client_id": settings.PAYPAL_CONFIG["client_id"],
+        #     "client_secret": settings.PAYPAL_CONFIG["client_secret"]
         # })
+        paypalrestsdk.configure({
+            "mode": "sandbox",  # live
+            "client_id": campaign_obj.meta_payment["sg"]["paypal"]["paypal_clientId"],
+            "client_secret": campaign_obj.meta_payment["sg"]["paypal"]["paypal_secret"]
+        })
         payment = paypalrestsdk.Payment({
             "intent": "sale",
             "payer": {
                 "payment_method": "paypal"},
             "redirect_urls": {
-                "return_url": settings.PAYPAL_CONFIG["complete_url"] + f"?order_id={order_id}",
-                "cancel_url": f"{settings.LOCAL_API_SERVER}/buyer/order/{order_id}/confirmation"
+                "return_url": f"{settings.GCP_API_LOADBALANCER_URL}/api/payment/paypal_payment_complete_check?order_id={order_id}",
+                "cancel_url": f"{settings.WEB_SERVER_URL}/payment/cancel"
             },
             "transactions": data
         })
@@ -315,25 +315,18 @@ class PaymentViewSet(viewsets.GenericViewSet):
         order_object = Verify.get_order(order_id)
         campaign_obj = order_object.campaign
 
-        # sandbox mode
         paypalrestsdk.configure({
-            "mode": settings.PAYPAL_CONFIG["mode"],
-            "client_id": settings.PAYPAL_CONFIG["client_id"],
-            "client_secret": settings.PAYPAL_CONFIG["client_secret"]
+            "mode": "sandbox",  # live
+            "client_id": campaign_obj.meta_payment["sg"]["paypal"]["paypal_clientId"],
+            "client_secret": campaign_obj.meta_payment["sg"]["paypal"]["paypal_secret"]
         })
-        # live mode
-        # paypalrestsdk.configure({
-        #     "mode": "live",
-        #     "client_id": campaign_obj.meta_payment["sg"]["paypal"]["paypal_clientId"],
-        #     "client_secret": campaign_obj.meta_payment["sg"]["paypal"]["paypal_secret"]
-        # })
 
         payment = paypalrestsdk.Payment.find(paymentId)
         if payment.execute({"payer_id": payer_id}):
             print("Payment execute successfully")
             order_object.status = "complete"
             order_object.save()
-            return HttpResponseRedirect(f"http://localhost:8000/buyer/order/{order_object.id}/confirmation")
+            return HttpResponseRedirect(f'{settings.WEB_SERVER_URL}/buyer/order/{order_object.id}/confirmation')
         else:
             print(payment.error)  # Error Hash
             return Response(payment.error)
@@ -417,7 +410,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         # if status == 'completed' and float(total) == float(amount):
         db.api_order.update_one(
             { 'id': int(order_id) },
-            { '$set': {'status': 'complete', 'checkout_details': hitpay_dict} }
+            { '$set': {'status': 'complete', 'checkout_details': hitpay_dict, 'payment_method': 'hitpay'} }
         )
 
         send_email(order_id)    
@@ -427,10 +420,6 @@ class PaymentViewSet(viewsets.GenericViewSet):
     @action(detail=False, methods=['PUT'], url_path=r'buyser_receipt_upload', parser_classes=(MultiPartParser,))
     @api_error_handler
     def buyser_receipt_upload(self, request):
-        meta_data = {
-            "last_five_digit": "",
-            "receipt_image": ""
-        }
         image = request.data["image"]
         print(f"image: {image}")
         # if not image:
@@ -452,18 +441,19 @@ class PaymentViewSet(viewsets.GenericViewSet):
         # _, user_subscription = verify_request(
         #     api_user, platform_name, platform_id)
 
-        send_email(order_id)
+        order.meta["receipt_image"] = ""
+        order.meta["last_five_digit"] = ""
         if image != "undefined":
             image_path = default_storage.save(
                 f'campaign/{order.campaign.id}/order/{order.id}/receipt/{image.name}', ContentFile(image.read()))
             image_path = settings.GS_URL + image_path
-            meta_data["receipt_image"] = image_path
+            order.meta["receipt_image"] = image_path
         if last_five_digit:
-            meta_data["last_five_digit"] = last_five_digit
-        order.meta = meta_data
+            order.meta["last_five_digit"] = last_five_digit
         order.payment_method = "Direct Payment"
         order.status = "complete"
         order.save()
+        send_email(order_id)
 
         return Response({"message": "upload succeed"}, status=status.HTTP_200_OK)
 

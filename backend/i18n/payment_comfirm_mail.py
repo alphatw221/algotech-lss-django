@@ -5,26 +5,26 @@ from django.utils.translation import ugettext as _
 
 
 @lang_translate_default_en
-def i18n_get_mail_content(order_id, campaign_data, order_data, lang=None):
+def i18n_get_mail_content(order_id, campaign_data, order_data, shop_name, lang=None):
     meta = order_data['meta']
     products = order_data['products']
     campaign_title = campaign_data['title']
     meta_logistic = campaign_data['meta_logistic']
 
     mail_content = f'<h3>Order # {str(order_id)}</h3>'
-    mail_content+= f'<h3>Campaign Name : {campaign_title}</h3>----------------------------------------<br>'
-    mail_content+= f'<b>FB Name : {order_data["customer_name"]}</b><br>'
+    mail_content+= f'<h3>{shop_name} : {campaign_title}</h3>----------------------------------------<br>'
+    mail_content+= f'<b>FB Name : </b>{order_data["customer_name"]}<br>'
     mail_content+= f'<b>Delivery To : </b><br>' 
-    mail_content+= f'<b>{order_data["shipping_first_name"]} {order_data["shipping_last_name"]}<br>'
+    mail_content+= f'{order_data["shipping_first_name"]} {order_data["shipping_last_name"]}<br>'
     mail_content+= f'{order_data["shipping_phone"]}<br>'
-    mail_content+= f'<b>Shipping way: {order_data["shipping_method"]}</b><br>'
+    mail_content+= f'<b>Delivery way : </b>{order_data["shipping_method"]}<br>'
     try:
         if order_data['shipping_method'] == 'in_store':
-            mail_content+= f'<b>Pick up store : {meta["pick_up_store"]} ,  {meta["pick_up_store_address"]}</b><br>'
-            mail_content+= f'<b>Pick up date : {meta["pick_up_date"]}</b><br><br>'
+            mail_content+= f'<b>Pick up store : </b>{meta["pick_up_store"]} ,  {meta["pick_up_store_address"]}<br>'
+            mail_content+= f'<b>Pick up date : </b>{meta["pick_up_date"]}<br><br>'
         else:
-            mail_content+= f'<b>Shipping address : {order_data["shipping_address_1"]} , {order_data["shipping_location"]} , {order_data["shipping_region"]}</b><br>'
-            mail_content+= f'<b>Shipping date : {order_data["shipping_date"].strftime("%m/%d/%Y")}</b><br><br>'
+            mail_content+= f'<b>Delivery address : </b>{order_data["shipping_address_1"]}, {order_data["shipping_location"]}, {order_data["shipping_region"]}, {order_data["shipping_postcode"]}<br>'
+            mail_content+= f'<b>Delivery date : </b>{order_data["shipping_date"].strftime("%m/%d/%Y")}<br><br>'
     except:
         pass
     # mail_content+= '\n----------- Summary -----------\n'
@@ -33,6 +33,7 @@ def i18n_get_mail_content(order_id, campaign_data, order_data, lang=None):
     # for key, val in products.items():
     #     mail_content+= '$' + str(products[key]['price']) + '   ' + str(products[key]['qty']).zfill(3) + '   $' + str(products[key]['subtotal']) + '    ' + products[key]['name'] + '\n'
 
+    mail_content+= f'<b>Payment method : </b>{order_data["payment_method"]}<br>'
     mail_content+= '<table style="border-collapse: collapse;"><tr><th style="border: 1px solid black;">Item</th><th style="border: 1px solid black;">Price</th><th style="border: 1px solid black;">Qty</th><th style="border: 1px solid black;">Totoal</th></tr>'
     for key, product in products.items():
         mail_content+= f'<tr><td style="border: 1px solid black;">{product["name"]}</td><td style="border: 1px solid black;">${product["price"]}</td><td style="border: 1px solid black;">{product["qty"]}</td><td style="border: 1px solid black;">{product["subtotal"]}</td></tr>'
