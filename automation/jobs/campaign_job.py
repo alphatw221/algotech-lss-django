@@ -25,18 +25,18 @@ from api.utils.error_handle.error_handler.capture_platform_error_handler import 
 @campaign_job_error_handler
 def campaign_job(campaign_id):
 
-    print(f"campaign_id: {campaign_id}\n")
+    print(f"campaign_id: {campaign_id}")
     campaign = db.api_campaign.find_one({"id": campaign_id})
-    print("-------------------------------------------------------------------------\n")
+    print("-------------------------------------------------------------------------")
     print("Facebook:\n")
     capture_facebook(campaign)
-    print("-------------------------------------------------------------------------\n")
+    print("-------------------------------------------------------------------------")
     print("Youtube:\n")
     capture_youtube(campaign)
-    print("-------------------------------------------------------------------------\n")
+    print("-------------------------------------------------------------------------")
     print("Instagram:\n")
     capture_instagram(campaign)
-    print("-------------------------------------------------------------------------\n")
+    print("-------------------------------------------------------------------------")
 
 @capture_platform_error_handler
 def capture_facebook(campaign):
@@ -63,9 +63,9 @@ def capture_facebook(campaign):
     # print(order_codes_mapping)
 
     code, data = api_fb_get_post_comments(page_token, post_id, since)
-    print(f"post_id: {post_id}\n")
-    print(f"since: {since}\n")
-    print(f"code: {code}\n")
+    print(f"post_id: {post_id}")
+    print(f"since: {since}")
+    print(f"code: {code}")
 
     if code // 100 != 2 and 'error' in data and data['error']['type'] in ('GraphMethodException', 'OAuthException'):
         facebook_campaign['post_id'] = ''
@@ -162,9 +162,9 @@ def capture_youtube(campaign):
     code, data = api_youtube_get_live_chat_comment(
         next_page_token, live_chat_id, 100)
 
-    print(f"live_chat_id: {live_chat_id}\n")
-    print(f"next_page_token: {next_page_token}\n")
-    print(f"code: {code}\n")
+    print(f"live_chat_id: {live_chat_id}")
+    print(f"next_page_token: {next_page_token}")
+    print(f"code: {code}")
 
     if code // 100 != 2 and 'error' in data:
         youtube_campaign['remark'] = f'Facebook API error: {data["error"]["message"]}'
@@ -263,9 +263,9 @@ def capture_instagram(campaign):
         code, data = api_ig_get_after_post_comments(
             page_token, post_id, page_after)
 
-    print(f"page_token: {page_token}\n")
-    print(f"live_media_id  : {post_id}\n")
-    print(f"code: {code}\n")
+    print(f"page_token: {page_token}")
+    print(f"live_media_id  : {post_id}")
+    print(f"code: {code}")
 
     if code // 100 != 2 and 'error' in data and data['error']['type'] in ('GraphMethodException', 'OAuthException'):
         instagram_campaign['post_id'] = post_id
