@@ -21,10 +21,8 @@ from api.models.youtube.youtube_channel import YoutubeChannel
 from api.models.instagram.instagram_profile import InstagramProfile
 from django.conf import settings
 from django.core.mail import send_mail as django_send_mail
-import pendulum, time
+import pendulum, time, datetime
 
-import datetime
-import hashlib
 from django.http import HttpResponseRedirect
 from api.models.user.user_subscription import UserSubscriptionSerializerMeta
 from api.utils.common.verify import Verify
@@ -40,6 +38,12 @@ from api.utils.error_handle.error.api_error import ApiVerifyError
 import hmac, hashlib, base64, binascii
 from backend.i18n.payment_comfirm_mail import i18n_get_mail_content, i18n_get_mail_subject
 from api.utils.error_handle.error_handler.email_error_handle import email_error_handler
+from mail.sender.sender import send_smtp_mail
+
+
+
+platform_dict = {'facebook':FacebookPage, 'youtube':YoutubeChannel, 'instagram':InstagramProfile}
+
 
 @email_error_handler
 def send_email(order_id):
@@ -52,12 +56,9 @@ def send_email(order_id):
 
     mail_subject = i18n_get_mail_subject(shop_name)
     mail_content = i18n_get_mail_content(order_id, campaign_data, order_data)
+    
+    send_smtp_mail(customer_email, mail_subject, mail_content)
 
-    django_send_mail(mail_subject, mail_content, settings.EMAIL_HOST_USER, [customer_email], fail_silently = False)
-    print(f'{pendulum.now()} - {customer_email} - {"success"}')
-  
-
-platform_dict = {'facebook':FacebookPage, 'youtube':YoutubeChannel, 'instagram':InstagramProfile}
 
 class PaymentViewSet(viewsets.GenericViewSet):
     queryset = User.objects.none()

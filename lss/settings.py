@@ -302,12 +302,12 @@ GCP_PROJECT_ID = "liveshowseller"
 
 # mail app
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
+EMAIL_HOST = 'mail.liveshowseller.com' ## smtp.gmail.com
+EMAIL_PORT = 465
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
-EMAIL_HOST_USER = 'derekhwang@accoladeglobal.net' ## noreply@liveshowseller.com
-EMAIL_HOST_PASSWORD = 'jyhudyfbvpmewjsc'
+EMAIL_HOST_USER = 'noreply@liveshowseller.com' ## derekhwang@accoladeglobal.net
+EMAIL_HOST_PASSWORD = 'bq5^82DrrpQ4' ## jyhudyfbvpmewjsc
 
 # cron app
 CRON_CLASSES = [

@@ -1,8 +1,11 @@
-from mail.models import Mail
+import pendulum, time, smtplib
+
 from django.conf import settings
 from django.core.mail import send_mail as django_send_mail
-import pendulum, time
+
+from mail.models import Mail
 from mail.sender.mail_info import MailInfo
+from email.mime.text import MIMEText
 from api.utils.error_handle.error.api_error import ApiVerifyError
 
 
@@ -57,3 +60,21 @@ def send_Email(mail_list):
         #TODO writing error in order meta 
         pass
         # raise ApiVerifyError('email address wrong format')
+
+
+def send_smtp_mail(customer_email, mail_subject, mail_content):
+    mailserver = settings.EMAIL_HOST
+    username_send = settings.EMAIL_HOST_USER
+    password = settings.EMAIL_HOST_PASSWORD
+    username_recv = customer_email
+    mail = MIMEText(mail_content, 'html')
+    mail['Subject'] = mail_subject
+    mail['From'] = username_send
+    mail['To'] = username_recv
+    
+    smtp = smtplib.SMTP_SSL(mailserver)
+    smtp.login(username_send, password)
+    smtp.sendmail(username_send, username_recv, mail.as_string())
+    smtp.quit()
+
+    print(f'{pendulum.now()} - {customer_email} - {"success"}')
