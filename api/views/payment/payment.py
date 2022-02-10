@@ -55,7 +55,7 @@ def send_email(order_id):
     customer_email = order_data['shipping_email']
 
     mail_subject = i18n_get_mail_subject(shop_name)
-    mail_content = i18n_get_mail_content(order_id, campaign_data, order_data)
+    mail_content = i18n_get_mail_content(order_id, campaign_data, order_data, shop_name)
     
     send_smtp_mail(customer_email, mail_subject, mail_content)
 
@@ -417,7 +417,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         # if status == 'completed' and float(total) == float(amount):
         db.api_order.update_one(
             { 'id': int(order_id) },
-            { '$set': {'status': 'complete', 'checkout_details': hitpay_dict} }
+            { '$set': {'status': 'complete', 'checkout_details': hitpay_dict, 'payment_method': 'hitpay'} }
         )
 
         send_email(order_id)    
