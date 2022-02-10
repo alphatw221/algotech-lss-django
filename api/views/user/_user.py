@@ -13,7 +13,6 @@ from rest_framework.response import Response
 from rest_framework import status
 from api.utils.common.verify import ApiVerifyError
 from backend.api.facebook.user import api_fb_get_me_login
-from backend.api.youtube.user import api_google_get_me
 from lss.views.custom_jwt import CustomTokenObtainPairSerializer
 from backend.api.instagram.user import *
 
