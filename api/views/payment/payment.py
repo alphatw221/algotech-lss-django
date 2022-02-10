@@ -427,10 +427,10 @@ class PaymentViewSet(viewsets.GenericViewSet):
     @action(detail=False, methods=['PUT'], url_path=r'buyser_receipt_upload', parser_classes=(MultiPartParser,))
     @api_error_handler
     def buyser_receipt_upload(self, request):
-        meta_data = {
-            "last_five_digit": "",
-            "receipt_image": ""
-        }
+        # meta_data = {
+        #     "last_five_digit": "",
+        #     "receipt_image": ""
+        # }
         image = request.data["image"]
         print(f"image: {image}")
         # if not image:
@@ -443,6 +443,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             raise ApiVerifyError("no order found")
 
         order = Order.objects.get(id=order_id)
+        meta_data = order.meta
         api_user = Order.objects.get(id=order_id).campaign.created_by
         print(api_user)
         platform_name = order.platform
@@ -452,7 +453,6 @@ class PaymentViewSet(viewsets.GenericViewSet):
         # _, user_subscription = verify_request(
         #     api_user, platform_name, platform_id)
 
-        send_email(order_id)
         if image != "undefined":
             image_path = default_storage.save(
                 f'campaign/{order.campaign.id}/order/{order.id}/receipt/{image.name}', ContentFile(image.read()))
@@ -464,6 +464,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         order.payment_method = "Direct Payment"
         order.status = "complete"
         order.save()
+        send_email(order_id)
 
         return Response({"message": "upload succeed"}, status=status.HTTP_200_OK)
 
