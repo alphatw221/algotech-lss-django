@@ -16,7 +16,7 @@ from automation.jobs.comment_job import comment_job
 from backend.pymongo.mongodb import db, client
 
 import time
-import datetime
+from datetime import datetime
 from dateutil import parser
 from backend.api.youtube.viedo import api_youtube_get_video_info_with_access_token, api_youtube_get_video_info_with_api_key
 from api.utils.error_handle.error_handler.campaign_job_error_handler import campaign_job_error_handler
@@ -133,11 +133,14 @@ def capture_youtube(campaign):
     youtube_campaign = campaign['youtube_campaign']
     access_token = youtube_campaign.get('access_token')
     refresh_token = youtube_campaign.get('refresh_token')
-
+    
 
     if not access_token or not refresh_token:
         print("need both access_token and refresh_token")
         return
+
+    
+
 
     # live_chat_id = youtube_campaign.get('live_video_id')
 
@@ -233,6 +236,17 @@ def capture_youtube(campaign):
         youtube_campaign['latest_comment_time'] = parser.parse(
             comments[-1]['snippet']['publishedAt']).timestamp()
         youtube_campaign['is_failed'] = False
+
+        last_refresh_timestamp = youtube_campaign.get('last_refresh_timestamp',1)
+        now_timestamp = datetime.timestamp(datetime.now())
+        if last_refresh_timestamp+3000 <= now_timestamp:
+            #refresh_token
+
+
+            youtube_campaign['last_refresh_timestamp'] = now_timestamp
+            pass
+
+
         db.api_campaign.update_one({'id': campaign['id']}, {
                                    "$set": {'youtube_campaign': youtube_campaign}})
     except Exception as e:
