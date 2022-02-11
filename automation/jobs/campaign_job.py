@@ -147,8 +147,8 @@ def capture_youtube(campaign):
         if not live_video_id:
             print('no live_video_id')
             return
-        code, data = api_youtube_get_video_info_with_api_key(live_video_id)
-        # code, data = api_youtube_get_video_info_with_access_token(access_token, live_video_id)
+        # code, data = api_youtube_get_video_info_with_api_key(live_video_id)
+        code, data = api_youtube_get_video_info_with_access_token(access_token, live_video_id)
         if code // 100 != 2:
 
             print("video info error")
