@@ -1,13 +1,12 @@
 import os
 import django
-
-from backend.api.google.user import api_google_post_refresh_token
 try:
     os.environ['DJANGO_SETTINGS_MODULE'] = 'lss.settings'  # for rq_job
     django.setup()
 except Exception:
     pass
 
+from backend.api.google.user import api_google_post_refresh_token
 from backend.api.facebook.post import api_fb_get_post_comments
 from backend.api.instagram.post import api_ig_get_post_comments, api_ig_get_after_post_comments
 from backend.api.instagram.user import api_ig_get_id_from, api_ig_get_profile_picture
@@ -193,7 +192,7 @@ def capture_youtube(campaign):
 
     if not comments:
         return
-        
+
     is_failed = youtube_campaign.get('is_failed')
     latest_comment_time = youtube_campaign.get('latest_comment_time', 1)
 
