@@ -13,6 +13,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from api.utils.common.verify import ApiVerifyError
 from backend.api.facebook.user import api_fb_get_me_login
+from backend.api.google.user import api_google_get_token
 from lss.views.custom_jwt import CustomTokenObtainPairSerializer
 from backend.api.instagram.user import *
 
@@ -84,16 +85,17 @@ def google_login_helper(request, user_type='customer'):
     code = request.GET.get("code")
     campaign_id = request.GET.get("state")
 
-    response = requests.post(
-        url="https://accounts.google.com/o/oauth2/token",
-        data={
-            "code": code,
-            "client_id": "536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com",
-            "client_secret": "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",
-            "redirect_uri": settings.GCP_API_LOADBALANCER_URL + "/api/user/google_user_callback",
-            "grant_type": "authorization_code"
-        }
-    )
+    # response = requests.post(
+    #     url="https://accounts.google.com/o/oauth2/token",
+    #     data={
+    #         "code": code,
+    #         "client_id": "536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com",
+    #         "client_secret": "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",
+    #         "redirect_uri": settings.GCP_API_LOADBALANCER_URL + "/api/user/google_user_callback",
+    #         "grant_type": "authorization_code"
+    #     }
+    # )
+    code, response = api_google_get_token(code, settings.GCP_API_LOADBALANCER_URL + "/api/user/google_user_callback")
     if not response.status_code / 100 == 2:
         return HttpResponse(f"NOT OK")
     access_token = response.json().get("access_token")
