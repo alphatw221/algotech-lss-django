@@ -7,7 +7,7 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from api.models.user.user import User, UserSerializer
 from api.models.youtube.youtube_channel import YoutubeChannel
 from api.utils.common.verify import ApiVerifyError
-from api.views.user._user import facebook_login_helper, google_login_helper
+from api.views.user._user import facebook_login_helper, google_login_helper, google_fast_login_helper
 from backend.api.facebook.user import api_fb_get_accounts_from_user
 from backend.api.facebook.page import api_fb_get_page_picture
 from backend.api.youtube.channel import api_youtube_get_list_channel
@@ -37,15 +37,25 @@ class UserViewSet(viewsets.ModelViewSet):
     def user_login(self, request, pk=None):
         return facebook_login_helper(request, user_type='user')
 
-    @action(detail=False, methods=['GET'], url_path=r'google_customer_callback')
-    @api_error_handler
-    def google_customer_callback(self, request):
-        return google_login_helper(request, user_type='customer')
+    
 
     @action(detail=False, methods=['GET'], url_path=r'google_user_callback')
     @api_error_handler
     def google_user_callback(self, request):
+        return google_fast_login_helper(request, user_type='user')
+
+
+
+    @action(detail=False, methods=['GET'], url_path=r'google_customer_login_callback')
+    @api_error_handler
+    def google_customer_login_callback(self, request):
+        return google_login_helper(request, user_type='customer')
+
+    @action(detail=False, methods=['GET'], url_path=r'google_user_login_callback')
+    @api_error_handler
+    def google_user_login_callback(self, request):
         return google_login_helper(request, user_type='user')
+
 
 
     @api_error_handler

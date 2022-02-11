@@ -9,7 +9,7 @@ except Exception:
 from backend.api.facebook.post import api_fb_get_post_comments
 from backend.api.instagram.post import api_ig_get_post_comments, api_ig_get_after_post_comments
 from backend.api.instagram.user import api_ig_get_id_from, api_ig_get_profile_picture
-from backend.api.youtube.live_chat import api_youtube_get_live_chat_comment
+from backend.api.youtube.live_chat import api_youtube_get_live_chat_comment_with_access_token, api_youtube_get_live_chat_comment_with_api_key
 from backend.python_rq.python_rq import comment_queue
 from automation.jobs.comment_job import comment_job
 
@@ -18,7 +18,7 @@ from backend.pymongo.mongodb import db, client
 import time
 import datetime
 from dateutil import parser
-from backend.api.youtube.viedo import api_youtube_get_video_info
+from backend.api.youtube.viedo import api_youtube_get_video_info_with_access_token, api_youtube_get_video_info_with_api_key
 from api.utils.error_handle.error_handler.campaign_job_error_handler import campaign_job_error_handler
 from api.utils.error_handle.error_handler.capture_platform_error_handler import capture_platform_error_handler
 
@@ -131,9 +131,12 @@ def capture_youtube(campaign):
     # token = youtube_channel['token']
 
     youtube_campaign = campaign['youtube_campaign']
-    token = youtube_campaign.get('access_token')
+    access_token = youtube_campaign.get('access_token')
+    refresh_token = youtube_campaign.get('refresh_token')
 
-    if not token:
+
+    if not access_token or not refresh_token:
+        print("need both access_token and refresh_token")
         return
 
     # live_chat_id = youtube_campaign.get('live_video_id')
@@ -144,7 +147,8 @@ def capture_youtube(campaign):
         if not live_video_id:
             print('no live_video_id')
             return
-        code, data = api_youtube_get_video_info(live_video_id)
+        code, data = api_youtube_get_video_info_with_api_key(live_video_id)
+        # code, data = api_youtube_get_video_info_with_access_token(access_token, live_video_id)
         if code // 100 != 2:
 
             print("video info error")
@@ -163,7 +167,7 @@ def capture_youtube(campaign):
 
     next_page_token = youtube_campaign.get('next_page_token', "")
 
-    if not token or not live_chat_id:
+    if not access_token or not live_chat_id:
         return
 
     # campaign_products = db.api_campaign_product.find(
@@ -172,8 +176,10 @@ def capture_youtube(campaign):
     #                        for campaign_product in campaign_products}
     order_codes_mapping = OrderCodesMappingSingleton.get_mapping(campaign['id'])
 
-    code, data = api_youtube_get_live_chat_comment(
+    code, data = api_youtube_get_live_chat_comment_with_api_key(
         next_page_token, live_chat_id, 100)
+    # code, data = api_youtube_get_live_chat_comment_with_access_token(
+    #     next_page_token, live_chat_id, 100)
 
     print(f"live_chat_id: {live_chat_id}")
     print(f"next_page_token: {next_page_token}")

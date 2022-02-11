@@ -2,7 +2,7 @@ from backend.api.youtube._youtube_api_caller import YoutubeApiCaller
 from django.conf import settings
 
 
-def api_youtube_get_video_info(video_id: str):
+def api_youtube_get_video_info_with_api_key(video_id: str):
     params = {
         "key": settings.YOUTUBE_API_KEY,
         "id": video_id,
@@ -11,6 +11,14 @@ def api_youtube_get_video_info(video_id: str):
     ret = YoutubeApiCaller('videos', params=params).get()
     return ret
 
+def api_youtube_get_video_info_with_access_token(access_token: str, video_id: str):
+    params = {
+        # "key": settings.YOUTUBE_API_KEY,
+        "id": video_id,
+        "part": "id,snippet,liveStreamingDetails",
+    }
+    ret = YoutubeApiCaller('videos', bearer_token=access_token, params=params).get()
+    return ret
 
 def api_youtube_get_video_comment_thread(page_token: str, video_id: str, max_results: int):
     params = {

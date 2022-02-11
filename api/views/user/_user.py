@@ -80,8 +80,7 @@ def facebook_login_helper(request, user_type='user'):
 
     return Response(ret, status=status.HTTP_200_OK)
 
-
-def google_login_helper(request, user_type='customer'):
+def google_fast_login_helper(request, user_type='customer'):
     code = request.GET.get("code")
     campaign_id = request.GET.get("state")
 
@@ -104,9 +103,32 @@ def google_login_helper(request, user_type='customer'):
     campaign_object.save()
     print(response.json())
     return HttpResponse(f"OK")
+
+def google_login_helper(request, user_type='customer'):
+    code = request.GET.get("code")
+    # campaign_id = request.GET.get("state")
+
+    response = requests.post(
+        url="https://accounts.google.com/o/oauth2/token",
+        data={
+            "code": code,
+            "client_id": "536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com",
+            "client_secret": "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",
+            "redirect_uri": settings.GCP_API_LOADBALANCER_URL + "/api/user/google_user_callback",
+            "grant_type": "authorization_code"
+        }
+    )
+    if not response.status_code / 100 == 2:
+        return HttpResponse(f"NOT OK")
+    access_token = response.json().get("access_token")
+    refresh_token = response.json().get("refresh_toekn")
+
     #//--------------------------------
 
     #google api here
+
+    #derek here
+
 
     if response.status_code / 100 != 2:
         raise ApiVerifyError("google user token invalid")
@@ -148,7 +170,8 @@ def google_login_helper(request, user_type='customer'):
     if user_type=='user' and api_user.status != 'valid':
         raise ApiVerifyError('account not activated')
 
-    api_user.google_info["token"] = google_user_token
+    api_user.google_info["access_token"] = access_token
+    api_user.google_info['refresh_token'] = refresh_token
     api_user.google_info["id"] = google_id
     api_user.google_info["name"] = google_name
     api_user.google_info["picture"] = google_picture
