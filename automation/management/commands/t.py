@@ -1,5 +1,6 @@
 import imp
 import pprint
+import requests
 
 from api.models.campaign.campaign import Campaign
 from api.models.campaign.campaign_product import CampaignProduct
@@ -49,9 +50,26 @@ class Command(BaseCommand):
         # self.ipg_test()
         # self.youtube_test()
         # campaign_job(80)
-        send_email(273)
+        # send_email(273)
+        # code,data = api_google_post_refresh_token("1//0eEcTGHyIHZidCgYIARAAGA4SNwF-L9IrBxG90zwkR-Y7k4QoYBjY5H8JjykXbHi1QvqbVdaZPNejuNpkcxc8wjVIixgC_UKgCeQ")
+        # print(code)
+        # print(data)
+
+        response = requests.post(
+            url="https://accounts.google.com/o/oauth2/token",
+            data={
+                "client_id": "536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com",  #TODO keep it to settings
+                "client_secret": "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",                                 #TODO keep it to settings
+                "grant_type": "refresh_token",
+                "refresh_token": "1//0eEcTGHyIHZidCgYIARAAGA4SNwF-L9IrBxG90zwkR-Y7k4QoYBjY5H8JjykXbHi1QvqbVdaZPNejuNpkcxc8wjVIixgC_UKgCeQ"
+            },)
 
 
+        print(response.status_code)
+        print(response.json())
+    
+
+        
     def campaign_test(self):
         cs = CampaignManager.get_active_campaigns()
         print(cs)

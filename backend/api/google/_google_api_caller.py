@@ -9,3 +9,7 @@ class GoogleApiCaller(RestApiJsonCaller):
 @dataclass
 class GoogleAccountApiCaller(RestApiJsonCaller):
     domain_url: str = "https://accounts.google.com"
+
+@dataclass
+class GoogleOauth2ApiCaller(RestApiJsonCaller):
+    domain_url: str = "https://oauth2.googleapis.com"
