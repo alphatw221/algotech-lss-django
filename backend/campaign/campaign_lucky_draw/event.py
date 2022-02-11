@@ -126,8 +126,6 @@ class DrawFromCartProductsEvent(CampaignLuckyDrawEvent):
         
         candidate_set = set()
         for order_product in order_products:
-            print ('order_product')
-            print (order_product)
             if order_product.customer_id == page_id:
                 continue
             else:
@@ -184,8 +182,6 @@ class DrawFromCampaignCommentsEvent(ABC):
                 candidate_set.add(
                     (campaign_comment['platform'], campaign_comment['customer_id'], campaign_comment['customer_name'])
                 )
-        print ('candidate_set')
-        print (candidate_set)
         
         if self.unrepeat == 'True':
             candidate_set = get_final_set(candidate_set, winner_set, self.winner_num)
@@ -265,8 +261,6 @@ def get_final_set(candidate_set, winner_set, winner_num):
     for candidate in candidate_set:
         if not candidate[1] in winner_set:
             exclusive_set.add(candidate) 
-    print ('exclusive_set')
-    print (exclusive_set)
     if (len(exclusive_set) <= winner_num):
         exclusive_set = candidate_set
     candidate_set = exclusive_set

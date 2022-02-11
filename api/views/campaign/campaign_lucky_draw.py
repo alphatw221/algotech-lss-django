@@ -35,43 +35,17 @@ def verify_user(api_user, platform_name, platform_id):
     if platform:
         return True
 
-
+#TODO v1.2 reverse save in meta when lucky draw appear
 def get_winner_json(winner_lists):
     response_list = []
-    try:
-        if (len(winner_lists[0]) == 3):
-            for winner_list in winner_lists:
-                winner = {}
-                winner['platform'] = winner_list[0]
-                winner['customer_id'] = winner_list[1]
-                winner['customer_name'] = winner_list[2]
-                
-                if winner_list[0] == 'facebook':
-                    try:
-                        winner_datas = db.api_user.find({'facebook_info.id': winner_list[1]})
-                        for winner_data in winner_datas:
-                            winner['img_url'] = winner_data['facebook_info']['picture']
-                    except:
-                        winner['img_url'] = ''
-
-                response_list.append(winner)
-            response_json = { 'winner_list': response_list }
-        # elif (len(winner_lists[0]) > 5):
-        #     for winner in winner_lists:
-        #         # print ('winner')
-        #         # print (winner)
-        #         winnerJson = {}
-        #         winner_info = db.api_user.find_one({'facebook_info.id': winner})
-        #         winnerJson['platform'] = 'facebook'
-        #         winnerJson['customer_id'] = winner
-        #         winnerJson['customer_name'] = winner_info['name']
-        #         winnerJson['customer_id'] = winner_info['picture']
-        #         response_list.append(winnerJson)
-        #     response_json = { 'winner_list': response_list }
-        else:
-            response_json = { 'winner_list': [] }
-    except:
-        response_json = { 'winner_list': [] }
+    for winner in winner_lists:
+        winner_json = {}
+        winner_json['platform'] = winner[0]
+        winner_json['customer_id'] = winner[1]
+        winner_json['customer_name'] = winner[2]
+        winner_json['img_url'] = winner[3]
+        response_list.append(winner_json)
+    response_json = { 'winner_list': response_list }
     return response_json
 
 
@@ -104,26 +78,22 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
         winner_json = {}
         if _verify_user:
             winner_json['campaign_title'] = db.api_campaign.find_one({'id': campaign_id})['title']
+            winner_infos, winner_list = db.api_campaign_lucky_draw.find({'campaign_id': campaign_id}), []
 
-            winner_infos = db.api_campaign_lucky_draw.find({'campaign_id': campaign_id})
-            winner_list = []
             for winner_info in winner_infos:
                 if winner_info['winner_list']:
                     response = get_winner_json(winner_info['winner_list'])
                     for winner in response['winner_list']:
                         json = {}
                         prize_name = db.api_campaign_product.find_one({'id': winner_info['prize_campaign_product_id']})['name']
-                        # print (winner)
-
                         json['name'] = winner['customer_name']
                         try:
                             json['img'] = winner['img_url']
                         except:
                             json['img'] = ''
                         json['prize_name'] = prize_name
-                        json['datetime'] = winner_info['created_at']
+                        json['datetime'] = winner_info['created_at'].strftime('%Y-%m-%d')
                         winner_list.append(json)
-                    # print (winner_info['id'])
             winner_json['winner_list'] = winner_list
 
         return Response(winner_json, status=status.HTTP_200_OK)
