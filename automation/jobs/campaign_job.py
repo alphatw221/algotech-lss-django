@@ -15,7 +15,7 @@ from backend.python_rq.python_rq import comment_queue
 from automation.jobs.comment_job import comment_job
 
 from backend.pymongo.mongodb import db, client
-
+import requests
 import time
 from datetime import datetime
 from dateutil import parser
@@ -233,7 +233,17 @@ def capture_youtube(campaign):
         if last_refresh_timestamp+3000 <= now_timestamp:
             #refresh_token
             print("refreshing token...")
-            code, refresh_token_response = api_google_post_refresh_token(refresh_token)
+            response = requests.post(
+            url="https://accounts.google.com/o/oauth2/token",
+            data={
+                "client_id": "536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com",  #TODO keep it to settings
+                "client_secret": "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",                                 #TODO keep it to settings
+                "grant_type": "refresh_token",
+                "refresh_token": refresh_token
+            },)
+
+            code, refresh_token_response = response.status_code, response.json()
+            # code, refresh_token_response = api_google_post_refresh_token(refresh_token)
             print(f"refresh status :{code}")
             print(f"refresh data: {refresh_token_response}")
             if code // 100 != 2:
