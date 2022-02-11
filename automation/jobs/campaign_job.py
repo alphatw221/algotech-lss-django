@@ -331,8 +331,6 @@ def capture_instagram(campaign):
             if page_after_index + 1 > count:
                 continue
             else:
-                if count == 1:
-                    created_at = comment['timestamp']
                 try:
                     is_failed = instagram_campaign['is_failed']
                     latest_comment_time = instagram_campaign['latest_comment_time']
@@ -367,6 +365,7 @@ def capture_instagram(campaign):
                                                                  uni_format_comment, order_codes_mapping), result_ttl=10, failure_ttl=10)
                     else:
                         continue
+                created_at = comment['timestamp']
                 page_after_index = count
         instagram_campaign['is_failed'] = False
         instagram_campaign['last_create'] = created_at
