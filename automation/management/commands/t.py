@@ -1,3 +1,4 @@
+import imp
 import pprint
 
 from api.models.campaign.campaign import Campaign
@@ -28,6 +29,7 @@ from backend.api.instagram.user import *
 from backend.api.youtube.viedo import api_youtube_get_video_info_with_api_key
 from automation.jobs.campaign_job import campaign_job
 from mail.sender.sender import *
+from api.views.payment.payment import * 
 
 
 class Command(BaseCommand):
@@ -46,11 +48,9 @@ class Command(BaseCommand):
         # self.campaign_test()
         # self.ipg_test()
         # self.youtube_test()
-        campaign_job(63)
-        
+        # campaign_job(80)
+        send_email(273)
 
-        # ret = api_ig_get_user_content('EAANwBngXqOABAICPRO2rWvnvQFmc0pvzZA2iPKGK6G3Xjw6ZBhIW9bRSRZBlezi6jnE7HOyH5imeSG1BgyteiyE0J0MnZAZBjyCoa4rKZAZCVu5Rb3WIbOXklCT5titey5yxQvNpZBpOwYSqZAVk6U9Gvm2UguBOGneo1ZCxZCnNaer2TxJoZAVL8Kx9GgCdVBrMtYfSoVBqNZAWKjwZDZD', '17841450481107774')
-        # print (ret)
 
     def campaign_test(self):
         cs = CampaignManager.get_active_campaigns()

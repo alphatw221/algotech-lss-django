@@ -27,11 +27,6 @@ def i18n_get_mail_content(order_id, campaign_data, order_data, shop_name, lang=N
             mail_content+= f'<b>Delivery date : </b>{order_data["shipping_date"].strftime("%m/%d/%Y")}<br><br>'
     except:
         pass
-    # mail_content+= '\n----------- Summary -----------\n'
-    # mail_content+= 'Price    Qty    Total      Item\n'
-    # mail_content+= '-----------------------------\n'
-    # for key, val in products.items():
-    #     mail_content+= '$' + str(products[key]['price']) + '   ' + str(products[key]['qty']).zfill(3) + '   $' + str(products[key]['subtotal']) + '    ' + products[key]['name'] + '\n'
 
     mail_content+= f'<b>Payment method : </b>{order_data["payment_method"]}<br>'
     mail_content+= '<table style="border-collapse: collapse;"><tr><th style="border: 1px solid black;">Item</th><th style="border: 1px solid black;">Price</th><th style="border: 1px solid black;">Qty</th><th style="border: 1px solid black;">Totoal</th></tr>'
