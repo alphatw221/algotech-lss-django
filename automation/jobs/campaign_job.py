@@ -1,5 +1,7 @@
 import os
 import django
+
+from backend.api.google.user import api_google_post_refresh_token
 try:
     os.environ['DJANGO_SETTINGS_MODULE'] = 'lss.settings'  # for rq_job
     django.setup()
@@ -139,10 +141,6 @@ def capture_youtube(campaign):
         print("need both access_token and refresh_token")
         return
 
-    
-
-
-    # live_chat_id = youtube_campaign.get('live_video_id')
 
     live_chat_id = youtube_campaign.get('live_chat_id')
     if not live_chat_id:
@@ -173,16 +171,11 @@ def capture_youtube(campaign):
     if not access_token or not live_chat_id:
         return
 
-    # campaign_products = db.api_campaign_product.find(
-    #     {"campaign_id": campaign['id'], "$or": [{"type": "product"}, {"type": "product-fast"}]})
-    # order_codes_mapping = {campaign_product['order_code'].lower(): campaign_product
-    #                        for campaign_product in campaign_products}
     order_codes_mapping = OrderCodesMappingSingleton.get_mapping(campaign['id'])
 
     code, data = api_youtube_get_live_chat_comment_with_api_key(
         next_page_token, live_chat_id, 100)
-    # code, data = api_youtube_get_live_chat_comment_with_access_token(
-    #     next_page_token, live_chat_id, 100)
+    # code, data = api_youtube_get_live_chat_comment_with_access_token(access_token, next_page_token, live_chat_id, 100)
 
     print(f"live_chat_id: {live_chat_id}")
     print(f"next_page_token: {next_page_token}")
@@ -200,8 +193,7 @@ def capture_youtube(campaign):
 
     if not comments:
         return
-    # is_failed, latest_comment_time = False,
-
+        
     is_failed = youtube_campaign.get('is_failed')
     latest_comment_time = youtube_campaign.get('latest_comment_time', 1)
 
@@ -241,11 +233,15 @@ def capture_youtube(campaign):
         now_timestamp = datetime.timestamp(datetime.now())
         if last_refresh_timestamp+3000 <= now_timestamp:
             #refresh_token
-
-
-            youtube_campaign['last_refresh_timestamp'] = now_timestamp
-            pass
-
+            print("refreshing token...")
+            code, refresh_token_response = api_google_post_refresh_token(refresh_token)
+            print(f"refresh status :{code}")
+            print(f"refresh data: {refresh_token_response}")
+            if code // 100 != 2:
+                del youtube_campaign['refresh_token']
+            else:
+                youtube_campaign['access_token'] = refresh_token_response.get('access_token')
+                youtube_campaign['last_refresh_timestamp'] = now_timestamp
 
         db.api_campaign.update_one({'id': campaign['id']}, {
                                    "$set": {'youtube_campaign': youtube_campaign}})
