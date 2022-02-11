@@ -291,11 +291,11 @@ def capture_instagram(campaign):
     if not page_token or not post_id:
         return
 
-    # campaign_products = db.api_campaign_product.find(
-    #     {"campaign_id": campaign['id'], "$or": [{"type": "product"}, {"type": "product-fast"}]})
-    # order_codes_mapping = {campaign_product['order_code'].lower(): campaign_product
-    #                        for campaign_product in campaign_products}
-    order_codes_mapping = OrderCodesMappingSingleton.get_mapping(campaign['id'])
+    campaign_products = db.api_campaign_product.find(
+        {"campaign_id": campaign['id'], "$or": [{"type": "product"}, {"type": "product-fast"}]})
+    order_codes_mapping = {campaign_product['order_code'].lower(): campaign_product
+                           for campaign_product in campaign_products}
+    # order_codes_mapping = OrderCodesMappingSingleton.get_mapping(campaign['id'])
     
     code, data = '', ''
     if page_after == '':
