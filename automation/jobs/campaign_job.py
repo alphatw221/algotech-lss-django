@@ -328,7 +328,7 @@ def capture_instagram(campaign):
         #     comment = comments[i]
         for comment in comments:
             count += 1
-            if page_after_index > count:
+            if page_after_index + 1 > count:
                 continue
             else:
                 if count == 1:
