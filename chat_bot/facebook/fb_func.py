@@ -6,6 +6,7 @@ import pendulum, re
 
 from api.models.facebook.facebook_page import FacebookPage
 from backend.pymongo.mongodb import db
+from datetime import datetime
 from backend.api.facebook.chat_bot import api_fb_post_page_message_chat_bot
 
 
@@ -19,26 +20,30 @@ def get_auto_response(fb_id, message):
 def handleTextMessage(page_id, sender_id, message):
     try:
         fb_id = FacebookPage.objects.get(page_id = page_id).id
-        
+        campaign_id_list = []
         try:
-            campaign_id = Campaign.objects.filter(
-                facebook_page_id = fb_id,
-                start_at__lt = pendulum.now(),
-                end_at__gt = pendulum.now(),
-            ).latest('start_at').id
+           # campaign_id = Campaign.objects.filter(
+           #     facebook_page_id = fb_id,
+           #     start_at__lt = pendulum.now(),
+           #     end_at__gt = pendulum.now(),
+           # ).latest('start_at').id
+            campaign_datas = db.api_campaign.find({'facebook_page_id': fb_id, 'start_at': {'$lt': datetime.now()}, 'end_at': {'$gt': datetime.now()}})
+            for campaign_data in campaign_datas:
+                campaign_id_list.append(campaign_data['id'])
         except Exception:
-            campaign_id = -1
-        
-        comment_count = CampaignComment.objects.filter(
-            campaign_id = campaign_id,
-            customer_id = sender_id,
-            platform = 'facebook'
-        ).count()
+            campaign_id_list.append(-1)
+        print (campaign_id_list)
+        comment_count = db.api_campaign_comment.find({'campaign_id':{'$in': campaign_id_list}, 'customer_id': sender_id, 'platform': 'facebook'}).count()
+        #comment_count = CampaignComment.objects.filter(
+        #    campaign_id = campaign_id,
+        #    customer_id = sender_id,
+        #    platform = 'facebook'
+        #).count()
 
         if comment_count > 0:
-            outout_msg = get_auto_response(fb_id, message['text'])
+            output_msg = get_auto_response(fb_id, message['text'])
             page_token = FacebookPage.objects.get(page_id = page_id).token
-            response = {'text': outout_msg}
+            response = {'text': output_msg}
             api_fb_post_page_message_chat_bot(page_token, sender_id, response)
         else:
             print ('user not commented before')
