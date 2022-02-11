@@ -84,22 +84,24 @@ def google_fast_login_helper(request, user_type='customer'):
     code = request.GET.get("code")
     campaign_id = request.GET.get("state")
 
-    # response = requests.post(
-    #     url="https://accounts.google.com/o/oauth2/token",
-    #     data={
-    #         "code": code,
-    #         "client_id": "536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com",
-    #         "client_secret": "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",
-    #         "redirect_uri": settings.GCP_API_LOADBALANCER_URL + "/api/user/google_user_callback",
-    #         "grant_type": "authorization_code"
-    #     }
-    # )
-    code, response = api_google_get_token(code, settings.GCP_API_LOADBALANCER_URL + "/api/user/google_user_callback")
+    response = requests.post(
+        url="https://accounts.google.com/o/oauth2/token",
+        data={
+            "code": code,
+            "client_id": "536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com",
+            "client_secret": "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",
+            "redirect_uri": settings.GCP_API_LOADBALANCER_URL + "/api/user/google_user_callback",
+            "grant_type": "authorization_code"
+        }
+    )
+    # code, response = api_google_post_token(code, "http://localhost:8001" + "/api/user/google_user_callback")
     if not response.status_code / 100 == 2:
         return HttpResponse(f"NOT OK")
     access_token = response.json().get("access_token")
+    refresh_token = response.json().get("refresh_token")
     campaign_object = Campaign.objects.get(id=campaign_id)
     campaign_object.youtube_campaign["access_token"] = access_token
+    campaign_object.youtube_campaign["refresh_token"] = refresh_token
     campaign_object.save()
     print(response.json())
     return HttpResponse(f"OK")
