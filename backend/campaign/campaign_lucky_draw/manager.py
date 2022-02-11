@@ -19,7 +19,10 @@ from backend.cart.cart_product.request_processor import \
     CartProductRequestProcessorLuckyDraw
 from backend.cart.cart_product.request_validator import \
     CartProductRequestValidatorLuckyDraw
-from backend.pymongo.mongodb import db
+
+from backend.pymongo.mongodb import db, get_incremented_filed
+from api.models.order.pre_order import api_pre_order_template
+from datetime import datetime
 
 
 class CampaignLuckyDrawManager:
@@ -44,8 +47,36 @@ class CampaignLuckyDrawManager:
             return lucky_draw
         for winner in lucky_draw.winner_list:
             _json = {}
+            
             try:
-                pre_order, created = PreOrder.objects.get_or_create(campaign=campaign, platform=winner[0], customer_id=winner[1], customer_name=winner[2])
+                # pre_order, created = PreOrder.objects.get_or_create(campaign=campaign, platform=winner[0], customer_id=winner[1], customer_name=winner[2])
+                pre_order = db.api_pre_order.find_one({'campaign_id': int(campaign.id), 'platform': winner[0], 'customer_id': winner[1], 'customer_name': winner[2]})
+                if not pre_order:
+                    increment_id = get_incremented_filed(
+                    collection_name="api_pre_order", field_name="id")
+
+                    template = api_pre_order_template.copy()
+                    template.update({
+                        'id': increment_id,
+                        'customer_id': winner[1],
+                        'customer_name': winner[2],
+                        'customer_img': '',
+                        'campaign_id': campaign.id,
+                        'platform': winner[0],
+                        'platform_id': platform['id'],
+                        'created_at': datetime.utcnow()
+                    })
+
+                    try:
+                        _id = db.api_pre_order.insert_one(template).inserted_id
+                        pre_order = db.api_pre_order.find_one(_id)
+                    except Exception as e:
+                        print(e)
+                        print('new pre_order error!!!!!')
+                        continue
+                else:
+                    pre_order, created = PreOrder.objects.get_or_create(campaign=campaign, platform=winner[0], customer_id=winner[1], customer_name=winner[2])
+
                 PreOrderHelper.add_product(None, pre_order=pre_order, campaign_product=prize_campaign_product, qty=1)
                 result = CampaignAnnouncer.announce_lucky_draw_winner(lucky_draw, winner[2])
                 response_result.append(result)
@@ -109,9 +140,20 @@ class CampaignLuckyDrawProcessor:
         try:
             if self.num_of_winner > len(candidate_set):
                 self.num_of_winner = len(candidate_set)
-            winner_list = random.sample(candidate_set, self.num_of_winner)
+            winner_list, final_winner_list = random.sample(candidate_set, self.num_of_winner), []
+            for winner in winner_list:
+                winner_datas, img_url = db.api_user.find({'facebook_info.id': winner[1], 'type': 'customer'}), ''
+                for winner_data in winner_datas:
+                    try:
+                        img_url = winner_data['facebook_info']['picture']
+                    except:
+                        continue
+                winner = list(winner)
+                winner.append(img_url)
+                final_winner_list.append(winner)
+                print ('final_winner_list', final_winner_list)
         except Exception:
-            winner_list = []
+            final_winner_list = []
 
         return campaign_lucky_draw.create_campaign_lucky_draw(
             campaign=self.campaign,
@@ -122,4 +164,4 @@ class CampaignLuckyDrawProcessor:
             condition_type=self.event.get_condition_type(),
             num_of_winner=self.num_of_winner,
             candidate_list=list(candidate_set),
-            winner_list=winner_list)
+            winner_list=final_winner_list)
