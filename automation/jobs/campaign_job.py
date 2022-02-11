@@ -163,12 +163,13 @@ def capture_youtube(campaign):
             print("no liveStreamingDetails")
             return
         live_chat_id = liveStreamingDetails.get('activeLiveChatId')
+        if not live_chat_id:
+            print("can't get live_chat_id")
+            return
         youtube_campaign['live_chat_id'] = live_chat_id
+        db.api_campaign.update_one({'id': campaign['id']}, { "$set": {'youtube_campaign': youtube_campaign}})
 
     next_page_token = youtube_campaign.get('next_page_token', "")
-
-    if not access_token or not live_chat_id:
-        return
 
     order_codes_mapping = OrderCodesMappingSingleton.get_mapping(campaign['id'])
 
