@@ -26,7 +26,7 @@ from backend.pymongo.mongodb import db
 from api.models.youtube.youtube_channel import YoutubeChannel
 from automation.jobs.campaign_job import *
 from backend.api.instagram.user import *
-from backend.api.youtube.viedo import api_youtube_get_video_info
+from backend.api.youtube.viedo import api_youtube_get_video_info_with_api_key
 from automation.jobs.campaign_job import campaign_job
 from mail.sender.sender import *
 from api.views.payment.payment import * 
@@ -124,7 +124,7 @@ class Command(BaseCommand):
         IPG_Helper.create_payment(timezone, chargetotal, currency)
 
     def youtube_test(self):
-        ret, code = api_youtube_get_video_info("5qap5aO4i9A")
+        ret, code = api_youtube_get_video_info_with_api_key("5qap5aO4i9A")
 
         print(f"code :{code}")
         print(f"ret :{ret}")

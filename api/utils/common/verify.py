@@ -77,7 +77,10 @@ class Verify():
     def get_seller_user(request):
         if not request.user.api_users.filter(type='user').exists():
             raise ApiVerifyError('no api_user found')
-        return request.user.api_users.get(type='user')
+        api_user = request.user.api_users.get(type='user')
+        if api_user.status != "valid":
+            raise ApiVerifyError("not activated user")
+        return api_user
         
     @staticmethod
     def verify_user(api_user):

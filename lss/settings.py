@@ -261,7 +261,7 @@ INSTAGRAM_API_URL = "https://graph.instagram.com"
 YOUTUBE_API_URL = "https://www.googleapis.com/youtube/v3"
 # YOUTUBE_API_KEY = "AIzaSyDcsngr4WwNI5HUi9CNMLVRgCx5YdTaaA0"
 YOUTUBE_API_KEY = "AIzaSyAoK27UOjKezYRRBriBqL7kUrmXXRYH3Kw"
-
+GOOGLE_API_URL = "https://www.googleapis.com/"
 YOUTUBE_API_CONFIG = {
     "web": {
         "project_id": "primeval-nectar-322805",
@@ -332,11 +332,12 @@ REDIS_SERVER = {
 GCP_API_LOADBALANCER_URL = "https://gipassl.algotech.app"
 LOCAL_API_SERVER = "http://localhost:8001"
 # paypal settings
+# package github: https://github.com/paypal/PayPal-Python-SDK
+
 PAYPAL_CONFIG = {
     "mode": "sandbox",
     "client_id": "ASABJtviIflIhkeEH4QBeYuhQoN7RWcPsC6fN-TXIfzhMQ2UDK1raOVd3xBWAmItoAg2WRgI4Nbpde8J",  # it's sandbox
     "client_secret": "EFEGnvXwP8DsSUYF5zoQ5ZkaArtlpzAlgpWJOwBlHRMUP6NwAq8-KmnTv087ihZrAIlyg5VtKo73Wj54",  # it's sandbox
-    "complete_url": f"{LOCAL_API_SERVER}/api/payment/paypal_payment_complete_check",
 }
 
 # APPEND_SLASH=False

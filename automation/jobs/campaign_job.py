@@ -9,7 +9,7 @@ except Exception:
 from backend.api.facebook.post import api_fb_get_post_comments
 from backend.api.instagram.post import api_ig_get_post_comments, api_ig_get_after_post_comments
 from backend.api.instagram.user import api_ig_get_id_from, api_ig_get_profile_picture
-from backend.api.youtube.live_chat import api_youtube_get_live_chat_comment
+from backend.api.youtube.live_chat import api_youtube_get_live_chat_comment_with_access_token, api_youtube_get_live_chat_comment_with_api_key
 from backend.python_rq.python_rq import comment_queue
 from automation.jobs.comment_job import comment_job
 
@@ -18,48 +18,48 @@ from backend.pymongo.mongodb import db, client
 import time
 import datetime
 from dateutil import parser
-from backend.api.youtube.viedo import api_youtube_get_video_info
+from backend.api.youtube.viedo import api_youtube_get_video_info_with_access_token, api_youtube_get_video_info_with_api_key
+from api.utils.error_handle.error_handler.campaign_job_error_handler import campaign_job_error_handler
+from api.utils.error_handle.error_handler.capture_platform_error_handler import capture_platform_error_handler
 
+class OrderCodesMappingSingleton:
 
+    order_codes_mapping = None
+
+    @classmethod
+    def get_mapping(cls, campaign_id):
+        if cls.order_codes_mapping == None:
+            campaign_products = db.api_campaign_product.find(
+                {"campaign_id": campaign_id, "$or": [{"type": "product"}, {"type": "product-fast"}]})
+            cls.order_codes_mapping = {campaign_product['order_code'].lower(): campaign_product
+                                for campaign_product in campaign_products}
+        return cls.order_codes_mapping
+
+@campaign_job_error_handler
 def campaign_job(campaign_id):
 
-    try:
-        print(f"campaign_id: {campaign_id}\n")
-        campaign = db.api_campaign.find_one({"id": campaign_id})
+    print(f"campaign_id: {campaign_id}")
+    campaign = db.api_campaign.find_one({"id": campaign_id})
+    print("-------------------------------------------------------------------------")
+    print("Facebook:\n")
+    capture_facebook(campaign)
+    print("-------------------------------------------------------------------------")
+    print("Youtube:\n")
+    capture_youtube(campaign)
+    print("-------------------------------------------------------------------------")
+    print("Instagram:\n")
+    capture_instagram(campaign)
+    print("-------------------------------------------------------------------------")
 
-        try:
-            if campaign['facebook_page_id']:
-                facebook_page = db.api_facebook_page.find_one(
-                    {"id": campaign['facebook_page_id']})
-                capture_facebook(campaign, facebook_page)
-        except Exception:
-            pass
-        print("-------------------------------------------------------------------------")
-        try:
-            if campaign['youtube_channel_id']:
-                youtube_channel = db.api_youtube_channel.find_one(
-                    {'id': campaign['youtube_channel_id']})
-                capture_youtube(campaign, youtube_channel)
-        except Exception as e:
-            print(f"youtube error: {e}")
-            pass
-        print("-------------------------------------------------------------------------")
-        try:
-            if campaign['instagram_profile_id']:
-                instagram_post = db.api_instagram_profile.find_one(
-                    {'id': int(campaign['instagram_profile_id'])})
-                # if not facebook_page:
-                #     facebook_page = db.api_facebook_page.find_one({"id": campaign['facebook_page_id']})
-                capture_instagram(campaign, instagram_post)
-        except Exception as e:
-            print(e)
-            pass
-        print("-------------------------------------------------------------------------")
-    except Exception:
-        pass
+@capture_platform_error_handler
+def capture_facebook(campaign):
 
+    if not campaign['facebook_page_id']:
+        return
 
-def capture_facebook(campaign, facebook_page):
+    facebook_page = db.api_facebook_page.find_one(
+        {"id": campaign['facebook_page_id']})
+
     page_token = facebook_page['token']
     facebook_campaign = campaign['facebook_campaign']
     post_id = facebook_campaign.get('post_id', '')
@@ -68,19 +68,16 @@ def capture_facebook(campaign, facebook_page):
     if not page_token or not post_id:
         return
 
-    campaign_products = db.api_campaign_product.find(
-        {"campaign_id": campaign['id'], "$or": [{"type": "product"}, {"type": "product-fast"}]})
-    order_codes_mapping = {campaign_product['order_code'].lower(): campaign_product
-                           for campaign_product in campaign_products}
-
-    # print(order_codes_mapping)
+    # campaign_products = db.api_campaign_product.find(
+    #     {"campaign_id": campaign['id'], "$or": [{"type": "product"}, {"type": "product-fast"}]})
+    # order_codes_mapping = {campaign_product['order_code'].lower(): campaign_product
+    #                        for campaign_product in campaign_products}
+    order_codes_mapping = OrderCodesMappingSingleton.get_mapping(campaign['id'])
 
     code, data = api_fb_get_post_comments(page_token, post_id, since)
-    print(f"page_token: {page_token}\n")
-    print(f"post_id: {post_id}\n")
-    print(f"since: {since}\n")
-    print(f"code: {code}\n")
-    print("platform: facebook\n")
+    print(f"post_id: {post_id}")
+    print(f"since: {since}")
+    print(f"code: {code}")
 
     if code // 100 != 2 and 'error' in data and data['error']['type'] in ('GraphMethodException', 'OAuthException'):
         facebook_campaign['post_id'] = ''
@@ -123,10 +120,24 @@ def capture_facebook(campaign, facebook_page):
     db.api_campaign.update_one({'id': campaign['id']}, {
                                "$set": {'facebook_campaign': facebook_campaign}})
 
+@capture_platform_error_handler
+def capture_youtube(campaign):
 
-def capture_youtube(campaign, youtube_channel):
-    page_token = youtube_channel['page_token']
+    # if not campaign['youtube_channel_id']:
+    #     return
+
+    youtube_channel = db.api_youtube_channel.find_one(
+                {'id': campaign['youtube_channel_id']})
+    # token = youtube_channel['token']
+
     youtube_campaign = campaign['youtube_campaign']
+    access_token = youtube_campaign.get('access_token')
+    refresh_token = youtube_campaign.get('refresh_token')
+
+
+    if not access_token or not refresh_token:
+        print("need both access_token and refresh_token")
+        return
 
     # live_chat_id = youtube_campaign.get('live_video_id')
 
@@ -136,7 +147,8 @@ def capture_youtube(campaign, youtube_channel):
         if not live_video_id:
             print('no live_video_id')
             return
-        code, data = api_youtube_get_video_info(live_video_id)
+        code, data = api_youtube_get_video_info_with_api_key(live_video_id)
+        # code, data = api_youtube_get_video_info_with_access_token(access_token, live_video_id)
         if code // 100 != 2:
 
             print("video info error")
@@ -155,22 +167,23 @@ def capture_youtube(campaign, youtube_channel):
 
     next_page_token = youtube_campaign.get('next_page_token', "")
 
-    if not page_token or not live_chat_id:
+    if not access_token or not live_chat_id:
         return
 
-    campaign_products = db.api_campaign_product.find(
-        {"campaign_id": campaign['id'], "$or": [{"type": "product"}, {"type": "product-fast"}]})
-    order_codes_mapping = {campaign_product['order_code'].lower(): campaign_product
-                           for campaign_product in campaign_products}
+    # campaign_products = db.api_campaign_product.find(
+    #     {"campaign_id": campaign['id'], "$or": [{"type": "product"}, {"type": "product-fast"}]})
+    # order_codes_mapping = {campaign_product['order_code'].lower(): campaign_product
+    #                        for campaign_product in campaign_products}
+    order_codes_mapping = OrderCodesMappingSingleton.get_mapping(campaign['id'])
 
-    code, data = api_youtube_get_live_chat_comment(
+    code, data = api_youtube_get_live_chat_comment_with_api_key(
         next_page_token, live_chat_id, 100)
+    # code, data = api_youtube_get_live_chat_comment_with_access_token(
+    #     next_page_token, live_chat_id, 100)
 
-    print(f"page_token: {page_token}\n")
-    print(f"live_chat_id: {live_chat_id}\n")
-    print(f"next_page_token: {next_page_token}\n")
-    print(f"code: {code}\n")
-    print("platform: youtube\n")
+    print(f"live_chat_id: {live_chat_id}")
+    print(f"next_page_token: {next_page_token}")
+    print(f"code: {code}")
 
     if code // 100 != 2 and 'error' in data:
         youtube_campaign['remark'] = f'Facebook API error: {data["error"]["message"]}'
@@ -232,8 +245,15 @@ def capture_youtube(campaign, youtube_channel):
                                    "$set": {'youtube_campaign': youtube_campaign}})
         return
 
+@capture_platform_error_handler
+def capture_instagram(campaign):
 
-def capture_instagram(campaign, instagram_post):
+    if not campaign['instagram_profile_id']:
+        return
+
+    instagram_post = db.api_instagram_profile.find_one(
+        {'id': int(campaign['instagram_profile_id'])})
+
     page_token = instagram_post['token']
     instagram_campaign = campaign['instagram_campaign']
     post_id = instagram_campaign['live_media_id']
@@ -251,10 +271,12 @@ def capture_instagram(campaign, instagram_post):
     if not page_token or not post_id:
         return
 
-    campaign_products = db.api_campaign_product.find(
-        {"campaign_id": campaign['id'], "$or": [{"type": "product"}, {"type": "product-fast"}]})
-    order_codes_mapping = {campaign_product['order_code'].lower(): campaign_product
-                           for campaign_product in campaign_products}
+    # campaign_products = db.api_campaign_product.find(
+    #     {"campaign_id": campaign['id'], "$or": [{"type": "product"}, {"type": "product-fast"}]})
+    # order_codes_mapping = {campaign_product['order_code'].lower(): campaign_product
+    #                        for campaign_product in campaign_products}
+    order_codes_mapping = OrderCodesMappingSingleton.get_mapping(campaign['id'])
+    
     code, data = '', ''
     if page_after == '':
         code, data = api_ig_get_post_comments(page_token, post_id)
@@ -262,10 +284,8 @@ def capture_instagram(campaign, instagram_post):
         code, data = api_ig_get_after_post_comments(
             page_token, post_id, page_after)
 
-    print(f"page_token: {page_token}\n")
-    print(f"0.  : {post_id}\n")
-    print(f"code: {code}\n")
-    print("platform: instagram\n")
+    print(f"live_media_id  : {post_id}")
+    print(f"code: {code}")
 
     if code // 100 != 2 and 'error' in data and data['error']['type'] in ('GraphMethodException', 'OAuthException'):
         instagram_campaign['post_id'] = post_id

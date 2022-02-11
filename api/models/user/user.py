@@ -42,6 +42,8 @@ class User(models.Model):
     facebook_info = models.JSONField(null=True, blank=True, default=dict)
     instagram_info = models.JSONField(null=True, blank=True, default=dict)
     youtube_info = models.JSONField(null=True, blank=True, default=dict)
+    google_info = models.JSONField(null=True, blank=True, default=dict)
+    
     user_plan = models.ForeignKey(
         UserPlan, null=True, on_delete=models.SET_NULL, related_name='users')
     meta = models.JSONField(null=True, blank=True, default=dict)
