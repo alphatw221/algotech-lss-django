@@ -147,8 +147,8 @@ def capture_youtube(campaign):
         if not live_video_id:
             print('no live_video_id')
             return
-        # code, data = api_youtube_get_video_info_with_api_key(live_video_id)
-        code, data = api_youtube_get_video_info_with_access_token(access_token, live_video_id)
+        code, data = api_youtube_get_video_info_with_api_key(live_video_id)
+        # code, data = api_youtube_get_video_info_with_access_token(access_token, live_video_id)
         if code // 100 != 2:
 
             print("video info error")
@@ -172,9 +172,9 @@ def capture_youtube(campaign):
 
     order_codes_mapping = OrderCodesMappingSingleton.get_mapping(campaign['id'])
 
-    code, data = api_youtube_get_live_chat_comment_with_api_key(
-        next_page_token, live_chat_id, 100)
-    # code, data = api_youtube_get_live_chat_comment_with_access_token(access_token, next_page_token, live_chat_id, 100)
+    # code, data = api_youtube_get_live_chat_comment_with_api_key(
+    #     next_page_token, live_chat_id, 100)
+    code, data = api_youtube_get_live_chat_comment_with_access_token(access_token, next_page_token, live_chat_id, 100)
 
     print(f"live_chat_id: {live_chat_id}")
     print(f"next_page_token: {next_page_token}")
