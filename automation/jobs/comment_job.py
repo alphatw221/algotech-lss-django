@@ -97,7 +97,7 @@ def comment_job(campaign, platform_name, platform, comment, order_codes_mapping)
         print('no state')
         return
     print(f"state: {state}")
-    comment_responding(platform_name, platform, pre_order,
+    comment_responding(platform_name, platform, campaign, pre_order,
                        comment, campaign_product, qty, state)
 
 
@@ -114,7 +114,7 @@ def command_responding(platform_name, platform, campaign, comment, command):
         return
 
 
-def comment_responding(platform_name, platform, pre_order, comment, campaign_product, qty, state):
+def comment_responding(platform_name, platform, campaign, pre_order, comment, campaign_product, qty, state):
     # return
     if platform_name == 'facebook':
         text = i18n_get_request_response(
@@ -132,13 +132,19 @@ def comment_responding(platform_name, platform, pre_order, comment, campaign_pro
 
         shopping_cart_info, info_in_pm_notice = i18n_get_additional_text(pre_order,
                                                                          lang=platform['lang'])
+        
 
         customer_name =comment['customer_name']
         text = f"@{customer_name}"+ text+f"Shopping Cart: {settings.WEB_SERVER_URL}/buyer/cart/{pre_order['id']}"
         live_chat_id = comment.get("live_chat_id")
         if not live_chat_id:
             return
-        access_token = platform.get('page_token')
+
+
+        # access_token = platform.get('page_token')
+
+        youtube_campaign = campaign['youtube_campaign']
+        access_token = youtube_campaign.get('access_token')
         if not access_token :
             print("no access token")
             return
