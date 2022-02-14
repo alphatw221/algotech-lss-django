@@ -55,19 +55,18 @@ class Command(BaseCommand):
         # print(code)
         # print(data)
 
-        response = requests.post(
-            url="https://accounts.google.com/o/oauth2/token",
-            data={
-                "client_id": "536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com",  #TODO keep it to settings
-                "client_secret": "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",                                 #TODO keep it to settings
-                "grant_type": "refresh_token",
-                "refresh_token": "1//0eEcTGHyIHZidCgYIARAAGA4SNwF-L9IrBxG90zwkR-Y7k4QoYBjY5H8JjykXbHi1QvqbVdaZPNejuNpkcxc8wjVIixgC_UKgCeQ"
-            },)
+        # response = requests.post(
+        #     url="https://accounts.google.com/o/oauth2/token",
+        #     data={
+        #         "client_id": "536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com",  #TODO keep it to settings
+        #         "client_secret": "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",                                 #TODO keep it to settings
+        #         "grant_type": "refresh_token",
+        #         "refresh_token": "1//0eEcTGHyIHZidCgYIARAAGA4SNwF-L9IrBxG90zwkR-Y7k4QoYBjY5H8JjykXbHi1QvqbVdaZPNejuNpkcxc8wjVIixgC_UKgCeQ"
+        #     },)
 
 
-        print(response.status_code)
-        print(response.json())
-    
+        # print(response.status_code)
+        # print(response.json())
 
         
     def campaign_test(self):
