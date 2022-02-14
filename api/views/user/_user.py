@@ -1,3 +1,4 @@
+import traceback
 from datetime import datetime
 import string
 import random
@@ -13,7 +14,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from api.utils.common.verify import ApiVerifyError
 from backend.api.facebook.user import api_fb_get_me_login
-from backend.api.google.user import api_google_get_token
+from backend.api.google.user import api_google_get_userinfo
+from backend.api.youtube.viedo import api_youtube_get_video_info_with_access_token
 from lss.views.custom_jwt import CustomTokenObtainPairSerializer
 from backend.api.instagram.user import *
 
@@ -80,35 +82,83 @@ def facebook_login_helper(request, user_type='user'):
 
     return Response(ret, status=status.HTTP_200_OK)
 
-def google_fast_login_helper(request, user_type='customer'):
-    code = request.GET.get("code")
-    campaign_id = request.GET.get("state")
+# def google_fast_login_helper(request):
+#     code = request.GET.get("code")
+#     campaign_id = request.GET.get("state")
 
-    response = requests.post(
-        url="https://accounts.google.com/o/oauth2/token",
-        data={
-            "code": code,
-            "client_id": "536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com",
-            "client_secret": "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",
-            "redirect_uri": settings.GCP_API_LOADBALANCER_URL + "/api/user/google_user_callback",
-            "grant_type": "authorization_code"
-        }
-    )
-    # code, response = api_google_post_token(code, "http://localhost:8001" + "/api/user/google_user_callback")
-    if not response.status_code / 100 == 2:
+#     response = requests.post(
+#         url="https://accounts.google.com/o/oauth2/token",
+#         data={
+#             "code": code,
+#             "client_id": "536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com",
+#             "client_secret": "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",
+#             "redirect_uri": settings.GCP_API_LOADBALANCER_URL + "/api/user/google_user_callback",
+#             "grant_type": "authorization_code"
+#         }
+#     )
+#     # code, response = api_google_post_token(code, "http://localhost:8001" + "/api/user/google_user_callback")
+#     if not response.status_code / 100 == 2:
+
+def google_fast_login_helper(request, user_type='customer'):
+    def get_params(request):
+        code = request.GET.get("code")
+        state = request.GET.get("state").split(",")
+        campaign_id = state[0]
+        youtube_video_id = state[1]
+        print("campaign_id", campaign_id)
+        print("youtube_video_id", youtube_video_id)
+        return code, campaign_id, youtube_video_id
+    def api_google_post_token(code):
+        token_response = requests.post(
+            url="https://accounts.google.com/o/oauth2/token",
+            data={
+                "code": code,
+                "client_id": "536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com",
+                "client_secret": "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",
+                "redirect_uri": settings.GCP_API_LOADBALANCER_URL + "/api/user/google_user_callback",
+                "grant_type": "authorization_code"
+            }
+        )
+        # code, response = api_google_post_token(code, "http://localhost:8001" + "/api/user/google_user_callback")
+        if not token_response.status_code / 100 == 2:
+            raise
+        access_token = token_response.json().get("access_token")
+        refresh_token = token_response.json().get("refresh_token")
+        return access_token, refresh_token
+    def get_user_youtube_channel_id(access_token, youtube_video_id):
+        code, youtube_api_response = api_youtube_get_video_info_with_access_token(access_token, youtube_video_id)
+        if not code / 100 == 2:
+            raise
+        channelId = youtube_api_response["items"][0]["snippet"]["channelId"]
+        return channelId
+    def get_self_all_channels(access_token):
+        list_channel_response = requests.get(url=f"https://youtube.googleapis.com/youtube/v3/channels?part=id&mine=true&access_token={access_token}")
+        if not list_channel_response.status_code / 100 == 2:
+            raise
+        your_all_channels = [i["id"] for i in list_channel_response.json().get("items")]
+        return your_all_channels
+    def save_token_to_campaign(campaign_id, access_token, refresh_token):
+        campaign_object = Campaign.objects.get(id=campaign_id)
+        campaign_object.youtube_campaign["access_token"] = access_token
+        campaign_object.youtube_campaign["refresh_token"] = refresh_token
+        campaign_object.save()
+    try:
+        code, campaign_id, youtube_video_id = get_params(request)
+        access_token, refresh_token = api_google_post_token(code)
+        channelId = get_user_youtube_channel_id(access_token, youtube_video_id)
+        your_all_channels = get_self_all_channels(access_token)
+        if channelId not in your_all_channels:
+            return HttpResponse(f"This Youtube video doesn't belong to this account")
+        save_token_to_campaign(campaign_id, access_token, refresh_token)
+        return HttpResponse(f"OK")
+    except Exception as e:
+        print(traceback.format_exc())
         return HttpResponse(f"NOT OK")
-    access_token = response.json().get("access_token")
-    refresh_token = response.json().get("refresh_token")
-    campaign_object = Campaign.objects.get(id=campaign_id)
-    campaign_object.youtube_campaign["access_token"] = access_token
-    campaign_object.youtube_campaign["refresh_token"] = refresh_token
-    campaign_object.save()
-    print(response.json())
-    return HttpResponse(f"OK")
+
 
 def google_login_helper(request, user_type='customer'):
+
     code = request.GET.get("code")
-    # campaign_id = request.GET.get("state")
 
     response = requests.post(
         url="https://accounts.google.com/o/oauth2/token",
@@ -116,7 +166,7 @@ def google_login_helper(request, user_type='customer'):
             "code": code,
             "client_id": "536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com",
             "client_secret": "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",
-            "redirect_uri": settings.GCP_API_LOADBALANCER_URL + "/api/user/google_user_callback",
+            "redirect_uri": settings.GCP_API_LOADBALANCER_URL + "/api/user/google_user_login_callback",
             "grant_type": "authorization_code"
         }
     )
@@ -125,21 +175,16 @@ def google_login_helper(request, user_type='customer'):
     access_token = response.json().get("access_token")
     refresh_token = response.json().get("refresh_toekn")
 
-    #//--------------------------------
-
-    #google api here
-
-    #derek here
-
+    code, response = api_google_get_userinfo(access_token)
 
     if response.status_code / 100 != 2:
         raise ApiVerifyError("google user token invalid")
+
     google_id = response["id"]
     google_name = response["name"]
     google_picture = response["picture"]
     email = response["email"]
 
-    # //-------------------------------
     api_user_exists = User.objects.filter(
         email=email, type=user_type).exists()
     auth_user_exists = AuthUser.objects.filter(email=email).exists()
