@@ -84,7 +84,7 @@ def capture_facebook(campaign):
         facebook_campaign['post_id'] = ''
         facebook_campaign['remark'] = f'Facebook API error: {data["error"]}'
         db.api_campaign.update_one({'id': campaign['id']}, {
-                                   '$set': {"facebook_campaign", facebook_campaign}})
+                                   '$set': {"facebook_campaign": facebook_campaign}})
         return
 
     comment_capture_since = since
@@ -182,9 +182,11 @@ def capture_youtube(campaign):
     print(f"code: {code}")
 
     if code // 100 != 2 and 'error' in data:
-        youtube_campaign['remark'] = f'Facebook API error: {data["error"]["message"]}'
+        youtube_campaign['live_chat_id'] = ''
+        youtube_campaign['live_video_id'] = ''
+        youtube_campaign['remark'] = 'youtube API error'
         db.api_campaign.update_one({'id': campaign['id']}, {
-                                   '$set': {"youtube_campaign", youtube_campaign}})
+                                   '$set': {"youtube_campaign":youtube_campaign}})
         return
 
     next_page_token = data['nextPageToken']
@@ -311,7 +313,7 @@ def capture_instagram(campaign):
         instagram_campaign['post_id'] = post_id
         instagram_campaign['remark'] = f'Instagram API error: {data["error"]}'
         db.api_campaign.update_one({'id': campaign['id']}, {
-                                   '$set': {"instagram_campaign", instagram_campaign}})
+                                   '$set': {"instagram_campaign":instagram_campaign}})
         return
 
     comments = data.get('data', [])
