@@ -79,15 +79,21 @@ class DrawFromProductsEvent(CampaignLuckyDrawEvent):
             if order_data['customer_id'] == page_id:
                 continue
             else:
+                winner_datas, img_url = db.api_pre_order.find({'customer_id': order_data['customer_id'], 'campaign_id': self.campaign.id}), ''
+                for winner_data in winner_datas:
+                    img_url = winner_data['customer_img']
                 candidate_set.add(
-                    (order_data['platform'], order_data['customer_id'], order_data['customer_name'])
+                    (order_data['platform'], order_data['customer_id'], order_data['customer_name'], img_url)
                 )
         for order_data in pre_order_datas:
             if order_data['customer_id'] == page_id:
                 continue
             else:
+                winner_datas, img_url = db.api_pre_order.find({'customer_id': order_data['customer_id'], 'campaign_id': self.campaign.id}), ''
+                for winner_data in winner_datas:
+                    img_url = winner_data['customer_img']
                 candidate_set.add(
-                    (order_data['platform'], order_data['customer_id'], order_data['customer_name'])
+                    (order_data['platform'], order_data['customer_id'], order_data['customer_name'], img_url)
                 )
         if self.unrepeat == 'True':
             candidate_set = get_final_set(candidate_set, winner_set, self.winner_num)
@@ -129,8 +135,11 @@ class DrawFromCartProductsEvent(CampaignLuckyDrawEvent):
             if order_product.customer_id == page_id:
                 continue
             else:
+                winner_datas, img_url = db.api_pre_order.find({'customer_id': order_product.customer_id, 'campaign_id': self.campaign.id}), ''
+                for winner_data in winner_datas:
+                    img_url = winner_data['customer_img']
                 candidate_set.add(
-                    (order_product.platform, order_product.customer_id, order_product.customer_name)
+                    (order_product.platform, order_product.customer_id, order_product.customer_name, img_url)
                 )
         
         if self.unrepeat == 'True':
@@ -174,13 +183,14 @@ class DrawFromCampaignCommentsEvent(ABC):
 
         candidate_set = set()
         for campaign_comment in campaign_comments:
-            print ('campaign_comment')
-            print (campaign_comment)
             if (campaign_comment['customer_id'] == page_id):
                 continue
             else:
+                winner_datas, img_url = db.api_campaign_comment.find({'customer_id': campaign_comment['customer_id'], 'campaign_id': self.campaign.id}), ''
+                for winner_data in winner_datas:
+                    img_url = winner_data['image']
                 candidate_set.add(
-                    (campaign_comment['platform'], campaign_comment['customer_id'], campaign_comment['customer_name'])
+                    (campaign_comment['platform'], campaign_comment['customer_id'], campaign_comment['customer_name'], img_url)
                 )
         
         if self.unrepeat == 'True':
@@ -229,8 +239,11 @@ class DrawFromCampaignLikesEvent(ABC):
                     if (person['id'] == page_id):
                         continue
                     else:
+                        winner_datas, img_url = db.api_user.find({'facebook_info.id': person['id'], 'type': 'customer'}), ''
+                        for winner_data in winner_datas:
+                            img_url = winner_data['facebook_info']['picture']
                         candidate_set.add(
-                            ('facebook', person['id'], person['name'])
+                            ('facebook', person['id'], person['name'], img_url)
                         )
                 try:
                     after = response[1]['paging']['cursors']['after']
