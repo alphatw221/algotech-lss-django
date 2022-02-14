@@ -15,6 +15,7 @@ from api.models.youtube.youtube_channel import YoutubeChannel
 import datetime
 import hashlib
 from api.utils.common.verify import Verify
+from backend.api.youtube.channel import api_youtube_get_list_channel
 from backend.pymongo.mongodb import db
 
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
@@ -47,3 +48,31 @@ class YoutubeViewSet(viewsets.GenericViewSet):
         comments_json = loads(comments_str)
         return Response(comments_json, status=status.HTTP_200_OK)
         
+    
+    @action(detail=False, methods=['POST'], url_path=r'get_youtube_channel', permission_classes=(IsAuthenticated,))
+    @api_error_handler
+    def get_youtube_channel(self, request):
+
+        access_token = getdata(request, ('access_token',))
+
+        if not access_token:
+            raise ApiVerifyError('no access_token')
+
+        code, list_channel_response = api_youtube_get_list_channel(access_token)
+
+        if code//100 !=2:
+            raise ApiVerifyError('invalid access_token')
+        
+        #TODO dealing with next_page_token
+        for channel in list_channel_response['items']:
+
+            channel_id = channel['id']
+            snippet = channel['snippet']
+
+            channel_name = snippet['title']
+            thumbnails = snippet['thumbnails']
+            channel_image = thumbnails['default']['url']
+
+            youtube_channel = YoutubeChannel.objects.update_or_create(channel_id=channel_id, name=channel_name, image=channel_image)
+            
+        return Response(list_channel_response['items'], status=status.HTTP_200_OK)

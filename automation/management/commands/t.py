@@ -9,6 +9,8 @@ from api.utils.orm import campaign_comment, cart_product
 from backend.api.facebook.page import *
 from backend.api.facebook.post import *
 from backend.api.facebook.user import *
+from backend.api.google.user import api_google_get_userinfo
+from backend.api.youtube.channel import api_youtube_get_list_channel
 from backend.campaign.campaign.manager import CampaignManager
 # from backend.campaign.campaign_comment.comment_processor import *
 from backend.campaign.campaign_lucky_draw.event import (
@@ -55,19 +57,23 @@ class Command(BaseCommand):
         # print(code)
         # print(data)
 
-        response = requests.post(
-            url="https://accounts.google.com/o/oauth2/token",
-            data={
-                "client_id": "536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com",  #TODO keep it to settings
-                "client_secret": "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",                                 #TODO keep it to settings
-                "grant_type": "refresh_token",
-                "refresh_token": "1//0eEcTGHyIHZidCgYIARAAGA4SNwF-L9IrBxG90zwkR-Y7k4QoYBjY5H8JjykXbHi1QvqbVdaZPNejuNpkcxc8wjVIixgC_UKgCeQ"
-            },)
+        # response = requests.post(
+        #     url="https://accounts.google.com/o/oauth2/token",
+        #     data={
+        #         "client_id": "536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com",  #TODO keep it to settings
+        #         "client_secret": "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",                                 #TODO keep it to settings
+        #         "grant_type": "refresh_token",
+        #         "refresh_token": "1//0eEcTGHyIHZidCgYIARAAGA4SNwF-L9IrBxG90zwkR-Y7k4QoYBjY5H8JjykXbHi1QvqbVdaZPNejuNpkcxc8wjVIixgC_UKgCeQ"
+        #     },)
 
 
-        print(response.status_code)
-        print(response.json())
-    
+        # print(response.status_code)
+        # print(response.json())
+
+        code, response = api_youtube_get_list_channel("ya29.A0ARrdaM9yHOcb1GqssFQ93knIU9ahz5Qy8O-MsnBK90l5GxtWp6_J-Os2vcUNdZeXi7H3ACQEqbSmxvcyG95_S2An5g7vtXBzEPiUpB_yCTpcmMT9ZiqCoEVY-fUCACPttxE5TeJiiQZh3iARTWkwKQrhkxq5hg")
+
+        print(code)
+        print(response)
 
         
     def campaign_test(self):

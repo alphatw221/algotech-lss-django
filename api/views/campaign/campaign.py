@@ -3,6 +3,7 @@ import json
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
+from django.http import HttpResponse
 from rest_framework import status, viewsets
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated
@@ -17,7 +18,7 @@ from api.utils.common.verify import Verify
 from api.utils.common.verify import ApiVerifyError
 from api.utils.common.common import *
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
-
+import requests
 
 def verify_seller_request(api_user):
     Verify.verify_user(api_user)
@@ -218,3 +219,40 @@ class CampaignViewSet(viewsets.ModelViewSet):
                     comments_list.append(commentJson)
 
         return Response(comments_list, status=status.HTTP_200_OK)
+
+
+    # @action(detail=False, methods=['GET'], url_path=r'bind_youtube_channel_callback')
+    # @api_error_handler
+    # def bind_youtube_channel_callback(self, request):
+
+    #     code = request.GET.get("code")
+    #     state = request.GET.get("state")
+
+    #     platform_name, platform_id, user_platform_token, youtube_channel_id = state.split(',')
+
+    #     platform = Verify.get_platform_verify_with_token(user_platform_token, platform_name, platform_id)
+
+    #     youtube_channel_id
+    #     response = requests.post(
+    #         url="https://accounts.google.com/o/oauth2/token",
+    #         data={
+    #             "code": code,
+    #             "client_id": "536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com",
+    #             "client_secret": "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",
+    #             "redirect_uri": settings.GCP_API_LOADBALANCER_URL + "/api/campaign/bind_youtube_channel_callback",
+    #             "grant_type": "authorization_code"
+    #         }
+    #     )
+    #     # code, response = api_google_post_token(code, "http://localhost:8001" + "/api/user/google_user_callback")
+    #     if not response.status_code / 100 == 2:
+    #         return HttpResponse(f"NOT OK")
+
+    #     access_token = response.json().get("access_token")
+    #     refresh_token = response.json().get("refresh_token")
+    #     campaign_object = Campaign.objects.get(id=campaign_id)
+    #     campaign_object.youtube_campaign["access_token"] = access_token
+    #     campaign_object.youtube_campaign["refresh_token"] = refresh_token
+    #     campaign_object.save()
+    #     print(response.json())
+    #     return HttpResponse(f"OK")
+    

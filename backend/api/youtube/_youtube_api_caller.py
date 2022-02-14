@@ -10,3 +10,7 @@ class YoutubeApiCaller(RestApiJsonCaller):
 @dataclass
 class GoogleApiCaller(RestApiJsonCaller):
     domain_url: str = settings.GOOGLE_API_URL
+
+@dataclass
+class YoutubeGoogleApiCaller(RestApiJsonCaller):
+    domain_url: str = "https://youtube.googleapis.com/youtube/v3"

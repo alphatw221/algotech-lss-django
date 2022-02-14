@@ -68,6 +68,27 @@ class Verify():
         return False
 
     @staticmethod
+    def check_is_admin_by_token(token, platform_name, platform):
+        try:
+            if platform_name == 'facebook':
+                status_code, response = api_fb_get_me_accounts(
+                    token)
+                for item in response['data']:
+                    if item['id'] == platform.page_id:
+                        return True
+                return False
+            elif platform_name == 'youtube':
+                # return api_user.youtube_info[''] == platform.xxx
+                return True
+            elif platform_name == 'instagram':
+                # api_user.instagram_info['']
+
+                return True
+        except Exception as e:
+            return False
+        return False
+
+    @staticmethod
     def get_customer_user(request):
         if not request.user.api_users.filter(type='customer').exists():
             raise ApiVerifyError('no api_user found')
@@ -101,6 +122,18 @@ class Verify():
             raise ApiVerifyError("user is not platform admin")
         return platform
     
+    @classmethod
+    def get_platform_verify_with_token(cls, token, platform_name, platform_id):
+        if platform_name not in platform_dict:
+            raise ApiVerifyError("no platfrom name found")
+        if not platform_dict[platform_name].objects.filter(id=platform_id).exists():
+            raise ApiVerifyError("no platfrom found")
+        platform =  platform_dict[platform_name].objects.get(
+            id=platform_id)
+        if not cls.check_is_admin_by_token(token, platform_name, platform):
+            raise ApiVerifyError("user is not platform admin")
+        return platform
+
     @staticmethod
     def get_pre_order(pre_order_id):
         if not PreOrder.objects.filter(id=pre_order_id).exists():

@@ -5,6 +5,10 @@ def api_google_get_me(token: str):
     code, ret = GoogleApiCaller('userinfo/v2/me', bearer_token=token).get()
     return code, ret
 
+def api_google_get_userinfo(token: str):
+    code, ret = GoogleApiCaller('oauth2/v2/userinfo', bearer_token=token).get()
+    return code, ret
+
 
 def api_google_get_token(code, redirect_uri):
     data={
