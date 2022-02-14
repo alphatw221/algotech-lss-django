@@ -51,7 +51,7 @@ class Command(BaseCommand):
         # self.campaign_test()
         # self.ipg_test()
         # self.youtube_test()
-        # campaign_job(80)
+        campaign_job(86)
         # send_email(273)
         # code,data = api_google_post_refresh_token("1//0eEcTGHyIHZidCgYIARAAGA4SNwF-L9IrBxG90zwkR-Y7k4QoYBjY5H8JjykXbHi1QvqbVdaZPNejuNpkcxc8wjVIixgC_UKgCeQ")
         # print(code)
@@ -69,11 +69,14 @@ class Command(BaseCommand):
 
         # print(response.status_code)
         # print(response.json())
+<<<<<<< HEAD
 
         code, response = api_youtube_get_list_channel("ya29.A0ARrdaM9yHOcb1GqssFQ93knIU9ahz5Qy8O-MsnBK90l5GxtWp6_J-Os2vcUNdZeXi7H3ACQEqbSmxvcyG95_S2An5g7vtXBzEPiUpB_yCTpcmMT9ZiqCoEVY-fUCACPttxE5TeJiiQZh3iARTWkwKQrhkxq5hg")
 
         print(code)
         print(response)
+=======
+>>>>>>> 005dad6387b59aaca204b3390d54da9b781b31a1
 
         
     def campaign_test(self):

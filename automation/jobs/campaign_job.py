@@ -8,7 +8,7 @@ except Exception:
 
 from backend.api.google.user import api_google_post_refresh_token
 from backend.api.facebook.post import api_fb_get_post_comments
-from backend.api.instagram.post import api_ig_get_post_comments, api_ig_get_after_post_comments
+from backend.api.instagram.post import api_ig_get_post_comments
 from backend.api.instagram.user import api_ig_get_id_from, api_ig_get_profile_picture
 from backend.api.youtube.live_chat import api_youtube_get_live_chat_comment_with_access_token, api_youtube_get_live_chat_comment_with_api_key
 from backend.python_rq.python_rq import comment_queue
@@ -278,108 +278,97 @@ def capture_instagram(campaign):
 
     page_token = instagram_post['token']
     instagram_campaign = campaign['instagram_campaign']
-    post_id = instagram_campaign['live_media_id']
-    since, page_after, page_after_index = '', '', 0
-    try:
-        since = instagram_campaign['last_create']
-    except:
-        since = ''
-    try:
-        page_after = instagram_campaign['page_after']
-        page_after_index = instagram_campaign['page_after_index']
-    except:
-        page_after = ''
-        page_after_index = 0
-    if not page_token or not post_id:
+    live_media_id = instagram_campaign['live_media_id']
+
+    if not page_token or not live_media_id:
         return
 
-    # campaign_products = db.api_campaign_product.find(
-    #     {"campaign_id": campaign['id'], "$or": [{"type": "product"}, {"type": "product-fast"}]})
-    # order_codes_mapping = {campaign_product['order_code'].lower(): campaign_product
-    #                        for campaign_product in campaign_products}
+    last_crelast_create_message_id = instagram_campaign.get("last_create_message_id")
+    
     order_codes_mapping = OrderCodesMappingSingleton.get_mapping(campaign['id'])
     
-    code, data = '', ''
-    if page_after == '':
-        code, data = api_ig_get_post_comments(page_token, post_id)
-    else:
-        code, data = api_ig_get_after_post_comments(
-            page_token, post_id, page_after)
+    after_page = None
 
-    print(f"live_media_id  : {post_id}")
-    print(f"code: {code}")
-
+<<<<<<< HEAD
     if code // 100 != 2 and 'error' in data and data['error']['type'] in ('GraphMethodException', 'OAuthException'):
         instagram_campaign['post_id'] = post_id
         instagram_campaign['remark'] = f'Instagram API error: {data["error"]}'
         db.api_campaign.update_one({'id': campaign['id']}, {
                                    '$set': {"instagram_campaign":instagram_campaign}})
         return
+=======
+    keep_capturing = True
 
-    comments = data.get('data', [])
-    try:
-        page_after = data['paging']['cursors']['after']
-    except:
-        pass
-    print(f"number of comments: {len(comments)}")
-    is_failed, latest_comment_time = False, ''
-    try:
-        created_at = ''
-        count = 0
-        # for i in range(page_after_index, len(comments)): 
-        #     comment = comments[i]
+    while keep_capturing :
+        code, get_ig_comments_response = api_ig_get_post_comments(page_token, live_media_id, after_page)
+
+        print(f"live_media_id  : {live_media_id}")
+        print(f"code: {code}")
+
+        if code // 100 != 2 and 'error' in get_ig_comments_response and get_ig_comments_response['error']['type'] in ('GraphMethodException', 'OAuthException'):
+            instagram_campaign['live_media_id'] = ''
+            instagram_campaign['remark'] = f'Instagram API error: {get_ig_comments_response["error"]}'
+            db.api_campaign.update_one({'id': campaign['id']}, {
+                                    '$set': {"instagram_campaign": instagram_campaign}})
+            return
+
+        comments = get_ig_comments_response.get('data', [])
+
+        if not comments:
+            return 
+
+        if not after_page:
+            new_last_crelast_create_message_id = comments[0]['id']
+
+        print(f"number of comments: {len(comments)}")
+>>>>>>> 005dad6387b59aaca204b3390d54da9b781b31a1
+
         for comment in comments:
-            count += 1
-            if page_after_index + 1 > count:
-                continue
-            else:
-                try:
-                    is_failed = instagram_campaign['is_failed']
-                    latest_comment_time = instagram_campaign['latest_comment_time']
-                except:
-                    pass
 
-                if is_failed == True and comment['timestamp'] > latest_comment_time:
-                    pass
-                else:
-                    from_info = api_ig_get_id_from(page_token, comment['id'])
-                    profile_img_url = api_ig_get_profile_picture(
-                        page_token, from_info[1]['from']['id'])
-                    img_url = ''
+            if comment['id'] == last_crelast_create_message_id:
+                keep_capturing = False
+                break
 
-                    if profile_img_url[0] == 400:
-                        img_url == ''
-                    if profile_img_url[0] == 200:
-                        img_url = profile_img_url[1]['profile_picture_url']
-                    if (since < comment['timestamp']):
-                        uni_format_comment = {
-                            'platform': 'instagram',
-                            'id': comment['id'],
-                            "campaign_id": campaign['id'],
-                            'message': comment['text'],
-                            "created_time": comment['timestamp'],
-                            # "customer_id": comment['id'],
-                            "customer_id": from_info[1]['from']['username'],
-                            "customer_name": from_info[1]['from']['username'],
-                            "image": img_url}
-                        db.api_campaign_comment.insert_one(uni_format_comment)
-                        comment_queue.enqueue(comment_job, args=(campaign, 'instagram', instagram_post,
-                                                                 uni_format_comment, order_codes_mapping), result_ttl=10, failure_ttl=10)
-                    else:
-                        continue
-                created_at = comment['timestamp']
-                page_after_index = count
-        instagram_campaign['is_failed'] = False
-        instagram_campaign['last_create'] = created_at
-        instagram_campaign['page_after'] = page_after
-        instagram_campaign['page_after_index'] = page_after_index
-        db.api_campaign.update_one({'id': campaign['id']}, {
-            "$set": {'instagram_campaign': instagram_campaign}})
-    except Exception:
-        lastest_comment_time = db.api_campaign_comment.find_one(
-            {'platform': 'instagram'}, sort=[('created_time', -1)])['created_time']
-        instagram_campaign['is_failed'] = True
-        instagram_campaign['latest_comment_time'] = lastest_comment_time
-        db.api_campaign.update_one({'id': campaign['id']}, {
-                                   "$set": {'instagram_campaign': instagram_campaign}})
-        return
+            from_info = api_ig_get_id_from(page_token, comment['id'])
+            profile_img_url = api_ig_get_profile_picture(
+                page_token, from_info[1]['from']['id'])
+            img_url = ''
+
+            if profile_img_url[0] == 400:
+                img_url == ''
+            if profile_img_url[0] == 200:
+                img_url = profile_img_url[1]['profile_picture_url']
+
+            uni_format_comment = {
+                'platform': 'instagram',
+                'id': comment['id'],
+                "campaign_id": campaign['id'],
+                'message': comment['text'],
+                "created_time": comment['timestamp'],  #parse to timestamp
+                "customer_id": from_info[1]['from']['username'],   #
+                "customer_name": from_info[1]['from']['username'],  #
+                "image": img_url}   #
+            db.api_campaign_comment.insert_one(uni_format_comment)
+            comment_queue.enqueue(comment_job, args=(campaign, 'instagram', instagram_post,
+                                                        uni_format_comment, order_codes_mapping), result_ttl=10, failure_ttl=10)
+
+        if keep_capturing:
+            after_page = get_ig_comments_response.get('paging', {}).get('cursors', {}).get('after', None)
+
+        if not after_page:
+            keep_capturing = False
+
+    instagram_campaign['is_failed'] = False
+    instagram_campaign['last_create_message_id'] = new_last_crelast_create_message_id
+    db.api_campaign.update_one({'id': campaign['id']}, {
+        "$set": {'instagram_campaign': instagram_campaign}})
+
+    
+    # except Exception:
+    #     lastest_comment_time = db.api_campaign_comment.find_one(
+    #         {'platform': 'instagram'}, sort=[('created_time', -1)])['created_time']
+    #     instagram_campaign['is_failed'] = True
+    #     instagram_campaign['latest_comment_time'] = lastest_comment_time
+    #     db.api_campaign.update_one({'id': campaign['id']}, {
+    #                                "$set": {'instagram_campaign': instagram_campaign}})
+    #     return
