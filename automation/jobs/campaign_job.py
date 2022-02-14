@@ -322,12 +322,13 @@ def capture_instagram(campaign):
     print(f"number of comments: {len(comments)}")
     is_failed, latest_comment_time = False, ''
     try:
-        created_at = ''
         count = 0
         # for i in range(page_after_index, len(comments)): 
         #     comment = comments[i]
         for comment in comments:
             count += 1
+            if count == 1:
+                since = comment['timestamp']
             if page_after_index + 1 > count:
                 continue
             else:
@@ -365,12 +366,13 @@ def capture_instagram(campaign):
                                                                  uni_format_comment, order_codes_mapping), result_ttl=10, failure_ttl=10)
                     else:
                         continue
-                created_at = comment['timestamp']
+                
                 page_after_index = count
         instagram_campaign['is_failed'] = False
-        instagram_campaign['last_create'] = created_at
+        instagram_campaign['last_create'] = since
         instagram_campaign['page_after'] = page_after
         instagram_campaign['page_after_index'] = page_after_index
+        print (instagram_campaign)
         db.api_campaign.update_one({'id': campaign['id']}, {
             "$set": {'instagram_campaign': instagram_campaign}})
     except Exception:

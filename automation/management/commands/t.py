@@ -49,7 +49,7 @@ class Command(BaseCommand):
         # self.campaign_test()
         # self.ipg_test()
         # self.youtube_test()
-        # campaign_job(80)
+        campaign_job(86)
         # send_email(273)
         # code,data = api_google_post_refresh_token("1//0eEcTGHyIHZidCgYIARAAGA4SNwF-L9IrBxG90zwkR-Y7k4QoYBjY5H8JjykXbHi1QvqbVdaZPNejuNpkcxc8wjVIixgC_UKgCeQ")
         # print(code)
