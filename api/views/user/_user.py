@@ -1,3 +1,4 @@
+import traceback
 from datetime import datetime
 import string
 import random
@@ -150,7 +151,8 @@ def google_fast_login_helper(request, user_type='customer'):
             return HttpResponse(f"This Youtube video doesn't belong to this account")
         save_token_to_campaign(campaign_id, access_token, refresh_token)
         return HttpResponse(f"OK")
-    except:
+    except Exception as e:
+        print(traceback.format_exc())
         return HttpResponse(f"NOT OK")
 
 
