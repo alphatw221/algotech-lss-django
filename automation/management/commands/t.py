@@ -10,7 +10,7 @@ from backend.api.facebook.page import *
 from backend.api.facebook.post import *
 from backend.api.facebook.user import *
 from backend.api.google.user import api_google_get_userinfo
-from backend.api.youtube.channel import api_youtube_get_list_channel
+from backend.api.youtube.channel import api_youtube_get_list_channel_by_toekn
 from backend.campaign.campaign.manager import CampaignManager
 # from backend.campaign.campaign_comment.comment_processor import *
 from backend.campaign.campaign_lucky_draw.event import (
@@ -69,14 +69,11 @@ class Command(BaseCommand):
 
         # print(response.status_code)
         # print(response.json())
-<<<<<<< HEAD
 
-        code, response = api_youtube_get_list_channel("ya29.A0ARrdaM9yHOcb1GqssFQ93knIU9ahz5Qy8O-MsnBK90l5GxtWp6_J-Os2vcUNdZeXi7H3ACQEqbSmxvcyG95_S2An5g7vtXBzEPiUpB_yCTpcmMT9ZiqCoEVY-fUCACPttxE5TeJiiQZh3iARTWkwKQrhkxq5hg")
+        code, response = api_youtube_get_list_channel_by_toekn("ya29.A0ARrdaM9yHOcb1GqssFQ93knIU9ahz5Qy8O-MsnBK90l5GxtWp6_J-Os2vcUNdZeXi7H3ACQEqbSmxvcyG95_S2An5g7vtXBzEPiUpB_yCTpcmMT9ZiqCoEVY-fUCACPttxE5TeJiiQZh3iARTWkwKQrhkxq5hg")
 
         print(code)
         print(response)
-=======
->>>>>>> 005dad6387b59aaca204b3390d54da9b781b31a1
 
         
     def campaign_test(self):

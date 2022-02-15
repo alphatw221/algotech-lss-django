@@ -12,6 +12,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from datetime import datetime
+from api.models.youtube.youtube_channel import YoutubeChannel
 
 from backend.pymongo.mongodb import db
 from api.utils.common.verify import Verify
@@ -221,38 +222,23 @@ class CampaignViewSet(viewsets.ModelViewSet):
         return Response(comments_list, status=status.HTTP_200_OK)
 
 
-    # @action(detail=False, methods=['GET'], url_path=r'bind_youtube_channel_callback')
-    # @api_error_handler
-    # def bind_youtube_channel_callback(self, request):
+    @action(detail=False, methods=['GET'], url_path=r'bind_youtube_channel' ,permission_classes=(IsAuthenticated,))
+    @api_error_handler
+    def bind_youtube_channel(self, request):
 
-    #     code = request.GET.get("code")
-    #     state = request.GET.get("state")
+        api_user, platform_name, platform_id, youtube_channel_id, google_access_token, campaign_id = getparams(request, ("platform_name", "platform_id", "youtube_channel_id", "campaign_id"), with_user=True, seller=True)
+        
+        platform = Verify.get_platform(api_user, platform_name, platform_id)
 
-    #     platform_name, platform_id, user_platform_token, youtube_channel_id = state.split(',')
+        user_subscription = Verify.get_user_subscription(platform)
+        
 
-    #     platform = Verify.get_platform_verify_with_token(user_platform_token, platform_name, platform_id)
+        if not YoutubeChannel.objects.filter(channel_id = youtube_channel_id).exists():
+            raise ApiVerifyError('youtube channel not exists')
 
-    #     youtube_channel_id
-    #     response = requests.post(
-    #         url="https://accounts.google.com/o/oauth2/token",
-    #         data={
-    #             "code": code,
-    #             "client_id": "536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com",
-    #             "client_secret": "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",
-    #             "redirect_uri": settings.GCP_API_LOADBALANCER_URL + "/api/campaign/bind_youtube_channel_callback",
-    #             "grant_type": "authorization_code"
-    #         }
-    #     )
-    #     # code, response = api_google_post_token(code, "http://localhost:8001" + "/api/user/google_user_callback")
-    #     if not response.status_code / 100 == 2:
-    #         return HttpResponse(f"NOT OK")
+        youtube_channel = YoutubeChannel.objects.get(channel_id = youtube_channel_id)
+        campaign = Verify.get_campaign_from_platform(platform, campaign_id)
 
-    #     access_token = response.json().get("access_token")
-    #     refresh_token = response.json().get("refresh_token")
-    #     campaign_object = Campaign.objects.get(id=campaign_id)
-    #     campaign_object.youtube_campaign["access_token"] = access_token
-    #     campaign_object.youtube_campaign["refresh_token"] = refresh_token
-    #     campaign_object.save()
-    #     print(response.json())
-    #     return HttpResponse(f"OK")
-    
+        user_subscription.youtube_channel.add(youtube_channel)
+
+        pass 

@@ -289,14 +289,6 @@ def capture_instagram(campaign):
     
     after_page = None
 
-<<<<<<< HEAD
-    if code // 100 != 2 and 'error' in data and data['error']['type'] in ('GraphMethodException', 'OAuthException'):
-        instagram_campaign['post_id'] = post_id
-        instagram_campaign['remark'] = f'Instagram API error: {data["error"]}'
-        db.api_campaign.update_one({'id': campaign['id']}, {
-                                   '$set': {"instagram_campaign":instagram_campaign}})
-        return
-=======
     keep_capturing = True
 
     while keep_capturing :
@@ -321,7 +313,6 @@ def capture_instagram(campaign):
             new_last_crelast_create_message_id = comments[0]['id']
 
         print(f"number of comments: {len(comments)}")
->>>>>>> 005dad6387b59aaca204b3390d54da9b781b31a1
 
         for comment in comments:
 

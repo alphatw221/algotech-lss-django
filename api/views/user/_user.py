@@ -14,6 +14,7 @@ from rest_framework import status
 from api.utils.common.verify import ApiVerifyError
 from backend.api.facebook.user import api_fb_get_me_login
 from backend.api.google.user import api_google_get_userinfo
+from backend.api.youtube.channel import api_youtube_get_list_channel_by_toekn
 from backend.api.youtube.viedo import api_youtube_get_video_info_with_access_token
 from lss.views.custom_jwt import CustomTokenObtainPairSerializer
 from backend.api.instagram.user import *
@@ -98,15 +99,15 @@ def facebook_login_helper(request, user_type='user'):
 #     # code, response = api_google_post_token(code, "http://localhost:8001" + "/api/user/google_user_callback")
 #     if not response.status_code / 100 == 2:
 
-def google_fast_login_helper(request, user_type='customer'):
-    def get_params(request):
+def google_fast_login_helper(request):
+
+    def get_params():
         code = request.GET.get("code")
-        state = request.GET.get("state").split(",")
-        campaign_id = state[0]
-        youtube_video_id = state[1]
+        campaign_id, youtube_video_id = request.GET.get("state").split(",")
         print("campaign_id", campaign_id)
         print("youtube_video_id", youtube_video_id)
         return code, campaign_id, youtube_video_id
+
     def api_google_post_token(code):
         token_response = requests.post(
             url="https://accounts.google.com/o/oauth2/token",
@@ -124,23 +125,29 @@ def google_fast_login_helper(request, user_type='customer'):
         access_token = token_response.json().get("access_token")
         refresh_token = token_response.json().get("refresh_token")
         return access_token, refresh_token
+
     def get_user_youtube_channel_id(access_token, youtube_video_id):
         code, youtube_api_response = api_youtube_get_video_info_with_access_token(access_token, youtube_video_id)
         if not code / 100 == 2:
             raise
         channelId = youtube_api_response["items"][0]["snippet"]["channelId"]
         return channelId
+
     def get_self_all_channels(access_token):
-        list_channel_response = requests.get(url=f"https://youtube.googleapis.com/youtube/v3/channels?part=id&mine=true&access_token={access_token}")
-        if not list_channel_response.status_code / 100 == 2:
+
+        code, list_channel_response = api_youtube_get_list_channel_by_toekn(access_token)
+        # list_channel_response = requests.get(url=f"https://youtube.googleapis.com/youtube/v3/channels?part=id&mine=true&access_token={access_token}")
+        if not code / 100 == 2:
             raise
         your_all_channels = [i["id"] for i in list_channel_response.json().get("items")]
         return your_all_channels
+
     def save_token_to_campaign(campaign_id, access_token, refresh_token):
-        campaign_object = Campaign.objects.get(id=campaign_id)
-        campaign_object.youtube_campaign["access_token"] = access_token
-        campaign_object.youtube_campaign["refresh_token"] = refresh_token
-        campaign_object.save()
+            campaign_object = Campaign.objects.get(id=campaign_id)
+            campaign_object.youtube_campaign["access_token"] = access_token
+            campaign_object.youtube_campaign["refresh_token"] = refresh_token
+            campaign_object.save()
+    
     try:
         code, campaign_id, youtube_video_id = get_params(request)
         access_token, refresh_token = api_google_post_token(code)
@@ -149,6 +156,7 @@ def google_fast_login_helper(request, user_type='customer'):
         if channelId not in your_all_channels:
             return HttpResponse(f"This Youtube video doesn't belong to this account")
         save_token_to_campaign(campaign_id, access_token, refresh_token)
+
         return HttpResponse(f"OK")
     except:
         return HttpResponse(f"NOT OK")

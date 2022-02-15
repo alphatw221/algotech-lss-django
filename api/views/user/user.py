@@ -10,7 +10,7 @@ from api.utils.common.verify import ApiVerifyError
 from api.views.user._user import facebook_login_helper, google_login_helper, google_fast_login_helper
 from backend.api.facebook.user import api_fb_get_accounts_from_user
 from backend.api.facebook.page import api_fb_get_page_picture
-from backend.api.youtube.channel import api_youtube_get_list_channel
+from backend.api.youtube.channel import api_youtube_get_list_channel_by_toekn
 from rest_framework.response import Response
 from rest_framework import status
 from api.models.facebook.facebook_page import FacebookPage
@@ -147,7 +147,7 @@ class UserViewSet(viewsets.ModelViewSet):
         google_token = api_user.youtube_info['token']
 
         #TODO
-        status_code, response = api_youtube_get_list_channel(
+        status_code, response = api_youtube_get_list_channel_by_toekn(
             user_token=api_user.facebook_info['token'], user_id=api_user.facebook_info['id'])
 
         if status_code != 200:

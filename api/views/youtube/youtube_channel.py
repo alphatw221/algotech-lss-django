@@ -15,7 +15,7 @@ from api.models.youtube.youtube_channel import YoutubeChannel
 import datetime
 import hashlib
 from api.utils.common.verify import Verify
-from backend.api.youtube.channel import api_youtube_get_list_channel
+from backend.api.youtube.channel import api_youtube_get_list_channel_by_toekn
 from backend.pymongo.mongodb import db
 
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
@@ -58,7 +58,7 @@ class YoutubeViewSet(viewsets.GenericViewSet):
         if not access_token:
             raise ApiVerifyError('no access_token')
 
-        code, list_channel_response = api_youtube_get_list_channel(access_token)
+        code, list_channel_response = api_youtube_get_list_channel_by_toekn(access_token)
 
         if code//100 !=2:
             raise ApiVerifyError('invalid access_token')
