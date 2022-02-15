@@ -86,6 +86,9 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         platform = verify_request(api_user, platform_name, platform_id)
 
+
+        #TODO check platform in user_subscription
+        
         campaigns = platform.campaigns.all()
         if campaign_status == 'history':
             campaigns = campaigns.filter(end_at__lt=datetime.now())

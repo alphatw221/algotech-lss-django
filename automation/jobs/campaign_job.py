@@ -278,9 +278,10 @@ def capture_instagram(campaign):
 
     page_token = instagram_post['token']
     instagram_campaign = campaign['instagram_campaign']
-    live_media_id = instagram_campaign['live_media_id']
+    live_media_id = instagram_campaign.get('live_media_id')
 
     if not page_token or not live_media_id:
+        print("no page_token or live_media_id")
         return
 
     last_crelast_create_message_id = instagram_campaign.get("last_create_message_id")
