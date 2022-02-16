@@ -339,9 +339,8 @@ PAYPAL_CONFIG = {
     "client_id": "ASABJtviIflIhkeEH4QBeYuhQoN7RWcPsC6fN-TXIfzhMQ2UDK1raOVd3xBWAmItoAg2WRgI4Nbpde8J",  # it's sandbox
     "client_secret": "EFEGnvXwP8DsSUYF5zoQ5ZkaArtlpzAlgpWJOwBlHRMUP6NwAq8-KmnTv087ihZrAIlyg5VtKo73Wj54",  # it's sandbox
 }
+STRIPE_API_KEY = "sk_test_51J2aFmF3j9D00CA0KABMZVKtOVnZNbBvM2hcokicJmfx8vvrmNyys5atEAcpp0Au2O3HtX0jz176my7g0ozbinof00RL4QAZrY"
 
 # APPEND_SLASH=False
-
-
 # OPERATION_CODE_NAME: AGILE
 ADMIN_LIST = [1, ]

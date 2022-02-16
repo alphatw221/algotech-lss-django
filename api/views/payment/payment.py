@@ -1,7 +1,8 @@
+import stripe
+from django.shortcuts import redirect
 from rest_framework import views, viewsets, status
 import paypalrestsdk, json
 from django.core.files.base import ContentFile
-from django.http import HttpResponseRedirect
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework import views, viewsets, status
 from rest_framework.decorators import action, api_view, permission_classes, parser_classes
@@ -56,7 +57,7 @@ def send_email(order_id):
 
     mail_subject = i18n_get_mail_subject(shop_name)
     mail_content = i18n_get_mail_content(order_id, campaign_data, order_data, shop_name)
-    
+
     send_smtp_mail(customer_email, mail_subject, mail_content)
 
 
@@ -326,7 +327,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             print("Payment execute successfully")
             order_object.status = "complete"
             order_object.save()
-            return HttpResponseRedirect(f'{settings.WEB_SERVER_URL}/buyer/order/{order_object.id}/confirmation')
+            return HttpResponseRedirect(redirect_to=f'{settings.WEB_SERVER_URL}/buyer/order/{order_object.id}/confirmation')
         else:
             print(payment.error)  # Error Hash
             return Response(payment.error)
@@ -413,7 +414,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             { '$set': {'status': 'complete', 'checkout_details': hitpay_dict, 'payment_method': 'hitpay'} }
         )
 
-        send_email(order_id)    
+        send_email(order_id)
         return Response('hitpay succed')
 
 
@@ -470,6 +471,126 @@ class PaymentViewSet(viewsets.GenericViewSet):
             meta_payment = order.campaign.meta_payment
             meta_payment = json.loads(json.dumps(meta_payment))
             return Response(meta_payment, status=status.HTTP_200_OK)
+        except Exception as e:
+            print(e)
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['POST'], url_path=r'stripe_pay', parser_classes=(FormParser,))
+    @api_error_handler
+    def stripe_pay_create_checkout_session(self, request):
+        stripe.api_key = settings.STRIPE_API_KEY
+        try:
+            # api_user, order_id = getparams(
+            #     request, ("order_id",), seller=False)
+            # customer_user = Verify.get_customer_user(request)
+            order_id = request.data["order_id"]
+            order_object = Verify.get_order(order_id)
+            currency = "SGD" if order_object.currency is None else order_object.currency
+
+            item_list = []
+            for key, values in order_object.products.items():
+                image = f"{settings.GS_URL}{values.get('image', '')}".replace(" ", "%20")
+                product = stripe.Product.create(
+                    name=values.get("name", ""),
+                    images=[image]
+                )
+                price = stripe.Price.create(
+                    product=product.id,
+                    unit_amount=int(values.get("price", 0)*100),
+                    currency=currency,
+                )
+                item_list.append(
+                    {
+                        # Provide the exact Price ID (for example, pr_1234) of the product you want to sell
+                        'price': price.id,
+                        "quantity": values.get("qty", 0)
+                    },
+                )
+            print(item_list)
+            discounts = []
+            if order_object.adjust_price:
+                discount = stripe.Coupon.create(
+                    amount_off=int(-order_object.adjust_price * 100),
+                    currency=currency
+                )
+                discounts.append(
+                    {
+                        'coupon': discount.id,
+                    }
+                )
+            stripe.Coupon.create(percent_off=20, duration="once")
+            shipping_options = []
+            if order_object.shipping_cost:
+                shipping_rate = stripe.ShippingRate.create(
+                    display_name="General Shipping",
+                    type="fixed_amount",
+                    fixed_amount={
+                        'amount': int(order_object.shipping_cost * 100),
+                        'currency': currency,
+                    }
+                )
+                shipping_options.append(
+                    {
+                        'shipping_rate': shipping_rate.id,
+                    }
+                )
+            elif order_object.free_delivery:
+                shipping_rate = stripe.ShippingRate.create(
+                    display_name="Free Delivery",
+                    type="fixed_amount",
+                    fixed_amount={
+                        'amount': 0,
+                        'currency': currency,
+                    }
+                )
+                shipping_options.append(
+                    {
+                        'shipping_rate': shipping_rate.id,
+                    }
+                )
+            checkout_session = stripe.checkout.Session.create(
+                line_items=item_list,
+                shipping_options=shipping_options,
+                discounts=discounts,
+                mode='payment',
+                success_url='http://localhost:8001/api/payment/strip_success?session_id={CHECKOUT_SESSION_ID}&order_id=' + str(order_object.id),
+                cancel_url=f"{settings.WEB_SERVER_URL}/payment/cancel",
+
+            )
+            print(checkout_session.url)
+            return Response(checkout_session.url, status=status.HTTP_303_SEE_OTHER)
+        except Exception as e:
+            print(e)
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['GET'], url_path=r'strip_success',)
+    @api_error_handler
+    def strip_success(self, request):
+        try:
+            stripe.api_key = settings.STRIPE_API_KEY
+            print("session_id", request.GET["session_id"])
+            session = stripe.checkout.Session.retrieve(request.GET["session_id"])
+
+            payment_intent = stripe.PaymentIntent.retrieve(
+                session.payment_intent,
+            )
+            print("datetime", datetime.datetime.fromtimestamp(payment_intent.created))
+            order_id = request.GET["order_id"]
+            order_object = Verify.get_order(order_id)
+            if payment_intent.status == "succeeded":
+                checkout_details = {
+                    "client_secret": payment_intent.client_secret,
+                    "created": datetime.datetime.fromtimestamp(payment_intent.created),
+                    "id": payment_intent.id,
+                    "object": payment_intent.object,
+                    "receipt_email": payment_intent.receipt_email,
+                    "receipt_url": payment_intent.charges.data[0].receipt_url,
+                }
+                db.api_order.update_one(
+                    {'id': int(order_object.id)},
+                    {'$set': {'status': 'complete', 'checkout_details': checkout_details, 'payment_method': 'stripe'}}
+                )
+            return HttpResponseRedirect(redirect_to=f'{settings.WEB_SERVER_URL}/buyer/order/{order_object.id}/confirmation')
         except Exception as e:
             print(e)
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)

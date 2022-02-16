@@ -27,6 +27,7 @@ rq = "^1.10.1"
 google-cloud-logging = "^2.7.0"
 paypalrestsdk = "^1.13.1"
 rq-dashboard = "^0.6.1"
+stripe = "^2.65.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
