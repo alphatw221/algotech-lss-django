@@ -152,11 +152,13 @@ class CampaignViewSet(viewsets.ModelViewSet):
         platform_name = request.query_params.get('platform_name')
         platform_id = request.query_params.get('platform_id')
         api_user = request.user.api_users.get(type='user')
-
         _, campaign = verify_request(
             api_user, platform_name, platform_id, campaign_id=pk)
-
+        yt_access_token = campaign.youtube_campaign.get("access_token", "")
+        yt_refresh_token = campaign.youtube_campaign.get("refresh_token", "")
         json_data = json.loads(request.data["data"])
+        json_data["youtube_campaign"]["access_token"] = yt_access_token
+        json_data["youtube_campaign"]["refresh_token"] = yt_refresh_token
         for key, value in request.data.items():
             if "account" in key:
                 account_number = key.split("_")[1]
