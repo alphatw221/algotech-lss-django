@@ -14,7 +14,7 @@ from api.utils.error_handle.error_handler.api_error_handler import api_error_han
 def verify_seller_request(api_user, platform_name, platform_id, campaign_id, campaign_product_id=None, cart_product_id=None):
     Verify.verify_user(api_user)
     platform = Verify.get_platform(api_user, platform_name, platform_id)
-    campaign = Verify.get_campaign(platform, campaign_id)
+    campaign = Verify.get_campaign_from_platform(platform, campaign_id)
 
     if campaign_product_id:
         if not campaign.products.filter(id=campaign_product_id).exists():

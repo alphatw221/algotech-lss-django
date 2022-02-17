@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from api.models.campaign.campaign import Campaign
 from backend.api.facebook.user import api_fb_get_me_accounts
 from api.models.facebook.facebook_page import FacebookPage
 from api.models.youtube.youtube_channel import YoutubeChannel
@@ -155,10 +156,10 @@ class Verify():
         return user_subscription
 
     @staticmethod
-    def get_campaign(platform, campaign_id):
-        if not platform.campaigns.filter(id=campaign_id).exists():
+    def get_campaign(campaign_id):
+        if not Campaign.filter(id=campaign_id).exists():
             raise ApiVerifyError("no campaign found")
-        campaign = platform.campaigns.get(id=campaign_id)
+        campaign = Campaign.get(id=campaign_id)
         return campaign
     
     @staticmethod
