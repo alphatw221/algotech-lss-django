@@ -4,7 +4,7 @@ import string
 import random
 
 import requests
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 
 from api.models.campaign.campaign import Campaign
 from api.models.user.user import User
@@ -150,10 +150,10 @@ def google_fast_login_helper(request, user_type='customer'):
         if channelId not in your_all_channels:
             return HttpResponse(f"This Youtube video doesn't belong to this account")
         save_token_to_campaign(campaign_id, access_token, refresh_token)
-        return HttpResponse(f"OK")
+        return HttpResponseRedirect(redirect_to=f'{settings.WEB_SERVER_URL}/campaign/edit/{campaign_id}')
     except Exception as e:
         print(traceback.format_exc())
-        return HttpResponse(f"NOT OK")
+        return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 def google_login_helper(request, user_type='customer'):

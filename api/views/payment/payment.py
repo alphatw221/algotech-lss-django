@@ -1,3 +1,5 @@
+import urllib
+
 import stripe
 from django.shortcuts import redirect
 from rest_framework import views, viewsets, status
@@ -506,18 +508,21 @@ class PaymentViewSet(viewsets.GenericViewSet):
     @action(detail=False, methods=['POST'], url_path=r'stripe_pay', parser_classes=(FormParser,))
     @api_error_handler
     def stripe_pay_create_checkout_session(self, request):
-        stripe.api_key = settings.STRIPE_API_KEY
+        # stripe.api_key = settings.STRIPE_API_KEY
         try:
             # api_user, order_id = getparams(
             #     request, ("order_id",), seller=False)
             # customer_user = Verify.get_customer_user(request)
             order_id = request.data["order_id"]
             order_object = Verify.get_order(order_id)
+            campaign = order_object.campaign
+            stripe.api_key = campaign.meta_payment.get("sg").get("stripe").get("stripe_secret")
+            print("stripe.api_key", stripe.api_key)
             currency = "SGD" if order_object.currency is None else order_object.currency
-
             item_list = []
             for key, values in order_object.products.items():
-                image = f"{settings.GS_URL}{values.get('image', '')}".replace(" ", "%20")
+                image = urllib.parse.quote(f"{settings.GS_URL}{values.get('image', '')}")
+                print(image)
                 product = stripe.Product.create(
                     name=values.get("name", ""),
                     images=[image]
@@ -595,7 +600,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
     @api_error_handler
     def strip_success(self, request):
         try:
-            stripe.api_key = settings.STRIPE_API_KEY
+            # stripe.api_key = settings.STRIPE_API_KEY
             print("session_id", request.GET["session_id"])
             session = stripe.checkout.Session.retrieve(request.GET["session_id"])
 
@@ -605,6 +610,9 @@ class PaymentViewSet(viewsets.GenericViewSet):
             print("datetime", datetime.datetime.fromtimestamp(payment_intent.created))
             order_id = request.GET["order_id"]
             order_object = Verify.get_order(order_id)
+            campaign = order_object.campaign
+            stripe.api_key = campaign.meta_payment.get("sg").get("stripe").get("stripe_secret")
+            print("stripe.api_key", stripe.api_key)
             if payment_intent.status == "succeeded":
                 checkout_details = {
                     "client_secret": payment_intent.client_secret,
@@ -616,7 +624,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
                 }
                 db.api_order.update_one(
                     {'id': int(order_object.id)},
-                    {'$set': {'status': 'complete', 'checkout_details': checkout_details, 'payment_method': 'stripe'}}
+                    {'$set': {'status': 'complete', 'checkout_details': checkout_details, 'payment_method': 'Stripe'}}
                 )
             return HttpResponseRedirect(redirect_to=f'{settings.WEB_SERVER_URL}/buyer/order/{order_object.id}/confirmation')
         except Exception as e:
