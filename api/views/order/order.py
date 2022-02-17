@@ -121,7 +121,7 @@ def verify_buyer_request(api_user, platform_name, campaign_id, check_info=None):
 def verify_seller_request(api_user, platform_name, platform_id, campaign_id, order_id=None):
     Verify.verify_user(api_user)
     platform = Verify.get_platform(api_user, platform_name, platform_id)
-    campaign = Verify.get_campaign(platform, campaign_id)
+    campaign = Verify.get_campaign_from_platform(platform, campaign_id)
 
     if order_id:
         if not Order.objects.get(id=order_id):

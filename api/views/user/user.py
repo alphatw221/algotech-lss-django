@@ -20,7 +20,7 @@ from api.models.user.user_subscription import UserSubscription, UserSubscription
 
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 from api.utils.common.verify import Verify
-platform_info_dict={'facebook':'facebook_info', 'youtube':'youtube_info', 'instagram':'instagram_info'}
+platform_info_dict={'facebook':'facebook_info', 'youtube':'youtube_info', 'instagram':'instagram_info', 'google':'google_info'}
 
 class UserViewSet(viewsets.ModelViewSet):
     # permission_classes = (IsAuthenticated,)

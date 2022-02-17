@@ -22,6 +22,7 @@ from dateutil import parser
 from backend.api.youtube.viedo import api_youtube_get_video_info_with_access_token, api_youtube_get_video_info_with_api_key
 from api.utils.error_handle.error_handler.campaign_job_error_handler import campaign_job_error_handler
 from api.utils.error_handle.error_handler.capture_platform_error_handler import capture_platform_error_handler
+import traceback
 
 class OrderCodesMappingSingleton:
 
@@ -61,8 +62,8 @@ def capture_facebook(campaign):
     facebook_page = db.api_facebook_page.find_one(
         {"id": campaign['facebook_page_id']})
 
-    page_token = facebook_page['token']
-    facebook_campaign = campaign['facebook_campaign']
+    page_token = facebook_page.get('token')
+    facebook_campaign = campaign.get('facebook_campaign',{})
     post_id = facebook_campaign.get('post_id', '')
     since = facebook_campaign.get('comment_capture_since', 1)
 
@@ -80,27 +81,33 @@ def capture_facebook(campaign):
     print(f"since: {since}")
     print(f"code: {code}")
 
-    if code // 100 != 2 and 'error' in data and data['error']['type'] in ('GraphMethodException', 'OAuthException'):
+    if code // 100 != 2 :
         facebook_campaign['post_id'] = ''
         facebook_campaign['remark'] = f'Facebook API error: {data["error"]}'
-        db.api_campaign.update_one({'id': campaign['id']}, {
+        db.api_campaign.update_one({'id': campaign.get('id')}, {
                                    '$set': {"facebook_campaign": facebook_campaign}})
         return
 
     comment_capture_since = since
     comments = data.get('data', [])
 
-    if comments and int(comments[-1]['created_time']) == since:
+    if comments and int(comments[-1].get('created_time')) == since:
         print(f"number of comments: {0}")
         return
 
     print(f"number of comments: {len(comments)}")
     try:
         for comment in comments:
-            print(comment['message'])
-            if comment['from']['id'] == facebook_page['page_id']:
-                comment_capture_since = comment['created_time']
+            print(comment.get('message'))
+
+            if not comment.get('from',{}).get('id'):
+                print("can't get user")
                 continue
+
+            if comment.get('from',{}).get('id') == facebook_page.get('page_id'):
+                comment_capture_since = comment.get('created_time')
+                continue
+
             uni_format_comment = {
                 'platform': 'facebook',
                 'id': comment['id'],
@@ -115,7 +122,8 @@ def capture_facebook(campaign):
                                   uni_format_comment, order_codes_mapping), result_ttl=10, failure_ttl=10)
             comment_capture_since = comment['created_time']
     except Exception as e:
-        print(e)
+        print(traceback.format_exc())
+        
 
     facebook_campaign['comment_capture_since'] = comment_capture_since
     db.api_campaign.update_one({'id': campaign['id']}, {
@@ -258,7 +266,7 @@ def capture_youtube(campaign):
         db.api_campaign.update_one({'id': campaign['id']}, {
                                    "$set": {'youtube_campaign': youtube_campaign}})
     except Exception as e:
-        print(e)
+        print(traceback.format_exc())
         latest_campaign_comment = db.api_campaign_comment.find_one(
             {'platform': 'youtube', 'campaign_id': campaign['id']}, sort=[('created_time', -1)])
         youtube_campaign['is_failed'] = True
@@ -357,6 +365,7 @@ def capture_instagram(campaign):
 
     
     # except Exception:
+    #     print(traceback.format_exc())
     #     lastest_comment_time = db.api_campaign_comment.find_one(
     #         {'platform': 'instagram'}, sort=[('created_time', -1)])['created_time']
     #     instagram_campaign['is_failed'] = True
