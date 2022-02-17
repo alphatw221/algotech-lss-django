@@ -11,10 +11,13 @@ from backend.api.facebook.chat_bot import api_fb_post_page_message_chat_bot
 
 
 def get_auto_response(fb_id, message):
-    message_list = message.split(' ')
-    output_msg = db.api_auto_response.find_one({'facebook_page_id': fb_id, 'input_msg': {'$in': message_list}})['output_msg']
+    message_list = message.lower().split(' ')
+    output_msg_list = []
+    output_datas = db.api_auto_response.find({'facebook_page_id': fb_id, 'input_msg': {'$in': message_list}})
+    for output_data in output_datas:
+        output_msg_list.append(output_data['output_msg'])
     # output_msg = AutoResponse.objects.get(facebook_page_id = fb_id, input_msg = message).output_msg
-    return output_msg
+    return output_msg_list
 
 
 def handleTextMessage(page_id, sender_id, message):
@@ -32,7 +35,6 @@ def handleTextMessage(page_id, sender_id, message):
                 campaign_id_list.append(campaign_data['id'])
         except Exception:
             campaign_id_list.append(-1)
-        print (campaign_id_list)
         comment_count = db.api_campaign_comment.find({'campaign_id':{'$in': campaign_id_list}, 'customer_id': sender_id, 'platform': 'facebook'}).count()
         #comment_count = CampaignComment.objects.filter(
         #    campaign_id = campaign_id,
@@ -41,10 +43,11 @@ def handleTextMessage(page_id, sender_id, message):
         #).count()
 
         if comment_count > 0:
-            output_msg = get_auto_response(fb_id, message['text'])
+            output_msg_list = get_auto_response(fb_id, message['text'])
             page_token = FacebookPage.objects.get(page_id = page_id).token
-            response = {'text': output_msg}
-            api_fb_post_page_message_chat_bot(page_token, sender_id, response)
+            for output_msg in output_msg_list:
+                response = {'text': output_msg}
+                api_fb_post_page_message_chat_bot(page_token, sender_id, response)
         else:
             print ('user not commented before')
 
