@@ -52,7 +52,8 @@ def get_keyword_campaign_comments(campaign: Campaign, keyword: str,
     try:
         return CampaignComment.objects.filter(
             campaign=campaign,
-            message__contains=keyword,
+            message=keyword,
+            # message__contains=keyword,
         ).values('customer_id', 'customer_name', 'platform').annotate(count=Count('customer_id')).order_by('pk')[:limit]
     except Exception:
         return []

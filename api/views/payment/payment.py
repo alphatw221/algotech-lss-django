@@ -2,7 +2,6 @@ from rest_framework import views, viewsets, status
 import paypalrestsdk, json
 from django.core.files.base import ContentFile
 from django.http import HttpResponseRedirect
-from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework import views, viewsets, status
 from rest_framework.decorators import action, api_view, permission_classes, parser_classes
 from rest_framework.response import Response
@@ -14,31 +13,25 @@ from rest_framework.parsers import MultiPartParser, FormParser, FileUploadParser
 
 from api.utils.common.common import getdata, getparams
 from api.models.order.order import Order
-from api.models.user import user
-from api.models.user.user_subscription import UserSubscription
 from api.models.facebook.facebook_page import FacebookPage
 from api.models.youtube.youtube_channel import YoutubeChannel
 from api.models.instagram.instagram_profile import InstagramProfile
-from django.conf import settings
-from django.core.mail import send_mail as django_send_mail
 import pendulum, time, datetime
 
 from django.http import HttpResponseRedirect
-from api.models.user.user_subscription import UserSubscriptionSerializerMeta
 from api.utils.common.verify import Verify
 from api.views.payment._payment import HitPay_Helper
-from api.views.user.user_subscription import verify_request
 from backend.pymongo.mongodb import db
 from mail.sender.sender import *
 
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 from api.utils.error_handle.error.api_error import ApiVerifyError
-106
 
 import hmac, hashlib, base64, binascii
 from backend.i18n.payment_comfirm_mail import i18n_get_mail_content, i18n_get_mail_subject
 from api.utils.error_handle.error_handler.email_error_handle import email_error_handler
 from mail.sender.sender import send_smtp_mail
+from django.shortcuts import redirect
 
 
 
@@ -365,40 +358,46 @@ class PaymentViewSet(viewsets.GenericViewSet):
         currency = 'SGD' if not order_data['currency'] else order_data['currency']
         amount = order_data['total']
 
+        # params = {
+        #     'email': email,
+        #     'name': name,
+        #     'redirect_url': 'https://v1login.liveshowseller.com/buyer/order/' + order_id + '/confirmation',
+        #     'webhook': 'https://gipassl.algotech.app/api/payment/hit_pay_webhook/',
+        #     'amount': amount,
+        #     'currency': currency,
+        #     'reference_number': order_id,
+        # }
+        headers = {
+            'X-BUSINESS-API-KEY': settings.HITPAY_API_KEY,
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
         params = {
             'email': email,
             'name': name,
-            'redirect_url': 'https://v1login.liveshowseller.com/buyer/order/' + order_id + '/confirmation',
-            'webhook': 'https://gipassl.algotech.app/api/payment/hit_pay_webhook/',
+            'redirect_url': f'{settings.GCP_API_LOADBALANCER_URL}/api/payment/hit_pay_return_redirect/?order_id={order_id}',
+            'webhook': '{settings.GCP_API_LOADBALANCER_URL}/api/payment/hit_pay_webhook/',
             'amount': amount,
             'currency': currency,
             'reference_number': order_id,
         }
-        headers = {
-            'X-BUSINESS-API-KEY': '64044c7551b232cbf23b32d9b21e30ff1f4c5b42068c8c59864f161cad6af21b',
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'X-Requested-With': 'XMLHttpRequest'
-        }
         code, ret = HitPay_Helper.HitPayApiCaller(headers=headers,
                             params=params).post()
+
         if code != 201:
             raise Exception('hitpay got wrong')
         #TODO record payment not replace   
-        db.api_order.find_one () 
-        # db.api_order.update_one({'id': int(order_id)}, {'$set': {'meta': {'payment_id': ret['id']}}}) 
 
         return Response(ret['url'])
 
     @action(detail=False, methods=['POST'], url_path=r'hit_pay_webhook', parser_classes=(MultiPartParser, FormParser))
     def hit_pay_webhook(self, request):
         data_dict = request.data.dict()
-        payment_id = data_dict['payment_id']
-        payment_request_id = data_dict['payment_request_id']
-        amount = data_dict['amount']
-        status = data_dict['status']
+        payment_id, payment_request_id, phone = data_dict['payment_id'], data_dict['payment_request_id'], data_dict['phone']
+        amount, currency, status = data_dict['amount'], data_dict['currency'], data_dict['status']
         order_id = data_dict['reference_number']
-        hmac = data_dict['hmac']
-        secret_salt = '2MUizyJj429NIoOMmTXedyICmbwS1rt6Wph7cGqzG99IkmCV6nUCQ22lRVCB0Rgu'
+        _hmac, secret_salt = data_dict['hmac'], settings.HITPAY_SECRET_SALT
+        sort_key_list = ['amount', 'currency', 'hmac', 'payment_id', 'payment_request_id', 'phone', 'reference_number', 'status']
 
         hitpay_dict, info_dict = {}, {}
         info_dict['payment_id'] = payment_id
@@ -407,14 +406,41 @@ class PaymentViewSet(viewsets.GenericViewSet):
         total = int(db.api_order.find_one({'id': int(order_id)})['total'])
 
         #TODO change to real checking way
-        # if status == 'completed' and float(total) == float(amount):
-        db.api_order.update_one(
-            { 'id': int(order_id) },
-            { '$set': {'status': 'complete', 'checkout_details': hitpay_dict, 'payment_method': 'hitpay'} }
-        )
+        if status == 'completed' and int(total) == int(float(amount)):
+            db.api_order.update_one(
+                { 'id': int(order_id) },
+                { '$set': {'status': 'complete', 'checkout_details': hitpay_dict, 'payment_method': 'hitpay'} }
+            )
 
         send_email(order_id)    
         return Response('hitpay succed')
+    
+    @action(detail=False, methods=['GET'], url_path=r'hit_pay_return_redirect')
+    @api_error_handler
+    def hit_pay_redirect(self, request):
+        time.sleep(2)
+        order_id, status = request.query_params.get('order_id'), ''
+        payment_request_id = db.api_order.find_one({'id': int(order_id)})['checkout_details']['hitpay']['payment_request_id']
+
+        headers = {
+            'X-BUSINESS-API-KEY': settings.HITPAY_API_KEY,
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+        params = {
+            'ID': payment_request_id
+        }
+        code, ret = HitPay_Helper.HitPayApiCaller(headers=headers, params=params).get()
+        #TODO return redirect to order history page
+        if code != 200:
+            raise Exception('hitpay get payment request api failed')
+        
+        for _ret in ret:
+            if _ret['id'] == payment_request_id:
+                status = _ret['status']
+        if status == 'completed':
+            return redirect('https://v1login.liveshowseller.com/buyer/order/' + order_id + '/confirmation')
+        #TODO else return redirect to order history page
 
 
     @action(detail=False, methods=['PUT'], url_path=r'buyser_receipt_upload', parser_classes=(MultiPartParser,))
