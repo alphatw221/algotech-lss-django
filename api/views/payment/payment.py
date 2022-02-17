@@ -381,13 +381,15 @@ class PaymentViewSet(viewsets.GenericViewSet):
             'email': email,
             'name': name,
             'redirect_url': f'{settings.GCP_API_LOADBALANCER_URL}/api/payment/hit_pay_return_redirect/?order_id={order_id}',
-            'webhook': '{settings.GCP_API_LOADBALANCER_URL}/api/payment/hit_pay_webhook/',
+            'webhook': f'{settings.GCP_API_LOADBALANCER_URL}/api/payment/hit_pay_webhook/',
             'amount': amount,
             'currency': currency,
             'reference_number': order_id,
         }
+        
         code, ret = HitPay_Helper.HitPayApiCaller(headers=headers,
                             params=params).post()
+        print (code, ret)
 
         if code != 201:
             raise Exception('hitpay got wrong')
