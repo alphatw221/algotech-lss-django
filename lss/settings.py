@@ -244,6 +244,9 @@ SUPPORTED_PLATFORMS = [
     ("instagram", "Instagram"),
 ]
 
+HITPAY_API_URL = 'https://api.sandbox.hit-pay.com/v1/' 
+HITPAY_API_KEY = '64044c7551b232cbf23b32d9b21e30ff1f4c5b42068c8c59864f161cad6af21b'
+HITPAY_SECRET_SALT = '2MUizyJj429NIoOMmTXedyICmbwS1rt6Wph7cGqzG99IkmCV6nUCQ22lRVCB0Rgu'
 
 # Facebook
 FACEBOOK_API_URL = "https://graph.facebook.com"
@@ -339,9 +342,8 @@ PAYPAL_CONFIG = {
     "client_id": "ASABJtviIflIhkeEH4QBeYuhQoN7RWcPsC6fN-TXIfzhMQ2UDK1raOVd3xBWAmItoAg2WRgI4Nbpde8J",  # it's sandbox
     "client_secret": "EFEGnvXwP8DsSUYF5zoQ5ZkaArtlpzAlgpWJOwBlHRMUP6NwAq8-KmnTv087ihZrAIlyg5VtKo73Wj54",  # it's sandbox
 }
+STRIPE_API_KEY = "sk_test_51J2aFmF3j9D00CA0KABMZVKtOVnZNbBvM2hcokicJmfx8vvrmNyys5atEAcpp0Au2O3HtX0jz176my7g0ozbinof00RL4QAZrY"
 
 # APPEND_SLASH=False
-
-
 # OPERATION_CODE_NAME: AGILE
 ADMIN_LIST = [1, ]

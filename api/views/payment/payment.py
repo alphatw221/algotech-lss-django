@@ -1,3 +1,7 @@
+import urllib
+
+import stripe
+from django.shortcuts import redirect
 from rest_framework import views, viewsets, status
 import paypalrestsdk, json
 from django.core.files.base import ContentFile
@@ -14,31 +18,25 @@ from rest_framework.parsers import MultiPartParser, FormParser, FileUploadParser
 
 from api.utils.common.common import getdata, getparams
 from api.models.order.order import Order
-from api.models.user import user
-from api.models.user.user_subscription import UserSubscription
 from api.models.facebook.facebook_page import FacebookPage
 from api.models.youtube.youtube_channel import YoutubeChannel
 from api.models.instagram.instagram_profile import InstagramProfile
-from django.conf import settings
-from django.core.mail import send_mail as django_send_mail
 import pendulum, time, datetime
 
 from django.http import HttpResponseRedirect
-from api.models.user.user_subscription import UserSubscriptionSerializerMeta
 from api.utils.common.verify import Verify
 from api.views.payment._payment import HitPay_Helper
-from api.views.user.user_subscription import verify_request
 from backend.pymongo.mongodb import db
 from mail.sender.sender import *
 
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 from api.utils.error_handle.error.api_error import ApiVerifyError
-106
 
 import hmac, hashlib, base64, binascii
 from backend.i18n.payment_comfirm_mail import i18n_get_mail_content, i18n_get_mail_subject
 from api.utils.error_handle.error_handler.email_error_handle import email_error_handler
 from mail.sender.sender import send_smtp_mail
+from django.shortcuts import redirect
 
 
 
@@ -56,7 +54,7 @@ def send_email(order_id):
 
     mail_subject = i18n_get_mail_subject(shop_name)
     mail_content = i18n_get_mail_content(order_id, campaign_data, order_data, shop_name)
-    
+
     send_smtp_mail(customer_email, mail_subject, mail_content)
 
 
@@ -326,7 +324,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             print("Payment execute successfully")
             order_object.status = "complete"
             order_object.save()
-            return HttpResponseRedirect(f'{settings.WEB_SERVER_URL}/buyer/order/{order_object.id}/confirmation')
+            return HttpResponseRedirect(redirect_to=f'{settings.WEB_SERVER_URL}/buyer/order/{order_object.id}/confirmation')
         else:
             print(payment.error)  # Error Hash
             return Response(payment.error)
@@ -365,40 +363,48 @@ class PaymentViewSet(viewsets.GenericViewSet):
         currency = 'SGD' if not order_data['currency'] else order_data['currency']
         amount = order_data['total']
 
+        # params = {
+        #     'email': email,
+        #     'name': name,
+        #     'redirect_url': 'https://v1login.liveshowseller.com/buyer/order/' + order_id + '/confirmation',
+        #     'webhook': 'https://gipassl.algotech.app/api/payment/hit_pay_webhook/',
+        #     'amount': amount,
+        #     'currency': currency,
+        #     'reference_number': order_id,
+        # }
+        headers = {
+            'X-BUSINESS-API-KEY': settings.HITPAY_API_KEY,
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
         params = {
             'email': email,
             'name': name,
-            'redirect_url': 'https://v1login.liveshowseller.com/buyer/order/' + order_id + '/confirmation',
-            'webhook': 'https://gipassl.algotech.app/api/payment/hit_pay_webhook/',
+            'redirect_url': f'{settings.GCP_API_LOADBALANCER_URL}/api/payment/hit_pay_return_redirect/?order_id={order_id}',
+            'webhook': f'{settings.GCP_API_LOADBALANCER_URL}/api/payment/hit_pay_webhook/',
             'amount': amount,
             'currency': currency,
             'reference_number': order_id,
         }
-        headers = {
-            'X-BUSINESS-API-KEY': '64044c7551b232cbf23b32d9b21e30ff1f4c5b42068c8c59864f161cad6af21b',
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'X-Requested-With': 'XMLHttpRequest'
-        }
+        
         code, ret = HitPay_Helper.HitPayApiCaller(headers=headers,
                             params=params).post()
+        print (code, ret)
+
         if code != 201:
             raise Exception('hitpay got wrong')
         #TODO record payment not replace   
-        db.api_order.find_one () 
-        # db.api_order.update_one({'id': int(order_id)}, {'$set': {'meta': {'payment_id': ret['id']}}}) 
 
         return Response(ret['url'])
 
     @action(detail=False, methods=['POST'], url_path=r'hit_pay_webhook', parser_classes=(MultiPartParser, FormParser))
     def hit_pay_webhook(self, request):
         data_dict = request.data.dict()
-        payment_id = data_dict['payment_id']
-        payment_request_id = data_dict['payment_request_id']
-        amount = data_dict['amount']
-        status = data_dict['status']
+        payment_id, payment_request_id, phone = data_dict['payment_id'], data_dict['payment_request_id'], data_dict['phone']
+        amount, currency, status = data_dict['amount'], data_dict['currency'], data_dict['status']
         order_id = data_dict['reference_number']
-        hmac = data_dict['hmac']
-        secret_salt = '2MUizyJj429NIoOMmTXedyICmbwS1rt6Wph7cGqzG99IkmCV6nUCQ22lRVCB0Rgu'
+        _hmac, secret_salt = data_dict['hmac'], settings.HITPAY_SECRET_SALT
+        sort_key_list = ['amount', 'currency', 'hmac', 'payment_id', 'payment_request_id', 'phone', 'reference_number', 'status']
 
         hitpay_dict, info_dict = {}, {}
         info_dict['payment_id'] = payment_id
@@ -407,14 +413,41 @@ class PaymentViewSet(viewsets.GenericViewSet):
         total = int(db.api_order.find_one({'id': int(order_id)})['total'])
 
         #TODO change to real checking way
-        # if status == 'completed' and float(total) == float(amount):
-        db.api_order.update_one(
-            { 'id': int(order_id) },
-            { '$set': {'status': 'complete', 'checkout_details': hitpay_dict, 'payment_method': 'hitpay'} }
-        )
+        if status == 'completed' and int(total) == int(float(amount)):
+            db.api_order.update_one(
+                { 'id': int(order_id) },
+                { '$set': {'status': 'complete', 'checkout_details': hitpay_dict, 'payment_method': 'hitpay'} }
+            )
 
-        send_email(order_id)    
+        send_email(order_id)
         return Response('hitpay succed')
+    
+    @action(detail=False, methods=['GET'], url_path=r'hit_pay_return_redirect')
+    @api_error_handler
+    def hit_pay_redirect(self, request):
+        time.sleep(2)
+        order_id, status = request.query_params.get('order_id'), ''
+        payment_request_id = db.api_order.find_one({'id': int(order_id)})['checkout_details']['hitpay']['payment_request_id']
+
+        headers = {
+            'X-BUSINESS-API-KEY': settings.HITPAY_API_KEY,
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+        params = {
+            'ID': payment_request_id
+        }
+        code, ret = HitPay_Helper.HitPayApiCaller(headers=headers, params=params).get()
+        #TODO return redirect to order history page
+        if code != 200:
+            raise Exception('hitpay get payment request api failed')
+        
+        for _ret in ret:
+            if _ret['id'] == payment_request_id:
+                status = _ret['status']
+        if status == 'completed':
+            return redirect('https://v1login.liveshowseller.com/buyer/order/' + order_id + '/confirmation')
+        #TODO else return redirect to order history page
 
 
     @action(detail=False, methods=['PUT'], url_path=r'buyser_receipt_upload', parser_classes=(MultiPartParser,))
@@ -470,6 +503,131 @@ class PaymentViewSet(viewsets.GenericViewSet):
             meta_payment = order.campaign.meta_payment
             meta_payment = json.loads(json.dumps(meta_payment))
             return Response(meta_payment, status=status.HTTP_200_OK)
+        except Exception as e:
+            print(e)
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['POST'], url_path=r'stripe_pay', parser_classes=(FormParser,))
+    @api_error_handler
+    def stripe_pay_create_checkout_session(self, request):
+        # stripe.api_key = settings.STRIPE_API_KEY
+        try:
+            # api_user, order_id = getparams(
+            #     request, ("order_id",), seller=False)
+            # customer_user = Verify.get_customer_user(request)
+            order_id = request.data["order_id"]
+            order_object = Verify.get_order(order_id)
+            campaign = order_object.campaign
+            stripe.api_key = campaign.meta_payment.get("sg").get("stripe").get("stripe_secret")
+            print("stripe.api_key", stripe.api_key)
+            currency = "SGD" if order_object.currency is None else order_object.currency
+            item_list = []
+            for key, values in order_object.products.items():
+                image = urllib.parse.quote(f"{settings.GS_URL}{values.get('image', '')}")
+                print(image)
+                product = stripe.Product.create(
+                    name=values.get("name", ""),
+                    images=[image]
+                )
+                price = stripe.Price.create(
+                    product=product.id,
+                    unit_amount=int(values.get("price", 0)*100),
+                    currency=currency,
+                )
+                item_list.append(
+                    {
+                        # Provide the exact Price ID (for example, pr_1234) of the product you want to sell
+                        'price': price.id,
+                        "quantity": values.get("qty", 0)
+                    },
+                )
+            print(item_list)
+            discounts = []
+            if order_object.adjust_price:
+                discount = stripe.Coupon.create(
+                    amount_off=int(-order_object.adjust_price * 100),
+                    currency=currency
+                )
+                discounts.append(
+                    {
+                        'coupon': discount.id,
+                    }
+                )
+            stripe.Coupon.create(percent_off=20, duration="once")
+            shipping_options = []
+            if order_object.shipping_cost:
+                shipping_rate = stripe.ShippingRate.create(
+                    display_name="General Shipping",
+                    type="fixed_amount",
+                    fixed_amount={
+                        'amount': int(order_object.shipping_cost * 100),
+                        'currency': currency,
+                    }
+                )
+                shipping_options.append(
+                    {
+                        'shipping_rate': shipping_rate.id,
+                    }
+                )
+            elif order_object.free_delivery:
+                shipping_rate = stripe.ShippingRate.create(
+                    display_name="Free Delivery",
+                    type="fixed_amount",
+                    fixed_amount={
+                        'amount': 0,
+                        'currency': currency,
+                    }
+                )
+                shipping_options.append(
+                    {
+                        'shipping_rate': shipping_rate.id,
+                    }
+                )
+            checkout_session = stripe.checkout.Session.create(
+                line_items=item_list,
+                shipping_options=shipping_options,
+                discounts=discounts,
+                mode='payment',
+                success_url=settings.GCP_API_LOADBALANCER_URL + '/api/payment/strip_success?session_id={CHECKOUT_SESSION_ID}&order_id=' + str(order_object.id),
+                cancel_url=f"{settings.WEB_SERVER_URL}/payment/cancel",
+
+            )
+            print(checkout_session.url)
+            return Response(checkout_session.url, status=status.HTTP_303_SEE_OTHER)
+        except Exception as e:
+            print(e)
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['GET'], url_path=r'strip_success',)
+    @api_error_handler
+    def strip_success(self, request):
+        try:
+            # stripe.api_key = settings.STRIPE_API_KEY
+            print("session_id", request.GET["session_id"])
+            order_id = request.GET["order_id"]
+            order_object = Verify.get_order(order_id)
+            campaign_object = order_object.campaign
+            stripe.api_key = campaign_object.meta_payment.get("sg").get("stripe").get("stripe_secret")
+            print("stripe.api_key", stripe.api_key)
+            session = stripe.checkout.Session.retrieve(request.GET["session_id"])
+            payment_intent = stripe.PaymentIntent.retrieve(
+                session.payment_intent,
+            )
+            print("datetime", datetime.datetime.fromtimestamp(payment_intent.created))
+            if payment_intent.status == "succeeded":
+                checkout_details = {
+                    "client_secret": payment_intent.client_secret,
+                    "created": datetime.datetime.fromtimestamp(payment_intent.created),
+                    "id": payment_intent.id,
+                    "object": payment_intent.object,
+                    "receipt_email": payment_intent.receipt_email,
+                    "receipt_url": payment_intent.charges.data[0].receipt_url,
+                }
+                db.api_order.update_one(
+                    {'id': int(order_object.id)},
+                    {'$set': {'status': 'complete', 'checkout_details': checkout_details, 'payment_method': 'Stripe'}}
+                )
+            return HttpResponseRedirect(redirect_to=f'{settings.WEB_SERVER_URL}/buyer/order/{order_object.id}/confirmation')
         except Exception as e:
             print(e)
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)

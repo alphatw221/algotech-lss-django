@@ -140,20 +140,9 @@ class CampaignLuckyDrawProcessor:
         try:
             if self.num_of_winner > len(candidate_set):
                 self.num_of_winner = len(candidate_set)
-            winner_list, final_winner_list = random.sample(candidate_set, self.num_of_winner), []
-            for winner in winner_list:
-                winner_datas, img_url = db.api_user.find({'facebook_info.id': winner[1], 'type': 'customer'}), ''
-                for winner_data in winner_datas:
-                    try:
-                        img_url = winner_data['facebook_info']['picture']
-                    except:
-                        continue
-                winner = list(winner)
-                winner.append(img_url)
-                final_winner_list.append(winner)
-                print ('final_winner_list', final_winner_list)
+            winner_list = random.sample(candidate_set, self.num_of_winner)
         except Exception:
-            final_winner_list = []
+            winner_list = []
 
         return campaign_lucky_draw.create_campaign_lucky_draw(
             campaign=self.campaign,
@@ -164,4 +153,4 @@ class CampaignLuckyDrawProcessor:
             condition_type=self.event.get_condition_type(),
             num_of_winner=self.num_of_winner,
             candidate_list=list(candidate_set),
-            winner_list=final_winner_list)
+            winner_list=winner_list)
