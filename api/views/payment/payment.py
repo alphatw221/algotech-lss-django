@@ -586,7 +586,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
                 shipping_options=shipping_options,
                 discounts=discounts,
                 mode='payment',
-                success_url='http://localhost:8001/api/payment/strip_success?session_id={CHECKOUT_SESSION_ID}&order_id=' + str(order_object.id),
+                success_url=settings.GCP_API_LOADBALANCER_URL + '/api/payment/strip_success?session_id={CHECKOUT_SESSION_ID}&order_id=' + str(order_object.id),
                 cancel_url=f"{settings.WEB_SERVER_URL}/payment/cancel",
 
             )
@@ -602,17 +602,16 @@ class PaymentViewSet(viewsets.GenericViewSet):
         try:
             # stripe.api_key = settings.STRIPE_API_KEY
             print("session_id", request.GET["session_id"])
+            order_id = request.GET["order_id"]
+            order_object = Verify.get_order(order_id)
+            campaign_object = order_object.campaign
+            stripe.api_key = campaign_object.meta_payment.get("sg").get("stripe").get("stripe_secret")
+            print("stripe.api_key", stripe.api_key)
             session = stripe.checkout.Session.retrieve(request.GET["session_id"])
-
             payment_intent = stripe.PaymentIntent.retrieve(
                 session.payment_intent,
             )
             print("datetime", datetime.datetime.fromtimestamp(payment_intent.created))
-            order_id = request.GET["order_id"]
-            order_object = Verify.get_order(order_id)
-            campaign = order_object.campaign
-            stripe.api_key = campaign.meta_payment.get("sg").get("stripe").get("stripe_secret")
-            print("stripe.api_key", stripe.api_key)
             if payment_intent.status == "succeeded":
                 checkout_details = {
                     "client_secret": payment_intent.client_secret,
