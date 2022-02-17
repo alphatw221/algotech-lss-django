@@ -71,8 +71,8 @@ class YoutubeCampaignSerializer(serializers.Serializer):
     latest_comment_time = serializers.FloatField(required=False, default=0)
     remark = serializers.CharField(required=False, default="")
     next_page_token = serializers.CharField(required=False, default="")
-    access_token = serializers.CharField(required=False, default="")
-    refresh_token = serializers.CharField(required=False, default="")
+    access_token = serializers.CharField(required=False, default="", allow_blank=True)
+    refresh_token = serializers.CharField(required=False, default="", allow_blank=True)
 
 
 class InstagramCampaignSerializer(serializers.Serializer):
