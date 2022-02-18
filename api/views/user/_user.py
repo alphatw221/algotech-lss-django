@@ -84,7 +84,8 @@ def facebook_login_helper(request, user_type='user'):
 
     return Response(ret, status=status.HTTP_200_OK)
 
-def google_fast_login_helper(request):
+
+def google_fast_login_helper(request, user_type="seller"):
 
     def get_params():
         code = request.GET.get("code")
