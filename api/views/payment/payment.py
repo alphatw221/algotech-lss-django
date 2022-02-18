@@ -61,7 +61,7 @@ def send_email(order_id):
 class PaymentViewSet(viewsets.GenericViewSet):
     queryset = User.objects.none()
 
-    @action(detail=False, methods=['GET'], url_path=r'get_ipg_order_data', permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['GET'], url_path=r'get_ipg_order_data')
     @api_error_handler
     def get_ipg_order_data(self, request, pk=None):
 
