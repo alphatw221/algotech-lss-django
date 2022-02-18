@@ -158,9 +158,9 @@ class Verify():
 
     @staticmethod
     def get_campaign(campaign_id):
-        if not Campaign.filter(id=campaign_id).exists():
+        if not Campaign.objects.filter(id=campaign_id).exists():
             raise ApiVerifyError("no campaign found")
-        campaign = Campaign.get(id=campaign_id)
+        campaign = Campaign.objects.get(id=campaign_id)
         return campaign
     
     @staticmethod
