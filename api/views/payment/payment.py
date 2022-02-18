@@ -271,7 +271,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         #     "client_secret": settings.PAYPAL_CONFIG["client_secret"]
         # })
         paypalrestsdk.configure({
-            "mode": "sandbox",  # live
+            "mode": "live",  # live
             "client_id": campaign_obj.meta_payment["sg"]["paypal"]["paypal_clientId"],
             "client_secret": campaign_obj.meta_payment["sg"]["paypal"]["paypal_secret"]
         })
@@ -315,7 +315,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         campaign_obj = order_object.campaign
 
         paypalrestsdk.configure({
-            "mode": "sandbox",  # live
+            "mode": "live",  # live
             "client_id": campaign_obj.meta_payment["sg"]["paypal"]["paypal_clientId"],
             "client_secret": campaign_obj.meta_payment["sg"]["paypal"]["paypal_secret"]
         })
