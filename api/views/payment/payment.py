@@ -61,7 +61,7 @@ def send_email(order_id):
 class PaymentViewSet(viewsets.GenericViewSet):
     queryset = User.objects.none()
 
-    @action(detail=False, methods=['GET'], url_path=r'get_ipg_order_data')
+    @action(detail=False, methods=['GET'], url_path=r'get_ipg_order_data', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def get_ipg_order_data(self, request, pk=None):
 
@@ -235,8 +235,9 @@ class PaymentViewSet(viewsets.GenericViewSet):
         }
 
         """
-        api_user, order_id = getparams(
-            request, ("order_id",), seller=False)
+        order_id = request.query_params.get('order_id')
+        # api_user, order_id = getparams(
+        #     request, ("order_id",), seller=False)
         # customer_user = Verify.get_customer_user(request)
         order_object = Verify.get_order(order_id)
 
@@ -351,12 +352,14 @@ class PaymentViewSet(viewsets.GenericViewSet):
     @action(detail=False, methods=['GET'], url_path=r'hit_pay')
     @api_error_handler
     def hit_pay(self, request):
-        api_user, order_id = getparams(
-            request, ("order_id", ))
+        # api_user, order_id = getparams(
+        #     request, ("order_id", ))
 
-        user_data = db.api_user.find_one({'id': api_user.id})
-        name = user_data['name']
-        email = user_data['email']
+        order_id = request.query_params.get('order_id')
+
+        # user_data = db.api_user.find_one({'id': api_user.id})
+        # name = user_data['name']
+        # email = user_data['email']
         order_data = db.api_order.find_one({'id': int(order_id)})
         if not order_data:
             raise ApiVerifyError('no order found')
@@ -378,8 +381,8 @@ class PaymentViewSet(viewsets.GenericViewSet):
             'X-Requested-With': 'XMLHttpRequest'
         }
         params = {
-            'email': email,
-            'name': name,
+            'email': 'email@gmail.com',
+            'name': 'name',
             'redirect_url': f'{settings.GCP_API_LOADBALANCER_URL}/api/payment/hit_pay_return_redirect/?order_id={order_id}',
             'webhook': f'{settings.GCP_API_LOADBALANCER_URL}/api/payment/hit_pay_webhook/',
             'amount': amount,
@@ -494,12 +497,13 @@ class PaymentViewSet(viewsets.GenericViewSet):
     @api_error_handler
     def get_direct_payment_info(self, request):
         try:
-            api_user, order_id = getparams(request,('order_id',), seller=False)
+            # api_user, order_id = getparams(request,('order_id',), seller=False)
+            order_id = request.query_params.get('order_id')
             if not Order.objects.filter(id=order_id).exists():
                 raise ApiVerifyError("no order found")
 
             order = Verify.get_order(order_id)
-            Verify.user_match_order(api_user, order)
+            # Verify.user_match_order(api_user, order)
             meta_payment = order.campaign.meta_payment
             meta_payment = json.loads(json.dumps(meta_payment))
             return Response(meta_payment, status=status.HTTP_200_OK)
@@ -553,7 +557,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
                         'coupon': discount.id,
                     }
                 )
-            stripe.Coupon.create(percent_off=20, duration="once")
+            # stripe.Coupon.create(percent_off=20, duration="once")
             shipping_options = []
             if order_object.shipping_cost:
                 shipping_rate = stripe.ShippingRate.create(
