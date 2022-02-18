@@ -186,6 +186,7 @@ class DashboardViewSet(viewsets.ModelViewSet):
 
         return Response(campaignRank, status=status.HTTP_200_OK)
 
+    #TODO rewrite campaign_id_list, caculating way 
     @action(detail=False, methods=['GET'], url_path=r'campaign_manage_order')
     @api_error_handler
     def seller_total_sales(self, request):
@@ -204,9 +205,15 @@ class DashboardViewSet(viewsets.ModelViewSet):
                 campaign_order_proceed_count = db.api_order.find({'campaign_id': campaign_data['id'], 'status': 'review'}).count()
                 campaign_pre_order_count = db.api_pre_order.find({'campaign_id': campaign_data['id']}).count()
                 campaign_id_list.append(campaign_data['id'])
-               
-                campaign_order_total_uncheck_rate += campaign_order_complete_count / (campaign_order_complete_count + campaign_order_proceed_count) * 100        
-                campaign_order_total_close_rate += campaign_order_complete_count / (campaign_order_complete_count + campaign_pre_order_count) * 100
+                
+                try:                    
+                    campaign_order_total_uncheck_rate += campaign_order_complete_count / (campaign_order_complete_count + campaign_order_proceed_count) * 100        
+                except:
+                    campaign_order_total_uncheck_rate = 0
+                try:
+                    campaign_order_total_close_rate += campaign_order_complete_count / (campaign_order_complete_count + campaign_pre_order_count) * 100
+                except:
+                    campaign_order_total_close_rate = 0
                 campaign_count += 1
 
             campaign_order_average_uncheck_rate, campaign_order_average_close_rate, campaign_sales_average, comment_count_average = 0, 0 , 0, 0
