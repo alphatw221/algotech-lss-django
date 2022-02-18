@@ -72,6 +72,8 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
             api_user, platform_name, platform_id)
 
         data = request.data
+        data['input_msg'] = data['input_msg'].lower()
+
         if platform_name == 'facebook':
             data['facebook_page'] = platform.id
         elif platform_name == 'youtube':
@@ -80,7 +82,7 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         serializer.save()
-
+        
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['PUT'], url_path=r'update_auto_response')
@@ -93,8 +95,11 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
         _, _, auto_response = verify_request(
             api_user, platform_name, platform_id, auto_response_id=pk)
 
+        data = request.data
+        data['input_msg'] = data['input_msg'].lower()
+        
         serializer = self.get_serializer(
-            auto_response, data=request.data, partial=True)
+            auto_response, data=data, partial=True)
 
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

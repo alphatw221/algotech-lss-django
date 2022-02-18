@@ -60,13 +60,12 @@ class CampaignProductPagination(PageNumberPagination):
 
 
 class CampaignProductViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated,)
     queryset = CampaignProduct.objects.all().order_by('id')
     serializer_class = CampaignProductSerializer
     filterset_fields = []
     pagination_class = CampaignProductPagination
 
-    @action(detail=True, methods=['GET'], url_path=r'retrieve_campaign_product')
+    @action(detail=True, methods=['GET'], url_path=r'retrieve_campaign_product', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def retrieve_campaign_product(self, request, pk=None):
         platform_id = request.query_params.get('platform_id')
@@ -81,7 +80,7 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['GET'], url_path=r'list_campaign_product')
+    @action(detail=False, methods=['GET'], url_path=r'list_campaign_product', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def list_campaign_product(self, request):
         platform_id = request.query_params.get('platform_id')
@@ -126,7 +125,7 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
 
         return Response(data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['GET'], url_path=r'list_campaign_lucky_draw_product')
+    @action(detail=False, methods=['GET'], url_path=r'list_campaign_lucky_draw_product', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def list_campaign_lucky_draw_product(self, request):
         platform_id = request.query_params.get('platform_id')
@@ -144,7 +143,7 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
 
         return Response(data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['POST'], url_path=r'create_campaign_product')
+    @action(detail=False, methods=['POST'], url_path=r'create_campaign_product', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def create_campaign_product(self, request):
         platform_id = request.query_params.get('platform_id')
@@ -166,7 +165,7 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['PUT'], url_path=r'update_campaign_product')
+    @action(detail=True, methods=['PUT'], url_path=r'update_campaign_product', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def update_campaign_product(self, request, pk=None):
 
@@ -191,7 +190,7 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['DELETE'], url_path=r'delete_campaign_product')
+    @action(detail=True, methods=['DELETE'], url_path=r'delete_campaign_product', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def delete_campaign_product(self, request, pk=None):
 
@@ -224,7 +223,6 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
 
         return Response({"message": "delete success"}, status=status.HTTP_200_OK)
     
-    from api.models.product.product import Product
 
     @action(detail=False, methods=['POST'], url_path=r'fast_add_product', permission_classes=(IsAuthenticated,) )
     @api_error_handler
@@ -266,7 +264,7 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
 
         # return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['PUT'], url_path=r'fast_update', parser_classes=(MultiPartParser,))
+    @action(detail=True, methods=['PUT'], url_path=r'fast_update', parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated,))
     @api_error_handler
     def fast_update_campaign_product(self, request, pk=None):
         platform_id = request.query_params.get('platform_id')
@@ -301,9 +299,10 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'], url_path=r'buyer_list_campaign_product')
     @api_error_handler
     def buyer_list_campaign_product(self, request):
-        api_user, pre_order_id = getparams(request,('pre_order_id',), seller=False)
+        # api_user, pre_order_id = getparams(request,('pre_order_id',), seller=False)
+        pre_order_id = request.query_params.get('pre_order_id')
         pre_order=Verify.get_pre_order(pre_order_id)
-        Verify.user_match_pre_order(api_user, pre_order)
+        # Verify.user_match_pre_order(api_user, pre_order)
 
         campaign_products = pre_order.campaign.products.filter(Q(type='product') | Q(type="product-fast"))
         serializer = self.get_serializer(campaign_products, many=True)
