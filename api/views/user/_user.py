@@ -87,7 +87,7 @@ def facebook_login_helper(request, user_type='user'):
 
 def google_fast_login_helper(request, user_type="seller"):
 
-    def get_params():
+    def get_params(request):
         code = request.GET.get("code")
         campaign_id, youtube_video_id = request.GET.get("state").split(",")
         print("campaign_id", campaign_id)
