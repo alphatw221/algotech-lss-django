@@ -84,9 +84,10 @@ def facebook_login_helper(request, user_type='user'):
 
     return Response(ret, status=status.HTTP_200_OK)
 
-def google_fast_login_helper(request):
 
-    def get_params():
+def google_fast_login_helper(request, user_type="seller"):
+
+    def get_params(request):
         code = request.GET.get("code")
         campaign_id, youtube_video_id = request.GET.get("state").split(",")
         print("campaign_id", campaign_id)
@@ -147,12 +148,11 @@ def google_fast_login_helper(request):
         campaign.youtube_campaign["access_token"] = access_token
         campaign.youtube_campaign["refresh_token"] = refresh_token
         campaign.save()
-
         # save_token_to_campaign(campaign_id, access_token, refresh_token)
-
-        return HttpResponse(f"OK")
-    except:
-        return HttpResponse(f"NOT OK")
+        return HttpResponseRedirect(redirect_to=f'{settings.WEB_SERVER_URL}/campaign/edit/{campaign_id}')
+    except Exception as e:
+        print(traceback.format_exc())
+        return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 from django.shortcuts import redirect
 

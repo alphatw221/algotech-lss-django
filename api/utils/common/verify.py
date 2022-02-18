@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from os import stat
 from api.models.campaign.campaign import Campaign
 from backend.api.facebook.user import api_fb_get_me_accounts
 from api.models.facebook.facebook_page import FacebookPage
@@ -53,6 +54,7 @@ class Verify():
             if platform_name == 'facebook':
                 status_code, response = api_fb_get_me_accounts(
                     api_user.facebook_info['token'])
+
                 for item in response['data']:
                     if item['id'] == platform.page_id:
                         return True
@@ -157,9 +159,9 @@ class Verify():
 
     @staticmethod
     def get_campaign(campaign_id):
-        if not Campaign.filter(id=campaign_id).exists():
+        if not Campaign.objects.filter(id=campaign_id).exists():
             raise ApiVerifyError("no campaign found")
-        campaign = Campaign.get(id=campaign_id)
+        campaign = Campaign.objects.get(id=campaign_id)
         return campaign
     
     @staticmethod
@@ -169,6 +171,11 @@ class Verify():
         campaign = platform.campaigns.get(id=campaign_id)
         return campaign
 
+    @staticmethod
+    def get_product_from_user_subscription(user_subscription, product_id):
+        if not user_subscription.products.filter(id=product_id).exists():
+            raise ApiVerifyError("no product found")
+        return user_subscription.products.get(id=product_id)
 
     @staticmethod
     def get_campaign_product_from_campaign(campaign, campaign_product_id):
