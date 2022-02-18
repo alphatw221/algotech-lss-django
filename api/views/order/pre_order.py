@@ -213,9 +213,11 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['POST'], url_path=r'delivery_info')
     @api_error_handler
     def update_buyer_submit(self, request, pk=None):
-        date_list = request.data['shipping_date'].split('-')
-        request.data['shipping_date'] = datetime.date(int(date_list[0]), int(date_list[1]), int(date_list[2]))
-
+        try:
+            date_list = request.data['shipping_date'].split('-')
+            request.data['shipping_date'] = datetime.date(int(date_list[0]), int(date_list[1]), int(date_list[2]))
+        except:
+            pass
         # OPERATION_CODE_NAME: AGILE
         # if request.user.id in settings.ADMIN_LIST:
         pre_order=PreOrder.objects.get(id=pk)
