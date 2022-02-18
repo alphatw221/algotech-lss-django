@@ -54,6 +54,7 @@ class Verify():
             if platform_name == 'facebook':
                 status_code, response = api_fb_get_me_accounts(
                     api_user.facebook_info['token'])
+
                 for item in response['data']:
                     if item['id'] == platform.page_id:
                         return True

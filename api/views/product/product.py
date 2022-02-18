@@ -231,20 +231,19 @@ class ProductViewSet(viewsets.ModelViewSet):
 
         # return Response(campaign_product, status=status.HTTP_200_OK)
 
-        api_user,  campaign_id ,platform_id ,platform_name, api_user, order_code , \
-        max_order_amount, qty_for_sale, customer_removable , customer_editable  = getparams(
+        api_user, campaign_id ,platform_id ,platform_name, order_code , max_order_amount, qty_for_sale, customer_removable , customer_editable  = getparams(
             request,
             (
                 "campaign_id", 
                 "platform_id", 
                 "platform_name" , 
-                "api_user", 
                 "order_code", 
                 "max_order_amount", 
                 "qty_for_sale", 
                 "customer_removable", 
                 "customer_editable" 
             ), with_user=True, seller=True)
+
 
         platform = Verify.get_platform(api_user, platform_name, platform_id)
         user_subscription = Verify.get_user_subscription(platform)
