@@ -61,7 +61,7 @@ def send_email(order_id):
 class PaymentViewSet(viewsets.GenericViewSet):
     queryset = User.objects.none()
 
-    @action(detail=False, methods=['GET'], url_path=r'get_ipg_order_data', permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['GET'], url_path=r'get_ipg_order_data')
     @api_error_handler
     def get_ipg_order_data(self, request, pk=None):
 
@@ -220,7 +220,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             'platform_id': platform_id
         })
 
-    @action(detail=False, methods=['GET'], url_path=r"paypal_payment_create", permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['GET'], url_path=r"paypal_payment_create")
     def paypal_payment_create(self, request, *args, **kwargs):
         """
 
@@ -348,7 +348,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
 
     #     return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['GET'], url_path=r'hit_pay', permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['GET'], url_path=r'hit_pay')
     @api_error_handler
     def hit_pay(self, request):
         api_user, order_id = getparams(
