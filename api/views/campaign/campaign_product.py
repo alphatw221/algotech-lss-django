@@ -11,6 +11,7 @@ from rest_framework.parsers import MultiPartParser
 import json
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
+from api.models.product.product import Product
 
 from api.utils.common.verify import Verify
 from api.utils.common.verify import ApiVerifyError
@@ -223,37 +224,47 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
 
         return Response({"message": "delete success"}, status=status.HTTP_200_OK)
     
-    @action(detail=False, methods=['POST'], url_path=r'fast_create', parser_classes=(MultiPartParser,))
+    from api.models.product.product import Product
+
+    @action(detail=False, methods=['POST'], url_path=r'fast_add_product', permission_classes=(IsAuthenticated,) )
     @api_error_handler
-    def fast_create_campaign_product(self, request):
-        platform_id = request.query_params.get('platform_id')
-        platform_name = request.query_params.get('platform_name')
-        campaign_id = request.query_params.get('campaign_id')
-        api_user = request.user.api_users.get(type='user')
+    def fast_add_product(self, request):
 
-        _, campaign, user_subscription = verify_request(
-            api_user, platform_name, platform_id, campaign_id, is_fast=True)
+        api_user, platform_id, platform_name, campaign_id, code, price, qty = getparams(request, ("platform_id", "platform_name", "campaign_id", "code", "price", "qty"), with_user=True, seller=True)
 
-        text = request.data['text']
-        data = json.loads(text)
-        data['campaign'] = campaign.id
-        data['created_by'] = api_user.id
-        data['user_subscription'] = user_subscription.id
-        serializer = self.get_serializer(data=data)
+        platform = Verify.get_platform(api_user, platform_name, platform_id)
+        campaign = Verify.get_campaign_from_platform(platform, campaign_id)
+        user_subscription = Verify.get_user_subscription(platform)
 
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        fast_campaign = serializer.save()
+        product = Product.objects.create(user_subscription=user_subscription, created_by=api_user, name=code, order_code=code, price=float(price), qty=0)
+        campaign_product = CampaignProduct.objects.create(campaign=campaign, created_by=api_user,product=product,  status=1, type='product-fast', name=code, order_code=code, price=float(price), qty_for_sale=int(qty))
 
-        if 'image' in request.data:
-            image = request.data['image']
-            image_path = default_storage.save(
-                f'{user_subscription.id}/fast_campaign/{fast_campaign.id}/{image.name}', ContentFile(image.read()))
-            fast_campaign.image = image_path
+        return Response(CampaignProductSerializer(campaign_product).data, status=status.HTTP_200_OK)
 
-            fast_campaign.save()    
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        # _, campaign, user_subscription = verify_request(
+        #     api_user, platform_name, platform_id, campaign_id, is_fast=True)
+
+        # text = request.data['text']
+        # data = json.loads(text)
+        # data['campaign'] = campaign.id
+        # data['created_by'] = api_user.id
+        # data['user_subscription'] = user_subscription.id
+        # serializer = self.get_serializer(data=data)
+
+        # if not serializer.is_valid():
+        #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # fast_campaign = serializer.save()
+
+        # if 'image' in request.data:
+        #     image = request.data['image']
+        #     image_path = default_storage.save(
+        #         f'{user_subscription.id}/fast_campaign/{fast_campaign.id}/{image.name}', ContentFile(image.read()))
+        #     fast_campaign.image = image_path
+
+        #     fast_campaign.save()    
+
+        # return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['PUT'], url_path=r'fast_update', parser_classes=(MultiPartParser,))
     @api_error_handler
