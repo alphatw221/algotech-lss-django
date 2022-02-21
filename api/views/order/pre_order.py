@@ -244,7 +244,22 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         # return Response(verify_message, status=status.HTTP_200_OK)
 
     # --------------------------------------------------------------------------------------------------------
-    @action(detail=True, methods=['GET'], url_path=r'buyer_retrieve')
+
+    from rest_framework.permissions import BasePermission
+
+    class IsPreOrderCustomer(BasePermission):
+
+        def has_permission(self, request, view):
+            try:
+                pk = view.kwargs.get('pk')
+                api_user = Verify.get_customer_user(request)
+                pre_order = Verify.get_pre_order(pk)
+                Verify.user_match_pre_order(api_user, pre_order)
+            except Exception:
+                return False
+            return True
+
+    @action(detail=True, methods=['GET'], url_path=r'buyer_retrieve', permission_classes=(IsAuthenticated,IsPreOrderCustomer))
     @api_error_handler
     def buyer_retrieve_pre_order(self, request, pk=None):
         # api_user, = getparams(request, (), with_user=True, seller=False)

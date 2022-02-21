@@ -33,3 +33,17 @@ def api_ig_post_page_message_on_comment(page_token: str, comment_id: str, messag
     ret = FacebookApiCaller(f'{comment_id}/replies', bearer_token=page_token,
                             data=data).post()
     return ret
+
+
+# def api_ig_get_comment_author():
+#     data = {
+#         "message": message
+#     }
+#     ret = FacebookApiCaller(f'{comment_id}/replies', bearer_token=page_token,
+#                             data=data).post()
+#     return ret
+
+#     pass
+
+# def api_ig_post_comment():
+#     pass
