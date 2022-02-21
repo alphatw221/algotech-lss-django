@@ -216,7 +216,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         
         return Response('order deleted', status=status.HTTP_200_OK)
     
-    @action(detail=False, methods=['GET'], url_path=r'report')
+    @action(detail=False, methods=['GET'], url_path=r'report', permission_classes = (IsAuthenticated,))
     @api_error_handler
     def seller_order_report(self, request):
         api_user, platform_id, platform_name, campaign_id, column_list = getparams(
