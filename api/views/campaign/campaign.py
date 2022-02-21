@@ -45,13 +45,13 @@ class CampaignPagination(PageNumberPagination):
 
 
 class CampaignViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated,)
+    
     queryset = Campaign.objects.all().order_by('id')
     serializer_class = CampaignSerializer
     filterset_fields = []
     pagination_class = CampaignPagination
 
-    @action(detail=True, methods=['GET'], url_path=r'retrieve_campaign')
+    @action(detail=True, methods=['GET'], url_path=r'retrieve_campaign', permission_classes = (IsAuthenticated,))
     @api_error_handler
     def retrieve_campaign(self, request, pk=None):
         platform_name = request.query_params.get('platform_name')
@@ -74,7 +74,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         return Response(campaign_data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['GET'], url_path=r'list_campaign')
+    @action(detail=False, methods=['GET'], url_path=r'list_campaign', permission_classes = (IsAuthenticated,))
     @api_error_handler
     def list_campaign(self, request):
         platform_name = request.query_params.get('platform_name')
@@ -109,7 +109,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
             data = serializer.data
         return Response(data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['POST'], url_path=r'create_campaign', parser_classes=(MultiPartParser,))
+    @action(detail=False, methods=['POST'], url_path=r'create_campaign', parser_classes=(MultiPartParser,IsAuthenticated))
     @api_error_handler
     def create_campaign(self, request):
         platform_name = request.query_params.get('platform_name')
@@ -151,7 +151,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['PUT'], url_path=r'update_campaign', parser_classes=(MultiPartParser,))
+    @action(detail=True, methods=['PUT'], url_path=r'update_campaign', parser_classes=(MultiPartParser,IsAuthenticated))
     @api_error_handler
     def update_campaign(self, request, pk=None):
         platform_name = request.query_params.get('platform_name')
@@ -215,7 +215,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
 
 
-    @action(detail=True, methods=['DELETE'], url_path=r'delete_campaign')
+    @action(detail=True, methods=['DELETE'], url_path=r'delete_campaign', permission_classes = (IsAuthenticated,))
     @api_error_handler
     def delete_campaign(self, request, pk=None):
         platform_name = request.query_params.get('platform_name')
@@ -228,7 +228,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         return Response({"message": "delete success"}, status=status.HTTP_200_OK)
     
-    @action(detail=False, methods=['GET'], url_path=r'ig_comment')
+    @action(detail=False, methods=['GET'], url_path=r'ig_comment', permission_classes = (IsAuthenticated,))
     @api_error_handler
     def seller_total_revenue(self, request):
         api_user = request.user.api_users.get(type='user')
