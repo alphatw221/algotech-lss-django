@@ -8,4 +8,4 @@ __pycache__
 .pytest_cache
 .venv
 .test.py
-.wsgi.py
+/lss/wsgi.py
