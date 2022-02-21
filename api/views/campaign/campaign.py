@@ -178,6 +178,42 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+        api_user, platform_name, platform_id = getparams(request, ("platform_name", "platform_id"), with_user=True, seller=True)
+
+        platform = Verify.get_platform(api_user, platform_name, platform_id)
+        campaign = Verify.get_campaign_from_platform(platform, pk)
+
+        #temp solution : no to overide campaign data
+        json_data = json.loads(request.data["data"])
+        facebook_campaign = campaign.facebook_campaign.__dict__
+        facebook_campaign.update(json_data.get("facebook_campaign",{}))
+        json_data['facebook_campaign']=facebook_campaign
+        
+        youtube_campaign = campaign.youtube_campaign.__dict__
+        youtube_campaign.update(json_data.get("youtube_campaign",{}))
+        json_data['youtube_campaign']=youtube_campaign
+
+        instagram_campaign = campaign.instagram_campaign.__dict__
+        instagram_campaign.update(json_data.get("instagram_campaign",{}))
+        json_data['instagram_campaign']=instagram_campaign
+
+
+        for key, value in request.data.items():
+            if "account" in key:
+                account_number = key.split("_")[1]
+                image_path = default_storage.save(
+                    f'/campaign/{campaign.id}/payment/direct_payment/accounts/{account_number}/{value.name}', ContentFile(value.read()))
+                print(f"image_path: {image_path}")
+                json_data["meta_payment"]["sg"]["direct_payment"]["accounts"][account_number]["image"] = image_path
+
+        serializer = CampaignSerializer(
+            campaign, data=json_data, partial=True)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
+
+
+
     @action(detail=True, methods=['DELETE'], url_path=r'delete_campaign')
     @api_error_handler
     def delete_campaign(self, request, pk=None):

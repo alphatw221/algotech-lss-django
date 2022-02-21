@@ -137,12 +137,12 @@ class OrderPagination(PageNumberPagination):
 
 
 class OrderViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated,)
+    
     queryset = Order.objects.all().order_by('id')
     serializer_class = OrderSerializer
     filterset_fields = []
     
-    @action(detail=True, methods=['GET'], url_path=r'seller_retrieve')
+    @action(detail=True, methods=['GET'], url_path=r'seller_retrieve', permission_classes = (IsAuthenticated,))
     @api_error_handler
     def seller_retrieve_order(self, request, pk=None):
 
@@ -160,7 +160,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
     
-    @action(detail=False, methods=['GET'], url_path=r'seller_list')
+    @action(detail=False, methods=['GET'], url_path=r'seller_list', permission_classes = (IsAuthenticated,))
     @api_error_handler
     def seller_list_order(self, request):
         api_user, platform_id, platform_name, campaign_id, order_by = getparams(
@@ -186,7 +186,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         return Response(data, status=status.HTTP_200_OK)
     
-    @action(detail=True, methods=['GET'], url_path=r'seller_cancel')
+    @action(detail=True, methods=['GET'], url_path=r'seller_cancel', permission_classes = (IsAuthenticated,))
     @api_error_handler
     def seller_cancel_order(self, request, pk=None):
 
@@ -201,7 +201,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         return Response('order canceled', status=status.HTTP_200_OK)
     
-    @action(detail=True, methods=['GET'], url_path=r'seller_delete')
+    @action(detail=True, methods=['GET'], url_path=r'seller_delete', permission_classes = (IsAuthenticated,))
     @api_error_handler
     def seller_delete_order(self, request, pk=None):
 
