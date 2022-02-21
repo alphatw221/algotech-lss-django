@@ -126,9 +126,10 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         #TODO
         # json_data['youtube_channel'] = platform.id if platform_name == 'youtube' else None
-        json_data['youtube_channel'] = 1
-        
-        json_data['instagram_profile'] = platform.id if platform_name == 'instagram' else None
+        json_data['youtube_channel'] = platform.id if platform_name == 'youtube' else 1
+
+        json_data['instagram_profile'] = platform.id if platform_name == 'instagram' or platform_name == 'facebook' else None
+
         serializer = CampaignSerializerCreate(data=json_data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
