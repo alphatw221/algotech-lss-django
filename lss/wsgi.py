@@ -19,4 +19,4 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'lss.settings')
 application = get_wsgi_application()
 
 
-#testtesttest
+#test2 test2
