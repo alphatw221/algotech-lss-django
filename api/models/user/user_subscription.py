@@ -8,7 +8,7 @@ from api.models.youtube.youtube_channel import (YoutubeChannel,
 from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
-
+from django.conf import settings
 
 class UserSubscription(models.Model):
     class Meta:
@@ -37,6 +37,8 @@ class UserSubscription(models.Model):
     meta_logistic = models.JSONField(default=dict, null=True, blank=dict)
     meta_country = models.JSONField(null=True, blank=True, default=dict)
 
+    lang = models.CharField(max_length=255, blank=True,
+                            choices=settings.LANGUAGES, default='en')
 
 class UserSubscriptionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -58,12 +60,13 @@ class UserSubscriptionSerializer(serializers.ModelSerializer):
     meta_logistic = serializers.JSONField(default=dict)
     meta_country = serializers.JSONField(default=dict)
 
+    
 
 class UserSubscriptionSerializerSimplify(UserSubscriptionSerializer):
     class Meta:
         model = UserSubscription
         fields = ['id', 'meta', 'meta_country', 'name',
-                  'description', 'remark', 'type', 'status']
+                  'description', 'remark', 'type', 'status', 'lang']
         read_only_fields = ['created_at', 'modified_at']
 
 

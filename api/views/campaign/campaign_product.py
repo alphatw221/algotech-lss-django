@@ -27,7 +27,7 @@ def verify_request(api_user, platform_name, platform_id, campaign_id, campaign_p
     Verify.verify_user(api_user)
     platform = Verify.get_platform(api_user, platform_name, platform_id)
     campaign = Verify.get_campaign_from_platform(platform, campaign_id)
-    user_subscription = Verify.get_user_subscription(platform)
+    user_subscription = Verify.get_user_subscription_from_platform(platform)
 
     if campaign_product_id:
         if not campaign.products.filter(id=campaign_product_id).exists():
@@ -232,7 +232,7 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
 
         platform = Verify.get_platform(api_user, platform_name, platform_id)
         campaign = Verify.get_campaign_from_platform(platform, campaign_id)
-        user_subscription = Verify.get_user_subscription(platform)
+        user_subscription = Verify.get_user_subscription_from_platform(platform)
 
         product = Product.objects.create(user_subscription=user_subscription, created_by=api_user, name=code, order_code=code, price=float(price), qty=0)
         campaign_product = CampaignProduct.objects.create(campaign=campaign, created_by=api_user,product=product,  status=1, type='product-fast', name=code, order_code=code, price=float(price), qty_for_sale=int(qty))

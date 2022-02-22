@@ -14,7 +14,7 @@ from api.utils.error_handle.error_handler.api_error_handler import api_error_han
 def verify_request(api_user, platform_name, platform_id, auto_response_id=None):
     Verify.verify_user(api_user)
     platform = Verify.get_platform(api_user, platform_name, platform_id)
-    user_subscription = Verify.get_user_subscription(platform)
+    user_subscription = Verify.get_user_subscription_from_platform(platform)
     if auto_response_id:
         if not platform.auto_responses.filter(id=auto_response_id).exists():
             raise ApiVerifyError('no auto_response found')

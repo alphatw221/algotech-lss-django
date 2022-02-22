@@ -24,7 +24,7 @@ from api.utils.error_handle.error_handler.api_error_handler import api_error_han
 def verify_request(api_user, platform_name, platform_id, product_id=None):
     Verify.verify_user(api_user)
     platform = Verify.get_platform(api_user, platform_name, platform_id)
-    user_subscription = Verify.get_user_subscription(platform)
+    user_subscription = Verify.get_user_subscription_from_platform(platform)
     if product_id:
         if not user_subscription.products.filter(id=product_id).exists():
             raise ApiVerifyError('no product found')
@@ -211,7 +211,7 @@ class ProductViewSet(viewsets.ModelViewSet):
 
 
         platform = Verify.get_platform(api_user, platform_name, platform_id)
-        user_subscription = Verify.get_user_subscription(platform)
+        user_subscription = Verify.get_user_subscription_from_platform(platform)
         campaign = Verify.get_campaign_from_platform(platform, campaign_id)
         product = Verify.get_product_from_user_subscription(user_subscription,  pk)
 
