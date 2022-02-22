@@ -20,6 +20,7 @@ from api.utils.common.verify import Verify
 from api.utils.common.verify import ApiVerifyError
 
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
+from liveshowseller.api.utils.common.common import getparams
 
 def verify_request(api_user, platform_name, platform_id):
     Verify.verify_user(api_user)
@@ -46,29 +47,22 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
     filterset_fields = []
     pagination_class = UserSubscriptionPagination
 
-    @action(detail=False, methods=['GET'], url_path=r'root_add_platform')
+    @action(detail=False, methods=['GET'], url_path=r'root_add_platform', permission_classes=(IsAdminUser,))
     def root_add_platform(self, request):
-        try:
-            platform_name = request.query_params.get('platform_name')
-            platform_id = request.query_params.get('platform_id')
-            api_user = request.user.api_users.get(type='user')
+        api_user, platform_name, platform_id = getparams(request, ('platform_name', 'platform_id'), with_user=True, seller=True)
 
-            platform, user_subscription = verify_request(
-                api_user, platform_name, platform_id)
+        platform = Verify.get_platform(api_user, platform_name, platform_id)
+        
+        platform, user_subscription = verify_request(
+            api_user, platform_name, platform_id)
 
-            if platform_name == 'facebook':
-                user_subscription.facebook_pages.add(platform)
-            elif platform_name == 'youtube':
-                pass
-
-        except ApiVerifyError as e:
-            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except:
-            return Response({"message": "error occerd during process"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+        if platform_name == 'facebook':
+            user_subscription.facebook_pages.add(platform)
+        elif platform_name == 'youtube':
+            pass
         return Response({'message': "add platform success"}, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['GET'], url_path=r'root_remove_platform')
+    @action(detail=False, methods=['GET'], url_path=r'root_remove_platform', permission_classes=(IsAdminUser,))
     def root_remove_platform(self, request):
         try:
             platform_name = request.query_params.get('platform_name')
@@ -89,71 +83,72 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
         return Response({'message': "remove platform success"}, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['GET'], url_path=r'root_add_user')
-    def root_add_user(self, request):
+    # @action(detail=False, methods=['GET'], url_path=r'root_add_user')
+    # def root_add_user(self, request):
 
-        target_user_id = request.query_params.get('target_user_id')
-        user_subscription_id = request.query_params.get('user_subscription_id')
+    #     target_user_id = request.query_params.get('target_user_id')
+    #     user_subscription_id = request.query_params.get('user_subscription_id')
 
-        api_user = request.user.api_users.get(type='user')
-        if not api_user:
-            return Response({"message": "no user found"}, status=status.HTTP_400_BAD_REQUEST)
-        elif api_user.status != "valid":
-            return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
+    #     api_user = request.user.api_users.get(type='user')
+    #     if not api_user:
+    #         return Response({"message": "no user found"}, status=status.HTTP_400_BAD_REQUEST)
+    #     elif api_user.status != "valid":
+    #         return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
 
-        if not User.objects.filter(id=target_user_id, type='user').exists():
-            return Response({"message": "no target user found"}, status=status.HTTP_400_BAD_REQUEST)
-        target_user = User.objects.get(id=target_user_id, type='user')
-        if target_user.status != "valid":
-            return Response({"message": "target user not activated"}, status=status.HTTP_400_BAD_REQUEST)
+    #     if not User.objects.filter(id=target_user_id, type='user').exists():
+    #         return Response({"message": "no target user found"}, status=status.HTTP_400_BAD_REQUEST)
+    #     target_user = User.objects.get(id=target_user_id, type='user')
+    #     if target_user.status != "valid":
+    #         return Response({"message": "target user not activated"}, status=status.HTTP_400_BAD_REQUEST)
 
-        if not api_user.user_subscriptions.filter(id=user_subscription_id).exists():
-            return Response({"message": "no user_subscription found"}, status=status.HTTP_400_BAD_REQUEST)
-        user_subscription = api_user.user_subscriptions.get(
-            id=user_subscription_id)
+    #     if not api_user.user_subscriptions.filter(id=user_subscription_id).exists():
+    #         return Response({"message": "no user_subscription found"}, status=status.HTTP_400_BAD_REQUEST)
+    #     user_subscription = api_user.user_subscriptions.get(
+    #         id=user_subscription_id)
 
-        if user_subscription.root_users.filter(id=target_user.id).exists():
-            return Response({"message": "target user already in user_subscription"}, status=status.HTTP_400_BAD_REQUEST)
+    #     if user_subscription.root_users.filter(id=target_user.id).exists():
+    #         return Response({"message": "target user already in user_subscription"}, status=status.HTTP_400_BAD_REQUEST)
 
-        try:
-            user_subscription.root_users.add(target_user)
-        except:
-            return Response({"message": "error occerd during process"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    #     try:
+    #         user_subscription.root_users.add(target_user)
+    #     except:
+    #         return Response({"message": "error occerd during process"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        return Response({'message': "add target user success"}, status=status.HTTP_200_OK)
+    #     return Response({'message': "add target user success"}, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['GET'], url_path=r'root_remove_user')
-    def root_remove_user(self, request):
+    # @action(detail=False, methods=['GET'], url_path=r'root_remove_user')
+    # def root_remove_user(self, request):
 
-        target_user_id = request.query_params.get('target_user_id')
-        user_subscription_id = request.query_params.get('user_subscription_id')
+    #     target_user_id = request.query_params.get('target_user_id')
+    #     user_subscription_id = request.query_params.get('user_subscription_id')
 
-        api_user = request.user.api_users.get(type='user')
-        if not api_user:
-            return Response({"message": "no user found"}, status=status.HTTP_400_BAD_REQUEST)
-        elif api_user.status != "valid":
-            return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
+    #     api_user = request.user.api_users.get(type='user')
+    #     if not api_user:
+    #         return Response({"message": "no user found"}, status=status.HTTP_400_BAD_REQUEST)
+    #     elif api_user.status != "valid":
+    #         return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
 
-        if not User.objects.filter(id=target_user_id, type='user').exists():
-            return Response({"message": "no target user found"}, status=status.HTTP_400_BAD_REQUEST)
-        target_user = User.objects.get(id=target_user_id, type='user')
-        if target_user.status != "valid":
-            return Response({"message": "target user not activated"}, status=status.HTTP_400_BAD_REQUEST)
+    #     if not User.objects.filter(id=target_user_id, type='user').exists():
+    #         return Response({"message": "no target user found"}, status=status.HTTP_400_BAD_REQUEST)
+    #     target_user = User.objects.get(id=target_user_id, type='user')
+    #     if target_user.status != "valid":
+    #         return Response({"message": "target user not activated"}, status=status.HTTP_400_BAD_REQUEST)
 
-        if not api_user.user_subscriptions.filter(id=user_subscription_id).exists():
-            return Response({"message": "no user_subscription found"}, status=status.HTTP_400_BAD_REQUEST)
-        user_subscription = api_user.user_subscriptions.get(
-            id=user_subscription_id)
+    #     if not api_user.user_subscriptions.filter(id=user_subscription_id).exists():
+    #         return Response({"message": "no user_subscription found"}, status=status.HTTP_400_BAD_REQUEST)
+    #     user_subscription = api_user.user_subscriptions.get(
+    #         id=user_subscription_id)
 
-        if not user_subscription.root_users.filter(id=target_user.id).exists():
-            return Response({"message": "target user not in user_subscription"}, status=status.HTTP_400_BAD_REQUEST)
+    #     if not user_subscription.root_users.filter(id=target_user.id).exists():
+    #         return Response({"message": "target user not in user_subscription"}, status=status.HTTP_400_BAD_REQUEST)
 
-        try:
-            user_subscription.root_users.remove(target_user)
-        except:
-            return Response({"message": "error occerd during process"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    #     try:
+    #         user_subscription.root_users.remove(target_user)
+    #     except:
+    #         return Response({"message": "error occerd during process"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        return Response({'message': "delete target user success"}, status=status.HTTP_200_OK)
+    #     return Response({'message': "delete target user success"}, status=status.HTTP_200_OK)
+
 
     @action(detail=False, methods=['GET'], url_path=r'get_meta')
     def get_meta(self, request):
