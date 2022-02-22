@@ -5,6 +5,7 @@ from api.utils.common.verify import Verify, getparams
 
 class PlatfomrIsCampaignOwner(BasePermission):
     def has_permission(self, request, view):
+        print(view)
         try:
             api_user, platform_name, platform_id = getparams(request, ("platform_name", "platform_id"), with_user=True, seller=True)
             platform = Verify.get_platform(api_user, platform_name, platform_id)
@@ -12,3 +13,8 @@ class PlatfomrIsCampaignOwner(BasePermission):
             return True
         except:
             return False
+    def has_object_permission(self, request, view, obj):
+        print(view)
+        print(obj)
+
+
