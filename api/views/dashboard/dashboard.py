@@ -192,52 +192,52 @@ class DashboardViewSet(viewsets.ModelViewSet):
     def seller_total_sales(self, request):
         api_user, platform, campaign, pre_order, order_product, campaign_product, qty, search = Verify.PreOrderApi.FromSeller.verify(request)
         is_user = verify_seller_request(api_user)
-        campaign_id = campaign.id
-        user_id = int(api_user.id)
-        
+        campaign_id, user_id = campaign.id, int(api_user.id)
         manage_order = {}
+
         if is_user:
-            campaign_datas = db.api_campaign.find({'created_by_id': user_id})
-            campaign_order_complete_count, campaign_order_proceed_count, campaign_pre_order_count, campaign_count = 0, 0, 0, 0
-            campaign_order_total_uncheck_rate, campaign_order_total_close_rate, campaign_id_list, campaing_sales_total = 0, 0, [], 0
-            for campaign_data in campaign_datas:
-                campaign_order_complete_count = db.api_order.find({'campaign_id': campaign_data['id'], 'status': 'complete'}).count()
-                campaign_order_proceed_count = db.api_order.find({'campaign_id': campaign_data['id'], 'status': 'review'}).count()
-                campaign_pre_order_count = db.api_pre_order.find({'campaign_id': campaign_data['id']}).count()
+            campaigns = db.api_campaign.find({'created_by_id': user_id})
+            order_complete_count, order_proceed_count, pre_order_count, campaign_count = 0, 0, 0, 0
+            campaign_id_list, total_order_uncheck_rate, total_order_close_rate, total_sales = [], 0, 0, 0
+            
+            for campaign_data in campaigns:
+                order_complete_count = db.api_order.find({'campaign_id': campaign_data['id'], 'status': 'complete'}).count()
+                order_proceed_count = db.api_order.find({'campaign_id': campaign_data['id'], 'status': 'review'}).count()
+                pre_order_count = db.api_pre_order.find({'campaign_id': campaign_data['id']}).count()
                 campaign_id_list.append(campaign_data['id'])
                 
-                try:                    
-                    campaign_order_total_uncheck_rate += campaign_order_complete_count / (campaign_order_complete_count + campaign_order_proceed_count) * 100        
-                except:
-                    campaign_order_total_uncheck_rate = 0
                 try:
-                    campaign_order_total_close_rate += campaign_order_complete_count / (campaign_order_complete_count + campaign_pre_order_count) * 100
-                except:
-                    campaign_order_total_close_rate = 0
+                    total_order_uncheck_rate += order_complete_count / (order_complete_count + order_proceed_count) * 100  
+                except ZeroDivisionError:
+                    total_order_uncheck_rate = 0
+                try:      
+                    total_order_close_rate += order_complete_count / (order_complete_count + pre_order_count) * 100
+                except ZeroDivisionError:
+                    total_order_close_rate = 0
                 campaign_count += 1
 
-            campaign_order_average_uncheck_rate, campaign_order_average_close_rate, campaign_sales_average, comment_count_average = 0, 0 , 0, 0
+            average_order_uncheck_rate, average_order_close_rate, average_sales, average_comment_count = 0, 0 , 0, 0
             try:
-                campaign_order_average_uncheck_rate = campaign_order_total_uncheck_rate / campaign_count
-            except:
-                campaign_order_average_uncheck_rate = 0
+                average_order_uncheck_rate = total_order_uncheck_rate / campaign_count
+            except ZeroDivisionError:
+                average_order_uncheck_rate = 0
             try:
-                campaign_order_average_close_rate = campaign_order_total_close_rate / campaign_count       
-            except:
-                campaign_order_average_close_rate = 0
+                average_order_close_rate = total_order_close_rate / campaign_count       
+            except ZeroDivisionError:
+                average_order_close_rate = 0
 
             order_datas = db.api_order.find({'campaign_id': {'$in': campaign_id_list}})
             for order_data in order_datas:
                 for key, val in order_data['products'].items():
-                    campaing_sales_total += val['subtotal']
+                    total_sales += val['subtotal']
             try:   # 總campaign完成訂單總金額平均
-                campaign_sales_average = campaing_sales_total / campaign_count
-            except:
-                campaign_sales_average = 0
+                average_sales = total_sales / campaign_count
+            except ZeroDivisionError:
+                average_sales = 0
             try:
-                comment_count_average = db.api_campaign_comment.find({'campaign_id': {'$in': campaign_id_list}}).count() / campaign_count
-            except:
-                comment_count_average = 0
+                average_comment_count = db.api_campaign_comment.find({'campaign_id': {'$in': campaign_id_list}}).count() / campaign_count
+            except ZeroDivisionError:
+                average_comment_count = 0
 
             # manage order
             pre_order_qty, order_qty, close_rate, uncheckout_rate, complete_sales, comment_count = 0, 0, 0, 0, 0, 0
@@ -262,33 +262,32 @@ class DashboardViewSet(viewsets.ModelViewSet):
             # 訂單成交量
             try:
                 close_rate = order_complete_count / (order_complete_count + pre_order_count) * 100
-            except:
+            except ZeroDivisionError:
                 close_rate = 0
             # 未完成付款
             try:
                 uncheckout_rate = order_proceed_count / (order_complete_count + order_proceed_count) * 100
-            except:
+            except ZeroDivisionError:
                 uncheckout_rate = 0
             
             manage_order['close_rate'] = close_rate
             manage_order['complete_sales'] = complete_sales
             manage_order['uncheckout_rate'] = uncheckout_rate
             manage_order['comment_count'] = comment_count
-            manage_order['cart_qty'] = pre_order_count
+            manage_order['cart_qty'] = (pre_order_count + order_proceed_count)
             manage_order['order_qty'] = order_complete_count
-            manage_order['close_rate_raise'] = close_rate - campaign_order_average_close_rate
-            manage_order['uncheckout_rate_raise'] = uncheckout_rate - campaign_order_average_uncheck_rate
+            manage_order['close_rate_raise'] = close_rate - average_order_close_rate
+            manage_order['uncheckout_rate_raise'] = uncheckout_rate - average_order_uncheck_rate
             try:
-                manage_order['campaign_sales_raise'] = complete_sales / campaign_sales_average
-            except:
+                manage_order['campaign_sales_raise'] = complete_sales / average_sales
+            except ZeroDivisionError:
                 manage_order['campaign_sales_raise'] = 0
             try:
-                manage_order['comment_count_raise'] = comment_count / comment_count_average
-            except:
+                manage_order['comment_count_raise'] = comment_count / average_comment_count
+            except ZeroDivisionError:
                 manage_order['comment_count_raise'] = 0
+
         return Response(manage_order, status=status.HTTP_200_OK)
-                
-                
                 
     
     @action(detail=False, methods=['GET'], url_path=r'order_list')
