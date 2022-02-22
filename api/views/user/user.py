@@ -59,8 +59,9 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 
-    @api_error_handler
+    
     @action(detail=False, methods=['GET'], url_path=r'facebook_pages')
+    @api_error_handler
     def get_facebook_pages_by_client(self, request):
 
         api_user = request.user.api_users.get(type='user')
@@ -139,8 +140,9 @@ class UserViewSet(viewsets.ModelViewSet):
 
         return Response(response, status=status.HTTP_200_OK)
 
-    @api_error_handler
+    
     @action(detail=False, methods=['GET'], url_path=r'youtube_channels')
+    @api_error_handler
     def get_youtube_channels(self, request):
 
         api_user = Verify.get_seller_user(request)
@@ -188,3 +190,19 @@ class UserViewSet(viewsets.ModelViewSet):
             picture = getattr(api_user,platform_info_dict[platform_name]).get('picture','')
 
         return Response(picture, status=status.HTTP_200_OK)
+
+    
+    @action(detail=False, methods=['POST'], url_path=r'create_valid_api_user', permission_classes=(IsAdminUser,))
+    @api_error_handler
+    def create_valid_api_user(self, request):
+
+        name = request.data.get("name")
+        email = request.data.get("email")
+
+        if not name or not email:
+            raise ApiVerifyError('name and email must not be empty')
+
+        api_user = User.objects.create(
+            name=name, email=email, type='user', status='valid')
+
+        return Response("ok", status=status.HTTP_200_OK)

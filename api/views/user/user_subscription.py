@@ -2,13 +2,14 @@ from rest_framework import serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from api.models.user.user import User
-from api.models.user.user_subscription import UserSubscription, UserSubscriptionSerializer, UserSubscriptionSerializerMeta
+from api.models.user.user_subscription import UserSubscription, UserSubscriptionSerializer, UserSubscriptionSerializerMeta, UserSubscriptionSerializerSimplify
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework import status
 from api.models.facebook.facebook_page import FacebookPage
 from api.models.youtube.youtube_channel import YoutubeChannel
 from datetime import datetime
+from api.utils.common.common import getdata
 from backend.api.facebook.user import api_fb_get_me_accounts
 
 from rest_framework.parsers import MultiPartParser
@@ -16,7 +17,7 @@ import json
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 
-from api.utils.common.verify import Verify
+from api.utils.common.verify import Verify, getparams
 from api.utils.common.verify import ApiVerifyError
 
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
@@ -25,7 +26,7 @@ from liveshowseller.api.utils.common.common import getparams
 def verify_request(api_user, platform_name, platform_id):
     Verify.verify_user(api_user)
     platform = Verify.get_platform(api_user, platform_name, platform_id)
-    user_subscription = Verify.get_user_subscription(platform)
+    user_subscription = Verify.get_user_subscription_from_platform(platform)
 
     return platform, user_subscription
 
@@ -335,18 +336,38 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-def is_admin(platform_name, api_user, platform):
-    try:
-        if platform_name == 'facebook':
-            status_code, response = api_fb_get_me_accounts(
-                api_user.facebook_info['token'])
+    @action(detail=False, methods=['PUT'], url_path=r'update_language')
+    @api_error_handler
+    def update_language(self, request):
 
-            for item in response['data']:
-                if item['id'] == platform.page_id:
-                    return True
-            return False
-        elif platform_name == 'youtube':
-            pass
-    except:
-        return False
-    return False
+        api_user, platform_name, platform_id = getparams(request, ('platform_name', 'platform_id'), with_user=True, seller=True)
+        language, = getdata(request, ('language',))
+
+        Verify.language_supported(language)
+        platform = Verify.get_platform(api_user, platform_name, platform_id)
+        user_subscription = Verify.get_user_subscription_from_platform(platform)
+
+        user_subscription.lang = language
+        user_subscription.save()
+
+        return Response(UserSubscriptionSerializerSimplify(user_subscription).data, status=status.HTTP_200_OK)
+
+    
+    @action(detail=False, methods=['PUT'], url_path=r'update_note')
+    @api_error_handler
+    def update_note(self, request):
+
+        api_user, platform_name, platform_id = getparams(request, ('platform_name', 'platform_id'), with_user=True, seller=True)
+        delivery_note, special_note, confirmation_note = getdata(request, ('delivery_note',"special_note", "confirmation_note"))
+
+        platform = Verify.get_platform(api_user, platform_name, platform_id)
+        user_subscription = Verify.get_user_subscription_from_platform(platform)
+
+        user_subscription.meta['delivery_note']=delivery_note
+        user_subscription.meta['special_note']=special_note
+        user_subscription.meta['confirmation_note']=confirmation_note
+
+        user_subscription.save()
+
+        return Response(UserSubscriptionSerializerMeta(user_subscription).data, status=status.HTTP_200_OK)
+    

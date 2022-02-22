@@ -45,12 +45,12 @@ class User(models.Model):
     google_info = models.JSONField(null=True, blank=True, default=dict)
     
     user_plan = models.ForeignKey(
-        UserPlan, null=True, on_delete=models.SET_NULL, related_name='users')
+        UserPlan, null=True, on_delete=models.SET_NULL, related_name='users', blank=True, default=None)
     meta = models.JSONField(null=True, blank=True, default=dict)
     payment_meta = models.JSONField(null=True, blank=True, default=dict)
 
     auth_user = models.ForeignKey(
-        AuthUser, on_delete=models.CASCADE, related_name="api_users")
+        AuthUser, on_delete=models.CASCADE, related_name="api_users", null=True, blank=True, default=None)
 
     def __str__(self):
         return self.name

@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 from os import stat
+
+from django.conf import settings
 from api.models.campaign.campaign import Campaign
 from backend.api.facebook.user import api_fb_get_me_accounts
 from api.models.facebook.facebook_page import FacebookPage
@@ -69,6 +71,11 @@ class Verify():
         except Exception as e:
             return False
         return False
+
+    @staticmethod
+    def language_supported(language):
+        if language not in settings.SUPPORTED_LANGUAGES:
+            raise ApiVerifyError('language not supported')
 
     @staticmethod
     def check_is_admin_by_token(token, platform_name, platform):
@@ -150,7 +157,7 @@ class Verify():
         return Order.objects.get(id=order_id)
 
     @staticmethod
-    def get_user_subscription(platform):
+    def get_user_subscription_from_platform(platform):
         user_subscriptions = platform.user_subscriptions.all()
         if not user_subscriptions:
             raise ApiVerifyError("platform not in any user_subscription")
@@ -204,7 +211,24 @@ class Verify():
 
     @staticmethod
     def user_match_pre_order(api_user, pre_order):
-        pass
+
+
+
+        # platform_id = pre_order.get('platform_id')
+        platform_name = pre_order.get('platform')
+
+        if platform_name == 'facebook':
+            pass
+            if pre_order.get('customer_id') != api_user.get('facebook_info',{}).get("id"):
+                raise ApiVerifyError('error!')
+        elif platform_name == 'youtube':
+            if pre_order.get('customer_id') != api_user.get('google_info',{}).get("id"):
+                raise ApiVerifyError('error!')
+            pass
+        else:
+            pass
+
+        # pass
 
     @staticmethod
     def user_match_order(api_user, order):

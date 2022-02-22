@@ -212,12 +212,20 @@ USE_L10N = True
 USE_TZ = True
 
 LOCALE_PATHS = [os.path.join(BASE_DIR, 'locale')]
+
 LANGUAGES = [
     ('en', 'English'),
     ('zh-hans', 'Simplified Chinese'),
     ('zh-hant', 'Traditional Chinese'),
     ('id', 'Indonesian'),
 ]
+
+SUPPORTED_LANGUAGES={
+    'en',
+    'zh-hans',
+    'zh-hant',
+    'id'
+}
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
