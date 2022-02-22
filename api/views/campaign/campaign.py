@@ -13,6 +13,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from datetime import datetime
 from api.models.youtube.youtube_channel import YoutubeChannel
+from api.utils.common.permission import PlatfomrIsCampaignOwner
 
 from backend.pymongo.mongodb import db
 from api.utils.common.verify import Verify
@@ -51,15 +52,13 @@ class CampaignViewSet(viewsets.ModelViewSet):
     filterset_fields = []
     pagination_class = CampaignPagination
 
-    @action(detail=True, methods=['GET'], url_path=r'retrieve_campaign', permission_classes = (IsAuthenticated,))
+    @action(detail=True, methods=['GET'], url_path=r'retrieve_campaign', permission_classes=(IsAuthenticated, PlatfomrIsCampaignOwner,))
     @api_error_handler
     def retrieve_campaign(self, request, pk=None):
         platform_name = request.query_params.get('platform_name')
         platform_id = request.query_params.get('platform_id')
         api_user = request.user.api_users.get(type='user')
-
-        _, campaign = verify_request(
-            api_user, platform_name, platform_id, campaign_id=pk)
+        campaign = Verify.get_campaign(campaign_id=pk)
         serializer = CampaignSerializerRetreive(campaign)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -74,7 +73,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         return Response(campaign_data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['GET'], url_path=r'list_campaign', permission_classes = (IsAuthenticated,))
+    @action(detail=False, methods=['GET'], url_path=r'list_campaign', permission_classes=(IsAuthenticated, PlatfomrIsCampaignOwner,))
     @api_error_handler
     def list_campaign(self, request):
         platform_name = request.query_params.get('platform_name')
@@ -110,6 +109,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
         return Response(data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['POST'], url_path=r'create_campaign', parser_classes=(MultiPartParser,IsAuthenticated))
+    @action(detail=False, methods=['POST'], url_path=r'create_campaign', parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated, PlatfomrIsCampaignOwner,))
     @api_error_handler
     def create_campaign(self, request):
         platform_name = request.query_params.get('platform_name')
@@ -119,7 +119,6 @@ class CampaignViewSet(viewsets.ModelViewSet):
         platform = verify_request(api_user, platform_name, platform_id)
         # TODO check platform in user_subscription
         
-        print(platform)
         json_data = json.loads(request.data["data"])
         json_data['created_by'] = api_user.id
         json_data['facebook_page'] = platform.id if platform_name == 'facebook' else None
@@ -189,7 +188,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
         facebook_campaign = campaign.facebook_campaign.__dict__
         facebook_campaign.update(json_data.get("facebook_campaign",{}))
         json_data['facebook_campaign']=facebook_campaign
-        
+
         youtube_campaign = campaign.youtube_campaign.__dict__
         youtube_campaign.update(json_data.get("youtube_campaign",{}))
         json_data['youtube_campaign']=youtube_campaign
