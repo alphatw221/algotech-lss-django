@@ -32,7 +32,7 @@ class PreOrderPagination(PageNumberPagination):
 
 
 class PreOrderViewSet(viewsets.ModelViewSet):
-    # permission_classes = (IsAuthenticated,)
+    
     queryset = PreOrder.objects.all().order_by('id')
     serializer_class = PreOrderSerializer
     filterset_fields = []
@@ -259,7 +259,9 @@ class PreOrderViewSet(viewsets.ModelViewSet):
                 return False
             return True
 
-    @action(detail=True, methods=['GET'], url_path=r'buyer_retrieve', permission_classes=(IsAuthenticated,IsPreOrderCustomer))
+    # permission_classes=(IsAuthenticated,IsPreOrderCustomer)
+
+    @action(detail=True, methods=['GET'], url_path=r'buyer_retrieve')
     @api_error_handler
     def buyer_retrieve_pre_order(self, request, pk=None):
         # api_user, = getparams(request, (), with_user=True, seller=False)

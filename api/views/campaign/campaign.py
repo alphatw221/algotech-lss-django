@@ -45,13 +45,13 @@ class CampaignPagination(PageNumberPagination):
 
 
 class CampaignViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated,)
+    
     queryset = Campaign.objects.all().order_by('id')
     serializer_class = CampaignSerializer
     filterset_fields = []
     pagination_class = CampaignPagination
 
-    @action(detail=True, methods=['GET'], url_path=r'retrieve_campaign')
+    @action(detail=True, methods=['GET'], url_path=r'retrieve_campaign', permission_classes = (IsAuthenticated,))
     @api_error_handler
     def retrieve_campaign(self, request, pk=None):
         platform_name = request.query_params.get('platform_name')
@@ -74,7 +74,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         return Response(campaign_data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['GET'], url_path=r'list_campaign')
+    @action(detail=False, methods=['GET'], url_path=r'list_campaign', permission_classes = (IsAuthenticated,))
     @api_error_handler
     def list_campaign(self, request):
         platform_name = request.query_params.get('platform_name')
@@ -109,7 +109,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
             data = serializer.data
         return Response(data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['POST'], url_path=r'create_campaign', parser_classes=(MultiPartParser,))
+    @action(detail=False, methods=['POST'], url_path=r'create_campaign', parser_classes=(MultiPartParser,IsAuthenticated))
     @api_error_handler
     def create_campaign(self, request):
         platform_name = request.query_params.get('platform_name')
@@ -126,9 +126,10 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         #TODO
         # json_data['youtube_channel'] = platform.id if platform_name == 'youtube' else None
-        json_data['youtube_channel'] = 1
-        
-        json_data['instagram_profile'] = platform.id if platform_name == 'instagram' else None
+        json_data['youtube_channel'] = platform.id if platform_name == 'youtube' else 1
+
+        json_data['instagram_profile'] = platform.id if platform_name == 'instagram' or platform_name == 'facebook' else None
+
         serializer = CampaignSerializerCreate(data=json_data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -150,7 +151,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['PUT'], url_path=r'update_campaign', parser_classes=(MultiPartParser,))
+    @action(detail=True, methods=['PUT'], url_path=r'update_campaign', parser_classes=(MultiPartParser,IsAuthenticated))
     @api_error_handler
     def update_campaign(self, request, pk=None):
         platform_name = request.query_params.get('platform_name')
@@ -178,7 +179,43 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['DELETE'], url_path=r'delete_campaign')
+        api_user, platform_name, platform_id = getparams(request, ("platform_name", "platform_id"), with_user=True, seller=True)
+
+        platform = Verify.get_platform(api_user, platform_name, platform_id)
+        campaign = Verify.get_campaign_from_platform(platform, pk)
+
+        #temp solution : no to overide campaign data
+        json_data = json.loads(request.data["data"])
+        facebook_campaign = campaign.facebook_campaign.__dict__
+        facebook_campaign.update(json_data.get("facebook_campaign",{}))
+        json_data['facebook_campaign']=facebook_campaign
+        
+        youtube_campaign = campaign.youtube_campaign.__dict__
+        youtube_campaign.update(json_data.get("youtube_campaign",{}))
+        json_data['youtube_campaign']=youtube_campaign
+
+        instagram_campaign = campaign.instagram_campaign.__dict__
+        instagram_campaign.update(json_data.get("instagram_campaign",{}))
+        json_data['instagram_campaign']=instagram_campaign
+
+
+        for key, value in request.data.items():
+            if "account" in key:
+                account_number = key.split("_")[1]
+                image_path = default_storage.save(
+                    f'/campaign/{campaign.id}/payment/direct_payment/accounts/{account_number}/{value.name}', ContentFile(value.read()))
+                print(f"image_path: {image_path}")
+                json_data["meta_payment"]["sg"]["direct_payment"]["accounts"][account_number]["image"] = image_path
+
+        serializer = CampaignSerializer(
+            campaign, data=json_data, partial=True)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
+
+
+
+    @action(detail=True, methods=['DELETE'], url_path=r'delete_campaign', permission_classes = (IsAuthenticated,))
     @api_error_handler
     def delete_campaign(self, request, pk=None):
         platform_name = request.query_params.get('platform_name')
@@ -191,7 +228,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         return Response({"message": "delete success"}, status=status.HTTP_200_OK)
     
-    @action(detail=False, methods=['GET'], url_path=r'ig_comment')
+    @action(detail=False, methods=['GET'], url_path=r'ig_comment', permission_classes = (IsAuthenticated,))
     @api_error_handler
     def seller_total_revenue(self, request):
         api_user = request.user.api_users.get(type='user')
