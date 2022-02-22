@@ -137,7 +137,6 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
 
         campaign_products = campaign.products.filter(Q(type='lucky_draw') | Q(type="lucky_draw-fast"))
 
-
         serializer = self.get_serializer(campaign_products, many=True)
         data = serializer.data
 
