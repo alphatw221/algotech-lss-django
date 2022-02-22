@@ -7,6 +7,7 @@ from backend.api.facebook.user import api_fb_get_me_accounts
 from api.models.facebook.facebook_page import FacebookPage
 from api.models.youtube.youtube_channel import YoutubeChannel
 from api.models.instagram.instagram_profile import InstagramProfile
+from api.models.user.user_subscription import UserSubscription
 
 from api.models.order.order import Order
 from api.models.order.pre_order import PreOrder
@@ -155,6 +156,12 @@ class Verify():
         if not Order.objects.filter(id=order_id).exists():
             raise ApiVerifyError('no order found')
         return Order.objects.get(id=order_id)
+    
+    @staticmethod
+    def get_user_subscription(user_subscription_id):
+        if not UserSubscription.objects.filter(id=user_subscription_id).exists():
+            raise ApiVerifyError("user subscription not found")
+        return UserSubscription.objects.get(id=user_subscription_id)
 
     @staticmethod
     def get_user_subscription_from_platform(platform):
