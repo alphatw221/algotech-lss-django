@@ -252,9 +252,9 @@ SUPPORTED_PLATFORMS = [
     ("instagram", "Instagram"),
 ]
 
-HITPAY_API_URL = 'https://api.sandbox.hit-pay.com/v1/' 
-HITPAY_API_KEY = '64044c7551b232cbf23b32d9b21e30ff1f4c5b42068c8c59864f161cad6af21b'
-HITPAY_SECRET_SALT = '2MUizyJj429NIoOMmTXedyICmbwS1rt6Wph7cGqzG99IkmCV6nUCQ22lRVCB0Rgu'
+HITPAY_API_URL = 'https://api.hit-pay.com/v1/payment-requests'  ## https://api.sandbox.hit-pay.com/v1/
+HITPAY_API_KEY = 'a17041b2c841f88263faaed459e1579a592a431acf8b69e044645d28d4a1c316'
+HITPAY_SECRET_SALT = '9ntt8RQoPtP9NXlO36aZTpP5wK10vFWbsw45KjaBGNzfYiU75cUJ3LLCEqMLGUO9'
 
 # Facebook
 FACEBOOK_API_URL = "https://graph.facebook.com"
