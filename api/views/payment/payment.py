@@ -358,29 +358,21 @@ class PaymentViewSet(viewsets.GenericViewSet):
 
     @action(detail=False, methods=['GET'], url_path=r"paypal_cancel")
     def paypal_cancel(self, request, *args, **kwargs):
-
-        paymentId = request.GET["paymentId"]
-        payer_id = request.GET["PayerID"]
-        order_id = request.GET["order_id"]
-        order_object = Verify.get_order(order_id)
-        campaign_obj = order_object.campaign
-
-        paypalrestsdk.configure({
-            "mode": "live",  # live
-            "client_id": campaign_obj.meta_payment["sg"]["paypal"]["paypal_clientId"],
-            "client_secret": campaign_obj.meta_payment["sg"]["paypal"]["paypal_secret"]
-        })
-
-        payment = paypalrestsdk.Payment.find(paymentId)
-        if payment.execute({"payer_id": payer_id}):
-            print("Payment execute successfully")
-            order_object.status = "complete"
+        try:
+            order_id = request.GET["order_id"]
+            order_object = Verify.get_order(order_id)
+            pre_order = PreOrder.objects.filter(customer_id=order_object.customer_id, campaign_id=order_object.campaign_id)
+            if len(pre_order) > 1:
+                return Response({"message": "Buyer has more than one shopping cart."}, status=status.HTTP_400_BAD_REQUEST)
+            order_object.checkout_detail[len(order_object.checkout_detail) + 1] = {
+                "action": "cancel payment",
+                "time": datetime.datetime.now()
+            }
             order_object.save()
-            return HttpResponseRedirect(
-                redirect_to=f'{settings.WEB_SERVER_URL}/buyer/order/{order_object.id}/confirmation')
-        else:
-            print(payment.error)  # Error Hash
-            return Response(payment.error)
+            return HttpResponseRedirect(redirect_to=f'{settings.WEB_SERVER_URL}/buyer/cart/{pre_order.id}')
+        except Exception as e:
+            print(e)
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     # @action(detail=False, methods=['GET'], url_path=r'get_ipg_order_data')
     # @api_error_handler

@@ -158,6 +158,7 @@ from django.shortcuts import redirect
 
 def google_login_helper(request, user_type='customer'):
     code = request.GET.get("code")
+    print("user_type", user_type)
     if user_type == "customer":
         order_id = request.GET.get("state")
         red = redirect(f'{settings.WEB_SERVER_URL}/buyer/cart/{order_id}')
@@ -188,6 +189,8 @@ def google_login_helper(request, user_type='customer'):
 
 
     if not response.status_code / 100 == 2:
+        print(response)
+        print(traceback.format_exc)
         raise ApiCallerError('get google token fail')
 
     access_token = response.json().get("access_token")
