@@ -180,71 +180,6 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     
     #------------------buyer---------------------------------------------------------------------------
     
-    #TODO transfer to campaign or payment 
-    @action(detail=True, methods=['GET'], url_path=r'campaign_info')
-    @api_error_handler
-    def get_campaign_info(self, request, pk=None):
-
-        # OPERATION_CODE_NAME: AGILE
-        # if request.user.id in settings.ADMIN_LIST:
-        pre_order=PreOrder.objects.get(id=pk)
-        campaign = db.api_campaign.find_one({'id': pre_order.campaign_id})
-        data_dict = {
-            'campaign_id': pre_order.campaign_id,
-            'platform': pre_order.platform,
-            'platform_id': pre_order.platform_id,
-            'meta_logistic': campaign['meta_logistic']
-        }
-
-        return Response(data_dict, status=status.HTTP_200_OK)
-
-        # api_user, pre_order, order_product, campaign_product, qty = Verify.PreOrderApi.FromBuyer.verify(request, pk)
-        # campaign = db.api_campaign.find_one({'id': pre_order.campaign_id})
-        # data_dict = {
-        #     'campaign_id': pre_order.campaign_id,
-        #     'platform': pre_order.platform,
-        #     'platform_id': pre_order.platform_id,
-        #     'meta_logistic': campaign['meta_logistic']
-        # }
-
-        # return Response(data_dict, status=status.HTTP_200_OK)
-
-    #TODO transfer to campaign or payment  , permission_classes=(IsAuthenticated,)
-    @action(detail=True, methods=['POST'], url_path=r'delivery_info')
-    @api_error_handler
-    def update_buyer_submit(self, request, pk=None):
-        try:
-            date_list = request.data['shipping_date'].split('-')
-            request.data['shipping_date'] = datetime.date(int(date_list[0]), int(date_list[1]), int(date_list[2]))
-        except:
-            pass
-        # OPERATION_CODE_NAME: AGILE
-        # if request.user.id in settings.ADMIN_LIST:
-        pre_order=PreOrder.objects.get(id=pk)
-        # pre_meta = pre_order.meta
-        # pre_meta.update(request.data['meta'])
-        # request.data['meta'] = pre_meta
-        serializer = PreOrderSerializerUpdatePaymentShipping(pre_order, data=request.data, partial=True)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        serializer.save()
-        pre_order = PreOrder.objects.get(id=pk)
-        verify_message = Verify.PreOrderApi.FromBuyer.verify_delivery_info(pre_order)
-        return Response(verify_message, status=status.HTTP_200_OK)
-
-        # api_user, pre_order, order_product, campaign_product, qty = Verify.PreOrderApi.FromBuyer.verify(request, pk)
-
-        # serializer = PreOrderSerializerUpdatePaymentShipping(pre_order, data=request.data, partial=True)
-        # if not serializer.is_valid():
-        #     print (serializer.errors)
-        #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        # serializer.save()
-        # pre_order = PreOrder.objects.get(id=pk)
-        # verify_message = Verify.PreOrderApi.FromBuyer.verify_delivery_info(pre_order)
-        # return Response(verify_message, status=status.HTTP_200_OK)
-
-    # --------------------------------------------------------------------------------------------------------
-
     from rest_framework.permissions import BasePermission
 
     class IsPreOrderCustomer(BasePermission):
@@ -382,11 +317,3 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         PreOrderHelper.delete_product(
             api_user, pre_order, order_product, order_product.campaign_product)
         return Response({'message':"delete success"}, status=status.HTTP_200_OK)
-
-    @action(detail=True, methods=['GET'], url_path=r'campaign_prodcut_list')
-    @api_error_handler
-    def buyer_campaign_prodcut_list(self, request, pk=None):
-        pre_order = Verify.get_pre_order(pk)
-        campaign_products = pre_order.campaign.products.values()
-        return Response(campaign_products, status=status.HTTP_200_OK)
-
