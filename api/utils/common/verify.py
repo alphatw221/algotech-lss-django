@@ -219,8 +219,6 @@ class Verify():
     @staticmethod
     def user_match_pre_order(api_user, pre_order):
 
-
-
         # platform_id = pre_order.get('platform_id')
         platform_name = pre_order.get('platform')
 
@@ -235,11 +233,20 @@ class Verify():
         else:
             pass
 
-        # pass
-
     @staticmethod
     def user_match_order(api_user, order):
-        pass
+        platform_name = order.get('platform')
+
+        if platform_name == 'facebook':
+            pass
+            if order.get('customer_id') != api_user.get('facebook_info',{}).get("id"):
+                raise ApiVerifyError('error!')
+        elif platform_name == 'youtube':
+            if order.get('customer_id') != api_user.get('google_info',{}).get("id"):
+                raise ApiVerifyError('error!')
+            pass
+        else:
+            pass
 
     class PreOrderApi():
 
