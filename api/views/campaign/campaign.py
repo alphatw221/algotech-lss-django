@@ -272,7 +272,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
         
         platform = Verify.get_platform(api_user, platform_name, platform_id)
 
-        user_subscription = Verify.get_user_subscription(platform)
+        user_subscription = Verify.get_user_subscription_from_platform(platform)
         
 
         if not YoutubeChannel.objects.filter(channel_id = youtube_channel_id).exists():

@@ -341,6 +341,9 @@ class OrderViewSet(viewsets.ModelViewSet):
         
         return response
     
+
+
+    #---------------------------------------------buyer---------------------------------------------------------------------------
     #TODO transfer to campaign or payment 
     @action(detail=True, methods=['POST'], url_path=r'delivery_info')
     @api_error_handler
