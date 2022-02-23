@@ -174,26 +174,10 @@ DATABASES = {
             'readPreference': 'primary',
             'ssl': False,
         }
-    },
-    # 'default': {  # for social lab
-    #     'ENGINE': 'djongo',
-    #     'NAME': 'lss',
-    #     'ENFORCE_SCHEMA': False,
-    #     'CLIENT': {
-    #         'host': 'mongodb://52.221.239.166:27017',
-    #         'username': 'sociallabdev',
-    #         'password': 'sociallab2021',
-    #         'authSource': 'admin',
-    #         'authMechanism': 'SCRAM-SHA-1',
-    #         'ssl': False,
-    #     }
-    # }
+    }
 }
 MONGODB_CONNECTION_STRING = 'mongodb://lss:algo83111T%%@34.126.92.142:27017,35.240.200.4:27017,34.126.155.150:27017'
-# MONGODB_CONNECTION_STRING = 'mongodb://sociallabdev:sociallab2021@52.221.239.166:27017' # for social lab
 MONGODB_DATABASE_NAME = 'lss'
-
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -228,12 +212,20 @@ USE_L10N = True
 USE_TZ = True
 
 LOCALE_PATHS = [os.path.join(BASE_DIR, 'locale')]
+
 LANGUAGES = [
     ('en', 'English'),
     ('zh-hans', 'Simplified Chinese'),
     ('zh-hant', 'Traditional Chinese'),
     ('id', 'Indonesian'),
 ]
+
+SUPPORTED_LANGUAGES={
+    'en',
+    'zh-hans',
+    'zh-hant',
+    'id'
+}
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
@@ -260,9 +252,9 @@ SUPPORTED_PLATFORMS = [
     ("instagram", "Instagram"),
 ]
 
-HITPAY_API_URL = 'https://api.sandbox.hit-pay.com/v1/' 
-HITPAY_API_KEY = '64044c7551b232cbf23b32d9b21e30ff1f4c5b42068c8c59864f161cad6af21b'
-HITPAY_SECRET_SALT = '2MUizyJj429NIoOMmTXedyICmbwS1rt6Wph7cGqzG99IkmCV6nUCQ22lRVCB0Rgu'
+HITPAY_API_URL = 'https://api.hit-pay.com/v1/payment-requests'  ## https://api.sandbox.hit-pay.com/v1/
+HITPAY_API_KEY = 'a17041b2c841f88263faaed459e1579a592a431acf8b69e044645d28d4a1c316'
+HITPAY_SECRET_SALT = '9ntt8RQoPtP9NXlO36aZTpP5wK10vFWbsw45KjaBGNzfYiU75cUJ3LLCEqMLGUO9'
 
 # Facebook
 FACEBOOK_API_URL = "https://graph.facebook.com"
@@ -350,6 +342,7 @@ REDIS_SERVER = {
 # gcp load balancer
 GCP_API_LOADBALANCER_URL = "https://gipassl.algotech.app"
 LOCAL_API_SERVER = "http://localhost:8001"
+TEST_API_SERVER = "http://192.168.74.114/lss-backend"
 # paypal settings
 # package github: https://github.com/paypal/PayPal-Python-SDK
 

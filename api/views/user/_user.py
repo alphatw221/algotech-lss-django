@@ -157,20 +157,37 @@ def google_fast_login_helper(request, user_type="seller"):
 from django.shortcuts import redirect
 
 def google_login_helper(request, user_type='customer'):
-
     code = request.GET.get("code")
+    if user_type == "customer":
+        order_id = request.GET.get("state")
+        red = redirect(f'{settings.WEB_SERVER_URL}/buyer/cart/{order_id}')
+        response = requests.post(
+            url="https://accounts.google.com/o/oauth2/token",
+            data={
+                "code": code,
+                "client_id": "536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com",
+                "client_secret": "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",
+                # "redirect_uri": settings.GCP_API_LOADBALANCER_URL + "/api/user/google_customer_login_callback",
+                # "redirect_uri": "http://localhost:8001" + "/api/user/google_customer_login_callback",
+                "redirect_uri": settings.TEST_API_SERVER + "/api/user/google_customer_login_callback",
+                "grant_type": "authorization_code"
+            }
+        )
+    if user_type == "user":
+        red = redirect(f'{settings.WEB_SERVER_URL}/platform')
+        response = requests.post(
+            url="https://accounts.google.com/o/oauth2/token",
+            data={
+                "code": code,
+                "client_id": "536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com",
+                "client_secret": "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",
+                # "redirect_uri": settings.GCP_API_LOADBALANCER_URL + "/api/user/google_user_login_callback",
+                # "redirect_uri": "http://localhost:8001" + "/api/user/google_user_login_callback",
+                "redirect_uri": settings.TEST_API_SERVER + "/api/user/google_user_login_callback",
+                "grant_type": "authorization_code"
+            }
+        )
 
-    response = requests.post(
-        url="https://accounts.google.com/o/oauth2/token",
-        data={
-            "code": code,
-            "client_id": "536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com",
-            "client_secret": "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",
-            # "redirect_uri": settings.GCP_API_LOADBALANCER_URL + "/api/user/google_user_login_callback",
-            "redirect_uri": "http://localhost:8000" + "/api/user/google_user_login_callback",
-            "grant_type": "authorization_code"
-        }
-    )
 
     if not response.status_code / 100 == 2:
         raise ApiCallerError('get google token fail')
@@ -191,7 +208,6 @@ def google_login_helper(request, user_type='customer'):
     api_user_exists = User.objects.filter(
         email=email, type=user_type).exists()
     auth_user_exists = AuthUser.objects.filter(email=email).exists()
-
 
     scenario1 = api_user_exists and auth_user_exists
     scenario2 = api_user_exists and not auth_user_exists
@@ -217,7 +233,7 @@ def google_login_helper(request, user_type='customer'):
         api_user = User.objects.create(
             name=google_name, email=email, type=user_type, status='new', auth_user=auth_user)
 
-    if user_type=='user' and api_user.status != 'valid':
+    if user_type == 'user' and api_user.status != 'valid':
         raise ApiVerifyError('account not activated')
 
     api_user.google_info["access_token"] = access_token
@@ -225,10 +241,17 @@ def google_login_helper(request, user_type='customer'):
     api_user.google_info["id"] = google_id
     api_user.google_info["name"] = google_name
     api_user.google_info["picture"] = google_picture
-    api_user.save()
+    channels = {}
+    code, list_channel_response = api_youtube_get_list_channel_by_token(access_token)
+    if not code / 100 == 2:
+        raise ApiCallerError('list youtube channels error')
 
+    for item in list_channel_response.get("items"):
+        channels[item['id']] = item
+    api_user.youtube_info['channels'] = channels
     auth_user.last_login = datetime.now()
     auth_user.save()
+    api_user.save()
 
     # refresh = RefreshToken.for_user(auth_user)
 
@@ -239,11 +262,8 @@ def google_login_helper(request, user_type='customer'):
     #     'access': str(refresh.access_token),
     # }
 
-    red = redirect('https://www.google.com')
-    red.set_cookie('token',str(refresh.access_token)) #TODO setting domain, expired
-
+    red.set_cookie('token', str(refresh.access_token)) #TODO setting domain, expired
     return red
-    return Response(ret, status=status.HTTP_200_OK)
 
 
 def instagram_login_helper(request, user_type='customer'):

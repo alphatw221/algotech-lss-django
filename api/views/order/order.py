@@ -1,3 +1,5 @@
+from ast import operator
+import functools
 from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -17,7 +19,10 @@ import xlsxwriter, os.path, io, datetime
 from io import StringIO
 from django.conf import settings
 from dateutil import parser
-
+import functools
+ 
+import operator
+from django.db.models import Q
 
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 def get_title_map():
@@ -438,3 +443,28 @@ class OrderViewSet(viewsets.ModelViewSet):
             return Response('order canceled', status=status.HTTP_200_OK)
         else:
             return Response('order submited, can not cancel by customer', status=status.HTTP_400_BAD_REQUEST)
+
+    
+    @action(detail=False, methods=['GET'], url_path=r'buyer_list', permission_classes = (IsAuthenticated,))
+    @api_error_handler
+    def list_buyer_history_order(self, request):
+
+        api_user, = getparams(
+            request, (), with_user=True, seller=False)
+
+        query_list=[]
+
+        if api_user.facebook_info.get("id"):
+            query_list.append( Q(customer_id = api_user.facebook_info.get("id")) )
+
+        for channel_id, _ in api_user.youtube_info:
+            query_list.append( Q(customer_id = channel_id) )
+
+        if api_user.instagram_info.get("id"):
+            query_list.append( Q(customer_id = api_user.instagram_info.get("id")) )
+            
+        orders = Order.objects.filter(functools.reduce(operator.or_, query_list))
+
+
+ 
+        return Response(OrderSerializer(orders, many=True).data, status=status.HTTP_200_OK)
