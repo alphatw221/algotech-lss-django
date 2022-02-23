@@ -127,8 +127,12 @@ def comment_responding(platform_name, platform, campaign, pre_order, comment, ca
 
         print("code", code)
         print("response", ret)
-        api_fb_post_page_message_on_comment(
+        code, ret = api_fb_post_page_message_on_comment(
             platform['token'], comment['id'], text+shopping_cart_info)
+        
+        print("code", code)
+        print("response", ret)
+        
     elif platform_name == 'youtube':
         text = i18n_get_request_response(
         state, campaign_product, qty, lang=platform['lang'])
