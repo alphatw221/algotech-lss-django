@@ -7,6 +7,7 @@ from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 
 from api.models.order.order import Order, OrderSerializer, OrderSerializerUpdatePaymentShipping
+from api.models.order.pre_order import PreOrder
 from api.utils.common.verify import Verify
 from api.utils.common.verify import ApiVerifyError, platform_dict
 from api.utils.common.common import getparams
@@ -458,6 +459,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         query_list=[]
 
         if api_user.facebook_info.get("id"):
+            print(api_user.facebook_info.get("id"))
             query_list.append( Q(customer_id = api_user.facebook_info.get("id")) )
 
         for channel_id, _ in api_user.youtube_info:
@@ -466,8 +468,8 @@ class OrderViewSet(viewsets.ModelViewSet):
         if api_user.instagram_info.get("id"):
             query_list.append( Q(customer_id = api_user.instagram_info.get("id")) )
             
-        orders = Order.objects.filter(functools.reduce(operator.or_, query_list))
-
+        # orders = Order.objects.filter(functools.reduce(operator.or_, query_list))
+        orders = PreOrder.objects.filter(functools.reduce(operator.or_, query_list))
 
  
         return Response(OrderSerializer(orders, many=True).data, status=status.HTTP_200_OK)
