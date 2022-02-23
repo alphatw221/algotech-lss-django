@@ -123,7 +123,7 @@ class Order(models.Model):
     free_delivery = models.BooleanField(
         blank=False, null=True, default=False)
 
-    customer = models.ForeignKey(
+    buyer = models.ForeignKey(
         User, null=True, default=None, blank=True, on_delete=models.SET_NULL, related_name='orders')
 
 class OrderSerializer(serializers.ModelSerializer):
