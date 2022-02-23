@@ -308,3 +308,10 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
         data = serializer.data
 
         return Response(data, status=status.HTTP_200_OK)
+    
+    @action(detail=True, methods=['GET'], url_path=r'campaign_prodcut_list')
+    @api_error_handler
+    def buyer_campaign_prodcut_list(self, request, pk=None):
+        pre_order = Verify.get_pre_order(pk)
+        campaign_products = pre_order.campaign.products.values()
+        return Response(campaign_products, status=status.HTTP_200_OK)

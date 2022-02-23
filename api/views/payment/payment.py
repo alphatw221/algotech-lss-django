@@ -15,6 +15,7 @@ from django.contrib.auth.models import User
 from django.conf import settings
 from django.core.files.storage import default_storage
 from rest_framework.parsers import MultiPartParser, FormParser, FileUploadParser
+from api.models.order.pre_order import PreOrder, PreOrderSerializer, PreOrderSerializerUpdatePaymentShipping
 
 from api.utils.common.common import getdata, getparams
 from api.models.order.order import Order
@@ -722,5 +723,50 @@ class PaymentViewSet(viewsets.GenericViewSet):
         except Exception as e:
             print(e)
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    
+    #TODO transfer to campaign or payment 
+    @action(detail=True, methods=['GET'], url_path=r'campaign_info')
+    @api_error_handler
+    def get_campaign_info(self, request, pk=None):
+
+        # OPERATION_CODE_NAME: AGILE
+        # if request.user.id in settings.ADMIN_LIST:
+        pre_order=PreOrder.objects.get(id=pk)
+        campaign = db.api_campaign.find_one({'id': pre_order.campaign_id})
+        data_dict = {
+            'campaign_id': pre_order.campaign_id,
+            'platform': pre_order.platform,
+            'platform_id': pre_order.platform_id,
+            'meta_logistic': campaign['meta_logistic']
+        }
+
+        return Response(data_dict, status=status.HTTP_200_OK)
+        # api_user, pre_order, order_product, campaign_product, qty = Verify.PreOrderApi.FromBuyer.verify(request, pk)
+
+
+    #TODO transfer to campaign or payment  , permission_classes=(IsAuthenticated,)
+    @action(detail=True, methods=['POST'], url_path=r'delivery_info')
+    @api_error_handler
+    def update_buyer_submit(self, request, pk=None):
+        try:
+            date_list = request.data['shipping_date'].split('-')
+            request.data['shipping_date'] = datetime.date(int(date_list[0]), int(date_list[1]), int(date_list[2]))
+        except:
+            pass
+        # OPERATION_CODE_NAME: AGILE
+        # if request.user.id in settings.ADMIN_LIST:
+        pre_order=PreOrder.objects.get(id=pk)
+        # pre_meta = pre_order.meta
+        # pre_meta.update(request.data['meta'])
+        # request.data['meta'] = pre_meta
+        serializer = PreOrderSerializerUpdatePaymentShipping(pre_order, data=request.data, partial=True)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
+        pre_order = PreOrder.objects.get(id=pk)
+        verify_message = Verify.PreOrderApi.FromBuyer.verify_delivery_info(pre_order)
+        return Response(verify_message, status=status.HTTP_200_OK)
+
+        # api_user, pre_order, order_product, campaign_product, qty = Verify.PreOrderApi.FromBuyer.verify(request, pk)
 
 
