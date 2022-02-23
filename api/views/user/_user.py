@@ -167,9 +167,8 @@ def google_login_helper(request, user_type='customer'):
                 "code": code,
                 "client_id": "536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com",
                 "client_secret": "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",
-                # "redirect_uri": settings.GCP_API_LOADBALANCER_URL + "/api/user/google_customer_login_callback",
+                "redirect_uri": settings.GCP_API_LOADBALANCER_URL + "/api/user/google_customer_login_callback",
                 # "redirect_uri": "http://localhost:8001" + "/api/user/google_customer_login_callback",
-                "redirect_uri": settings.TEST_API_SERVER + "/api/user/google_customer_login_callback",
                 "grant_type": "authorization_code"
             }
         )
@@ -181,9 +180,8 @@ def google_login_helper(request, user_type='customer'):
                 "code": code,
                 "client_id": "536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com",
                 "client_secret": "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",
-                # "redirect_uri": settings.GCP_API_LOADBALANCER_URL + "/api/user/google_user_login_callback",
+                "redirect_uri": settings.GCP_API_LOADBALANCER_URL + "/api/user/google_user_login_callback",
                 # "redirect_uri": "http://localhost:8001" + "/api/user/google_user_login_callback",
-                "redirect_uri": settings.TEST_API_SERVER + "/api/user/google_user_login_callback",
                 "grant_type": "authorization_code"
             }
         )
