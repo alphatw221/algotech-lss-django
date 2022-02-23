@@ -365,24 +365,8 @@ class OrderViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'], url_path=r'buyer_list', permission_classes = (IsAuthenticated,))
     @api_error_handler
     def list_buyer_history_order(self, request):
-
         api_user, = getparams(
             request, (), with_user=True, seller=False)
 
-        query_list=[]
-
-        if api_user.facebook_info.get("id"):
-            print(api_user.facebook_info.get("id"))
-            query_list.append( Q(customer_id = api_user.facebook_info.get("id")) )
-
-        for channel_id, _ in api_user.youtube_info:
-            query_list.append( Q(customer_id = channel_id) )
-
-        if api_user.instagram_info.get("id"):
-            query_list.append( Q(customer_id = api_user.instagram_info.get("id")) )
-            
-        # orders = Order.objects.filter(functools.reduce(operator.or_, query_list))
-        orders = PreOrder.objects.filter(functools.reduce(operator.or_, query_list))
-
- 
-        return Response(OrderSerializer(orders, many=True).data, status=status.HTTP_200_OK)
+        return Response(OrderSerializer(api_user.orders, many=True).data, status=status.HTTP_200_OK)
+        

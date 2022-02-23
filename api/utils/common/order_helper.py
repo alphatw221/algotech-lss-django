@@ -199,6 +199,7 @@ class PreOrderHelper():
                     api_order_data['id'] = increment_id
                     del api_order_data['_id']
                     api_order_data['created_at'] = datetime.utcnow()
+                    api_order_data['buyer_id'] = api_user.id
                     template = api_order_template.copy()
                     template.update(api_order_data)
                     #TODO add api_user reference

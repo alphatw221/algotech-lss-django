@@ -197,7 +197,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
     # permission_classes=(IsAuthenticated,IsPreOrderCustomer)
 
-    @action(detail=True, methods=['GET'], url_path=r'buyer_retrieve', permission_classes=(IsAuthenticated,IsPreOrderCustomer))
+    @action(detail=True, methods=['GET'], url_path=r'buyer_retrieve', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def buyer_retrieve_pre_order(self, request, pk=None):
 
@@ -208,7 +208,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-    @action(detail=True, methods=['GET'], url_path=r'buyer_checkout', permission_classes=(IsAuthenticated,IsPreOrderCustomer))
+    @action(detail=True, methods=['GET'], url_path=r'buyer_checkout', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def buyer_pre_order_checkout(self, request, pk=None):
         
@@ -219,7 +219,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         return Response(api_order, status=status.HTTP_200_OK)
 
 
-    @action(detail=True, methods=['GET'], url_path=r'buyer_add', permission_classes=(IsAuthenticated,IsPreOrderCustomer))
+    @action(detail=True, methods=['GET'], url_path=r'buyer_add', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def buyer_add_order_product(self, request, pk=None):
 
@@ -233,7 +233,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
 
 
-    @action(detail=True, methods=['GET'], url_path=r'buyer_update', permission_classes=(IsAuthenticated,IsPreOrderCustomer))
+    @action(detail=True, methods=['GET'], url_path=r'buyer_update', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def buyer_update_order_product(self, request, pk=None):
 
@@ -246,14 +246,13 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
         return Response(api_order_product, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['GET'], url_path=r'buyer_delete', permission_classes=(IsAuthenticated,IsPreOrderCustomer))
+    @action(detail=True, methods=['GET'], url_path=r'buyer_delete', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def buyer_delete_order_product(self, request, pk=None):
 
         api_user, order_product_id, = getparams(request, ('order_product_id',), with_user=True, seller=False)
         pre_order=Verify.get_pre_order(pk)
         order_product = Verify.get_order_product_from_pre_order(pre_order, order_product_id)
-
 
         PreOrderHelper.delete_product(
             api_user, pre_order, order_product, order_product.campaign_product)
