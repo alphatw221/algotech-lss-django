@@ -157,35 +157,25 @@ def google_fast_login_helper(request, user_type="seller"):
 from django.shortcuts import redirect
 
 def google_login_helper(request, user_type='customer'):
-    code = request.GET.get("code")
-    print("user_type", user_type)
+
     if user_type == "customer":
-        order_id = request.GET.get("state")
-        red = redirect(f'{settings.WEB_SERVER_URL}/buyer/cart/{order_id}')
-        response = requests.post(
-            url="https://accounts.google.com/o/oauth2/token",
-            data={
-                "code": code,
-                "client_id": "536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com",
-                "client_secret": "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",
-                "redirect_uri": settings.GCP_API_LOADBALANCER_URL + "/api/user/google_customer_login_callback",
-                # "redirect_uri": "http://localhost:8001" + "/api/user/google_customer_login_callback",
-                "grant_type": "authorization_code"
-            }
-        )
-    if user_type == "user":
+        red = redirect(f'{settings.WEB_SERVER_URL}/buyer/cart/{request.GET.get("state")}')
+        redirect_uri = "/api/user/google_customer_login_callback"
+    elif user_type == "user":
         red = redirect(f'{settings.WEB_SERVER_URL}/platform')
-        response = requests.post(
+        redirect_uri = "/api/user/google_user_login_callback"
+
+    response = requests.post(
             url="https://accounts.google.com/o/oauth2/token",
             data={
-                "code": code,
+                "code": request.GET.get("code"),
                 "client_id": "536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com",
                 "client_secret": "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",
-                "redirect_uri": settings.GCP_API_LOADBALANCER_URL + "/api/user/google_user_login_callback",
-                # "redirect_uri": "http://localhost:8001" + "/api/user/google_user_login_callback",
+                "redirect_uri": settings.GCP_API_LOADBALANCER_URL + redirect_uri,
                 "grant_type": "authorization_code"
             }
         )
+
 
 
     if not response.status_code / 100 == 2:
@@ -194,17 +184,19 @@ def google_login_helper(request, user_type='customer'):
         raise ApiCallerError('get google token fail')
 
     access_token = response.json().get("access_token")
-    refresh_token = response.json().get("refresh_toekn")
+    refresh_token = response.json().get("refresh_token")
 
     code, response = api_google_get_userinfo(access_token)
 
     if code / 100 != 2:
+        print(response)
+        print(traceback.format_exc)
         raise ApiCallerError("google user token invalid")
 
-    google_id = response["id"]
-    google_name = response["name"]
-    google_picture = response["picture"]
-    email = response["email"]
+    google_id, google_name, google_picture, email = response["id"], response["name"], response["picture"], response["email"]
+    # google_name = response["name"]
+    # google_picture = response["picture"]
+    # email = response["email"]
 
     api_user_exists = User.objects.filter(
         email=email, type=user_type).exists()
@@ -242,26 +234,22 @@ def google_login_helper(request, user_type='customer'):
     api_user.google_info["id"] = google_id
     api_user.google_info["name"] = google_name
     api_user.google_info["picture"] = google_picture
-    channels = {}
-    code, list_channel_response = api_youtube_get_list_channel_by_token(access_token)
-    if not code / 100 == 2:
-        raise ApiCallerError('list youtube channels error')
 
-    for item in list_channel_response.get("items"):
-        channels[item['id']] = item
-    api_user.youtube_info['channels'] = channels
+    
+    code, list_channel_response = api_youtube_get_list_channel_by_token(access_token)
+
+    if code / 100 == 2:
+        channels = {}
+        for item in list_channel_response.get("items"):
+            channels[item['id']] = item
+        api_user.youtube_info['channels'] = channels
+
     auth_user.last_login = datetime.now()
     auth_user.save()
     api_user.save()
 
-    # refresh = RefreshToken.for_user(auth_user)
 
     refresh = CustomTokenObtainPairSerializer.get_token(auth_user)
-
-    # ret = {
-    #     'refresh': str(refresh),
-    #     'access': str(refresh.access_token),
-    # }
 
     red.set_cookie('token', str(refresh.access_token)) #TODO setting domain, expired
     return red
