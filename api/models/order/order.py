@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
+from api.models.user.user import User
 
 class Order(models.Model):
     campaign = models.ForeignKey(
@@ -121,6 +122,9 @@ class Order(models.Model):
     adjust_price = models.FloatField(null=True, blank=True, default=0)
     free_delivery = models.BooleanField(
         blank=False, null=True, default=False)
+
+    customer = models.ForeignKey(
+        User, null=True, default=None, blank=True, on_delete=models.SET_NULL, related_name='orders')
 
 class OrderSerializer(serializers.ModelSerializer):
 
