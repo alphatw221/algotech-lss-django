@@ -201,6 +201,7 @@ class PreOrderHelper():
                     api_order_data['created_at'] = datetime.utcnow()
                     template = api_order_template.copy()
                     template.update(api_order_data)
+                    #TODO add api_user reference
                     db.api_order.insert_one(template, session=session)
 
                     db.api_order_product.update_many(
