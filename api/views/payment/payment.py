@@ -281,7 +281,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
                 "payment_method": "paypal"},
             "redirect_urls": {
                 "return_url": f"{settings.GCP_API_LOADBALANCER_URL}/api/payment/paypal_payment_complete_check?order_id={order_id}",
-                "cancel_url": f"{settings.WEB_SERVER_URL}/payment/cancel"
+                "cancel_url": f"{settings.WEB_SERVER_URL}/api/payment/paypal_cancel?order_id={order_id}"
             },
             "transactions": data
         })
@@ -290,12 +290,18 @@ class PaymentViewSet(viewsets.GenericViewSet):
         else:
             print(payment.error)
             return Response(payment.error)
-
+        print(payment)
         for link in payment.links:
             if link.rel == "approval_url":
+                approval_url = str(link.href)
+                # order_object.checkout_detail = {
+                #     "paymentId": "",
+                #     "PayerID": "",
+                #     "checkout_time": datetime.datatime.now()
+                # }
                 # Convert to str to avoid Google App Engine Unicode issue
                 # https://github.com/paypal/rest-api-sdk-python/pull/58
-                approval_url = str(link.href)
+
                 print("Redirect for approval: %s" % (approval_url))
                 return Response({
                     "status": 202,
@@ -330,6 +336,50 @@ class PaymentViewSet(viewsets.GenericViewSet):
             print(payment.error)  # Error Hash
             return Response(payment.error)
 
+
+    # @action(detail=False, methods=['GET'], url_path=r'get_ipg_order_data')
+    # @api_error_handler
+    # def get_ipg_order_data(self, request, pk=None):
+    #     api_user, order_id = getparams(
+    #         request, ("order_id", ), seller=False)
+
+    #     if not api_user:
+    #         raise ApiVerifyError("no user found")
+    #     elif api_user.status != "valid":
+    #         raise ApiVerifyError("not activated user")
+
+    #     _, _, pre_order = verify_seller_request(
+    #         api_user, platform_name, platform_id, campaign_id, pre_order_id=pk)
+
+    #     serializer = PreOrderSerializer(pre_order)
+
+    #     return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['GET'], url_path=r"paypal_cancel")
+    def paypal_cancel(self, request, *args, **kwargs):
+
+        paymentId = request.GET["paymentId"]
+        payer_id = request.GET["PayerID"]
+        order_id = request.GET["order_id"]
+        order_object = Verify.get_order(order_id)
+        campaign_obj = order_object.campaign
+
+        paypalrestsdk.configure({
+            "mode": "live",  # live
+            "client_id": campaign_obj.meta_payment["sg"]["paypal"]["paypal_clientId"],
+            "client_secret": campaign_obj.meta_payment["sg"]["paypal"]["paypal_secret"]
+        })
+
+        payment = paypalrestsdk.Payment.find(paymentId)
+        if payment.execute({"payer_id": payer_id}):
+            print("Payment execute successfully")
+            order_object.status = "complete"
+            order_object.save()
+            return HttpResponseRedirect(
+                redirect_to=f'{settings.WEB_SERVER_URL}/buyer/order/{order_object.id}/confirmation')
+        else:
+            print(payment.error)  # Error Hash
+            return Response(payment.error)
 
     # @action(detail=False, methods=['GET'], url_path=r'get_ipg_order_data')
     # @api_error_handler
@@ -597,6 +647,8 @@ class PaymentViewSet(viewsets.GenericViewSet):
 
             )
             print(checkout_session.url)
+            order_object.checkout_detail["checkout_session_id"] = checkout_session.id
+            order_object.history["last_check_time"] = checkout_session
             return Response(checkout_session.url, status=status.HTTP_303_SEE_OTHER)
         except Exception as e:
             print(e)
@@ -632,6 +684,41 @@ class PaymentViewSet(viewsets.GenericViewSet):
                     {'$set': {'status': 'complete', 'checkout_details': checkout_details, 'payment_method': 'Stripe'}}
                 )
             return HttpResponseRedirect(redirect_to=f'{settings.WEB_SERVER_URL}/buyer/order/{order_object.id}/confirmation')
+        except Exception as e:
+            print(e)
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['GET'], url_path=r'strip_cancel', )
+    @api_error_handler
+    def strip_cancel(self, request):
+        try:
+            # stripe.api_key = settings.STRIPE_API_KEY
+            print("session_id", request.GET["session_id"])
+            order_id = request.GET["order_id"]
+            order_object = Verify.get_order(order_id)
+            campaign_object = order_object.campaign
+            stripe.api_key = campaign_object.meta_payment.get("sg").get("stripe").get("stripe_secret")
+            print("stripe.api_key", stripe.api_key)
+            session = stripe.checkout.Session.retrieve(request.GET["session_id"])
+            payment_intent = stripe.PaymentIntent.retrieve(
+                session.payment_intent,
+            )
+            print("datetime", datetime.datetime.fromtimestamp(payment_intent.created))
+            if payment_intent.status == "succeeded":
+                checkout_details = {
+                    "client_secret": payment_intent.client_secret,
+                    "created": datetime.datetime.fromtimestamp(payment_intent.created),
+                    "id": payment_intent.id,
+                    "object": payment_intent.object,
+                    "receipt_email": payment_intent.receipt_email,
+                    "receipt_url": payment_intent.charges.data[0].receipt_url,
+                }
+                db.api_order.update_one(
+                    {'id': int(order_object.id)},
+                    {'$set': {'status': 'complete', 'checkout_details': checkout_details, 'payment_method': 'Stripe'}}
+                )
+            return HttpResponseRedirect(
+                redirect_to=f'{settings.WEB_SERVER_URL}/buyer/order/{order_object.id}/confirmation')
         except Exception as e:
             print(e)
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
