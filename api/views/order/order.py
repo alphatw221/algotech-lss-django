@@ -57,73 +57,6 @@ def get_title_map():
     return title_map
 
 
-def verify_buyer_request(api_user, platform_name, campaign_id, check_info=None):
-    if platform_name not in platform_dict:
-        raise ApiVerifyError("no platfrom name found")
-    if platform_name=='facebook':
-        customer_id=api_user.facebook_info['id']
-    else:
-        raise ApiVerifyError('platform not support')
-
-    if not Order.objects.filter(platform=platform_name, customer_id=customer_id, campaign_id=campaign_id).exists():
-        raise ApiVerifyError('no order found')
-    order =Order.objects.get(platform=platform_name, customer_id=customer_id, campaign_id=campaign_id)
-    if check_info == None:
-        return order
-
-    verify_message = {}
-    check_exist = False
-    #TODO 訊息彙整回傳一次
-    if not order.shipping_first_name:
-        check_exist = True
-        verify_message['shipping_first_name'] = 'not valid'
-    if not order.shipping_last_name:
-        check_exist = True
-        verify_message['shipping_last_name'] = 'not valid'
-    if not order.shipping_phone:
-        check_exist = True
-        verify_message['shipping_phone'] = 'not valid'
-    if not order.shipping_postcode:
-        check_exist = True
-        verify_message['shipping_postcode'] = 'not valid'
-    if not order.shipping_region:
-        check_exist = True
-        verify_message['shipping_region'] = 'not valid'
-    if not order.shipping_location:
-        check_exist = True
-        verify_message['shipping_location'] = 'not valid'
-    if not order.shipping_address_1:
-        check_exist = True
-        verify_message['shipping_address'] = 'not valid'
-    if not order.shipping_method:
-        check_exist = True
-        verify_message['shipping_method'] = 'not valid'
-    if not order.payment_first_name:
-        check_exist = True
-        verify_message['payment_first_name'] = 'not valid'
-    if not order.payment_last_name:
-        check_exist = True
-        verify_message['payment_last_name'] = 'not valid'
-    if not order.payment_company:
-        check_exist = True
-        verify_message['payment_company'] = 'not valid'
-    if not order.payment_postcode:
-        check_exist = True
-        verify_message['payment_postcode'] = 'not valid'
-    if not order.payment_region:
-        check_exist = True
-        verify_message['payment_region'] = 'not valid'
-    if not order.payment_location:
-        check_exist = True
-        verify_message['payment_location'] = 'not valid'
-    if not order.payment_address_1:
-        check_exist = True
-        verify_message['payment_address'] = 'not valid'
-    if check_exist == True:
-        raise ApiVerifyError(verify_message)
-    return order
-
-
 def verify_seller_request(api_user, platform_name, platform_id, campaign_id, order_id=None):
     Verify.verify_user(api_user)
     platform = Verify.get_platform(api_user, platform_name, platform_id)
@@ -341,40 +274,23 @@ class OrderViewSet(viewsets.ModelViewSet):
         workbook.close()
         
         return response
-    
-    # #TODO transfer to campaign or payment 
-    # @action(detail=True, methods=['POST'], url_path=r'delivery_info')
-    # @api_error_handler
-    # def update_order_info(self, request, pk=None):
-    #     date_list = request.data['shipping_date'].split('-')
-    #     request.data['shipping_date'] = datetime.date(int(date_list[0]), int(date_list[1]), int(date_list[2]))
 
-    #     # OPERATION_CODE_NAME: AGILE
-    #     if request.user.id in settings.ADMIN_LIST:
-    #         pre_order=Order.objects.get(id=pk)
-    #         serializer = OrderSerializerUpdatePaymentShipping(pre_order, data=request.data, partial=True)
-    #         if not serializer.is_valid():
-    #             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    #         serializer.save()
-    #         pre_order = Order.objects.get(id=pk)
-    #         verify_message = Verify.PreOrderApi.FromBuyer.verify_delivery_info(pre_order)
-    #         return Response(verify_message, status=status.HTTP_200_OK)
+# --------------------- buyer --------------------------------------------
 
-    #     api_user, platform_id, platform_name, campaign_id = getparams(
-    #         request, ("platform_id", "platform_name", "campaign_id"))
-    #     _, _, order = verify_seller_request(
-    #         api_user, platform_name, platform_id, campaign_id, order_id=pk)
+    from rest_framework.permissions import BasePermission
 
-    #     serializer = OrderSerializerUpdatePaymentShipping(order, data=request.data, partial=True)
-    #     if not serializer.is_valid():
-    #         print (serializer.errors)
-    #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    #     serializer.save()
-    #     order = Order.objects.get(id=pk)
-    #     verify_message = Verify.PreOrderApi.FromBuyer.verify_delivery_info(order)
+    class IsOrderCustomer(BasePermission):
 
-    #     return Response(verify_message, status=status.HTTP_200_OK)
-    
+        def has_permission(self, request, view):
+            try:
+                pk = view.kwargs.get('pk')
+                api_user = Verify.get_customer_user(request)
+                order = Verify.get_order(pk)
+                Verify.user_match_order(api_user, order)
+            except Exception:
+                return False
+            return True
+            
     @action(detail=True, methods=['GET'], url_path=r'buyer_retrieve')
     @api_error_handler
     def buyer_retrieve_order(self, request, pk=None):
