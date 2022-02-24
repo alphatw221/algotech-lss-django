@@ -407,7 +407,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         if not order_data:
             raise ApiVerifyError('no order found')
         currency = 'SGD' if not order_data['currency'] else order_data['currency']
-        amount = order_data['total']
+        amount, email = order_data['total'], order_data['shipping_email']
 
         # params = {
         #     'email': email,
@@ -424,7 +424,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             'X-Requested-With': 'XMLHttpRequest'
         }
         params = {
-            'email': 'email@gmail.com',
+            'email': email,
             'name': 'name',
             'redirect_url': f'{settings.GCP_API_LOADBALANCER_URL}/api/payment/hit_pay_return_redirect/?order_id={order_id}',
             'webhook': f'{settings.GCP_API_LOADBALANCER_URL}/api/payment/hit_pay_webhook/',
