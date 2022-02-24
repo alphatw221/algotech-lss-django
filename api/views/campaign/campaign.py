@@ -153,30 +153,30 @@ class CampaignViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['PUT'], url_path=r'update_campaign', parser_classes=(MultiPartParser,IsAuthenticated))
     @api_error_handler
     def update_campaign(self, request, pk=None):
-        platform_name = request.query_params.get('platform_name')
-        platform_id = request.query_params.get('platform_id')
-        api_user = request.user.api_users.get(type='user')
-        _, campaign = verify_request(
-            api_user, platform_name, platform_id, campaign_id=pk)
-        yt_access_token = campaign.youtube_campaign.get("access_token", "")
-        yt_refresh_token = campaign.youtube_campaign.get("refresh_token", "")
-        json_data = json.loads(request.data["data"])
-        json_data["youtube_campaign"]["access_token"] = yt_access_token
-        json_data["youtube_campaign"]["refresh_token"] = yt_refresh_token
-        for key, value in request.data.items():
-            if "account" in key:
-                account_number = key.split("_")[1]
-                image_path = default_storage.save(
-                    f'/campaign/{campaign.id}/payment/direct_payment/accounts/{account_number}/{value.name}', ContentFile(value.read()))
-                print(f"image_path: {image_path}")
-                json_data["meta_payment"]["sg"]["direct_payment"]["accounts"][account_number]["image"] = image_path
-        serializer = self.get_serializer(
-            campaign, data=json_data, partial=True)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        serializer.save()
+        # platform_name = request.query_params.get('platform_name')
+        # platform_id = request.query_params.get('platform_id')
+        # api_user = request.user.api_users.get(type='user')
+        # _, campaign = verify_request(
+        #     api_user, platform_name, platform_id, campaign_id=pk)
+        # yt_access_token = campaign.youtube_campaign.get("access_token", "")
+        # yt_refresh_token = campaign.youtube_campaign.get("refresh_token", "")
+        # json_data = json.loads(request.data["data"])
+        # json_data["youtube_campaign"]["access_token"] = yt_access_token
+        # json_data["youtube_campaign"]["refresh_token"] = yt_refresh_token
+        # for key, value in request.data.items():
+        #     if "account" in key:
+        #         account_number = key.split("_")[1]
+        #         image_path = default_storage.save(
+        #             f'/campaign/{campaign.id}/payment/direct_payment/accounts/{account_number}/{value.name}', ContentFile(value.read()))
+        #         print(f"image_path: {image_path}")
+        #         json_data["meta_payment"]["sg"]["direct_payment"]["accounts"][account_number]["image"] = image_path
+        # serializer = self.get_serializer(
+        #     campaign, data=json_data, partial=True)
+        # if not serializer.is_valid():
+        #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # serializer.save()
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        # return Response(serializer.data, status=status.HTTP_200_OK)
 
         api_user, platform_name, platform_id = getparams(request, ("platform_name", "platform_id"), with_user=True, seller=True)
 
@@ -211,6 +211,8 @@ class CampaignViewSet(viewsets.ModelViewSet):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 
