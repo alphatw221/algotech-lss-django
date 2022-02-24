@@ -60,18 +60,18 @@ class Campaign(models.Model):
 
 
 class FacebookCampaignSerializer(serializers.Serializer):
-    post_id = serializers.CharField(required=False, default="")
+    post_id = serializers.CharField(required=False, default="", allow_blank=True)
     comment_capture_since = serializers.FloatField(required=False, default=1)
-    remark = serializers.CharField(required=False, default="")
+    remark = serializers.CharField(required=False, default="", allow_blank=True)
 
 
 class YoutubeCampaignSerializer(serializers.Serializer):
-    live_video_id = serializers.CharField(required=False, default="")
-    live_chat_id = serializers.CharField(required=False, default="")
+    live_video_id = serializers.CharField(required=False, default="", allow_blank=True)
+    live_chat_id = serializers.CharField(required=False, default="", allow_blank=True)
     is_failed = serializers.BooleanField(required=False, default=False)
     latest_comment_time = serializers.FloatField(required=False, default=1)
-    remark = serializers.CharField(required=False, default="")
-    next_page_token = serializers.CharField(required=False, default="")
+    remark = serializers.CharField(required=False, default="", allow_blank=True)
+    next_page_token = serializers.CharField(required=False, default="", allow_blank=True)
     access_token = serializers.CharField(required=False, default="", allow_blank=True)
     refresh_token = serializers.CharField(required=False, default="", allow_blank=True)
     last_refresh_timestamp = serializers.FloatField(required=False, default=1)
@@ -79,9 +79,9 @@ class YoutubeCampaignSerializer(serializers.Serializer):
 
 
 class InstagramCampaignSerializer(serializers.Serializer):
-    live_media_id = serializers.CharField(required=False, default="")
-    remark = serializers.CharField(required=False, default="")
-    last_create_message_id = serializers.CharField(required=False, default="")
+    live_media_id = serializers.CharField(required=False, default="", allow_blank=True)
+    remark = serializers.CharField(required=False, default="", allow_blank=True)
+    last_create_message_id = serializers.CharField(required=False, default="", allow_blank=True)
     is_failed = serializers.BooleanField(required=False, default=False)
     
 class CampaignSerializer(serializers.ModelSerializer):
