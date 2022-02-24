@@ -158,24 +158,24 @@ from django.shortcuts import redirect
 
 def google_login_helper(request, user_type='customer'):
 
-    if user_type == "customer":
-        red = redirect(f'{settings.WEB_SERVER_URL}/buyer/cart/{request.GET.get("state")}')
-        redirect_uri = "/api/user/google_customer_login_callback"
-    elif user_type == "user":
-        red = redirect(f'{settings.WEB_SERVER_URL}/platform')
-        redirect_uri = "/api/user/google_user_login_callback"
+    # if user_type == "customer":
+    #     red = redirect(f'{settings.WEB_SERVER_URL}/buyer/cart/{request.GET.get("state")}')
+    #     redirect_uri = "/api/user/google_customer_login_callback"
+    # elif user_type == "user":
+    #     red = redirect(f'{settings.WEB_SERVER_URL}/platform')
+    #     redirect_uri = "/api/user/google_user_login_callback"
 
+    code = request.data.get("code")
     response = requests.post(
             url="https://accounts.google.com/o/oauth2/token",
             data={
-                "code": request.GET.get("code"),
+                "code": code,
                 "client_id": "536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com",
                 "client_secret": "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",
-                "redirect_uri": settings.WEB_SERVER_URL + redirect_uri,
+                "redirect_uri": settings.WEB_SERVER_URL + '/google-redirect',
                 "grant_type": "authorization_code"
             }
         )
-
 
 
     if not response.status_code / 100 == 2:
@@ -186,6 +186,8 @@ def google_login_helper(request, user_type='customer'):
     access_token = response.json().get("access_token")
     refresh_token = response.json().get("refresh_token")
 
+    print(access_token)
+    return
     code, response = api_google_get_userinfo(access_token)
 
     if code / 100 != 2:
