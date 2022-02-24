@@ -364,7 +364,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             pre_order = PreOrder.objects.filter(customer_id=order_object.customer_id, campaign_id=order_object.campaign_id)
             if len(pre_order) > 1:
                 return Response({"message": "Buyer has more than one shopping cart."}, status=status.HTTP_400_BAD_REQUEST)
-            order_object.checkout_detail[len(order_object.checkout_detail) + 1] = {
+            order_object.checkout_details[len(order_object.checkout_details) + 1] = {
                 "action": "cancel payment",
                 "time": datetime.datetime.now()
             }
@@ -640,8 +640,11 @@ class PaymentViewSet(viewsets.GenericViewSet):
 
             )
             print(checkout_session.url)
-            order_object.checkout_detail["checkout_session_id"] = checkout_session.id
-            order_object.history["last_check_time"] = checkout_session
+            order_object.checkout_details["checkout_session_id"] = checkout_session.id
+            order_object.history[len(order_object.history) + 1] = {
+                "action": "checkout",
+                "time": checkout_session
+            }
             return Response(checkout_session.url, status=status.HTTP_303_SEE_OTHER)
         except Exception as e:
             print(e)
