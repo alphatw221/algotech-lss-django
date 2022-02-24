@@ -165,7 +165,7 @@ def google_login_helper(request, user_type='customer'):
     #     red = redirect(f'{settings.WEB_SERVER_URL}/platform')
     #     redirect_uri = "/api/user/google_user_login_callback"
 
-    code = request.data.get("code")
+    code = request.query_params.get("code")
     response = requests.post(
             url="https://accounts.google.com/o/oauth2/token",
             data={
