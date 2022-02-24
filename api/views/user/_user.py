@@ -171,7 +171,7 @@ def google_login_helper(request, user_type='customer'):
                 "code": request.GET.get("code"),
                 "client_id": "536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com",
                 "client_secret": "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",
-                "redirect_uri": settings.GCP_API_LOADBALANCER_URL + redirect_uri,
+                "redirect_uri": settings.WEB_SERVER_URL + redirect_uri,
                 "grant_type": "authorization_code"
             }
         )
