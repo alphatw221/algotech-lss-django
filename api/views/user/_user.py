@@ -157,23 +157,15 @@ def google_fast_login_helper(request, user_type="seller"):
 from django.shortcuts import redirect
 
 def google_login_helper(request, user_type='customer'):
-
-    # if user_type == "customer":
-    #     red = redirect(f'{settings.WEB_SERVER_URL}/buyer/cart/{request.GET.get("state")}')
-    #     redirect_uri = "/api/user/google_customer_login_callback"
-    # elif user_type == "user":
-    #     red = redirect(f'{settings.WEB_SERVER_URL}/platform')
-    #     redirect_uri = "/api/user/google_user_login_callback"
-
-    code = request.query_params.get("code")
+    
     response = requests.post(
             url="https://accounts.google.com/o/oauth2/token",
             data={
-                "code": code,
+                "code": request.query_params.get("code"),
                 "client_id": "536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com",
                 "client_secret": "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",
-                "redirect_uri": 'http://localhost:8000/google-redirect',
-                # "redirect_uri": settings.WEB_SERVER_URL + '/google-redirect',
+                # "redirect_uri": 'http://localhost:8000/google-redirect',
+                "redirect_uri": settings.WEB_SERVER_URL + "/google-redirect",
                 "grant_type": "authorization_code"
             }
         )
