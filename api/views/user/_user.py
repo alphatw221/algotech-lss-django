@@ -252,7 +252,7 @@ def google_login_helper(request, user_type='customer'):
     refresh = CustomTokenObtainPairSerializer.get_token(auth_user)
 
     # red.set_cookie('token', str(refresh.access_token)) #TODO setting domain, expired
-    red.set_cookie("access_token", str(refresh.access_token), path="/")
+    red.set_cookie("access_token", str(refresh.access_token), path="/", domain=settings.WEB_SERVER_URL)
     return red
 
 
