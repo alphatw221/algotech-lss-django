@@ -185,15 +185,15 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         #temp solution : no to overide campaign data
         json_data = json.loads(request.data["data"])
-        facebook_campaign = campaign.facebook_campaign.__dict__
+        facebook_campaign = campaign.facebook_campaign.copy()
         facebook_campaign.update(json_data.get("facebook_campaign",{}))
         json_data['facebook_campaign']=facebook_campaign
 
-        youtube_campaign = campaign.youtube_campaign.__dict__
+        youtube_campaign = campaign.youtube_campaign.copy()
         youtube_campaign.update(json_data.get("youtube_campaign",{}))
         json_data['youtube_campaign']=youtube_campaign
 
-        instagram_campaign = campaign.instagram_campaign.__dict__
+        instagram_campaign = campaign.instagram_campaign.copy()
         instagram_campaign.update(json_data.get("instagram_campaign",{}))
         json_data['instagram_campaign']=instagram_campaign
 
