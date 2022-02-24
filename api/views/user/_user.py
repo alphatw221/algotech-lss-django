@@ -187,8 +187,6 @@ def google_login_helper(request, user_type='customer'):
     access_token = response.json().get("access_token")
     refresh_token = response.json().get("refresh_token")
 
-    print(access_token)
-    return
     code, response = api_google_get_userinfo(access_token)
 
     if code / 100 != 2:
@@ -254,9 +252,16 @@ def google_login_helper(request, user_type='customer'):
 
     refresh = CustomTokenObtainPairSerializer.get_token(auth_user)
 
-    # red.set_cookie('token', str(refresh.access_token)) #TODO setting domain, expired
-    red.set_cookie("access_token", str(refresh.access_token), path="/", domain=None, samesite=None, secure=False)
-    return red
+    ret = {
+        'refresh': str(refresh),
+        'access': str(refresh.access_token),
+    }
+
+    return Response(ret, status=status.HTTP_200_OK)
+
+    # # red.set_cookie('token', str(refresh.access_token)) #TODO setting domain, expired
+    # red.set_cookie("access_token", str(refresh.access_token), path="/", domain=None, samesite=None, secure=False)
+    # return red
 
 
 def instagram_login_helper(request, user_type='customer'):

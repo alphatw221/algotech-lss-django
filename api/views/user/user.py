@@ -50,8 +50,8 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'], url_path=r'google_customer_login_callback')
     @api_error_handler
     def google_customer_login_callback(self, request):
-        google_login_helper(request, user_type='customer')
-        return HttpResponse('ok',status=status.HTTP_200_OK)
+        # google_login_helper(request, user_type='customer')
+        # return HttpResponse('ok',status=status.HTTP_200_OK)
         return google_login_helper(request, user_type='customer')
 
     @action(detail=False, methods=['GET'], url_path=r'google_user_login_callback')
