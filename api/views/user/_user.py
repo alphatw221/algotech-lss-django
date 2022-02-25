@@ -157,6 +157,10 @@ def google_fast_login_helper(request, user_type="seller"):
 from django.shortcuts import redirect
 
 def google_login_helper(request, user_type='customer'):
+
+    google_code = request.query_params.get("code")
+    print("google_code", google_code)
+    
     response = requests.post(
             url="https://accounts.google.com/o/oauth2/token",
             data={
