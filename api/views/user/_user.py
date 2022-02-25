@@ -157,7 +157,6 @@ def google_fast_login_helper(request, user_type="seller"):
 from django.shortcuts import redirect
 
 def google_login_helper(request, user_type='customer'):
-    
     response = requests.post(
             url="https://accounts.google.com/o/oauth2/token",
             data={
@@ -230,12 +229,18 @@ def google_login_helper(request, user_type='customer'):
 
     
     code, list_channel_response = api_youtube_get_list_channel_by_token(access_token)
-    print("list_channel_response", list_channel_response)
+    
     if code / 100 == 2:
         channels = {}
-        for item in list_channel_response.get("items"):
-            channels[item['id']] = item
-        api_user.youtube_info['channels'] = channels
+        try:
+            for item in list_channel_response.get("items"):
+                channels[item['id']] = item
+            api_user.youtube_info['channels'] = channels
+        except:
+            print("this account doesn't have any channel.")
+            api_user.youtube_info['channels'] = {
+                "message": "this account doesn't have any channel."
+            }
 
     auth_user.last_login = datetime.now()
     auth_user.save()
