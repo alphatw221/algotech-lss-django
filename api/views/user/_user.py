@@ -230,7 +230,7 @@ def google_login_helper(request, user_type='customer'):
 
     
     code, list_channel_response = api_youtube_get_list_channel_by_token(access_token)
-
+    print("list_channel_response", list_channel_response)
     if code / 100 == 2:
         channels = {}
         for item in list_channel_response.get("items"):
