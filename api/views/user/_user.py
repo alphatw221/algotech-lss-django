@@ -171,8 +171,7 @@ def google_login_helper(request, user_type='customer'):
 
 
     if not response.status_code / 100 == 2:
-        print(response)
-        print(traceback.format_exc)
+        print(response.json())
         raise ApiCallerError('get google token fail')
 
     access_token = response.json().get("access_token")
