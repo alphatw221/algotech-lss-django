@@ -19,7 +19,7 @@ import requests
 import time
 from datetime import datetime
 from dateutil import parser
-from backend.api.youtube.viedo import api_youtube_get_video_info_with_access_token, api_youtube_get_video_info_with_api_key
+from backend.api.youtube.viedo import api_youtube_get_video_info_with_access_token, api_youtube_get_video_info_with_api_key, api_youtube_get_video_comment_thread
 from api.utils.error_handle.error_handler.campaign_job_error_handler import campaign_job_error_handler
 from api.utils.error_handle.error_handler.capture_platform_error_handler import capture_platform_error_handler
 import traceback
@@ -131,23 +131,25 @@ def capture_facebook(campaign):
 
 @capture_platform_error_handler
 def capture_youtube(campaign):
-
     # if not campaign['youtube_channel_id']:
     #     return
 
     youtube_channel = db.api_youtube_channel.find_one(
                 {'id': campaign['youtube_channel_id']})
-    # token = youtube_channel['token']
 
     youtube_campaign = campaign['youtube_campaign']
     access_token = youtube_campaign.get('access_token')
     refresh_token = youtube_campaign.get('refresh_token')
+
+    next_page_token = youtube_campaign.get('next_page_token', '')
     
+    order_codes_mapping = OrderCodesMappingSingleton.get_mapping(campaign['id'])
 
     if not access_token or not refresh_token:
         print("need both access_token and refresh_token")
         return
 
+    #TODO determind video / live_chat
 
     live_chat_id = youtube_campaign.get('live_chat_id')
     if not live_chat_id:
@@ -167,6 +169,9 @@ def capture_youtube(campaign):
             print("no items")
             return
         liveStreamingDetails = items[0].get('liveStreamingDetails')
+        if 'actualEndTime' in liveStreamingDetails.keys():
+            capture_youtube_video(campaign, youtube_channel, order_codes_mapping)
+            
         if not liveStreamingDetails:
             print("no liveStreamingDetails")
             return
@@ -177,9 +182,6 @@ def capture_youtube(campaign):
         youtube_campaign['live_chat_id'] = live_chat_id
         db.api_campaign.update_one({'id': campaign['id']}, { "$set": {'youtube_campaign': youtube_campaign}})
 
-    next_page_token = youtube_campaign.get('next_page_token', "")
-
-    order_codes_mapping = OrderCodesMappingSingleton.get_mapping(campaign['id'])
 
     # code, data = api_youtube_get_live_chat_comment_with_api_key(
     #     next_page_token, live_chat_id, 100)
@@ -191,7 +193,7 @@ def capture_youtube(campaign):
 
     if code // 100 != 2 and 'error' in data:
         youtube_campaign['live_chat_id'] = ''
-        youtube_campaign['live_video_id'] = ''
+        youtube_campaign['next_page_token'] = ''
         youtube_campaign['remark'] = 'youtube API error'
         db.api_campaign.update_one({'id': campaign['id']}, {
                                    '$set': {"youtube_campaign":youtube_campaign}})
@@ -239,29 +241,7 @@ def capture_youtube(campaign):
             comments[-1]['snippet']['publishedAt']).timestamp()
         youtube_campaign['is_failed'] = False
 
-        last_refresh_timestamp = youtube_campaign.get('last_refresh_timestamp',1)
-        now_timestamp = datetime.timestamp(datetime.now())
-        if last_refresh_timestamp+3000 <= now_timestamp:
-            #refresh_token
-            print("refreshing token...")
-            response = requests.post(
-            url="https://accounts.google.com/o/oauth2/token",
-            data={
-                "client_id": "536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com",  #TODO keep it to settings
-                "client_secret": "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",                                 #TODO keep it to settings
-                "grant_type": "refresh_token",
-                "refresh_token": refresh_token
-            },)
-
-            code, refresh_token_response = response.status_code, response.json()
-            # code, refresh_token_response = api_google_post_refresh_token(refresh_token)
-            print(f"refresh status :{code}")
-            print(f"refresh data: {refresh_token_response}")
-            if code // 100 != 2:
-                del youtube_campaign['refresh_token']
-            else:
-                youtube_campaign['access_token'] = refresh_token_response.get('access_token')
-                youtube_campaign['last_refresh_timestamp'] = now_timestamp
+        youtube_campaign = get_youtube_refresh_token(youtube_campaign, refresh_token)
 
         db.api_campaign.update_one({'id': campaign['id']}, {
                                    "$set": {'youtube_campaign': youtube_campaign}})
@@ -373,3 +353,107 @@ def capture_instagram(campaign):
     #     db.api_campaign.update_one({'id': campaign['id']}, {
     #                                "$set": {'instagram_campaign': instagram_campaign}})
     #     return
+
+
+def capture_youtube_video(campaign, youtube_channel, order_codes_mapping):
+    youtube_campaign = campaign['youtube_campaign']
+    refresh_token = youtube_campaign.get('refresh_token')
+    next_page_token = youtube_campaign.get('next_page_token', '')
+    live_video_id = youtube_campaign.get('live_video_id')
+    
+    is_live_end = True
+
+    keep_capturing = True
+
+    is_failed = youtube_campaign.get('is_failed', False)
+    last_crelast_create_message_id = youtube_campaign.get("last_create_message_id")
+
+    while keep_capturing :
+        code, get_yt_video_data = api_youtube_get_video_comment_thread(next_page_token, live_video_id, 10)
+        
+        print(f"video_id: {live_video_id}")
+        print(f"code: {code}") 
+
+        if code // 100 != 2 and 'error' in get_yt_video_data:
+            youtube_campaign['live_video_id'] = ''
+            youtube_campaign['next_page_token'] = ''
+            youtube_campaign['remark'] = 'youtube API error'
+            db.api_campaign.update_one({'id': campaign['id']}, {
+                                    '$set': {"youtube_campaign":youtube_campaign}})
+            return
+        
+        items = get_yt_video_data.get('items', [])
+        if not items:
+            return
+        
+        if not next_page_token:
+            new_last_crelast_create_message_id = items[0]['snippet']['topLevelComment']['id']
+
+        print(f"number of comments: {len(items)}")
+        
+        for comment in items:
+            if comment['id'] == last_crelast_create_message_id:
+                keep_capturing = False
+                print ('no new comment !!')
+                break
+            
+            print (comment['snippet']['topLevelComment']['snippet']['textDisplay'])
+
+            comment_time_stamp = parser.parse(
+                comment['snippet']['topLevelComment']['snippet']['publishedAt']).timestamp()
+            
+            uni_format_comment = {
+                'platform': 'youtube',
+                'id': comment['snippet']['topLevelComment']['id'],
+                "campaign_id": campaign['id'],
+                'message': comment['snippet']['topLevelComment']['snippet']['textDisplay'],
+                "created_time": comment_time_stamp,
+                "customer_id": comment['snippet']['topLevelComment']['snippet']['authorChannelId']['value'],
+                "customer_name": comment['snippet']['topLevelComment']['snippet']['authorDisplayName'],
+                "image": comment['snippet']['topLevelComment']['snippet']['authorProfileImageUrl'],
+            }
+            db.api_campaign_comment.insert_one(uni_format_comment)
+
+            comment_queue.enqueue(comment_job, args=(campaign, 'youtube', youtube_channel,
+                                                    uni_format_comment, order_codes_mapping), result_ttl=10, failure_ttl=10)
+            
+        if keep_capturing:
+            next_page_token = get_yt_video_data.get('nextPageToken', '')
+
+        if not next_page_token:
+            keep_capturing = False
+        
+    youtube_campaign['is_failed'] = False
+    youtube_campaign['last_create_message_id'] = new_last_crelast_create_message_id
+    youtube_campaign['next_page_token'] = next_page_token
+
+    youtube_campaign = get_youtube_refresh_token(youtube_campaign, refresh_token)
+    db.api_campaign.update_one({'id': campaign['id']}, {
+        "$set": {'youtube_campaign': youtube_campaign}})
+
+def get_youtube_refresh_token(youtube_campaign, refresh_token):
+    last_refresh_timestamp = youtube_campaign.get('last_refresh_timestamp',1)
+    now_timestamp = datetime.timestamp(datetime.now())
+    if last_refresh_timestamp+3000 <= now_timestamp:
+        #refresh_token
+        print("refreshing token...")
+        response = requests.post(
+        url="https://accounts.google.com/o/oauth2/token",
+        data={
+            "client_id": "536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com",  #TODO keep it to settings
+            "client_secret": "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",                                 #TODO keep it to settings
+            "grant_type": "refresh_token",
+            "refresh_token": refresh_token
+        },)
+
+        code, refresh_token_response = response.status_code, response.json()
+        # code, refresh_token_response = api_google_post_refresh_token(refresh_token)
+        print(f"refresh status :{code}")
+        print(f"refresh data: {refresh_token_response}")
+        if code // 100 != 2:
+            del youtube_campaign['refresh_token']
+        else:
+            youtube_campaign['access_token'] = refresh_token_response.get('access_token')
+            youtube_campaign['last_refresh_timestamp'] = now_timestamp
+    
+    return youtube_campaign
