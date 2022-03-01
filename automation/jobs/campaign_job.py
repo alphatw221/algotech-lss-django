@@ -375,7 +375,8 @@ def capture_youtube_video(campaign, youtube_channel, order_codes_mapping):
         print(f"code: {code}") 
 
         if code // 100 != 2 and 'error' in get_yt_video_data:
-            youtube_campaign['live_video_id'] = ''
+            # youtube_campaign['live_video_id'] = ''
+            youtube_campaign['live_chat_id'] = ''
             youtube_campaign['next_page_token'] = ''
             youtube_campaign['remark'] = 'youtube API error'
             db.api_campaign.update_one({'id': campaign['id']}, {
