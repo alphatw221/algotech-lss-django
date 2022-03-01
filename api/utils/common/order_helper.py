@@ -220,6 +220,8 @@ class PreOrderHelper():
 
     @staticmethod
     def _check_lock(api_user, api_pre_order):
+        return
+        #2022.02.25 deactivated due to demo
         if not api_user:
             return
         if api_user.type == 'customer':
