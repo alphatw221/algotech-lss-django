@@ -16,3 +16,38 @@ class IsCampaignSeller(BasePermission):
         except Exception:
             return False
         return True
+
+
+
+
+class IsCampaignRetrievable(BasePermission):
+    def has_permission(self, request, view):
+        try:
+            pk = view.kwargs.get('pk')
+            api_user, platform_name, platform_id = getparams(request, ("platform_name", "platform_id"), with_user=True, seller=True)
+            platform = Verify.get_platform(api_user, platform_name, platform_id)
+            Verify.is_admin(api_user, platform_name, platform)
+            return True
+        except:
+            return False
+    def has_object_permission(self, request, view, obj):
+        print(view)
+        print(obj)
+
+
+
+class PlatfomrIsCampaignOwner(BasePermission):
+    def has_permission(self, request, view):
+        print(view)
+        try:
+
+            api_user, platform_name, platform_id = getparams(request, ("platform_name", "platform_id"), with_user=True, seller=True)
+            platform = Verify.get_platform(api_user, platform_name, platform_id)
+            Verify.is_admin(api_user, platform_name, platform)
+            return True
+        except:
+            return False
+    def has_object_permission(self, request, view, obj):
+        print(view)
+        print(obj)
+
