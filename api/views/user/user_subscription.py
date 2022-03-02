@@ -3,7 +3,7 @@ from rest_framework import serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from api.models.user.user import User
-from api.models.user.user_subscription import UserSubscription, UserSubscriptionSerializer, UserSubscriptionSerializerMeta, UserSubscriptionSerializerSimplify
+from api.models.user.user_subscription import UserSubscription, UserSubscriptionSerializer, UserSubscriptionSerializerMeta, UserSubscriptionSerializerSimplify, UserSubscriptionSerializerCreate
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework import status
@@ -49,9 +49,19 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
     filterset_fields = []
     pagination_class = UserSubscriptionPagination
 
+    @action(detail=False, methods=['POST'], url_path=r'create_user_subscription', permission_classes=(IsAdminUser,))
+    @api_error_handler
+    def create_user_subscription(self, request):
+        print(request.data)
+        serializer = UserSubscriptionSerializerCreate(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        user_subscription = serializer.save()
+        return Response(UserSubscriptionSerializer(user_subscription).data, status=status.HTTP_200_OK)
+
     @action(detail=True, methods=['GET'], url_path=r'add_platform', permission_classes=(IsAdminUser,))
     @api_error_handler
-    def root_add_platform(self, request, pk=None):
+    def add_platform(self, request, pk=None):
         api_user, platform_name, platform_id = getparams(request, ('platform_name', 'platform_id'), with_user=True, seller=True)
         platform = Verify.get_platform(api_user, platform_name, platform_id)
         user_subscription = Verify.get_user_subscription(pk)
@@ -67,7 +77,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['GET'], url_path=r'remove_platform', permission_classes=(IsAdminUser,))
     @api_error_handler
-    def root_remove_platform(self, request, pk=None):
+    def remove_platform(self, request, pk=None):
         api_user, platform_name, platform_id = getparams(request, ('platform_name', 'platform_id'), with_user=True, seller=True)
         platform = Verify.get_platform(api_user, platform_name, platform_id)
         user_subscription = Verify.get_user_subscription(pk)
