@@ -3,7 +3,7 @@ from api.utils.common.verify import Verify
 from api.utils.common.common import getparams
 
 
-class IsOrderSeller(BasePermission):
+class IsSellerCampaignOrderRetrievable(BasePermission):
 
     def has_permission(self, request, view):
         try:
@@ -19,7 +19,7 @@ class IsOrderSeller(BasePermission):
         return True
 
 
-class IsCampaignOrderListable(BasePermission):
+class IsSellerOrderCampaignValid(BasePermission):
 
     def has_permission(self, request, view):
         try:
