@@ -134,11 +134,15 @@ class UserViewSet(viewsets.ModelViewSet):
                 page_token=page_token, page_id=page_id, height=100, width=100)
             item['image'] = picture_data['data']['url'] if status_code == 200 else None
             if FacebookPage.objects.filter(page_id=page_id).exists():
-                FacebookPage.objects.filter(page_id=page_id).update(token=page_token, token_update_at=datetime.now(
+
+                facebook_page = FacebookPage.objects.get(page_id=page_id)
+                facebook_page.update(token=page_token, token_update_at=datetime.now(
                 ), token_update_by=api_user.facebook_info['id'], image=item['image'])
             else:
-                FacebookPage.objects.create(
+                facebook_page = FacebookPage.objects.create(
                     page_id=page_id, name=page_name, token=page_token, token_update_at=datetime.now(), token_update_by=api_user.facebook_info['id'], image=item['image'])
+
+            item['in_subscription']=True if len(facebook_page.user_subscriptions) else False
 
         return Response(response, status=status.HTTP_200_OK)
 

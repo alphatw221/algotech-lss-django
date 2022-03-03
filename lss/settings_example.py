@@ -257,6 +257,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # Live Show Seller info
 WEB_SERVER_URL = "https://v1login.liveshowseller.com"
+# WEB_SERVER_URL = "https://plusone.sociallab.ph/lss/public"  # for social lab
 SHOPPING_CART_URL = f"{WEB_SERVER_URL}/buyer/login_to_cart"
 SUPPORTED_PLATFORMS = [
     ("n/a", "No specific platform"),
