@@ -161,8 +161,8 @@ class OrderViewSet(viewsets.ModelViewSet):
         api_user, platform_id, platform_name, campaign_id, column_list = getparams(
             request, ("platform_id", "platform_name", "campaign_id", "column_list"), with_user=True, seller=True)
         
-        platform, campaign = verify_seller_request(
-            api_user, platform_name, platform_id, campaign_id)
+        # platform, campaign = verify_seller_request(
+        #     api_user, platform_name, platform_id, campaign_id)
         
         #check_download_at:
         # last_report_download_at = campaign.meta.get('last_report_download_at',None)
@@ -265,7 +265,10 @@ class OrderViewSet(viewsets.ModelViewSet):
                 column += 1
             
             products = order_data['products']
+            print ('product_column_dict', product_column_dict)
+            print ('products:', products)
             for campaing_product_id_str, product in products.items():
+                print (campaing_product_id_str, product)
                 worksheet.write(row, product_column_dict[campaing_product_id_str], product['qty'])
                 
             row += 1

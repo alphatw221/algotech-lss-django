@@ -22,6 +22,8 @@ from lss.views.custom_jwt import (CustomTokenObtainPairView,
                                   CustomTokenRefreshView,
                                   CustomTokenVerifyView)
 
+from backend.views.test_view import index
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),
@@ -37,4 +39,5 @@ urlpatterns = [
          name='custom_token_refresh'),
     path('custom_token/verify/', CustomTokenVerifyView.as_view(),
          name='custom_token_verify'),
+    path('backend/', index)
 ]
