@@ -185,6 +185,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         #temp solution : no to overide campaign data
         json_data = json.loads(request.data["data"])
+        print (json_data)
         facebook_campaign = campaign.facebook_campaign.copy()
         facebook_campaign.update(json_data.get("facebook_campaign",{}))
         json_data['facebook_campaign']=facebook_campaign
