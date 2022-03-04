@@ -229,7 +229,7 @@ class DashboardViewSet(viewsets.ModelViewSet):
                 for key, val in order['products'].items():
                     complete_sales += val['subtotal']  # 完成訂單總金額
 
-            pre_order_count = db.api_pre_order.find({'campaign_id': campaign_id}).count()
+            pre_order_count = db.api_pre_order.find({'campaign_id': campaign_id, 'total': {'$ne': 0}}).count()
             order_complete_count = db.api_order.find({'campaign_id': campaign_id, 'status': 'complete'}).count()
             order_proceed_count = db.api_order.find({'campaign_id': campaign_id, 'status': 'review'}).count()
             comment_count = db.api_campaign_comment.find({'campaign_id': campaign_id}).count()
