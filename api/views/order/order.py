@@ -230,7 +230,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         column = 0
 
         order_id_list = []
-        order_ids = db.api_order.find({'campaign_id': int(campaign_id)})
+        order_ids = db.api_order.find({'campaign_id': int(campaign_id), 'status': 'complete'})
         for order_id in order_ids:
             order_id_list.append(order_id['id'])
         
