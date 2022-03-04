@@ -2,6 +2,7 @@ import imp
 import pprint
 import requests
 
+
 from api.models.campaign.campaign import Campaign
 from api.models.campaign.campaign_product import CampaignProduct
 from api.models.cart.cart_product import CartProduct
@@ -33,8 +34,8 @@ from backend.api.youtube.viedo import api_youtube_get_video_info_with_api_key
 from automation.jobs.campaign_job import campaign_job
 from mail.sender.sender import *
 from api.views.payment.payment import * 
-
-
+from django.conf import settings
+from api.code.code import SubscriptionCodeManager
 class Command(BaseCommand):
     help = ''
 
@@ -43,8 +44,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # pass
-        print("id",get_incremented_filed("api_order","id") )
-
+        # print("id",get_incremented_filed("api_order","id") )
+        self.subscription_code_test()
     def campaign_test(self):
         cs = CampaignManager.get_active_campaigns()
         print(cs)
@@ -124,6 +125,11 @@ class Command(BaseCommand):
 
     def campaign_test(self):
         campaign_job(53)
+
+    def subscription_code_test(self):
+        print(SubscriptionCodeManager.generate(1,30))
+        code = "gAAAAABiIZm30ERH6Z0sgphHgO2UrqWWltQfhTndkYFWe5YXUnSLyp2Rbushoc2QOUHphB8l4SzURX4GUJgeQ3CP5xw5BNadkIYncsE6-p19KWaL12XzTJvIC42LeaMaQDPFvFdju2SU32S-XiOjSDLwKGPH4LiOHWHCh02uhO1sQb8kcKPZ-oRMYk3iKxsqHDURvh9M4cIHNQi3OTr_DX60w_ZALRHEZQ=="
+        SubscriptionCodeManager.execute(code,'facebook',1)
 # $stringToHash = $this->storeId . $this->txndatetime . $this->chargetotal . $this->currency . $this->sharedSecret;
 #         $ascii = bin2hex($stringToHash);
 
