@@ -33,7 +33,7 @@ from automation.jobs.campaign_job import campaign_job
 from mail.sender.sender import *
 from api.views.payment.payment import * 
 from django.conf import settings
-from api.code.code import SubscriptionCodeManager
+from api.code.code_manager import SubscriptionCodeManager
 
 from api.models.campaign.campaign import Campaign
 from api.models.campaign.campaign_product import CampaignProduct
