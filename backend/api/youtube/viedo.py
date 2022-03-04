@@ -23,8 +23,8 @@ def api_youtube_get_video_info_with_access_token(access_token: str, video_id: st
 def api_youtube_get_video_comment_thread(page_token: str, video_id: str, max_results: int):
     params = {
         "key": settings.YOUTUBE_API_KEY,
-        "id": video_id,
-        "masResults": max_results,
+        "videoId": video_id,
+        "maxResults": max_results,
         "part": "id,snippet",
         "pageToken": page_token,
         "order": "time"

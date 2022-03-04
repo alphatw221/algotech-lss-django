@@ -175,10 +175,23 @@ DATABASES = {
             'ssl': False,
         }
     }
+    # 'default': {  # for social lab
+    #     'ENGINE': 'djongo',
+    #     'NAME': 'lss',
+    #     'ENFORCE_SCHEMA': False,
+    #     'CLIENT': {
+    #         'host': 'mongodb://52.221.239.166:27017',
+    #         'username': 'sociallabdev',
+    #         'password': 'sociallab2021',
+    #         'authSource': 'admin',
+    #         'authMechanism': 'SCRAM-SHA-1',
+    #         'ssl': False,
+    #     }
+    # }
 }
 MONGODB_CONNECTION_STRING = 'mongodb://lss:algo83111T%%@34.126.92.142:27017,35.240.200.4:27017,34.126.155.150:27017'
+# MONGODB_CONNECTION_STRING = 'mongodb://sociallabdev:sociallab2021@52.221.239.166:27017' # for social lab
 MONGODB_DATABASE_NAME = 'lss'
-
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 
@@ -244,6 +257,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # Live Show Seller info
 WEB_SERVER_URL = "https://v1login.liveshowseller.com"
+# WEB_SERVER_URL = "https://plusone.sociallab.ph/lss/public"  # for social lab
 SHOPPING_CART_URL = f"{WEB_SERVER_URL}/buyer/login_to_cart"
 SUPPORTED_PLATFORMS = [
     ("n/a", "No specific platform"),
@@ -337,6 +351,12 @@ REDIS_SERVER = {
     "port": "6379",
     "username": None,
     "password": r"algo83111T%%"}
+# redis server for social lab
+# REDIS_SERVER = {
+#     "host": "127.0.0.1",
+#     "port": "6379",
+#     "username": None,
+#     "password": r"1234"}
 
 
 # gcp load balancer
