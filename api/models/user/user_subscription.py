@@ -39,6 +39,8 @@ class UserSubscription(models.Model):
 
     lang = models.CharField(max_length=255, blank=True,
                             choices=settings.LANGUAGES, default='en')
+                            
+    meta_code = models.JSONField(null=True, blank=True, default=dict)
 
 class UserSubscriptionSerializer(serializers.ModelSerializer):
     class Meta:
