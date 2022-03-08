@@ -52,7 +52,7 @@ class VerifyRequestFromWhome(ABC):
 class Verify():
 
     @staticmethod
-    def is_admin(api_user, platform_name, platform):
+    def is_platform_admin(api_user, platform_name, platform):
         try:
             if platform_name == 'facebook':
                 status_code, response = api_fb_get_me_accounts(
@@ -129,7 +129,7 @@ class Verify():
             raise ApiVerifyError("no platfrom found")
         platform = platform_dict[platform_name].objects.get(
             id=platform_id)
-        if not cls.is_admin(api_user, platform_name, platform):
+        if not cls.is_platform_admin(api_user, platform_name, platform):
             raise ApiVerifyError("user is not platform admin")
         return platform
     

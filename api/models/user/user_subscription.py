@@ -41,6 +41,7 @@ class UserSubscription(models.Model):
                             choices=settings.LANGUAGES, default='en')
                             
     meta_code = models.JSONField(null=True, blank=True, default=dict)
+    user_plan = models.JSONField(null=True, blank=True, default=dict)
 
 class UserSubscriptionSerializer(serializers.ModelSerializer):
     class Meta:

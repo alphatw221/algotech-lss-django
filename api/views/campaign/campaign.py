@@ -147,7 +147,8 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['PUT'], url_path=r'update_campaign', parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated, IsPlatformCampaignRetrievable))
+    # , permission_classes=(IsAuthenticated, IsPlatformCampaignRetrievable)
+    @action(detail=True, methods=['PUT'], url_path=r'update_campaign', parser_classes=(MultiPartParser,))
     @api_error_handler
     def update_campaign(self, request, pk=None):
 
@@ -155,6 +156,8 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         platform = Verify.get_platform(api_user, platform_name, platform_id)
         campaign = Verify.get_campaign_from_platform(platform, pk)
+
+          
 
         #temp solution : no to overide campaign data
         json_data = json.loads(request.data["data"])
