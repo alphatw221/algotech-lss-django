@@ -55,6 +55,8 @@ INSTALLED_APPS = [
     'chat_bot',
     'mail',
     'cron',
+    'corsheaders',
+    'webpack_loader',
 ]
 
 LOGGING = {
@@ -137,7 +139,7 @@ ROOT_URLCONF = 'lss.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates'),],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -257,7 +259,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # Live Show Seller info
 WEB_SERVER_URL = "https://v1login.liveshowseller.com"
-# WEB_SERVER_URL = "https://plusone.sociallab.ph/lss/public"  # for social lab
 SHOPPING_CART_URL = f"{WEB_SERVER_URL}/buyer/login_to_cart"
 SUPPORTED_PLATFORMS = [
     ("n/a", "No specific platform"),
@@ -351,12 +352,6 @@ REDIS_SERVER = {
     "port": "6379",
     "username": None,
     "password": r"algo83111T%%"}
-# redis server for social lab
-# REDIS_SERVER = {
-#     "host": "127.0.0.1",
-#     "port": "6379",
-#     "username": None,
-#     "password": r"1234"}
 
 
 # gcp load balancer
@@ -376,3 +371,12 @@ STRIPE_API_KEY = "sk_test_51J2aFmF3j9D00CA0KABMZVKtOVnZNbBvM2hcokicJmfx8vvrmNyys
 # APPEND_SLASH=False
 # OPERATION_CODE_NAME: AGILE
 ADMIN_LIST = [1, ]
+
+WEBPACK_LOADER = {
+  'DEFAULT': {
+    'CACHE': not DEBUG,
+    'STATS_FILE': os.path.join(BASE_DIR, 'webpack-stats.json'),
+    'POLL_INTERVAL': 0.1,
+    'IGNORE': [r'.+\.hot-update.js', r'.+\.map'],
+  }
+}

@@ -28,6 +28,7 @@ google-cloud-logging = "^2.7.0"
 paypalrestsdk = "^1.13.1"
 rq-dashboard = "^0.6.1"
 stripe = "^2.65.0"
+django-webpack-loader = "^1.4.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

@@ -1,14 +1,20 @@
+{% load render_bundle from webpack_loader %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Django Vue</title>
+    {% render_bundle 'app' 'css' %}
 </head>
 <body>
-    <a href="https://accounts.google.com/o/oauth2/v2/auth?scope=https://www.googleapis.com/auth/youtube%20
-    https://www.googleapis.com/auth/youtubepartner-channel-audit%20https://www.googleapis.com/auth/userinfo.email%20
-    https://www.googleapis.com/auth/userinfo.profile&redirect_uri=http://localhost:8001/api/user/google_user_callback&state=81,MV21cQ2v_bs&response_type=code&client_id=536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com&access_type=offline">登入</a>
-    <iframe width="1015" height="761" src="https://www.youtube.com/embed/2Hwzd_5pc8c" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-    <iframe width="320" height="440" src="http://instagram.com/p/CZto57cp8mk/embed" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    <h1>Hello Django!!!</h1>
+    <div id="app"></div>
+    <div id="app1"></div>
+<!--    <a href="https://accounts.google.com/o/oauth2/v2/auth?scope=https://www.googleapis.com/auth/youtube%20-->
+<!--    https://www.googleapis.com/auth/youtubepartner-channel-audit%20https://www.googleapis.com/auth/userinfo.email%20-->
+<!--    https://www.googleapis.com/auth/userinfo.profile&redirect_uri=http://localhost:8001/api/user/google_user_callback&state=81,MV21cQ2v_bs&response_type=code&client_id=536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com&access_type=offline">登入</a>-->
+<!--    <iframe width="1015" height="761" src="https://www.youtube.com/embed/2Hwzd_5pc8c" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>-->
+<!--    <iframe width="320" height="440" src="http://instagram.com/p/CZto57cp8mk/embed" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>-->
+    {% render_bundle 'app' 'js' %}
 </body>
 </html>
