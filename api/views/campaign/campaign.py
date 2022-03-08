@@ -21,6 +21,7 @@ from api.utils.common.verify import ApiVerifyError
 from api.utils.common.common import *
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 import requests
+from api.models.user.user_subscription import UserSubscription
 
 def verify_seller_request(api_user):
     Verify.verify_user(api_user)
@@ -147,8 +148,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    # , permission_classes=(IsAuthenticated, IsPlatformCampaignRetrievable)
-    @action(detail=True, methods=['PUT'], url_path=r'update_campaign', parser_classes=(MultiPartParser,))
+    @action(detail=True, methods=['PUT'], url_path=r'update_campaign', parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated, IsPlatformCampaignRetrievable))
     @api_error_handler
     def update_campaign(self, request, pk=None):
 
@@ -156,20 +156,18 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         platform = Verify.get_platform(api_user, platform_name, platform_id)
         campaign = Verify.get_campaign_from_platform(platform, pk)
-
-          
-
+        user_subscription = Verify.get_user_subscription_from_platform(platform)
+        
         #temp solution : no to overide campaign data
         json_data = json.loads(request.data["data"])
 
-
-       # if not ...:
-       #     json_data['facebook_page_id']=None
-       # if not ...:
-       #     json_data['youtube_channel_id']=None
-       # if not ...:
-       #     json_data['instagram_profile']=None
-
+        if 'facebook' not in user_subscription.user_plan.get('activated_platform'):
+           json_data['facebook_page_id']=None
+        if 'youtube' not in user_subscription.user_plan.get('activated_platform'):
+           json_data['youtube_channel_id']=None
+        if 'instagram' not in user_subscription.user_plan.get('activated_platform'):
+           json_data['instagram_profile']=None
+        
         facebook_campaign = campaign.facebook_campaign.copy()
         facebook_campaign.update(json_data.get("facebook_campaign",{}))
         json_data['facebook_campaign']=facebook_campaign
