@@ -112,7 +112,7 @@ class CampaignSerializerCreate(serializers.ModelSerializer):
     youtube_campaign = YoutubeCampaignSerializer(default=dict)
     instagram_campaign = InstagramCampaignSerializer(default=dict)
 
-    meta = serializers.JSONField(default=dict)
+    meta = serializers.JSONField(default={"allow_checkout": 1})
     meta_payment = serializers.JSONField(default=dict)
     meta_logistic = serializers.JSONField(default=dict)
 

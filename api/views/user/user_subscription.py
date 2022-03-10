@@ -2,6 +2,7 @@ from platform import platform
 from rest_framework import serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from api.code.subscription_code_manager import SubscriptionCodeManager
 from api.models.user.user import User
 from api.models.user.user_subscription import UserSubscription, UserSubscriptionSerializer, UserSubscriptionSerializerMeta, UserSubscriptionSerializerSimplify, UserSubscriptionSerializerCreate
 from rest_framework.pagination import PageNumberPagination
@@ -58,6 +59,28 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         user_subscription = serializer.save()
         return Response(UserSubscriptionSerializer(user_subscription).data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['POST'], url_path=r'create_activate_code', permission_classes=(IsAdminUser,))
+    @api_error_handler
+    def create_activate_code(self, request, pk=None):
+        try:
+            data = request.data
+            user_subscription_id, maximum_usage_count, interval = data.get('user_subscription_id', None), data.get('maximum_usage_count', None), data.get('interval', None)
+            code = SubscriptionCodeManager.generate(user_subscription_id, maximum_usage_count, interval)
+            return Response(code, status=status.HTTP_200_OK)
+        except ApiVerifyError as e:
+            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
+        
+    @action(detail=False, methods=['POST'], url_path=r'subscirption_code_activate_page', permission_classes=(IsAuthenticated,))
+    @api_error_handler
+    def subscirption_code_activate_page(self, request, pk=None):
+        try:
+            data = request.data
+            code, platform_name, platform_id = data['activation_code'], data['platform_name'], data['platform_id']
+            subscription_page_data = SubscriptionCodeManager.execute(code, platform_name, platform_id)
+            return Response(subscription_page_data, status=status.HTTP_200_OK)
+        except ApiVerifyError as e:
+            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['GET'], url_path=r'add_platform', permission_classes=(IsAdminUser,))
     @api_error_handler

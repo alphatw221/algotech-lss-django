@@ -23,8 +23,6 @@ from lss.views.custom_jwt import (CustomTokenObtainPairView,
                                   CustomTokenVerifyView)
 from django.views.generic import TemplateView
 
-from backend.views.test_view import index
-
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),
@@ -40,6 +38,6 @@ urlpatterns = [
          name='custom_token_refresh'),
     path('custom_token/verify/', CustomTokenVerifyView.as_view(),
          name='custom_token_verify'),
-    path('backend/', index),
+    path('backend/', include('backend.urls')),
     path("google-redirect/", TemplateView.as_view(template_name="google_test_login.html"))
 ]

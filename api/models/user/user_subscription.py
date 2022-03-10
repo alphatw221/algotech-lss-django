@@ -62,6 +62,7 @@ class UserSubscriptionSerializer(serializers.ModelSerializer):
     meta_payment = serializers.JSONField(default=dict)
     meta_logistic = serializers.JSONField(default=dict)
     meta_country = serializers.JSONField(default=dict)
+    user_plan = serializers.JSONField(default=dict, required=False)
 
     
 
