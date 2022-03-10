@@ -246,10 +246,10 @@ SUPPORTED_LANGUAGES={
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
-# STATIC_ROOT = os.path.join(BASE_DIR, "static")
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static")
-]
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
+# STATICFILES_DIRS = [
+#     os.path.join(BASE_DIR, "static")
+# ]
 
 
 # Default primary key field type
@@ -373,12 +373,5 @@ STRIPE_API_KEY = "sk_test_51J2aFmF3j9D00CA0KABMZVKtOVnZNbBvM2hcokicJmfx8vvrmNyys
 # OPERATION_CODE_NAME: AGILE
 ADMIN_LIST = [1, ]
 
-WEBPACK_LOADER = {
-  'DEFAULT': {
-    'CACHE': not DEBUG,
-    'STATS_FILE': os.path.join(BASE_DIR, 'frontend/webpack-stats.json'),
-    'POLL_INTERVAL': 0.1,
-    'IGNORE': [r'.+\.hot-update.js', r'.+\.map'],
-  }
-}
+
 FERNET_KEY = '4zQFttQhIuTXZr15hKSEOwndw_VdLg_bQGc_vPRTtb8='
