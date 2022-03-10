@@ -258,13 +258,17 @@ def capture_youtube(campaign):
 @capture_platform_error_handler
 def capture_instagram(campaign):
 
-    if not campaign['instagram_profile_id']:
-        return
+    
 
     # temperery use facebook_page as platform
+    if not campaign['facebook_page_id']:
+        return
+
     facebook_page = db.api_facebook_page.find_one(
         {"id": campaign['facebook_page_id']})
 
+    # if not campaign['instagram_profile_id']:
+    #     return
     # instagram_post = db.api_instagram_profile.find_one(
     #     {'id': int(campaign['instagram_profile_id'])})
 
