@@ -220,14 +220,12 @@ class DashboardViewSet(viewsets.ModelViewSet):
             for pre_order in pre_orders:
                 for key, val in pre_order['products'].items():
                     pre_order_qty += val['qty']
+                    
             orders = db.api_order.find({'campaign_id': campaign_id, 'status': 'complete'})
             for order in orders:
                 for key, val in order['products'].items():
                     order_qty += val['qty']
-            orders = db.api_order.find({'campaign_id': campaign_id, 'status': 'complete'})
-            for order in orders:
-                for key, val in order['products'].items():
-                    complete_sales += val['subtotal']  # 完成訂單總金額
+                    complete_sales += val['subtotal']
 
             pre_order_count = db.api_pre_order.find({'campaign_id': campaign_id, 'total': {'$ne': 0}}).count()
             order_complete_count = db.api_order.find({'campaign_id': campaign_id, 'status': 'complete'}).count()
@@ -235,9 +233,9 @@ class DashboardViewSet(viewsets.ModelViewSet):
             comment_count = db.api_campaign_comment.find({'campaign_id': campaign_id}).count()
 
             # 訂單成交量
-            close_rate = 0 if order_complete_count == 0 or pre_order_count == 0 else order_complete_count / (order_complete_count + pre_order_count) * 100
+            close_rate = 0 if order_complete_count == 0 else order_complete_count / (order_complete_count + order_proceed_count) * 100
             # 未完成付款
-            uncheckout_rate = 0 if order_complete_count == 0 or order_proceed_count == 0 or pre_order_count == 0  else order_proceed_count / (order_complete_count + order_proceed_count + pre_order_count) * 100
+            uncheckout_rate = 0 if order_complete_count == 0 or order_proceed_count == 0 and pre_order_count == 0  else order_proceed_count / (order_complete_count + order_proceed_count + pre_order_count) * 100
             
             manage_order['close_rate'] = close_rate
             manage_order['complete_sales'] = complete_sales
