@@ -56,7 +56,6 @@ INSTALLED_APPS = [
     'mail',
     'cron',
     'corsheaders',
-    'webpack_loader',
 ]
 
 LOGGING = {
