@@ -126,7 +126,7 @@ def google_fast_login_helper(request, user_type="seller"):
         # list_channel_response = requests.get(url=f"https://youtube.googleapis.com/youtube/v3/channels?part=id&mine=true&access_token={access_token}")
         if not code / 100 == 2:
             raise ApiCallerError('list youtube channels error')
-                                      
+
         return [item["id"] for item in list_channel_response.get("items")]
 
     # def save_token_to_campaign(campaign_id, access_token, refresh_token):
@@ -134,7 +134,7 @@ def google_fast_login_helper(request, user_type="seller"):
     #         campaign_object.youtube_campaign["access_token"] = access_token
     #         campaign_object.youtube_campaign["refresh_token"] = refresh_token
     #         campaign_object.save()
-    
+
     try:
         code, campaign_id, youtube_video_id = get_params(request)
         access_token, refresh_token = api_google_post_token(code)
@@ -145,10 +145,10 @@ def google_fast_login_helper(request, user_type="seller"):
             return HttpResponse(f"This Youtube video doesn't belong to this account")
 
         campaign = Verify.get_campaign(campaign_id)
+        campaign.youtube_campaign["live_video_id"] = youtube_video_id
         campaign.youtube_campaign["access_token"] = access_token
         campaign.youtube_campaign["refresh_token"] = refresh_token
         campaign.save()
-        # save_token_to_campaign(campaign_id, access_token, refresh_token)
         return HttpResponseRedirect(redirect_to=f'{settings.WEB_SERVER_URL}/campaign/edit/{campaign_id}')
     except Exception as e:
         print(traceback.format_exc())
