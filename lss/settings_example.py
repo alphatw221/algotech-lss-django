@@ -175,23 +175,26 @@ DATABASES = {
             'readPreference': 'primary',
             'ssl': False,
         }
-    }
+    },
     # 'default': {  # for social lab
     #     'ENGINE': 'djongo',
     #     'NAME': 'lss',
     #     'ENFORCE_SCHEMA': False,
     #     'CLIENT': {
-    #         'host': 'mongodb://52.221.239.166:27017',
-    #         'username': 'sociallabdev',
-    #         'password': 'sociallab2021',
+    #         'host': 'mongodb://52.221.239.166:27017, 13.215.51.14:27017, 18.142.57.3:27017',
+    #         'replicaSet': 'rs1',
+    #         'username': 'admin',
+    #         'password': 'admin',
     #         'authSource': 'admin',
     #         'authMechanism': 'SCRAM-SHA-1',
+    #         'readPreference': 'primary',
     #         'ssl': False,
     #     }
     # }
 }
 MONGODB_CONNECTION_STRING = 'mongodb://lss:algo83111T%%@34.126.92.142:27017,35.240.200.4:27017,34.126.155.150:27017'
-# MONGODB_CONNECTION_STRING = 'mongodb://sociallabdev:sociallab2021@52.221.239.166:27017' # for social lab
+# for social lab
+# MONGODB_CONNECTION_STRING = 'mongodb://admin:admin@52.221.239.166:27017,13.215.51.14:27017,18.142.57.3:27017'
 MONGODB_DATABASE_NAME = 'lss'
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
