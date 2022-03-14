@@ -1,4 +1,4 @@
-from settings import *
+from lss.settings import *
 
 DATABASES = {
     # for social lab
