@@ -21,7 +21,7 @@ DATABASES = {
 
 MONGODB_CONNECTION_STRING = 'mongodb://admin:admin@52.221.239.166:27017,13.215.51.14:27017,18.142.57.3:27017'
 WEB_SERVER_URL = "https://plusone.sociallab.ph/lss/public"
-
+SHOPPING_CART_URL = f"{WEB_SERVER_URL}/buyer/login_to_cart"
 REDIS_SERVER = {
     "host": "127.0.0.1",
     "port": "6379",
