@@ -8,7 +8,7 @@ from api.models.user.user import User, UserSerializer
 from api.models.youtube.youtube_channel import YoutubeChannel
 from api.utils.common.verify import ApiVerifyError
 from api.utils.error_handle.error.api_error import ApiCallerError
-from api.views.user._user import facebook_login_helper, google_login_helper, google_fast_login_helper
+from api.views.user._user import facebook_login_helper, google_login_helper, google_authorize_helper
 from backend.api.facebook.user import api_fb_get_accounts_from_user
 from backend.api.facebook.page import api_fb_get_page_picture
 from backend.api.youtube.channel import api_youtube_get_list_channel_by_token
@@ -40,10 +40,10 @@ class UserViewSet(viewsets.ModelViewSet):
 
     
 
-    @action(detail=False, methods=['GET'], url_path=r'google_user_callback')
+    @action(detail=False, methods=['GET'], url_path=r'google_authorize')
     @api_error_handler
-    def google_user_callback(self, request):
-        return google_fast_login_helper(request, user_type='user')
+    def google_authorize(self, request):
+        return google_authorize_helper(request, user_type='user')
 
 
 

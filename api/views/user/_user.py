@@ -20,7 +20,7 @@ from backend.api.youtube.viedo import api_youtube_get_video_info_with_access_tok
 from lss.views.custom_jwt import CustomTokenObtainPairSerializer
 from backend.api.instagram.user import *
 from google.oauth2 import id_token
-from google.auth.transport import requests
+from google.auth.transport import requests as google_requests
 from django.shortcuts import redirect
 
 def facebook_login_helper(request, user_type='user'):
@@ -87,27 +87,26 @@ def facebook_login_helper(request, user_type='user'):
     return Response(ret, status=status.HTTP_200_OK)
 
 
-def google_fast_login_helper(request, user_type="seller"):
+def google_authorize_helper(request, user_type="seller"):
 
     def get_params(request):
         code = request.GET.get("code")
-        campaign_id, youtube_video_id = request.GET.get("state").split(",")
+        campaign_id, youtube_video_id, redirect_uri = request.GET.get("state").split(",")
         print("campaign_id", campaign_id)
         print("youtube_video_id", youtube_video_id)
-        return code, campaign_id, youtube_video_id
+        return code, campaign_id, youtube_video_id, redirect_uri
 
-    def api_google_post_token(code):
+    def api_google_post_token(code, redirect_uri):
         token_response = requests.post(
             url="https://accounts.google.com/o/oauth2/token",
             data={
                 "code": code,
-                "client_id": "536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com",
-                "client_secret": "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",
-                "redirect_uri": settings.GCP_API_LOADBALANCER_URL + "/api/user/google_user_callback",
+                "client_id": settings.OATH_CLIENT_ID_FOR_LIVESHOWSELLER,
+                "client_secret": settings.OATH_CLIENT_SECRET_FOR_LIVESHOWSELLER,
+                "redirect_uri": redirect_uri,
                 "grant_type": "authorization_code"
             }
         )
-        # code, response = api_google_post_token(code, "http://localhost:8001" + "/api/user/google_user_callback")
         if not token_response.status_code / 100 == 2:
             raise ApiCallerError('get google token by code error')
 
@@ -125,21 +124,14 @@ def google_fast_login_helper(request, user_type="seller"):
     def get_self_all_channels(access_token):
 
         code, list_channel_response = api_youtube_get_list_channel_by_token(access_token)
-        # list_channel_response = requests.get(url=f"https://youtube.googleapis.com/youtube/v3/channels?part=id&mine=true&access_token={access_token}")
         if not code / 100 == 2:
             raise ApiCallerError('list youtube channels error')
 
         return [item["id"] for item in list_channel_response.get("items")]
 
-    # def save_token_to_campaign(campaign_id, access_token, refresh_token):
-    #         campaign_object = Campaign.objects.get(id=campaign_id)
-    #         campaign_object.youtube_campaign["access_token"] = access_token
-    #         campaign_object.youtube_campaign["refresh_token"] = refresh_token
-    #         campaign_object.save()
-
     try:
-        code, campaign_id, youtube_video_id = get_params(request)
-        access_token, refresh_token = api_google_post_token(code)
+        code, campaign_id, youtube_video_id, redirect_uri = get_params(request)
+        access_token, refresh_token = api_google_post_token(code, redirect_uri)
         channelId = get_user_youtube_channel_id(access_token, youtube_video_id)
         your_all_channels = get_self_all_channels(access_token)
 
@@ -214,7 +206,7 @@ def google_login_helper(request, user_type='customer'):
         # Specify the CLIENT_ID of the app that accesses the backend:
         token = request.query_params.get("token", None)
         CLIENT_ID = settings.OATH_CLIENT_ID_FOR_LIVESHOWSELLER
-        idinfo = id_token.verify_oauth2_token(token, requests.Request(), CLIENT_ID)
+        idinfo = id_token.verify_oauth2_token(token, google_requests.Request(), CLIENT_ID)
         print(idinfo)
         # Or, if multiple clients access the backend server:
         # idinfo = id_token.verify_oauth2_token(token, requests.Request())
