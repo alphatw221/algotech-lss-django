@@ -11,7 +11,7 @@ from api.models.youtube.youtube_channel import YoutubeChannel
 from api.utils.common.common import getdata
 from api.utils.common.verify import ApiVerifyError
 from api.utils.error_handle.error.api_error import ApiCallerError
-from api.views.user._user import facebook_login_helper, google_login_helper, google_fast_login_helper
+from api.views.user._user import facebook_login_helper, google_login_helper, google_authorize_helper
 from backend.api.facebook.user import api_fb_get_accounts_from_user
 from backend.api.facebook.page import api_fb_get_page_picture
 from backend.api.youtube.channel import api_youtube_get_list_channel_by_token
@@ -43,18 +43,16 @@ class UserViewSet(viewsets.ModelViewSet):
 
     
 
-    @action(detail=False, methods=['GET'], url_path=r'google_user_callback')
+    @action(detail=False, methods=['GET'], url_path=r'google_authorize')
     @api_error_handler
-    def google_user_callback(self, request):
-        return google_fast_login_helper(request, user_type='user')
+    def google_authorize(self, request):
+        return google_authorize_helper(request, user_type='user')
 
 
 
     @action(detail=False, methods=['GET'], url_path=r'google_customer_login_callback')
     @api_error_handler
     def google_customer_login_callback(self, request):
-        # google_login_helper(request, user_type='customer')
-        # return HttpResponse('ok',status=status.HTTP_200_OK)
         return google_login_helper(request, user_type='customer')
 
     @action(detail=False, methods=['GET'], url_path=r'google_user_login_callback')
