@@ -101,8 +101,8 @@ def google_authorize_helper(request, user_type="seller"):
             url="https://accounts.google.com/o/oauth2/token",
             data={
                 "code": code,
-                "client_id": settings.OATH_CLIENT_ID_FOR_LIVESHOWSELLER,
-                "client_secret": settings.OATH_CLIENT_SECRET_FOR_LIVESHOWSELLER,
+                "client_id": settings.GOOGLE_OAUTH_CLIENT_ID_FOR_LIVESHOWSELLER,
+                "client_secret": settings.GOOGLE_OAUTH_CLIENT_SECRET_FOR_LIVESHOWSELLER,
                 "redirect_uri": redirect_uri,
                 "grant_type": "authorization_code"
             }
@@ -205,7 +205,7 @@ def google_login_helper(request, user_type='customer'):
     try:
         # Specify the CLIENT_ID of the app that accesses the backend:
         token = request.query_params.get("token", None)
-        CLIENT_ID = settings.OATH_CLIENT_ID_FOR_LIVESHOWSELLER
+        CLIENT_ID = settings.GOOGLE_OAUTH_CLIENT_ID_FOR_LIVESHOWSELLER
         idinfo = id_token.verify_oauth2_token(token, google_requests.Request(), CLIENT_ID)
         print(idinfo)
         # Or, if multiple clients access the backend server:
