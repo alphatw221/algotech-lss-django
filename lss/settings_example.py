@@ -306,6 +306,10 @@ YOUTUBE_API_CONFIG = {
     }
 }
 
+# Google API credentials
+OATH_CLIENT_ID_FOR_LIVESHOWSELLER = "536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com"
+OATH_CLIENT_SECRET_FOR_LIVESHOWSELLER = "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"
+
 # backend app
 COMMENT_PROCESSING = {
     'REST_INTERVAL_SECONDS': 40,
