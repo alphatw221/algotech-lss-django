@@ -44,9 +44,9 @@ platform_dict = {'facebook': FacebookPage,
 
 
 class UserSubscriptionViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAdminUser,)
     queryset = UserSubscription.objects.all().order_by('id')
-    serializer_class = UserSubscriptionSerializer
+    serializer_class = UserSubscriptionSerializerSimplify
     filterset_fields = []
     pagination_class = UserSubscriptionPagination
 
@@ -62,25 +62,29 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['POST'], url_path=r'create_activate_code', permission_classes=(IsAdminUser,))
     @api_error_handler
-    def create_activate_code(self, request, pk=None):
+    def create_activate_code(self, request):
         try:
-            data = request.data
-            user_subscription_id, maximum_usage_count, interval = data.get('user_subscription_id', None), data.get('maximum_usage_count', None), data.get('interval', None)
+            user_subscription_id, maximum_usage_count, interval = getdata(request, ('user_subscription_id','maximum_usage_count','interval'))
+            # data = request.data
+            # user_subscription_id, maximum_usage_count, interval = data.get('user_subscription_id', None), data.get('maximum_usage_count', None), data.get('interval', None)
             code = SubscriptionCodeManager.generate(user_subscription_id, maximum_usage_count, interval)
             return Response(code, status=status.HTTP_200_OK)
         except ApiVerifyError as e:
             return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
         
-    @action(detail=False, methods=['POST'], url_path=r'subscirption_code_activate_page', permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['POST'], url_path=r'execute_activate_code', permission_classes=(IsAuthenticated,))
     @api_error_handler
-    def subscirption_code_activate_page(self, request, pk=None):
-        try:
-            data = request.data
-            code, platform_name, platform_id = data['activation_code'], data['platform_name'], data['platform_id']
-            subscription_page_data = SubscriptionCodeManager.execute(code, platform_name, platform_id)
-            return Response(subscription_page_data, status=status.HTTP_200_OK)
-        except ApiVerifyError as e:
-            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
+    def execute_activate_code(self, request):
+        code, platform_name, platform_id = getdata(request,('activation_code','plarform_name','plarform_id'))
+        subscription_page_data = SubscriptionCodeManager.execute(code, platform_name, platform_id)
+        return Response(subscription_page_data, status=status.HTTP_200_OK)
+        # try:
+        #     data = request.data
+        #     code, platform_name, platform_id = data['activation_code'], data['platform_name'], data['platform_id']
+        #     subscription_page_data = SubscriptionCodeManager.execute(code, platform_name, platform_id)
+        #     return Response(subscription_page_data, status=status.HTTP_200_OK)
+        # except ApiVerifyError as e:
+        #     return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['GET'], url_path=r'add_platform', permission_classes=(IsAdminUser,))
     @api_error_handler
@@ -114,7 +118,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
         return Response({'message': "remove platform success"}, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['GET'], url_path=r'get_meta')
+    @action(detail=False, methods=['GET'], url_path=r'get_meta', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def get_meta(self, request):
         api_user, platform_name, platform_id = getparams(request, ('platform_name', 'platform_id'), with_user=True, seller=True)
@@ -126,7 +130,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['POST'], url_path=r'update_hitpay')
+    @action(detail=False, methods=['POST'], url_path=r'update_hitpay', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def update_hitpay(self, request):
         api_user, platform_name, platform_id = getparams(request, ('platform_name', 'platform_id'), with_user=True, seller=True)
@@ -145,7 +149,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['POST'], url_path=r'update_paypal')
+    @action(detail=False, methods=['POST'], url_path=r'update_paypal', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def update_paypal(self, request):
         api_user, platform_name, platform_id = getparams(request, ('platform_name', 'platform_id'), with_user=True, seller=True)
@@ -164,7 +168,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['POST'], url_path=r'update_firstdata')
+    @action(detail=False, methods=['POST'], url_path=r'update_firstdata', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def update_firstdata(self, request):
         api_user, platform_name, platform_id = getparams(request, ('platform_name', 'platform_id'), with_user=True, seller=True)
@@ -183,7 +187,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['POST'], url_path=r'update_stripe')
+    @action(detail=False, methods=['POST'], url_path=r'update_stripe', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def update_stripe(self, request):
         api_user, platform_name, platform_id = getparams(request, ('platform_name', 'platform_id'), with_user=True, seller=True)
@@ -202,7 +206,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['POST'], url_path=r'update_direct_payment', parser_classes=(MultiPartParser,))
+    @action(detail=False, methods=['POST'], url_path=r'update_direct_payment', parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated,))
     @api_error_handler
     def update_direct_payment(self, request):
         api_user, platform_name, platform_id = getparams(request, ('platform_name', 'platform_id'), with_user=True, seller=True)
@@ -234,7 +238,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
         return Response(UserSubscriptionSerializerMeta(user_subscription).data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['POST'], url_path=r'update_logistic')
+    @action(detail=False, methods=['POST'], url_path=r'update_logistic', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def update_logistic(self, request):
         api_user, platform_name, platform_id = getparams(request, ('platform_name', 'platform_id'), with_user=True, seller=True)
@@ -251,7 +255,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-    @action(detail=False, methods=['PUT'], url_path=r'update_language')
+    @action(detail=False, methods=['PUT'], url_path=r'update_language', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def update_language(self, request):
         api_user, platform_name, platform_id = getparams(request, ('platform_name', 'platform_id'), with_user=True, seller=True)
@@ -267,7 +271,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         return Response(UserSubscriptionSerializerSimplify(user_subscription).data, status=status.HTTP_200_OK)
 
     
-    @action(detail=False, methods=['PUT'], url_path=r'update_note')
+    @action(detail=False, methods=['PUT'], url_path=r'update_note', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def update_note(self, request):
         api_user, platform_name, platform_id = getparams(request, ('platform_name', 'platform_id'), with_user=True, seller=True)

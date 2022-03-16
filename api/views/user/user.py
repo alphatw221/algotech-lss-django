@@ -1,11 +1,14 @@
+from math import perm
 import re
 from sys import platform
 from django.http.response import HttpResponse
 from rest_framework import serializers, status, viewsets
 from rest_framework.decorators import action, permission_classes
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from api.models.campaign.campaign import YoutubeCampaignSerializer
 from api.models.user.user import User, UserSerializer
 from api.models.youtube.youtube_channel import YoutubeChannel
+from api.utils.common.common import getdata
 from api.utils.common.verify import ApiVerifyError
 from api.utils.error_handle.error.api_error import ApiCallerError
 from api.views.user._user import facebook_login_helper, google_login_helper, google_fast_login_helper
@@ -14,7 +17,7 @@ from backend.api.facebook.page import api_fb_get_page_picture
 from backend.api.youtube.channel import api_youtube_get_list_channel_by_token
 from rest_framework.response import Response
 from rest_framework import status
-from api.models.facebook.facebook_page import FacebookPage
+from api.models.facebook.facebook_page import FacebookPage, FacebookPageSerializer
 from datetime import datetime
 from api.models.user.user_subscription import UserSubscription, UserSubscriptionSerializerSimplify
 
@@ -62,19 +65,21 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
     
-    @action(detail=False, methods=['GET'], url_path=r'facebook_pages')
+    @action(detail=False, methods=['GET'], url_path=r'facebook_pages', permission_classes=(IsAuthenticated,))
     @api_error_handler
-    def get_facebook_pages_by_client(self, request):
+    def get_facebook_pages(self, request):
 
-        api_user = request.user.api_users.get(type='user')
+        api_user = Verify.get_seller_user(request)
+        api_user_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
 
-        if not api_user:
-            raise ApiVerifyError("no user found")
-        elif api_user.status != "valid":
-            raise ApiVerifyError("not activated user")
+        user_token = api_user.facebook_info.get['token']
+        user_id = api_user.facebook_info.get['id']
+
+        if not user_token or not user_id:
+            raise ApiVerifyError('no facebook token or id')
 
         status_code, response = api_fb_get_accounts_from_user(
-            user_token=api_user.facebook_info['token'], user_id=api_user.facebook_info['id'])
+            user_token=user_token, user_id=user_id)
 
         if status_code != 200:
             raise ApiVerifyError("api_fb_get_accounts_from_user error")
@@ -83,78 +88,124 @@ class UserViewSet(viewsets.ModelViewSet):
             page_token = item['access_token']
             page_id = item['id']
             page_name = item['name']
+
             status_code, picture_data = api_fb_get_page_picture(
                 page_token=page_token, page_id=page_id, height=100, width=100)
-            item['image'] = picture_data['data']['url'] if status_code == 200 else None
             
+            page_image = item['image'] = picture_data['data']['url'] if status_code == 200 else None
+
             if FacebookPage.objects.filter(page_id=page_id).exists():
                 facebook_page = FacebookPage.objects.get(page_id=page_id)
+                facebook_page.name = page_name
                 facebook_page.token = page_token
                 facebook_page.token_update_at = datetime.now()
                 facebook_page.token_update_by = api_user.facebook_info['id']
-                facebook_page.image = item['image']
+                facebook_page.image = page_image
                 facebook_page.save()
             else:
                 facebook_page = FacebookPage.objects.create(
-                    page_id=page_id, name=page_name, token=page_token, token_update_at=datetime.now(), token_update_by=api_user.facebook_info['id'], image=item['image'])
+                    page_id=page_id, name=page_name, token=page_token, token_update_at=datetime.now(), token_update_by=api_user.facebook_info['id'], image=page_image)
                 facebook_page.save()
 
-            user_subscriptions = facebook_page.user_subscriptions.all()
-            item['user_subscription'] = UserSubscriptionSerializerSimplify(
-                user_subscriptions[0]).data if user_subscriptions else None
+            if not facebook_page.user_subscriptions.all():
+                api_user_user_subscription.facebook_pages.add(facebook_page)
+                
 
-            del item['access_token']
-            del item['category_list']
-            del item['tasks']
-            item['id'] = facebook_page.id
-        del response['paging']
-        return Response(response, status=status.HTTP_200_OK)
+        return Response(FacebookPageSerializer(api_user_user_subscription.facebook_pages.all(), many = True).data, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['GET'], url_path=r'facebook_pages')
-    def get_facebook_pages_by_server(self, request, pk=None):
 
-        if not User.objects.filter(id=pk).exists():
-            return Response({"message": "no user found"}, status=status.HTTP_400_BAD_REQUEST)
 
-        api_user = User.objects.get(id=pk)
-        if api_user.status != "valid":
-            return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
+        #---------
+        # api_user = request.user.api_users.get(type='user')
 
-        status_code, response = api_fb_get_accounts_from_user(
-            user_token=api_user.facebook_info['token'], user_id=api_user.facebook_info['id'])
+        # if not api_user:
+        #     raise ApiVerifyError("no user found")
+        # elif api_user.status != "valid":
+        #     raise ApiVerifyError("not activated user")
 
-        if status_code != 200:
-            return Response({'message': 'api_fb_get_accounts_from_user error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        # status_code, response = api_fb_get_accounts_from_user(
+        #     user_token=api_user.facebook_info['token'], user_id=api_user.facebook_info['id'])
 
-        for item in response['data']:
-            page_token = item['access_token']
-            page_id = item['id']
-            page_name = item['name']
-            status_code, picture_data = api_fb_get_page_picture(
-                page_token=page_token, page_id=page_id, height=100, width=100)
-            item['image'] = picture_data['data']['url'] if status_code == 200 else None
-            if FacebookPage.objects.filter(page_id=page_id).exists():
+        # if status_code != 200:
+        #     raise ApiVerifyError("api_fb_get_accounts_from_user error")
 
-                facebook_page = FacebookPage.objects.get(page_id=page_id)
-                facebook_page.update(token=page_token, token_update_at=datetime.now(
-                ), token_update_by=api_user.facebook_info['id'], image=item['image'])
-            else:
-                facebook_page = FacebookPage.objects.create(
-                    page_id=page_id, name=page_name, token=page_token, token_update_at=datetime.now(), token_update_by=api_user.facebook_info['id'], image=item['image'])
+        # for item in response['data']:
+        #     page_token = item['access_token']
+        #     page_id = item['id']
+        #     page_name = item['name']
+        #     status_code, picture_data = api_fb_get_page_picture(
+        #         page_token=page_token, page_id=page_id, height=100, width=100)
+        #     item['image'] = picture_data['data']['url'] if status_code == 200 else None
+            
+        #     if FacebookPage.objects.filter(page_id=page_id).exists():
+        #         facebook_page = FacebookPage.objects.get(page_id=page_id)
+        #         facebook_page.name = page_name
+        #         facebook_page.token = page_token
+        #         facebook_page.token_update_at = datetime.now()
+        #         facebook_page.token_update_by = api_user.facebook_info['id']
+        #         facebook_page.image = item['image']
+        #         facebook_page.save()
+        #     else:
+        #         facebook_page = FacebookPage.objects.create(
+        #             page_id=page_id, name=page_name, token=page_token, token_update_at=datetime.now(), token_update_by=api_user.facebook_info['id'], image=item['image'])
+        #         facebook_page.save()
 
-            item['in_subscription']=True if len(facebook_page.user_subscriptions) else False
+        #     user_subscriptions = facebook_page.user_subscriptions.all()
+        #     item['user_subscription'] = UserSubscriptionSerializerSimplify(
+        #         user_subscriptions[0]).data if user_subscriptions else None
 
-        return Response(response, status=status.HTTP_200_OK)
+        #     del item['access_token']
+        #     del item['category_list']
+        #     del item['tasks']
+        #     item['id'] = facebook_page.id
+        # del response['paging']
+        # return Response(response, status=status.HTTP_200_OK)
+
+    # @action(detail=True, methods=['GET'], url_path=r'facebook_pages')
+    # def get_facebook_pages_by_server(self, request, pk=None):
+
+    #     if not User.objects.filter(id=pk).exists():
+    #         return Response({"message": "no user found"}, status=status.HTTP_400_BAD_REQUEST)
+
+    #     api_user = User.objects.get(id=pk)
+    #     if api_user.status != "valid":
+    #         return Response({"message": "not activated user"}, status=status.HTTP_400_BAD_REQUEST)
+
+    #     status_code, response = api_fb_get_accounts_from_user(
+    #         user_token=api_user.facebook_info['token'], user_id=api_user.facebook_info['id'])
+
+    #     if status_code != 200:
+    #         return Response({'message': 'api_fb_get_accounts_from_user error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    #     for item in response['data']:
+    #         page_token = item['access_token']
+    #         page_id = item['id']
+    #         page_name = item['name']
+    #         status_code, picture_data = api_fb_get_page_picture(
+    #             page_token=page_token, page_id=page_id, height=100, width=100)
+    #         item['image'] = picture_data['data']['url'] if status_code == 200 else None
+    #         if FacebookPage.objects.filter(page_id=page_id).exists():
+
+    #             facebook_page = FacebookPage.objects.get(page_id=page_id)
+    #             facebook_page.update(token=page_token, token_update_at=datetime.now(
+    #             ), token_update_by=api_user.facebook_info['id'], image=item['image'])
+    #         else:
+    #             facebook_page = FacebookPage.objects.create(
+    #                 page_id=page_id, name=page_name, token=page_token, token_update_at=datetime.now(), token_update_by=api_user.facebook_info['id'], image=item['image'])
+
+    #         item['in_subscription']=True if len(facebook_page.user_subscriptions) else False
+
+    #     return Response(response, status=status.HTTP_200_OK)
 
     
-    @action(detail=False, methods=['GET'], url_path=r'youtube_channels')
+    @action(detail=False, methods=['GET'], url_path=r'youtube_channels', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def get_youtube_channels(self, request):
 
         api_user = Verify.get_seller_user(request)
+        api_user_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
 
         google_token = api_user.google_info.get['access_token']
-        
         if not google_token:
             raise ApiVerifyError('no google oauth token')
 
@@ -169,14 +220,29 @@ class UserViewSet(viewsets.ModelViewSet):
             channel_etag = item['etag']
             channel_id = item['id']
             snippet = item['snippet']
-
             title = snippet['title']
             picture = snippet['thumbnails']['default']['url']
             
-            youtube_channel = YoutubeChannel.objects.update_or_create(
-                    channel_id=channel_id, name=title, token=google_token, token_update_at=datetime.now(), token_update_by=api_user.youtube_info['id'], image=picture)
+            if YoutubeChannel.objects.filter(channel_id=channel_id).exists():
+                youtube_channel = YoutubeChannel.objects.get(channel_id=channel_id)
+                youtube_channel.name = title
+                youtube_channel.token = google_token
+                youtube_channel.token_update_at = datetime.now()
+                youtube_channel.token_update_by = api_user.google_info['id']
+                youtube_channel.image = picture
+                youtube_channel.save()
+            else:
+                youtube_channel = YoutubeChannel.objects.create(
+                    channel_id=channel_id, name=title, token=google_token, token_update_at=datetime.now(), token_update_by=api_user.google_info['id'], image=picture)
+                youtube_channel.save()
 
-        return Response(response, status=status.HTTP_200_OK)
+            if not youtube_channel.user_subscriptions.all():
+                api_user_user_subscription.youtube_channels.add(youtube_channel)
+
+            # youtube_channel = YoutubeChannel.objects.update_or_create(
+            #         channel_id=channel_id, name=title, token=google_token, token_update_at=datetime.now(), token_update_by=api_user.youtube_info['id'], image=picture)
+
+        return Response(YoutubeCampaignSerializer(api_user_user_subscription.youtube_channels.all(), many = True).data, status=status.HTTP_200_OK)
 
 
     @action(detail=False, methods=['GET'], url_path=r'profile_image', permission_classes=(IsAuthenticated,))
@@ -202,13 +268,16 @@ class UserViewSet(viewsets.ModelViewSet):
     @api_error_handler
     def create_valid_api_user(self, request):
 
-        name = request.data.get("name")
-        email = request.data.get("email")
-
+        name, email = getdata(request,("name","email"))
         if not name or not email:
             raise ApiVerifyError('name and email must not be empty')
 
-        api_user = User.objects.create(
-            name=name, email=email, type='user', status='valid')
+        if User.objects.filter(email=email, type='user').exists():
+            api_user = User.objects.get(email=email, type='user')
+            api_user.status='valid'
+            api_user.save()
+        else:
+            api_user = User.objects.create(
+                name=name, email=email, type='user', status='valid')
 
         return Response("ok", status=status.HTTP_200_OK)
