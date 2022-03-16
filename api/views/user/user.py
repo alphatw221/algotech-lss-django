@@ -70,8 +70,8 @@ class UserViewSet(viewsets.ModelViewSet):
         api_user = Verify.get_seller_user(request)
         api_user_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
 
-        user_token = api_user.facebook_info.get['token']
-        user_id = api_user.facebook_info.get['id']
+        user_token = api_user.facebook_info.get('token')
+        user_id = api_user.facebook_info.get('id')
 
         if not user_token or not user_id:
             raise ApiVerifyError('no facebook token or id')
@@ -203,7 +203,7 @@ class UserViewSet(viewsets.ModelViewSet):
         api_user = Verify.get_seller_user(request)
         api_user_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
 
-        google_token = api_user.google_info.get['access_token']
+        google_token = api_user.google_info.get('access_token')
         if not google_token:
             raise ApiVerifyError('no google oauth token')
 
