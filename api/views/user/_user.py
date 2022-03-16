@@ -47,6 +47,7 @@ def facebook_login_helper(request, user_type='user'):
     # scenario4: both don't exists
     if scenario1:
         api_user = User.objects.get(email=email, type=user_type)
+        auth_user = AuthUser.objects.get(email=email)
         if not api_user.auth_user:
             api_user.auth_user=auth_user
     elif scenario2:
