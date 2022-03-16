@@ -26,9 +26,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-_*%^a_086!sv_#y^t(c0(+%dbqufars4zf8##q!yqjlp#c7m!l'
 
-# used to encrypt or decrypt code by Fernet library
-FERNET_KEY = '4zQFttQhIuTXZr15hKSEOwndw_VdLg_bQGc_vPRTtb8='
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -58,6 +55,7 @@ INSTALLED_APPS = [
     'chat_bot',
     'mail',
     'cron',
+    'corsheaders',
 ]
 
 LOGGING = {
@@ -140,7 +138,7 @@ ROOT_URLCONF = 'lss.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
+        'DIRS': [os.path.join(BASE_DIR, 'templates'),],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -178,26 +176,27 @@ DATABASES = {
             'ssl': False,
         }
     },
-    # 'default': {  # for social lab
+    # for social lab
+    # 'default': {
     #     'ENGINE': 'djongo',
     #     'NAME': 'lss',
     #     'ENFORCE_SCHEMA': False,
     #     'CLIENT': {
-    #         'host': 'mongodb://52.221.239.166:27017',
-    #         'username': 'sociallabdev',
-    #         'password': 'sociallab2021',
+    #         'host': 'mongodb://52.221.239.166:27017, 13.215.51.14:27017, 18.142.57.3:27017',
+    #         'replicaSet': 'rs1',
+    #         'username': 'admin',
+    #         'password': 'admin',
     #         'authSource': 'admin',
     #         'authMechanism': 'SCRAM-SHA-1',
+    #         'readPreference': 'primary',
     #         'ssl': False,
     #     }
     # }
 }
 MONGODB_CONNECTION_STRING = 'mongodb://lss:algo83111T%%@34.126.92.142:27017,35.240.200.4:27017,34.126.155.150:27017'
-# MONGODB_CONNECTION_STRING = 'mongodb://sociallabdev:sociallab2021@52.221.239.166:27017' # for social lab
+# for social lab
+# MONGODB_CONNECTION_STRING = 'mongodb://admin:admin@52.221.239.166:27017,13.215.51.14:27017,18.142.57.3:27017'
 MONGODB_DATABASE_NAME = 'lss'
-
-
-
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 
@@ -251,8 +250,9 @@ SUPPORTED_LANGUAGES={
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
-STATICFILES_DIRS = [
-]
+# STATICFILES_DIRS = [
+#     os.path.join(BASE_DIR, "static")
+# ]
 
 
 # Default primary key field type
@@ -263,6 +263,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # Live Show Seller info
 WEB_SERVER_URL = "https://v1login.liveshowseller.com"
+# for social lab
+# WEB_SERVER_URL = "https://plusone.sociallab.ph/lss/public"
+
 SHOPPING_CART_URL = f"{WEB_SERVER_URL}/buyer/login_to_cart"
 SUPPORTED_PLATFORMS = [
     ("n/a", "No specific platform"),
@@ -271,9 +274,9 @@ SUPPORTED_PLATFORMS = [
     ("instagram", "Instagram"),
 ]
 
-HITPAY_API_URL = 'https://api.sandbox.hit-pay.com/v1/' 
-HITPAY_API_KEY = '64044c7551b232cbf23b32d9b21e30ff1f4c5b42068c8c59864f161cad6af21b'
-HITPAY_SECRET_SALT = '2MUizyJj429NIoOMmTXedyICmbwS1rt6Wph7cGqzG99IkmCV6nUCQ22lRVCB0Rgu'
+HITPAY_API_URL = 'https://api.hit-pay.com/v1/payment-requests'  ## https://api.sandbox.hit-pay.com/v1/
+HITPAY_API_KEY = 'a17041b2c841f88263faaed459e1579a592a431acf8b69e044645d28d4a1c316'
+HITPAY_SECRET_SALT = '9ntt8RQoPtP9NXlO36aZTpP5wK10vFWbsw45KjaBGNzfYiU75cUJ3LLCEqMLGUO9'
 
 # Facebook
 FACEBOOK_API_URL = "https://graph.facebook.com"
@@ -302,6 +305,10 @@ YOUTUBE_API_CONFIG = {
         "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
     }
 }
+
+# Google API credentials
+GOOGLE_OAUTH_CLIENT_ID_FOR_LIVESHOWSELLER = "536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com"
+GOOGLE_OAUTH_CLIENT_SECRET_FOR_LIVESHOWSELLER = "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"
 
 # backend app
 COMMENT_PROCESSING = {
@@ -357,10 +364,21 @@ REDIS_SERVER = {
     "username": None,
     "password": r"algo83111T%%"}
 
+# for social lab
+# REDIS_SERVER = {
+#     "host": "127.0.0.1",
+#     "port": "6379",
+#     "username": None,
+#     "password": r"1234"}
+
 
 # gcp load balancer
 GCP_API_LOADBALANCER_URL = "https://gipassl.algotech.app"
+# for social lab
+# GCP_API_LOADBALANCER_URL = "https://sb.liveshowseller.ph"
+
 LOCAL_API_SERVER = "http://localhost:8001"
+TEST_API_SERVER = "http://192.168.74.114/lss-backend"
 # paypal settings
 # package github: https://github.com/paypal/PayPal-Python-SDK
 
@@ -374,3 +392,6 @@ STRIPE_API_KEY = "sk_test_51J2aFmF3j9D00CA0KABMZVKtOVnZNbBvM2hcokicJmfx8vvrmNyys
 # APPEND_SLASH=False
 # OPERATION_CODE_NAME: AGILE
 ADMIN_LIST = [1, ]
+
+
+FERNET_KEY = '4zQFttQhIuTXZr15hKSEOwndw_VdLg_bQGc_vPRTtb8='
