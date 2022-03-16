@@ -68,5 +68,5 @@ class OrderCodeTextProcessor(TextProcessor):
             text, OrderCodeTextProcessor.aborting_chars)
 
     @staticmethod
-    def _text_has_chars(text: str, chars_set: set[str]):
+    def _text_has_chars(text: str, chars_set: set):
         return any([c in text for c in chars_set])

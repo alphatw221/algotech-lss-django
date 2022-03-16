@@ -11,6 +11,14 @@ from rest_framework import serializers
 from django.conf import settings
 
 class UserSubscription(models.Model):
+    TYPE_CHOICES = [
+        ('trial', 'Trial'),
+        ('lite', 'Lite'),
+        ('standard', 'Standard'),
+        ('premium', 'Premium'),
+        ('pay per use', 'Pay Per Use'),
+    ]
+
     class Meta:
         db_table = 'api_user_subscription'
 
@@ -27,7 +35,7 @@ class UserSubscription(models.Model):
     description = models.TextField(null=True, blank=True, default=None)
     remark = models.TextField(null=True, blank=True, default=None)
 
-    type = models.CharField(max_length=255, null=True, blank=True)
+    type = models.CharField(max_length=255, null=True, blank=True, choices=TYPE_CHOICES, default='trial')
     status = models.CharField(max_length=255, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -43,6 +51,7 @@ class UserSubscription(models.Model):
     meta_code = models.JSONField(null=True, blank=True, default=dict)
     user_plan = models.JSONField(null=True, blank=True, default=dict)
 
+    expired_at = models.DateTimeField(null=True, blank=True, default=None)
 class UserSubscriptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserSubscription

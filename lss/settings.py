@@ -56,7 +56,6 @@ INSTALLED_APPS = [
     'mail',
     'cron',
     'corsheaders',
-    'webpack_loader',
 ]
 
 LOGGING = {
@@ -176,23 +175,27 @@ DATABASES = {
             'readPreference': 'primary',
             'ssl': False,
         }
-    }
-    # 'default': {  # for social lab
+    },
+    # for social lab
+    # 'default': {
     #     'ENGINE': 'djongo',
     #     'NAME': 'lss',
     #     'ENFORCE_SCHEMA': False,
     #     'CLIENT': {
-    #         'host': 'mongodb://52.221.239.166:27017',
-    #         'username': 'sociallabdev',
-    #         'password': 'sociallab2021',
+    #         'host': 'mongodb://52.221.239.166:27017, 13.215.51.14:27017, 18.142.57.3:27017',
+    #         'replicaSet': 'rs1',
+    #         'username': 'admin',
+    #         'password': 'admin',
     #         'authSource': 'admin',
     #         'authMechanism': 'SCRAM-SHA-1',
+    #         'readPreference': 'primary',
     #         'ssl': False,
     #     }
     # }
 }
 MONGODB_CONNECTION_STRING = 'mongodb://lss:algo83111T%%@34.126.92.142:27017,35.240.200.4:27017,34.126.155.150:27017'
-# MONGODB_CONNECTION_STRING = 'mongodb://sociallabdev:sociallab2021@52.221.239.166:27017' # for social lab
+# for social lab
+# MONGODB_CONNECTION_STRING = 'mongodb://admin:admin@52.221.239.166:27017,13.215.51.14:27017,18.142.57.3:27017'
 MONGODB_DATABASE_NAME = 'lss'
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -246,10 +249,10 @@ SUPPORTED_LANGUAGES={
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
-# STATIC_ROOT = os.path.join(BASE_DIR, "static")
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static")
-]
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
+# STATICFILES_DIRS = [
+#     os.path.join(BASE_DIR, "static")
+# ]
 
 
 # Default primary key field type
@@ -260,6 +263,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # Live Show Seller info
 WEB_SERVER_URL = "https://v1login.liveshowseller.com"
+# for social lab
+# WEB_SERVER_URL = "https://plusone.sociallab.ph/lss/public"
+
 SHOPPING_CART_URL = f"{WEB_SERVER_URL}/buyer/login_to_cart"
 SUPPORTED_PLATFORMS = [
     ("n/a", "No specific platform"),
@@ -299,6 +305,10 @@ YOUTUBE_API_CONFIG = {
         "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
     }
 }
+
+# Google API credentials
+GOOGLE_OAUTH_CLIENT_ID_FOR_LIVESHOWSELLER = "536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com"
+GOOGLE_OAUTH_CLIENT_SECRET_FOR_LIVESHOWSELLER = "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"
 
 # backend app
 COMMENT_PROCESSING = {
@@ -354,9 +364,19 @@ REDIS_SERVER = {
     "username": None,
     "password": r"algo83111T%%"}
 
+# for social lab
+# REDIS_SERVER = {
+#     "host": "127.0.0.1",
+#     "port": "6379",
+#     "username": None,
+#     "password": r"1234"}
+
 
 # gcp load balancer
 GCP_API_LOADBALANCER_URL = "https://gipassl.algotech.app"
+# for social lab
+# GCP_API_LOADBALANCER_URL = "https://sb.liveshowseller.ph"
+
 LOCAL_API_SERVER = "http://localhost:8001"
 TEST_API_SERVER = "http://192.168.74.114/lss-backend"
 # paypal settings
@@ -373,12 +393,5 @@ STRIPE_API_KEY = "sk_test_51J2aFmF3j9D00CA0KABMZVKtOVnZNbBvM2hcokicJmfx8vvrmNyys
 # OPERATION_CODE_NAME: AGILE
 ADMIN_LIST = [1, ]
 
-WEBPACK_LOADER = {
-  'DEFAULT': {
-    'CACHE': not DEBUG,
-    'STATS_FILE': os.path.join(BASE_DIR, 'frontend/webpack-stats.json'),
-    'POLL_INTERVAL': 0.1,
-    'IGNORE': [r'.+\.hot-update.js', r'.+\.map'],
-  }
-}
+
 FERNET_KEY = '4zQFttQhIuTXZr15hKSEOwndw_VdLg_bQGc_vPRTtb8='

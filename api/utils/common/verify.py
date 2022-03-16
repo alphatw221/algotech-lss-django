@@ -172,6 +172,14 @@ class Verify():
         return user_subscription
 
     @staticmethod
+    def get_user_subscription_from_api_user(api_user):
+        user_subscriptions = api_user.user_subscriptions.all()
+        if not user_subscriptions:
+            raise ApiVerifyError("user not in any user_subscription")
+        user_subscription = user_subscriptions[0]
+        return user_subscription
+
+    @staticmethod
     def get_campaign(campaign_id):
         if not Campaign.objects.filter(id=campaign_id).exists():
             raise ApiVerifyError("no campaign found")

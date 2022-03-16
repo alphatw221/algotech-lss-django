@@ -29,6 +29,9 @@ paypalrestsdk = "^1.13.1"
 rq-dashboard = "^0.6.1"
 stripe = "^2.65.0"
 django-webpack-loader = "^1.4.1"
+google-auth-oauthlib = "^0.5.1"
+google-auth-httplib2 = "^0.1.0"
+google-api-python-client = "^2.41.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

@@ -9,4 +9,3 @@ __pycache__
 .venv
 .test.py
 /lss/wsgi.py
-/lss/settings.py
