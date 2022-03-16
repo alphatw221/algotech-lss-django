@@ -46,11 +46,10 @@ def facebook_login_helper(request, user_type='user'):
 
     # scenario4: both don't exists
     if scenario1:
-        #TODO flaw fix
         api_user = User.objects.get(email=email, type=user_type)
-        auth_user = api_user.auth_user
+        if not api_user.auth_user:
+            api_user.auth_user=auth_user
     elif scenario2:
-        #TODO flaw fix
         api_user = User.objects.get(email=email, type=user_type)
         auth_user = AuthUser.objects.create_user(
             facebook_name, email, ''.join(random.choice(string.ascii_letters+string.digits) for _ in range(8)))
