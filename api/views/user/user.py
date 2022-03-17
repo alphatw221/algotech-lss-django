@@ -20,17 +20,25 @@ from rest_framework import status
 from api.models.facebook.facebook_page import FacebookPage, FacebookPageSerializer
 from datetime import datetime
 from api.models.user.user_subscription import UserSubscription, UserSubscriptionSerializerSimplify
+from rest_framework.pagination import PageNumberPagination
 
 from backend.pymongo.mongodb import db
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 from api.utils.common.verify import Verify
 platform_info_dict={'facebook':'facebook_info', 'youtube':'youtube_info', 'instagram':'instagram_info', 'google':'google_info'}
 
+
+class UserPagination(PageNumberPagination):
+    page_query_param = 'page'
+    page_size_query_param = 'page_size'
+
+
 class UserViewSet(viewsets.ModelViewSet):
     # permission_classes = (IsAuthenticated,)
     queryset = User.objects.all().order_by('id')
     serializer_class = UserSerializer
     filterset_fields = []
+    pagination_class = UserPagination
 
     @action(detail=False, methods=['POST'], url_path=r'customer_login')
     @api_error_handler
@@ -267,7 +275,7 @@ class UserViewSet(viewsets.ModelViewSet):
     @api_error_handler
     def create_valid_api_user(self, request):
 
-        name, email = getdata(request,("name","email"))
+        name, email = getdata(request, ("name","email"))
         if not name or not email:
             raise ApiVerifyError('name and email must not be empty')
 
@@ -281,20 +289,24 @@ class UserViewSet(viewsets.ModelViewSet):
 
         return Response("ok", status=status.HTTP_200_OK)
     
-    @action(detail=False, methods=['GET'], url_path=r'list', permission_classes=(IsAdminUser,))
+    @action(detail=False, methods=['GET'], url_path=r'search_list', permission_classes=(IsAdminUser,))
     @api_error_handler
-    def list_api_user(self, request):
-        users_list = []
-        users = db.api_user.find({'type': 'user'})
+    def search_api_user(self, request):
+        search_column = request.query_params.get('search_column')
+        keyword = request.query_params.get('keyword')
+        kwargs = { search_column + '__icontains': keyword }
 
-        for user in users:
-            user_arr = {
-               'id': user['id'],
-               'name': user['name'],
-               'email': user['email'],
-               'status': user['status']
-            }
-          
-            users_list.append(user_arr)
+        queryset = User.objects.all().order_by('id')
 
-        return Response(users_list, status=status.HTTP_200_OK)
+        if search_column != 'undefined' and keyword != 'undefined':
+            queryset = queryset.filter(**kwargs)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            result = self.get_paginated_response(serializer.data)
+            data = result.data
+        else:
+            serializer = self.get_serializer(queryset, many=True)
+            data = serializer.data
+
+        return Response(data, status=status.HTTP_200_OK)

@@ -287,4 +287,26 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         user_subscription.save()
 
         return Response(UserSubscriptionSerializerMeta(user_subscription).data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['GET'], url_path=r'search_list', permission_classes=(IsAdminUser,))
+    @api_error_handler
+    def search_user_subscription(self, request):
+        search_column = request.query_params.get('search_column')
+        keyword = request.query_params.get('keyword')
+        kwargs = { search_column + '__icontains': keyword }
+
+        queryset = UserSubscription.objects.all().order_by('id')
+
+        if search_column != 'undefined' and keyword != 'undefined':
+            queryset = queryset.filter(**kwargs)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            result = self.get_paginated_response(serializer.data)
+            data = result.data
+        else:
+            serializer = self.get_serializer(queryset, many=True)
+            data = serializer.data
+
+        return Response(data, status=status.HTTP_200_OK)
     
