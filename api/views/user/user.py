@@ -6,8 +6,9 @@ from rest_framework import serializers, status, viewsets
 from rest_framework.decorators import action, permission_classes
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from api.models.campaign.campaign import YoutubeCampaignSerializer
+from api.models.instagram.instagram_profile import InstagramProfile, InstagramProfileSerializer
 from api.models.user.user import User, UserSerializer
-from api.models.youtube.youtube_channel import YoutubeChannel
+from api.models.youtube.youtube_channel import YoutubeChannel, YoutubeChannelSerializer
 from api.utils.common.common import getdata
 from api.utils.common.verify import ApiVerifyError
 from api.utils.error_handle.error.api_error import ApiCallerError
@@ -20,9 +21,22 @@ from rest_framework import status
 from api.models.facebook.facebook_page import FacebookPage, FacebookPageSerializer
 from datetime import datetime
 from api.models.user.user_subscription import UserSubscription, UserSubscriptionSerializerSimplify
-
+from django.contrib.auth.models import User as AuthUser
+from rest_framework_simplejwt.tokens import RefreshToken
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 from api.utils.common.verify import Verify
+from rest_framework.pagination import PageNumberPagination
+from backend.api.google.user import api_google_get_userinfo
+from django.conf import settings
+import string
+import random
+from lss.views.custom_jwt import CustomTokenObtainPairSerializer
+import requests
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
+from backend.api.facebook.page import api_fb_get_page_business_profile
+from backend.api.instagram.profile import api_ig_get_profile_info
+
 platform_info_dict={'facebook':'facebook_info', 'youtube':'youtube_info', 'instagram':'instagram_info', 'google':'google_info'}
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -30,18 +44,172 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().order_by('id')
     serializer_class = UserSerializer
     filterset_fields = []
+    pagination_class = PageNumberPagination
 
+    #facebook
     @action(detail=False, methods=['POST'], url_path=r'customer_login')
     @api_error_handler
     def customer_login(self, request, pk=None):
         return facebook_login_helper(request, user_type='customer')
 
+    #facebook
     @action(detail=False, methods=['POST'], url_path=r'user_login')
     @api_error_handler
     def user_login(self, request, pk=None):
         return facebook_login_helper(request, user_type='user')
 
     
+    #google
+    @action(detail=False, methods=['POST'], url_path=r'customer_google_login')
+    @api_error_handler
+    def customer_google_login(self, request, pk=None):
+        user_type='buyer'
+        token = request.data.get('token')
+        identity_info = id_token.verify_oauth2_token(token, google_requests.Request(), settings.GOOGLE_OAUTH_CLIENT_ID_FOR_LIVESHOWSELLER)
+
+        google_id, google_name, google_picture, email = identity_info["sub"], identity_info["name"], identity_info["picture"], identity_info["email"]
+
+        api_user_exists = User.objects.filter(
+            email=email, type=user_type).exists()
+        auth_user_exists = AuthUser.objects.filter(email=email).exists()
+
+        scenario1 = api_user_exists and auth_user_exists
+        scenario2 = api_user_exists and not auth_user_exists
+        scenario3 = not api_user_exists and auth_user_exists
+
+        # scenario4: both don't exists
+
+        if scenario1:
+            api_user = User.objects.get(email=email, type=user_type)
+            auth_user = AuthUser.objects.get(email=email)
+            if not api_user.auth_user:
+                api_user.auth_user=auth_user
+        elif scenario2:
+            api_user = User.objects.get(email=email, type=user_type)
+            auth_user = AuthUser.objects.create_user(
+                google_name, email, ''.join(random.choice(string.ascii_letters+string.digits) for _ in range(8)))
+            api_user.auth_user = auth_user
+        elif scenario3:
+            auth_user = AuthUser.objects.get(email=email)
+            api_user = User.objects.create(
+                name=google_name, email=email, type=user_type, status='new', auth_user=auth_user)
+        else:  # scenario4
+            auth_user = AuthUser.objects.create_user(
+                google_name, email, ''.join(random.choice(string.ascii_letters+string.digits) for _ in range(8)))
+            api_user = User.objects.create(
+                name=google_name, email=email, type=user_type, status='new', auth_user=auth_user)
+
+        if user_type == 'user' and api_user.status != 'valid':
+            raise ApiVerifyError('account not activated')
+
+        api_user.google_info["id"] = google_id
+        api_user.google_info["name"] = google_name
+        api_user.google_info["picture"] = google_picture
+
+
+        auth_user.last_login = datetime.now()
+        auth_user.save()
+        api_user.save()
+
+
+        refresh = CustomTokenObtainPairSerializer.get_token(auth_user)
+
+        ret = {
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        }
+
+        return ret
+        
+
+    #google
+    @action(detail=False, methods=['POST'], url_path=r'user_google_login')
+    @api_error_handler
+    def user_google_login(self, request, pk=None):
+        user_type='user'
+        google_user_code = request.data.get('code')
+        response = requests.post(
+                url="https://accounts.google.com/o/oauth2/token",
+                data={
+                    "code": google_user_code,
+                    "client_id": "536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com",
+                    "client_secret": "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",
+                    # "redirect_uri": 'http://localhost:8000/google-redirect',
+                    "redirect_uri": settings.WEB_SERVER_URL + "/google-redirect",
+                    "grant_type": "authorization_code"
+                }
+            )
+
+        if not response.status_code / 100 == 2:
+            print(response.json())
+            raise ApiCallerError('get google token fail')
+
+        access_token = response.json().get("access_token")
+        refresh_token = response.json().get("refresh_token")
+
+        code, response = api_google_get_userinfo(access_token)
+
+        if code / 100 != 2:
+            print(response)
+            raise ApiCallerError("google user token invalid")
+
+        google_id, google_name, google_picture, email = response["id"], response["name"], response["picture"], response["email"]
+
+        api_user_exists = User.objects.filter(
+            email=email, type=user_type).exists()
+        auth_user_exists = AuthUser.objects.filter(email=email).exists()
+
+        scenario1 = api_user_exists and auth_user_exists
+        scenario2 = api_user_exists and not auth_user_exists
+        scenario3 = not api_user_exists and auth_user_exists
+
+        # scenario4: both don't exists
+
+        if scenario1:
+            api_user = User.objects.get(email=email, type=user_type)
+            auth_user = AuthUser.objects.get(email=email)
+            if not api_user.auth_user:
+                api_user.auth_user=auth_user
+        elif scenario2:
+            api_user = User.objects.get(email=email, type=user_type)
+            auth_user = AuthUser.objects.create_user(
+                google_name, email, ''.join(random.choice(string.ascii_letters+string.digits) for _ in range(8)))
+            api_user.auth_user = auth_user
+        elif scenario3:
+            auth_user = AuthUser.objects.get(email=email)
+            api_user = User.objects.create(
+                name=google_name, email=email, type=user_type, status='new', auth_user=auth_user)
+        else:  # scenario4
+            auth_user = AuthUser.objects.create_user(
+                google_name, email, ''.join(random.choice(string.ascii_letters+string.digits) for _ in range(8)))
+            api_user = User.objects.create(
+                name=google_name, email=email, type=user_type, status='new', auth_user=auth_user)
+
+        if user_type == 'user' and api_user.status != 'valid':
+            raise ApiVerifyError('account not activated')
+
+        api_user.google_info["access_token"] = access_token
+        api_user.google_info['refresh_token'] = refresh_token
+        api_user.google_info["id"] = google_id
+        api_user.google_info["name"] = google_name
+        api_user.google_info["picture"] = google_picture
+
+        auth_user.last_login = datetime.now()
+        auth_user.save()
+        api_user.save()
+
+        refresh = CustomTokenObtainPairSerializer.get_token(auth_user)
+
+        ret = {
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        }
+
+        return Response(ret, status=status.HTTP_200_OK)
+
+
+
+
 
     @action(detail=False, methods=['GET'], url_path=r'google_authorize')
     @api_error_handler
@@ -68,6 +236,7 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_facebook_pages(self, request):
 
         api_user = Verify.get_seller_user(request)
+        print(api_user)
         api_user_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
 
         user_token = api_user.facebook_info.get('token')
@@ -107,12 +276,46 @@ class UserViewSet(viewsets.ModelViewSet):
 
             if not facebook_page.user_subscriptions.all():
                 api_user_user_subscription.facebook_pages.add(facebook_page)
-                
+
+            status_code, business_profile_response = api_fb_get_page_business_profile(facebook_page.token, facebook_page.page_id)
+            print(business_profile_response)
+            if status_code != 200:
+                print('get profile error')
+                continue
+
+            business_id = business_profile_response.get("instagram_business_account",{}).get("id")
+            
+            if not business_id:
+                print('no business id')
+                continue
+
+            status_code, profile_info_response = api_ig_get_profile_info(facebook_page.token, business_id)
+            profile_name = profile_info_response.get('name')
+            profile_pricure = profile_info_response.get('profile_picture_url')
+
+            if InstagramProfile.objects.filter(business_id=business_id).exists():
+                instagram_profile = InstagramProfile.objects.get(business_id=business_id)
+                instagram_profile.name = profile_name
+                instagram_profile.token = page_token
+                instagram_profile.token_update_at = datetime.now()
+                instagram_profile.token_update_by = api_user.facebook_info['id']
+                instagram_profile.image = profile_pricure
+                instagram_profile.save()
+            else:
+                instagram_profile = InstagramProfile.objects.create(
+                    business_id=business_id, name=profile_name, token=page_token, token_update_at=datetime.now(), token_update_by=api_user.facebook_info['id'], image=profile_pricure)
+                instagram_profile.save()
+
+            if not instagram_profile.user_subscriptions.all():
+                api_user_user_subscription.instagram_profiles.add(instagram_profile)
+
+
 
         return Response(FacebookPageSerializer(api_user_user_subscription.facebook_pages.all(), many = True).data, status=status.HTTP_200_OK)
 
 
 
+        
         #---------
         # api_user = request.user.api_users.get(type='user')
 
@@ -240,8 +443,18 @@ class UserViewSet(viewsets.ModelViewSet):
             # youtube_channel = YoutubeChannel.objects.update_or_create(
             #         channel_id=channel_id, name=title, token=google_token, token_update_at=datetime.now(), token_update_by=api_user.youtube_info['id'], image=picture)
 
-        return Response(YoutubeCampaignSerializer(api_user_user_subscription.youtube_channels.all(), many = True).data, status=status.HTTP_200_OK)
+        return Response(YoutubeChannelSerializer(api_user_user_subscription.youtube_channels.all(), many = True).data, status=status.HTTP_200_OK)
 
+    @action(detail=False, methods=['GET'], url_path=r'instagram_profiles', permission_classes=(IsAuthenticated,))
+    @api_error_handler
+    def get_instagram_profiles(self, request):
+
+        api_user = Verify.get_seller_user(request)
+        api_user_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+
+        return Response(InstagramProfileSerializer(api_user_user_subscription.instagram_profiles.all(), many = True).data, status=status.HTTP_200_OK)
+
+        
 
     @action(detail=False, methods=['GET'], url_path=r'profile_image', permission_classes=(IsAuthenticated,))
     def get_profile_image(self, request, pk=None):
