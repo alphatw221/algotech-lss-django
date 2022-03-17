@@ -93,19 +93,19 @@ def google_authorize_helper(request, user_type="seller"):
 
     def get_params(request):
         code = request.GET.get("code")
-        campaign_id, youtube_video_id, redirect_uri = request.GET.get("state").split(",")
+        campaign_id, youtube_video_id, redirect_url, current_url = request.GET.get("state").split(",")
         print("campaign_id", campaign_id)
         print("youtube_video_id", youtube_video_id)
-        return code, campaign_id, youtube_video_id, redirect_uri
+        return code, campaign_id, youtube_video_id, redirect_url, current_url
 
-    def api_google_post_token(code, redirect_uri):
+    def api_google_post_token(code, redirect_url):
         token_response = requests.post(
             url="https://accounts.google.com/o/oauth2/token",
             data={
                 "code": code,
                 "client_id": settings.GOOGLE_OAUTH_CLIENT_ID_FOR_LIVESHOWSELLER,
                 "client_secret": settings.GOOGLE_OAUTH_CLIENT_SECRET_FOR_LIVESHOWSELLER,
-                "redirect_uri": redirect_uri,
+                "redirect_uri": redirect_url,
                 "grant_type": "authorization_code"
             }
         )
@@ -132,8 +132,8 @@ def google_authorize_helper(request, user_type="seller"):
         return [item["id"] for item in list_channel_response.get("items")]
 
     try:
-        code, campaign_id, youtube_video_id, redirect_uri = get_params(request)
-        access_token, refresh_token = api_google_post_token(code, redirect_uri)
+        code, campaign_id, youtube_video_id, redirect_url, current_url = get_params(request)
+        access_token, refresh_token = api_google_post_token(code, redirect_url)
         channelId = get_user_youtube_channel_id(access_token, youtube_video_id)
         your_all_channels = get_self_all_channels(access_token)
 
@@ -145,7 +145,7 @@ def google_authorize_helper(request, user_type="seller"):
         campaign.youtube_campaign["access_token"] = access_token
         campaign.youtube_campaign["refresh_token"] = refresh_token
         campaign.save()
-        return HttpResponseRedirect(redirect_to=f'{settings.WEB_SERVER_URL}/campaign/edit/{campaign_id}')
+        return HttpResponseRedirect(redirect_to=current_url)
     except Exception as e:
         print(traceback.format_exc())
         return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
