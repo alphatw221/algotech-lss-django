@@ -23,6 +23,8 @@ from datetime import datetime
 from api.models.user.user_subscription import UserSubscription, UserSubscriptionSerializerSimplify
 from django.contrib.auth.models import User as AuthUser
 from rest_framework_simplejwt.tokens import RefreshToken
+
+from backend.pymongo.mongodb import db
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 from api.utils.common.verify import Verify
 from rest_framework.pagination import PageNumberPagination
@@ -492,3 +494,21 @@ class UserViewSet(viewsets.ModelViewSet):
                 name=name, email=email, type='user', status='valid')
 
         return Response("ok", status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['GET'], url_path=r'list', permission_classes=(IsAdminUser,))
+    @api_error_handler
+    def list_api_user(self, request):
+        users_list = []
+        users = db.api_user.find({'type': 'user'})
+
+        for user in users:
+            user_arr = {
+               'id': user['id'],
+               'name': user['name'],
+               'email': user['email'],
+               'status': user['status']
+            }
+          
+            users_list.append(user_arr)
+
+        return Response(users_list, status=status.HTTP_200_OK)
