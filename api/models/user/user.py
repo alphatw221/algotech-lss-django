@@ -65,6 +65,8 @@ class UserSerializer(serializers.ModelSerializer):
     facebook_info = FacebookInfoSerializer(required=False)
     instagram_info = serializers.JSONField(default=dict)
     youtube_info = serializers.JSONField(default=dict)
+    google_info = serializers.JSONField(default=dict)
+    
     meta = serializers.JSONField(default=dict)
     payment_meta = serializers.JSONField(default=dict)
 

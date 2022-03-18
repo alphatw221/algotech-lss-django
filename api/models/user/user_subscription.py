@@ -1,3 +1,4 @@
+from pyexpat import model
 from api.models.facebook.facebook_page import (FacebookPage,
                                                FacebookPageInfoSerializer)
 from api.models.instagram.instagram_profile import (
@@ -9,6 +10,7 @@ from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
 from django.conf import settings
+
 
 class UserSubscription(models.Model):
     TYPE_CHOICES = [
@@ -24,6 +26,10 @@ class UserSubscription(models.Model):
 
     root_users = models.ManyToManyField(
         User, related_name='user_subscriptions')
+
+    # admin_users = models.ManyToManyField(
+    #     User, related_name='user_subscriptions',through='UserSubscriptionAdminUsers')
+    
     facebook_pages = models.ManyToManyField(
         FacebookPage, related_name='user_subscriptions')
     instagram_profiles = models.ManyToManyField(
@@ -52,6 +58,26 @@ class UserSubscription(models.Model):
     user_plan = models.JSONField(null=True, blank=True, default=dict)
 
     expired_at = models.DateTimeField(null=True, blank=True, default=None)
+
+
+class UserSubscriptionAdminUsers(models.Model):
+
+    user_subscription = models.ForeignKey(UserSubscription, null=True, on_delete=models.CASCADE, related_name='user_subscriptions', blank=True, default=None)
+    user = models.ForeignKey(User, null=True, on_delete=models.CASCADE, related_name='users', blank=True, default=None)
+
+class UserSubscriptionAdminUsersSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserSubscriptionAdminUsers
+        fields = '__all__'
+        read_only_fields = ['created_at', 'modified_at']
+
+
+
+
+
+
+
+
 class UserSubscriptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserSubscription

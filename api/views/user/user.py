@@ -24,7 +24,6 @@ from api.models.user.user_subscription import UserSubscription, UserSubscription
 from django.contrib.auth.models import User as AuthUser
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from backend.pymongo.mongodb import db
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 from api.utils.common.verify import Verify
 from rest_framework.pagination import PageNumberPagination
@@ -244,7 +243,6 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_facebook_pages(self, request):
 
         api_user = Verify.get_seller_user(request)
-        print(api_user)
         api_user_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
 
         user_token = api_user.facebook_info.get('token')

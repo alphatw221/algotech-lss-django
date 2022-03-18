@@ -8,10 +8,11 @@ from api.models.user.user_subscription import UserSubscription, UserSubscription
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework import status
-from api.models.facebook.facebook_page import FacebookPage
+from api.models.facebook.facebook_page import FacebookPage, FacebookPageSerializer
 from api.models.youtube.youtube_channel import YoutubeChannel
 from datetime import datetime
 from api.utils.common.common import getdata
+from backend.api.facebook.page import api_fb_get_page_picture
 from backend.api.facebook.user import api_fb_get_me_accounts
 
 from rest_framework.parsers import MultiPartParser
@@ -310,3 +311,87 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
         return Response(data, status=status.HTTP_200_OK)
     
+    @action(detail=False, methods=['GET'], url_path=r'facebook_pages', permission_classes=(IsAuthenticated,))
+    @api_error_handler
+    def list_user_subscription_facebook_pages(self, request):
+        api_user = Verify.get_seller_user(request)
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        
+        return Response(FacebookPageSerializer(user_subscription.facebook_pages.all(),many=True).data, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['POST'], url_path=r'bind_facebook_pages', permission_classes=())
+    @api_error_handler
+    def bind_user_facebook_pages(self, request, pk=None):
+        token, = getdata(request,('accessToken',))
+        api_user_user_subscription = Verify.get_user_subscription(pk)
+
+        if not token:
+            raise ApiVerifyError("please provide token")
+        print(token)
+        status_code, response = api_fb_get_me_accounts(token)
+
+        print(response)
+
+        if status_code != 200:
+            raise ApiVerifyError("api_fb_get_accounts_from_user error")
+
+        
+
+        for item in response['data']:
+            page_token = item['access_token']
+            page_id = item['id']
+            page_name = item['name']
+
+            status_code, picture_data = api_fb_get_page_picture(
+                page_token=page_token, page_id=page_id, height=100, width=100)
+            
+            page_image = item['image'] = picture_data['data']['url'] if status_code == 200 else None
+
+            if FacebookPage.objects.filter(page_id=page_id).exists():
+                facebook_page = FacebookPage.objects.get(page_id=page_id)
+                facebook_page.name = page_name
+                facebook_page.token = page_token
+                facebook_page.token_update_at = datetime.now()
+                facebook_page.image = page_image
+                facebook_page.save()
+            else:
+                facebook_page = FacebookPage.objects.create(
+                    page_id=page_id, name=page_name, token=page_token, token_update_at=datetime.now(), image=page_image)
+                facebook_page.save()
+
+            if not facebook_page.user_subscriptions.all():
+                api_user_user_subscription.facebook_pages.add(facebook_page)
+
+            # status_code, business_profile_response = api_fb_get_page_business_profile(facebook_page.token, facebook_page.page_id)
+            # print(business_profile_response)
+            # if status_code != 200:
+            #     print('get profile error')
+            #     continue
+
+            # business_id = business_profile_response.get("instagram_business_account",{}).get("id")
+            
+            # if not business_id:
+            #     print('no business id')
+            #     continue
+
+            # status_code, profile_info_response = api_ig_get_profile_info(facebook_page.token, business_id)
+            # profile_name = profile_info_response.get('name')
+            # profile_pricure = profile_info_response.get('profile_picture_url')
+
+            # if InstagramProfile.objects.filter(business_id=business_id).exists():
+            #     instagram_profile = InstagramProfile.objects.get(business_id=business_id)
+            #     instagram_profile.name = profile_name
+            #     instagram_profile.token = page_token
+            #     instagram_profile.token_update_at = datetime.now()
+            #     instagram_profile.token_update_by = api_user.facebook_info['id']
+            #     instagram_profile.image = profile_pricure
+            #     instagram_profile.save()
+            # else:
+            #     instagram_profile = InstagramProfile.objects.create(
+            #         business_id=business_id, name=profile_name, token=page_token, token_update_at=datetime.now(), token_update_by=api_user.facebook_info['id'], image=profile_pricure)
+            #     instagram_profile.save()
+
+            # if not instagram_profile.user_subscriptions.all():
+            #     api_user_user_subscription.instagram_profiles.add(instagram_profile)
+
+        return Response(FacebookPageSerializer(api_user_user_subscription.facebook_pages.all(),many=True).data, status=status.HTTP_200_OK)

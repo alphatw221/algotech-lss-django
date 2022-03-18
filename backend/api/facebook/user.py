@@ -19,8 +19,9 @@ def api_fb_get_id(token: str, user_or_page_id: str):
 
 
 def api_fb_get_me_accounts(user_token: str):
-    ret = FacebookApiCaller('me/accounts',
-                            bearer_token=user_token,).get()
+    params = {"fields":"id,name,access_token"}
+    ret = FacebookApiCaller('/v13.0/me/accounts',
+                            bearer_token=user_token,params=params).get()
     return ret
 
 
