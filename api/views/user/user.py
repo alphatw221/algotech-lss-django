@@ -1,6 +1,8 @@
+import json
 from math import perm
 import re
 from sys import platform
+from django.http import HttpResponseRedirect
 from django.http.response import HttpResponse
 from rest_framework import serializers, status, viewsets
 from rest_framework.decorators import action, permission_classes
@@ -9,7 +11,7 @@ from api.models.campaign.campaign import YoutubeCampaignSerializer
 from api.models.instagram.instagram_profile import InstagramProfile, InstagramProfileSerializer
 from api.models.user.user import User, UserSerializer
 from api.models.youtube.youtube_channel import YoutubeChannel, YoutubeChannelSerializer
-from api.utils.common.common import getdata
+from api.utils.common.common import getdata, getparams
 from api.utils.common.verify import ApiVerifyError
 from api.utils.error_handle.error.api_error import ApiCallerError
 from api.views.user._user import facebook_login_helper, google_login_helper, google_authorize_helper
@@ -37,7 +39,9 @@ from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 from backend.api.facebook.page import api_fb_get_page_business_profile
 from backend.api.instagram.profile import api_ig_get_profile_info
-
+# from rest_framework.authtoken.models import Token
+from rest_framework_simplejwt.tokens import AccessToken
+from django.contrib.auth.models import User as AuthUser
 platform_info_dict={'facebook':'facebook_info', 'youtube':'youtube_info', 'instagram':'instagram_info', 'google':'google_info'}
 
 
@@ -237,6 +241,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 
+
     
     @action(detail=False, methods=['GET'], url_path=r'facebook_pages', permission_classes=(IsAuthenticated,))
     @api_error_handler
@@ -404,19 +409,51 @@ class UserViewSet(viewsets.ModelViewSet):
 
     #     return Response(response, status=status.HTTP_200_OK)
 
-    
-    @action(detail=False, methods=['GET'], url_path=r'youtube_channels', permission_classes=(IsAuthenticated,))
-    @api_error_handler
-    def get_youtube_channels(self, request):
 
-        api_user = Verify.get_seller_user(request)
+
+    @action(detail=False, methods=['GET'], url_path=r'bind_youtube_channels_callback', permission_classes=())
+    @api_error_handler
+    def bind_youtube_channels(self, request):
+
+        state,google_user_code = getparams(request,("state","code"), with_user=False)
+        state = json.loads(state)
+        redirect_uri, redirect_route, callback_uri, token = state.get('redirect_uri'),state.get('redirect_route'),state.get('callback_uri'), state.get('token')
+
+        print(redirect_uri)
+        print(redirect_route)
+        print(callback_uri)
+
+        auth_user_id = AccessToken(token).get('user_id')
+        
+        auth_user = AuthUser.objects.get(id=auth_user_id)
+        api_user = auth_user.api_users.get(type='user')
+        
+        if not api_user:
+            raise ApiVerifyError("user token error")
+
         api_user_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
 
-        google_token = api_user.google_info.get('access_token')
-        if not google_token:
-            raise ApiVerifyError('no google oauth token')
+        response = requests.post(
+                url="https://accounts.google.com/o/oauth2/token",
+                data={
+                    "code": google_user_code,
+                    "client_id": "536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com",
+                    "client_secret": "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",
+                    "redirect_uri": callback_uri,
+                    # "redirect_uri": settings.WEB_SERVER_URL + "/bind_youtube_channels_callback",
+                    "grant_type": "authorization_code"
+                }
+            )
 
-        status_code, response = api_youtube_get_list_channel_by_token(google_token)
+
+        if not response.status_code / 100 == 2:
+            print(response.json())
+            raise ApiCallerError('get google token fail')
+
+        access_token = response.json().get("access_token")
+        refresh_token = response.json().get("refresh_token")
+
+        status_code, response = api_youtube_get_list_channel_by_token(access_token)
 
         if status_code != 200:
             raise ApiCallerError("get youtube channels error")
@@ -433,21 +470,31 @@ class UserViewSet(viewsets.ModelViewSet):
             if YoutubeChannel.objects.filter(channel_id=channel_id).exists():
                 youtube_channel = YoutubeChannel.objects.get(channel_id=channel_id)
                 youtube_channel.name = title
-                youtube_channel.token = google_token
+                youtube_channel.token = access_token
+                youtube_channel.refresh_token = refresh_token
                 youtube_channel.token_update_at = datetime.now()
                 youtube_channel.token_update_by = api_user.google_info['id']
                 youtube_channel.image = picture
                 youtube_channel.save()
             else:
                 youtube_channel = YoutubeChannel.objects.create(
-                    channel_id=channel_id, name=title, token=google_token, token_update_at=datetime.now(), token_update_by=api_user.google_info['id'], image=picture)
+                    channel_id=channel_id, name=title, token=access_token, refresh_token=refresh_token, token_update_at=datetime.now(), token_update_by=api_user.google_info['id'], image=picture)
                 youtube_channel.save()
 
             if not youtube_channel.user_subscriptions.all():
                 api_user_user_subscription.youtube_channels.add(youtube_channel)
 
-            # youtube_channel = YoutubeChannel.objects.update_or_create(
-            #         channel_id=channel_id, name=title, token=google_token, token_update_at=datetime.now(), token_update_by=api_user.youtube_info['id'], image=picture)
+        redirect = HttpResponseRedirect(redirect_to=redirect_uri+'#/'+redirect_route)
+        return redirect
+        # return Response(YoutubeChannelSerializer(api_user_user_subscription.youtube_channels.all(), many = True).data, status=status.HTTP_200_OK)
+
+    
+    @action(detail=False, methods=['GET'], url_path=r'youtube_channels', permission_classes=(IsAuthenticated,))
+    @api_error_handler
+    def get_youtube_channels(self, request):
+
+        api_user = Verify.get_seller_user(request)
+        api_user_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
 
         return Response(YoutubeChannelSerializer(api_user_user_subscription.youtube_channels.all(), many = True).data, status=status.HTTP_200_OK)
 

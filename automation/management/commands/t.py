@@ -192,4 +192,4 @@ class Command(BaseCommand):
 
 #         return hash("sha256", $ascii);
     def add_user_subscription_user(self):
-        UserSubscription.objects.get(id=1).root_users.add(User.objects.get(id=33))
+        UserSubscription.objects.get(id=1).root_users.add(User.objects.get(id=44))

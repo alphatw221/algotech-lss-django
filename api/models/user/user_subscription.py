@@ -60,16 +60,16 @@ class UserSubscription(models.Model):
     expired_at = models.DateTimeField(null=True, blank=True, default=None)
 
 
-class UserSubscriptionAdminUsers(models.Model):
+# class UserSubscriptionAdminUsers(models.Model):
 
-    user_subscription = models.ForeignKey(UserSubscription, null=True, on_delete=models.CASCADE, related_name='user_subscriptions', blank=True, default=None)
-    user = models.ForeignKey(User, null=True, on_delete=models.CASCADE, related_name='users', blank=True, default=None)
+#     user_subscription = models.ForeignKey(UserSubscription, null=True, on_delete=models.CASCADE, related_name='user_subscriptions', blank=True, default=None)
+#     user = models.ForeignKey(User, null=True, on_delete=models.CASCADE, related_name='users', blank=True, default=None)
 
-class UserSubscriptionAdminUsersSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = UserSubscriptionAdminUsers
-        fields = '__all__'
-        read_only_fields = ['created_at', 'modified_at']
+# class UserSubscriptionAdminUsersSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = UserSubscriptionAdminUsers
+#         fields = '__all__'
+#         read_only_fields = ['created_at', 'modified_at']
 
 
 

@@ -1,3 +1,4 @@
+import json
 import traceback
 from datetime import datetime
 import string
@@ -10,7 +11,7 @@ from django.contrib.auth.models import User as AuthUser
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
 from rest_framework import status
-from api.utils.common.verify import  Verify
+from api.utils.common.verify import  Verify, getparams
 from api.utils.error_handle.error.api_error import ApiCallerError, ApiVerifyError
 from backend.api.facebook.user import api_fb_get_me_login
 from backend.api.google.user import api_google_get_userinfo
@@ -215,8 +216,17 @@ def google_login_helper(request, user_type='customer'):
         return Response(our_jwt_tokens, status=status.HTTP_200_OK)
 
 
-    elif user_type=='seller':
-        google_user_code = request.data.get('code')
+    elif user_type=='user':
+
+        state,google_user_code = getparams(request,("state","code"), with_user=False)
+        # redirect_uri, callback_uri = state.split(',')
+        state = json.loads(state)
+        redirect_uri, redirect_route, callback_uri = state.get('redirect_uri'),state.get('redirect_route'),state.get('callback_uri')
+
+
+        # google_user_code = request.data.get('code')
+        print(redirect_uri)
+        print(callback_uri)
         response = requests.post(
                 url="https://accounts.google.com/o/oauth2/token",
                 data={
@@ -224,7 +234,8 @@ def google_login_helper(request, user_type='customer'):
                     "client_id": "536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com",
                     "client_secret": "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",
                     # "redirect_uri": 'http://localhost:8000/google-redirect',
-                    "redirect_uri": settings.WEB_SERVER_URL + "/google-redirect",
+                    # "redirect_uri": settings.WEB_SERVER_URL + "/google_user_login_callback",
+                    "redirect_uri": callback_uri,
                     "grant_type": "authorization_code"
                 }
             )
@@ -291,10 +302,16 @@ def google_login_helper(request, user_type='customer'):
             'refresh': str(refresh),
             'access': str(refresh.access_token),
         }
+        
+        # return Response(ret, status=status.HTTP_200_OK)
 
-        return Response(ret, status=status.HTTP_200_OK)
+        redirect = HttpResponseRedirect(redirect_to=redirect_uri+'#/'+redirect_route)
+        redirect.set_cookie('access_token', str(refresh.access_token),path="/")
+        return redirect
 
-
+        # # red.set_cookie('token', str(refresh.access_token)) #TODO setting domain, expired
+        # red.set_cookie("access_token", str(refresh.access_token), path="/", domain=None, samesite=None, secure=False)
+        # return red
     
 
 
