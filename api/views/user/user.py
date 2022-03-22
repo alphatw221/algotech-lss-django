@@ -409,7 +409,75 @@ class UserViewSet(viewsets.ModelViewSet):
 
     #     return Response(response, status=status.HTTP_200_OK)
 
+    @action(detail=False, methods=['GET'], url_path=r'bind_youtube_channels', permission_classes=())
+    @api_error_handler
+    def bind_youtube_channels_frontend(self, request):
+        state,google_user_code = getparams(request,("state","code"), with_user=False)
+        redirect_uri, current_url, user_subscription_id = state.split(",")
 
+        print(redirect_uri)
+        print(current_url)
+        print(user_subscription_id)
+        api_user_user_subscription = Verify.get_user_subscription(user_subscription_id)
+
+        response = requests.post(
+                url="https://accounts.google.com/o/oauth2/token",
+                data={
+                    "code": google_user_code,
+                    "client_id": "536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com",
+                    "client_secret": "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",
+                    "redirect_uri": redirect_uri,
+                    # "redirect_uri": settings.WEB_SERVER_URL + "/bind_youtube_channels_callback",
+                    "grant_type": "authorization_code"
+                }
+            )
+
+
+        if not response.status_code / 100 == 2:
+            print(response.json())
+            raise ApiCallerError('get google token fail')
+
+        access_token = response.json().get("access_token")
+        refresh_token = response.json().get("refresh_token")
+
+        status_code, response = api_youtube_get_list_channel_by_token(access_token)
+
+        if status_code != 200:
+            raise ApiCallerError("get youtube channels error")
+
+        #TODO handle next page token
+        for item in response['items']:
+
+            channel_etag = item['etag']
+            channel_id = item['id']
+            snippet = item['snippet']
+            title = snippet['title']
+            picture = snippet['thumbnails']['default']['url']
+            
+            if YoutubeChannel.objects.filter(channel_id=channel_id).exists():
+                youtube_channel = YoutubeChannel.objects.get(channel_id=channel_id)
+                youtube_channel.name = title
+                youtube_channel.token = access_token
+                youtube_channel.refresh_token = refresh_token
+                youtube_channel.token_update_at = datetime.now()
+                youtube_channel.image = picture
+                youtube_channel.save()
+            else:
+                youtube_channel = YoutubeChannel.objects.create(
+                    channel_id=channel_id, 
+                    name=title, 
+                    token=access_token, 
+                    refresh_token=refresh_token,
+                    token_update_at=datetime.now(), 
+                    image=picture
+                )
+                youtube_channel.save()
+
+            if not youtube_channel.user_subscriptions.all():
+                api_user_user_subscription.youtube_channels.add(youtube_channel)
+
+        redirect = HttpResponseRedirect(redirect_to=current_url)
+        return redirect
 
     @action(detail=False, methods=['GET'], url_path=r'bind_youtube_channels_callback', permission_classes=())
     @api_error_handler
