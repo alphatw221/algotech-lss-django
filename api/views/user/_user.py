@@ -208,7 +208,7 @@ def verify_google_user(response, user_type):
 
 def google_login_helper(request, user_type='customer'):
     token = request.query_params.get("token", None)
-    identity_info = id_token.verify_oauth2_token(token, google_requests.Request(), settings.GOOGLE_OAUTH_CLIENT_ID_FOR_LIVESHOWSELLER)
+    identity_info = id_token.verify_oauth2_token(token, google_requests.Request(), settings.GOOGLE_OAUTH_CLIENT_ID_FOR_LIVESHOWSELLER, clock_skew_in_seconds=10)
     our_jwt_tokens = verify_google_user(identity_info, user_type=user_type)
     return Response(our_jwt_tokens, status=status.HTTP_200_OK)
 
