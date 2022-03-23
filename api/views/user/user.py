@@ -507,7 +507,16 @@ class UserViewSet(viewsets.ModelViewSet):
 
         return Response(InstagramProfileSerializer(api_user_user_subscription.instagram_profiles.all(), many = True).data, status=status.HTTP_200_OK)
 
-        
+    @action(detail=False, methods=['GET'], url_path=r'buyer_profile_images', permission_classes=(IsAuthenticated,))
+    def get_buyer_profile_images(self, request):
+        api_user = Verify.get_customer_user(request)
+        pictures=[]
+        for platform_name in ['facebook', 'youtube', 'instagram']:
+            picture = getattr(api_user,platform_info_dict[platform_name]).get('picture')
+            if picture:
+                pictures.append(picture)
+        return Response(pictures, status=status.HTTP_200_OK)
+
 
     @action(detail=False, methods=['GET'], url_path=r'profile_image', permission_classes=(IsAuthenticated,))
     def get_profile_image(self, request, pk=None):
