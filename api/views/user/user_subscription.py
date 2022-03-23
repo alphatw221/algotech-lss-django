@@ -30,12 +30,6 @@ from api.utils.common.common import getparams
 from backend.api.youtube.channel import api_youtube_get_list_channel_by_token
 import requests
 
-def verify_request(api_user, platform_name, platform_id):
-    Verify.verify_user(api_user)
-    platform = Verify.get_platform(api_user, platform_name, platform_id)
-    user_subscription = Verify.get_user_subscription_from_platform(platform)
-
-    return platform, user_subscription
 
 
 class UserSubscriptionPagination(PageNumberPagination):
@@ -68,14 +62,10 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['POST'], url_path=r'create_activate_code', permission_classes=(IsAdminUser,))
     @api_error_handler
     def create_activate_code(self, request):
-        try:
-            user_subscription_id, maximum_usage_count, interval = getdata(request, ('user_subscription_id','maximum_usage_count','interval'))
-            # data = request.data
-            # user_subscription_id, maximum_usage_count, interval = data.get('user_subscription_id', None), data.get('maximum_usage_count', None), data.get('interval', None)
-            code = SubscriptionCodeManager.generate(user_subscription_id, maximum_usage_count, interval)
-            return Response(code, status=status.HTTP_200_OK)
-        except ApiVerifyError as e:
-            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
+        user_subscription_id, maximum_usage_count, interval = getdata(request, ('user_subscription_id','maximum_usage_count','interval'))
+        code = SubscriptionCodeManager.generate(user_subscription_id, maximum_usage_count, interval)
+        return Response(code, status=status.HTTP_200_OK)
+
         
     @action(detail=False, methods=['POST'], url_path=r'execute_activate_code', permission_classes=(IsAuthenticated,))
     @api_error_handler
@@ -83,13 +73,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         code, platform_name, platform_id = getdata(request,('activation_code','plarform_name','plarform_id'))
         subscription_page_data = SubscriptionCodeManager.execute(code, platform_name, platform_id)
         return Response(subscription_page_data, status=status.HTTP_200_OK)
-        # try:
-        #     data = request.data
-        #     code, platform_name, platform_id = data['activation_code'], data['platform_name'], data['platform_id']
-        #     subscription_page_data = SubscriptionCodeManager.execute(code, platform_name, platform_id)
-        #     return Response(subscription_page_data, status=status.HTTP_200_OK)
-        # except ApiVerifyError as e:
-        #     return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
+
 
     @action(detail=True, methods=['GET'], url_path=r'add_platform', permission_classes=(IsAdminUser,))
     @api_error_handler
@@ -472,3 +456,11 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
         redirect = HttpResponseRedirect(redirect_to=redirect_uri+'#/'+redirect_route)
         return redirect
+
+    @action(detail=False, methods=['GET'], url_path=r'instagram_profiles', permission_classes=(IsAuthenticated,))
+    @api_error_handler
+    def list_user_subscription_instagram_profile(self, request):
+        api_user = Verify.get_seller_user(request)
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        
+        return Response(YoutubeChannelSerializer(user_subscription.instagram_profiles.all(),many=True).data, status=status.HTTP_200_OK)

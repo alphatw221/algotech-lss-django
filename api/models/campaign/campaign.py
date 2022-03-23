@@ -1,10 +1,12 @@
 from email.policy import default
+from re import T
 from api.models.facebook.facebook_page import (FacebookPage,
                                                FacebookPageInfoSerializer, FacebookPageSerializer)
 
 from api.models.instagram.instagram_profile import (
     InstagramProfile, InstagramProfileSerializer, InstagramProfileInfoSerializer)
 from api.models.user.user import User
+from api.models.user.user_subscription import UserSubscription
 from api.models.youtube.youtube_channel import (YoutubeChannel,
                                                 YoutubeChannelInfoSerializer, YoutubeChannelSerializer)
 from django.contrib import admin
@@ -24,6 +26,9 @@ class Campaign(models.Model):
     created_by = models.ForeignKey(
         User, null=True, on_delete=models.SET_NULL, related_name='campaigns')
 
+    user_subscription = models.ForeignKey(
+        UserSubscription,  null=True, on_delete=models.SET_NULL, related_name='campaigns')
+        
     title = models.CharField(max_length=255, null=True, blank=True)
     description = models.TextField(null=True, blank=True, default=None)
     start_at = models.DateTimeField(null=True, blank=True, default=None)
@@ -105,7 +110,8 @@ class CampaignSerializer(serializers.ModelSerializer):
 class CampaignSerializerCreate(serializers.ModelSerializer):
     class Meta:
         model = Campaign
-        fields = '__all__'
+        # fields = '__all__'
+        exclude = ['facebook_page','youtube_channel','instagram_profile']
         read_only_fields = ['created_at', 'modified_at']
 
     facebook_campaign = FacebookCampaignSerializer(default=dict)
@@ -116,6 +122,21 @@ class CampaignSerializerCreate(serializers.ModelSerializer):
     meta_payment = serializers.JSONField(default=dict)
     meta_logistic = serializers.JSONField(default=dict)
 
+
+class CampaignSerializerEdit(serializers.ModelSerializer):
+    class Meta:
+        model = Campaign
+        # fields = '__all__'
+        exclude = ['facebook_page','youtube_channel','instagram_profile']
+        read_only_fields = ['created_at', 'modified_at']
+
+    facebook_campaign = FacebookCampaignSerializer(default=dict)
+    youtube_campaign = YoutubeCampaignSerializer(default=dict)
+    instagram_campaign = InstagramCampaignSerializer(default=dict)
+
+    meta = serializers.JSONField(default={"allow_checkout": 1})
+    meta_payment = serializers.JSONField(default=dict)
+    meta_logistic = serializers.JSONField(default=dict)
 
 class CampaignSerializerRetreive(CampaignSerializer):
 

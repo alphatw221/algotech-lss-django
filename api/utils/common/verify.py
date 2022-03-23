@@ -173,11 +173,33 @@ class Verify():
 
     @staticmethod
     def get_user_subscription_from_api_user(api_user):
-        user_subscriptions = api_user.user_subscriptions.all()
-        if not user_subscriptions:
-            raise ApiVerifyError("user not in any user_subscription")
-        user_subscription = user_subscriptions[0]
+        user_subscription = api_user.user_subscription
+        if not user_subscription:
+            raise ApiVerifyError("no user_subscription")
         return user_subscription
+        # user_subscriptions = api_user.user_subscriptions.all()
+        # if not user_subscriptions:
+        #     raise ApiVerifyError("user not in any user_subscription")
+        # user_subscription = user_subscriptions[0]
+        # return user_subscription
+
+    @staticmethod
+    def get_facebook_page_from_user_subscription(user_subscription, facebook_page_id):
+        if not user_subscription.facebook_pages.filter(id=facebook_page_id).exists():
+            raise ApiVerifyError("facebook page not bound to user_subscription")
+        return user_subscription.facebook_pages.get(id=facebook_page_id)
+
+    @staticmethod
+    def get_youtube_channel_from_user_subscription(user_subscription, youtube_channel_id):
+        if not user_subscription.youtube_channels.filter(id=youtube_channel_id).exists():
+            raise ApiVerifyError("youtube channel not bound to user_subscription")
+        return user_subscription.youtube_channels.get(id=youtube_channel_id)
+
+    @staticmethod
+    def get_instagram_profile_from_user_subscription(user_subscription, instagram_profile_id):
+        if not user_subscription.instagram_profiles.filter(id=instagram_profile_id).exists():
+            raise ApiVerifyError("instagram profile not bound to user_subscription")
+        return user_subscription.instagram_profiles.get(id=instagram_profile_id)
 
     @staticmethod
     def get_campaign(campaign_id):
@@ -191,6 +213,13 @@ class Verify():
         if not platform.campaigns.filter(id=campaign_id).exists():
             raise ApiVerifyError("no campaign found")
         campaign = platform.campaigns.get(id=campaign_id)
+        return campaign
+        
+    @staticmethod
+    def get_campaign_from_user_subscription(user_subscription, campaign_id):
+        if not user_subscription.campaigns.filter(id=campaign_id).exists():
+            raise ApiVerifyError("no campaign found")
+        campaign = user_subscription.campaigns.get(id=campaign_id)
         return campaign
 
     @staticmethod

@@ -3,7 +3,6 @@ from api.models.facebook.facebook_page import (FacebookPage,
                                                FacebookPageInfoSerializer)
 from api.models.instagram.instagram_profile import (
     InstagramProfile, InstagramProfileInfoSerializer)
-from api.models.user.user import User, UserSerializer
 from api.models.youtube.youtube_channel import (YoutubeChannel,
                                                 YoutubeChannelInfoSerializer)
 from django.contrib import admin
@@ -24,12 +23,7 @@ class UserSubscription(models.Model):
     class Meta:
         db_table = 'api_user_subscription'
 
-    root_users = models.ManyToManyField(
-        User, related_name='user_subscriptions')
 
-    # admin_users = models.ManyToManyField(
-    #     User, related_name='user_subscriptions',through='UserSubscriptionAdminUsers')
-    
     facebook_pages = models.ManyToManyField(
         FacebookPage, related_name='user_subscriptions')
     instagram_profiles = models.ManyToManyField(
@@ -60,18 +54,6 @@ class UserSubscription(models.Model):
     expired_at = models.DateTimeField(null=True, blank=True, default=None)
 
 
-# class UserSubscriptionAdminUsers(models.Model):
-
-#     user_subscription = models.ForeignKey(UserSubscription, null=True, on_delete=models.CASCADE, related_name='user_subscriptions', blank=True, default=None)
-#     user = models.ForeignKey(User, null=True, on_delete=models.CASCADE, related_name='users', blank=True, default=None)
-
-# class UserSubscriptionAdminUsersSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = UserSubscriptionAdminUsers
-#         fields = '__all__'
-#         read_only_fields = ['created_at', 'modified_at']
-
-
 
 
 
@@ -84,8 +66,6 @@ class UserSubscriptionSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['created_at', 'modified_at']
 
-    root_users = UserSerializer(
-        many=True, read_only=True)
     facebook_pages = FacebookPageInfoSerializer(
         many=True, read_only=True)
     instagram_profiles = InstagramProfileInfoSerializer(
@@ -127,3 +107,9 @@ class UserSubscriptionAdmin(admin.ModelAdmin):
     model = UserSubscription
     list_display = [field.name for field in UserSubscription._meta.fields]
     search_fields = [field.name for field in UserSubscription._meta.fields]
+
+
+
+
+
+

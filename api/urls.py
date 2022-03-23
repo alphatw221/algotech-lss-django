@@ -20,14 +20,13 @@ from api.views.facebook import facebook_page
 
 from api.views.product import product
 
-from api.views.cart import cart_product
 
 from api.views.order import order
 from api.views.order import pre_order
 from api.views.dashboard import dashboard
 from api.views.payment import payment
 
-from api.views.image import image
+
 from api.views.payment import payment
 from api.views.youtube import youtube_channel
 from django.views.decorators.csrf import csrf_exempt
@@ -64,8 +63,6 @@ def url_setup(urlpatterns):
 
     router.register(r'product', product.ProductViewSet)
 
-    router.register(r'cart-product', cart_product.CartProductViewSet)
-
     router.register(r'order', order.OrderViewSet)
 
     router.register(r'pre_order', pre_order.PreOrderViewSet)
@@ -76,10 +73,6 @@ def url_setup(urlpatterns):
 
     router.register(r'youtube', youtube_channel.YoutubeViewSet)
     
-    urlpatterns += [
-        path('image/upload/<filename>',
-             image.upload, name='file_upload'),
-    ]
 
     urlpatterns.append(path('', include(router.urls)))
 

@@ -7,7 +7,7 @@ from django.http import HttpResponse
 from rest_framework import status, viewsets
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated
-from api.models.campaign.campaign import Campaign, CampaignSerializer, CampaignSerializerRetreive, CampaignSerializerCreate
+from api.models.campaign.campaign import Campaign, CampaignSerializer, CampaignSerializerEdit, CampaignSerializerRetreive, CampaignSerializerCreate
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -18,7 +18,7 @@ from api.permissions.seller.campaign_permission import IsCampaignPlatformValid, 
 from backend.pymongo.mongodb import db
 from api.utils.common.verify import Verify
 from api.utils.common.verify import ApiVerifyError
-from api.utils.common.common import *
+from api.utils.common.common import getdata,getparams
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 import requests
 from api.models.user.user_subscription import UserSubscription
@@ -27,17 +27,17 @@ def verify_seller_request(api_user):
     Verify.verify_user(api_user)
     return True
 
-def verify_request(api_user, platform_name, platform_id, campaign_id=None):
-    Verify.verify_user(api_user)
-    platform = Verify.get_platform(api_user, platform_name, platform_id)
+# def verify_request(api_user, platform_name, platform_id, campaign_id=None):
+#     Verify.verify_user(api_user)
+#     platform = Verify.get_platform(api_user, platform_name, platform_id)
 
-    if campaign_id:
-        if not platform.campaigns.filter(id=campaign_id).exists():
-            raise ApiVerifyError("no campaign found")
-        campaign = platform.campaigns.get(id=campaign_id)
-        return platform, campaign
+#     if campaign_id:
+#         if not platform.campaigns.filter(id=campaign_id).exists():
+#             raise ApiVerifyError("no campaign found")
+#         campaign = platform.campaigns.get(id=campaign_id)
+#         return platform, campaign
 
-    return platform
+#     return platform
 
 
 class CampaignPagination(PageNumberPagination):
@@ -53,16 +53,15 @@ class CampaignViewSet(viewsets.ModelViewSet):
     filterset_fields = []
     pagination_class = CampaignPagination
 
-    @action(detail=True, methods=['GET'], url_path=r'retrieve_campaign', permission_classes=(IsAuthenticated, IsPlatformCampaignRetrievable,))
+    @action(detail=True, methods=['GET'], url_path=r'retrieve_campaign', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def retrieve_campaign(self, request, pk=None):
-        platform_name = request.query_params.get('platform_name')
-        platform_id = request.query_params.get('platform_id')
-        api_user = request.user.api_users.get(type='user')
-        campaign = Verify.get_campaign(campaign_id=pk)
-        serializer = CampaignSerializerRetreive(campaign)
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        api_user = Verify.get_seller_user(request)
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        campaign = Verify.get_campaign_from_user_subscription(user_subscription,pk)
+
+        return Response(CampaignSerializer(campaign).data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['GET'], url_path=r'retrieve_campaign_buyer')
     @api_error_handler
@@ -74,22 +73,14 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         return Response(campaign_data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['GET'], url_path=r'list_campaign', permission_classes=(IsAuthenticated, IsCampaignPlatformValid,))
+    @action(detail=False, methods=['GET'], url_path=r'list_campaign', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def list_campaign(self, request):
-        platform_name = request.query_params.get('platform_name')
-        platform_id = request.query_params.get('platform_id')
-        order_by = request.query_params.get('order_by')
-        campaign_status = request.query_params.get('status')
-        key_word = request.query_params.get('key_word')
-        api_user = request.user.api_users.get(type='user')
-
-        platform = verify_request(api_user, platform_name, platform_id)
-
-
-        #TODO check platform in user_subscription
+        api_user, key_word, campaign_status, order_by = getparams(request,("key_word", "campaign_status", "order_by"), with_user=True, seller=True)
         
-        campaigns = platform.campaigns.all()
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        campaigns = user_subscription.campaigns.all()
+        
         if campaign_status == 'history':
             campaigns = campaigns.filter(end_at__lt=datetime.now())
         elif campaign_status == 'schedule':
@@ -109,23 +100,26 @@ class CampaignViewSet(viewsets.ModelViewSet):
             data = serializer.data
         return Response(data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['POST'], url_path=r'create_campaign', parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated, IsCampaignPlatformValid,))
+    @action(detail=False, methods=['POST'], url_path=r'create_campaign', parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated,))
     @api_error_handler
     def create_campaign(self, request):
-        platform_name = request.query_params.get('platform_name')
-        platform_id = request.query_params.get('platform_id')
-        api_user = request.user.api_users.get(type='user')
+        # platform_name = request.query_params.get('platform_name')
+        # platform_id = request.query_params.get('platform_id')
 
-        platform = verify_request(api_user, platform_name, platform_id)
-        # TODO check platform in user_subscription
+        api_user = Verify.get_seller_user(request)
+        # platform = verify_request(api_user, platform_name, platform_id)
+
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        # campaigns = user_subscription.campaigns.all()
         
         json_data = json.loads(request.data["data"])
         json_data['created_by'] = api_user.id
-        json_data['facebook_page'] = platform.id if platform_name == 'facebook' else None
+        json_data['user_subscription'] = user_subscription.id
+        # json_data['facebook_page'] = platform.id if platform_name == 'facebook' else None
 
-        json_data['youtube_channel'] = platform.id if platform_name == 'youtube' else None
+        # json_data['youtube_channel'] = platform.id if platform_name == 'youtube' else None
 
-        json_data['instagram_profile'] = platform.id if platform_name == 'instagram' else None
+        # json_data['instagram_profile'] = platform.id if platform_name == 'instagram' else None
 
         serializer = CampaignSerializerCreate(data=json_data)
         if not serializer.is_valid():
@@ -140,6 +134,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
                     ContentFile(value.read()))
                 print(f"image_path: {image_path}")
                 json_data["meta_payment"]["sg"]["direct_payment"]["accounts"][account_number]["image"] = image_path
+        
         serializer = self.get_serializer(
             campaign, data=json_data, partial=True)
         if not serializer.is_valid():
@@ -148,25 +143,30 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['PUT'], url_path=r'update_campaign', parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated, IsPlatformCampaignRetrievable))
+    @action(detail=True, methods=['PUT'], url_path=r'update_campaign', parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated,))
     @api_error_handler
     def update_campaign(self, request, pk=None):
 
-        api_user, platform_name, platform_id = getparams(request, ("platform_name", "platform_id"), with_user=True, seller=True)
-
-        platform = Verify.get_platform(api_user, platform_name, platform_id)
-        campaign = Verify.get_campaign_from_platform(platform, pk)
-        user_subscription = Verify.get_user_subscription_from_platform(platform)
+        # api_user, platform_name, platform_id = getparams(request, ("platform_name", "platform_id"), with_user=True, seller=True)
         
+        # platform = Verify.get_platform(api_user, platform_name, platform_id)
+        # campaign = Verify.get_campaign_from_platform(platform, pk)
+        # user_subscription = Verify.get_user_subscription_from_platform(platform)
+
+        api_user = Verify.get_seller_user(request)
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        campaign = Verify.get_campaign_from_user_subscription(user_subscription, pk)
+
+
         #temp solution : no to overide campaign data
         json_data = json.loads(request.data["data"])
 
-        if 'facebook' not in user_subscription.user_plan.get('activated_platform'):
-           json_data['facebook_page_id']=None
-        if 'youtube' not in user_subscription.user_plan.get('activated_platform'):
-           json_data['youtube_channel_id']=None
-        if 'instagram' not in user_subscription.user_plan.get('activated_platform'):
-           json_data['instagram_profile']=None
+        # if 'facebook' not in user_subscription.user_plan.get('activated_platform'):
+        #    json_data['facebook_page_id']=None
+        # if 'youtube' not in user_subscription.user_plan.get('activated_platform'):
+        #    json_data['youtube_channel_id']=None
+        # if 'instagram' not in user_subscription.user_plan.get('activated_platform'):
+        #    json_data['instagram_profile']=None
         
         facebook_campaign = campaign.facebook_campaign.copy()
         facebook_campaign.update(json_data.get("facebook_campaign",{}))
@@ -189,7 +189,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
                 print(f"image_path: {image_path}")
                 json_data["meta_payment"]["sg"]["direct_payment"]["accounts"][account_number]["image"] = image_path
 
-        serializer = CampaignSerializer(
+        serializer = CampaignSerializerEdit(
             campaign, data=json_data, partial=True)
         if not serializer.is_valid():
             print(serializer.errors)
@@ -200,19 +200,74 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
 
 
-    @action(detail=True, methods=['DELETE'], url_path=r'delete_campaign', permission_classes = (IsAuthenticated, IsPlatformCampaignRetrievable))
+    @action(detail=True, methods=['DELETE'], url_path=r'delete_campaign', permission_classes = (IsAuthenticated, ))
     @api_error_handler
     def delete_campaign(self, request, pk=None):
-        platform_name = request.query_params.get('platform_name')
-        platform_id = request.query_params.get('platform_id')
-        api_user = request.user.api_users.get(type='user')
 
-        _, campaign = verify_request(
-            api_user, platform_name, platform_id, campaign_id=pk)
-        campaign.delete()
+        api_user = Verify.get_seller_user(request)
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        campaign = Verify.get_campaign_from_user_subscription(user_subscription)
+
+        campaign.user_subscription = None
+        campaign.facebook_page = None
+        campaign.youtube_page = None
+        campaign.instagram_profile = None
+        campaign.save()
 
         return Response({"message": "delete success"}, status=status.HTTP_200_OK)
     
+
+
+    @action(detail=True, methods=['GET'], url_path=r'bind_facebook_page', permission_classes=(IsAuthenticated,))
+    @api_error_handler
+    def bind_facebook_page_to_campaign(self, request, pk=None):
+
+        api_user, facebook_page_id = getparams(request, ('facebook_page_id',),with_user=True, seller=True)
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        campaign = Verify.get_campaign_from_user_subscription(user_subscription, pk)
+
+        if 'facebook' not in user_subscription.user_plan.get('activated_platform'):
+           raise ApiVerifyError('facebook not activated')
+
+        facebook_page = Verify.get_facebook_page_from_user_subscription(user_subscription, facebook_page_id)
+        campaign.facebook_page = facebook_page
+        campaign.save()
+        return Response(CampaignSerializerRetreive(campaign).data, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['GET'], url_path=r'bind_youtube_channel', permission_classes=(IsAuthenticated,))
+    @api_error_handler
+    def bind_youtube_channel_to_campaign(self, request, pk=None):
+
+        api_user, youtube_channel_id = getparams(request, ('youtube_channel_id',),with_user=True, seller=True)
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        campaign = Verify.get_campaign_from_user_subscription(user_subscription, pk)
+
+        if 'youtube' not in user_subscription.user_plan.get('activated_platform'):
+           raise ApiVerifyError('youtube not activated')
+
+        youtube_channel = Verify.get_youtube_channel_from_user_subscription(user_subscription, youtube_channel_id)
+        campaign.youtube_channel = youtube_channel
+        campaign.save()
+        return Response(CampaignSerializerRetreive(campaign).data, status=status.HTTP_200_OK)
+
+
+    @action(detail=True, methods=['GET'], url_path=r'bind_instagram_profile', permission_classes=(IsAuthenticated,))
+    @api_error_handler
+    def bind_instagram_profile_to_campaign(self, request, pk=None):
+
+        api_user, instagram_profile_id = getparams(request, ('instagram_profile_id',),with_user=True, seller=True)
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        campaign = Verify.get_campaign_from_user_subscription(user_subscription, pk)
+
+        if 'instagram' not in user_subscription.user_plan.get('activated_platform'):
+           raise ApiVerifyError('instagram not activated')
+
+        instagram_profile = Verify.get_instagram_profile_from_user_subscription(user_subscription, instagram_profile_id)
+        campaign.instagram_profile = instagram_profile
+        campaign.save()
+        return Response(CampaignSerializerRetreive(campaign).data, status=status.HTTP_200_OK)
+
+
 
     #TODO @Dereck Move to instagram_profile view
     @action(detail=False, methods=['GET'], url_path=r'ig_comment', permission_classes = (IsAuthenticated,))

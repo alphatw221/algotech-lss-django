@@ -6,6 +6,8 @@ from django.contrib.auth.models import User as AuthUser
 from djongo import models
 from rest_framework import serializers
 
+from api.models.user.user_subscription import UserSubscription
+
 
 class User(models.Model):
     class Meta:
@@ -21,6 +23,9 @@ class User(models.Model):
         ('valid', 'Valid'),
     ]
 
+    user_subscription = models.ForeignKey(
+        UserSubscription,  null=True, on_delete=models.SET_NULL, related_name='users')
+        
     name = models.CharField(max_length=255, null=True, blank=True)
     description = models.TextField(null=True, blank=True, default=None)
     remark = models.TextField(null=True, blank=True, default=None)
