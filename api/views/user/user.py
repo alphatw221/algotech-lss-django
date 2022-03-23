@@ -143,8 +143,8 @@ class UserViewSet(viewsets.ModelViewSet):
                 url="https://accounts.google.com/o/oauth2/token",
                 data={
                     "code": google_user_code,
-                    "client_id": "536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com",
-                    "client_secret": "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",
+                    "client_id": settings.GOOGLE_OAUTH_CLIENT_ID_FOR_LIVESHOWSELLER,
+                    "client_secret": settings.GOOGLE_OAUTH_CLIENT_SECRET_FOR_LIVESHOWSELLER,
                     # "redirect_uri": 'http://localhost:8000/google-redirect',
                     "redirect_uri": settings.WEB_SERVER_URL + "/google-redirect",
                     "grant_type": "authorization_code"
@@ -424,8 +424,8 @@ class UserViewSet(viewsets.ModelViewSet):
                 url="https://accounts.google.com/o/oauth2/token",
                 data={
                     "code": google_user_code,
-                    "client_id": "536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com",
-                    "client_secret": "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",
+                    "client_id": settings.GOOGLE_OAUTH_CLIENT_ID_FOR_LIVESHOWSELLER,
+                    "client_secret": settings.GOOGLE_OAUTH_CLIENT_SECRET_FOR_LIVESHOWSELLER,
                     "redirect_uri": redirect_uri,
                     # "redirect_uri": settings.WEB_SERVER_URL + "/bind_youtube_channels_callback",
                     "grant_type": "authorization_code"
@@ -505,8 +505,8 @@ class UserViewSet(viewsets.ModelViewSet):
                 url="https://accounts.google.com/o/oauth2/token",
                 data={
                     "code": google_user_code,
-                    "client_id": "536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com",
-                    "client_secret": "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",
+                    "client_id": settings.GOOGLE_OAUTH_CLIENT_ID_FOR_LIVESHOWSELLER,
+                    "client_secret": settings.GOOGLE_OAUTH_CLIENT_SECRET_FOR_LIVESHOWSELLER,
                     "redirect_uri": callback_uri,
                     # "redirect_uri": settings.WEB_SERVER_URL + "/bind_youtube_channels_callback",
                     "grant_type": "authorization_code"
