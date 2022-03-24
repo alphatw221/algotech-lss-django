@@ -512,7 +512,8 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(pictures, status=status.HTTP_200_OK)
 
 
-    @action(detail=False, methods=['GET'], url_path=r'profile_images', permission_classes=(IsAuthenticated,))
+    # @action(detail=False, methods=['GET'], url_path=r'profile_images', permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['GET'], url_path=r'profile_images')
     def get_profile_image(self, request, pk=None):
 
         api_user = Verify.get_seller_user(request)
