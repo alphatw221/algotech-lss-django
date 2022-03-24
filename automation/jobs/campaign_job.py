@@ -163,7 +163,8 @@ def capture_youtube(campaign):
 
         code, data = api_youtube_get_video_info_with_access_token(access_token, live_video_id)
         if code // 100 != 2:
-
+            if code == 401:
+                refresh_youtube_channel_token(youtube_channel)
             print("video info error")
             print(data)
             return
@@ -200,8 +201,9 @@ def capture_youtube(campaign):
     print(f"code: {code}")
 
     if code // 100 != 2 and 'error' in data:
-
-        #TODO handle token expired
+        if code == 401:
+            access_token = refresh_youtube_channel_token(youtube_channel)
+            return
 
         youtube_campaign['live_chat_id'] = ''
         youtube_campaign['next_page_token'] = ''
