@@ -136,7 +136,10 @@ def capture_youtube(campaign):
 
     youtube_channel = db.api_youtube_channel.find_one(
                 {'id': campaign['youtube_channel_id']})
-
+    if not youtube_channel:
+        print("no youtube_channel found")
+        return
+        
     youtube_campaign = campaign['youtube_campaign']
 
     access_token = youtube_channel.get('token')
