@@ -4,6 +4,8 @@ from rest_framework import serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from api.code.subscription_code_manager import SubscriptionCodeManager
+from api.models.campaign.campaign import InstagramCampaignSerializer
+from api.models.instagram.instagram_profile import InstagramProfileInfoSerializer, InstagramProfileSerializer
 from api.models.user.user import User
 from api.models.user.user_subscription import UserSubscription, UserSubscriptionSerializer, UserSubscriptionSerializerMeta, UserSubscriptionSerializerSimplify, UserSubscriptionSerializerCreate
 from rest_framework.pagination import PageNumberPagination
@@ -463,4 +465,4 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         api_user = Verify.get_seller_user(request)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
         
-        return Response(YoutubeChannelSerializer(user_subscription.instagram_profiles.all(),many=True).data, status=status.HTTP_200_OK)
+        return Response(InstagramProfileSerializer(user_subscription.instagram_profiles.all(),many=True).data, status=status.HTTP_200_OK)
