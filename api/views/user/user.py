@@ -512,23 +512,31 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(pictures, status=status.HTTP_200_OK)
 
 
-    @action(detail=False, methods=['GET'], url_path=r'profile_image', permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['GET'], url_path=r'profile_images', permission_classes=(IsAuthenticated,))
     def get_profile_image(self, request, pk=None):
 
-        platform_name = request.query_params.get('platform_name')
-        if not platform_name in platform_info_dict:
-            raise ApiVerifyError('not support platform')
+        api_user = Verify.get_seller_user(request)
+        pictures=[]
+        for platform_name in ['facebook', 'youtube', 'instagram']:
+            picture = getattr(api_user,platform_info_dict[platform_name]).get('picture')
+            if picture:
+                pictures.append(picture)
+        return Response(pictures, status=status.HTTP_200_OK)
 
-        picture = ""
-        auth_user = request.user
-        if auth_user.api_users.filter(type='user').exists():
-            api_user = auth_user.api_users.get(type='user')
-            picture = getattr(api_user,platform_info_dict[platform_name]).get('picture','')
-        elif auth_user.api_users.filter(type='customer').exists():
-            api_user = auth_user.api_users.get(type='customer')
-            picture = getattr(api_user,platform_info_dict[platform_name]).get('picture','')
+        # platform_name = request.query_params.get('platform_name')
+        # if not platform_name in platform_info_dict:
+        #     raise ApiVerifyError('not support platform')
 
-        return Response(picture, status=status.HTTP_200_OK)
+        # picture = ""
+        # auth_user = request.user
+        # if auth_user.api_users.filter(type='user').exists():
+        #     api_user = auth_user.api_users.get(type='user')
+        #     picture = getattr(api_user,platform_info_dict[platform_name]).get('picture','')
+        # elif auth_user.api_users.filter(type='customer').exists():
+        #     api_user = auth_user.api_users.get(type='customer')
+        #     picture = getattr(api_user,platform_info_dict[platform_name]).get('picture','')
+
+        # return Response(picture, status=status.HTTP_200_OK)
 
     
     @action(detail=False, methods=['POST'], url_path=r'create_valid_api_user', permission_classes=(IsAdminUser,))
