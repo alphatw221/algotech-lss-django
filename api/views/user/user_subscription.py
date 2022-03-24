@@ -1,4 +1,5 @@
 from platform import platform
+from tkinter.tix import Tree
 from django.http import HttpResponseRedirect
 from rest_framework import serializers, status, viewsets
 from rest_framework.decorators import action
@@ -539,3 +540,23 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
         
         return Response(InstagramProfileSerializer(user_subscription.instagram_profiles.all(),many=True).data, status=status.HTTP_200_OK)
+
+
+
+    @action(detail=False, methods=['GET'], url_path=r'dealer_list', permission_classes=(IsAuthenticated,))
+    @api_error_handler
+    def dealer_list_subscriber(self, request):
+        api_user = Verify.get_seller_user(request)
+        dealer_user_subscription = Verify.get_dealer_user_subscription_from_api_user(api_user)
+        
+        return Response(UserSubscriptionSerializerSimplify(dealer_user_subscription.subscribers.all(),many=True).data, status=status.HTTP_200_OK)
+
+    
+    @action(detail=True, methods=['GET'], url_path=r'dealer_retrieve', permission_classes=(IsAuthenticated,))
+    @api_error_handler
+    def dealer_list_subscriber(self, request, pk=None):
+        api_user = Verify.get_seller_user(request)
+        dealer_user_subscription = Verify.get_dealer_user_subscription_from_api_user(api_user)
+        user_subscription = Verify.get_user_subscription_from_dealer_user_subscription(dealer_user_subscription,pk)
+
+        return Response(UserSubscriptionSerializer(user_subscription).data, status=status.HTTP_200_OK)
