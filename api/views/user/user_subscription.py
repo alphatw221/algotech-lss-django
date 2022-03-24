@@ -311,7 +311,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         
         return Response(FacebookPageSerializer(user_subscription.facebook_pages.all(),many=True).data, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['POST'], url_path=r'bind_facebook_pages', permission_classes=())
+    @action(detail=True, methods=['POST'], url_path=r'v2/bind_facebook_pages', permission_classes=())
     @api_error_handler
     def bind_user_facebook_pages(self, request, pk=None):
         token, = getdata(request,('accessToken',))
@@ -396,7 +396,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         
         return Response(YoutubeChannelSerializer(user_subscription.youtube_channels.all(),many=True).data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['GET'], url_path=r'bind_youtube_channels', permission_classes=())
+    @action(detail=False, methods=['GET'], url_path=r'v2/bind_youtube_channels', permission_classes=())
     @api_error_handler
     def bind_youtube_channels_frontend(self, request):
         state,google_user_code = getparams(request,("state","code"), with_user=False)

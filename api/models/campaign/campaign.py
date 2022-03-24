@@ -28,7 +28,10 @@ class Campaign(models.Model):
 
     user_subscription = models.ForeignKey(
         UserSubscription,  null=True, on_delete=models.SET_NULL, related_name='campaigns')
-        
+    
+    dealer = models.ForeignKey(
+        UserSubscription,  null=True, on_delete=models.SET_NULL, related_name='subscriber_campaigns')
+
     title = models.CharField(max_length=255, null=True, blank=True)
     description = models.TextField(null=True, blank=True, default=None)
     start_at = models.DateTimeField(null=True, blank=True, default=None)
