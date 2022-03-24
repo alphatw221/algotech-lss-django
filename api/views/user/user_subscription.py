@@ -31,7 +31,9 @@ from api.utils.error_handle.error_handler.api_error_handler import api_error_han
 from api.utils.common.common import getparams
 from backend.api.youtube.channel import api_youtube_get_list_channel_by_token
 import requests
-
+from rest_framework_simplejwt.tokens import AccessToken
+from django.contrib.auth.models import User as AuthUser
+from django.conf import settings
 
 
 class UserSubscriptionPagination(PageNumberPagination):
@@ -45,7 +47,7 @@ platform_dict = {'facebook': FacebookPage,
 
 
 class UserSubscriptionViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAdminUser,)
+    permission_classes = ()
     queryset = UserSubscription.objects.all().order_by('id')
     serializer_class = UserSubscriptionSerializerSimplify
     filterset_fields = []
@@ -394,6 +396,77 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         
         return Response(YoutubeChannelSerializer(user_subscription.youtube_channels.all(),many=True).data, status=status.HTTP_200_OK)
 
+    @action(detail=False, methods=['GET'], url_path=r'bind_youtube_channels', permission_classes=())
+    @api_error_handler
+    def bind_youtube_channels_frontend(self, request):
+        state,google_user_code = getparams(request,("state","code"), with_user=False)
+        redirect_uri, current_url, access_token= state.split(",")
+        
+        auth_user_id = AccessToken(access_token).get('user_id')
+        auth_user = AuthUser.objects.get(id=auth_user_id)
+        api_user = auth_user.api_users.get(type='user')
+        
+        api_user_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        response = requests.post(
+                url="https://accounts.google.com/o/oauth2/token",
+                data={
+                    "code": google_user_code,
+                    "client_id": settings.GOOGLE_OAUTH_CLIENT_ID_FOR_LIVESHOWSELLER,
+                    "client_secret": settings.GOOGLE_OAUTH_CLIENT_SECRET_FOR_LIVESHOWSELLER,
+                    "redirect_uri": redirect_uri,
+                    # "redirect_uri": settings.WEB_SERVER_URL + "/bind_youtube_channels_callback",
+                    "grant_type": "authorization_code"
+                }
+            )
+
+
+        if not response.status_code / 100 == 2:
+            print(response.json())
+            raise ApiCallerError('get google token fail')
+
+        access_token = response.json().get("access_token")
+        refresh_token = response.json().get("refresh_token")
+
+        status_code, response = api_youtube_get_list_channel_by_token(access_token)
+
+        if status_code != 200:
+            raise ApiCallerError("get youtube channels error")
+
+        #TODO handle next page token
+        for item in response['items']:
+
+            channel_etag = item['etag']
+            channel_id = item['id']
+            snippet = item['snippet']
+            title = snippet['title']
+            picture = snippet['thumbnails']['default']['url']
+            
+            if YoutubeChannel.objects.filter(channel_id=channel_id).exists():
+                youtube_channel = YoutubeChannel.objects.get(channel_id=channel_id)
+                youtube_channel.name = title
+                youtube_channel.token = access_token
+                youtube_channel.refresh_token = refresh_token
+                youtube_channel.token_update_at = datetime.now()
+                youtube_channel.image = picture
+                youtube_channel.save()
+            else:
+                youtube_channel = YoutubeChannel.objects.create(
+                    channel_id=channel_id, 
+                    name=title, 
+                    token=access_token, 
+                    refresh_token=refresh_token,
+                    token_update_at=datetime.now(), 
+                    image=picture
+                )
+                youtube_channel.save()
+
+            if not youtube_channel.user_subscriptions.all():
+                api_user_user_subscription.youtube_channels.add(youtube_channel)
+
+        redirect = HttpResponseRedirect(redirect_to=current_url)
+        return redirect
+    
+    
     @action(detail=False, methods=['GET'], url_path=r'bind_youtube_channels_callback', permission_classes=())
     @api_error_handler
     def bind_youtube_channels(self, request):
