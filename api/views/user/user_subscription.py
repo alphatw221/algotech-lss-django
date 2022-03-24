@@ -1,5 +1,4 @@
 from platform import platform
-from tkinter.tix import Tree
 from django.http import HttpResponseRedirect
 from rest_framework import serializers, status, viewsets
 from rest_framework.decorators import action
