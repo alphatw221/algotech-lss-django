@@ -29,10 +29,14 @@ class YoutubeViewSet(viewsets.GenericViewSet):
     @api_error_handler
     def get_youtube_comment(self, request, pk=None):
 
-        api_user, platform_id, platform_name, campaign_id, since_timestamp, count = getparams(request, ('platform_id', "platform_name", 'campaign_id', 'since_timestamp', "count"), with_user=True, seller=True)
+        # api_user, platform_id, platform_name, campaign_id, since_timestamp, count = getparams(request, ('platform_id', "platform_name", 'campaign_id', 'since_timestamp', "count"), with_user=True, seller=True)
 
-        platform = Verify.get_platform(api_user, platform_name, platform_id)
-        Verify.get_campaign_from_platform(platform, campaign_id)
+        # platform = Verify.get_platform(api_user, platform_name, platform_id)
+        # Verify.get_campaign_from_platform(platform, campaign_id)
+
+        api_user, campaign_id, since_timestamp, count = getparams(request, ("campaign_id", "since_timestamp", "count"), with_user=True, seller=True)
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
 
         if not since_timestamp:
             since_timestamp =1 
