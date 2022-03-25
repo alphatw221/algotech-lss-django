@@ -396,7 +396,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         
         return Response(YoutubeChannelSerializer(user_subscription.youtube_channels.all(),many=True).data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['GET'], url_path=r'v2/bind_youtube_channels', permission_classes=())
+    @action(detail=False, methods=['GET'], url_path=r'bind_youtube_channels', permission_classes=())
     @api_error_handler
     def bind_youtube_channels_frontend(self, request):
         state,google_user_code = getparams(request,("state","code"), with_user=False)
@@ -467,7 +467,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         return redirect
     
     
-    @action(detail=False, methods=['GET'], url_path=r'bind_youtube_channels_callback', permission_classes=())
+    @action(detail=False, methods=['GET'], url_path=r'v2/bind_youtube_channels_callback', permission_classes=())
     @api_error_handler
     def bind_youtube_channels(self, request):
 
