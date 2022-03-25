@@ -1,11 +1,12 @@
 import os
 import django
-from django.conf import settings
+
 try:
     os.environ['DJANGO_SETTINGS_MODULE'] = 'lss.settings'  # for rq_job
     django.setup()
 except Exception:
     pass
+from django.conf import settings
 from api.utils.common.order_helper import PreOrderHelper, PreOrderErrors
 
 from backend.utils.text_processing.command_processor import \
