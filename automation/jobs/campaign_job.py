@@ -140,21 +140,22 @@ def capture_youtube(campaign):
         print("no youtube_channel found")
         return
         
-    youtube_campaign = campaign['youtube_campaign']
-
     access_token = youtube_channel.get('token')
     refresh_token = youtube_channel.get('refresh_token')
-
-    next_page_token = youtube_campaign.get('next_page_token', '')
-    
-    order_codes_mapping = OrderCodesMappingSingleton.get_mapping(campaign['id'])
 
     if not access_token or not refresh_token:
         print("need both access_token and refresh_token")
         return
 
+    youtube_campaign = campaign['youtube_campaign']
+
+    next_page_token = youtube_campaign.get('next_page_token', '')
+    
+    
+
+    
     if youtube_campaign.get('live_chat_ended',False):
-        capture_youtube_video(campaign, youtube_channel, order_codes_mapping)
+        capture_youtube_video(campaign, youtube_channel)
         return
 
     live_chat_id = youtube_campaign.get('live_chat_id')
@@ -175,17 +176,19 @@ def capture_youtube(campaign):
         if not items:
             print("no items")
             return
+
         liveStreamingDetails = items[0].get('liveStreamingDetails')
+
+        if not liveStreamingDetails:
+            print("no liveStreamingDetails")
+            return
+
         if 'actualEndTime' in liveStreamingDetails.keys():
             youtube_campaign['live_chat_ended'] = True
             db.api_campaign.update_one({'id': campaign['id']}, {
                                     '$set': {"youtube_campaign":youtube_campaign}})
             return
             
-            
-        if not liveStreamingDetails:
-            print("no liveStreamingDetails")
-            return
         live_chat_id = liveStreamingDetails.get('activeLiveChatId')
         if not live_chat_id:
             print("can't get live_chat_id")
@@ -194,7 +197,7 @@ def capture_youtube(campaign):
         #start of every youtube live chat:
         youtube_campaign['live_chat_id'] = live_chat_id
         db.api_campaign.update_one({'id': campaign['id']}, { "$set": {'youtube_campaign': youtube_campaign}})
-        access_token = refresh_youtube_channel_token(youtube_channel) #temporary
+        access_token = refresh_youtube_channel_token(youtube_channel)
 
 
     code, data = api_youtube_get_live_chat_comment_with_access_token(access_token, next_page_token, live_chat_id, 100)
@@ -224,6 +227,8 @@ def capture_youtube(campaign):
 
     is_failed = youtube_campaign.get('is_failed')
     latest_comment_time = youtube_campaign.get('latest_comment_time', 1)
+
+    order_codes_mapping = OrderCodesMappingSingleton.get_mapping(campaign['id'])
 
     try:
         for comment in comments:
@@ -380,7 +385,7 @@ def capture_instagram(campaign):
     #     return
 
 
-def capture_youtube_video(campaign, youtube_channel, order_codes_mapping):
+def capture_youtube_video(campaign, youtube_channel):
     youtube_campaign = campaign['youtube_campaign']
     # refresh_token = youtube_campaign.get('refresh_token')
     next_page_token = youtube_campaign.get('next_page_token', '')
@@ -392,7 +397,8 @@ def capture_youtube_video(campaign, youtube_channel, order_codes_mapping):
 
     # is_failed = youtube_campaign.get('is_failed', False)
     last_create_message_id = youtube_campaign.get("last_create_message_id")
-
+    order_codes_mapping = OrderCodesMappingSingleton.get_mapping(campaign['id'])
+    
     while keep_capturing :
         code, get_yt_video_data = api_youtube_get_video_comment_thread(next_page_token, live_video_id, 10)
         
