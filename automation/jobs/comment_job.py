@@ -150,11 +150,7 @@ def comment_responding(platform_name, platform, campaign, pre_order, comment, ca
         if not live_chat_id:
             return
 
-
-        # access_token = platform.get('page_token')
-
-        youtube_campaign = campaign['youtube_campaign']
-        access_token = youtube_campaign.get('access_token')
+        access_token = platform.get('token')
         if not access_token :
             print("no access token")
             return
