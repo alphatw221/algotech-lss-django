@@ -58,7 +58,7 @@ class User(models.Model):
         AuthUser, on_delete=models.CASCADE, related_name="api_users", null=True, blank=True, default=None)
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
 
 class UserSerializer(serializers.ModelSerializer):

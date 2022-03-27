@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'mail',
     'cron',
     'corsheaders',
+    'django_extensions'
 ]
 
 LOGGING = {
@@ -138,7 +139,7 @@ ROOT_URLCONF = 'lss.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates'),],
+        'DIRS': [os.path.join(BASE_DIR, 'templates'), ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -238,7 +239,7 @@ LANGUAGES = [
     ('id', 'Indonesian'),
 ]
 
-SUPPORTED_LANGUAGES={
+SUPPORTED_LANGUAGES = {
     'en',
     'zh-hans',
     'zh-hant',
@@ -274,7 +275,8 @@ SUPPORTED_PLATFORMS = [
     ("instagram", "Instagram"),
 ]
 
-HITPAY_API_URL = 'https://api.hit-pay.com/v1/payment-requests'  ## https://api.sandbox.hit-pay.com/v1/
+# https://api.sandbox.hit-pay.com/v1/
+HITPAY_API_URL = 'https://api.hit-pay.com/v1/payment-requests'
 HITPAY_API_KEY = 'a17041b2c841f88263faaed459e1579a592a431acf8b69e044645d28d4a1c316'
 HITPAY_SECRET_SALT = '9ntt8RQoPtP9NXlO36aZTpP5wK10vFWbsw45KjaBGNzfYiU75cUJ3LLCEqMLGUO9'
 
@@ -339,12 +341,12 @@ GCP_PROJECT_ID = "liveshowseller"
 
 # mail app
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'mail.liveshowseller.com' ## smtp.gmail.com
+EMAIL_HOST = 'mail.liveshowseller.com'  # smtp.gmail.com
 EMAIL_PORT = 465
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
-EMAIL_HOST_USER = 'noreply@liveshowseller.com' ## derekhwang@accoladeglobal.net
-EMAIL_HOST_PASSWORD = 'bq5^82DrrpQ4' ## jyhudyfbvpmewjsc
+EMAIL_HOST_USER = 'noreply@liveshowseller.com'  # derekhwang@accoladeglobal.net
+EMAIL_HOST_PASSWORD = 'bq5^82DrrpQ4'  # jyhudyfbvpmewjsc
 
 # cron app
 CRON_CLASSES = [
