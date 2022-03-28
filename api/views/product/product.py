@@ -157,12 +157,10 @@ class ProductViewSet(viewsets.ModelViewSet):
     @api_error_handler
     def update_product_to_campaign(self, request, pk=None):
         
-        api_user, campaign_id ,platform_id ,platform_name, order_code , max_order_amount, qty_for_sale, customer_removable , customer_editable  = getparams(
+        api_user, campaign_id , order_code , max_order_amount, qty_for_sale, customer_removable , customer_editable  = getparams(
             request,
             (
                 "campaign_id", 
-                "platform_id", 
-                "platform_name" , 
                 "order_code", 
                 "max_order_amount", 
                 "qty_for_sale", 
@@ -170,10 +168,8 @@ class ProductViewSet(viewsets.ModelViewSet):
                 "customer_editable" 
             ), with_user=True, seller=True)
 
-
-        platform = Verify.get_platform(api_user, platform_name, platform_id)
-        user_subscription = Verify.get_user_subscription_from_platform(platform)
-        campaign = Verify.get_campaign_from_platform(platform, campaign_id)
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        campaign = Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
         product = Verify.get_product_from_user_subscription(user_subscription,  pk)
 
         campaign_product = CampaignProduct.objects.create(
