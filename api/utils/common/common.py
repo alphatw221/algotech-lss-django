@@ -2,6 +2,7 @@ from api.utils.error_handle.error.api_error import ApiVerifyError
 
 def getparams(request, params: tuple, with_user=True, seller=True):
     ret=[]
+    print (request.user)
     if with_user:
         if seller:
             if not request.user.api_users.filter(type='user').exists():

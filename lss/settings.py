@@ -280,6 +280,8 @@ HITPAY_API_URL = 'https://api.hit-pay.com/v1/payment-requests'
 HITPAY_API_KEY = 'a17041b2c841f88263faaed459e1579a592a431acf8b69e044645d28d4a1c316'
 HITPAY_SECRET_SALT = '9ntt8RQoPtP9NXlO36aZTpP5wK10vFWbsw45KjaBGNzfYiU75cUJ3LLCEqMLGUO9'
 
+PAYMONGO_SECRET_KEY = 'sk_test_kXkD4NBMYZixy8dJ8GV6br4u'
+
 # Facebook
 FACEBOOK_API_URL = "https://graph.facebook.com"
 FACEBOOK_API_URL_V12 = "https://graph.facebook.com/v12.0/"
