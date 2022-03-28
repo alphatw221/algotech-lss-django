@@ -1,6 +1,6 @@
 import urllib
 
-import stripe
+import stripe, base64
 from django.shortcuts import redirect
 from rest_framework import views, viewsets, status
 import paypalrestsdk, json
@@ -38,7 +38,7 @@ from backend.i18n.payment_comfirm_mail import i18n_get_mail_content, i18n_get_ma
 from api.utils.error_handle.error_handler.email_error_handle import email_error_handler
 from mail.sender.sender import send_smtp_mail
 from django.shortcuts import redirect
-
+import requests
 
 
 platform_dict = {'facebook':FacebookPage, 'youtube':YoutubeChannel, 'instagram':InstagramProfile}
@@ -765,3 +765,74 @@ class PaymentViewSet(viewsets.GenericViewSet):
         # api_user, pre_order, order_product, campaign_product, qty = Verify.PreOrderApi.FromBuyer.verify(request, pk)
 
 
+    @action(detail=False, methods=['POST'], url_path=r'paymongo_create_link')
+    @api_error_handler
+    def paymongo_create_link(self, request, pk=None):
+        order_id = request.query_params.get('order_id')
+
+        amount = db.api_order.find_one({'id': int(order_id)})['total'] * 100
+        amount = 10000
+
+        message_bytes = settings.PAYMONGO_SECRET_KEY.encode('ascii')
+        base64_bytes = base64.b64encode(message_bytes)
+        secret_key = base64_bytes.decode('ascii')
+
+        url = "https://api.paymongo.com/v1/links"
+        payload = {
+            "data": {
+                "attributes": {
+                    "amount": amount,
+                    "description": f"Order_{order_id}",
+                    "remarks": ""
+                },
+            }
+        }
+        headers = {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Authorization": f"Basic {secret_key}"
+        }
+
+        response = requests.request("POST", url, json=payload, headers=headers)
+        payMongoResponse = json.loads(response.text)
+        response = {
+            'checkout_url': payMongoResponse['data']['attributes']['checkout_url'],
+            'reference_number': payMongoResponse['data']['attributes']['reference_number']
+        }
+
+        return Response(response, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['GET'], url_path=r'paymongo_retrieve_link')
+    @api_error_handler
+    def paymongo_get_link(self, request, pk=None):
+        reference_number = request.query_params.get('reference_number')
+        # order_id = request.query_params.get('order_id')
+
+        message_bytes = settings.PAYMONGO_SECRET_KEY.encode('ascii')
+        base64_bytes = base64.b64encode(message_bytes)
+        secret_key = base64_bytes.decode('ascii')
+
+        url = "https://api.paymongo.com/v1/links"
+        params = {
+            "reference_number": reference_number
+        }
+        headers = {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Authorization": f"Basic {secret_key}"
+        }
+
+        response = requests.request("GET", url, params=params, headers=headers)
+        payMongoResponse = json.loads(response.text)
+        response = {
+            'order_id': payMongoResponse['data'][0]['attributes']['description'].split('_')[1],
+            'order_status': payMongoResponse['data'][0]['attributes']['status']
+        }
+
+        if payMongoResponse['data'][0]['attributes']['status'] == 'paid':
+            db.api_order.update(
+                {'id': int(payMongoResponse['data'][0]['attributes']['description'].split('_')[1])},
+                {'$set': {'status': 'complete'}}
+            )
+
+        return Response(response, status=status.HTTP_200_OK)
