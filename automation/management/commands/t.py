@@ -198,4 +198,4 @@ class Command(BaseCommand):
     def test_text_classifier(self):
         from backend.api.nlp.classify import classify_comment_v1
 
-        print(classify_comment_v1(texts=[['Deliver Delivery delivery'],['payment payment payment'],['delivery delivery delivery'],['hi']],threshold=0.7))
+        print(classify_comment_v1(texts=[['Deliver Delivery delivery','payment payment payment']],threshold=0.7))
