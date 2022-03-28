@@ -1,4 +1,6 @@
 
+from api.models.facebook.facebook_page import FacebookPageInfoSerializer
+from api.models.instagram.instagram_profile import InstagramProfileInfoSerializer
 from api.models.user.facebook_info import FacebookInfoSerializer
 from api.models.user.user_plan import UserPlan
 from django.contrib import admin
@@ -7,6 +9,7 @@ from djongo import models
 from rest_framework import serializers
 
 from api.models.user.user_subscription import UserSubscription
+from api.models.youtube.youtube_channel import YoutubeChannelInfoSerializer
 
 
 class User(models.Model):
@@ -76,6 +79,42 @@ class UserSerializer(serializers.ModelSerializer):
     payment_meta = serializers.JSONField(default=dict)
 
 
+class UserSerializerForDealerList(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        exclude = ['auth_user','payment_meta','meta','user_plan','user_subscription','created_at','updated_at']
+    facebook_info = serializers.JSONField(default=dict)
+    instagram_info = serializers.JSONField(default=dict)
+    youtube_info = serializers.JSONField(default=dict)
+    google_info = serializers.JSONField(default=dict)
+class UserSubscriptionSerializerDealerList(serializers.ModelSerializer):
+    class Meta:
+        model = UserSubscription
+        fields = [
+                'id', 
+                'name',
+                'description', 
+                'remark', 
+                'type', 
+                'status', 
+                'lang',
+                'facebook_pages',
+                'instagram_profiles',
+                'youtube_channels',
+                'user_plan',
+                'expired_at',
+                'users'
+                ]
+
+    facebook_pages = FacebookPageInfoSerializer(
+        many=True, read_only=True, default=list)
+    instagram_profiles = InstagramProfileInfoSerializer(
+        many=True, read_only=True, default=list)
+    youtube_channels = YoutubeChannelInfoSerializer(
+        many=True, read_only=True, default=list)
+
+    user_plan = serializers.JSONField(default=dict, required=False)
+    users = UserSerializerForDealerList(many=True, read_only=True, default=list)
 class UserAdmin(admin.ModelAdmin):
     model = User
     list_display = [field.name for field in User._meta.fields]

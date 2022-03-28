@@ -6,8 +6,8 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from api.code.subscription_code_manager import SubscriptionCodeManager
 from api.models.campaign.campaign import InstagramCampaignSerializer
 from api.models.instagram.instagram_profile import InstagramProfileInfoSerializer, InstagramProfileSerializer
-from api.models.user.user import User
-from api.models.user.user_subscription import UserSubscription, UserSubscriptionSerializer, UserSubscriptionSerializerMeta, UserSubscriptionSerializerSimplify, UserSubscriptionSerializerCreate
+from api.models.user.user import User,UserSubscriptionSerializerDealerList
+from api.models.user.user_subscription import UserSubscription, UserSubscriptionSerializer, UserSubscriptionSerializerForDealerRetrieve, UserSubscriptionSerializerMeta, UserSubscriptionSerializerSimplify, UserSubscriptionSerializerCreate
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework import status
@@ -53,7 +53,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
     filterset_fields = []
     pagination_class = UserSubscriptionPagination
 
-    @action(detail=False, methods=['POST'], url_path=r'create_user_subscription', permission_classes=(IsAdminUser,))
+    @action(detail=False, methods=['POST'], url_path=r'admin_create_user_subscription', permission_classes=(IsAdminUser,))
     @api_error_handler
     def create_user_subscription(self, request):
         print(request.data)
@@ -63,7 +63,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         user_subscription = serializer.save()
         return Response(UserSubscriptionSerializer(user_subscription).data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['POST'], url_path=r'create_activate_code', permission_classes=(IsAdminUser,))
+    @action(detail=False, methods=['POST'], url_path=r'admin_create_activate_code', permission_classes=(IsAdminUser,))
     @api_error_handler
     def create_activate_code(self, request):
         user_subscription_id, maximum_usage_count, interval = getdata(request, ('user_subscription_id','maximum_usage_count','interval'))
@@ -79,7 +79,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         return Response(subscription_page_data, status=status.HTTP_200_OK)
 
 
-    @action(detail=True, methods=['GET'], url_path=r'add_platform', permission_classes=(IsAdminUser,))
+    @action(detail=True, methods=['GET'], url_path=r'admin_add_platform', permission_classes=(IsAdminUser,))
     @api_error_handler
     def add_platform(self, request, pk=None):
         api_user, platform_name, platform_id = getparams(request, ('platform_name', 'platform_id'), with_user=True, seller=True)
@@ -95,7 +95,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
         return Response({'message': "add platform success"}, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['GET'], url_path=r'remove_platform', permission_classes=(IsAdminUser,))
+    @action(detail=True, methods=['GET'], url_path=r'admin_remove_platform', permission_classes=(IsAdminUser,))
     @api_error_handler
     def remove_platform(self, request, pk=None):
         api_user, platform_name, platform_id = getparams(request, ('platform_name', 'platform_id'), with_user=True, seller=True)
@@ -281,7 +281,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
         return Response(UserSubscriptionSerializerMeta(user_subscription).data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['GET'], url_path=r'search_list', permission_classes=(IsAdminUser,))
+    @action(detail=False, methods=['GET'], url_path=r'admin_search_list', permission_classes=(IsAdminUser,))
     @api_error_handler
     def search_user_subscription(self, request):
         search_column = request.query_params.get('search_column')
@@ -542,20 +542,34 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
 
 
-    @action(detail=False, methods=['GET'], url_path=r'dealer_list', permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['GET'], url_path=r'dealer_search_list', permission_classes=(IsAuthenticated,))
     @api_error_handler
-    def dealer_list_subscriber(self, request):
-        api_user = Verify.get_seller_user(request)
-        dealer_user_subscription = Verify.get_dealer_user_subscription_from_api_user(api_user)
-        
-        return Response(UserSubscriptionSerializerSimplify(dealer_user_subscription.subscribers.all(),many=True).data, status=status.HTTP_200_OK)
+    def dealer_search_list_subscriber(self, request):
 
+        api_user, search_column, keyword = getparams(request,('search_column','keyword'),with_user=True, seller=True)
+        dealer_user_subscription = Verify.get_dealer_user_subscription_from_api_user(api_user)
+
+        queryset = dealer_user_subscription.subscribers.all()
+
+        if search_column and keyword and search_column!='undefined' and keyword != 'undefined': 
+            kwargs = { search_column + '__icontains': keyword }
+            queryset = queryset.filter(**kwargs)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = UserSubscriptionSerializerDealerList(page, many=True)
+            result = self.get_paginated_response(serializer.data)
+            data = result.data
+        else:
+            serializer = UserSubscriptionSerializerDealerList(queryset, many=True)
+            data = serializer.data
+
+        return Response(data, status=status.HTTP_200_OK)
     
     @action(detail=True, methods=['GET'], url_path=r'dealer_retrieve', permission_classes=(IsAuthenticated,))
     @api_error_handler
-    def dealer_list_subscriber(self, request, pk=None):
+    def dealer_retrieve_subscriber(self, request, pk=None):
         api_user = Verify.get_seller_user(request)
         dealer_user_subscription = Verify.get_dealer_user_subscription_from_api_user(api_user)
         user_subscription = Verify.get_user_subscription_from_dealer_user_subscription(dealer_user_subscription,pk)
 
-        return Response(UserSubscriptionSerializer(user_subscription).data, status=status.HTTP_200_OK)
+        return Response(UserSubscriptionSerializerForDealerRetrieve(user_subscription).data, status=status.HTTP_200_OK)

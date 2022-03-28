@@ -1,3 +1,4 @@
+from email.policy import default
 from pyexpat import model
 from api.models.facebook.facebook_page import (FacebookPage,
                                                FacebookPageInfoSerializer)
@@ -12,13 +13,14 @@ from django.conf import settings
 
 
 class UserSubscription(models.Model):
+
     TYPE_CHOICES = [
         ('trial', 'Trial'),
         ('lite', 'Lite'),
         ('standard', 'Standard'),
         ('premium', 'Premium'),
         ('pay per use', 'Pay Per Use'),
-        {'dealer','Dealer'}
+        ('dealer','Dealer')
     ]
 
     class Meta:
@@ -70,11 +72,11 @@ class UserSubscriptionSerializer(serializers.ModelSerializer):
         read_only_fields = ['created_at', 'modified_at']
 
     facebook_pages = FacebookPageInfoSerializer(
-        many=True, read_only=True)
+        many=True, read_only=True, default=list)
     instagram_profiles = InstagramProfileInfoSerializer(
-        many=True, read_only=True)
+        many=True, read_only=True, default=list)
     youtube_channels = YoutubeChannelInfoSerializer(
-        many=True, read_only=True)
+        many=True, read_only=True, default=list)
 
     meta = serializers.JSONField(default=dict)
     meta_payment = serializers.JSONField(default=dict)
@@ -82,6 +84,20 @@ class UserSubscriptionSerializer(serializers.ModelSerializer):
     meta_country = serializers.JSONField(default=dict)
     user_plan = serializers.JSONField(default=dict, required=False)
 
+
+
+class UserSubscriptionSerializerForDealerRetrieve(serializers.ModelSerializer):
+    class Meta:
+        model = UserSubscription
+        exclude=['created_at', 'updated_at','meta_payment','meta_logistic','meta_country','meta_code','meta']
+
+    facebook_pages = FacebookPageInfoSerializer(
+        many=True, read_only=True, default=list)
+    instagram_profiles = InstagramProfileInfoSerializer(
+        many=True, read_only=True, default=list)
+    youtube_channels = YoutubeChannelInfoSerializer(
+        many=True, read_only=True, default=list)
+    user_plan = serializers.JSONField(default=dict, required=False)
     
 
 class UserSubscriptionSerializerCreate(UserSubscriptionSerializer):
@@ -90,11 +106,20 @@ class UserSubscriptionSerializerCreate(UserSubscriptionSerializer):
         fields = ['name', 'description', 'remark', 'type', 'status', 'lang']
         read_only_fields = ['created_at', 'modified_at']
 
-class UserSubscriptionSerializerSimplify(UserSubscriptionSerializer):
+class UserSubscriptionSerializerSimplify(serializers.ModelSerializer):
     class Meta:
         model = UserSubscription
-        fields = ['id', 'meta', 'meta_country', 'name',
-                  'description', 'remark', 'type', 'status', 'lang']
+        fields = [
+            'id', 
+            'meta', 
+            'meta_country', 
+            'name',
+            'description', 
+            'remark', 
+            'type', 
+            'status', 
+            'lang'
+            ]
         read_only_fields = ['created_at', 'modified_at']
 
 
