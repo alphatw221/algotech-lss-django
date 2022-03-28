@@ -82,9 +82,9 @@ class CampaignViewSet(viewsets.ModelViewSet):
         campaigns = user_subscription.campaigns.all()
         
         if campaign_status == 'history':
-            campaigns = campaigns.filter(end_at__lt=datetime.now())
+            campaigns = campaigns.filter(end_at__lt=datetime.utcnow())
         elif campaign_status == 'schedule':
-            campaigns = campaigns.filter(end_at__gte=datetime.now())
+            campaigns = campaigns.filter(end_at__gte=datetime.utcnow())
         if key_word:
             campaigns = campaigns.filter(title__icontains=str(key_word))
         if order_by:
@@ -120,7 +120,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
         # json_data['youtube_channel'] = platform.id if platform_name == 'youtube' else None
 
         # json_data['instagram_profile'] = platform.id if platform_name == 'instagram' else None
-
+        print(json_data)
         serializer = CampaignSerializerCreate(data=json_data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
