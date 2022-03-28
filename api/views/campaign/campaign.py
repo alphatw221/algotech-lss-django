@@ -61,7 +61,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
         campaign = Verify.get_campaign_from_user_subscription(user_subscription,pk)
 
-        return Response(CampaignSerializer(campaign).data, status=status.HTTP_200_OK)
+        return Response(CampaignSerializerRetreive(campaign).data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['GET'], url_path=r'retrieve_campaign_buyer')
     @api_error_handler
@@ -76,7 +76,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'], url_path=r'list_campaign', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def list_campaign(self, request):
-        api_user, key_word, campaign_status, order_by = getparams(request,("key_word", "campaign_status", "order_by"), with_user=True, seller=True)
+        api_user, key_word, campaign_status, order_by = getparams(request,("key_word", "status", "order_by"), with_user=True, seller=True)
         
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
         campaigns = user_subscription.campaigns.all()

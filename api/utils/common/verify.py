@@ -184,6 +184,20 @@ class Verify():
         # return user_subscription
 
     @staticmethod
+    def get_dealer_user_subscription_from_api_user(api_user):
+        user_subscription = api_user.user_subscription
+        if not user_subscription:
+            raise ApiVerifyError("no user_subscription")
+        if user_subscription.type != "dealer":
+            raise ApiVerifyError("not dealer")
+        return user_subscription
+
+    def get_user_subscription_from_dealer_user_subscription(dealer_user_subscription,user_subscription_id):
+        if not dealer_user_subscription.subscribers.filter(id=user_subscription_id).exists():
+            raise ApiVerifyError("no user_subscription")
+        return dealer_user_subscription.subscribers.get(id=user_subscription_id)
+
+    @staticmethod
     def get_facebook_page_from_user_subscription(user_subscription, facebook_page_id):
         if not user_subscription.facebook_pages.filter(id=facebook_page_id).exists():
             raise ApiVerifyError("facebook page not bound to user_subscription")

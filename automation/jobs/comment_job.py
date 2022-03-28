@@ -1,11 +1,12 @@
 import os
 import django
-from django.conf import settings
+
 try:
     os.environ['DJANGO_SETTINGS_MODULE'] = 'lss.settings'  # for rq_job
     django.setup()
 except Exception:
     pass
+from django.conf import settings
 from api.utils.common.order_helper import PreOrderHelper, PreOrderErrors
 
 from backend.utils.text_processing.command_processor import \
@@ -149,11 +150,7 @@ def comment_responding(platform_name, platform, campaign, pre_order, comment, ca
         if not live_chat_id:
             return
 
-
-        # access_token = platform.get('page_token')
-
-        youtube_campaign = campaign['youtube_campaign']
-        access_token = youtube_campaign.get('access_token')
+        access_token = platform.get('token')
         if not access_token :
             print("no access token")
             return

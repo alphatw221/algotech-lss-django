@@ -18,6 +18,7 @@ class UserSubscription(models.Model):
         ('standard', 'Standard'),
         ('premium', 'Premium'),
         ('pay per use', 'Pay Per Use'),
+        {'dealer','Dealer'}
     ]
 
     class Meta:
@@ -52,6 +53,8 @@ class UserSubscription(models.Model):
     user_plan = models.JSONField(null=True, blank=True, default=dict)
 
     expired_at = models.DateTimeField(null=True, blank=True, default=None)
+
+    dealer = models.ForeignKey("self", on_delete=models.SET_NULL, null=True, related_name="subscribers")
 
 
 
