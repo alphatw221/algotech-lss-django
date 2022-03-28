@@ -61,4 +61,4 @@ class RestApiJsonCaller:
             return 0, {'RestApiJsonCaller error': e}
 
     def __get_url(self):
-        return f"{self.domain_url}/{f'{self.path}/' if self.path else ''}"
+        return f"{self.domain_url}/{f'{self.path}' if self.path else ''}"

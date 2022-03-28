@@ -41,7 +41,8 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.add_user_subscription_user()
+        self.test_text_classifier()
+        # self.add_user_subscription_user()
         # self.lucky_draw_test()
         # from backend.google_cloud_monitoring.google_cloud_monitoring import CommentQueueLengthMetric
         # CommentQueueLengthMetric.create_metric_descriptor()
@@ -193,3 +194,8 @@ class Command(BaseCommand):
 #         return hash("sha256", $ascii);
     def add_user_subscription_user(self):
         UserSubscription.objects.get(id=1).root_users.add(User.objects.get(id=44))
+
+    def test_text_classifier(self):
+        from backend.api.nlp.classify import classify_comment_v1
+
+        print(classify_comment_v1(texts=[['Deliver Delivery delivery'],['payment payment payment'],['delivery delivery delivery'],['hi']],threshold=0.7))

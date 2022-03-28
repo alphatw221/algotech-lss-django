@@ -62,6 +62,10 @@ def capture_facebook(campaign):
     facebook_page = db.api_facebook_page.find_one(
         {"id": campaign['facebook_page_id']})
 
+    if not facebook_page:
+        print("no facebook_page found")
+        return
+
     page_token = facebook_page.get('token')
     facebook_campaign = campaign.get('facebook_campaign',{})
     post_id = facebook_campaign.get('post_id', '')
@@ -283,18 +287,23 @@ def capture_instagram(campaign):
     
 
     # temperery use facebook_page as platform
-    if not campaign['facebook_page_id']:
-        return
-
-    facebook_page = db.api_facebook_page.find_one(
-        {"id": campaign['facebook_page_id']})
-
     # if not campaign['instagram_profile_id']:
     #     return
-    # instagram_post = db.api_instagram_profile.find_one(
-    #     {'id': int(campaign['instagram_profile_id'])})
 
-    page_token = facebook_page['token']
+    # facebook_page = db.api_.find_one(
+    #     {"id": campaign['facebook_page_id']})
+
+    if not campaign['instagram_profile_id']:
+        return
+
+    instagram_profile = db.api_instagram_profile.find_one(
+        {'id': int(campaign['instagram_profile_id'])})
+
+    if not instagram_profile:
+        print("no instagram_profile found")
+        return
+
+    page_token = instagram_profile['token']
     instagram_campaign = campaign['instagram_campaign']
     live_media_id = instagram_campaign.get('live_media_id')
 
@@ -359,7 +368,7 @@ def capture_instagram(campaign):
                 "customer_name": from_info[1]['from']['username'],  #
                 "image": img_url}   #
             db.api_campaign_comment.insert_one(uni_format_comment)
-            comment_queue.enqueue(comment_job, args=(campaign, 'instagram', facebook_page,
+            comment_queue.enqueue(comment_job, args=(campaign, 'instagram', instagram_profile,
                                                         uni_format_comment, order_codes_mapping), result_ttl=10, failure_ttl=10)
 
         if keep_capturing:
