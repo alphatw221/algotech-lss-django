@@ -64,7 +64,7 @@ class Campaign(models.Model):
     meta_logistic = models.JSONField(default=dict, null=True, blank=dict)
 
     def __str__(self):
-        return self.title
+        return str(self.title)
 
 
 class FacebookCampaignSerializer(serializers.Serializer):
@@ -98,11 +98,11 @@ class CampaignSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['created_at', 'modified_at']
 
-    facebook_page = FacebookPageInfoSerializer(read_only=True)
+    facebook_page = FacebookPageInfoSerializer(default=dict)
     facebook_campaign = FacebookCampaignSerializer(default=dict)
-    youtube_channel = YoutubeChannelInfoSerializer(read_only=True)
+    youtube_channel = YoutubeChannelInfoSerializer(default=dict)
     youtube_campaign = YoutubeCampaignSerializer(default=dict)
-    instagram_profile = InstagramProfileInfoSerializer(read_only=True)
+    instagram_profile = InstagramProfileInfoSerializer(default=dict)
     instagram_campaign = InstagramCampaignSerializer(default=dict)
 
     meta = serializers.JSONField(default=dict)
