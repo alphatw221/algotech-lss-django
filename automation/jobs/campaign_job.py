@@ -121,7 +121,8 @@ def capture_facebook(campaign):
                 "customer_id": comment['from']['id'],
                 "customer_name": comment['from']['name'],
                 "image": comment['from']['picture']['data']['url'],
-                "categories":classify_comment_v1(texts=[[comment['message']]],threshold=0.8)}
+                "categories":list(classify_comment_v1(texts=[[comment['message']]],threshold=0.8))
+                }
             db.api_campaign_comment.insert_one(uni_format_comment)
             comment_queue.enqueue(comment_job, args=(campaign, 'facebook', facebook_page,
                                   uni_format_comment, order_codes_mapping), result_ttl=10, failure_ttl=10)
