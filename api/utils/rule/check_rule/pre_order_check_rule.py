@@ -88,7 +88,8 @@ class PreOrderCheckRule():
     def allow_checkout(**kwargs):
 
         api_user = kwargs.get('api_user')
-        campaign = kwargs.get('campaign')
+        pre_order = kwargs.get('pre_order')
+        campaign = pre_order.campaign
 
         if api_user and api_user.type=="user":
             return

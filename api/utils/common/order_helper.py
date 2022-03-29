@@ -201,6 +201,7 @@ class PreOrderHelper():
 
                     PreOrderCheckoutRuleChecker.check(**{
                         'api_user':api_user,
+                        'pre_order':pre_order,
                         'api_pre_order':api_pre_order,
                         })
 
