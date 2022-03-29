@@ -1,6 +1,7 @@
 from django.db.models.query import RawQuerySet
 from pymongo import message
 from requests.api import get
+from api.utils.rule.check_rule.pre_order_check_rule import PreOrderCheckRule
 from api.utils.rule.rule_checker.pre_order_rule_checker import PreOrderAddProductRuleChecker, PreOrderCheckoutRuleChecker, PreOrderDeleteProductRuleChecker, PreOrderUpdateProductRuleChecker
 from backend.pymongo.mongodb import db, client, get_incremented_filed
 from django.conf import settings
@@ -276,8 +277,12 @@ class PreOrderHelper():
         with client.start_session() as session:
             # try:
             with session.start_transaction():
-                qty_difference = cls._check_stock(
-                    api_campaign_product, original_qty=0, request_qty=qty)
+
+                ret = PreOrderCheckRule.is_stock_avaliable(**{'api_campaign_product':api_campaign_product,'qty':qty})
+                qty_difference = ret.get('qty_difference')
+
+                # qty_difference = cls._check_stock(
+                #     api_campaign_product, original_qty=0, request_qty=qty)
 
                 increment_id = get_incremented_filed(
                     collection_name="api_order_product", field_name="id")
@@ -347,8 +352,14 @@ class PreOrderHelper():
                 api_order_product = db.api_order_product.find_one(
                     {"pre_order_id": api_pre_order['id'], "campaign_product_id": api_campaign_product['id']}, session=session)
 
-                qty_difference = cls._check_stock(
-                    api_campaign_product, original_qty=api_order_product['qty'], request_qty=qty)
+                # api_campaign_product = kwargs.get('api_campaign_product')
+                # request_qty = kwargs.get('qty')
+                # api_order_product = kwargs.get('api_order_product')
+
+                ret = PreOrderCheckRule.is_stock_avaliable(**{'api_campaign_product':api_campaign_product,'qty':qty,'api_order_product':api_order_product})
+                qty_difference = ret.get('qty_difference')
+                # qty_difference = cls._check_stock(
+                #     api_campaign_product, original_qty=api_order_product['qty'], request_qty=qty)
 
                 db.api_campaign_product.update_one(
                     {'id': api_campaign_product['id']}, {"$inc": {'qty_sold': qty_difference}}, session=session)
