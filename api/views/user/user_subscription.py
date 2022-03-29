@@ -198,6 +198,25 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         user_subscription = serializer.save()
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['POST'], url_path=r'update_paymongo', permission_classes=(IsAuthenticated,))
+    @api_error_handler
+    def update_paymongo(self, request):
+        api_user, platform_name, platform_id = getparams(request, ('platform_name', 'platform_id'), with_user=True, seller=True)
+
+        platform = Verify.get_platform(api_user, platform_name, platform_id)
+        user_subscription = Verify.get_user_subscription_from_platform(platform)
+
+        meta_payment = user_subscription.meta_payment
+        meta_payment['paymongo'] = request.data
+
+        serializer = UserSubscriptionSerializerMeta(
+            user_subscription, data={"meta_payment": meta_payment}, partial=True)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        user_subscription = serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['POST'], url_path=r'update_direct_payment', parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated,))
     @api_error_handler
