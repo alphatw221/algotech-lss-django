@@ -15,8 +15,8 @@ from api.utils.error_handle.error_handler.api_error_handler import api_error_han
 from api.utils.error_handle.error_handler.add_or_update_by_comment_error_handler import add_or_update_by_comment_error_handler
 from pymongo import errors as pymongo_errors
 
-
 class PreOrderHelper():
+
 
     @classmethod
     def update_product(cls, api_user, pre_order, order_product, campaign_product, qty):

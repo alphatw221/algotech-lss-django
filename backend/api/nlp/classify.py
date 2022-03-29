@@ -17,7 +17,6 @@ def classify_comment_v1(texts,threshold=0.7):
     predictions = np.array(response.get("predictions"))
     max_index = np.argmax(predictions,axis=1)+1
     threshold_filter = np.sum((predictions>threshold),axis=1)
+    index = max_index*threshold_filter
 
-    index=np.where(threshold_filter,max_index,0)
-    
-    return categories[index]
+    return list(categories[index])
