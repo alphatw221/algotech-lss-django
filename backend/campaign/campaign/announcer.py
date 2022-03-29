@@ -52,6 +52,7 @@ class CampaignAnnouncer:
             CampaignAnnouncerError('Campagin not found.')
 
         result = {}
+        #TODO yt and ig comment 
         if (facebook_page := campaign.facebook_page) and campaign.facebook_campaign:
             text = i18n_func(*args, lang=facebook_page.lang)
             result['text'] = text
