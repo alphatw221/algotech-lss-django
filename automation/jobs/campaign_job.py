@@ -257,7 +257,7 @@ def capture_youtube(campaign):
                 "customer_name": comment['authorDetails']['displayName'],
                 "image": comment['authorDetails']['profileImageUrl'],
                 "live_chat_id": live_chat_id,
-                "categories":classify_comment_v1(texts=[[comment['message']]],threshold=0.8)
+                "categories":classify_comment_v1(texts=[[comment['snippet']['displayMessage']]],threshold=0.8)
             }
             db.api_campaign_comment.insert_one(uni_format_comment)
 
@@ -370,7 +370,7 @@ def capture_instagram(campaign):
                 "customer_id": from_info[1]['from']['username'],   #
                 "customer_name": from_info[1]['from']['username'],  #
                 "image": img_url,
-                "categories":classify_comment_v1(texts=[[comment['message']]],threshold=0.8)
+                "categories":classify_comment_v1(texts=[[comment['text']]],threshold=0.8)
                 }   #
             db.api_campaign_comment.insert_one(uni_format_comment)
             comment_queue.enqueue(comment_job, args=(campaign, 'instagram', instagram_profile,
@@ -461,7 +461,7 @@ def capture_youtube_video(campaign, youtube_channel):
                 "customer_id": comment['snippet']['topLevelComment']['snippet']['authorChannelId']['value'],
                 "customer_name": comment['snippet']['topLevelComment']['snippet']['authorDisplayName'],
                 "image": comment['snippet']['topLevelComment']['snippet']['authorProfileImageUrl'],
-                "categories":classify_comment_v1(texts=[[comment['message']]],threshold=0.8)
+                "categories":classify_comment_v1(texts=[[comment['snippet']['topLevelComment']['snippet']['textDisplay']]],threshold=0.8)
             }
             db.api_campaign_comment.insert_one(uni_format_comment)
 
