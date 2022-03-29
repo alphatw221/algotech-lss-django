@@ -25,17 +25,18 @@ class PreOrderCheckRule():
         if not qty:
             raise PreOrderErrors.PreOrderException(
                 'qty can not be zero or negitive')
-        return qty
+        return {'qty': qty}
 
     @staticmethod
     def is_stock_avaliable(**kwargs):
         api_campaign_product = kwargs.get('api_campaign_product')
-        request_qty = kwargs.get('api_campaign_product')
-        original_qty = kwargs.get('api_campaign_product')
+        request_qty = kwargs.get('qty')
+        api_order_product = kwargs.get('api_order_product')
+        original_qty = api_order_product['qty'] if api_order_product else 0
         qty_difference = int(request_qty)-original_qty
         if qty_difference and api_campaign_product["qty_for_sale"]-api_campaign_product["qty_sold"] < qty_difference:
             raise PreOrderErrors.UnderStock("out of stock")
-        return qty_difference
+        return {"qty_difference" : qty_difference}
 
     @staticmethod
     def is_order_product_removeable(**kwargs):

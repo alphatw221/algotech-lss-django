@@ -41,7 +41,7 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.test_text_classifier()
+        self.test_check_rule()
         # self.add_user_subscription_user()
         # self.lucky_draw_test()
         # from backend.google_cloud_monitoring.google_cloud_monitoring import CommentQueueLengthMetric
@@ -199,3 +199,21 @@ class Command(BaseCommand):
         from backend.api.nlp.classify import classify_comment_v1
 
         print(classify_comment_v1(texts=[['Deliver Delivery delivery','payment payment payment']],threshold=0.7))
+
+    def test_check_rule(self):
+        from api.utils.common.order_helper import PreOrderHelper
+        from api.models.user.user import User
+        from api.models.order.pre_order import PreOrder
+        from api.models.campaign.campaign_product import CampaignProduct
+        from api.models.order.order_product import OrderProduct
+
+        api_user = User.objects.get(id=1)
+        pre_order = PreOrder.objects.get(id=557)
+        # campaign_product = CampaignProduct.objects.get(id=7400)
+        
+
+        # order_product = OrderProduct.objects.get(id=252458)
+        # PreOrderHelper.add_product(api_user,pre_order,campaign_product,1)
+        # PreOrderHelper.update_product(api_user,pre_order,order_product,campaign_product,2)
+        # PreOrderHelper.delete_product(api_user,pre_order,order_product,campaign_product)
+        PreOrderHelper.checkout(api_user,pre_order)
