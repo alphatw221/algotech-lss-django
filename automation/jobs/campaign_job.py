@@ -23,7 +23,7 @@ from backend.api.youtube.viedo import api_youtube_get_video_info_with_access_tok
 from api.utils.error_handle.error_handler.campaign_job_error_handler import campaign_job_error_handler
 from api.utils.error_handle.error_handler.capture_platform_error_handler import capture_platform_error_handler
 import traceback
-
+from backend.api.nlp.classify import classify_comment_v1
 class OrderCodesMappingSingleton:
 
     order_codes_mapping = None
@@ -61,6 +61,10 @@ def capture_facebook(campaign):
 
     facebook_page = db.api_facebook_page.find_one(
         {"id": campaign['facebook_page_id']})
+
+    if not facebook_page:
+        print("no facebook_page found")
+        return
 
     page_token = facebook_page.get('token')
     facebook_campaign = campaign.get('facebook_campaign',{})
@@ -116,7 +120,9 @@ def capture_facebook(campaign):
                 "created_time": comment['created_time'],
                 "customer_id": comment['from']['id'],
                 "customer_name": comment['from']['name'],
-                "image": comment['from']['picture']['data']['url']}
+                "image": comment['from']['picture']['data']['url'],
+                "categories":classify_comment_v1(texts=[[comment['message']]],threshold=0.8)
+                }
             db.api_campaign_comment.insert_one(uni_format_comment)
             comment_queue.enqueue(comment_job, args=(campaign, 'facebook', facebook_page,
                                   uni_format_comment, order_codes_mapping), result_ttl=10, failure_ttl=10)
@@ -250,7 +256,8 @@ def capture_youtube(campaign):
                 "customer_id": comment['authorDetails']['channelId'],
                 "customer_name": comment['authorDetails']['displayName'],
                 "image": comment['authorDetails']['profileImageUrl'],
-                "live_chat_id": live_chat_id
+                "live_chat_id": live_chat_id,
+                "categories":classify_comment_v1(texts=[[comment['snippet']['displayMessage']]],threshold=0.8)
             }
             db.api_campaign_comment.insert_one(uni_format_comment)
 
@@ -283,18 +290,23 @@ def capture_instagram(campaign):
     
 
     # temperery use facebook_page as platform
-    if not campaign['facebook_page_id']:
-        return
-
-    facebook_page = db.api_facebook_page.find_one(
-        {"id": campaign['facebook_page_id']})
-
     # if not campaign['instagram_profile_id']:
     #     return
-    # instagram_post = db.api_instagram_profile.find_one(
-    #     {'id': int(campaign['instagram_profile_id'])})
 
-    page_token = facebook_page['token']
+    # facebook_page = db.api_.find_one(
+    #     {"id": campaign['facebook_page_id']})
+
+    if not campaign['instagram_profile_id']:
+        return
+
+    instagram_profile = db.api_instagram_profile.find_one(
+        {'id': int(campaign['instagram_profile_id'])})
+
+    if not instagram_profile:
+        print("no instagram_profile found")
+        return
+
+    page_token = instagram_profile['token']
     instagram_campaign = campaign['instagram_campaign']
     live_media_id = instagram_campaign.get('live_media_id')
 
@@ -357,9 +369,11 @@ def capture_instagram(campaign):
                 "created_time": comment['timestamp'],  #parse to timestamp
                 "customer_id": from_info[1]['from']['username'],   #
                 "customer_name": from_info[1]['from']['username'],  #
-                "image": img_url}   #
+                "image": img_url,
+                "categories":classify_comment_v1(texts=[[comment['text']]],threshold=0.8)
+                }   #
             db.api_campaign_comment.insert_one(uni_format_comment)
-            comment_queue.enqueue(comment_job, args=(campaign, 'instagram', facebook_page,
+            comment_queue.enqueue(comment_job, args=(campaign, 'instagram', instagram_profile,
                                                         uni_format_comment, order_codes_mapping), result_ttl=10, failure_ttl=10)
 
         if keep_capturing:
@@ -447,6 +461,7 @@ def capture_youtube_video(campaign, youtube_channel):
                 "customer_id": comment['snippet']['topLevelComment']['snippet']['authorChannelId']['value'],
                 "customer_name": comment['snippet']['topLevelComment']['snippet']['authorDisplayName'],
                 "image": comment['snippet']['topLevelComment']['snippet']['authorProfileImageUrl'],
+                "categories":classify_comment_v1(texts=[[comment['snippet']['topLevelComment']['snippet']['textDisplay']]],threshold=0.8)
             }
             db.api_campaign_comment.insert_one(uni_format_comment)
 

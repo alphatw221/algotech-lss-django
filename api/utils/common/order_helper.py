@@ -1,6 +1,8 @@
 from django.db.models.query import RawQuerySet
 from pymongo import message
 from requests.api import get
+from api.utils.rule.check_rule.pre_order_check_rule import PreOrderCheckRule
+from api.utils.rule.rule_checker.pre_order_rule_checker import PreOrderAddProductRuleChecker, PreOrderCheckoutRuleChecker, PreOrderDeleteProductRuleChecker, PreOrderUpdateProductRuleChecker
 from backend.pymongo.mongodb import db, client, get_incremented_filed
 from django.conf import settings
 from datetime import datetime
@@ -15,8 +17,8 @@ from api.utils.error_handle.error_handler.api_error_handler import api_error_han
 from api.utils.error_handle.error_handler.add_or_update_by_comment_error_handler import add_or_update_by_comment_error_handler
 from pymongo import errors as pymongo_errors
 
-
 class PreOrderHelper():
+
 
     @classmethod
     def update_product(cls, api_user, pre_order, order_product, campaign_product, qty):
@@ -30,13 +32,16 @@ class PreOrderHelper():
                     api_campaign_product = db.api_campaign_product.find_one(
                         {"id": campaign_product.id}, session=session)
 
-                    cls._check_lock(api_user, api_pre_order)
-                    qty = cls._check_qty(api_campaign_product, qty)
-                    cls._check_type(api_campaign_product)
-                    cls._check_editable(api_user,api_campaign_product)
+                    ret = PreOrderUpdateProductRuleChecker.check(**{
+                        'api_user':api_user,
+                        'api_pre_order':api_pre_order,
+                        'api_order_product':api_order_product,
+                        'api_campaign_product':api_campaign_product,
+                        'qty':qty,
+                        })
 
-                    qty_difference = cls._check_stock(
-                        api_campaign_product, original_qty=api_order_product['qty'], request_qty=qty)
+                    qty = ret.get('qty')
+                    qty_difference = ret.get('qty_difference')
 
                     db.api_campaign_product.update_one(
                         {'id': api_campaign_product['id']}, {"$inc": {'qty_sold': qty_difference}}, session=session)
@@ -53,7 +58,7 @@ class PreOrderHelper():
                         {'id': pre_order.id},
                         {
                             "$set": {
-                                "lock_at": datetime.now(), # if api_user and api_user.type == 'customer' else None,
+                                "lock_at": datetime.now() if api_user and api_user.type == 'customer' else None,
                                 "products": products
                             },
                             "$inc": {
@@ -76,13 +81,15 @@ class PreOrderHelper():
                     api_campaign_product = db.api_campaign_product.find_one(
                         {"id": campaign_product.id}, session=session)
 
-                    cls._check_lock(api_user, api_pre_order)
-                    qty = cls._check_qty(api_campaign_product, qty)
-                    cls._check_addable(api_pre_order, api_campaign_product)
-                    cls._check_type(api_campaign_product)
-                    qty_difference = cls._check_stock(
-                        api_campaign_product, original_qty=0, request_qty=qty)
-
+                    ret = PreOrderAddProductRuleChecker.check(**{
+                        'api_user':api_user,
+                        'api_pre_order':api_pre_order,
+                        'api_campaign_product':api_campaign_product,
+                        'qty':qty,
+                        })
+                    qty = ret.get('qty')
+                    qty_difference = ret.get('qty_difference')
+                    
                     increment_id = get_incremented_filed(
                         collection_name='api_order_product', field_name='id')
                     template = api_order_product_template.copy()
@@ -151,8 +158,13 @@ class PreOrderHelper():
                     api_campaign_product = db.api_campaign_product.find_one(
                         {"id": campaign_product.id}, session=session)
 
-                    cls._check_lock(api_user, api_pre_order)
-                    cls._check_removeable(api_user, api_campaign_product)
+
+                    PreOrderDeleteProductRuleChecker.check(**{
+                        'api_user':api_user,
+                        'api_pre_order':api_pre_order,
+                        'api_order_product':api_order_product,
+                        'api_campaign_product':api_campaign_product,
+                        })
 
                     db.api_campaign_product.update_one(
                         {'id': api_campaign_product['id']}, {"$inc": {'qty_sold': -api_order_product['qty']}}, session=session)
@@ -187,9 +199,10 @@ class PreOrderHelper():
                     api_pre_order = db.api_pre_order.find_one(
                         {"id": pre_order.id}, session=session)
 
-                    cls._check_allow_checkout(api_user, pre_order.campaign)
-                    cls._check_lock(api_user, api_pre_order)
-                    cls._check_empty(api_pre_order)
+                    PreOrderCheckoutRuleChecker.check(**{
+                        'api_user':api_user,
+                        'api_pre_order':api_pre_order,
+                        })
 
                     api_pre_order['total']=api_pre_order['subtotal']+api_pre_order['shipping_cost']+api_pre_order['adjust_price']
 
@@ -202,7 +215,6 @@ class PreOrderHelper():
                     api_order_data['buyer_id'] = api_user.id
                     template = api_order_template.copy()
                     template.update(api_order_data)
-                    #TODO add api_user reference
                     db.api_order.insert_one(template, session=session)
 
                     db.api_order_product.update_many(
@@ -214,81 +226,7 @@ class PreOrderHelper():
                 raise pymongo_errors.PyMongoError("server busy, please try again later")
         return db.api_order.find_one({"id": increment_id}, {"_id": False})
 
-    @staticmethod
-    def _check_platform(platform, customer_id, customer_name):
-        pass
-
-    @staticmethod
-    def _check_lock(api_user, api_pre_order):
-        return
-        #2022.02.25 deactivated due to demo
-        if not api_user:
-            return
-        if api_user.type == 'customer':
-            return
-        if api_pre_order['lock_at'] and datetime.timestamp(api_pre_order['lock_at'])+settings.CART_LOCK_INTERVAL > datetime.timestamp(datetime.now()):
-            raise PreOrderErrors.PreOrderException('cart in use')
-
-    @staticmethod
-    def _check_qty(api_campaign_product, qty):
-        if not qty:
-            raise PreOrderErrors.PreOrderException('please enter qty')
-        qty = int(qty)
-        if not qty:
-            raise PreOrderErrors.PreOrderException(
-                'qty can not be zero or negitive')
-        return qty
-
-    @staticmethod
-    def _check_stock(api_campaign_product, original_qty, request_qty):
-        qty_difference = int(request_qty)-original_qty
-        if qty_difference and api_campaign_product["qty_for_sale"]-api_campaign_product["qty_sold"] < qty_difference:
-            raise PreOrderErrors.UnderStock("out of stock")
-        return qty_difference
-
-    @staticmethod
-    def _check_removeable(api_user, api_campaign_product):
-        if not api_user:
-            return
-        if api_user.type=="user":
-            return
-        if not api_campaign_product['customer_removable']:
-            raise PreOrderErrors.RemoveNotAllowed("not removable")
-
-    @staticmethod
-    def _check_editable(api_user, api_campaign_product):
-        if not api_user:
-            return
-        if api_user.type=="user":
-            return
-        if not api_campaign_product.get('customer_editable',False):
-            raise PreOrderErrors.EditNotAllowed("not editable")
-
-
-    @staticmethod
-    def _check_addable(api_pre_order, api_campaign_product):
-        if str(api_campaign_product["id"]) in api_pre_order["products"]:
-            raise PreOrderErrors.PreOrderException(
-                "product already in pre_order")
-
-    @staticmethod
-    def _check_empty(api_pre_order):
-        if not bool(api_pre_order['products']):
-            raise PreOrderErrors.PreOrderException('cart is empty')
-
-    @staticmethod
-    def _check_allow_checkout(api_user, campaign):
-        if api_user and api_user.type=="user":
-            return
-        if not campaign.meta.get('allow_checkout', 1):
-            raise PreOrderErrors.PreOrderException('check out not allow')
-
-    @staticmethod
-    def _check_type(api_campaign_product):
-        if api_campaign_product['type'] == 'lucky_draw' or api_campaign_product['type'] == 'lucky_draw-fast':
-            api_campaign_product['price'] = 0
-        elif api_campaign_product['type'] == 'n/a':
-            raise PreOrderErrors.UnderStock('out of stock')
+    
 
     @classmethod
     @add_or_update_by_comment_error_handler
@@ -339,8 +277,12 @@ class PreOrderHelper():
         with client.start_session() as session:
             # try:
             with session.start_transaction():
-                qty_difference = cls._check_stock(
-                    api_campaign_product, original_qty=0, request_qty=qty)
+
+                ret = PreOrderCheckRule.is_stock_avaliable(**{'api_campaign_product':api_campaign_product,'qty':qty})
+                qty_difference = ret.get('qty_difference')
+
+                # qty_difference = cls._check_stock(
+                #     api_campaign_product, original_qty=0, request_qty=qty)
 
                 increment_id = get_incremented_filed(
                     collection_name="api_order_product", field_name="id")
@@ -410,8 +352,14 @@ class PreOrderHelper():
                 api_order_product = db.api_order_product.find_one(
                     {"pre_order_id": api_pre_order['id'], "campaign_product_id": api_campaign_product['id']}, session=session)
 
-                qty_difference = cls._check_stock(
-                    api_campaign_product, original_qty=api_order_product['qty'], request_qty=qty)
+                # api_campaign_product = kwargs.get('api_campaign_product')
+                # request_qty = kwargs.get('qty')
+                # api_order_product = kwargs.get('api_order_product')
+
+                ret = PreOrderCheckRule.is_stock_avaliable(**{'api_campaign_product':api_campaign_product,'qty':qty,'api_order_product':api_order_product})
+                qty_difference = ret.get('qty_difference')
+                # qty_difference = cls._check_stock(
+                #     api_campaign_product, original_qty=api_order_product['qty'], request_qty=qty)
 
                 db.api_campaign_product.update_one(
                     {'id': api_campaign_product['id']}, {"$inc": {'qty_sold': qty_difference}}, session=session)

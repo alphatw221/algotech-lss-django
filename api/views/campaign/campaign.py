@@ -79,8 +79,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
         api_user, key_word, campaign_status, order_by = getparams(request,("key_word", "status", "order_by"), with_user=True, seller=True)
         
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
-        campaigns = user_subscription.campaigns.all()
-        
+        campaigns = user_subscription.campaigns.filter(id__isnull=False) # Due to problematic dirty data
         if campaign_status == 'history':
             campaigns = campaigns.filter(end_at__lt=datetime.utcnow())
         elif campaign_status == 'schedule':
@@ -89,7 +88,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
             campaigns = campaigns.filter(title__icontains=str(key_word))
         if order_by:
             campaigns = campaigns.order_by(order_by)
-
+        
         page = self.paginate_queryset(campaigns)
         if page is not None:
             serializer = self.get_serializer(page, many=True)

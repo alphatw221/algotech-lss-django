@@ -282,6 +282,9 @@ HITPAY_SECRET_SALT = '9ntt8RQoPtP9NXlO36aZTpP5wK10vFWbsw45KjaBGNzfYiU75cUJ3LLCEq
 
 PAYMONGO_SECRET_KEY = 'sk_test_kXkD4NBMYZixy8dJ8GV6br4u'
 
+#NLP
+NLP_COMPUTING_MACHINE_URL = "http://192.168.74.127:8501"
+
 # Facebook
 FACEBOOK_API_URL = "https://graph.facebook.com"
 FACEBOOK_API_URL_V12 = "https://graph.facebook.com/v12.0/"
