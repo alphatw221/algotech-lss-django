@@ -102,8 +102,8 @@ class PaymentViewSet(viewsets.GenericViewSet):
             "mode" : "payonly",
             "timezone" : timezone,
             "txndatetime" : txndatetime,
-            "responseSuccessURL" : f"{settings.GCP_API_LOADBALANCER_URL}/api/payment/ipg_payment_success?order_id={order_id}",
-            "responseFailURL" : f"{settings.GCP_API_LOADBALANCER_URL}/api/payment/ipg_payment_fail?order_id={order_id}",
+            "responseSuccessURL" : f"{settings.GCP_API_LOADBALANCER_URL}/api/payment/ipg_payment_success/?order_id={order_id}",
+            "responseFailURL" : f"{settings.GCP_API_LOADBALANCER_URL}/api/payment/ipg_payment_fail/?order_id={order_id}",
             "hash_algorithm" : "SHA256",
             "hash":createHash(chargetotal,currency,storeId,sharedSecret,timezone,txndatetime),
             "chargetotal" : chargetotal,
@@ -114,43 +114,68 @@ class PaymentViewSet(viewsets.GenericViewSet):
         # return Response({"url":"https://test.ipg-online.com/connect/gateway/processing","credential":credential}, status=status.HTTP_200_OK)
         
 
-    @action(detail=False, methods=['GET'], url_path=r'ipg_payment_success')
+    @action(detail=False, methods=['POST'], url_path=r'ipg_payment_success')
     @api_error_handler
     def ipg_payment_success(self, request):
 
+        # txndate_processed	# '30/03/22 15:41:16'
+        # ccbin	# '492482'
+        # timezone	# 'Asia/Singapore'
+        # oid	# 'C-d21a3b03-4c6b-45d1-a4d0-e16de0cc2241'
+        # cccountry	# 'TWN'
+        # expmonth	# '06'
+        # hash_algorithm	# 'SHA256'
+        # endpointTransactionId	# '208910903298'
+        # currency	# '702'
+        # processor_response_code	# '00'
+        # chargetotal	# '0.10'
+        # terminal_id	# '86221567'
+        # approval_code	# 'Y:048993:3556730117:PPX :208910903298'
+        # expyear	# '2022'
+        # response_hash	# '2caa9e26d241a23e22838755e671307a7b5f5ebfb9426a038baed14c688b0fb1'
+                        # '2caa9e26d241a23e22838755e671307a7b5f5ebfb9426a038baed14c688b0fb1'
+        # response_code_3dsecure	# '1'
+        # schemeTransactionId	# '382089367573454'
+        # tdate	# '1648635076'
+        # installments_interest	# 'false'
+        # bname	# 'Yi Hsueh Lin'
+        # ccbrand	# 'VISA'
+        # refnumber	# '208910903298'
+        # txntype	# 'sale'
+        # paymentMethod	# 'V'
+        # txndatetime	# '2022:03:30-18:10:33'
+        # cardnumber	# '(VISA) ... 5117'
+        # ipgTransactionId	# '73556730117'
+        # status	# 'APPROVED'
+
+        # approval_code|chargetotal|currency|txndatetime|storename
+
+        approval_code, chargetotal, currency, txndatetime, response_hash = getdata(request,("approval_code", "chargetotal", "currency", "txndatetime","response_hash"))
         order_id, = getparams(request, ('order_id',), with_user=False)
         order = Verify.get_order(order_id)
+        campaign = Verify.get_campaign_from_order(order)
+        firstdata = campaign.meta_payment.get('sg',{}).get('firstdata')   #TODO REMOVE SG layer
 
-        order.meta['ipg_success']=request.data
-        order.status="complete"
-        order.save()
+        if not firstdata:
+            raise ApiVerifyError('no firstdata credential')
 
-        print(request)
-        # return HttpResponseRedirect(redirect_to='https://www.google.com')
+        storeId = firstdata.get('ipg_storeId')
+        sharedSecret = firstdata.get('ipg_sharedSecret')
+
+        parameter_string = sharedSecret+approval_code+chargetotal+currency+txndatetime+storeId
+        ascii = binascii.b2a_hex(parameter_string.encode())   
+        hash = hashlib.sha256(ascii).hexdigest()
+
+
+        if  response_hash and response_hash == hash:
+            order.meta['ipg_success']=request.data
+            order.status="complete"
+            order.save()
+
         return HttpResponseRedirect(redirect_to=settings.WEB_SERVER_URL+f'/buyer/order/{order.id}/confirmation')
 
-        # ‘response_hash’
-        # resopnse code
-        # approval_code|chargetotal|currency|txndatetime|storename
-        order_id = request.query_params.get('order_id')
-
-        print(f"order_id {order_id}")
-
-        approval_code, oid, refnumber, trancaction_status, txndate_processed, ipgTransactionId, fail_reason, response_hash = getdata(request, ("approval_code", "oid", "refnumber", "status", "txndate_processed", "ipgTransactionId", "fail_reason", "response_hash"))
-
-
-        print(f"approval_code {approval_code}")
-        print(f"oid {oid}")
-        print(f"refnumber {refnumber}")
-        print(f"trancaction_status {trancaction_status}")
-        print(f"txndate_processed {txndate_processed}")
-        print(f"ipgTransactionId {ipgTransactionId}")
-        print(f"fail_reason {fail_reason}")
-        print(f"response_hash {response_hash}")
-
-        return HttpResponseRedirect(redirect_to='https://www.google.com')
-
-    @action(detail=False, methods=['GET'], url_path=r'ipg_payment_fail')
+        
+    @action(detail=False, methods=['POST'], url_path=r'ipg_payment_fail')
     @api_error_handler
     def ipg_payment_fail(self, request, pk=None):
 
@@ -160,23 +185,8 @@ class PaymentViewSet(viewsets.GenericViewSet):
         order.meta['ipg_fail']=request.data
         order.save()
         
-        print(request)
         return HttpResponseRedirect(redirect_to=settings.WEB_SERVER_URL+f'/buyer/order/{order.id}/confirmation')
-        approval_code, oid, refnumber, trancaction_status, approval_code, txndate_processed, ipgTransactionId, fail_reason, response_hash = getdata(request, ("approval_code", "oid", "refnumber", "status", "approval_code", "txndate_processed", "ipgTransactionId", "fail_reason", "response_hash"))
-
-
-        # OrderMetaModel::api_update($order_id, 'payment_info', $request->post('ipgTransactionId'));
-        # OrderMetaModel::api_update($order_id, 'payment_info_ccbrand', $request->post('ccbrand'));
-        # OrderMetaModel::api_update($order_id, 'payment_info_cardnumber', $request->post('cardnumber'));
-        # OrderMetaModel::api_update($order_id, 'payment_method', 'First Data IPG');
-
-        # (new OrderController)->checkout_process($campaign_id, $fb_psid, $order_id);
-        # (new EmailController)->send_order($order_id);
-        # return redirect()->route('page_confirmation', ['campaign_id' => $campaign_id, 'order_id' => $order_id]);
-
-
-        return Response(data, status=status.HTTP_200_OK)
-
+        
     @action(detail=False, methods=['POST'])
     def direct_payment(self, request, *args, **kwargs):
         platform_name = request.GET["platform_name"]
