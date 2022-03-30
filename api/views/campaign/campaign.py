@@ -68,7 +68,6 @@ class CampaignViewSet(viewsets.ModelViewSet):
     def retrieve_campaign_buyer(self, request, pk=None):
         campaign_data = db.api_campaign.find_one({'id': int(pk)})
         campaign_data.pop('_id', None)
-        print (campaign_data)
         # serializer = Campaign.objects.get(id=pk)
 
         return Response(campaign_data, status=status.HTTP_200_OK)
