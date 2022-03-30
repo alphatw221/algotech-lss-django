@@ -40,5 +40,6 @@ urlpatterns = [
          name='custom_token_verify'),
     path('backend/', include('backend.urls')),
     path("google-redirect/", TemplateView.as_view(template_name="google_test_login.html")),
-    path("index/", TemplateView.as_view(template_name="index.html"))
+    path("index/", TemplateView.as_view(template_name="index.html")),
+    path('ipg_test/',TemplateView.as_view(template_name="ipg_test.html") )
 ]

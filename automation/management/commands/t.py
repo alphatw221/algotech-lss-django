@@ -42,9 +42,7 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        # print (api_ig_get_post_comments('EAANwBngXqOABABTXjxXDwuIMmvZCkvTnNCIp77WTojNZCmdyBf5T58QqE3bVrYZCYps8Cdjeugzpvx44ZAK74gOlJ8VBH0pqZAfZBr7MwqtUFEbo4tNmjizJesaJLmlPd1ZBZApblKGAEkZAGcuxF0wU8NiZA6xZBZCLhdnda3JhmRl3SjKNblZAMQsZBy', '17924366216164577', 'aaaaaaaaaaaaa'))
-        
-        self.test_check_rule()
+        self.test_pre_order_helper()
         # self.add_user_subscription_user()
         # self.lucky_draw_test()
         # from backend.google_cloud_monitoring.google_cloud_monitoring import CommentQueueLengthMetric
@@ -211,12 +209,12 @@ class Command(BaseCommand):
         from api.models.order.order_product import OrderProduct
 
         api_user = User.objects.get(id=1)
-        pre_order = PreOrder.objects.get(id=557)
-        campaign_product = CampaignProduct.objects.get(id=7400)
+        pre_order = PreOrder.objects.get(id=506)
+        # campaign_product = CampaignProduct.objects.get(id=7400)
         
 
-        order_product = OrderProduct.objects.get(id=252464)
-        PreOrderHelper.add_product(api_user,pre_order,campaign_product,1)
-        PreOrderHelper.update_product(api_user,pre_order,order_product,2)
-        PreOrderHelper.delete_product(api_user,pre_order,order_product)
+        # order_product = OrderProduct.objects.get(id=252464)
+        # PreOrderHelper.add_product(api_user,pre_order,campaign_product,1)
+        # PreOrderHelper.update_product(api_user,pre_order,order_product,2)
+        # PreOrderHelper.delete_product(api_user,pre_order,order_product)
         PreOrderHelper.checkout(api_user,pre_order)

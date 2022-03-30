@@ -62,29 +62,43 @@ def send_email(order_id):
 class PaymentViewSet(viewsets.GenericViewSet):
     queryset = User.objects.none()
 
-    @action(detail=False, methods=['GET'], url_path=r'get_ipg_order_data', permission_classes=(IsAuthenticated))
+    @action(detail=False, methods=['GET'], url_path=r'get_ipg_order_data', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def get_ipg_order_data(self, request):
+
+        def createHash(chargetotal,currency,storeId,sharedSecret):
+            stringToHash = str(storeId) + str(getDateTime()) + str(chargetotal) + str(currency) + sharedSecret
+            ascii = binascii.b2a_hex(stringToHash.encode())   
+            hash_object = hashlib.sha1(ascii)
+            return hash_object.hexdigest()
+            
+        def getDateTime():
+            return datetime.datetime.now().strftime("%Y:%m:%d-%H:%M:%S")
+
+        # return Response({"hash":createHash("1","356"),"datetime":getDateTime()}, status=status.HTTP_200_OK)
 
         api_user, order_id = getparams(request,('order_id',),with_user=True, seller=False)
 
         order = Verify.get_order_by_api_user(api_user,order_id)
         campaign = Verify.get_campaign_from_order(order)
 
-        firstdata = campaign.meta_payment.get('firstdata')
+        firstdata = campaign.meta_payment.get('sg',{}).get('firstdata')   #TODO REMOVE SG layer
 
         if not firstdata:
             raise ApiVerifyError('no firstdata credential')
-
-        txndatetime = datetime.datetime.now().strftime("%Y:%m:%d-%H:%M:%S")
+        
         chargetotal = order.total
         currency = firstdata.get('ipg_currency')
-        storename = firstdata.get('ipg_storeId')
+        storeId = firstdata.get('ipg_storeId')
         timezone = firstdata.get('ipg_timezone')
-        secret = firstdata.get('ipg_sharedSecret')
+        sharedSecret = firstdata.get('ipg_sharedSecret')
 
 
         credential = {
+            "authenticateTransaction":"true",
+            "oid":"2002",
+            "full_bypass":"false",
+            "customerid":"123",
             "chargetotal" : chargetotal,
             # "checkoutoption" : "combinedpage",
             "currency" : currency,
@@ -95,22 +109,47 @@ class PaymentViewSet(viewsets.GenericViewSet):
             # "responseFailURL" : settings.GCP_API_LOADBALANCER_URL + f"/api/payment/ipg_payment_fail?order_id={order_id}",
             # "responseSuccessURL" : settings.GCP_API_LOADBALANCER_URL + f"/api/payment/ipg_payment_success?order_id={order_id}",
 
-            "storename" : storename,
+            "storename" : storeId,
             "timezone" : timezone,
-            "txndatetime" : txndatetime,
+            "txndatetime" : getDateTime(),
             "txntype" : "sale",
-            
+            "sharedsecret":sharedSecret,
+            "hash":createHash(chargetotal,currency,storeId,sharedSecret)
+
+
+
+
+            # 'storename' => $this->storeId,
+            # 'txntype' => 'sale',
+            # 'mode' => 'payonly',
+            # 'timezone' => $this->timezone,
+            # 'txndatetime' => $this->txndatetime,
+            # 'responseSuccessURL' => env('API_SERVER_URL') . '/api/payment/ipg_payment_success?order_id=' . $this->order->id,
+            # 'responseFailURL' =>  env('API_SERVER_URL') . '/api/payment/ipg_payment_fail?order_id=' . $this->order->id,
+            # 'hash_algorithm' => 'SHA256',
+            # 'hash' => $this->createHash(),
+            # 'chargetotal' => $this->chargetotal,
+            # 'currency' => $this->currency,
+
+
         }
 
-        stringToHash = str(storename) + str(txndatetime) + str(chargetotal) + str(currency) + str(secret)
+        # stringToHash = str(storename) + str(txndatetime) + str(chargetotal) + str(currency) + str(secret)
 
-        ascii = binascii.b2a_hex(stringToHash.encode('utf-8'))   
-        # ascii = binascii.b2a_base64()
-        # ascii = binascii.b2a_uu()
-        hash_object = hashlib.sha1(ascii)
-        hex_dig = hash_object.hexdigest()
+        # # storeId = "33995001"
+        # # sharedSecret = "sharedsecret"
+        # # stringToHash = str(storeId) + str(getDateTime()) + str(chargetotal) + str(currency) + sharedSecret
+        # # ascii = binascii.b2a_hex(stringToHash)   
+        # # hash_object = hashlib.sha1(ascii)
+        # # hex_dig = hash_object.hexdigest()
+        
+        # ascii = binascii.b2a_hex(stringToHash.encode())   
+        # # ascii = binascii.b2a_base64()
+        # # ascii = binascii.b2a_uu()
+        # hash_object = hashlib.sha1(ascii)
+        # hex_dig = hash_object.hexdigest()
 
-        credential['hash']= hex_dig
+        # credential['hash']= hex_dig
 
         return Response({"url":"https://test.ipg-online.com/connect/gateway/processing","credential":credential}, status=status.HTTP_200_OK)
 
@@ -549,21 +588,20 @@ class PaymentViewSet(viewsets.GenericViewSet):
     @action(detail=False, methods=['POST'], url_path=r'stripe_pay', parser_classes=(FormParser,))
     @api_error_handler
     def stripe_pay_create_checkout_session(self, request):
-        # stripe.api_key = settings.STRIPE_API_KEY
+        
         try:
-            # api_user, order_id = getparams(
-            #     request, ("order_id",), seller=False)
-            # customer_user = Verify.get_customer_user(request)
             order_id = request.data["order_id"]
             order_object = Verify.get_order(order_id)
             campaign = order_object.campaign
             stripe.api_key = campaign.meta_payment.get("sg").get("stripe").get("stripe_secret")
+
+            # stripe.api_key = settings.STRIPE_API_KEY  # for testing
+            
             print("stripe.api_key", stripe.api_key)
             currency = "SGD" if order_object.currency is None else order_object.currency
             item_list = []
             for key, values in order_object.products.items():
-                image = urllib.parse.quote(f"{settings.GS_URL}{values.get('image', '')}")
-                print(image)
+                image = urllib.parse.quote(f"{settings.GS_URL}{values.get('image', '')}").replace("%3A", ":")
                 product = stripe.Product.create(
                     name=values.get("name", ""),
                     images=[image]
@@ -592,7 +630,6 @@ class PaymentViewSet(viewsets.GenericViewSet):
                         'coupon': discount.id,
                     }
                 )
-            # stripe.Coupon.create(percent_off=20, duration="once")
             shipping_options = []
             if order_object.shipping_cost:
                 shipping_rate = stripe.ShippingRate.create(
@@ -628,15 +665,16 @@ class PaymentViewSet(viewsets.GenericViewSet):
                 discounts=discounts,
                 mode='payment',
                 success_url=settings.GCP_API_LOADBALANCER_URL + '/api/payment/strip_success?session_id={CHECKOUT_SESSION_ID}&order_id=' + str(order_object.id),
-                cancel_url=f"{settings.WEB_SERVER_URL}/payment/cancel",
+                cancel_url=f"{settings.GCP_API_LOADBALANCER_URL}/api/payment/strip_cancel?order_id={order_object.id}",
 
             )
-            print(checkout_session.url)
-            order_object.checkout_details["checkout_session_id"] = checkout_session.id
-            order_object.history[len(order_object.history) + 1] = {
+            
+            order_object.checkout_details["checkout_session"] = checkout_session
+            order_object.history[str(len(order_object.history) + 1)] = {
                 "action": "checkout",
-                "time": checkout_session
+                "time": pendulum.now("UTC").to_iso8601_string()
             }
+            order_object.save()
             return Response(checkout_session.url, status=status.HTTP_303_SEE_OTHER)
         except Exception as e:
             print(e)
@@ -652,25 +690,29 @@ class PaymentViewSet(viewsets.GenericViewSet):
             order_object = Verify.get_order(order_id)
             campaign_object = order_object.campaign
             stripe.api_key = campaign_object.meta_payment.get("sg").get("stripe").get("stripe_secret")
+            # stripe.api_key = settings.STRIPE_API_KEY # for testing
             print("stripe.api_key", stripe.api_key)
             session = stripe.checkout.Session.retrieve(request.GET["session_id"])
             payment_intent = stripe.PaymentIntent.retrieve(
                 session.payment_intent,
             )
-            print("datetime", datetime.datetime.fromtimestamp(payment_intent.created))
             if payment_intent.status == "succeeded":
-                checkout_details = {
+                after_pay_details = {
                     "client_secret": payment_intent.client_secret,
-                    "created": datetime.datetime.fromtimestamp(payment_intent.created),
+                    # "created": datetime.datetime.fromtimestamp(payment_intent.created),
                     "id": payment_intent.id,
                     "object": payment_intent.object,
                     "receipt_email": payment_intent.receipt_email,
                     "receipt_url": payment_intent.charges.data[0].receipt_url,
                 }
-                db.api_order.update_one(
-                    {'id': int(order_object.id)},
-                    {'$set': {'status': 'complete', 'checkout_details': checkout_details, 'payment_method': 'Stripe'}}
-                )
+                order_object.status = 'complete'
+                order_object.payment_method = 'Stripe'
+                order_object.checkout_details["after_pay_details"] = after_pay_details
+                order_object.history[str(len(order_object.history) + 1)] = {
+                    "action": "pay",
+                    "time": pendulum.now("UTC").to_iso8601_string()
+                }
+                order_object.save()
             return HttpResponseRedirect(redirect_to=f'{settings.WEB_SERVER_URL}/buyer/order/{order_object.id}/confirmation')
         except Exception as e:
             print(e)
@@ -680,33 +722,15 @@ class PaymentViewSet(viewsets.GenericViewSet):
     @api_error_handler
     def strip_cancel(self, request):
         try:
-            # stripe.api_key = settings.STRIPE_API_KEY
-            print("session_id", request.GET["session_id"])
             order_id = request.GET["order_id"]
             order_object = Verify.get_order(order_id)
-            campaign_object = order_object.campaign
-            stripe.api_key = campaign_object.meta_payment.get("sg").get("stripe").get("stripe_secret")
-            print("stripe.api_key", stripe.api_key)
-            session = stripe.checkout.Session.retrieve(request.GET["session_id"])
-            payment_intent = stripe.PaymentIntent.retrieve(
-                session.payment_intent,
-            )
-            print("datetime", datetime.datetime.fromtimestamp(payment_intent.created))
-            if payment_intent.status == "succeeded":
-                checkout_details = {
-                    "client_secret": payment_intent.client_secret,
-                    "created": datetime.datetime.fromtimestamp(payment_intent.created),
-                    "id": payment_intent.id,
-                    "object": payment_intent.object,
-                    "receipt_email": payment_intent.receipt_email,
-                    "receipt_url": payment_intent.charges.data[0].receipt_url,
-                }
-                db.api_order.update_one(
-                    {'id': int(order_object.id)},
-                    {'$set': {'status': 'complete', 'checkout_details': checkout_details, 'payment_method': 'Stripe'}}
-                )
+            order_object.history[str(len(order_object.history) + 1)] = {
+                "action": "back",
+                "time": pendulum.now("UTC").to_iso8601_string()
+            }
+            order_object.save()
             return HttpResponseRedirect(
-                redirect_to=f'{settings.WEB_SERVER_URL}/buyer/order/{order_object.id}/confirmation')
+                redirect_to=f'{settings.WEB_SERVER_URL}/buyer/order/{order_object.id}/payment')
         except Exception as e:
             print(e)
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
