@@ -382,6 +382,9 @@ class PaymentViewSet(viewsets.GenericViewSet):
         #     request, ("order_id", ))
 
         order_id = request.query_params.get('order_id')
+        order_object = Verify.get_order(order_id)
+        campaign = order_object.campaign
+        api_key = campaign.meta_payment.get("sg").get("hitpay").get("hitpay_api_key")
 
         # user_data = db.api_user.find_one({'id': api_user.id})
         # name = user_data['name']
@@ -402,7 +405,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         #     'reference_number': order_id,
         # }
         headers = {
-            'X-BUSINESS-API-KEY': settings.HITPAY_API_KEY,
+            'X-BUSINESS-API-KEY': api_key,
             'Content-Type': 'application/x-www-form-urlencoded',
             'X-Requested-With': 'XMLHttpRequest'
         }
@@ -454,12 +457,18 @@ class PaymentViewSet(viewsets.GenericViewSet):
     @action(detail=False, methods=['GET'], url_path=r'hit_pay_return_redirect')
     @api_error_handler
     def hit_pay_redirect(self, request):
+        order_id, status = request.query_params.get('order_id'), request.query_params.get('status') 
+        if status == 'canceled':
+            return redirect(settings.WEB_SERVER_URL + '/buyer/cart/' + order_id)
         time.sleep(2)
-        order_id, status = request.query_params.get('order_id'), ''
+        order_object = Verify.get_order(order_id)
+        campaign = order_object.campaign
+        api_key = campaign.meta_payment.get("sg").get("hitpay").get("hitpay_api_key")
+
         payment_request_id = db.api_order.find_one({'id': int(order_id)})['checkout_details']['hitpay']['payment_request_id']
 
         headers = {
-            'X-BUSINESS-API-KEY': settings.HITPAY_API_KEY,
+            'X-BUSINESS-API-KEY': api_key,
             'Content-Type': 'application/x-www-form-urlencoded',
             'X-Requested-With': 'XMLHttpRequest'
         }
@@ -475,7 +484,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             if _ret['id'] == payment_request_id:
                 status = _ret['status']
         if status == 'completed':
-            return redirect('https://v1login.liveshowseller.com/buyer/order/' + order_id + '/confirmation')
+            return redirect(settings.WEB_SERVER_URL + '/buyer/order/' + order_id + '/confirmation')
         #TODO else return redirect to order history page
 
 
@@ -753,10 +762,14 @@ class PaymentViewSet(viewsets.GenericViewSet):
     def paymongo_create_link(self, request, pk=None):
         order_id = request.query_params.get('order_id')
 
+        order_object = Verify.get_order(order_id)
+        campaign_object = order_object.campaign
+        secret_key = campaign_object.meta_payment.get("sg").get("paymongo").get("paymongo_secret")
+
         amount = db.api_order.find_one({'id': int(order_id)})['total'] * 100
         amount = 10000
 
-        message_bytes = settings.PAYMONGO_SECRET_KEY.encode('ascii')
+        message_bytes = secret_key.encode('ascii')
         base64_bytes = base64.b64encode(message_bytes)
         secret_key = base64_bytes.decode('ascii')
 
@@ -789,9 +802,13 @@ class PaymentViewSet(viewsets.GenericViewSet):
     @api_error_handler
     def paymongo_get_link(self, request, pk=None):
         reference_number = request.query_params.get('reference_number')
-        # order_id = request.query_params.get('order_id')
+        order_id = request.query_params.get('order_id')
 
-        message_bytes = settings.PAYMONGO_SECRET_KEY.encode('ascii')
+        order_object = Verify.get_order(order_id)
+        campaign_object = order_object.campaign
+        secret_key = campaign_object.meta_payment.get("sg").get("paymongo").get("paymongo_secret")
+
+        message_bytes = secret_key.encode('ascii')
         base64_bytes = base64.b64encode(message_bytes)
         secret_key = base64_bytes.decode('ascii')
 
