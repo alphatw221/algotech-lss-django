@@ -32,6 +32,7 @@ from api.models.product.product import Product
 from api.models.order.order import Order
 from api.models.order.order_product import OrderProduct
 import datetime
+from backend.api.instagram.post import api_ig_post_comment_on_media, api_ig_get_post_comments
 
 
 class Command(BaseCommand):
@@ -41,6 +42,8 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
+        # print (api_ig_get_post_comments('EAANwBngXqOABABTXjxXDwuIMmvZCkvTnNCIp77WTojNZCmdyBf5T58QqE3bVrYZCYps8Cdjeugzpvx44ZAK74gOlJ8VBH0pqZAfZBr7MwqtUFEbo4tNmjizJesaJLmlPd1ZBZApblKGAEkZAGcuxF0wU8NiZA6xZBZCLhdnda3JhmRl3SjKNblZAMQsZBy', '17924366216164577', 'aaaaaaaaaaaaa'))
+        
         self.test_check_rule()
         # self.add_user_subscription_user()
         # self.lucky_draw_test()

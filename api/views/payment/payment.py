@@ -476,7 +476,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
     def hit_pay_redirect(self, request):
         order_id, status = request.query_params.get('order_id'), request.query_params.get('status') 
         if status == 'canceled':
-            return redirect(settings.WEB_SERVER_URL + '/buyer/cart/' + order_id)
+            return redirect(settings.WEB_SERVER_URL + '/buyer/order/' + order_id + '/payment')
         time.sleep(2)
         order_object = Verify.get_order(order_id)
         campaign = order_object.campaign
