@@ -11,6 +11,10 @@ from backend.i18n.campaign_announcement import (
     i18n_get_campaign_announcement_product_sold_out)
 from backend.message_sending.facebook.campaign_announcement import \
     CampaignAnnouncementFacebookMessageAgent as FacebookMessageAgent
+from backend.api.youtube.live_chat import api_youtube_post_live_chat_comment
+
+from api.models.youtube.youtube_channel import YoutubeChannel
+
 
 
 class CampaignAnnouncerError(Exception):
@@ -58,6 +62,13 @@ class CampaignAnnouncer:
             result['text'] = text
             result['facebook'] = CampaignAnnouncer._facebook_announcement(
                 facebook_page, campaign.facebook_campaign, text)
+
+        if (youtube_channel := campaign.youtube_channel) and campaign.youtube_campaign:
+            text = i18n_func(*args, lang=youtube_channel.lang)
+            result['text'] = text
+            result['youtube'] = CampaignAnnouncer._youtube_announcement(
+                youtube_channel, campaign.youtube_campaign, text)
+
         return result
 
     @staticmethod
@@ -67,3 +78,11 @@ class CampaignAnnouncer:
 
         return FacebookMessageAgent.page_comment_on_post(
             facebook_page.token, facebook_campaign['post_id'], message_text)
+    
+    @staticmethod
+    def _youtube_announcement(youtube_channel: YoutubeChannel, youtube_campaign: dict, message_text: str):
+        if not youtube_channel.token and not youtube_campaign['live_chat_id']:
+            raise CampaignAnnouncerError('Missing page_token or live_chat_id')
+
+        return api_youtube_post_live_chat_comment(
+            youtube_channel.token, youtube_campaign['live_chat_id'], message_text)

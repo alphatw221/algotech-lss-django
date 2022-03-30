@@ -34,6 +34,13 @@ def api_ig_post_page_message_on_comment(page_token: str, comment_id: str, messag
                             data=data).post()
     return ret
 
+def api_ig_post_comment_on_media(page_token: str, post_id: str, message: str):
+    params = {
+        'message': message
+    }
+
+    return  FacebookApiV12Caller(f'{post_id}/comments', bearer_token=page_token, params=params).post()
+
 
 # def api_ig_get_comment_author():
 #     data = {
