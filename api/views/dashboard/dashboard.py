@@ -1,3 +1,4 @@
+from ssl import VerifyFlags
 from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -187,66 +188,71 @@ class DashboardViewSet(viewsets.ModelViewSet):
         return Response(campaignRank, status=status.HTTP_200_OK)
 
     #TODO rewrite campaign_id_list, caculating way 
-    @action(detail=False, methods=['GET'], url_path=r'campaign_manage_order')
+    @action(detail=False, methods=['GET'], url_path=r'campaign_manage_order', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def seller_total_sales(self, request):
-        api_user, platform, campaign, pre_order, order_product, campaign_product, qty, search = Verify.PreOrderApi.FromSeller.verify(request)
-        is_user = verify_seller_request(api_user)
-        campaign_id, user_id = campaign.id, int(api_user.id)
+        # api_user, platform, campaign, pre_order, order_product, campaign_product, qty, search = Verify.PreOrderApi.FromSeller.verify(request)
+        # is_user = verify_seller_request(api_user)
+
+        api_user, campaign_id=getparams(request, ( 'campaign_id', ), with_user=True, seller=True)
+
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        campaign = Verify.get_campaign_from_user_subscription(user_subscription,campaign_id)
+
+        user_id = int(api_user.id)
         manage_order = {}
 
-        if is_user:
-            campaigns = db.api_campaign.find({'created_by_id': user_id})
-            campaign_id_list, campaign_count, total_sales = [], 0, 0
-            for campaign in campaigns:
-                campaign_id_list.append(campaign['id'])
-                campaign_count += 1
+        campaigns = db.api_campaign.find({'created_by_id': user_id})
+        campaign_id_list, campaign_count, total_sales = [], 0, 0
+        for campaign in campaigns:
+            campaign_id_list.append(campaign['id'])
+            campaign_count += 1
 
-            order_complete_count = db.api_order.find({'campaign_id': {'$in': campaign_id_list}, 'status': 'complete'}).count()
-            order_proceed_count = db.api_order.find({'campaign_id': {'$in': campaign_id_list}, 'status': 'review'}).count()
-            pre_order_count = db.api_pre_order.find({'campaign_id': {'$in': campaign_id_list}}).count()
-            orders = db.api_order.find({'campaign_id': {'$in': campaign_id_list}})
-            for order in orders:
-                for key, val in order['products'].items():
-                    total_sales += val['subtotal']
+        order_complete_count = db.api_order.find({'campaign_id': {'$in': campaign_id_list}, 'status': 'complete'}).count()
+        order_proceed_count = db.api_order.find({'campaign_id': {'$in': campaign_id_list}, 'status': 'review'}).count()
+        pre_order_count = db.api_pre_order.find({'campaign_id': {'$in': campaign_id_list}}).count()
+        orders = db.api_order.find({'campaign_id': {'$in': campaign_id_list}})
+        for order in orders:
+            for key, val in order['products'].items():
+                total_sales += val['subtotal']
 
-            average_order_uncheck_rate = 0 if order_complete_count == 0 or order_proceed_count == 0 else order_complete_count / (order_complete_count + order_proceed_count) * 100
-            average_order_close_rate = 0 if order_complete_count == 0 or order_proceed_count == 0 or pre_order_count == 0 else order_complete_count / (order_complete_count + order_proceed_count + pre_order_count) * 100
-            average_sales = 0 if total_sales == 0 else total_sales / campaign_count  # 總campaign完成訂單總金額平均
-            average_comment_count = 0 if db.api_campaign_comment.find({'campaign_id': {'$in': campaign_id_list}}).count() == 0 else db.api_campaign_comment.find({'campaign_id': {'$in': campaign_id_list}}).count() / campaign_count
+        average_order_uncheck_rate = 0 if order_complete_count == 0 or order_proceed_count == 0 else order_complete_count / (order_complete_count + order_proceed_count) * 100
+        average_order_close_rate = 0 if order_complete_count == 0 or order_proceed_count == 0 or pre_order_count == 0 else order_complete_count / (order_complete_count + order_proceed_count + pre_order_count) * 100
+        average_sales = 0 if total_sales == 0 else total_sales / campaign_count  # 總campaign完成訂單總金額平均
+        average_comment_count = 0 if db.api_campaign_comment.find({'campaign_id': {'$in': campaign_id_list}}).count() == 0 else db.api_campaign_comment.find({'campaign_id': {'$in': campaign_id_list}}).count() / campaign_count
 
-            pre_order_qty, order_qty, complete_sales = 0, 0, 0
-            pre_orders = db.api_pre_order.find({'campaign_id': campaign_id})
-            for pre_order in pre_orders:
-                for key, val in pre_order['products'].items():
-                    pre_order_qty += val['qty']
-                    
-            orders = db.api_order.find({'campaign_id': campaign_id, 'status': 'complete'})
-            for order in orders:
-                for key, val in order['products'].items():
-                    order_qty += val['qty']
-                    complete_sales += val['subtotal']
+        pre_order_qty, order_qty, complete_sales = 0, 0, 0
+        pre_orders = db.api_pre_order.find({'campaign_id': campaign_id})
+        for pre_order in pre_orders:
+            for key, val in pre_order['products'].items():
+                pre_order_qty += val['qty']
+                
+        orders = db.api_order.find({'campaign_id': campaign_id, 'status': 'complete'})
+        for order in orders:
+            for key, val in order['products'].items():
+                order_qty += val['qty']
+                complete_sales += val['subtotal']
 
-            pre_order_count = db.api_pre_order.find({'campaign_id': campaign_id, 'subtotal': {'$ne': 0}}).count()
-            order_complete_count = db.api_order.find({'campaign_id': campaign_id, 'status': 'complete'}).count()
-            order_proceed_count = db.api_order.find({'campaign_id': campaign_id, 'status': 'review'}).count()
-            comment_count = db.api_campaign_comment.find({'campaign_id': campaign_id}).count()
+        pre_order_count = db.api_pre_order.find({'campaign_id': campaign_id, 'subtotal': {'$ne': 0}}).count()
+        order_complete_count = db.api_order.find({'campaign_id': campaign_id, 'status': 'complete'}).count()
+        order_proceed_count = db.api_order.find({'campaign_id': campaign_id, 'status': 'review'}).count()
+        comment_count = db.api_campaign_comment.find({'campaign_id': campaign_id}).count()
 
-            # 訂單成交量
-            close_rate = 0 if order_complete_count == 0 else order_complete_count / (order_complete_count + order_proceed_count) * 100
-            # 未完成付款
-            uncheckout_rate = 0 if order_complete_count == 0 or order_proceed_count == 0 and pre_order_count == 0  else order_proceed_count / (order_complete_count + order_proceed_count + pre_order_count) * 100
-            
-            manage_order['close_rate'] = close_rate
-            manage_order['complete_sales'] = complete_sales
-            manage_order['uncheckout_rate'] = uncheckout_rate
-            manage_order['comment_count'] = comment_count
-            manage_order['cart_qty'] = (pre_order_count + order_proceed_count)
-            manage_order['order_qty'] = order_complete_count
-            manage_order['close_rate_raise'] = close_rate - average_order_close_rate
-            manage_order['uncheckout_rate_raise'] = uncheckout_rate - average_order_uncheck_rate
-            manage_order['campaign_sales_raise'] = 0 if complete_sales == 0 or average_sales == 0 else complete_sales / average_sales
-            manage_order['comment_count_raise'] = 0 if comment_count == 0 or average_comment_count == 0 else comment_count / average_comment_count
+        # 訂單成交量
+        close_rate = 0 if order_complete_count == 0 else order_complete_count / (order_complete_count + order_proceed_count) * 100
+        # 未完成付款
+        uncheckout_rate = 0 if order_complete_count == 0 or order_proceed_count == 0 and pre_order_count == 0  else order_proceed_count / (order_complete_count + order_proceed_count + pre_order_count) * 100
+        
+        manage_order['close_rate'] = close_rate
+        manage_order['complete_sales'] = complete_sales
+        manage_order['uncheckout_rate'] = uncheckout_rate
+        manage_order['comment_count'] = comment_count
+        manage_order['cart_qty'] = (pre_order_count + order_proceed_count)
+        manage_order['order_qty'] = order_complete_count
+        manage_order['close_rate_raise'] = close_rate - average_order_close_rate
+        manage_order['uncheckout_rate_raise'] = uncheckout_rate - average_order_uncheck_rate
+        manage_order['campaign_sales_raise'] = 0 if complete_sales == 0 or average_sales == 0 else complete_sales / average_sales
+        manage_order['comment_count_raise'] = 0 if comment_count == 0 or average_comment_count == 0 else comment_count / average_comment_count
 
         return Response(manage_order, status=status.HTTP_200_OK)
                 
@@ -255,11 +261,10 @@ class DashboardViewSet(viewsets.ModelViewSet):
     @api_error_handler
     def get_merge_order_list(self, request):
 
-        api_user, platform_id, platform_name, campaign_id, search, page=getparams(request, ('platform_id', 'platform_name', 'campaign_id', 'search', 'page'))
+        api_user, campaign_id, search, page=getparams(request, ( 'campaign_id', 'search', 'page'),with_user=True, seller=True)
 
-        Verify.verify_user(api_user)
-        platform = Verify.get_platform(api_user, platform_name, platform_id)
-        campaign = Verify.get_campaign_from_platform(platform, campaign_id)
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        campaign = Verify.get_campaign_from_user_subscription(user_subscription,campaign_id)
 
         pre_orders_queryset = campaign.pre_orders.exclude(subtotal=0).order_by('created_at')
 
