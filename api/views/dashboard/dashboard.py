@@ -199,7 +199,7 @@ class DashboardViewSet(viewsets.ModelViewSet):
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
         campaign = Verify.get_campaign_from_user_subscription(user_subscription,campaign_id)
 
-        user_id = int(api_user.id)
+        user_id, campaign_id = int(api_user.id), int(campaign_id)
         manage_order = {}
 
         campaigns = db.api_campaign.find({'created_by_id': user_id})
