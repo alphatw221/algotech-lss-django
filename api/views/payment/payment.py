@@ -103,15 +103,15 @@ class PaymentViewSet(viewsets.GenericViewSet):
             "timezone" : timezone,
             "txndatetime" : txndatetime,
             "responseSuccessURL" : f"{settings.GCP_API_LOADBALANCER_URL}/api/payment/ipg_payment_success?order_id={order_id}",
-            "responseFailURL" : f"{settings.GCP_API_LOADBALANCER_URL}/api/payment/ipg_payment_fail?order_id='{order_id}",
+            "responseFailURL" : f"{settings.GCP_API_LOADBALANCER_URL}/api/payment/ipg_payment_fail?order_id={order_id}",
             "hash_algorithm" : "SHA256",
             "hash":createHash(chargetotal,currency,storeId,sharedSecret,timezone,txndatetime),
             "chargetotal" : chargetotal,
             "currency" : currency,
         }
         
-        # return Response({"url":"https://www4.ipg-online.com/connect/gateway/processing","credential":credential}, status=status.HTTP_200_OK)
-        return Response({"url":"https://test.ipg-online.com/connect/gateway/processing","credential":credential}, status=status.HTTP_200_OK)
+        return Response({"url":"https://www4.ipg-online.com/connect/gateway/processing","credential":credential}, status=status.HTTP_200_OK)
+        # return Response({"url":"https://test.ipg-online.com/connect/gateway/processing","credential":credential}, status=status.HTTP_200_OK)
         
 
     @action(detail=False, methods=['GET'], url_path=r'ipg_payment_success')
