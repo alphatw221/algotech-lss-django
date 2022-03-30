@@ -219,7 +219,7 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
         campaign_product = Verify.get_campaign_product_from_campaign(campaign, pk)
 
         if campaign.start_at and datetime.timestamp(datetime.now())>datetime.timestamp(campaign.start_at):
-            raise ApiVerifyError('campaign product not deletable after starting campaign')
+            raise ApiVerifyError("This campaign product can't be deleted because the campaign has already started.")
         
         #soft delete:
         campaign_product.campaign = None
