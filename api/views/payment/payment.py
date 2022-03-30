@@ -62,29 +62,43 @@ def send_email(order_id):
 class PaymentViewSet(viewsets.GenericViewSet):
     queryset = User.objects.none()
 
-    @action(detail=False, methods=['GET'], url_path=r'get_ipg_order_data', permission_classes=(IsAuthenticated))
+    @action(detail=False, methods=['GET'], url_path=r'get_ipg_order_data', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def get_ipg_order_data(self, request):
+
+        def createHash(chargetotal,currency,storeId,sharedSecret):
+            stringToHash = str(storeId) + str(getDateTime()) + str(chargetotal) + str(currency) + sharedSecret
+            ascii = binascii.b2a_hex(stringToHash.encode())   
+            hash_object = hashlib.sha1(ascii)
+            return hash_object.hexdigest()
+            
+        def getDateTime():
+            return datetime.datetime.now().strftime("%Y:%m:%d-%H:%M:%S")
+
+        # return Response({"hash":createHash("1","356"),"datetime":getDateTime()}, status=status.HTTP_200_OK)
 
         api_user, order_id = getparams(request,('order_id',),with_user=True, seller=False)
 
         order = Verify.get_order_by_api_user(api_user,order_id)
         campaign = Verify.get_campaign_from_order(order)
 
-        firstdata = campaign.meta_payment.get('firstdata')
+        firstdata = campaign.meta_payment.get('sg',{}).get('firstdata')   #TODO REMOVE SG layer
 
         if not firstdata:
             raise ApiVerifyError('no firstdata credential')
-
-        txndatetime = datetime.datetime.now().strftime("%Y:%m:%d-%H:%M:%S")
+        
         chargetotal = order.total
         currency = firstdata.get('ipg_currency')
-        storename = firstdata.get('ipg_storeId')
+        storeId = firstdata.get('ipg_storeId')
         timezone = firstdata.get('ipg_timezone')
-        secret = firstdata.get('ipg_sharedSecret')
+        sharedSecret = firstdata.get('ipg_sharedSecret')
 
 
         credential = {
+            "authenticateTransaction":"true",
+            "oid":"2002",
+            "full_bypass":"false",
+            "customerid":"123",
             "chargetotal" : chargetotal,
             # "checkoutoption" : "combinedpage",
             "currency" : currency,
@@ -95,22 +109,47 @@ class PaymentViewSet(viewsets.GenericViewSet):
             # "responseFailURL" : settings.GCP_API_LOADBALANCER_URL + f"/api/payment/ipg_payment_fail?order_id={order_id}",
             # "responseSuccessURL" : settings.GCP_API_LOADBALANCER_URL + f"/api/payment/ipg_payment_success?order_id={order_id}",
 
-            "storename" : storename,
+            "storename" : storeId,
             "timezone" : timezone,
-            "txndatetime" : txndatetime,
+            "txndatetime" : getDateTime(),
             "txntype" : "sale",
-            
+            "sharedsecret":sharedSecret,
+            "hash":createHash(chargetotal,currency,storeId,sharedSecret)
+
+
+
+
+            # 'storename' => $this->storeId,
+            # 'txntype' => 'sale',
+            # 'mode' => 'payonly',
+            # 'timezone' => $this->timezone,
+            # 'txndatetime' => $this->txndatetime,
+            # 'responseSuccessURL' => env('API_SERVER_URL') . '/api/payment/ipg_payment_success?order_id=' . $this->order->id,
+            # 'responseFailURL' =>  env('API_SERVER_URL') . '/api/payment/ipg_payment_fail?order_id=' . $this->order->id,
+            # 'hash_algorithm' => 'SHA256',
+            # 'hash' => $this->createHash(),
+            # 'chargetotal' => $this->chargetotal,
+            # 'currency' => $this->currency,
+
+
         }
 
-        stringToHash = str(storename) + str(txndatetime) + str(chargetotal) + str(currency) + str(secret)
+        # stringToHash = str(storename) + str(txndatetime) + str(chargetotal) + str(currency) + str(secret)
 
-        ascii = binascii.b2a_hex(stringToHash.encode('utf-8'))   
-        # ascii = binascii.b2a_base64()
-        # ascii = binascii.b2a_uu()
-        hash_object = hashlib.sha1(ascii)
-        hex_dig = hash_object.hexdigest()
+        # # storeId = "33995001"
+        # # sharedSecret = "sharedsecret"
+        # # stringToHash = str(storeId) + str(getDateTime()) + str(chargetotal) + str(currency) + sharedSecret
+        # # ascii = binascii.b2a_hex(stringToHash)   
+        # # hash_object = hashlib.sha1(ascii)
+        # # hex_dig = hash_object.hexdigest()
+        
+        # ascii = binascii.b2a_hex(stringToHash.encode())   
+        # # ascii = binascii.b2a_base64()
+        # # ascii = binascii.b2a_uu()
+        # hash_object = hashlib.sha1(ascii)
+        # hex_dig = hash_object.hexdigest()
 
-        credential['hash']= hex_dig
+        # credential['hash']= hex_dig
 
         return Response({"url":"https://test.ipg-online.com/connect/gateway/processing","credential":credential}, status=status.HTTP_200_OK)
 

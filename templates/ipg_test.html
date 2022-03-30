@@ -1,0 +1,89 @@
+<html>
+    <head>
+        <title>IPG Connect Sample for PHP(hashing)</title>
+        <script>
+            function pay_by_firstdata(){
+    
+            fetch(`http://127.0.0.1:8000/api/payment/get_ipg_order_data?order_id=${32340}`, {
+                method: 'GET',
+                mode: 'cors',
+                headers: new Headers({
+                    'Authorization': `Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjQ5MjE5MjM3LCJpYXQiOjE2NDg2MTQ0MzcsImp0aSI6Ijc4N2ViNzg3YTM4NTQwOGY5NDAyMmIxOTgwZDJkMjRjIiwidXNlcl9pZCI6ODEsImRhdGEiOnsiYXV0aF91c2VyX2lkIjo4MSwic2VsbGVyX2lkIjoxLCJjdXN0b21lcl9pZCI6IiIsIm5hbWUiOiJZaS1Ic3VlaCBMaW4ifX0.ApYNNikEN3QwtlHNZes6QcEpxPvhUQgA-gWZycUv4Ik`,
+                    'Content-Type': 'application/json'
+                })
+            }).then(res => {
+                if (!res.ok) throw res
+                return res.json()
+            }).then(res => {
+                console.log(res)
+                const firstdata_hidden_form = document.getElementById('firstdata_hidden_form')
+
+                firstdata_hidden_form.attr("action", res.url)
+                for (const [key, value] of Object.entries(res.credential)) {
+                    $('<input>').attr({
+                        type: 'text',
+                        name: key,
+                        value: value
+                    }).appendTo(firstdata_hidden_form);
+                }
+    
+    
+                this.firstdata_hidden_form.find('input[type=submit]').click();
+            }).catch(error => {
+                switch (error.status) {
+                    case 500:
+                        alert('Oops! Something went wrong when fetch data. Please contact tech support.')
+                        break
+                    case 404:
+                        error.json().then(e => alert(e.detail))
+                        break
+                    case 401:
+                        // error.json().then(e => console.log(e))
+                        GS.logout()
+                        location.href = `${GS.app_url}/login`
+                }
+            })
+        }
+        </script>
+    </head>
+    <body>
+        <p>
+        <h1>
+            Order Form
+        </h1>
+
+        <form method="post" action="https://test.ipg-online.com/connect/gateway/processing" id="firstdata_hidden_form">
+            <!-- <input type="text" name="storename" value="">
+            <input type="text" name="txntype" value=""/>
+            <input type="text" name="mode" value=""/>
+            <input type="text" name="timezone" value=""/>
+            <input type="text" name="txndatetime" value=""/>
+            <input type="text" name="hash_algorithm" value=""/>
+            <input type="text" name="hash" value=""/>
+            <input type="text" name="chargetotal" value=""/>
+            <input type="text" name="currency" value=""/>
+            <input type="text" name="responseSuccessURL" value=""/>
+            <input type="text" name="responseFailURL" value=""/> -->
+            <input type="submit" value="" style="visibility: hidden"> 
+        </form>
+
+        <button type="button" onclick="pay_by_firstdata()">submit</button>
+    </body>
+
+    
+</html>    
+
+<!-- {
+    "url": "https://test.ipg-online.com/connect/gateway/processing",
+    "credential": {
+        "chargetotal": 133.6,
+        "currency": "702",
+        "hash_algorithm": "SHA1",
+        "mode": "payonly",
+        "storename": "4530042983",
+        "timezone": "Asia/Singapore",
+        "txndatetime": "2022:03:30-04:42:40",
+        "txntype": "sale",
+        "hash": "c615fce2a63d06b4535237f37c7083aa08c94956"
+    }
+} -->
