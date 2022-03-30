@@ -158,6 +158,13 @@ class Verify():
         return Order.objects.get(id=order_id)
     
     @staticmethod
+    def get_order_by_api_user(api_user,order_id):
+        if not api_user.orders.filter(id=order_id).exists():
+            raise ApiVerifyError('order not found')
+        return api_user.orders.get(id=order_id)
+
+
+    @staticmethod
     def get_user_subscription(user_subscription_id):
         if not UserSubscription.objects.filter(id=user_subscription_id).exists():
             raise ApiVerifyError("user subscription not found")
@@ -221,7 +228,13 @@ class Verify():
             raise ApiVerifyError("no campaign found")
         campaign = Campaign.objects.get(id=campaign_id)
         return campaign
-    
+
+    @staticmethod
+    def get_campaign_from_order(order):
+        if not order.campaign:
+            raise ApiVerifyError("no campaign found")
+        return order.campaign
+
     @staticmethod
     def get_campaign_from_platform(platform, campaign_id):
         if not platform.campaigns.filter(id=campaign_id).exists():

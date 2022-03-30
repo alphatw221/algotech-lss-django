@@ -200,7 +200,7 @@ class Command(BaseCommand):
 
         print(classify_comment_v1(texts=[['Deliver Delivery delivery','payment payment payment']],threshold=0.7))
 
-    def test_check_rule(self):
+    def test_pre_order_helper(self):
         from api.utils.common.order_helper import PreOrderHelper
         from api.models.user.user import User
         from api.models.order.pre_order import PreOrder
@@ -209,11 +209,11 @@ class Command(BaseCommand):
 
         api_user = User.objects.get(id=1)
         pre_order = PreOrder.objects.get(id=557)
-        # campaign_product = CampaignProduct.objects.get(id=7400)
+        campaign_product = CampaignProduct.objects.get(id=7400)
         
 
-        # order_product = OrderProduct.objects.get(id=252458)
-        # PreOrderHelper.add_product(api_user,pre_order,campaign_product,1)
-        # PreOrderHelper.update_product(api_user,pre_order,order_product,campaign_product,2)
-        # PreOrderHelper.delete_product(api_user,pre_order,order_product,campaign_product)
+        order_product = OrderProduct.objects.get(id=252464)
+        PreOrderHelper.add_product(api_user,pre_order,campaign_product,1)
+        PreOrderHelper.update_product(api_user,pre_order,order_product,2)
+        PreOrderHelper.delete_product(api_user,pre_order,order_product)
         PreOrderHelper.checkout(api_user,pre_order)

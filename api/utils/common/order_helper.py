@@ -21,7 +21,7 @@ class PreOrderHelper():
 
 
     @classmethod
-    def update_product(cls, api_user, pre_order, order_product, campaign_product, qty):
+    def update_product(cls, api_user, pre_order, order_product, qty):
         with client.start_session() as session:
             try:
                 with session.start_transaction():
@@ -30,7 +30,7 @@ class PreOrderHelper():
                     api_order_product = db.api_order_product.find_one(
                         {"id": order_product.id}, session=session)
                     api_campaign_product = db.api_campaign_product.find_one(
-                        {"id": campaign_product.id}, session=session)
+                        {"id": api_order_product['campaign_product_id']}, session=session)
 
                     ret = PreOrderUpdateProductRuleChecker.check(**{
                         'api_user':api_user,
@@ -53,19 +53,23 @@ class PreOrderHelper():
                     products[str(api_campaign_product['id'])]['qty'] = qty
                     products[str(api_campaign_product['id'])]['subtotal'] = float(
                         qty*api_order_product['price'])
-                    print(qty_difference*api_campaign_product['price'])
+
+                    subtotal = api_pre_order['subtotal']+qty_difference*api_campaign_product['price']
+                    free_delivery = api_pre_order.get("free_delivery",False)
+                    shipping_cost = 0 if free_delivery else api_pre_order.get('shipping_cost',0)
+                    adjust_price = api_pre_order.get("adjust_price",0)
+                    total = subtotal+ float(shipping_cost)+float(adjust_price)
+
                     db.api_pre_order.update_one(
                         {'id': pre_order.id},
                         {
                             "$set": {
                                 "lock_at": datetime.now() if api_user and api_user.type == 'customer' else None,
-                                "products": products
-                            },
-                            "$inc": {
-                                "subtotal": qty_difference*api_campaign_product['price'],
+                                "products": products,
+                                "subtotal":subtotal,
+                                "total":total
                             }
-                        },
-                        session=session)
+                        },session=session)
             except pymongo_errors.PyMongoError as e:
                 print(e)
                 raise pymongo_errors.PyMongoError("server busy, please try again later")
@@ -129,16 +133,22 @@ class PreOrderHelper():
                         "qty": qty,
                         "subtotal": float(qty*api_campaign_product["price"])
                     }
+
+                    subtotal = api_pre_order['subtotal']+(qty_difference*api_campaign_product['price'])
+                    free_delivery = api_pre_order.get("free_delivery",False)
+                    shipping_cost = 0 if free_delivery else api_pre_order.get('shipping_cost',0)
+                    adjust_price = api_pre_order.get("adjust_price",0)
+                    total = subtotal+ float(shipping_cost)+float(adjust_price)
+
                     db.api_pre_order.update_one(
                         {'id': pre_order.id},
                         {
                             "$set": {
                                 "lock_at": datetime.now() if api_user and api_user.type == 'customer' else None,
-                                "products": products
+                                "products": products,
+                                "subtotal":subtotal,
+                                "total":total
                             },
-                            "$inc": {
-                                "subtotal": qty_difference*api_campaign_product['price'],
-                            }
                         },
                         session=session)
             except pymongo_errors.PyMongoError as e:
@@ -147,7 +157,7 @@ class PreOrderHelper():
         return db.api_order_product.find_one({"id": increment_id}, {"_id": False})
 
     @classmethod
-    def delete_product(cls, api_user, pre_order, order_product, campaign_product):
+    def delete_product(cls, api_user, pre_order, order_product):
         with client.start_session() as session:
             try:
                 with session.start_transaction():
@@ -155,8 +165,10 @@ class PreOrderHelper():
                         {"id": pre_order.id}, session=session)
                     api_order_product = db.api_order_product.find_one(
                         {"id": order_product.id}, session=session)
+
+                    campaign_product_id = api_order_product['campaign_product_id']
                     api_campaign_product = db.api_campaign_product.find_one(
-                        {"id": campaign_product.id}, session=session)
+                        {"id": campaign_product_id}, session=session)
 
 
                     PreOrderDeleteProductRuleChecker.check(**{
@@ -166,24 +178,31 @@ class PreOrderHelper():
                         'api_campaign_product':api_campaign_product,
                         })
 
-                    db.api_campaign_product.update_one(
-                        {'id': api_campaign_product['id']}, {"$inc": {'qty_sold': -api_order_product['qty']}}, session=session)
+                    if api_campaign_product:
+                        db.api_campaign_product.update_one(
+                            {'id': campaign_product_id}, {"$inc": {'qty_sold': -api_order_product['qty']}}, session=session)
 
                     db.api_order_product.delete_one(
                         {'id': api_order_product['id']}, session=session)
 
                     products = api_pre_order['products']
-                    del products[str(api_campaign_product['id'])]
+                    del products[str(campaign_product_id)]
+
+                    subtotal = api_pre_order['subtotal']-api_order_product['qty']*api_order_product['price']
+                    free_delivery = api_pre_order.get("free_delivery",False)
+                    shipping_cost = 0 if free_delivery else api_pre_order.get('shipping_cost',0)
+                    adjust_price = api_pre_order.get("adjust_price",0)
+                    total = subtotal+ float(shipping_cost)+float(adjust_price)
+
                     db.api_pre_order.update_one(
                         {'id': pre_order.id},
                         {
                             "$set": {
                                 "lock_at": datetime.now() if api_user and api_user.type == 'customer' else None,
-                                "products": products
+                                "products": products,
+                                "subtotal":subtotal,
+                                "total":total
                             },
-                            "$inc": {
-                                "subtotal": -api_order_product['qty']*api_order_product['price'],
-                            }
                         },
                         session=session)
             except pymongo_errors.PyMongoError as e:
@@ -210,8 +229,9 @@ class PreOrderHelper():
                     increment_id = get_incremented_filed(
                         collection_name="api_order", field_name="id")
                     api_order_data = api_pre_order.copy()
-                    api_order_data['id'] = increment_id
+
                     del api_order_data['_id']
+                    api_order_data['id'] = increment_id
                     api_order_data['created_at'] = datetime.utcnow()
                     api_order_data['buyer_id'] = api_user.id
                     template = api_order_template.copy()
@@ -232,7 +252,6 @@ class PreOrderHelper():
     @classmethod
     @add_or_update_by_comment_error_handler
     def add_or_update_by_comment(cls, api_pre_order, api_campaign_product, qty):
-        # try:
         if not api_campaign_product['status']:
             return RequestState.INVALID_PRODUCT_NOT_ACTIVATED
         if api_campaign_product['max_order_amount'] and \
@@ -244,7 +263,6 @@ class PreOrderHelper():
                 cls.add_product_by_comment(
                         api_pre_order, api_campaign_product, qty)
                 return RequestState.ADDED
-                # return None
             elif qty == 0:
                 return RequestState.INVALID_ADD_ZERO_QTY
             else:
@@ -257,33 +275,23 @@ class PreOrderHelper():
 
                 cls.update_product_by_comment(api_pre_order, api_campaign_product, qty)
                 return RequestState.UPDATED
-                # return None
             elif qty == 0:
                 if not api_campaign_product['customer_removable']:
                     return RequestState.INVALID_REMOVE_NOT_ALLOWED
-                # delete
                 cls.delete_product_by_comment(
                         api_pre_order, api_campaign_product)
                 return RequestState.DELETED
-                # return None
             else:
                 return RequestState.INVALID_NEGATIVE_QTY
 
-        # except PreOrderErrors.PreOrderException as e:
-        #     return e.state
 
     @classmethod
-    # @api_error_handler
     def add_product_by_comment(cls, api_pre_order, api_campaign_product, qty):
         with client.start_session() as session:
-            # try:
             with session.start_transaction():
 
                 ret = PreOrderCheckRule.is_stock_avaliable(**{'api_campaign_product':api_campaign_product,'qty':qty})
                 qty_difference = ret.get('qty_difference')
-
-                # qty_difference = cls._check_stock(
-                #     api_campaign_product, original_qty=0, request_qty=qty)
 
                 increment_id = get_incremented_filed(
                     collection_name="api_order_product", field_name="id")
@@ -326,41 +334,32 @@ class PreOrderHelper():
                     "subtotal": float(qty*api_campaign_product["price"])
                 }
 
+                subtotal = api_pre_order['subtotal']+(qty_difference*api_campaign_product['price'])
+                free_delivery = api_pre_order.get("free_delivery",False)
+                shipping_cost = 0 if free_delivery else api_pre_order.get('shipping_cost',0)
+                adjust_price = api_pre_order.get("adjust_price",0)
+                total = subtotal+ float(shipping_cost)+float(adjust_price)
+
                 db.api_pre_order.update_one(
                     {'id': api_pre_order['id']},
                     {
                         "$set": {
-                            "products": products
+                            "products": products,
+                            "subtotal":subtotal,
+                            "total":total
                         },
-                        "$inc": {
-                            "subtotal": qty_difference*api_campaign_product['price'],
-                        }
-                    },
-                    session=session)
-                # return True
-            # except pymongo_errors.PyMongoError as e:
-            #     print(e)
-            #     print('pymongo error!!!!')
-            #     return False
+                    },session=session)
 
     @classmethod
-    # @api_error_handler
     def update_product_by_comment(cls, api_pre_order, api_campaign_product, qty):
 
         with client.start_session() as session:
-            # try:
             with session.start_transaction():
                 api_order_product = db.api_order_product.find_one(
                     {"pre_order_id": api_pre_order['id'], "campaign_product_id": api_campaign_product['id']}, session=session)
 
-                # api_campaign_product = kwargs.get('api_campaign_product')
-                # request_qty = kwargs.get('qty')
-                # api_order_product = kwargs.get('api_order_product')
-
                 ret = PreOrderCheckRule.is_stock_avaliable(**{'api_campaign_product':api_campaign_product,'qty':qty,'api_order_product':api_order_product})
                 qty_difference = ret.get('qty_difference')
-                # qty_difference = cls._check_stock(
-                #     api_campaign_product, original_qty=api_order_product['qty'], request_qty=qty)
 
                 db.api_campaign_product.update_one(
                     {'id': api_campaign_product['id']}, {"$inc": {'qty_sold': qty_difference}}, session=session)
@@ -373,28 +372,27 @@ class PreOrderHelper():
                             ]['qty'] = qty
                 products[str(api_campaign_product['id'])]['subtotal'] = float(
                     qty*api_order_product['price'])
+
+                subtotal = api_pre_order['subtotal']+qty_difference*api_campaign_product['price']
+                free_delivery = api_pre_order.get("free_delivery",False)
+                shipping_cost = 0 if free_delivery else api_pre_order.get('shipping_cost',0)
+                adjust_price = api_pre_order.get("adjust_price",0)
+                total = subtotal+ float(shipping_cost)+float(adjust_price)
+
                 db.api_pre_order.update_one(
                     {'id': api_pre_order['id']},
                     {
                         "$set": {
-                            "products": products
-                        },
-                        "$inc": {
-                            "subtotal": qty_difference*api_campaign_product['price'],
+                            "products": products,
+                            "subtotal":subtotal,
+                            "total":total
                         }
                     },
                     session=session)
-                # return True
-            # except pymongo_errors.PyMongoError as e:
-            #     print(e)
-            #     print('pymongo error!!!!')
-            #     return False
 
     @classmethod
-    # @api_error_handler
     def delete_product_by_comment(cls, api_pre_order, api_campaign_product):
         with client.start_session() as session:
-            # try:
             with session.start_transaction():
                 api_order_product = db.api_order_product.find_one(
                     {"pre_order_id": api_pre_order['id'], "campaign_product_id": api_campaign_product['id']}, session=session)
@@ -407,22 +405,22 @@ class PreOrderHelper():
 
                 products = api_pre_order['products']
                 del products[str(api_campaign_product['id'])]
+
+                subtotal = api_pre_order['subtotal']-api_order_product['qty']*api_order_product['price']
+                free_delivery = api_pre_order.get("free_delivery",False)
+                shipping_cost = 0 if free_delivery else api_pre_order.get('shipping_cost',0)
+                adjust_price = api_pre_order.get("adjust_price",0)
+                total = subtotal+ float(shipping_cost)+float(adjust_price)
+
                 db.api_pre_order.update_one(
                     {'id': api_pre_order['id']},
                     {
                         "$set": {
-                            "products": products
-                        },
-                        "$inc": {
-                            "subtotal": -api_order_product['qty']*api_order_product['price'],
+                            "products": products,
+                            "subtotal": subtotal,
+                            "total": total
                         }
-                    },
-                    session=session)
-                # return True
-            # except pymongo_errors.PyMongoError as e:
-            #     print(e)
-            #     print('error!!!!!!')
-            #     return False
+                    },session=session)
 
 
 class OrderHelper():

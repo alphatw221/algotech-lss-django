@@ -119,7 +119,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
         order_product = Verify.get_order_product_from_pre_order(pre_order, order_product_id)
         api_order_product = PreOrderHelper.update_product(
-            api_user, pre_order, order_product, order_product.campaign_product, qty)
+            api_user, pre_order, order_product, qty)
         return Response(api_order_product, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['PUT'], url_path=r'seller_adjust', permission_classes=(IsAuthenticated,))
@@ -179,7 +179,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         order_product = Verify.get_order_product_from_pre_order(pre_order, order_product_id)
         # api_user, platform, campaign, pre_order, order_product, campaign_product, qty, search = Verify.PreOrderApi.FromSeller.verify(request, pk)
         PreOrderHelper.delete_product(
-            api_user, pre_order, order_product, order_product.campaign_product)
+            api_user, pre_order, order_product)
         return Response({'message':"delete success"}, status=status.HTTP_200_OK)
     
     #------------------buyer---------------------------------------------------------------------------
@@ -245,7 +245,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         order_product = Verify.get_order_product_from_pre_order(pre_order, order_product_id)
 
         api_order_product = PreOrderHelper.update_product(api_user,
-            pre_order, order_product, order_product.campaign_product, qty)
+            pre_order, order_product, qty)
 
         return Response(api_order_product, status=status.HTTP_200_OK)
 
@@ -258,6 +258,6 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         order_product = Verify.get_order_product_from_pre_order(pre_order, order_product_id)
 
         PreOrderHelper.delete_product(
-            api_user, pre_order, order_product, order_product.campaign_product)
+            api_user, pre_order, order_product)
 
         return Response({'message':"delete success"}, status=status.HTTP_200_OK)

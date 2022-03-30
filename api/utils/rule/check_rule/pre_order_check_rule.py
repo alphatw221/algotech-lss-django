@@ -6,6 +6,12 @@ from api.utils.error_handle.error.pre_order_error import PreOrderErrors
 class PreOrderCheckRule():
 
     @staticmethod
+    def is_campaign_product_exist(**kwargs):
+        api_campaign_product = kwargs.get('api_campaign_product')
+        if not api_campaign_product:
+            raise PreOrderErrors.PreOrderException('campaign product has already been deleted')
+
+    @staticmethod
     def is_order_lock(**kwargs):
         api_user = kwargs.get('api_user')
         api_pre_order = kwargs.get('api_pre_order')
@@ -44,7 +50,7 @@ class PreOrderCheckRule():
         api_user = kwargs.get('api_user')
         api_campaign_product = kwargs.get('api_campaign_product')
 
-        if not api_user:
+        if not api_user or not api_campaign_product:
             return
         if api_user.type=="user":
             return
@@ -58,7 +64,7 @@ class PreOrderCheckRule():
         api_user = kwargs.get('api_user')
         api_campaign_product = kwargs.get('api_campaign_product')
 
-        if not api_user:
+        if not api_user or not api_campaign_product:
             return
         if api_user.type=="user":
             return

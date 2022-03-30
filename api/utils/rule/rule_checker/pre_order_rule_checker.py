@@ -4,6 +4,7 @@ from api.utils.rule.check_rule.pre_order_check_rule import PreOrderCheckRule
 class PreOrderUpdateProductRuleChecker(RuleChecker):
 
     check_list=[
+        PreOrderCheckRule.is_campaign_product_exist,
         PreOrderCheckRule.is_order_lock,
         PreOrderCheckRule.is_qty_valid,
         PreOrderCheckRule.campaign_product_type,
@@ -14,6 +15,7 @@ class PreOrderUpdateProductRuleChecker(RuleChecker):
 class PreOrderAddProductRuleChecker(RuleChecker):
 
     check_list=[
+        PreOrderCheckRule.is_campaign_product_exist,
         PreOrderCheckRule.is_order_lock,
         PreOrderCheckRule.is_qty_valid,
         PreOrderCheckRule.is_order_product_addable,
