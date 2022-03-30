@@ -18,17 +18,22 @@
                 console.log(res)
                 const firstdata_hidden_form = document.getElementById('firstdata_hidden_form')
 
-                firstdata_hidden_form.attr("action", res.url)
+                firstdata_hidden_form.setAttribute("action", res.url)
                 for (const [key, value] of Object.entries(res.credential)) {
-                    $('<input>').attr({
-                        type: 'text',
-                        name: key,
-                        value: value
-                    }).appendTo(firstdata_hidden_form);
+                    let element = document.createElement('input');
+                    element.setAttribute('type','text')
+                    element.setAttribute('name', key)
+                    element.setAttribute('value',value)
+                    firstdata_hidden_form.appendChild(element)
+                    // $('<input>').attr({
+                    //     type: 'text',
+                    //     name: key,
+                    //     value: value
+                    // }).appendTo(firstdata_hidden_form);
                 }
     
-    
-                this.firstdata_hidden_form.find('input[type=submit]').click();
+                
+                // document.getElementById('btn').click();
             }).catch(error => {
                 switch (error.status) {
                     case 500:
@@ -53,21 +58,10 @@
         </h1>
 
         <form method="post" action="https://test.ipg-online.com/connect/gateway/processing" id="firstdata_hidden_form">
-            <!-- <input type="text" name="storename" value="">
-            <input type="text" name="txntype" value=""/>
-            <input type="text" name="mode" value=""/>
-            <input type="text" name="timezone" value=""/>
-            <input type="text" name="txndatetime" value=""/>
-            <input type="text" name="hash_algorithm" value=""/>
-            <input type="text" name="hash" value=""/>
-            <input type="text" name="chargetotal" value=""/>
-            <input type="text" name="currency" value=""/>
-            <input type="text" name="responseSuccessURL" value=""/>
-            <input type="text" name="responseFailURL" value=""/> -->
-            <input type="submit" value="" style="visibility: hidden"> 
+            <input type="submit" id="btn" value="" > 
         </form>
 
-        <button type="button" onclick="pay_by_firstdata()">submit</button>
+        <button type="button"  onclick="pay_by_firstdata()">submit</button>
     </body>
 
     

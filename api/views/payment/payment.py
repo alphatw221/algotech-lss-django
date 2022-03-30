@@ -39,7 +39,7 @@ from api.utils.error_handle.error_handler.email_error_handle import email_error_
 from mail.sender.sender import send_smtp_mail
 from django.shortcuts import redirect
 import requests
-
+import pytz
 
 platform_dict = {'facebook':FacebookPage, 'youtube':YoutubeChannel, 'instagram':InstagramProfile}
 
@@ -65,17 +65,19 @@ class PaymentViewSet(viewsets.GenericViewSet):
     @action(detail=False, methods=['GET'], url_path=r'get_ipg_order_data', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def get_ipg_order_data(self, request):
-
-        def createHash(chargetotal,currency,storeId,sharedSecret):
-            stringToHash = str(storeId) + str(getDateTime()) + str(chargetotal) + str(currency) + sharedSecret
+        
+        def createHash(chargetotal,currency,storeId,sharedSecret,timezone,txndatetime):
+            
+            stringToHash = str(storeId) + txndatetime + str(chargetotal) + str(currency) + sharedSecret
             ascii = binascii.b2a_hex(stringToHash.encode())   
-            hash_object = hashlib.sha1(ascii)
+            hash_object = hashlib.sha256(ascii)
             return hash_object.hexdigest()
             
-        def getDateTime():
-            return datetime.datetime.now().strftime("%Y:%m:%d-%H:%M:%S")
+        def getDateTime(timezone):
+            
+            timezone = pytz.timezone(timezone)
+            return datetime.datetime.now(timezone).strftime("%Y:%m:%d-%H:%M:%S")
 
-        # return Response({"hash":createHash("1","356"),"datetime":getDateTime()}, status=status.HTTP_200_OK)
 
         api_user, order_id = getparams(request,('order_id',),with_user=True, seller=False)
 
@@ -92,84 +94,25 @@ class PaymentViewSet(viewsets.GenericViewSet):
         storeId = firstdata.get('ipg_storeId')
         timezone = firstdata.get('ipg_timezone')
         sharedSecret = firstdata.get('ipg_sharedSecret')
-
+        txndatetime = getDateTime(timezone)
 
         credential = {
-            "authenticateTransaction":"true",
-            "oid":"2002",
-            "full_bypass":"false",
-            "customerid":"123",
-            "chargetotal" : chargetotal,
-            # "checkoutoption" : "combinedpage",
-            "currency" : currency,
-            "hash_algorithm" : "SHA1",
-            "mode" : "payonly",
-
-            # "paymentMethod" :"M",
-            # "responseFailURL" : settings.GCP_API_LOADBALANCER_URL + f"/api/payment/ipg_payment_fail?order_id={order_id}",
-            # "responseSuccessURL" : settings.GCP_API_LOADBALANCER_URL + f"/api/payment/ipg_payment_success?order_id={order_id}",
-
             "storename" : storeId,
-            "timezone" : timezone,
-            "txndatetime" : getDateTime(),
             "txntype" : "sale",
-            "sharedsecret":sharedSecret,
-            "hash":createHash(chargetotal,currency,storeId,sharedSecret)
-
-
-
-
-            # 'storename' => $this->storeId,
-            # 'txntype' => 'sale',
-            # 'mode' => 'payonly',
-            # 'timezone' => $this->timezone,
-            # 'txndatetime' => $this->txndatetime,
-            # 'responseSuccessURL' => env('API_SERVER_URL') . '/api/payment/ipg_payment_success?order_id=' . $this->order->id,
-            # 'responseFailURL' =>  env('API_SERVER_URL') . '/api/payment/ipg_payment_fail?order_id=' . $this->order->id,
-            # 'hash_algorithm' => 'SHA256',
-            # 'hash' => $this->createHash(),
-            # 'chargetotal' => $this->chargetotal,
-            # 'currency' => $this->currency,
-
-
+            "mode" : "payonly",
+            "timezone" : timezone,
+            "txndatetime" : txndatetime,
+            "responseSuccessURL" : f"{settings.GCP_API_LOADBALANCER_URL}/api/payment/ipg_payment_success?order_id={order_id}",
+            "responseFailURL" : f"{settings.GCP_API_LOADBALANCER_URL}/api/payment/ipg_payment_fail?order_id='{order_id}",
+            "hash_algorithm" : "SHA256",
+            "hash":createHash(chargetotal,currency,storeId,sharedSecret,timezone,txndatetime),
+            "chargetotal" : chargetotal,
+            "currency" : currency,
         }
-
-        # stringToHash = str(storename) + str(txndatetime) + str(chargetotal) + str(currency) + str(secret)
-
-        # # storeId = "33995001"
-        # # sharedSecret = "sharedsecret"
-        # # stringToHash = str(storeId) + str(getDateTime()) + str(chargetotal) + str(currency) + sharedSecret
-        # # ascii = binascii.b2a_hex(stringToHash)   
-        # # hash_object = hashlib.sha1(ascii)
-        # # hex_dig = hash_object.hexdigest()
         
-        # ascii = binascii.b2a_hex(stringToHash.encode())   
-        # # ascii = binascii.b2a_base64()
-        # # ascii = binascii.b2a_uu()
-        # hash_object = hashlib.sha1(ascii)
-        # hex_dig = hash_object.hexdigest()
+        return Response({"url":"https://www4.ipg-online.com/connect/gateway/processing","credential":credential}, status=status.HTTP_200_OK)
 
-        # credential['hash']= hex_dig
-
-        return Response({"url":"https://test.ipg-online.com/connect/gateway/processing","credential":credential}, status=status.HTTP_200_OK)
-
-        # before_hashing_string = "".join([str(value) for key,value in credential.items()])
-        # before_hashing_string = "|".join([str(value) for key,value in credential.items()])
-
-        # print(before_hashing_string)
-        sharedsecret=firstdata['ipg_sharedSecret']
-
-        print(sharedsecret.encode())
-        dig = hmac.new(sharedsecret.encode(), msg=before_hashing_string.encode(), digestmod=hashlib.sha256).digest()
-        print(dig)
-        print(type(dig))
-        hashExtended = base64.b64encode(dig).decode()
-        print(hashExtended)
-        credential['hashExtended'] = hashExtended                                                                                                                           
-
-
-        return Response({"url":"https://test.ipg-online.com/connect/gateway/processing","credential":credential}, status=status.HTTP_200_OK)
-
+        
 
     @action(detail=False, methods=['GET'], url_path=r'ipg_payment_success')
     @api_error_handler
