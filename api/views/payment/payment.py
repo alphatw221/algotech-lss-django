@@ -62,43 +62,26 @@ def send_email(order_id):
 class PaymentViewSet(viewsets.GenericViewSet):
     queryset = User.objects.none()
 
-    @action(detail=False, methods=['GET'], url_path=r'get_ipg_order_data')
+    @action(detail=False, methods=['GET'], url_path=r'get_ipg_order_data', permission_classes=(IsAuthenticated))
     @api_error_handler
-    def get_ipg_order_data(self, request, pk=None):
+    def get_ipg_order_data(self, request):
 
-        order_id = request.query_params.get('order_id')
+        api_user, order_id = getparams(request,('order_id',),with_user=True, seller=False)
 
-        order = Verify.get_order(order_id)
+        order = Verify.get_order_by_api_user(api_user,order_id)
+        campaign = Verify.get_campaign_from_order(order)
 
-        if not order.platform in platform_dict:
-            raise ApiVerifyError("platform not supported")
-
-        platform_class = platform_dict.get(order.platform)
-
-        if not platform_class.objects.filter(id=order.platform_id).exists():
-            raise ApiVerifyError("no platform found")
-        platform = platform_class.objects.get(id=order.platform_id)
-
-        user_subscriptions = platform.user_subscriptions.all()
-
-        if not user_subscriptions:
-            raise ApiVerifyError("platform not in any user_subscription")
-        user_subscription = user_subscriptions[0]
-
-        firstdata = user_subscription.meta_payment.get('firstdata')
-
-
-        #TODO  取campaign meta_payment
+        firstdata = campaign.meta_payment.get('firstdata')
 
         if not firstdata:
             raise ApiVerifyError('no firstdata credential')
 
         txndatetime = datetime.datetime.now().strftime("%Y:%m:%d-%H:%M:%S")
         chargetotal = order.total
-        currency = firstdata['ipg_currency']
-        storename = firstdata['ipg_storeId']
-        timezone = firstdata['ipg_timezone']
-        secret = firstdata['ipg_sharedSecret']
+        currency = firstdata.get('ipg_currency')
+        storename = firstdata.get('ipg_storeId')
+        timezone = firstdata.get('ipg_timezone')
+        secret = firstdata.get('ipg_sharedSecret')
 
 
         credential = {
