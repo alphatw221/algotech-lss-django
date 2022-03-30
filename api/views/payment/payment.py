@@ -114,7 +114,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         # return Response({"url":"https://test.ipg-online.com/connect/gateway/processing","credential":credential}, status=status.HTTP_200_OK)
         
 
-    @action(detail=False, methods=['POST'], url_path=r'ipg_payment_success')
+    @action(detail=False, methods=['POST'], url_path=r'ipg_payment_success', parser_classes=(FormParser, MultiPartParser))
     @api_error_handler
     def ipg_payment_success(self, request):
 
@@ -171,7 +171,10 @@ class PaymentViewSet(viewsets.GenericViewSet):
             order.meta['ipg_success']=request.data
             order.status="complete"
             order.save()
-
+        else:
+            order.meta['ipg_success']=request.data
+            order.save()
+            
         return HttpResponseRedirect(redirect_to=settings.WEB_SERVER_URL+f'/buyer/order/{order.id}/confirmation')
 
         
