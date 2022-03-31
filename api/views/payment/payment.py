@@ -857,5 +857,6 @@ class PaymentViewSet(viewsets.GenericViewSet):
                 {'id': order_id},
                 {'$set': {'status': 'complete'}}
             )
+            print ('bbbbbbbbbbbbbbbbbbbbbbbbb')
         
         return Response('response', status=status.HTTP_200_OK)
