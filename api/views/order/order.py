@@ -85,16 +85,10 @@ class OrderViewSet(viewsets.ModelViewSet):
     @api_error_handler
     def seller_retrieve_order(self, request, pk=None):
 
-        api_user, platform_id, platform_name = getparams(
-            request, ("platform_id", "platform_name"),with_user=True, seller=True)
-
-        platform = Verify.get_platform(api_user, platform_name, platform_id)
+        api_user = Verify.get_seller_user(request)
         order=Verify.get_order(pk)
-        Verify.get_campaign_from_platform(platform, order.campaign.id)
-
-        # _, _, order = verify_seller_request(
-        #     api_user, platform_name, platform_id, campaign_id, order_id=pk)
-
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        Verify.get_campaign_from_user_subscription(user_subscription, order.campaign.id)
         serializer = OrderSerializer(order)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
