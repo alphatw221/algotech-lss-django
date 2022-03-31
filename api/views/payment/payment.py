@@ -846,17 +846,12 @@ class PaymentViewSet(viewsets.GenericViewSet):
     @action(detail=False, methods=['POST'], url_path=r'paymongo_webhook')
     @api_error_handler
     def paymongo_webhook(self, request, pk=None):
-        print ('aaaaaaaaaaaaaaaaaaaaaaaa')
-        print (request.data['data']['attributes']['data']['attributes']['status'])
         order_id = int(request.data['data']['attributes']['data']['attributes']['description'].split('_')[1])
-        print (order_id)
-        print ('--------------------------')
 
         if (request.data['data']['attributes']['data']['attributes']['status'] == 'paid'):
             db.api_order.update(
                 {'id': order_id},
                 {'$set': {'status': 'complete'}}
             )
-            print ('bbbbbbbbbbbbbbbbbbbbbbbbb')
         
         return Response('response', status=status.HTTP_200_OK)

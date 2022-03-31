@@ -286,6 +286,7 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
         text = request.data['text']
         data = json.loads(text)
         data['image'] = image_path
+        data['type'] = 'product-fast'
 
         serializer = CampaignProductSerializerUpdate(
             campaign_product, data=data, partial=True)
