@@ -44,7 +44,7 @@ class ProductViewSet(viewsets.ModelViewSet):
     @api_error_handler
     def list_product(self, request):
 
-        api_user, key_word, product_status, order_by = getparams(request,("key_word", "product_status", "order_by"),with_user=True,seller=True)
+        api_user, key_word, product_status, order_by = getparams(request,("key_word", "status", "order_by"),with_user=True,seller=True)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
         
         queryset = user_subscription.products.all()

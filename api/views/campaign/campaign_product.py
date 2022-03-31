@@ -254,8 +254,9 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
 
         api_user, campaign_id, code, price, qty = getparams(request,("campaign_id","code", "price", "qty"),with_user=True, seller=True)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
-        campaign = Verify.get_campaign_from_user_subscription(user_subscription)
-
+        campaign = Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
+        if len(Product.objects.filter(order_code=code)) > 0:
+            raise ApiVerifyError("This order code has been used in inventory.")
         product = Product.objects.create(user_subscription=user_subscription, created_by=api_user, name=code, order_code=code, price=float(price), qty=0)
         campaign_product = CampaignProduct.objects.create(campaign=campaign, created_by=api_user,product=product,  status=1, type='product-fast', name=code, order_code=code, price=float(price), qty_for_sale=int(qty))
 
@@ -286,6 +287,7 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
         text = request.data['text']
         data = json.loads(text)
         data['image'] = image_path
+        data['type'] = 'product-fast'
 
         serializer = CampaignProductSerializerUpdate(
             campaign_product, data=data, partial=True)
@@ -305,11 +307,10 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
 
         pre_order_id = request.query_params.get('pre_order_id')
         pre_order=Verify.get_pre_order(pre_order_id)
-
-        campaign_products = pre_order.campaign.products.filter(Q(type='product') | Q(type="product-fast"))
+        pre_order_products = list(pre_order.products.keys())
+        campaign_products = pre_order.campaign.products.filter(Q(type='product') | Q(type="product-fast")).exclude(id__in=pre_order_products)
         serializer = self.get_serializer(campaign_products, many=True)
         data = serializer.data
-
         return Response(data, status=status.HTTP_200_OK)
     
     @action(detail=True, methods=['GET'], url_path=r'campaign_prodcut_list', permission_classes=(IsAuthenticated,))
