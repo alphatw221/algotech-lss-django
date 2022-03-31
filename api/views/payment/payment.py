@@ -816,17 +816,45 @@ class PaymentViewSet(viewsets.GenericViewSet):
 
         return Response(response, status=status.HTTP_200_OK)
     
-    # @action(detail=False, methods=['GET'], url_path=r'paymongo_get_link_by_id')
-    # @api_error_handler
-    # def paymongo_get_link_by_id(self, request, pk=None):
+    @action(detail=False, methods=['GET'], url_path=r'paymongo_register_webhook')
+    @api_error_handler
+    def paymongo_register_webhook(self, request, pk=None):
+        order_id = request.query_params.get('order_id')
 
+        order_object = Verify.get_order(order_id)
+        campaign_object = order_object.campaign
+        secret_key = campaign_object.meta_payment.get("sg").get("paymongo").get("paymongo_secret")
+
+        message_bytes = secret_key.encode('ascii')
+        base64_bytes = base64.b64encode(message_bytes)
+        secret_key = base64_bytes.decode('ascii')
+
+        payload = {"data": {"attributes": {
+                    "events": ["payment.paid"],
+                    "url": f'{settings.GCP_API_LOADBALANCER_URL}/api/payment/paymongo_webhook/'
+                }}}
+        headers = {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Authorization": f"Basic {secret_key}"
+        }
+
+        response = requests.request("POST", settings.PAYMONGO_URL, json=payload, headers=headers)
+        return Response(response, status=status.HTTP_200_OK)
 
     
     @action(detail=False, methods=['POST'], url_path=r'paymongo_webhook')
     @api_error_handler
     def paymongo_webhook(self, request, pk=None):
         print ('aaaaaaaaaaaaaaaaaaaaaaaa')
-        print (request.data)
-        # f'{settings.GCP_API_LOADBALANCER_URL}/api/payment/paymongo_webhook/'
+        print (request.data['data']['attributes']['data']['status'])
+        order_id = int(request.data['data']['attributes']['data']['description'].split('_')[1])
+        print (order_id)
+
+        if (request.data['data']['attributes']['data']['status'] == 'paid'):
+            db.api_order.update(
+                {'id': order_id},
+                {'$set': {'status': 'complete'}}
+            )
         
         return Response('response', status=status.HTTP_200_OK)
