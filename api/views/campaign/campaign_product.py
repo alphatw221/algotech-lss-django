@@ -305,11 +305,10 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
 
         pre_order_id = request.query_params.get('pre_order_id')
         pre_order=Verify.get_pre_order(pre_order_id)
-
-        campaign_products = pre_order.campaign.products.filter(Q(type='product') | Q(type="product-fast"))
+        pre_order_products = list(pre_order.products.keys())
+        campaign_products = pre_order.campaign.products.filter(Q(type='product') | Q(type="product-fast")).exclude(id__in=pre_order_products)
         serializer = self.get_serializer(campaign_products, many=True)
         data = serializer.data
-
         return Response(data, status=status.HTTP_200_OK)
     
     @action(detail=True, methods=['GET'], url_path=r'campaign_prodcut_list', permission_classes=(IsAuthenticated,))
