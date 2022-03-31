@@ -847,9 +847,11 @@ class PaymentViewSet(viewsets.GenericViewSet):
     @api_error_handler
     def paymongo_webhook(self, request, pk=None):
         print ('aaaaaaaaaaaaaaaaaaaaaaaa')
+        print (type(request.data))
         print (request.data['data']['attributes']['data']['status'])
         order_id = int(request.data['data']['attributes']['data']['description'].split('_')[1])
         print (order_id)
+        print ('--------------------------')
 
         if (request.data['data']['attributes']['data']['status'] == 'paid'):
             db.api_order.update(
