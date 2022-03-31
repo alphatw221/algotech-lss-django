@@ -797,7 +797,6 @@ class PaymentViewSet(viewsets.GenericViewSet):
         base64_bytes = base64.b64encode(message_bytes)
         secret_key = base64_bytes.decode('ascii')
 
-        url = "https://api.paymongo.com/v1/links"
         payload = {
             "data": {
                 "attributes": {
@@ -813,11 +812,12 @@ class PaymentViewSet(viewsets.GenericViewSet):
             "Authorization": f"Basic {secret_key}"
         }
 
-        response = requests.request("POST", url, json=payload, headers=headers)
+        response = requests.request("POST", settings.PAYMONGO_URL, json=payload, headers=headers)
         payMongoResponse = json.loads(response.text)
         response = {
             'checkout_url': payMongoResponse['data']['attributes']['checkout_url'],
-            'reference_number': payMongoResponse['data']['attributes']['reference_number']
+            'reference_number': payMongoResponse['data']['attributes']['reference_number'],
+            'id': payMongoResponse['data']['id']
         }
 
         return Response(response, status=status.HTTP_200_OK)
@@ -836,7 +836,6 @@ class PaymentViewSet(viewsets.GenericViewSet):
         base64_bytes = base64.b64encode(message_bytes)
         secret_key = base64_bytes.decode('ascii')
 
-        url = "https://api.paymongo.com/v1/links"
         params = {
             "reference_number": reference_number
         }
@@ -846,7 +845,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             "Authorization": f"Basic {secret_key}"
         }
 
-        response = requests.request("GET", url, params=params, headers=headers)
+        response = requests.request("GET", settings.PAYMONGO_URL, params=params, headers=headers)
         payMongoResponse = json.loads(response.text)
         response = {
             'order_id': payMongoResponse['data'][0]['attributes']['description'].split('_')[1],
@@ -860,3 +859,18 @@ class PaymentViewSet(viewsets.GenericViewSet):
             )
 
         return Response(response, status=status.HTTP_200_OK)
+    
+    # @action(detail=False, methods=['GET'], url_path=r'paymongo_get_link_by_id')
+    # @api_error_handler
+    # def paymongo_get_link_by_id(self, request, pk=None):
+
+
+    
+    @action(detail=False, methods=['POST'], url_path=r'paymongo_webhook')
+    @api_error_handler
+    def paymongo_webhook(self, request, pk=None):
+        print ('aaaaaaaaaaaaaaaaaaaaaaaa')
+        print (request.data)
+        # f'{settings.GCP_API_LOADBALANCER_URL}/api/payment/paymongo_webhook/'
+        
+        return Response('response', status=status.HTTP_200_OK)
