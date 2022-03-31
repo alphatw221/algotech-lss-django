@@ -42,7 +42,7 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.test_pre_order_helper()
+        self.test_ipg_success_hash()
         # self.add_user_subscription_user()
         # self.lucky_draw_test()
         # from backend.google_cloud_monitoring.google_cloud_monitoring import CommentQueueLengthMetric
@@ -218,3 +218,25 @@ class Command(BaseCommand):
         # PreOrderHelper.update_product(api_user,pre_order,order_product,2)
         # PreOrderHelper.delete_product(api_user,pre_order,order_product)
         PreOrderHelper.checkout(api_user,pre_order)
+
+    def test_ipg_success_hash(self):
+        import hmac
+        import hashlib 
+        import binascii
+        # approval_code|chargetotal|currency|txndatetime|storename
+        # chargetotal|currency|txndatetime|storename|approval_code
+
+        #sharedsecret + approval_code + chargetotal + currency + txndatetime + storename
+
+        approval_code = 'Y:048993:3556730117:PPX :208910903298'
+        chargetotal= '0.10'
+        currency = '702'
+        txndatetime = '2022:03:30-18:10:33'
+        store_name = "4530042983"
+        secret = 'Xe33QM7UTs'
+
+        ascii = binascii.b2a_hex((secret+approval_code+chargetotal+currency+txndatetime+store_name).encode())   
+        hash = hashlib.sha256(ascii).hexdigest()
+        print(hash)
+        # hash = hmac.new(secret.encode(), (secret+approval_code+chargetotal+currency+txndatetime+store_name).encode(), hashlib.sha256).hexdigest()
+        # print(hash)

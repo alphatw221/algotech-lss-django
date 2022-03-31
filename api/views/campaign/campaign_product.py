@@ -219,7 +219,7 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
         campaign_product = Verify.get_campaign_product_from_campaign(campaign, pk)
 
         if campaign.start_at and datetime.timestamp(datetime.now())>datetime.timestamp(campaign.start_at):
-            raise ApiVerifyError('campaign product not deletable after starting campaign')
+            raise ApiVerifyError("This campaign product can't be deleted because the campaign has already started.")
         
         #soft delete:
         campaign_product.campaign = None
@@ -305,11 +305,10 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
 
         pre_order_id = request.query_params.get('pre_order_id')
         pre_order=Verify.get_pre_order(pre_order_id)
-
-        campaign_products = pre_order.campaign.products.filter(Q(type='product') | Q(type="product-fast"))
+        pre_order_products = list(pre_order.products.keys())
+        campaign_products = pre_order.campaign.products.filter(Q(type='product') | Q(type="product-fast")).exclude(id__in=pre_order_products)
         serializer = self.get_serializer(campaign_products, many=True)
         data = serializer.data
-
         return Response(data, status=status.HTTP_200_OK)
     
     @action(detail=True, methods=['GET'], url_path=r'campaign_prodcut_list', permission_classes=(IsAuthenticated,))
