@@ -254,8 +254,9 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
 
         api_user, campaign_id, code, price, qty = getparams(request,("campaign_id","code", "price", "qty"),with_user=True, seller=True)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
-        campaign = Verify.get_campaign_from_user_subscription(user_subscription)
-
+        campaign = Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
+        if len(Product.objects.filter(order_code=code)) > 0:
+            raise ApiVerifyError("This order code has been used in inventory.")
         product = Product.objects.create(user_subscription=user_subscription, created_by=api_user, name=code, order_code=code, price=float(price), qty=0)
         campaign_product = CampaignProduct.objects.create(campaign=campaign, created_by=api_user,product=product,  status=1, type='product-fast', name=code, order_code=code, price=float(price), qty_for_sale=int(qty))
 
