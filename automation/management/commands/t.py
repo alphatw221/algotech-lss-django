@@ -32,7 +32,7 @@ from api.models.product.product import Product
 from api.models.order.order import Order
 from api.models.order.order_product import OrderProduct
 import datetime
-from backend.api.instagram.post import api_ig_post_comment_on_media, api_ig_get_post_comments
+from backend.api.instagram.post import api_ig_private_message, api_ig_get_post_comments
 
 
 class Command(BaseCommand):
@@ -42,7 +42,13 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.test_ipg_success_hash()
+        ret = api_ig_private_message(
+            'EAANwBngXqOABAGDTqon3dewVtOKSdY14KGZAjLAQkeCnQCdIDvZAOMlxZCFZAJH2pmcZAvmClzDv3q2A3mOxStHk8WmpEVTpDwtSmAVJoB73T9MWrnNOPlkzZAPTGik3QcgZBKPDaNEZAnr59I6QGS9uvhniMSLKTLEkXlCTDzaplnZBDI5QOApl66bd1JuCuFwWmF6ZBdnN0xnQZDZD',
+            '17943432805910651',
+            '12345'
+        )
+        print (ret)
+        # self.test_ipg_success_hash()
         # self.add_user_subscription_user()
         # self.lucky_draw_test()
         # from backend.google_cloud_monitoring.google_cloud_monitoring import CommentQueueLengthMetric
