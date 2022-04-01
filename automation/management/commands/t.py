@@ -42,7 +42,7 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.test_ipg_success_hash()
+        self.test_mongodb_query()
         # self.add_user_subscription_user()
         # self.lucky_draw_test()
         # from backend.google_cloud_monitoring.google_cloud_monitoring import CommentQueueLengthMetric
@@ -240,3 +240,8 @@ class Command(BaseCommand):
         print(hash)
         # hash = hmac.new(secret.encode(), (secret+approval_code+chargetotal+currency+txndatetime+store_name).encode(), hashlib.sha256).hexdigest()
         # print(hash)
+
+    def test_mongodb_query(self):
+        from backend.pymongo.mongodb import db
+
+        print(db.api_campaign_comment.find({"campaign_id":365}).count())

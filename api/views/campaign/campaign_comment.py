@@ -19,36 +19,10 @@ class CampaignCommentViewSet(viewsets.ModelViewSet):
     filterset_fields = []
 
 
-    @action(detail=False, methods=['GET'], url_path=r'summarize', permission_classes=(IsAuthenticated,))
-    @api_error_handler
-    def comment_category_summarize(self, request):
-
-        api_user, campaign_id = getparams(request, ('campaign_id',),with_user=True, seller=True)
-        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
-        Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
-
-        ret = {}
-        ret['total'] = db.api_campaign_comment.find({"campaign_id":campaign_id}).count()
-        categories = ['delivery', 'payment']
-        for category in categories:
-            ret[category] = db.api_campaign_comment.find({"campaign_id":campaign_id,"categories":{"$elemMatch":category}}).count()
-        
-        return Response(ret, status=status.HTTP_200_OK)
+    
 
 
-    @action(detail=False, methods=['GET'], url_path=r'category_list', permission_classes=(IsAuthenticated,))
-    @api_error_handler
-    def comment_category_list(self, request):
-
-        api_user, campaign_id, category_name = getparams(request, ('campaign_id','category_name'),with_user=True, seller=True)
-        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
-        Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
-
-        
-        comments = db.api_campaign_comment.find({"campaign_id":campaign_id,"categories":{"$elemMatch":category_name}})
-        comments_str = dumps(comments)
-        comments_json = loads(comments_str)
-        return Response(comments_json, status=status.HTTP_200_OK)
+    
 
 
 
