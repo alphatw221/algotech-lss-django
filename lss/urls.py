@@ -13,8 +13,9 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
-from django.urls import include, path
+from django.urls import include, path, re_path
 from rest_framework_simplejwt.views import (TokenObtainPairView,
                                             TokenRefreshView, TokenVerifyView)
 
@@ -41,5 +42,6 @@ urlpatterns = [
     path('backend/', include('backend.urls')),
     path("google-redirect/", TemplateView.as_view(template_name="google_test_login.html")),
     path("index/", TemplateView.as_view(template_name="index.html")),
-    path('ipg_test/',TemplateView.as_view(template_name="ipg_test.html") )
+    path('ipg_test/',TemplateView.as_view(template_name="ipg_test.html") ),
+    re_path(r'^v2/',TemplateView.as_view(template_name="lss_entry.html")),
 ]

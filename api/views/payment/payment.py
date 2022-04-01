@@ -170,15 +170,15 @@ class PaymentViewSet(viewsets.GenericViewSet):
         if  response_hash and response_hash == hash:
             order.meta['ipg_success']=request.data
             order.status="complete"
-            order.save()
         else:
-            order.meta['ipg_success']=request.data
-            order.save()
-            
+            order.meta['ipg_fail']=request.data
+        
+        order.save()
+
         return HttpResponseRedirect(redirect_to=settings.WEB_SERVER_URL+f'/buyer/order/{order.id}/confirmation')
 
         
-    @action(detail=False, methods=['POST'], url_path=r'ipg_payment_fail')
+    @action(detail=False, methods=['POST'], url_path=r'ipg_payment_fail', parser_classes=(FormParser, MultiPartParser))
     @api_error_handler
     def ipg_payment_fail(self, request, pk=None):
 
