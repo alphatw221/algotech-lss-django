@@ -32,7 +32,7 @@ from api.models.product.product import Product
 from api.models.order.order import Order
 from api.models.order.order_product import OrderProduct
 import datetime
-from backend.api.instagram.post import api_ig_post_comment_on_media, api_ig_get_post_comments
+from backend.api.instagram.post import api_ig_private_message, api_ig_get_post_comments
 
 
 class Command(BaseCommand):

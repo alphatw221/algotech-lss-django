@@ -19,6 +19,7 @@ from backend.i18n.cart_product_request import (i18n_get_additional_text,
 from backend.api.facebook.post import (api_fb_post_page_comment_on_comment,
                                        api_fb_post_page_message_on_comment)
 from backend.api.youtube.live_chat import api_youtube_post_live_chat_comment
+from backend.api.instagram.post import api_ig_private_message
 
 from api.models.order.pre_order import api_pre_order_template
 from backend.pymongo.mongodb import db, client, get_incremented_filed
@@ -159,4 +160,18 @@ def comment_responding(platform_name, platform, campaign, pre_order, comment, ca
         print(f"youtube post comment response code: {code}")
         print(ret)
     elif platform_name == 'instagram':
-        return
+        text = i18n_get_request_response(
+            state, campaign_product, qty, lang=platform['lang'])
+
+        shopping_cart_info, info_in_pm_notice = i18n_get_additional_text(pre_order,
+                                                                         lang=platform['lang'])
+        # code, ret = api_fb_post_page_comment_on_comment(
+        #     platform['token'], comment['id'], text+info_in_pm_notice)
+        # print("code", code)
+        # print("response", ret)
+
+        code, ret = api_ig_private_message(
+            platform['token'], comment['id'], text+shopping_cart_info)
+        
+        print("code", code)
+        print("response", ret)
