@@ -330,11 +330,12 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         
         return Response(FacebookPageSerializer(user_subscription.facebook_pages.all(),many=True).data, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['POST'], url_path=r'v2/bind_facebook_pages', permission_classes=())
+    @action(detail=False, methods=['POST'], url_path=r'v2/bind_facebook_pages', permission_classes=(IsAuthenticated,))
     @api_error_handler
-    def bind_user_facebook_pages(self, request, pk=None):
+    def bind_user_facebook_pages(self, request):
         token, = getdata(request,('accessToken',))
-        api_user_user_subscription = Verify.get_user_subscription(pk)
+        api_user = request.user.api_users.get(type='user')
+        api_user_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
 
         if not token:
             raise ApiVerifyError("please provide token")
