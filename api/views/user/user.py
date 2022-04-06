@@ -579,7 +579,7 @@ class UserViewSet(viewsets.ModelViewSet):
             print ('success promo code')
         
         if plan != 'trial':
-            expired_at = expired_at.add(months=period)
+            expired_at = pendulum.now()
             user_plan = {
                 "activated_platform" : {
                     "facebook" : NULL,
@@ -588,7 +588,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 }
             }
         elif plan == 'trial':
-            expired_at = pendulum.now()
+            expired_at = expired_at.add(months=period)
             user_plan = {
                 "activated_platform" : {
                     "facebook" : NULL,
