@@ -5,7 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from api.code.subscription_code_manager import SubscriptionCodeManager
 from api.models.campaign.campaign import InstagramCampaignSerializer
-from api.models.instagram.instagram_profile import InstagramProfileInfoSerializer, InstagramProfileSerializer
+from api.models.instagram.instagram_profile import InstagramProfile, InstagramProfileInfoSerializer, InstagramProfileSerializer
 from api.models.user.user import User,UserSubscriptionSerializerDealerList
 from api.models.user.user_subscription import UserSubscription, UserSubscriptionSerializer, UserSubscriptionSerializerForDealerRetrieve, UserSubscriptionSerializerMeta, UserSubscriptionSerializerSimplify, UserSubscriptionSerializerCreate
 from rest_framework.pagination import PageNumberPagination
@@ -16,7 +16,7 @@ from api.models.youtube.youtube_channel import YoutubeChannel, YoutubeChannelSer
 from datetime import datetime
 from api.utils.common.common import getdata
 from api.utils.error_handle.error.api_error import ApiCallerError
-from backend.api.facebook.page import api_fb_get_page_picture
+from backend.api.facebook.page import api_fb_get_page_picture, api_fb_get_page_business_profile
 from backend.api.facebook.user import api_fb_get_me_accounts
 
 from rest_framework.parsers import MultiPartParser
@@ -29,6 +29,7 @@ from api.utils.common.verify import ApiVerifyError
 
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 from api.utils.common.common import getparams
+from backend.api.instagram.profile import api_ig_get_profile_info
 from backend.api.youtube.channel import api_youtube_get_list_channel_by_token
 import requests
 from rest_framework_simplejwt.tokens import AccessToken
@@ -560,7 +561,63 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         
         return Response(InstagramProfileSerializer(user_subscription.instagram_profiles.all(),many=True).data, status=status.HTTP_200_OK)
 
+    @action(detail=False, methods=['POST'], url_path=r'v2/bind_instagram_profiles', permission_classes=(IsAuthenticated,))
+    @api_error_handler
+    def bind_user_instagram_profiles(self, request):
+        token, = getdata(request,('accessToken',))
+        api_user = request.user.api_users.get(type='user')
+        api_user_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
 
+        if not token:
+            raise ApiVerifyError("please provide token")
+        print(token)
+        status_code, response = api_fb_get_me_accounts(token)
+
+        print(response)
+
+        if status_code != 200:
+            raise ApiVerifyError("api_fb_get_accounts_from_user error")
+
+        
+
+        for item in response['data']:
+            page_token = item['access_token']
+            page_id = item['id']
+            page_name = item['name']
+
+            status_code, business_profile_response = api_fb_get_page_business_profile(page_token, page_id)
+            print(business_profile_response)
+            if status_code != 200:
+                print('get profile error')
+                continue
+
+            business_id = business_profile_response.get("instagram_business_account",{}).get("id")
+            
+            if not business_id:
+                print('no business id')
+                continue
+
+            status_code, profile_info_response = api_ig_get_profile_info(page_token, business_id)
+            profile_name = profile_info_response.get('name')
+            profile_pricure = profile_info_response.get('profile_picture_url')
+
+            if InstagramProfile.objects.filter(business_id=business_id).exists():
+                instagram_profile = InstagramProfile.objects.get(business_id=business_id)
+                instagram_profile.name = profile_name
+                instagram_profile.token = page_token
+                instagram_profile.token_update_at = datetime.now()
+                instagram_profile.token_update_by = api_user.facebook_info['id']
+                instagram_profile.image = profile_pricure
+                instagram_profile.save()
+            else:
+                instagram_profile = InstagramProfile.objects.create(
+                    business_id=business_id, name=profile_name, token=page_token, token_update_at=datetime.now(), token_update_by=api_user.facebook_info['id'], image=profile_pricure)
+                instagram_profile.save()
+
+            if not instagram_profile.user_subscriptions.all():
+                api_user_user_subscription.instagram_profiles.add(instagram_profile)
+
+        return Response(FacebookPageSerializer(api_user_user_subscription.facebook_pages.all(),many=True).data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET'], url_path=r'dealer_search_list', permission_classes=(IsAuthenticated,))
     @api_error_handler
