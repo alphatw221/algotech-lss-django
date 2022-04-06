@@ -87,6 +87,7 @@ class UserSerializerForDealerList(serializers.ModelSerializer):
     instagram_info = serializers.JSONField(default=dict)
     youtube_info = serializers.JSONField(default=dict)
     google_info = serializers.JSONField(default=dict)
+    
 class UserSubscriptionSerializerDealerList(serializers.ModelSerializer):
     class Meta:
         model = UserSubscription

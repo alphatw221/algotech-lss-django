@@ -1,9 +1,10 @@
 import json
 from math import perm
-import re
+import re, pendulum
 from sys import platform
 from django.http import HttpResponseRedirect
 from django.http.response import HttpResponse
+from pymysql import NULL
 from rest_framework import serializers, status, viewsets
 from rest_framework.decorators import action, permission_classes
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
@@ -33,6 +34,7 @@ from backend.api.google.user import api_google_get_userinfo
 from django.conf import settings
 import string
 import random
+from api.models.user.user_subscription import UserSubscription
 from lss.views.custom_jwt import CustomTokenObtainPairSerializer
 import requests
 from google.oauth2 import id_token
@@ -564,3 +566,55 @@ class UserViewSet(viewsets.ModelViewSet):
             data = serializer.data
 
         return Response(data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['POST'], url_path=r'register', permission_classes=())
+    @api_error_handler
+    def user_register(self, request):
+        firstName, lastName, contactNumber, email, password, country, plan, period, promoCode = getdata(request, ("firstName", "lastName", "contactNumber", "email", "password", "country", "plan", "period", "promoCode"))
+
+        #TODO get promo code and do what it is 
+        if promoCode and promoCode != 'test':
+            return Response({"message": "Promo code is wrong"}, status=status.HTTP_400_BAD_REQUEST)
+        elif promoCode and promoCode == 'test':
+            print ('success promo code')
+        
+        if plan != 'trial':
+            expired_at = expired_at.add(months=period)
+            user_plan = {
+                "activated_platform" : {
+                    "facebook" : NULL,
+                    "youtube" : NULL,
+                    "instagram" : NULL
+                }
+            }
+        elif plan == 'trial':
+            expired_at = pendulum.now()
+            user_plan = {
+                "activated_platform" : {
+                    "facebook" : NULL,
+                }
+            }    
+        
+        auth_user = AuthUser.objects.create_user(
+            username=f'{firstName} {lastName}', email=email, password=password)
+        
+        user_subscription = UserSubscription.objects.create(
+            name=f'{firstName} {lastName}', status='valid', expired_at=expired_at, user_plan=user_plan, type=plan)
+        
+        meta = { 'country': country }
+        api_user = User.objects.create(
+            name=f'{firstName} {lastName}', email=email, type='user', status='valid', phone=contactNumber, meta=meta, auth_user=auth_user, user_subscription=user_subscription)
+        
+        user_subscription.save
+        api_user.save()
+        auth_user.last_login = datetime.now()
+        auth_user.save()
+
+        refresh = CustomTokenObtainPairSerializer.get_token(auth_user)
+
+        ret = {
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        }
+
+        return Response(ret, status=status.HTTP_200_OK)

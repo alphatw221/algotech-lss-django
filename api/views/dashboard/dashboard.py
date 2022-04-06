@@ -1,11 +1,11 @@
-from ssl import VerifyFlags
 from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from rsa import verify
 
 from api.models.order.order import Order, OrderSerializer
-from api.models.order.pre_order import PreOrder, PreOrderSerializer
+from api.models.order.pre_order import PreOrderSerializer
 from api.utils.common.verify import Verify
 from api.utils.common.common import *
 
@@ -16,10 +16,10 @@ import datetime, operator
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 from api.utils.common.common import getparams
 from django.db.models import Q
-from rest_framework.pagination import PageNumberPagination
 
-from django.core.paginator import Paginator
-from django.shortcuts import render
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+import random
 
 # class PreOrderPagination(PageNumberPagination):
 #     page_query_param = 'page'
@@ -194,10 +194,10 @@ class DashboardViewSet(viewsets.ModelViewSet):
         # api_user, platform, campaign, pre_order, order_product, campaign_product, qty, search = Verify.PreOrderApi.FromSeller.verify(request)
         # is_user = verify_seller_request(api_user)
 
-        api_user, campaign_id=getparams(request, ( 'campaign_id', ), with_user=True, seller=True)
+        api_user, campaign_id = getparams(request, ( 'campaign_id', ), with_user=True, seller=True)
 
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
-        campaign = Verify.get_campaign_from_user_subscription(user_subscription,campaign_id)
+        campaign = Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
 
         user_id, campaign_id = int(api_user.id), int(campaign_id)
         manage_order = {}
@@ -334,3 +334,75 @@ class DashboardViewSet(viewsets.ModelViewSet):
         campaign.save()
 
         return Response({"allow_checkout":campaign.meta['allow_checkout']}, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['GET'], url_path=r'dealer_cards', permission_classes=(IsAuthenticated,))
+    @api_error_handler
+    def dealer_cards(self, request):
+        api_user = Verify.get_seller_user(request)
+        dealer_user_subscription = Verify.get_dealer_user_subscription_from_api_user(api_user)
+        
+        subscriber_id_list = [dealer_user_subscription.id]
+        campaign_id_list = []
+        # for subscriber in dealer_user_subscription.subscribers.all():
+        #     subscriber_id_list.append(subscriber.id)
+        
+        close_expired_count, date_close_expired = 0, datetime.now() + relativedelta(months = 1)
+        user_subscriptions = db.api_user_subscription.find({'id': {'$in': subscriber_id_list}})
+        for user_subscription in user_subscriptions:
+            if date_close_expired > user_subscription['expired_at']:
+                close_expired_count += 1
+
+        campaigns_count, campaigns = 0, db.api_campaign.find({'user_subscription_id': {'$in': subscriber_id_list}})
+        for campaign in campaigns:
+            if 'id' in campaign:
+                campaign_id_list.append(campaign['id'])
+                campaigns_count += 1
+        
+        transaction_count = db.api_order.find({'id': {'$exists': True}, 'campaign_id': {'$in': campaign_id_list}, 'status': 'complete'}).count()
+        buyer_count = len(db.api_pre_order.find({'id': {'$exists': True},'campaign_id': {'$in': campaign_id_list}}).distinct('customer_id')) + len(db.api_order.find({'campaign_id': {'$in': campaign_id_list}}).distinct('customer_id'))
+        # buyer_count = db.api_pre_order.find({'campaign_id': {'$in': campaign_id_list}}).count() + db.api_order.find({'campaign_id': {'$in': campaign_id_list}}).count()
+
+        dealer_dashboard_json = {
+            'transaction': transaction_count,
+            'contract_due_soon': close_expired_count,
+            'buyers': buyer_count,
+            'campaigns': campaigns_count
+        }
+
+        return Response(dealer_dashboard_json, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['GET'], url_path=r'dealer_campaign_linechart', permission_classes=(IsAuthenticated,))
+    @api_error_handler
+    def dealer_campaign_linechart(self, request):
+        api_user = Verify.get_seller_user(request)
+        dealer_user_subscription = Verify.get_dealer_user_subscription_from_api_user(api_user)
+        
+        subscriber_obj = { dealer_user_subscription.name: dealer_user_subscription.id}
+        for subscriber in dealer_user_subscription.subscribers.all():
+            subscriber_obj[subscriber.name] = subscriber.id
+        
+        data_sets = []
+        for name, id in subscriber_obj.items():
+            now_date = datetime.now()
+            start_date = datetime.now() - relativedelta(months = 6)
+            date_lable_list, month_campaign_list = [], []
+            data_set = { 'lable': name }
+            data_set['fill'] = False
+            data_set['tension'] = 0.3
+            data_set['borderColor'] = f'rgb({random.randint(0, 255)},{random.randint(0, 255)},{random.randint(0, 255)})'
+
+            while now_date > start_date:
+                date_lable_list.append(start_date.strftime("%Y-%m"))
+                month_campaign_list.append(db.api_campaign.find({'user_subscription_id': id, 'created_at': {'$gte': start_date, '$lte': start_date + relativedelta(months = 1)}}).count())
+                start_date = start_date + relativedelta(months = 1)
+            data_set['data'] = month_campaign_list
+            
+            data_sets.append(data_set)
+                  
+        dealer_dashboard_json = {
+            'labels': date_lable_list,
+            'data_sets': data_sets
+        }
+
+        return Response(dealer_dashboard_json, status=status.HTTP_200_OK)
+        
