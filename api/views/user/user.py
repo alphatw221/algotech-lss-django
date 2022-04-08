@@ -1,3 +1,4 @@
+from calendar import month
 import json
 from math import perm
 import re, pendulum
@@ -22,7 +23,7 @@ from backend.api.youtube.channel import api_youtube_get_list_channel_by_token
 from rest_framework.response import Response
 from rest_framework import status
 from api.models.facebook.facebook_page import FacebookPage, FacebookPageSerializer
-from datetime import datetime
+from datetime import datetime, timedelta
 from api.models.user.user_subscription import UserSubscription, UserSubscriptionSerializerSimplify
 from django.contrib.auth.models import User as AuthUser
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -46,6 +47,7 @@ from rest_framework_simplejwt.tokens import AccessToken
 from django.contrib.auth.models import User as AuthUser
 from django.contrib.auth import authenticate
 
+import stripe
 platform_info_dict={'facebook':'facebook_info', 'youtube':'youtube_info', 'instagram':'instagram_info', 'google':'google_info'}
 
 
@@ -565,60 +567,172 @@ class UserViewSet(viewsets.ModelViewSet):
             data = result.data
         else:
             serializer = self.get_serializer(queryset, many=True)
-            data = serializer.data
+            data = serializer.dat
 
         return Response(data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['POST'], url_path=r'register_free_trial', permission_classes=())
+    @api_error_handler
+    def register_free_trial(self, request):
+        email, plan = getdata(request, ("email", "plan"), required=True)
+        firstName, lastName, contactNumber, password, country = getdata(request, ("firstName", "lastName", "contactNumber", "password", "country"), required=False)
+
+        if plan != 'Free Trial':
+            raise ApiVerifyError('plan option error')
+
+        if AuthUser.objects.filter(email = email).exists() or User.objects.filter(email=email).exists():
+            raise ApiVerifyError('email has already been used')
+
+        expired_at = datetime.now()+timedelta(days=30)
+        auth_user = AuthUser.objects.create_user(
+            username=f'{firstName} {lastName}', email=email, password=password)
+        
+        user_subscription = UserSubscription.objects.create(
+            name=f'{firstName} {lastName}', 
+            status='valid', 
+            expired_at=expired_at, 
+            user_plan= {"activated_platform" : ["facebook"]}, 
+            meta_country={ 'country': country },
+            type='trial')
+        
+        api_user = User.objects.create(
+            name=f'{firstName} {lastName}', email=email, type='user', status='valid', phone=contactNumber, auth_user=auth_user, user_subscription=user_subscription)
+        
+
+        ret = {
+            "Email":email,
+            "Password":password,
+            "Plan":plan,
+            "Subscription Period":"Monthly",
+            "Expired At":expired_at.strftime("%m/%d/%Y, %H:%M:%S"),
+            "Receipt":""
+        }
+        
+        return Response(ret, status=status.HTTP_200_OK)
+
+
+
+    @action(detail=False, methods=['POST'], url_path=r'validate_register', permission_classes=())
+    @api_error_handler
+    def validate_register_data(self, request):
+
+        EARLY_BIRD_PROMO_CODE = 'test'
+        STRIPE_API_KEY = "sk_test_51J2aFmF3j9D00CA0KABMZVKtOVnZNbBvM2hcokicJmfx8vvrmNyys5atEAcpp0Au2O3HtX0jz176my7g0ozbinof00RL4QAZrY" #TODO put it in settings
+
+        email, plan, period = getdata(request, ("email", "plan", "period"), required=True)
+        promoCode, = getdata(request, ("promoCode",), required=False)
+
+        if promoCode and promoCode != EARLY_BIRD_PROMO_CODE:
+            raise ApiVerifyError('invalid promo code')
+
+
+        if AuthUser.objects.filter(email = email).exists() or User.objects.filter(email=email).exists():
+            raise ApiVerifyError('email has already been used')
+        
+        if plan == 'Lite':
+                amount = 1.00
+        elif plan == 'Standard(USD 30.00/Month)':  
+            if period == "Monthly":
+                amount = 30.00
+            else :
+                amount = 90.00
+
+            amount = amount*0.9 if promoCode == EARLY_BIRD_PROMO_CODE else amount
+        elif plan =='Premium(USD 60.00/Month)':
+            if period == "Monthly":
+                amount = 60.00
+            else :
+                amount = 180.00
+            amount = amount*0.9 if promoCode == EARLY_BIRD_PROMO_CODE else amount
+        else:
+            raise ApiVerifyError('plan option error')
+        
+        
+        stripe.api_key = STRIPE_API_KEY  
+        intent = stripe.PaymentIntent.create( amount=int(amount*100), currency="SGD",)
+        
+        return Response({
+            "client_secret":intent.client_secret,
+            "payment_amount":amount,
+            "user_plan":plan
+        }, status=status.HTTP_200_OK)
+
 
     @action(detail=False, methods=['POST'], url_path=r'register', permission_classes=())
     @api_error_handler
     def user_register(self, request):
-        firstName, lastName, contactNumber, email, password, country, plan, period, promoCode = getdata(request, ("firstName", "lastName", "contactNumber", "email", "password", "country", "plan", "period", "promoCode"))
 
-        #TODO get promo code and do what it is 
-        if promoCode and promoCode != 'test':
-            return Response({"message": "Promo code is wrong"}, status=status.HTTP_400_BAD_REQUEST)
-        elif promoCode and promoCode == 'test':
-            print ('success promo code')
-        
-        if plan != 'trial':
-            expired_at = pendulum.now()
-            user_plan = {
-                "activated_platform" : {
-                    "facebook" : NULL,
-                    "youtube" : NULL,
-                    "instagram" : NULL
-                }
-            }
-        elif plan == 'trial':
-            expired_at = expired_at.add(months=period)
-            user_plan = {
-                "activated_platform" : {
-                    "facebook" : NULL,
-                }
-            }    
+        EARLY_BIRD_PROMO_CODE = 'test'
+        STRIPE_API_KEY = "sk_test_51J2aFmF3j9D00CA0KABMZVKtOVnZNbBvM2hcokicJmfx8vvrmNyys5atEAcpp0Au2O3HtX0jz176my7g0ozbinof00RL4QAZrY" #TODO put it in settings
+
+        email, password, plan, period, intentSecret = getdata(request,("email", "password", "plan", "period", "intentSecret"),required=True)
+        firstName, lastName, contactNumber, country , promoCode = getdata(request, ("firstName", "lastName", "contactNumber", "country", "promoCode"), required=False)
+
+        payment_intent_id = intentSecret[:27]
+        stripe.api_key = STRIPE_API_KEY
+        paymentIntent = stripe.PaymentIntent.retrieve(payment_intent_id)
+
+        if paymentIntent.status != "succeeded":
+            raise ApiVerifyError('payment not succeeded')
+
+        #last validation  (require refunds)
+        # ------------------------------------------------------------------------------------
+        if AuthUser.objects.filter(email = email).exists() or User.objects.filter(email=email).exists():
+            raise ApiVerifyError('email has already been used')
+
+        if plan == 'Lite':
+            amount = 1.00
+            subscription_type = "lite"
+
+        elif plan == 'Standard(USD 30.00/Month)':  
+            subscription_type = "standard"
+            if period == "Monthly":
+                amount = 30.00
+            else :
+                amount = 90.00
+
+            amount = amount*0.9 if promoCode == EARLY_BIRD_PROMO_CODE else amount
+        elif plan =='Premium(USD 60.00/Month)':
+            subscription_type = "premium"
+            if period == "Monthly":
+                amount = 60.00
+            else :
+                amount = 180.00
+            amount = amount*0.9 if promoCode == EARLY_BIRD_PROMO_CODE else amount
+        else:
+            raise ApiVerifyError('plan option error')
+
+        if int(amount*100) != paymentIntent.amount:
+            raise ApiVerifyError('payment amount error')
+        #------------------------------------------------------------------------------------
+
+        expired_at = datetime.now()+timedelta(days=30) if period == "Monthly" else datetime.now()+timedelta(days=60)
         
         auth_user = AuthUser.objects.create_user(
             username=f'{firstName} {lastName}', email=email, password=password)
         
         user_subscription = UserSubscription.objects.create(
-            name=f'{firstName} {lastName}', status='valid', expired_at=expired_at, user_plan=user_plan, type=plan)
+            name=f'{firstName} {lastName}', 
+            status='valid', 
+            expired_at=expired_at, 
+            user_plan= {"activated_platform" : ["facebook","youtube","instagram"]}, 
+            meta_country={ 'country': country },
+            meta = {"stripe payment intent":intentSecret},
+            type=subscription_type)
         
-        meta = { 'country': country }
         api_user = User.objects.create(
-            name=f'{firstName} {lastName}', email=email, type='user', status='valid', phone=contactNumber, meta=meta, auth_user=auth_user, user_subscription=user_subscription)
+            name=f'{firstName} {lastName}', email=email, type='user', status='valid', phone=contactNumber, auth_user=auth_user, user_subscription=user_subscription)
         
-        user_subscription.save
-        api_user.save()
-        auth_user.last_login = datetime.now()
-        auth_user.save()
-
-        refresh = CustomTokenObtainPairSerializer.get_token(auth_user)
 
         ret = {
-            'refresh': str(refresh),
-            'access': str(refresh.access_token),
+            "Email":email,
+            "Password":password,
+            "Plan":plan,
+            "Subscription Period":"Monthly",
+            "Expired At":expired_at.strftime("%m/%d/%Y, %H:%M:%S"),
+            "Receipt":paymentIntent.charges.get('data')[0].get('receipt_url')
         }
-
+        
         return Response(ret, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['POST'], url_path=r'client_login')

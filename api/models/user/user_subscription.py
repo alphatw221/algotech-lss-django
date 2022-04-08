@@ -54,6 +54,7 @@ class UserSubscription(models.Model):
     meta_code = models.JSONField(null=True, blank=True, default=dict)
     user_plan = models.JSONField(null=True, blank=True, default=dict)
 
+    credit_card_info = models.JSONField(null=True, blank=True, default=dict)
     expired_at = models.DateTimeField(null=True, blank=True, default=None)
 
     dealer = models.ForeignKey("self", on_delete=models.SET_NULL, null=True, related_name="subscribers")
