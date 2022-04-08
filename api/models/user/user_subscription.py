@@ -1,5 +1,7 @@
 from email.policy import default
 from pyexpat import model
+
+from pkg_resources import require
 from api.models.facebook.facebook_page import (FacebookPage,
                                                FacebookPageInfoSerializer)
 from api.models.instagram.instagram_profile import (
@@ -45,7 +47,7 @@ class UserSubscription(models.Model):
 
     meta = models.JSONField(null=True, blank=True, default=dict)
     meta_payment = models.JSONField(null=True, blank=True, default=dict)
-    meta_logistic = models.JSONField(default=dict, null=True, blank=dict)
+    meta_logistic = models.JSONField(null=True, blank=True, default=dict)
     meta_country = models.JSONField(null=True, blank=True, default=dict)
 
     lang = models.CharField(max_length=255, blank=True,
@@ -54,7 +56,7 @@ class UserSubscription(models.Model):
     meta_code = models.JSONField(null=True, blank=True, default=dict)
     user_plan = models.JSONField(null=True, blank=True, default=dict)
 
-    credit_card_info = models.JSONField(null=True, blank=True, default=dict)
+    # credit_card_info = models.JSONField(null=True, blank=True, default=dict)
     expired_at = models.DateTimeField(null=True, blank=True, default=None)
 
     dealer = models.ForeignKey("self", on_delete=models.SET_NULL, null=True, related_name="subscribers")
@@ -79,10 +81,10 @@ class UserSubscriptionSerializer(serializers.ModelSerializer):
     youtube_channels = YoutubeChannelInfoSerializer(
         many=True, read_only=True, default=list)
 
-    meta = serializers.JSONField(default=dict)
-    meta_payment = serializers.JSONField(default=dict)
-    meta_logistic = serializers.JSONField(default=dict)
-    meta_country = serializers.JSONField(default=dict)
+    meta = serializers.JSONField(default=dict, required=False)
+    meta_payment = serializers.JSONField(default=dict, required=False)
+    meta_logistic = serializers.JSONField(default=dict, required=False)
+    meta_country = serializers.JSONField(default=dict, required=False)
     user_plan = serializers.JSONField(default=dict, required=False)
 
 
@@ -124,13 +126,17 @@ class UserSubscriptionSerializerSimplify(serializers.ModelSerializer):
         read_only_fields = ['created_at', 'modified_at']
 
 
-class UserSubscriptionSerializerMeta(UserSubscriptionSerializer):
+class UserSubscriptionSerializerMeta(serializers.ModelSerializer):
     class Meta:
         model = UserSubscription
         fields = ['meta', 'meta_country', 'meta_logistic',
                   'meta_payment']
         read_only_fields = ['created_at', 'modified_at']
 
+    meta = serializers.JSONField(default=dict, required=False)
+    meta_payment = serializers.JSONField(default=dict, required=False)
+    meta_logistic = serializers.JSONField(default=dict, required=False)
+    meta_country = serializers.JSONField(default=dict, required=False)
 
 class UserSubscriptionAdmin(admin.ModelAdmin):
     model = UserSubscription
