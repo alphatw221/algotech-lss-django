@@ -115,10 +115,10 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'], url_path=r'get_meta', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def get_meta(self, request):
-        api_user, platform_name, platform_id = getparams(request, ('platform_name', 'platform_id'), with_user=True, seller=True)
+        # api_user, platform_name, platform_id = getparams(request, ('platform_name', 'platform_id'), with_user=True, seller=True)
 
-        platform = Verify.get_platform(api_user, platform_name, platform_id)
-        user_subscription = Verify.get_user_subscription_from_platform(platform)
+        api_user = Verify.get_seller_user(request)
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
 
         serializer = UserSubscriptionSerializerMeta(user_subscription)
 
@@ -127,10 +127,10 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['POST'], url_path=r'update_hitpay', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def update_hitpay(self, request):
-        api_user, platform_name, platform_id = getparams(request, ('platform_name', 'platform_id'), with_user=True, seller=True)
+        # api_user, platform_name, platform_id = getparams(request, ('platform_name', 'platform_id'), with_user=True, seller=True)
 
-        platform = Verify.get_platform(api_user, platform_name, platform_id)
-        user_subscription = Verify.get_user_subscription_from_platform(platform)
+        api_user = Verify.get_seller_user(request)
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
 
         meta_payment = user_subscription.meta_payment
         meta_payment['hitpay'] = request.data
@@ -146,10 +146,10 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['POST'], url_path=r'update_paypal', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def update_paypal(self, request):
-        api_user, platform_name, platform_id = getparams(request, ('platform_name', 'platform_id'), with_user=True, seller=True)
+        # api_user, platform_name, platform_id = getparams(request, ('platform_name', 'platform_id'), with_user=True, seller=True)
 
-        platform = Verify.get_platform(api_user, platform_name, platform_id)
-        user_subscription = Verify.get_user_subscription_from_platform(platform)
+        api_user = Verify.get_seller_user(request)
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
 
         meta_payment = user_subscription.meta_payment
         meta_payment['paypal'] = request.data
@@ -165,11 +165,10 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['POST'], url_path=r'update_firstdata', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def update_firstdata(self, request):
-        api_user, platform_name, platform_id = getparams(request, ('platform_name', 'platform_id'), with_user=True, seller=True)
+        # api_user, platform_name, platform_id = getparams(request, ('platform_name', 'platform_id'), with_user=True, seller=True)
 
-        platform = Verify.get_platform(api_user, platform_name, platform_id)
-        user_subscription = Verify.get_user_subscription_from_platform(platform)
-
+        api_user = Verify.get_seller_user(request)
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
         meta_payment = user_subscription.meta_payment
         meta_payment['firstdata'] = request.data
 
@@ -184,10 +183,10 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['POST'], url_path=r'update_stripe', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def update_stripe(self, request):
-        api_user, platform_name, platform_id = getparams(request, ('platform_name', 'platform_id'), with_user=True, seller=True)
+        # api_user, platform_name, platform_id = getparams(request, ('platform_name', 'platform_id'), with_user=True, seller=True)
 
-        platform = Verify.get_platform(api_user, platform_name, platform_id)
-        user_subscription = Verify.get_user_subscription_from_platform(platform)
+        api_user = Verify.get_seller_user(request)
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
 
         meta_payment = user_subscription.meta_payment
         meta_payment['stripe'] = request.data
@@ -203,10 +202,10 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['POST'], url_path=r'update_paymongo', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def update_paymongo(self, request):
-        api_user, platform_name, platform_id = getparams(request, ('platform_name', 'platform_id'), with_user=True, seller=True)
+        # api_user, platform_name, platform_id = getparams(request, ('platform_name', 'platform_id'), with_user=True, seller=True)
 
-        platform = Verify.get_platform(api_user, platform_name, platform_id)
-        user_subscription = Verify.get_user_subscription_from_platform(platform)
+        api_user = Verify.get_seller_user(request)
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
 
         meta_payment = user_subscription.meta_payment
         meta_payment['paymongo'] = request.data
@@ -222,10 +221,10 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['POST'], url_path=r'update_direct_payment', parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated,))
     @api_error_handler
     def update_direct_payment(self, request):
-        api_user, platform_name, platform_id = getparams(request, ('platform_name', 'platform_id'), with_user=True, seller=True)
+        # api_user, platform_name, platform_id = getparams(request, ('platform_name', 'platform_id'), with_user=True, seller=True)
 
-        platform = Verify.get_platform(api_user, platform_name, platform_id)
-        user_subscription = Verify.get_user_subscription_from_platform(platform)
+        api_user = Verify.get_seller_user(request)
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
 
         text = request.data['text']
         data = json.loads(text)
@@ -254,10 +253,10 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['POST'], url_path=r'update_logistic', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def update_logistic(self, request):
-        api_user, platform_name, platform_id = getparams(request, ('platform_name', 'platform_id'), with_user=True, seller=True)
+        # api_user, platform_name, platform_id = getparams(request, ('platform_name', 'platform_id'), with_user=True, seller=True)
 
-        platform = Verify.get_platform(api_user, platform_name, platform_id)
-        user_subscription = Verify.get_user_subscription_from_platform(platform)
+        api_user = Verify.get_seller_user(request)
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
 
         serializer = UserSubscriptionSerializerMeta(
             user_subscription, data={"meta_logistic": request.data}, partial=True)
@@ -271,12 +270,12 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['PUT'], url_path=r'update_language', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def update_language(self, request):
-        api_user, platform_name, platform_id = getparams(request, ('platform_name', 'platform_id'), with_user=True, seller=True)
+        # api_user, platform_name, platform_id = getparams(request, ('platform_name', 'platform_id'), with_user=True, seller=True)
         language, = getdata(request, ('language',))
 
         Verify.language_supported(language)
-        platform = Verify.get_platform(api_user, platform_name, platform_id)
-        user_subscription = Verify.get_user_subscription_from_platform(platform)
+        api_user = Verify.get_seller_user(request)
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
 
         user_subscription.lang = language
         user_subscription.save()
@@ -287,11 +286,11 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['PUT'], url_path=r'update_note', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def update_note(self, request):
-        api_user, platform_name, platform_id = getparams(request, ('platform_name', 'platform_id'), with_user=True, seller=True)
+        # api_user, platform_name, platform_id = getparams(request, ('platform_name', 'platform_id'), with_user=True, seller=True)
         delivery_note, special_note, confirmation_note = getdata(request, ('delivery_note',"special_note", "confirmation_note"))
 
-        platform = Verify.get_platform(api_user, platform_name, platform_id)
-        user_subscription = Verify.get_user_subscription_from_platform(platform)
+        api_user = Verify.get_seller_user(request)
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
 
         user_subscription.meta['delivery_note']=delivery_note
         user_subscription.meta['special_note']=special_note
@@ -610,8 +609,10 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
                 instagram_profile.image = profile_pricure
                 instagram_profile.save()
             else:
+                # instagram_profile = InstagramProfile.objects.create(
+                #     business_id=business_id, name=profile_name, token=page_token, token_update_at=datetime.now(), token_update_by=api_user.facebook_info['id'], image=profile_pricure)
                 instagram_profile = InstagramProfile.objects.create(
-                    business_id=business_id, name=profile_name, token=page_token, token_update_at=datetime.now(), token_update_by=api_user.facebook_info['id'], image=profile_pricure)
+                    business_id=business_id, name=profile_name, token=page_token, token_update_at=datetime.now(), image=profile_pricure)
                 instagram_profile.save()
 
             if not instagram_profile.user_subscriptions.all():
