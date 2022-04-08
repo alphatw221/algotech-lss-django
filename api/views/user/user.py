@@ -44,6 +44,8 @@ from backend.api.instagram.profile import api_ig_get_profile_info
 # from rest_framework.authtoken.models import Token
 from rest_framework_simplejwt.tokens import AccessToken
 from django.contrib.auth.models import User as AuthUser
+from django.contrib.auth import authenticate
+
 platform_info_dict={'facebook':'facebook_info', 'youtube':'youtube_info', 'instagram':'instagram_info', 'google':'google_info'}
 
 
@@ -617,4 +619,24 @@ class UserViewSet(viewsets.ModelViewSet):
             'access': str(refresh.access_token),
         }
 
+        return Response(ret, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['POST'], url_path=r'client_login')
+    @api_error_handler
+    def client_login(self, request):
+        email, password = getdata(request, ("email","password"))
+        
+        username = User.objects.get(email=email).name
+
+        auth_user = authenticate(username=username, password=password)
+
+        if auth_user is not None:
+            refresh = CustomTokenObtainPairSerializer.get_token(auth_user)
+        else:
+            return Response({"message": "Error User"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        ret = {
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        }
         return Response(ret, status=status.HTTP_200_OK)
