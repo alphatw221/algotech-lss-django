@@ -571,7 +571,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
         return Response(data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['POST'], url_path=r'register_free_trial', permission_classes=())
+    @action(detail=False, methods=['POST'], url_path=r'register/trial', permission_classes=())
     @api_error_handler
     def register_free_trial(self, request):
         email, plan = getdata(request, ("email", "plan"), required=True)
@@ -582,6 +582,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
         if AuthUser.objects.filter(email = email).exists() or User.objects.filter(email=email).exists():
             raise ApiVerifyError('email has already been used')
+
 
         expired_at = datetime.now()+timedelta(days=30)
         auth_user = AuthUser.objects.create_user(
@@ -612,7 +613,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 
-    @action(detail=False, methods=['POST'], url_path=r'validate_register', permission_classes=())
+    @action(detail=False, methods=['POST'], url_path=r'register/validate', permission_classes=())
     @api_error_handler
     def validate_register_data(self, request):
 

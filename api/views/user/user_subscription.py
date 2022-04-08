@@ -132,7 +132,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         api_user = Verify.get_seller_user(request)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
 
-        meta_payment = user_subscription.meta_payment
+        meta_payment = user_subscription.meta_payment.copy()
         meta_payment['hitpay'] = request.data
 
         serializer = UserSubscriptionSerializerMeta(
@@ -151,7 +151,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         api_user = Verify.get_seller_user(request)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
 
-        meta_payment = user_subscription.meta_payment
+        meta_payment = user_subscription.meta_payment.copy()
         meta_payment['paypal'] = request.data
 
         serializer = UserSubscriptionSerializerMeta(
@@ -169,7 +169,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
         api_user = Verify.get_seller_user(request)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
-        meta_payment = user_subscription.meta_payment
+        meta_payment = user_subscription.meta_payment.copy()
         meta_payment['firstdata'] = request.data
 
         serializer = UserSubscriptionSerializerMeta(
@@ -188,7 +188,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         api_user = Verify.get_seller_user(request)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
 
-        meta_payment = user_subscription.meta_payment
+        meta_payment = user_subscription.meta_payment.copy()
         meta_payment['stripe'] = request.data
 
         serializer = UserSubscriptionSerializerMeta(
@@ -207,7 +207,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         api_user = Verify.get_seller_user(request)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
 
-        meta_payment = user_subscription.meta_payment
+        meta_payment = user_subscription.meta_payment.copy()
         meta_payment['paymongo'] = request.data
 
         serializer = UserSubscriptionSerializerMeta(
@@ -239,9 +239,9 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
                         print(image_path)
                         data['accounts'][account_number]['image'] = image_path
 
-        meta_payment = user_subscription.meta_payment
+        meta_payment = user_subscription.meta_payment.copy()
         meta_payment['direct_payment'] = data
-
+        
         serializer = UserSubscriptionSerializerMeta(
             user_subscription, data={"meta_payment": meta_payment}, partial=True)
         if not serializer.is_valid():
