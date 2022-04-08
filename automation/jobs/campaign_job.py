@@ -329,7 +329,7 @@ def capture_instagram(campaign):
         print(f"code: {code}")
 
         if code // 100 != 2 and 'error' in get_ig_comments_response and get_ig_comments_response['error']['type'] in ('GraphMethodException', 'OAuthException'):
-            instagram_campaign['live_media_id'] = ''
+            # instagram_campaign['live_media_id'] = ''
             instagram_campaign['remark'] = f'Instagram API error: {get_ig_comments_response["error"]}'
             db.api_campaign.update_one({'id': campaign['id']}, {
                                     '$set': {"instagram_campaign": instagram_campaign}})
