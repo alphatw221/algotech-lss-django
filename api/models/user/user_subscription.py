@@ -1,7 +1,7 @@
 from email.policy import default
 from pyexpat import model
 
-from pkg_resources import require
+
 from api.models.facebook.facebook_page import (FacebookPage,
                                                FacebookPageInfoSerializer)
 from api.models.instagram.instagram_profile import (
