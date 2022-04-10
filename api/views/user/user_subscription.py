@@ -416,16 +416,11 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         
         return Response(YoutubeChannelSerializer(user_subscription.youtube_channels.all(),many=True).data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['GET'], url_path=r'bind_youtube_channels', permission_classes=())
+    @action(detail=False, methods=['POST'], url_path=r'bind_youtube_channels', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def bind_youtube_channels_frontend(self, request):
-        state,google_user_code = getparams(request,("state","code"), with_user=False)
-        redirect_uri, current_url, access_token= state.split(",")
-        
-        auth_user_id = AccessToken(access_token).get('user_id')
-        auth_user = AuthUser.objects.get(id=auth_user_id)
-        api_user = auth_user.api_users.get(type='user')
-        
+        google_user_code, redirect_uri = getdata(request,("code", "redirect_uri"))
+        api_user = Verify.get_seller_user(request)       
         api_user_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
         response = requests.post(
                 url="https://accounts.google.com/o/oauth2/token",
@@ -483,8 +478,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             if not youtube_channel.user_subscriptions.all():
                 api_user_user_subscription.youtube_channels.add(youtube_channel)
 
-        redirect = HttpResponseRedirect(redirect_to=current_url)
-        return redirect
+        return Response({}, status=status.HTTP_200_OK)
     
     
     @action(detail=False, methods=['GET'], url_path=r'v2/bind_youtube_channels_callback', permission_classes=())
