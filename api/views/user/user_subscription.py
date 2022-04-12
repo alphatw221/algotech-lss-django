@@ -645,3 +645,46 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         user_subscription = Verify.get_user_subscription_from_dealer_user_subscription(dealer_user_subscription,pk)
 
         return Response(UserSubscriptionSerializerForDealerRetrieve(user_subscription).data, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['PUT'], url_path=r'unsubscribe_facebook_page', permission_classes=(IsAuthenticated,))
+    @api_error_handler
+    def unsubscribe_facebook_page(self, request):
+        facebook_page_id, = getdata(request,("facebook_page_id",))
+        api_user = Verify.get_seller_user(request)       
+        api_user_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        
+        try:
+            facebook_page = api_user_user_subscription.facebook_pages.filter(id=facebook_page_id)
+            facebook_page.delete()
+        except:
+            raise ApiCallerError("no facebook page found")
+        return Response({"delete": True}, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['PUT'], url_path=r'unsubscribe_youtube_channel', permission_classes=(IsAuthenticated,))
+    @api_error_handler
+    def unsubscribe_youtube_channel(self, request):
+        youtube_channel_id, = getdata(request,("youtube_channel_id",))
+        api_user = Verify.get_seller_user(request)       
+        api_user_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        
+        try:
+            youtube_channel = api_user_user_subscription.youtube_channels.filter(id=youtube_channel_id)
+            youtube_channel.delete()
+        except:
+            raise ApiCallerError("no facebook page found")
+        return Response({"delete": True}, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['PUT'], url_path=r'unsubscribe_instagram_profile', permission_classes=(IsAuthenticated,))
+    @api_error_handler
+    def unsubscribe_instagram_profile(self, request):
+        instagram_profile_id, = getdata(request,("instagram_profile_id",))
+        api_user = Verify.get_seller_user(request)       
+        api_user_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        
+        try:
+            instagram_profile = api_user_user_subscription.instagram_profiles.filter(id=instagram_profile_id)
+            instagram_profile.delete()
+        except:
+            raise ApiCallerError("no facebook page found")
+        return Response({"delete": True}, status=status.HTTP_200_OK)
+
