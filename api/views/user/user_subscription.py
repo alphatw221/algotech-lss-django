@@ -333,8 +333,9 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['POST'], url_path=r'v2/bind_facebook_pages', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def bind_user_facebook_pages(self, request):
-        token, = getdata(request,('accessToken',))
-        api_user = request.user.api_users.get(type='user')
+        token, = getdata(request,('accessToken',), required=True)
+
+        api_user = Verify.get_seller_user(request)
         api_user_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
 
         if not token:
@@ -371,8 +372,10 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
                     page_id=page_id, name=page_name, token=page_token, token_update_at=datetime.now(), image=page_image)
                 facebook_page.save()
 
-            if not facebook_page.user_subscriptions.all():
+            if facebook_page not in api_user_user_subscription.facebook_pages.all():
                 api_user_user_subscription.facebook_pages.add(facebook_page)
+            # if not facebook_page.user_subscriptions.all():
+            #     api_user_user_subscription.facebook_pages.add(facebook_page)
 
             # status_code, business_profile_response = api_fb_get_page_business_profile(facebook_page.token, facebook_page.page_id)
             # print(business_profile_response)

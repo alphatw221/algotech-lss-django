@@ -531,14 +531,15 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
     
-    @action(detail=False, methods=['POST'], url_path=r'create_valid_api_user', permission_classes=(IsAdminUser,))
+    @action(detail=False, methods=['POST'], url_path=r'create/valid_api_user', permission_classes=(IsAdminUser,))
+    # @action(detail=False, methods=['POST'], url_path=r'create/valid_api_user', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def create_valid_api_user(self, request):
+        # return Response("ok", status=status.HTTP_200_OK)
+        # print('test')
+        name, email = getdata(request, ("name","email"), required=True)
 
-        name, email = getdata(request, ("name","email"))
-        if not name or not email:
-            raise ApiVerifyError('name and email must not be empty')
-
+        # print(name,email)
         if User.objects.filter(email=email, type='user').exists():
             api_user = User.objects.get(email=email, type='user')
             api_user.status='valid'
