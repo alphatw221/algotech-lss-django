@@ -590,7 +590,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
                 instagram_profile.name = profile_name
                 instagram_profile.token = page_token
                 instagram_profile.token_update_at = datetime.now()
-                instagram_profile.token_update_by = api_user.facebook_info['id']
+                # instagram_profile.token_update_by = api_user.facebook_info['id']
                 instagram_profile.image = profile_pricure
                 instagram_profile.save()
             else:
