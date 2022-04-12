@@ -736,20 +736,21 @@ class UserViewSet(viewsets.ModelViewSet):
         
         return Response(ret, status=status.HTTP_200_OK)
     
-    @action(detail=False, methods=['POST'], url_path=r'client_login')
+    @action(detail=False, methods=['POST'], url_path=r'login/general')
     @api_error_handler
-    def client_login(self, request):
-        email, password = getdata(request, ("email","password"))
+    def general_login(self, request):
+        email, password = getdata(request, ("email","password"), required=True)
         
-        username = User.objects.get(email=email).name
+        if not AuthUser.objects.filter(email=email).exists():
+            return Response({"message": "email or password incorrect"}, status=status.HTTP_401_UNAUTHORIZED)
 
-        auth_user = authenticate(username=username, password=password)
+        auth_user = AuthUser.objects.get(email=email)
 
-        if auth_user is not None:
-            refresh = CustomTokenObtainPairSerializer.get_token(auth_user)
-        else:
-            return Response({"message": "Error User"}, status=status.HTTP_400_BAD_REQUEST)
-        
+        if not auth_user.check_password(password):
+            return Response({"message": "email or password incorrect"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        refresh = CustomTokenObtainPairSerializer.get_token(auth_user)
+
         ret = {
             'refresh': str(refresh),
             'access': str(refresh.access_token),
