@@ -333,21 +333,16 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['POST'], url_path=r'v2/bind_facebook_pages', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def bind_user_facebook_pages(self, request):
-        token, = getdata(request,('accessToken',))
-        api_user = request.user.api_users.get(type='user')
+
+        token, = getdata(request,('accessToken',), required=True)
+
+        api_user = Verify.get_seller_user(request)
         api_user_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
 
-        if not token:
-            raise ApiVerifyError("please provide token")
-        print(token)
         status_code, response = api_fb_get_me_accounts(token)
-
-        print(response)
 
         if status_code != 200:
             raise ApiVerifyError("api_fb_get_accounts_from_user error")
-
-        
 
         for item in response['data']:
             page_token = item['access_token']
@@ -371,8 +366,10 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
                     page_id=page_id, name=page_name, token=page_token, token_update_at=datetime.now(), image=page_image)
                 facebook_page.save()
 
-            if not facebook_page.user_subscriptions.all():
+            if facebook_page not in api_user_user_subscription.facebook_pages.all():
                 api_user_user_subscription.facebook_pages.add(facebook_page)
+            # if not facebook_page.user_subscriptions.all():
+            #     api_user_user_subscription.facebook_pages.add(facebook_page)
 
             # status_code, business_profile_response = api_fb_get_page_business_profile(facebook_page.token, facebook_page.page_id)
             # print(business_profile_response)
@@ -475,7 +472,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
                 )
                 youtube_channel.save()
 
-            if not youtube_channel.user_subscriptions.all():
+            if youtube_channel not in api_user_user_subscription.youtube_channels.all():
                 api_user_user_subscription.youtube_channels.add(youtube_channel)
 
         return Response({}, status=status.HTTP_200_OK)
@@ -540,7 +537,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
                     channel_id=channel_id, name=title, token=access_token, refresh_token=refresh_token, token_update_at=datetime.now(), image=picture)
                 youtube_channel.save()
 
-            if not youtube_channel.user_subscriptions.all():
+            if youtube_channel not in api_user_user_subscription.youtube_channels.all():
                 api_user_user_subscription.youtube_channels.add(youtube_channel)
 
         redirect = HttpResponseRedirect(redirect_to=redirect_uri+'#/'+redirect_route)
@@ -557,21 +554,15 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['POST'], url_path=r'v2/bind_instagram_profiles', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def bind_user_instagram_profiles(self, request):
-        token, = getdata(request,('accessToken',))
-        api_user = request.user.api_users.get(type='user')
+        token, = getdata(request,('accessToken',), required=True)
+
+        api_user = Verify.get_seller_user(request)
         api_user_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
 
-        if not token:
-            raise ApiVerifyError("please provide token")
-        print(token)
         status_code, response = api_fb_get_me_accounts(token)
-
-        print(response)
 
         if status_code != 200:
             raise ApiVerifyError("api_fb_get_accounts_from_user error")
-
-        
 
         for item in response['data']:
             page_token = item['access_token']
@@ -599,7 +590,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
                 instagram_profile.name = profile_name
                 instagram_profile.token = page_token
                 instagram_profile.token_update_at = datetime.now()
-                instagram_profile.token_update_by = api_user.facebook_info['id']
+                # instagram_profile.token_update_by = api_user.facebook_info['id']
                 instagram_profile.image = profile_pricure
                 instagram_profile.save()
             else:
@@ -609,7 +600,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
                     business_id=business_id, name=profile_name, token=page_token, token_update_at=datetime.now(), image=profile_pricure)
                 instagram_profile.save()
 
-            if not instagram_profile.user_subscriptions.all():
+            if instagram_profile not in api_user_user_subscription.instagram_profiles.all():
                 api_user_user_subscription.instagram_profiles.add(instagram_profile)
 
         return Response(FacebookPageSerializer(api_user_user_subscription.facebook_pages.all(),many=True).data, status=status.HTTP_200_OK)

@@ -531,14 +531,15 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
     
-    @action(detail=False, methods=['POST'], url_path=r'create_valid_api_user', permission_classes=(IsAdminUser,))
+    @action(detail=False, methods=['POST'], url_path=r'create/valid_api_user', permission_classes=(IsAdminUser,))
+    # @action(detail=False, methods=['POST'], url_path=r'create/valid_api_user', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def create_valid_api_user(self, request):
+        # return Response("ok", status=status.HTTP_200_OK)
+        # print('test')
+        name, email = getdata(request, ("name","email"), required=True)
 
-        name, email = getdata(request, ("name","email"))
-        if not name or not email:
-            raise ApiVerifyError('name and email must not be empty')
-
+        # print(name,email)
         if User.objects.filter(email=email, type='user').exists():
             api_user = User.objects.get(email=email, type='user')
             api_user.status='valid'
@@ -618,7 +619,10 @@ class UserViewSet(viewsets.ModelViewSet):
     def validate_register_data(self, request):
 
         EARLY_BIRD_PROMO_CODE = 'test'
-        STRIPE_API_KEY = "sk_test_51J2aFmF3j9D00CA0KABMZVKtOVnZNbBvM2hcokicJmfx8vvrmNyys5atEAcpp0Au2O3HtX0jz176my7g0ozbinof00RL4QAZrY" #TODO put it in settings
+        # STRIPE_API_KEY = "sk_test_51J2aFmF3j9D00CA0KABMZVKtOVnZNbBvM2hcokicJmfx8vvrmNyys5atEAcpp0Au2O3HtX0jz176my7g0ozbinof00RL4QAZrY" #TODO put it in settings
+        STRIPE_API_KEY = "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" #TODO put it in settings
+
+
 
         email, plan, period = getdata(request, ("email", "plan", "period"), required=True)
         promoCode, = getdata(request, ("promoCode",), required=False)
@@ -664,7 +668,8 @@ class UserViewSet(viewsets.ModelViewSet):
     def user_register(self, request):
 
         EARLY_BIRD_PROMO_CODE = 'test'
-        STRIPE_API_KEY = "sk_test_51J2aFmF3j9D00CA0KABMZVKtOVnZNbBvM2hcokicJmfx8vvrmNyys5atEAcpp0Au2O3HtX0jz176my7g0ozbinof00RL4QAZrY" #TODO put it in settings
+        # STRIPE_API_KEY = "sk_test_51J2aFmF3j9D00CA0KABMZVKtOVnZNbBvM2hcokicJmfx8vvrmNyys5atEAcpp0Au2O3HtX0jz176my7g0ozbinof00RL4QAZrY" #TODO put it in settings
+        STRIPE_API_KEY = "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" #TODO put it in settings
 
         email, password, plan, period, intentSecret = getdata(request,("email", "password", "plan", "period", "intentSecret"),required=True)
         firstName, lastName, contactNumber, country , promoCode = getdata(request, ("firstName", "lastName", "contactNumber", "country", "promoCode"), required=False)
