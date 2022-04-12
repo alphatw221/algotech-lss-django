@@ -603,7 +603,7 @@ class UserViewSet(viewsets.ModelViewSet):
             "Password":password,
             "Plan":plan,
             "Subscription Period":"Monthly",
-            "Expired At":expired_at.strftime("%m/%d/%Y, %H:%M:%S"),
+            "Expired At":expired_at.strftime("%m/%d/%Y %H:%M:%S"),
             "Receipt":""
         }
         
@@ -728,7 +728,7 @@ class UserViewSet(viewsets.ModelViewSet):
             "Password":password,
             "Plan":plan,
             "Subscription Period":"Monthly",
-            "Expired At":expired_at.strftime("%m/%d/%Y, %H:%M:%S"),
+            "Expired At":expired_at.strftime("%m/%d/%Y %H:%M:%S"),
             "Receipt":paymentIntent.charges.get('data')[0].get('receipt_url')
         }
         
