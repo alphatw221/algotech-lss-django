@@ -45,7 +45,7 @@ class Command(BaseCommand):
                     # job.delete()
                     continue
                     # job.delete()
-                elif job_status in ('finished', 'failed', 'canceled'):
+                elif job_status in ('finished', 'failed', 'canceled'):  #
                     job.delete()
                     campaign_queue.enqueue(campaign_job, job_id=str(campaign.id), args=(
                         campaign.id,), result_ttl=10, failure_ttl=10)
