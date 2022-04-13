@@ -87,6 +87,17 @@ class UserSubscriptionSerializer(serializers.ModelSerializer):
     meta_country = serializers.JSONField(default=dict, required=False)
     user_plan = serializers.JSONField(default=dict, required=False)
 
+class UserSubscriptionSerializerAccountInfo(serializers.ModelSerializer):
+    class Meta:
+        model = UserSubscription
+        exclude=['created_at', 'updated_at','facebook_pages','instagram_profiles','youtube_channels']
+
+    meta = serializers.JSONField(default=dict, required=False)
+    meta_payment = serializers.JSONField(default=dict, required=False)
+    meta_logistic = serializers.JSONField(default=dict, required=False)
+    meta_country = serializers.JSONField(default=dict, required=False)
+    meta_code = serializers.JSONField(default=dict, required=False)
+    user_plan = serializers.JSONField(default=dict, required=False)
 
 
 class UserSubscriptionSerializerForDealerRetrieve(serializers.ModelSerializer):

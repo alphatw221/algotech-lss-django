@@ -117,7 +117,7 @@ class PreOrderHelper():
                     db.api_order_product.insert_one(template, session=session)
 
                     db.api_campaign_product.update_one({"id": campaign_product.id}, {
-                                                    "$inc": {'qty_sold': qty_difference}})
+                                                    "$inc": {'qty_sold': qty_difference}}, session=session)
 
                     products = api_pre_order['products']
                     products[str(api_campaign_product['id'])] = {
@@ -316,7 +316,7 @@ class PreOrderHelper():
                 db.api_order_product.insert_one(template, session=session)
 
                 db.api_campaign_product.update_one({"id": api_campaign_product['id']}, {
-                    "$inc": {'qty_sold': qty_difference}})
+                    "$inc": {'qty_sold': qty_difference}}, session=session)
 
                 products = api_pre_order['products']
 
