@@ -297,7 +297,7 @@ class PreOrderHelper():
                 qty_difference = ret.get('qty_difference')
 
                 increment_id = get_incremented_filed(
-                    collection_name="api_order_product", field_name="id")
+                    collection_name="api_order_product", field_name="id", session=session)
                 template = api_order_product_template.copy()
                 template.update({
                     "id": increment_id,
@@ -321,9 +321,6 @@ class PreOrderHelper():
                 db.api_campaign_product.update_one({"id": api_campaign_product['id']}, {
                     "$inc": {'qty_sold': qty_difference}}, session=session)
 
-                # products = api_pre_order['products']
-
-                # products[str(api_campaign_product['id'])] = {
                 order_product = {
                     "order_product_id": increment_id,
                     "name": api_campaign_product["name"],
@@ -338,34 +335,20 @@ class PreOrderHelper():
                     "subtotal": float(qty*api_campaign_product["price"])
                 }
 
-                # subtotal = api_pre_order['subtotal']+(qty_difference*api_campaign_product['price'])
+                subtotal = api_pre_order['subtotal']+(qty_difference*api_campaign_product['price'])
                 free_delivery = api_pre_order.get("free_delivery",False)
                 shipping_cost = 0 if free_delivery else api_pre_order.get('shipping_cost',0)
                 adjust_price = api_pre_order.get("adjust_price",0)
-                # total = subtotal+ float(shipping_cost)+float(adjust_price)
-
-                # db.api_pre_order.update_one(
-                #     {'id': api_pre_order['id']},
-                #     {
-                #         "$set": {
-                #             "products": products,
-                #             "subtotal":subtotal,
-                #             "total":total
-                #         },
-                #     },session=session)
+                total = subtotal+ float(shipping_cost)+float(adjust_price)
 
                 db.api_pre_order.update_one(
                     {'id': api_pre_order['id']},
                     {
                         "$set": {
                             f"products.{str(api_campaign_product['id'])}": order_product,
-                            # "subtotal":subtotal,
-                            # "total":total
+                            "subtotal":subtotal,
+                            "total":total
                         },
-                        "$inc":{
-                            "subtotal":(qty_difference*api_campaign_product['price']),
-                            "total":(qty_difference*api_campaign_product['price'])+shipping_cost+adjust_price,
-                        }
                     },session=session)
 
     @classmethod
@@ -373,6 +356,10 @@ class PreOrderHelper():
 
         with client.start_session() as session:
             with session.start_transaction():
+
+                api_pre_order = db.api_pre_order.find_one({"id":api_pre_order['id']}, session=session)
+                api_campaign_product = db.api_campaign_product.find_one({"id":api_campaign_product['id']}, session=session)
+
                 api_order_product = db.api_order_product.find_one(
                     {"pre_order_id": api_pre_order['id'], "campaign_product_id": api_campaign_product['id']}, session=session)
 
@@ -385,12 +372,6 @@ class PreOrderHelper():
                 db.api_order_product.update_one(
                     {'id': api_order_product['id']}, {"$set": {'qty': qty, 'subtotal': float(qty*api_campaign_product["price"])}}, session=session)
 
-                products = api_pre_order['products']
-                products[str(api_campaign_product['id'])
-                            ]['qty'] = qty
-                products[str(api_campaign_product['id'])]['subtotal'] = float(
-                    qty*api_order_product['price'])
-
                 subtotal = api_pre_order['subtotal']+qty_difference*api_campaign_product['price']
                 free_delivery = api_pre_order.get("free_delivery",False)
                 shipping_cost = 0 if free_delivery else api_pre_order.get('shipping_cost',0)
@@ -401,17 +382,21 @@ class PreOrderHelper():
                     {'id': api_pre_order['id']},
                     {
                         "$set": {
-                            "products": products,
+                            f"products.{str(api_campaign_product['id'])}.{'qty'}": qty,
+                            f"products.{str(api_campaign_product['id'])}.{'subtotal'}": float(qty*api_order_product['price']),
                             "subtotal":subtotal,
                             "total":total
-                        }
-                    },
-                    session=session)
+                        },
+                    },session=session)
 
     @classmethod
     def delete_product_by_comment(cls, api_pre_order, api_campaign_product):
         with client.start_session() as session:
             with session.start_transaction():
+
+                api_pre_order = db.api_pre_order.find_one({"id":api_pre_order['id']}, session=session)
+                api_campaign_product = db.api_campaign_product.find_one({"id":api_campaign_product['id']}, session=session)
+
                 api_order_product = db.api_order_product.find_one(
                     {"pre_order_id": api_pre_order['id'], "campaign_product_id": api_campaign_product['id']}, session=session)
 
@@ -420,9 +405,6 @@ class PreOrderHelper():
 
                 db.api_order_product.delete_one(
                     {'id': api_order_product['id']}, session=session)
-
-                products = api_pre_order['products']
-                del products[str(api_campaign_product['id'])]
 
                 subtotal = api_pre_order['subtotal']-api_order_product['qty']*api_order_product['price']
                 free_delivery = api_pre_order.get("free_delivery",False)
@@ -433,8 +415,10 @@ class PreOrderHelper():
                 db.api_pre_order.update_one(
                     {'id': api_pre_order['id']},
                     {
+                        "$unset":{
+                            f"products.{str(api_campaign_product['id'])}":""
+                        },
                         "$set": {
-                            "products": products,
                             "subtotal": subtotal,
                             "total": total
                         }
