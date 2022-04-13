@@ -417,7 +417,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
     @api_error_handler
     def bind_youtube_channels_frontend(self, request):
         google_user_code, redirect_uri = getdata(request,("code", "redirect_uri"))
-        api_user = Verify.get_seller_user(request)       
+        api_user = Verify.get_seller_user(request)    
         api_user_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
         response = requests.post(
                 url="https://accounts.google.com/o/oauth2/token",
@@ -425,7 +425,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
                     "code": google_user_code,
                     "client_id": settings.GOOGLE_OAUTH_CLIENT_ID_FOR_LIVESHOWSELLER,
                     "client_secret": settings.GOOGLE_OAUTH_CLIENT_SECRET_FOR_LIVESHOWSELLER,
-                    "redirect_uri": redirect_uri,
+                    "redirect_uri": request.META['HTTP_HOST'],
                     # "redirect_uri": settings.WEB_SERVER_URL + "/bind_youtube_channels_callback",
                     "grant_type": "authorization_code"
                 }
