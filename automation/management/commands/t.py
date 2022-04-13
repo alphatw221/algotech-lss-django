@@ -244,7 +244,16 @@ class Command(BaseCommand):
     def test_mongodb_query(self):
         from backend.pymongo.mongodb import db
 
-        print(db.api_campaign_comment.find({"campaign_id":365}).count())
+        db.api_pre_order.update_one(
+                    {'id': 629},
+                    {
+                        "$set": {
+                            f"products.{api_campaign_product['id']}": order_product,
+                            "subtotal":subtotal,
+                            "total":"total"
+                        },
+                    })
+
 
     def test_set_password(self):
 
