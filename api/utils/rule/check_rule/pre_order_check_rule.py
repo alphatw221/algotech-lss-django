@@ -100,7 +100,7 @@ class PreOrderCheckRule():
         if api_user and api_user.type=="user":
             return
         if not campaign.meta.get('allow_checkout', 1):
-            raise PreOrderErrors.PreOrderException('Seller had stopped checkout')
+            raise PreOrderErrors.PreOrderException('Sorry, you are unable to make that purchase right now.')
 
     @staticmethod
     def campaign_product_type(**kwargs):
