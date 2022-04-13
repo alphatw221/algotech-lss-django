@@ -1,6 +1,7 @@
 from django.db.models.query import RawQuerySet
 from pymongo import message
 from requests.api import get
+from api.utils.error_handle.error_handler.pymongo_error_handler import pymongo_error_handler
 from api.utils.rule.check_rule.pre_order_check_rule import PreOrderCheckRule
 from api.utils.rule.rule_checker.pre_order_rule_checker import PreOrderAddProductRuleChecker, PreOrderCheckoutRuleChecker, PreOrderDeleteProductRuleChecker, PreOrderUpdateProductRuleChecker
 from backend.pymongo.mongodb import db, client, get_incremented_filed
@@ -21,230 +22,210 @@ class PreOrderHelper():
 
 
     @classmethod
+    @pymongo_error_handler
     def update_product(cls, api_user, pre_order, order_product, qty):
         with client.start_session() as session:
-            try:
-                with session.start_transaction():
-                    api_pre_order = db.api_pre_order.find_one(
-                        {"id": pre_order.id}, session=session)
-                    api_order_product = db.api_order_product.find_one(
-                        {"id": order_product.id}, session=session)
-                    api_campaign_product = db.api_campaign_product.find_one(
-                        {"id": api_order_product['campaign_product_id']}, session=session)
+            with session.start_transaction():
+                api_pre_order = db.api_pre_order.find_one(
+                    {"id": pre_order.id}, session=session)
+                api_order_product = db.api_order_product.find_one(
+                    {"id": order_product.id}, session=session)
+                api_campaign_product = db.api_campaign_product.find_one(
+                    {"id": api_order_product['campaign_product_id']}, session=session)
 
-                    ret = PreOrderUpdateProductRuleChecker.check(**{
-                        'api_user':api_user,
-                        'api_pre_order':api_pre_order,
-                        'api_order_product':api_order_product,
-                        'api_campaign_product':api_campaign_product,
-                        'qty':qty,
-                        })
+                ret = PreOrderUpdateProductRuleChecker.check(**{
+                    'api_user':api_user,
+                    'api_pre_order':api_pre_order,
+                    'api_order_product':api_order_product,
+                    'api_campaign_product':api_campaign_product,
+                    'qty':qty,
+                    })
 
-                    qty = ret.get('qty')
-                    qty_difference = ret.get('qty_difference')
+                qty = ret.get('qty')
+                qty_difference = ret.get('qty_difference')
 
-                    db.api_campaign_product.update_one(
-                        {'id': api_campaign_product['id']}, {"$inc": {'qty_sold': qty_difference}}, session=session)
+                db.api_campaign_product.update_one(
+                    {'id': api_campaign_product['id']}, {"$inc": {'qty_sold': qty_difference}}, session=session)
 
-                    db.api_order_product.update_one(
-                        {'id': api_order_product['id']}, {"$set": {'qty': qty, 'subtotal': float(qty*api_campaign_product["price"])}}, session=session)
+                db.api_order_product.update_one(
+                    {'id': api_order_product['id']}, {"$set": {'qty': qty, 'subtotal': float(qty*api_campaign_product["price"])}}, session=session)
 
-                    products = api_pre_order['products']
-                    products[str(api_campaign_product['id'])]['qty'] = qty
-                    products[str(api_campaign_product['id'])]['subtotal'] = float(
-                        qty*api_order_product['price'])
+                subtotal = api_pre_order['subtotal']+qty_difference*api_campaign_product['price']
+                free_delivery = api_pre_order.get("free_delivery",False)
+                shipping_cost = 0 if free_delivery else api_pre_order.get('shipping_cost',0)
+                adjust_price = api_pre_order.get("adjust_price",0)
+                total = subtotal+ float(shipping_cost)+float(adjust_price)
 
-                    subtotal = api_pre_order['subtotal']+qty_difference*api_campaign_product['price']
-                    free_delivery = api_pre_order.get("free_delivery",False)
-                    shipping_cost = 0 if free_delivery else api_pre_order.get('shipping_cost',0)
-                    adjust_price = api_pre_order.get("adjust_price",0)
-                    total = subtotal+ float(shipping_cost)+float(adjust_price)
-
-                    db.api_pre_order.update_one(
-                        {'id': pre_order.id},
-                        {
-                            "$set": {
-                                "lock_at": datetime.now() if api_user and api_user.type == 'customer' else None,
-                                "products": products,
-                                "subtotal":subtotal,
-                                "total":total
-                            }
-                        },session=session)
-            except pymongo_errors.PyMongoError as e:
-                print(e)
-                raise pymongo_errors.PyMongoError("server busy, please try again later")
+                db.api_pre_order.update_one(
+                    {'id': pre_order.id},
+                    {
+                        "$set": {
+                            "lock_at": datetime.now() if api_user and api_user.type == 'customer' else None,
+                            f"products.{str(api_campaign_product['id'])}.{'qty'}": qty,
+                            f"products.{str(api_campaign_product['id'])}.{'subtotal'}": float(qty*api_order_product['price']),
+                            "subtotal":subtotal,
+                            "total":total
+                        }
+                    },session=session)
         return db.api_order_product.find_one({"id": api_order_product['id']}, {"_id": False})
 
     @classmethod
+    @pymongo_error_handler
     def add_product(cls, api_user, pre_order, campaign_product, qty):
         with client.start_session() as session:
-            try:
-                with session.start_transaction():
-                    api_pre_order = db.api_pre_order.find_one(
-                        {"id": pre_order.id}, session=session)
-                    api_campaign_product = db.api_campaign_product.find_one(
-                        {"id": campaign_product.id}, session=session)
+            with session.start_transaction():
+                api_pre_order = db.api_pre_order.find_one(
+                    {"id": pre_order.id}, session=session)
+                api_campaign_product = db.api_campaign_product.find_one(
+                    {"id": campaign_product.id}, session=session)
 
-                    ret = PreOrderAddProductRuleChecker.check(**{
-                        'api_user':api_user,
-                        'api_pre_order':api_pre_order,
-                        'api_campaign_product':api_campaign_product,
-                        'qty':qty,
-                        })
-                    qty = ret.get('qty')
-                    qty_difference = ret.get('qty_difference')
-                    
-                    increment_id = get_incremented_filed(
-                        collection_name='api_order_product', field_name='id')
-                    template = api_order_product_template.copy()
-                    template.update({
-                        "id": increment_id,
-                        "campaign_id": api_campaign_product["campaign_id"],
-                        "campaign_product_id": api_campaign_product["id"],
-                        "pre_order_id": api_pre_order["id"],
-                        "qty": qty,
-                        "customer_id": api_pre_order['customer_id'],
-                        "customer_name": api_pre_order['customer_name'],
-                        "platform": api_pre_order['platform'],
-                        "type": api_campaign_product["type"],
-                        "name": api_campaign_product["name"],
-                        "price": api_campaign_product["price"],
-                        "currency": api_campaign_product["currency"],
-                        "currency_sign": api_campaign_product["currency_sign"],
-                        "image": api_campaign_product["image"],
-                        "subtotal": float(qty*api_campaign_product["price"])
+                ret = PreOrderAddProductRuleChecker.check(**{
+                    'api_user':api_user,
+                    'api_pre_order':api_pre_order,
+                    'api_campaign_product':api_campaign_product,
+                    'qty':qty,
                     })
-                    db.api_order_product.insert_one(template, session=session)
+                qty = ret.get('qty')
+                qty_difference = ret.get('qty_difference')
+                
+                increment_id = get_incremented_filed(
+                    collection_name='api_order_product', field_name='id', session=session)
+                template = api_order_product_template.copy()
+                template.update({
+                    "id": increment_id,
+                    "campaign_id": api_campaign_product["campaign_id"],
+                    "campaign_product_id": api_campaign_product["id"],
+                    "pre_order_id": api_pre_order["id"],
+                    "qty": qty,
+                    "customer_id": api_pre_order['customer_id'],
+                    "customer_name": api_pre_order['customer_name'],
+                    "platform": api_pre_order['platform'],
+                    "type": api_campaign_product["type"],
+                    "name": api_campaign_product["name"],
+                    "price": api_campaign_product["price"],
+                    "currency": api_campaign_product["currency"],
+                    "currency_sign": api_campaign_product["currency_sign"],
+                    "image": api_campaign_product["image"],
+                    "subtotal": float(qty*api_campaign_product["price"])
+                })
+                db.api_order_product.insert_one(template, session=session)
 
-                    db.api_campaign_product.update_one({"id": campaign_product.id}, {
-                                                    "$inc": {'qty_sold': qty_difference}}, session=session)
+                db.api_campaign_product.update_one({"id": campaign_product.id}, {
+                                                "$inc": {'qty_sold': qty_difference}}, session=session)
 
-                    products = api_pre_order['products']
-                    products[str(api_campaign_product['id'])] = {
-                        "order_product_id": increment_id,
-                        "name": api_campaign_product["name"],
-                        "image": api_campaign_product["image"],
-                        "price": api_campaign_product["price"],
-                        "type": api_campaign_product["type"],
+                order_product = {
+                    "order_product_id": increment_id,
+                    "name": api_campaign_product["name"],
+                    "image": api_campaign_product["image"],
+                    "price": api_campaign_product["price"],
+                    "type": api_campaign_product["type"],
+                    "currency": api_campaign_product["currency"],
+                    "currency_sign": api_campaign_product["currency_sign"],
+                    "qty": qty,
+                    "subtotal": float(qty*api_campaign_product["price"])
+                }
 
-                        "currency": api_campaign_product["currency"],
-                        "currency_sign": api_campaign_product["currency_sign"],
+                subtotal = api_pre_order['subtotal']+(qty_difference*api_campaign_product['price'])
+                free_delivery = api_pre_order.get("free_delivery",False)
+                shipping_cost = 0 if free_delivery else api_pre_order.get('shipping_cost',0)
+                adjust_price = api_pre_order.get("adjust_price",0)
+                total = subtotal+ float(shipping_cost)+float(adjust_price)
 
-                        "qty": qty,
-                        "subtotal": float(qty*api_campaign_product["price"])
-                    }
-
-                    subtotal = api_pre_order['subtotal']+(qty_difference*api_campaign_product['price'])
-                    free_delivery = api_pre_order.get("free_delivery",False)
-                    shipping_cost = 0 if free_delivery else api_pre_order.get('shipping_cost',0)
-                    adjust_price = api_pre_order.get("adjust_price",0)
-                    total = subtotal+ float(shipping_cost)+float(adjust_price)
-
-                    db.api_pre_order.update_one(
-                        {'id': pre_order.id},
-                        {
-                            "$set": {
-                                "lock_at": datetime.now() if api_user and api_user.type == 'customer' else None,
-                                "products": products,
-                                "subtotal":subtotal,
-                                "total":total
-                            },
+                db.api_pre_order.update_one(
+                    {'id': pre_order.id},
+                    {
+                        "$set": {
+                            "lock_at": datetime.now() if api_user and api_user.type == 'customer' else None,
+                            f"products.{str(api_campaign_product['id'])}": order_product,
+                            "subtotal":subtotal,
+                            "total":total
                         },
-                        session=session)
-            except pymongo_errors.PyMongoError as e:
-                print(e)
-                raise pymongo_errors.PyMongoError("server busy, please try again later")
+                    },session=session)
         return db.api_order_product.find_one({"id": increment_id}, {"_id": False})
 
     @classmethod
+    @pymongo_error_handler
     def delete_product(cls, api_user, pre_order, order_product):
         with client.start_session() as session:
-            try:
-                with session.start_transaction():
-                    api_pre_order = db.api_pre_order.find_one(
-                        {"id": pre_order.id}, session=session)
-                    api_order_product = db.api_order_product.find_one(
-                        {"id": order_product.id}, session=session)
+            with session.start_transaction():
+                api_pre_order = db.api_pre_order.find_one(
+                    {"id": pre_order.id}, session=session)
+                api_order_product = db.api_order_product.find_one(
+                    {"id": order_product.id}, session=session)
 
-                    campaign_product_id = api_order_product['campaign_product_id']
-                    api_campaign_product = db.api_campaign_product.find_one(
-                        {"id": campaign_product_id}, session=session)
+                campaign_product_id = api_order_product['campaign_product_id']
+                api_campaign_product = db.api_campaign_product.find_one(
+                    {"id": campaign_product_id}, session=session)
 
 
-                    PreOrderDeleteProductRuleChecker.check(**{
-                        'api_user':api_user,
-                        'api_pre_order':api_pre_order,
-                        'api_order_product':api_order_product,
-                        'api_campaign_product':api_campaign_product,
-                        })
+                PreOrderDeleteProductRuleChecker.check(**{
+                    'api_user':api_user,
+                    'api_pre_order':api_pre_order,
+                    'api_order_product':api_order_product,
+                    'api_campaign_product':api_campaign_product,
+                    })
 
-                    if api_campaign_product:
-                        db.api_campaign_product.update_one(
-                            {'id': campaign_product_id}, {"$inc": {'qty_sold': -api_order_product['qty']}}, session=session)
+                if api_campaign_product:
+                    db.api_campaign_product.update_one(
+                        {'id': campaign_product_id}, {"$inc": {'qty_sold': -api_order_product['qty']}}, session=session)
 
-                    db.api_order_product.delete_one(
-                        {'id': api_order_product['id']}, session=session)
+                db.api_order_product.delete_one(
+                    {'id': api_order_product['id']}, session=session)
 
-                    products = api_pre_order['products']
-                    del products[str(campaign_product_id)]
+                subtotal = api_pre_order['subtotal']-api_order_product['qty']*api_order_product['price']
+                free_delivery = api_pre_order.get("free_delivery",False)
+                shipping_cost = 0 if free_delivery else api_pre_order.get('shipping_cost',0)
+                adjust_price = api_pre_order.get("adjust_price",0)
+                total = subtotal+ float(shipping_cost)+float(adjust_price)
 
-                    subtotal = api_pre_order['subtotal']-api_order_product['qty']*api_order_product['price']
-                    free_delivery = api_pre_order.get("free_delivery",False)
-                    shipping_cost = 0 if free_delivery else api_pre_order.get('shipping_cost',0)
-                    adjust_price = api_pre_order.get("adjust_price",0)
-                    total = subtotal+ float(shipping_cost)+float(adjust_price)
-
-                    db.api_pre_order.update_one(
-                        {'id': pre_order.id},
-                        {
-                            "$set": {
-                                "lock_at": datetime.now() if api_user and api_user.type == 'customer' else None,
-                                "products": products,
-                                "subtotal":subtotal,
-                                "total":total
-                            },
+                db.api_pre_order.update_one(
+                    {'id': pre_order.id},
+                    {
+                        "$unset":{
+                            f"products.{str(campaign_product_id)}": "",
                         },
-                        session=session)
-            except pymongo_errors.PyMongoError as e:
-                print(e)
-                raise pymongo_errors.PyMongoError("server busy, please try again later")
+                        "$set": {
+                            "lock_at": datetime.now() if api_user and api_user.type == 'customer' else None,
+                            
+                            "subtotal":subtotal,
+                            "total":total
+                        },
+                    },session=session)
         return True
 
     @classmethod
+    @pymongo_error_handler
     def checkout(cls, api_user, pre_order):
         with client.start_session() as session:
-            try:
-                with session.start_transaction():
-                    api_pre_order = db.api_pre_order.find_one(
-                        {"id": pre_order.id}, session=session)
+            with session.start_transaction():
+                api_pre_order = db.api_pre_order.find_one(
+                    {"id": pre_order.id}, session=session)
 
-                    PreOrderCheckoutRuleChecker.check(**{
-                        'api_user':api_user,
-                        'pre_order':pre_order,
-                        'api_pre_order':api_pre_order,
-                        })
+                PreOrderCheckoutRuleChecker.check(**{
+                    'api_user':api_user,
+                    'pre_order':pre_order,
+                    'api_pre_order':api_pre_order,
+                    })
 
-                    api_pre_order['total']=api_pre_order['subtotal']+api_pre_order['shipping_cost']+api_pre_order['adjust_price']
+                api_pre_order['total']=api_pre_order['subtotal']+api_pre_order['shipping_cost']+api_pre_order['adjust_price']
 
-                    increment_id = get_incremented_filed(
-                        collection_name="api_order", field_name="id")
-                    api_order_data = api_pre_order.copy()
+                increment_id = get_incremented_filed(
+                    collection_name="api_order", field_name="id", session=session)
+                api_order_data = api_pre_order.copy()
 
-                    del api_order_data['_id']
-                    api_order_data['id'] = increment_id
-                    api_order_data['created_at'] = datetime.utcnow()
-                    api_order_data['buyer_id'] = api_user.id
-                    template = api_order_template.copy()
-                    template.update(api_order_data)
-                    db.api_order.insert_one(template, session=session)
+                del api_order_data['_id']
+                api_order_data['id'] = increment_id
+                api_order_data['created_at'] = datetime.utcnow()
+                api_order_data['buyer_id'] = api_user.id
+                template = api_order_template.copy()
+                template.update(api_order_data)
+                db.api_order.insert_one(template, session=session)
 
-                    db.api_order_product.update_many(
-                        {"pre_order_id": api_pre_order["id"]}, {"$set": {"pre_order_id": None, "order_id": increment_id}})
-                    db.api_pre_order.update_one({"id": api_pre_order["id"]}, {
-                                                "$set": {"products": {}, "total": 0, "subtotal": 0, "adjust_price":0, "adjust_title":"", "free_delivery":False, "history":{}}}, session=session)
-            except pymongo_errors.PyMongoError as e:
-                print(e)
-                raise pymongo_errors.PyMongoError("server busy, please try again later")
+                db.api_order_product.update_many(
+                    {"pre_order_id": api_pre_order["id"]}, {"$set": {"pre_order_id": None, "order_id": increment_id}})
+                db.api_pre_order.update_one({"id": api_pre_order["id"]}, {
+                                            "$set": {"products": {}, "total": 0, "subtotal": 0, "adjust_price":0, "adjust_title":"", "free_delivery":False, "history":{}}}, session=session)
+      
         return db.api_order.find_one({"id": increment_id}, {"_id": False})
 
     
