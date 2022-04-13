@@ -318,9 +318,10 @@ class PreOrderHelper():
                 db.api_campaign_product.update_one({"id": api_campaign_product['id']}, {
                     "$inc": {'qty_sold': qty_difference}}, session=session)
 
-                products = api_pre_order['products']
+                # products = api_pre_order['products']
 
-                products[str(api_campaign_product['id'])] = {
+                # products[str(api_campaign_product['id'])] = {
+                order_product = {
                     "order_product_id": increment_id,
                     "name": api_campaign_product["name"],
                     "image": api_campaign_product["image"],
@@ -340,11 +341,21 @@ class PreOrderHelper():
                 adjust_price = api_pre_order.get("adjust_price",0)
                 total = subtotal+ float(shipping_cost)+float(adjust_price)
 
+                # db.api_pre_order.update_one(
+                #     {'id': api_pre_order['id']},
+                #     {
+                #         "$set": {
+                #             "products": products,
+                #             "subtotal":subtotal,
+                #             "total":total
+                #         },
+                #     },session=session)
+
                 db.api_pre_order.update_one(
                     {'id': api_pre_order['id']},
                     {
                         "$set": {
-                            "products": products,
+                            f"products.{api_campaign_product['id']}": order_product,
                             "subtotal":subtotal,
                             "total":total
                         },
