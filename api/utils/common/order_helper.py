@@ -358,7 +358,7 @@ class PreOrderHelper():
                     {'id': api_pre_order['id']},
                     {
                         "$set": {
-                            f"products.{api_campaign_product['id']}": order_product,
+                            f"products.{str(api_campaign_product['id'])}": order_product,
                             # "subtotal":subtotal,
                             # "total":total
                         },
