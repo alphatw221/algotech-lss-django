@@ -419,13 +419,14 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         google_user_code, redirect_uri = getdata(request,("code", "redirect_uri"))
         api_user = Verify.get_seller_user(request)    
         api_user_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        print(request.META["HTTP_ORIGIN"])
         response = requests.post(
                 url="https://accounts.google.com/o/oauth2/token",
                 data={
                     "code": google_user_code,
                     "client_id": settings.GOOGLE_OAUTH_CLIENT_ID_FOR_LIVESHOWSELLER,
                     "client_secret": settings.GOOGLE_OAUTH_CLIENT_SECRET_FOR_LIVESHOWSELLER,
-                    "redirect_uri": request.META['HTTP_HOST'],
+                    "redirect_uri": request.META['HTTP_ORIGIN'],
                     # "redirect_uri": settings.WEB_SERVER_URL + "/bind_youtube_channels_callback",
                     "grant_type": "authorization_code"
                 }
