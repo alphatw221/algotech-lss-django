@@ -290,6 +290,9 @@ class PreOrderHelper():
         with client.start_session() as session:
             with session.start_transaction():
 
+                api_pre_order = db.api_pre_order.find_one({"id",api_pre_order['id']}, session=session)
+                api_campaign_product = db.api_campaign_product.find_one({"id",api_campaign_product['id']}, session=session)
+
                 ret = PreOrderCheckRule.is_stock_avaliable(**{'api_campaign_product':api_campaign_product,'qty':qty})
                 qty_difference = ret.get('qty_difference')
 
@@ -335,11 +338,11 @@ class PreOrderHelper():
                     "subtotal": float(qty*api_campaign_product["price"])
                 }
 
-                subtotal = api_pre_order['subtotal']+(qty_difference*api_campaign_product['price'])
+                # subtotal = api_pre_order['subtotal']+(qty_difference*api_campaign_product['price'])
                 free_delivery = api_pre_order.get("free_delivery",False)
                 shipping_cost = 0 if free_delivery else api_pre_order.get('shipping_cost',0)
                 adjust_price = api_pre_order.get("adjust_price",0)
-                total = subtotal+ float(shipping_cost)+float(adjust_price)
+                # total = subtotal+ float(shipping_cost)+float(adjust_price)
 
                 # db.api_pre_order.update_one(
                 #     {'id': api_pre_order['id']},
@@ -356,9 +359,13 @@ class PreOrderHelper():
                     {
                         "$set": {
                             f"products.{api_campaign_product['id']}": order_product,
-                            "subtotal":subtotal,
-                            "total":total
+                            # "subtotal":subtotal,
+                            # "total":total
                         },
+                        "$inc":{
+                            "subtotal":(qty_difference*api_campaign_product['price']),
+                            "total":(qty_difference*api_campaign_product['price'])+shipping_cost+adjust_price,
+                        }
                     },session=session)
 
     @classmethod
