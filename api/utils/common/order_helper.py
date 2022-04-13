@@ -290,8 +290,8 @@ class PreOrderHelper():
         with client.start_session() as session:
             with session.start_transaction():
 
-                api_pre_order = db.api_pre_order.find_one({"id",api_pre_order['id']}, session=session)
-                api_campaign_product = db.api_campaign_product.find_one({"id",api_campaign_product['id']}, session=session)
+                api_pre_order = db.api_pre_order.find_one({"id":api_pre_order['id']}, session=session)
+                api_campaign_product = db.api_campaign_product.find_one({"id":api_campaign_product['id']}, session=session)
 
                 ret = PreOrderCheckRule.is_stock_avaliable(**{'api_campaign_product':api_campaign_product,'qty':qty})
                 qty_difference = ret.get('qty_difference')
@@ -358,8 +358,7 @@ class PreOrderHelper():
                     {'id': api_pre_order['id']},
                     {
                         "$set": {
-                            # f"products.{str(api_campaign_product['id'])}": order_product,
-                            "products.test": order_product,
+                            f"products.{str(api_campaign_product['id'])}": order_product,
                             # "subtotal":subtotal,
                             # "total":total
                         },
