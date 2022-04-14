@@ -42,7 +42,7 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.test_mongodb_query()
+        self.test_set_password()
         # self.add_user_subscription_user()
         # self.lucky_draw_test()
         # from backend.google_cloud_monitoring.google_cloud_monitoring import CommentQueueLengthMetric
@@ -244,4 +244,22 @@ class Command(BaseCommand):
     def test_mongodb_query(self):
         from backend.pymongo.mongodb import db
 
-        print(db.api_campaign_comment.find({"campaign_id":365}).count())
+        db.api_pre_order.update_one(
+                    {'id': 629},
+                    {
+                        "$set": {
+                            f"products.{api_campaign_product['id']}": order_product,
+                            "subtotal":subtotal,
+                            "total":"total"
+                        },
+                    })
+
+
+    def test_set_password(self):
+
+        from django.contrib.auth.models import User as AuthUser
+
+        auth_user = AuthUser.objects.get(id=101)
+
+        auth_user.set_password("12345678")
+        auth_user.save()

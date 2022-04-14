@@ -127,13 +127,12 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     def seller_adjust(self, request, pk=None):
 
         adjust_price, adjust_title, free_delivery = getdata(request,('adjust_price', 'adjust_title', 'free_delivery'))
-
+        adjust_price = float(adjust_price)
         api_user = Verify.get_seller_user(request)
         pre_order=Verify.get_pre_order(pk)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
         Verify.get_campaign_from_user_subscription(user_subscription,pre_order.campaign.id)
-
-        if type(adjust_price) not in [int, float] or type(free_delivery) != bool:
+        if type(free_delivery) != bool:
             raise ApiVerifyError("request data error")
 
         original_total = pre_order.total

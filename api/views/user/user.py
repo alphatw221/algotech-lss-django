@@ -11,7 +11,7 @@ from rest_framework.decorators import action, permission_classes
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from api.models.campaign.campaign import YoutubeCampaignSerializer
 from api.models.instagram.instagram_profile import InstagramProfile, InstagramProfileSerializer
-from api.models.user.user import User, UserSerializer
+from api.models.user.user import User, UserSerializer, UserSerializerAccountInfo
 from api.models.youtube.youtube_channel import YoutubeChannel, YoutubeChannelSerializer
 from api.utils.common.common import getdata, getparams
 from api.utils.common.verify import ApiVerifyError
@@ -761,3 +761,14 @@ class UserViewSet(viewsets.ModelViewSet):
             'access': str(refresh.access_token),
         }
         return Response(ret, status=status.HTTP_200_OK)
+
+
+    @action(detail=False, methods=['GET'], url_path=r'seller/account', permission_classes=(IsAuthenticated,))
+    @api_error_handler
+    def get_user_account_info(self, request):
+
+        api_user = Verify.get_seller_user(request)
+        
+        return Response(UserSerializerAccountInfo(api_user).data, status=status.HTTP_200_OK)
+
+

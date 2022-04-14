@@ -368,40 +368,6 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
             if facebook_page not in api_user_user_subscription.facebook_pages.all():
                 api_user_user_subscription.facebook_pages.add(facebook_page)
-            # if not facebook_page.user_subscriptions.all():
-            #     api_user_user_subscription.facebook_pages.add(facebook_page)
-
-            # status_code, business_profile_response = api_fb_get_page_business_profile(facebook_page.token, facebook_page.page_id)
-            # print(business_profile_response)
-            # if status_code != 200:
-            #     print('get profile error')
-            #     continue
-
-            # business_id = business_profile_response.get("instagram_business_account",{}).get("id")
-            
-            # if not business_id:
-            #     print('no business id')
-            #     continue
-
-            # status_code, profile_info_response = api_ig_get_profile_info(facebook_page.token, business_id)
-            # profile_name = profile_info_response.get('name')
-            # profile_pricure = profile_info_response.get('profile_picture_url')
-
-            # if InstagramProfile.objects.filter(business_id=business_id).exists():
-            #     instagram_profile = InstagramProfile.objects.get(business_id=business_id)
-            #     instagram_profile.name = profile_name
-            #     instagram_profile.token = page_token
-            #     instagram_profile.token_update_at = datetime.now()
-            #     instagram_profile.token_update_by = api_user.facebook_info['id']
-            #     instagram_profile.image = profile_pricure
-            #     instagram_profile.save()
-            # else:
-            #     instagram_profile = InstagramProfile.objects.create(
-            #         business_id=business_id, name=profile_name, token=page_token, token_update_at=datetime.now(), token_update_by=api_user.facebook_info['id'], image=profile_pricure)
-            #     instagram_profile.save()
-
-            # if not instagram_profile.user_subscriptions.all():
-            #     api_user_user_subscription.instagram_profiles.add(instagram_profile)
 
         return Response(FacebookPageSerializer(api_user_user_subscription.facebook_pages.all(),many=True).data, status=status.HTTP_200_OK)
 
@@ -419,13 +385,14 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         google_user_code, redirect_uri = getdata(request,("code", "redirect_uri"))
         api_user = Verify.get_seller_user(request)    
         api_user_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        print(request.META["HTTP_ORIGIN"])
         response = requests.post(
                 url="https://accounts.google.com/o/oauth2/token",
                 data={
                     "code": google_user_code,
                     "client_id": settings.GOOGLE_OAUTH_CLIENT_ID_FOR_LIVESHOWSELLER,
                     "client_secret": settings.GOOGLE_OAUTH_CLIENT_SECRET_FOR_LIVESHOWSELLER,
-                    "redirect_uri": request.META['HTTP_HOST'],
+                    "redirect_uri": request.META['HTTP_ORIGIN'],
                     # "redirect_uri": settings.WEB_SERVER_URL + "/bind_youtube_channels_callback",
                     "grant_type": "authorization_code"
                 }

@@ -8,7 +8,7 @@ from django.contrib.auth.models import User as AuthUser
 from djongo import models
 from rest_framework import serializers
 
-from api.models.user.user_subscription import UserSubscription
+from api.models.user.user_subscription import UserSubscription, UserSubscriptionSerializerAccountInfo
 from api.models.youtube.youtube_channel import YoutubeChannelInfoSerializer
 
 
@@ -78,6 +78,9 @@ class UserSerializer(serializers.ModelSerializer):
     meta = serializers.JSONField(default=dict)
     payment_meta = serializers.JSONField(default=dict)
 
+
+class UserSerializerAccountInfo(UserSerializer):
+    user_subscription = UserSubscriptionSerializerAccountInfo(read_only=True, default=list)
 
 class UserSerializerForDealerList(serializers.ModelSerializer):
     class Meta:
