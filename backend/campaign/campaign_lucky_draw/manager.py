@@ -46,8 +46,6 @@ class CampaignLuckyDrawManager:
         if (len(lucky_draw.winner_list) == 0):
             return lucky_draw
         for winner in lucky_draw.winner_list:
-            _json = {}
-            
             try:
                 # pre_order, created = PreOrder.objects.get_or_create(campaign=campaign, platform=winner[0], customer_id=winner[1], customer_name=winner[2])
                 pre_order = db.api_pre_order.find_one({'campaign_id': int(campaign.id), 'platform': winner[0], 'customer_id': winner[1], 'customer_name': winner[2]})
@@ -137,10 +135,43 @@ class CampaignLuckyDrawProcessor:
 
     def process(self) -> CampaignLuckyDraw:
         candidate_set = self.event.get_candidate_set()
+        condition_type = self.event.get_condition_type()
         try:
             if self.num_of_winner > len(candidate_set):
                 self.num_of_winner = len(candidate_set)
             winner_list = random.sample(candidate_set, self.num_of_winner)
+
+            # update winner_list in 
+            meta = db.api_campaign.find_one({'id': self.campaign.id})['meta']
+            meta_winner_list = meta.get('winner_list', [])
+            meta_winner_list = meta_winner_list + winner_list
+            meta['winner_list'] = meta_winner_list
+            db.api_campaign.update(
+                {'id': self.campaign.id},
+                {'$set': {'meta': meta}}
+            )
+
+            new_winner_list = []
+            for winner in winner_list:
+                winner_with_img = []
+                if condition_type == 'lucky_draw_campaign_comments':
+                    img_url = db.api_campaign_comment.find_one({'customer_id': winner[1], 'campaign_id': self.campaign.id})['image']
+                elif condition_type == 'lucky_draw_campaign_likes':
+                    img_url = db.api_user.find_one({'facebook_info.id': winner[1], 'type': 'customer'})['facebook_info']['picture']
+                elif condition_type == 'lucky_draw_cart_products':
+                    img_url = db.api_pre_order.find_one({'customer_id': winner[1], 'campaign_id': self.campaign.id})['customer_img']
+                elif condition_type == 'lucky_draw_products':
+                    img_url = db.api_pre_order.find({'customer_id': winner[1], 'campaign_id': self.campaign.id})['customer_img']
+
+                winner_with_img.append(winner[0])
+                winner_with_img.append(winner[1])
+                winner_with_img.append(winner[2])
+                winner_with_img.append(img_url)
+                new_winner_list.append(winner_with_img)
+            
+            winner_list = new_winner_list
+            
+
         except Exception:
             winner_list = []
 
@@ -150,7 +181,7 @@ class CampaignLuckyDrawProcessor:
             source_id=self.event.get_source_id(),
             source_type=self.event.get_source_type(),
             condition=self.event.get_condition(),
-            condition_type=self.event.get_condition_type(),
+            condition_type=condition_type,
             num_of_winner=self.num_of_winner,
             candidate_list=list(candidate_set),
             winner_list=winner_list)

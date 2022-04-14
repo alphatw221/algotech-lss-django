@@ -36,14 +36,16 @@ def verify_user(api_user, platform_name, platform_id):
         return True
 
 #TODO v1.2 reverse save in meta when lucky draw appear
+#TODO 在這邊再取圖片 依照label , winner_list改為物件形式
 def get_winner_json(winner_lists):
     response_list = []
     for winner in winner_lists:
-        winner_json = {}
-        winner_json['platform'] = winner[0]
-        winner_json['customer_id'] = winner[1]
-        winner_json['customer_name'] = winner[2]
-        winner_json['img_url'] = winner[3]
+        winner_json = {
+            'platform': winner[0],
+            'customer_id': winner[1],
+            'customer_name': winner[2],
+            'img_url': winner[3]
+        }
         response_list.append(winner_json)
     response_json = { 'winner_list': response_list }
     return response_json
@@ -55,17 +57,7 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
     serializer_class = CampaignLuckyDrawSerializer
     filterset_fields = []
 
-    # lucky_draw = CampaignLuckyDrawManager.process(
-    #     c, DrawFromCampaignLikesEvent(c), prize_cp, 1,
-    # )
 
-    # lucky_draw = CampaignLuckyDrawManager.process(
-    #     c, DrawFromCampaignCommentsEvent(c, 'order'), prize_cp, 1,
-    # )
-
-    # lucky_draw = CampaignLuckyDrawManager.process(
-    #     c, DrawFromCartProductsEvent(c, cp), prize_cp, 1,
-    # )
     @action(detail=False, methods=['GET'], url_path=r'list_winner')
     @api_error_handler
     def list_winner(self, request):
@@ -101,18 +93,17 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'], url_path=r'likes')
     @api_error_handler
     def lucky_draw_likes(self, request):
-        api_user, platform_id, platform_name, campaign_id, prize_campaign_product_id, qty, unrepeat = getparams(
-            request, ("platform_id", "platform_name", "campaign_id", "prize_campaign_product_id", "qty", "unrepeat")
+        api_user, platform_id, platform_name, campaign_id, prize_campaign_product_id, num_of_winner, unrepeat = getparams(
+            request, ("platform_id", "platform_name", "campaign_id", "prize_campaign_product_id", "num_of_winner", "unrepeat")
         )
-        qty = int(qty)
-        api_user = request.user.api_users.get(type='user')
+        num_of_winner = int(num_of_winner)
 
         _, campaign, prize_campaign_product = verify_request(
             api_user, platform_name, platform_id, campaign_id, prize_campaign_product_id)
 
         lucky_draw = CampaignLuckyDrawManager.process(
             campaign, DrawFromCampaignLikesEvent(
-                campaign, unrepeat, qty), prize_campaign_product, qty,
+                campaign, unrepeat, num_of_winner), prize_campaign_product, num_of_winner,
         )
         response_json = get_winner_json(lucky_draw.winner_list)
 
@@ -121,18 +112,17 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'], url_path=r'comment')
     @api_error_handler
     def lucky_draw_comment(self, request):
-        api_user, platform_id, platform_name, campaign_id, prize_campaign_product_id, keyword, qty, unrepeat = getparams(
-            request, ("platform_id", "platform_name", "campaign_id", "prize_campaign_product_id", "keyword", "qty", "unrepeat")
+        api_user, platform_id, platform_name, campaign_id, prize_campaign_product_id, keyword, num_of_winner, unrepeat = getparams(
+            request, ("platform_id", "platform_name", "campaign_id", "prize_campaign_product_id", "keyword", "num_of_winner", "unrepeat")
         )
-        qty = int(qty)
-        api_user = request.user.api_users.get(type='user')
+        num_of_winner = int(num_of_winner)
 
         _, campaign, prize_campaign_product = verify_request(
             api_user, platform_name, platform_id, campaign_id, prize_campaign_product_id)
 
         lucky_draw = CampaignLuckyDrawManager.process(
             campaign, DrawFromCampaignCommentsEvent(
-                campaign, keyword, unrepeat, qty), prize_campaign_product, qty,
+                campaign, keyword, unrepeat, num_of_winner), prize_campaign_product, num_of_winner,
         )
         response_json = get_winner_json(lucky_draw.winner_list)
 
@@ -141,18 +131,17 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'], url_path=r'carts')
     @api_error_handler
     def lucky_draw_cart(self, request):
-        api_user, platform_id, platform_name, campaign_id, prize_campaign_product_id, campaign_product_id, qty, unrepeat = getparams(
-            request, ("platform_id", "platform_name", "campaign_id", "prize_campaign_product_id", "campaign_product_id", "qty", "unrepeat")
+        api_user, platform_id, platform_name, campaign_id, prize_campaign_product_id, campaign_product_id, num_of_winner, unrepeat = getparams(
+            request, ("platform_id", "platform_name", "campaign_id", "prize_campaign_product_id", "campaign_product_id", "num_of_winner", "unrepeat")
         )
-        qty = int(qty)
-        api_user = request.user.api_users.get(type='user')
+        num_of_winner = int(num_of_winner)
 
         _, campaign, prize_campaign_product, campaign_product = verify_request(
             api_user, platform_name, platform_id, campaign_id, prize_campaign_product_id, campaign_product_id = campaign_product_id)
 
         lucky_draw = CampaignLuckyDrawManager.process(
             campaign, DrawFromCartProductsEvent(
-                campaign, campaign_product, unrepeat, qty), prize_campaign_product, qty,
+                campaign, campaign_product, unrepeat, num_of_winner), prize_campaign_product, num_of_winner,
         )
         response_json = get_winner_json(lucky_draw.winner_list)
 
@@ -161,18 +150,17 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'], url_path=r'products')
     @api_error_handler
     def lucky_draw_products(self, request):
-        api_user, platform_id, platform_name, campaign_id, prize_campaign_product_id, campaign_product_id, qty, unrepeat = getparams(
-            request, ("platform_id", "platform_name", "campaign_id", "prize_campaign_product_id", "campaign_product_id", "qty", "unrepeat")
+        api_user, platform_id, platform_name, campaign_id, prize_campaign_product_id, campaign_product_id, num_of_winner, unrepeat = getparams(
+            request, ("platform_id", "platform_name", "campaign_id", "prize_campaign_product_id", "campaign_product_id", "num_of_winner", "unrepeat")
         )
-        qty = int(qty)
-        api_user = request.user.api_users.get(type='user')
+        num_of_winner = int(num_of_winner)
 
         _, campaign, prize_campaign_product, campaign_product = verify_request(
             api_user, platform_name, platform_id, campaign_id, prize_campaign_product_id, campaign_product_id = campaign_product_id)
 
         lucky_draw = CampaignLuckyDrawManager.process(
             campaign, DrawFromProductsEvent(
-                campaign, campaign_product, unrepeat, qty), prize_campaign_product, qty,
+                campaign, campaign_product, unrepeat, num_of_winner), prize_campaign_product, num_of_winner,
         )
         response_json = get_winner_json(lucky_draw.winner_list)
 

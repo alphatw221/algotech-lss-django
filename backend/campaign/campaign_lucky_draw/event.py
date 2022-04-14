@@ -79,11 +79,11 @@ class DrawFromProductsEvent(CampaignLuckyDrawEvent):
             if order_data['customer_id'] == page_id:
                 continue
             else:
-                winner_datas, img_url = db.api_pre_order.find({'customer_id': order_data['customer_id'], 'campaign_id': self.campaign.id}), ''
-                for winner_data in winner_datas:
-                    img_url = winner_data['customer_img']
+                # winner_datas, img_url = db.api_pre_order.find({'customer_id': order_data['customer_id'], 'campaign_id': self.campaign.id}), ''
+                # for winner_data in winner_datas:
+                #     img_url = winner_data['customer_img']
                 candidate_set.add(
-                    (order_data['platform'], order_data['customer_id'], order_data['customer_name'], img_url)
+                    (order_data['platform'], order_data['customer_id'], order_data['customer_name'])
                 )
         for order_data in pre_order_datas:
             if order_data['customer_id'] == page_id:
@@ -135,11 +135,11 @@ class DrawFromCartProductsEvent(CampaignLuckyDrawEvent):
             if order_product.customer_id == page_id:
                 continue
             else:
-                winner_datas, img_url = db.api_pre_order.find({'customer_id': order_product.customer_id, 'campaign_id': self.campaign.id}), ''
-                for winner_data in winner_datas:
-                    img_url = winner_data['customer_img']
+                # winner_datas, img_url = db.api_pre_order.find({'customer_id': order_product.customer_id, 'campaign_id': self.campaign.id}), ''
+                # for winner_data in winner_datas:
+                #     img_url = winner_data['customer_img']
                 candidate_set.add(
-                    (order_product.platform, order_product.customer_id, order_product.customer_name, img_url)
+                    (order_product.platform, order_product.customer_id, order_product.customer_name)
                 )
         
         if self.unrepeat == 'True':
@@ -186,11 +186,12 @@ class DrawFromCampaignCommentsEvent(ABC):
             if (campaign_comment['customer_id'] == page_id):
                 continue
             else:
-                winner_datas, img_url = db.api_campaign_comment.find({'customer_id': campaign_comment['customer_id'], 'campaign_id': self.campaign.id}), ''
-                for winner_data in winner_datas:
-                    img_url = winner_data['image']
+                #TODO 回傳label到candidate set建完後 再依照label取img
+                # winner_datas, img_url = db.api_campaign_comment.find({'customer_id': campaign_comment['customer_id'], 'campaign_id': self.campaign.id}), ''
+                # for winner_data in winner_datas:
+                #     img_url = winner_data['image']
                 candidate_set.add(
-                    (campaign_comment['platform'], campaign_comment['customer_id'], campaign_comment['customer_name'], img_url)
+                    (campaign_comment['platform'], campaign_comment['customer_id'], campaign_comment['customer_name'])
                 )
         
         if self.unrepeat == 'True':
@@ -239,11 +240,12 @@ class DrawFromCampaignLikesEvent(ABC):
                     if (person['id'] == page_id):
                         continue
                     else:
-                        winner_datas, img_url = db.api_user.find({'facebook_info.id': person['id'], 'type': 'customer'}), ''
-                        for winner_data in winner_datas:
-                            img_url = winner_data['facebook_info']['picture']
+                        #TODO 回傳label到candidate set建完後 再依照label取img
+                        # winner_datas, img_url = db.api_user.find({'facebook_info.id': person['id'], 'type': 'customer'}), ''
+                        # for winner_data in winner_datas:
+                        #     img_url = winner_data['facebook_info']['picture']
                         candidate_set.add(
-                            ('facebook', person['id'], person['name'], img_url)
+                            ('facebook', person['id'], person['name'])
                         )
                 try:
                     after = response[1]['paging']['cursors']['after']
@@ -257,24 +259,26 @@ class DrawFromCampaignLikesEvent(ABC):
         return candidate_set
 
 
+#TODO 造成一個meta 每次都從meta抓取 不要重run整個db query
 def get_winner_set(campaign_id):
     winner_set = set()
-    lucky_winners = db.api_campaign_lucky_draw.find({'campaign_id': campaign_id})
-    for lucky_winner in lucky_winners:
-        try:
-            for winner in lucky_winner['winner_list']:
-                winner_set.add(winner[1])
-        except:
-            continue
+    meta = db.api_campaign.find_one({'id': campaign_id})['meta']
+    winner_list = meta.get('winner_list', [])
+    if winner_list:
+        for winner in winner_list:
+            winner_set.add(winner[1])
+
     return winner_set
 
 
 def get_final_set(candidate_set, winner_set, winner_num):
     exclusive_set = set()
     for candidate in candidate_set:
-        if not candidate[1] in winner_set:
+        if candidate[1] in winner_set:
+            continue
+        else:
             exclusive_set.add(candidate) 
-    if (len(exclusive_set) <= winner_num):
+    if (len(exclusive_set) < winner_num):
         exclusive_set = candidate_set
     candidate_set = exclusive_set
 
