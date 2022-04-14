@@ -1,17 +1,21 @@
-from api.models.facebook.facebook_page import (FacebookPage,
+from api.models.facebook.facebook_page import (FacebookPage, FacebookPageInfoSerializer,
                                                FacebookPageSerializer)
 from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
 from api.models.facebook.facebook_page import FacebookPage
+from api.models.user.user_subscription import UserSubscription
 
 
 class AutoResponse(models.Model):
     class Meta:
         db_table = 'api_auto_response'
 
+    user_subscription = models.ForeignKey(
+        UserSubscription,  null=True, on_delete=models.SET_NULL, related_name='auto_responses')
+
     facebook_page = models.ForeignKey(
-        FacebookPage, on_delete=models.CASCADE, related_name='auto_responses')
+        FacebookPage, null=True, on_delete=models.SET_NULL, related_name='auto_responses')
 
     description = models.TextField(null=True, blank=True, default=None)
     input_msg = models.TextField(null=True, blank=True, default=None)
@@ -31,9 +35,22 @@ class AutoResponseSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['created_at', 'modified_at']
 
-    # facebook_page = FacebookPageSerializer(read_only=True)
     meta = serializers.JSONField(default=dict)
 
+class AutoResponseSerializerUpdate(serializers.ModelSerializer):
+    class Meta:
+        model = AutoResponse
+        exclude=['created_at', 'updated_at','user_subscription', 'facebook_page']
+
+    meta = serializers.JSONField(default=dict)
+class AutoResponseSerializerList(serializers.ModelSerializer):
+    class Meta:
+        model = AutoResponse
+        fields = '__all__'
+        read_only_fields = ['created_at', 'modified_at']
+
+    facebook_page = FacebookPageInfoSerializer(read_only=True)
+    meta = serializers.JSONField(default=dict)
 
 class AutoResponseAdmin(admin.ModelAdmin):
     model = AutoResponse
