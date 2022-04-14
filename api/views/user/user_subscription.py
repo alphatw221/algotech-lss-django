@@ -410,7 +410,9 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
         if status_code != 200:
             raise ApiCallerError("get youtube channels error")
-
+        
+        if not response.get("items"):
+            raise ApiCallerError("not channel found in this account.")
         #TODO handle next page token
         for item in response['items']:
 

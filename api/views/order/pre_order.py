@@ -169,7 +169,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     @api_error_handler
     def seller_delete_order_product(self, request, pk=None):
 
-        api_user, order_product_id = getparams(request, ('order_product_id'), seller=True)
+        api_user, order_product_id = getparams(request, ('order_product_id',), seller=True)
         
         pre_order=Verify.get_pre_order(pk)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
