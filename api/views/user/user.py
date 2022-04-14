@@ -2,6 +2,7 @@ from calendar import month
 import json
 from math import perm
 import re, pendulum
+import traceback
 from sys import platform
 from django.http import HttpResponseRedirect
 from django.http.response import HttpResponse
@@ -36,6 +37,7 @@ from django.conf import settings
 import string
 import random
 from api.models.user.user_subscription import UserSubscription
+from backend.i18n.register_confirm_mail import i18n_get_register_confirm_mail_content, i18n_get_register_confirm_mail_subject
 from lss.views.custom_jwt import CustomTokenObtainPairSerializer
 import requests
 from google.oauth2 import id_token
@@ -48,6 +50,8 @@ from django.contrib.auth.models import User as AuthUser
 from django.contrib.auth import authenticate
 
 import stripe
+from mail.sender.sender import send_smtp_mail
+
 platform_info_dict={'facebook':'facebook_info', 'youtube':'youtube_info', 'instagram':'instagram_info', 'google':'google_info'}
 
 
@@ -610,7 +614,12 @@ class UserViewSet(viewsets.ModelViewSet):
             "Receipt":""
         }
         
-        return Response(ret, status=status.HTTP_200_OK)
+        try:
+            mail_subject = i18n_get_register_confirm_mail_subject(firstName, lastName,contactNumber, email, password, plan, None, country)
+            mail_content = i18n_get_register_confirm_mail_content(firstName, lastName,contactNumber, email, password, plan, None, country)
+            send_smtp_mail(email, mail_subject, mail_content)
+        except Exception:
+            print(traceback.format_exc())
 
 
 
@@ -726,7 +735,7 @@ class UserViewSet(viewsets.ModelViewSet):
             meta = {"stripe payment intent":intentSecret},
             type=subscription_type)
         
-        api_user = User.objects.create(
+        User.objects.create(
             name=f'{firstName} {lastName}', email=email, type='user', status='valid', phone=contactNumber, auth_user=auth_user, user_subscription=user_subscription)
         
 
@@ -739,6 +748,14 @@ class UserViewSet(viewsets.ModelViewSet):
             "Receipt":paymentIntent.charges.get('data')[0].get('receipt_url')
         }
         
+
+        try:
+            mail_subject = i18n_get_register_confirm_mail_subject(firstName, lastName,contactNumber, email, password, plan, period, country)
+            mail_content = i18n_get_register_confirm_mail_content(firstName, lastName,contactNumber, email, password, plan, period, country)
+            send_smtp_mail(email, mail_subject, mail_content)
+        except Exception:
+            print(traceback.format_exc())
+
         return Response(ret, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['POST'], url_path=r'login/general')

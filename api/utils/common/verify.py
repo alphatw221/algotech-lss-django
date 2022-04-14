@@ -129,10 +129,22 @@ class Verify():
             raise ApiVerifyError("no platfrom found")
         platform = platform_dict[platform_name].objects.get(
             id=platform_id)
-        if not cls.is_platform_admin(api_user, platform_name, platform):
-            raise ApiVerifyError("user is not platform admin")
+        # if not cls.is_platform_admin(api_user, platform_name, platform):
+        #     raise ApiVerifyError("user is not platform admin")
         return platform
     
+    @classmethod
+    def get_platform_from_user_subscription(cls, user_subscription, platform_name, platform_id):
+        attr_dict = {'facebook':'facebook_pages', 'youtube':'youtube_channels', 'instagram':'instagram_profiles'}
+
+        if  platform_name not in attr_dict:
+            raise ApiVerifyError('not support platform')
+
+        if not getattr(user_subscription,attr_dict[platform_name]).filter(id=platform_id).exists():
+            raise ApiVerifyError('platform not found')
+
+        return getattr(user_subscription,attr_dict[platform_name]).get(id=platform_id)
+
     @classmethod
     def get_platform_verify_with_token(cls, token, platform_name, platform_id):
         if platform_name not in platform_dict:
@@ -281,6 +293,13 @@ class Verify():
         if not pre_order.campaign.products.filter(id=campaign_product_id).exists():
             raise ApiVerifyError("no campaign_product found")
         return pre_order.campaign.products.get(id=campaign_product_id)
+
+    @staticmethod
+    def get_auto_response_from_user_subscription(user_subscription, auto_response_id):
+
+        if not user_subscription.auto_responses.filter(id=auto_response_id).exists():
+            raise ApiVerifyError("no auto reply found")
+        return user_subscription.auto_responses.get(id=auto_response_id)
 
     @staticmethod
     def user_match_pre_order(api_user, pre_order):
