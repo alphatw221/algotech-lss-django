@@ -60,7 +60,10 @@ class UserSubscription(models.Model):
     expired_at = models.DateTimeField(null=True, blank=True, default=None)
 
     dealer = models.ForeignKey("self", on_delete=models.SET_NULL, null=True, related_name="subscribers")
-
+    
+    def __str__(self) -> str:
+        return str(self.name)
+    
 
 
 
