@@ -4,7 +4,7 @@
 <html>
     <head>
     </head>
-    <body>
+    <body style="background-color: darkgray; color:black;">
         <!-- <div>
             {% get_current_language as LANGUAGE_CODE %}
             Current language: {{ LANGUAGE_CODE }}
@@ -16,51 +16,36 @@
                 <p>{% translate "COMMENT_COMMAND_CART_MESSAGE_HEADER" %}</p>
             {% endlanguage %}
         </div> -->
-
-
-        {% language 'en' %}
-        <div>
-            <h3>{% translate "CONFIRMATION_TITLE" %}, {{ firstName }} !</h3>
+        
+        <div style="text-align: center;">
+            <img src="https://storage.googleapis.com/lss_public_bucket/static/Welcome-400x150.jpg">
+            <h3>{% translate "TITLE_WELCOME" %}, {{ firstName }} !</h3>
+        </div>
+        <div style="text-align: center;">
+            <p>Dear {{ firstName }}. </p>
         </div>
         <br>
-        <div>
-            <p>{% translate "CONFIRMATION_ACTIVATED" %}</p>
-            <p>{% translate "CONFIRMATION_LOGIN_GUIDE" %}</p>
-            <form action="https://v1login.liveshowseller.com/login">
-                <input type="submit" value="Login now" />
-                {% translate "CONFIRMATION_VISIT" %} <a href="https://v1login.liveshowseller.com/login">https://v1login.liveshowseller.com/login</a>
-            </form>
+        <div style="text-align: center;">
+            <p>{% translate "THANKS_PHRASE_WELCOME" %}</p>
+            <p>{% translate "LOGIN_1_WELCOME" %} <a href="https://v1login.liveshowseller.com/login">{% translate "LOGIN_2_WELCOME" %}</a> {% translate "LOGIN_3_WELCOME" %}</p>
+        </div>
+        <div style="text-align: center;">
+            <p>Email: {{ email }}</p>
+            <p>Password: {{ password }}</p>
         </div>
         <br>
-        <div>
-            <p>{% translate "CONFIRMATION_GUIDE_STEP_1" %}</p>
-            <p>{% translate "CONFIRMATION_GUIDE_STEP_2" %}</p>
-            <p>{% translate "CONFIRMATION_GUIDE_STEP_3" %}</p>
-            <p>{% translate "CONFIRMATION_GUIDE_STEP_4" %}<a href="">lss@algotech.app.</a></p>
+        <div style="text-align: center;">
+            <p>{% translate "PLAN_CHOOSE_1_WELCOME" %}</p>
+            <p>{% translate "PLAN_CHOOSE_2_WELCOME" %}</p>
+            <p>{% translate "PLAN_CHOOSE_3_WELCOME" %} <a href="">lss@algotech.app</a> {% translate "PLAN_CHOOSE_4_WELCOME" %}</p>
         </div>
         <br>
-        <div>
-            <p>{% translate "CONFIRMATION_CONGRATS" %}</p>
+        <div style="text-align: center;">
+            <p>{% translate "CONGRATS_1_WELCOME" %}</p>
+            <p>{% translate "CONGRATS_2_WELCOME" %}</p>
+            <p>{% translate "CONGRATS_3_WELCOME" %}</p>
+            <img src="https://storage.googleapis.com/lss_public_bucket/static/LSSlogo-300-172.png" style="width: 200px">
         </div>
-        <div>
-            <p>{% translate "CONFIRMATION_CHEERS" %}</p>
-            <p>{% translate "CONFIRMATION_OUR_TEAM" %}</p>
-        </div>
-        {% endlanguage %}
 
-
-        <!-- <div>
-            <div>
-                congratulations!
-                {{firstName}}
-                {{lastName}}
-                {{contactNumber}}
-                {{email}}
-                {{password}}
-                {{plan}}
-                {{period}}
-                {{country}}
-            </div>
-        </div> -->
     </body>
 </html>   
