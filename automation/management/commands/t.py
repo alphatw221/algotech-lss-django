@@ -154,14 +154,30 @@ class Command(BaseCommand):
 
         from backend.python_rq.python_rq import email_queue
         from automation.jobs.send_email_job import send_email_job
-
+        kwargs={
+                "email": 'derekhwang33@gmail.com', 
+                "template_name": "register_confirmation.html",
+                "content": None,
+                "parameters": {
+                    'firstName': 'Derek',
+                    'email': 'test@gmail.com',
+                    'password': 'aaaaaaaaaaa'
+                },
+                "file": None, 
+            }
+        send_email_job(**kwargs)
+        
         # email_queue.enqueue(send_email_job,args=('alphatw22193@gmail.com', None, "test", None, None, None), result_ttl=10, failure_ttl=10)
-        email_queue.enqueue(
-            send_email_job,
-            kwargs={
-            "email":'alphatw22193@gmail.com', 
-            "template_name":"register_confirmation.html",
-            "content":"test",
-            "parameters":{},
-            "file":None, 
-            },result_ttl=10, failure_ttl=10)
+        # email_queue.enqueue(
+        #     send_email_job,
+        #     kwargs={
+        #         "email": 'derekhwang33@gmail.com', 
+        #         "template_name": "register_confirmation.html",
+        #         "content": None,
+        #         "parameters": {
+        #             'firstName': 'Derek',
+        #             'email': 'test@gmail.com',
+        #             'password': 'aaaaaaaaaaa'
+        #         },
+        #         "file": None, 
+        #     }, result_ttl=10, failure_ttl=10)
