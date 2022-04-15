@@ -83,6 +83,17 @@ class PreOrderCheckRule():
                 "product already in pre_order")
 
     @staticmethod
+    def is_under_max_limit(**kwargs):
+
+        api_campaign_product = kwargs.get('api_campaign_product')
+        qty = kwargs.get('qty')
+        if not api_campaign_product or not qty:
+            return
+        if qty > api_campaign_product['max_order_amount']:
+            raise PreOrderErrors.PreOrderException(
+                "exceed max order amount")
+
+    @staticmethod
     def is_order_empty(**kwargs):
 
         api_pre_order = kwargs.get('api_pre_order')

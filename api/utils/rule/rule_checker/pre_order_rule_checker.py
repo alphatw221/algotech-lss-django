@@ -9,7 +9,8 @@ class PreOrderUpdateProductRuleChecker(RuleChecker):
         PreOrderCheckRule.is_qty_valid,
         PreOrderCheckRule.campaign_product_type,
         PreOrderCheckRule.is_order_product_editable,
-        PreOrderCheckRule.is_stock_avaliable
+        PreOrderCheckRule.is_stock_avaliable,
+        PreOrderCheckRule.is_under_max_limit,
         ]
 
 class PreOrderAddProductRuleChecker(RuleChecker):
@@ -20,7 +21,8 @@ class PreOrderAddProductRuleChecker(RuleChecker):
         PreOrderCheckRule.is_qty_valid,
         PreOrderCheckRule.is_order_product_addable,
         PreOrderCheckRule.campaign_product_type,
-        PreOrderCheckRule.is_stock_avaliable
+        PreOrderCheckRule.is_stock_avaliable,
+        PreOrderCheckRule.is_under_max_limit,
         ]
 
 class PreOrderDeleteProductRuleChecker(RuleChecker):
