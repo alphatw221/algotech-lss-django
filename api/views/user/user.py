@@ -614,14 +614,14 @@ class UserViewSet(viewsets.ModelViewSet):
             "Receipt":""
         }
         
-        try:
-            mail_subject = i18n_get_register_confirm_mail_subject(firstName, lastName,contactNumber, email, password, plan, None, country)
-            mail_content = i18n_get_register_confirm_mail_content(firstName, lastName,contactNumber, email, password, plan, None, country)
-            send_smtp_mail(email, mail_subject, mail_content)
-        except Exception:
-            print(traceback.format_exc())
+        # try:
+        #     mail_subject = i18n_get_register_confirm_mail_subject(firstName, lastName,contactNumber, email, password, plan, None, country)
+        #     mail_content = i18n_get_register_confirm_mail_content(firstName, lastName,contactNumber, email, password, plan, None, country)
+        #     send_smtp_mail(email, mail_subject, mail_content)
+        # except Exception:
+        #     print(traceback.format_exc())
 
-
+        return Response(ret, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['POST'], url_path=r'register/validate', permission_classes=())
     @api_error_handler
