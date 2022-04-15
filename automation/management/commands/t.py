@@ -140,29 +140,21 @@ class Command(BaseCommand):
         from backend.pymongo.mongodb import db
 
         test=db.api_user_subscription.aggregate([
-        #     $lookup:
-        #  {
-        #    from: <collection to join>,
-        #    localField: <field from the input documents>,
-        #    foreignField: <field from the documents of the "from" collection>,
-        #    as: <output array field>
-        #  }
+            {
+                "$match":{
+                    "id":1
+                }
+            },
             {
                 "$lookup": {
                     "from": "api_campaign",
                     "localField": "id",
                     "foreignField": "user_subscription_id",
-                    "as": "address"
-                }
-            },
-            # { "$match": { "user_subscription_id": 1 } },
-            
+                    "as": "campaigns",
+                },
+            }
         ])
-
-        # campaign_id_list = db.api_campaign.find({"user_subscription_id":1},{ "_id":0,"id": 1})
-        for t in test:
-            print(t)
-        # print(list(test))
+        print(list(test))
         pass
     def test_set_password(self):
 
