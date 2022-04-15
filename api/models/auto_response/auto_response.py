@@ -56,3 +56,4 @@ class AutoResponseAdmin(admin.ModelAdmin):
     model = AutoResponse
     list_display = [field.name for field in AutoResponse._meta.fields]
     search_fields = [field.name for field in AutoResponse._meta.fields]
+    readonly_fields = ('meta',)
