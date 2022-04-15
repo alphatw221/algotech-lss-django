@@ -3,7 +3,7 @@ import json
 from django.conf import settings
 from django.http import HttpResponse
 from chat_bot.facebook.fb_func import *
-
+import traceback
 
 def facebook_verify(request):
     mode = request.query_params.get('hub.mode', None)
@@ -22,6 +22,7 @@ def facebook_receive(request):
     try:
         body = json.loads(request.body)
     except Exception:
+        print(traceback.format_exc())
         return HttpResponse(status=400)
 
     if body.get('object') == 'page':

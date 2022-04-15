@@ -160,8 +160,8 @@ class Command(BaseCommand):
             send_email_job,
             kwargs={
             "email":'alphatw22193@gmail.com', 
-            "template_name":None,
+            "template_name":"register_confirmation.html",
             "content":"test",
             "parameters":{},
             "file":None, 
-            "lang":None},result_ttl=10, failure_ttl=10)
+            },result_ttl=10, failure_ttl=10)
