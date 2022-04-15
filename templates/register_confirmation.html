@@ -1,0 +1,39 @@
+{% load i18n %}
+
+
+<html>
+    <head>
+    </head>
+    <body>
+        <div>
+            {% get_current_language as LANGUAGE_CODE %}
+            Current language: {{ LANGUAGE_CODE }}
+            <p>{% translate "COMMENT_COMMAND_CART_MESSAGE_HEADER" %}</p>
+
+            {% language 'en' %}
+                {% get_current_language as LANGUAGE_CODE %}
+                Current language: {{ LANGUAGE_CODE }}
+                <p>{% translate "COMMENT_COMMAND_CART_MESSAGE_HEADER" %}</p>
+            {% endlanguage %}
+        </div>
+        <div>
+            <h1>For testi</h1>
+        </div>
+        <div>
+            <div>
+                congratulations!
+                {{firstName}}
+                {{lastName}}
+                {{contactNumber}}
+                {{email}}
+                {{password}}
+                {{plan}}
+                {{period}}
+                {{country}}
+            </div>
+            <form action="https://v1login.liveshowseller.com/login">
+                <input type="submit" value="Go to LSS" />
+            </form>
+        </div>
+    </body>
+</html>   

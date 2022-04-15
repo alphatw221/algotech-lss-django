@@ -15,7 +15,4 @@ def email_error_handler(func):
         except Exception as e:
             print(traceback.format_exc())
             pass
-            #TODO record error log
-            # ApiLogEntry.write_entry(str(datetime.now()) + ' - ' +  traceback.format_exc())
-            return Response({"message": str(datetime.now())+"server error."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     return wrapper

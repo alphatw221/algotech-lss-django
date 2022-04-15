@@ -5,9 +5,11 @@ from django.core.mail import send_mail as django_send_mail
 
 from mail.models import Mail
 from mail.sender.mail_info import MailInfo
+from email.mime.application import MIMEApplication
+from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from api.utils.error_handle.error.api_error import ApiVerifyError
-
+import os
 
 # # convert email list to save in mongo
 # def create_mail_queue(mail_list):
@@ -62,7 +64,7 @@ def send_Email(mail_list):
         # raise ApiVerifyError('email address wrong format')
 
 
-def send_smtp_mail(customer_email, mail_subject, mail_content):
+def send_smtp_mail(customer_email, mail_subject, mail_content, file=None):
     mailserver = settings.EMAIL_HOST
     username_send = settings.EMAIL_HOST_USER
     password = settings.EMAIL_HOST_PASSWORD
@@ -72,6 +74,15 @@ def send_smtp_mail(customer_email, mail_subject, mail_content):
     mail['From'] = username_send
     mail['To'] = username_recv
     
+    if file:
+        with open(file, "rb") as f:
+            part = MIMEApplication(
+                f.read(),
+                Name=os.path.basename(f)
+            )
+        part['Content-Disposition'] = f"attachment; filename='{os.path.basename(f)}'" 
+        mail.attach(part)
+
     smtp = smtplib.SMTP_SSL(mailserver)
     smtp.login(username_send, password)
     smtp.sendmail(username_send, username_recv, mail.as_string())

@@ -35,12 +35,12 @@ from api.utils.error_handle.error.api_error import ApiVerifyError
 
 import hmac, hashlib, base64, binascii
 from backend.i18n.payment_comfirm_mail import i18n_get_mail_content, i18n_get_mail_subject
-from api.utils.error_handle.error_handler.email_error_handle import email_error_handler
+from api.utils.error_handle.error_handler.email_error_handler import email_error_handler
 from mail.sender.sender import send_smtp_mail
 from django.shortcuts import redirect
 import requests
 import pytz
-
+from api.views.payment._payment import PaymentMeta
 platform_dict = {'facebook':FacebookPage, 'youtube':YoutubeChannel, 'instagram':InstagramProfile}
 
 
@@ -855,3 +855,9 @@ class PaymentViewSet(viewsets.GenericViewSet):
             )
         
         return Response('response', status=status.HTTP_200_OK)
+
+
+    @action(detail=False, methods=['GET'], url_path=r'meta/(?P<country_code>[^/.]+)', permission_classes=(IsAuthenticated,))
+    @api_error_handler
+    def get_payment_meta(self, request, country_code):
+        return Response(PaymentMeta.get_meta(country_code), status=status.HTTP_200_OK)
