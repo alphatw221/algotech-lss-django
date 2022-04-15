@@ -16,32 +16,38 @@
                 <p>{% translate "COMMENT_COMMAND_CART_MESSAGE_HEADER" %}</p>
             {% endlanguage %}
         </div> -->
+
+
+        {% language 'en' %}
         <div>
-            <h3>Welcome to Live Show Seller, {{ firstName }} !</h3>
+            <h3>{% translate "CONFIRMATION_TITLE" %}, {{ firstName }} !</h3>
         </div>
         <br>
         <div>
-            <p>We’re thrilled to see you here. Your account has been activated. </p>
-            <p>Here’s where you can log in to Live Show Seller.</p>
+            <p>{% translate "CONFIRMATION_ACTIVATED" %}</p>
+            <p>{% translate "CONFIRMATION_LOGIN_GUIDE" %}</p>
             <form action="https://v1login.liveshowseller.com/login">
-                <input type="submit" value="Go to LSS" />
+                <input type="submit" value="Login now" />
+                {% translate "CONFIRMATION_VISIT" %} <a href="https://v1login.liveshowseller.com/login">https://v1login.liveshowseller.com/login</a>
             </form>
         </div>
         <br>
         <div>
-            <p>What happens next?</p>
-            <p>You can just take a look at our user guide below. It will walk you through every step of the process.</p>
-            <p>If any further assistance is needed, feel free to contact us to arrange an online demonstration via Zoom during office hours.</p>
-            <p>You may also contact us for any technical issue at <a href="">lss@algotech.app.</a></p>
+            <p>{% translate "CONFIRMATION_GUIDE_STEP_1" %}</p>
+            <p>{% translate "CONFIRMATION_GUIDE_STEP_2" %}</p>
+            <p>{% translate "CONFIRMATION_GUIDE_STEP_3" %}</p>
+            <p>{% translate "CONFIRMATION_GUIDE_STEP_4" %}<a href="">lss@algotech.app.</a></p>
         </div>
         <br>
         <div>
-            <p>Once again, we’re happy to have you on board!</p>
+            <p>{% translate "CONFIRMATION_CONGRATS" %}</p>
         </div>
         <div>
-            <p>Cheers,</p>
-            <p>The Live Show Seller Team</p>
+            <p>{% translate "CONFIRMATION_CHEERS" %}</p>
+            <p>{% translate "CONFIRMATION_OUR_TEAM" %}</p>
         </div>
+        {% endlanguage %}
+
 
         <!-- <div>
             <div>
