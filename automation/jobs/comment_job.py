@@ -1,8 +1,5 @@
 import os
 import django
-
-from backend.cart.cart_product.request import RequestState
-
 try:
     os.environ['DJANGO_SETTINGS_MODULE'] = 'lss.settings'  # for rq_job
     django.setup()
