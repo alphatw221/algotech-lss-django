@@ -1,6 +1,8 @@
 import os
 import django
 
+from backend.cart.cart_product.request import RequestState
+
 try:
     os.environ['DJANGO_SETTINGS_MODULE'] = 'lss.settings'  # for rq_job
     django.setup()
@@ -122,8 +124,11 @@ def comment_responding(platform_name, platform, campaign, pre_order, comment, ca
         text = i18n_get_request_response(
             state, campaign_product, qty, lang=platform['lang'])
 
-        shopping_cart_info, info_in_pm_notice = i18n_get_additional_text(pre_order,
-                                                                         lang=platform['lang'])
+        if state in [ RequestState.ADDED, RequestState.UPDATED, RequestState.DELETED]:
+            shopping_cart_info, info_in_pm_notice = i18n_get_additional_text(pre_order, lang=platform['lang'])
+        else:
+            shopping_cart_info, info_in_pm_notice = "", ""
+
         code, ret = api_fb_post_page_comment_on_comment(
             platform['token'], comment['id'], text+info_in_pm_notice)
 
