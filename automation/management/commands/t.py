@@ -43,7 +43,7 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.test_send_email()
+        self.test_mongodb_query()
 
 
     # def campaign_test(self):
@@ -139,8 +139,31 @@ class Command(BaseCommand):
     def test_mongodb_query(self):
         from backend.pymongo.mongodb import db
 
+        test=db.api_user_subscription.aggregate([
+        #     $lookup:
+        #  {
+        #    from: <collection to join>,
+        #    localField: <field from the input documents>,
+        #    foreignField: <field from the documents of the "from" collection>,
+        #    as: <output array field>
+        #  }
+            {
+                "$lookup": {
+                    "from": "api_campaign",
+                    "localField": "id",
+                    "foreignField": "user_subscription_id",
+                    "as": "address"
+                }
+            },
+            # { "$match": { "user_subscription_id": 1 } },
+            
+        ])
 
-
+        # campaign_id_list = db.api_campaign.find({"user_subscription_id":1},{ "_id":0,"id": 1})
+        for t in test:
+            print(t)
+        # print(list(test))
+        pass
     def test_set_password(self):
 
         from django.contrib.auth.models import User as AuthUser

@@ -6,6 +6,7 @@ from rsa import verify
 
 from api.models.order.order import Order, OrderSerializer
 from api.models.order.pre_order import PreOrderSerializer
+from api.models.user import user_subscription
 from api.utils.common.verify import Verify
 from api.utils.common.common import *
 
@@ -48,9 +49,24 @@ class DashboardViewSet(viewsets.ModelViewSet):
     serializer_class = OrderSerializer
     filterset_fields = []
 
+    # @action(detail=False, methods=['GET'], url_path=r'sales/total', permission_classes=(IsAuthenticated))
     @action(detail=False, methods=['GET'], url_path=r'total_sales')
     @api_error_handler
     def total_sales(self, request):
+
+        # api_user = Verify.get_seller_user(request)
+        # user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+
+        # campaign_id_list = db.api_campaign.find({"user_subscription_id":user_subscription},{ "id": 1})
+        # db.api_order.aggregate([
+        #     {
+        #         '$match': { "campaign_id": {"$in":} }
+        #     },
+        #     {
+        #         '$group': { _id: "$name", totalQuantity: { $sum: "$quantity" } }
+        #     }
+        #             ])
+
         api_user = request.user.api_users.get(type='user')
         is_user = verify_seller_request(api_user)
         total_sales = 0

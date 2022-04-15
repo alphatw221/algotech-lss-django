@@ -1,8 +1,5 @@
 import os
 import django
-
-from backend.cart.cart_product.request import RequestState
-
 try:
     os.environ['DJANGO_SETTINGS_MODULE'] = 'lss.settings'  # for rq_job
     django.setup()
@@ -29,7 +26,7 @@ from bson.objectid import ObjectId
 from api.utils.common.verify import ApiVerifyError
 from datetime import datetime
 from api.utils.error_handle.error_handler.comment_job_error_handler import comment_job_error_handler
-
+from backend.cart.cart_product.request import RequestState
 
 @comment_job_error_handler
 def comment_job(campaign, platform_name, platform, comment, order_codes_mapping):
