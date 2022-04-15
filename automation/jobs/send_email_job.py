@@ -18,7 +18,7 @@ from api.utils.error_handle.error_handler.email_error_handler import email_error
 
 @email_error_handler
 @lang_translate_default_en
-def send_email_job(email, template_name, content, parameters={}, file=None):
+def send_email_job(email, template_name, content, parameters={}, file=None, lang=None):
     
     mail = MIMEMultipart()
     mail['Subject'] = 'test_subject'
