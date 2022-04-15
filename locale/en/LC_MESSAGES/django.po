@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-15 07:33+0000\n"
+"POT-Creation-Date: 2022-04-15 10:10+0000\n"
 "PO-Revision-Date: 2021-12-13 15:51+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -159,3 +159,51 @@ msgstr "Find out details: {link}\n"
 #, python-brace-format
 msgid "ITEM_INFO{name}{qty}{dollar_sign}{total}\n"
 msgstr "{name} Qty:{qty} {dollar_sign}{total}\n"
+
+#: templates/register_confirmation.html:23
+msgid "CONFIRMATION_TITLE"
+msgstr "Welcome to Live Show Seller"
+
+#: templates/register_confirmation.html:27
+msgid "CONFIRMATION_ACTIVATED"
+msgstr "We’re thrilled to see you here. Your account has been activated."
+
+#: templates/register_confirmation.html:28
+msgid "CONFIRMATION_LOGIN_GUIDE"
+msgstr "Here’s where you can log in to Live Show Seller."
+
+#: templates/register_confirmation.html:31
+msgid "CONFIRMATION_VISIT"
+msgstr "or visit"
+
+#: templates/register_confirmation.html:36
+msgid "CONFIRMATION_GUIDE_STEP_1"
+msgstr "What happens next?"
+
+#: templates/register_confirmation.html:37
+msgid "CONFIRMATION_GUIDE_STEP_2"
+msgstr ""
+"You can just take a look at our user guide below. It will walk you through "
+"every step of the process."
+
+#: templates/register_confirmation.html:38
+msgid "CONFIRMATION_GUIDE_STEP_3"
+msgstr ""
+"If any further assistance is needed, feel free to contact us to arrange an "
+"online demonstration via Zoom during office hours."
+
+#: templates/register_confirmation.html:39
+msgid "CONFIRMATION_GUIDE_STEP_4"
+msgstr "You may also contact us for any technical issue at "
+
+#: templates/register_confirmation.html:43
+msgid "CONFIRMATION_CONGRATS"
+msgstr "Once again, we’re happy to have you on board!"
+
+#: templates/register_confirmation.html:46
+msgid "CONFIRMATION_CHEERS"
+msgstr "Cheers,"
+
+#: templates/register_confirmation.html:47
+msgid "CONFIRMATION_OUR_TEAM"
+msgstr "The Live Show Seller Team"

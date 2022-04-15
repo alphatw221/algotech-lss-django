@@ -89,11 +89,11 @@ class DrawFromProductsEvent(CampaignLuckyDrawEvent):
             if order_data['customer_id'] == page_id:
                 continue
             else:
-                winner_datas, img_url = db.api_pre_order.find({'customer_id': order_data['customer_id'], 'campaign_id': self.campaign.id}), ''
-                for winner_data in winner_datas:
-                    img_url = winner_data['customer_img']
+                # winner_datas, img_url = db.api_pre_order.find({'customer_id': order_data['customer_id'], 'campaign_id': self.campaign.id}), ''
+                # for winner_data in winner_datas:
+                #     img_url = winner_data['customer_img']
                 candidate_set.add(
-                    (order_data['platform'], order_data['customer_id'], order_data['customer_name'], img_url)
+                    (order_data['platform'], order_data['customer_id'], order_data['customer_name'])
                 )
         if self.unrepeat == 'True':
             candidate_set = get_final_set(candidate_set, winner_set, self.winner_num)

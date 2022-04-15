@@ -5,7 +5,7 @@
     <head>
     </head>
     <body>
-        <div>
+        <!-- <div>
             {% get_current_language as LANGUAGE_CODE %}
             Current language: {{ LANGUAGE_CODE }}
             <p>{% translate "COMMENT_COMMAND_CART_MESSAGE_HEADER" %}</p>
@@ -15,11 +15,41 @@
                 Current language: {{ LANGUAGE_CODE }}
                 <p>{% translate "COMMENT_COMMAND_CART_MESSAGE_HEADER" %}</p>
             {% endlanguage %}
+        </div> -->
+
+
+        {% language 'en' %}
+        <div>
+            <h3>{% translate "CONFIRMATION_TITLE" %}, {{ firstName }} !</h3>
+        </div>
+        <br>
+        <div>
+            <p>{% translate "CONFIRMATION_ACTIVATED" %}</p>
+            <p>{% translate "CONFIRMATION_LOGIN_GUIDE" %}</p>
+            <form action="https://v1login.liveshowseller.com/login">
+                <input type="submit" value="Login now" />
+                {% translate "CONFIRMATION_VISIT" %} <a href="https://v1login.liveshowseller.com/login">https://v1login.liveshowseller.com/login</a>
+            </form>
+        </div>
+        <br>
+        <div>
+            <p>{% translate "CONFIRMATION_GUIDE_STEP_1" %}</p>
+            <p>{% translate "CONFIRMATION_GUIDE_STEP_2" %}</p>
+            <p>{% translate "CONFIRMATION_GUIDE_STEP_3" %}</p>
+            <p>{% translate "CONFIRMATION_GUIDE_STEP_4" %}<a href="">lss@algotech.app.</a></p>
+        </div>
+        <br>
+        <div>
+            <p>{% translate "CONFIRMATION_CONGRATS" %}</p>
         </div>
         <div>
-            <h1>For testi</h1>
+            <p>{% translate "CONFIRMATION_CHEERS" %}</p>
+            <p>{% translate "CONFIRMATION_OUR_TEAM" %}</p>
         </div>
-        <div>
+        {% endlanguage %}
+
+
+        <!-- <div>
             <div>
                 congratulations!
                 {{firstName}}
@@ -31,9 +61,6 @@
                 {{period}}
                 {{country}}
             </div>
-            <form action="https://v1login.liveshowseller.com/login">
-                <input type="submit" value="Go to LSS" />
-            </form>
-        </div>
+        </div> -->
     </body>
 </html>   
