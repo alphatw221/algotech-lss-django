@@ -2,7 +2,7 @@ from chat_bot.facebook.webhook import facebook_receive, facebook_verify
 from rest_framework.decorators import api_view
 import requests
 from django.conf import settings
-
+import json
 
 @api_view(['GET', 'POST'])
 def webhook_facebook(request):
@@ -10,6 +10,6 @@ def webhook_facebook(request):
         return facebook_verify(request)
     elif request.method == 'POST':
         if settings.GCP_API_LOADBALANCER_URL != "https://sb.liveshowseller.ph":
-            r = requests.post('https://sb.liveshowseller.ph/chat_bot/facebook/', params=request.POST)
+            r = requests.post('https://sb.liveshowseller.ph/chat_bot/facebook/',data=json.loads(request.body))
 
         return facebook_receive(request)

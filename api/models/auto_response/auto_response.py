@@ -43,11 +43,11 @@ class AutoResponseSerializerUpdate(serializers.ModelSerializer):
         exclude=['created_at', 'updated_at','user_subscription', 'facebook_page']
 
     meta = serializers.JSONField(default=dict)
-class AutoResponseSerializerList(serializers.ModelSerializer):
+class AutoResponseSerializerWithFacebookInfo(serializers.ModelSerializer):
     class Meta:
         model = AutoResponse
         fields = '__all__'
-        read_only_fields = ['created_at', 'modified_at']
+        read_only_fields = ['created_at', 'modified_at', 'facebook_page']
 
     facebook_page = FacebookPageInfoSerializer(read_only=True)
     meta = serializers.JSONField(default=dict)
@@ -56,3 +56,4 @@ class AutoResponseAdmin(admin.ModelAdmin):
     model = AutoResponse
     list_display = [field.name for field in AutoResponse._meta.fields]
     search_fields = [field.name for field in AutoResponse._meta.fields]
+    readonly_fields = ('meta',)

@@ -18,6 +18,7 @@ from api.utils.common.common import getdata, getparams
 from api.utils.common.verify import ApiVerifyError
 from api.utils.error_handle.error.api_error import ApiCallerError
 from api.views.user._user import facebook_login_helper, google_login_helper, google_authorize_helper
+from automation.jobs.send_email_job import send_email_job
 from backend.api.facebook.user import api_fb_get_accounts_from_user
 from backend.api.facebook.page import api_fb_get_page_picture
 from backend.api.youtube.channel import api_youtube_get_list_channel_by_token
@@ -51,6 +52,7 @@ from django.contrib.auth import authenticate
 
 import stripe
 from mail.sender.sender import send_smtp_mail
+from backend.python_rq.python_rq import email_queue
 
 platform_info_dict={'facebook':'facebook_info', 'youtube':'youtube_info', 'instagram':'instagram_info', 'google':'google_info'}
 
@@ -614,12 +616,8 @@ class UserViewSet(viewsets.ModelViewSet):
             "Receipt":""
         }
         
-        # try:
-        #     mail_subject = i18n_get_register_confirm_mail_subject(firstName, lastName,contactNumber, email, password, plan, None, country)
-        #     mail_content = i18n_get_register_confirm_mail_content(firstName, lastName,contactNumber, email, password, plan, None, country)
-        #     send_smtp_mail(email, mail_subject, mail_content)
-        # except Exception:
-        #     print(traceback.format_exc())
+        # email_queue.enqueue(send_email_job,args=(email, 'register_confirmation.html', None, {'firstName',firstName}, None), result_ttl=10, failure_ttl=10)
+        
 
         return Response(ret, status=status.HTTP_200_OK)
 

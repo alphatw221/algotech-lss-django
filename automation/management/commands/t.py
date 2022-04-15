@@ -1,3 +1,4 @@
+import email
 import imp
 import pprint
 import requests
@@ -144,53 +145,23 @@ class Command(BaseCommand):
 
         from django.contrib.auth.models import User as AuthUser
 
-        auth_user = AuthUser.objects.get(id=101)
+        auth_user = AuthUser.objects.get(id=87)
 
-        auth_user.set_password("12345678")
+        auth_user.set_password(" ally@algotech.app")
         auth_user.save()
 
     def test_send_email(self):
 
-        import smtplib
-        from mail.sender.mail_info import MailInfo
-        from email.mime.application import MIMEApplication
-        from email.mime.multipart import MIMEMultipart
-        from email.mime.text import MIMEText
-        import os
-        
-        mailserver = settings.EMAIL_HOST
-        username_send = settings.EMAIL_HOST_USER
-        password = settings.EMAIL_HOST_PASSWORD
-        username_recv = "alphatw22193@gmail.com"
-        mail = MIMEMultipart()
+        from backend.python_rq.python_rq import email_queue
+        from automation.jobs.send_email_job import send_email_job
 
-        from django.template.loader import render_to_string
-        rendered = render_to_string('register_confirmation.html', 
-        {'firstName':'test', 
-        'lastName':'test2',
-        'contactNumber':'123', 
-        'email':'email.com', 
-        'password':'123123', 
-        'plan':'lite', 
-        'period':'Monthly', 
-        'country':'Taiwan'})
-
-        mail.attach(MIMEText(rendered, 'html'))
-        mail['Subject'] = 'test_subject'
-        mail['From'] = username_send
-        mail['To'] = username_recv
-        
-        # if file:
-        file = '/Users/linyilin/Desktop/liveshowseller/static/favicon.ico'
-        with open(file, "rb") as f:
-            part = MIMEApplication(
-                f.read(),
-                Name=os.path.basename(file)
-            )
-        part['Content-Disposition'] = f"attachment; filename='{os.path.basename(file)}'" 
-        mail.attach(part)
-
-        smtp = smtplib.SMTP_SSL(mailserver)
-        smtp.login(username_send, password)
-        smtp.sendmail(username_send, username_recv, mail.as_string())
-        smtp.quit()
+        # email_queue.enqueue(send_email_job,args=('alphatw22193@gmail.com', None, "test", None, None, None), result_ttl=10, failure_ttl=10)
+        email_queue.enqueue(
+            send_email_job,
+            kwargs={
+            "email":'alphatw22193@gmail.com', 
+            "template_name":"register_confirmation.html",
+            "content":"test",
+            "parameters":{},
+            "file":None, 
+            },result_ttl=10, failure_ttl=10)
