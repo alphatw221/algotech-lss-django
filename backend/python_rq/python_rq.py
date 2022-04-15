@@ -8,4 +8,5 @@ redis_connection=Redis(host=redis_info['host'],port=redis_info['port'],password=
 
 campaign_queue=Queue(name='campaign_queue',connection=redis_connection)
 comment_queue=Queue(name='comment_queue',connection=redis_connection)
+email_queue=Queue(name='email_queue', connection=redis_connection)
 report_queue=Queue(name='report_queue',connection=redis_connection)
