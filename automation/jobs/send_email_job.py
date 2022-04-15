@@ -17,7 +17,7 @@ from api.utils.error_handle.error_handler.email_error_handler import email_error
 from django.utils import translation
 
 @email_error_handler
-def send_email_job(subject, email, template_name, content, parameters={}, file=None, lang='en'):
+def send_email_job(subject, email, template_name=None, content=None, parameters={}, file=None, lang='en'):
     
     mail = MIMEMultipart()
     mail['Subject'] = subject
