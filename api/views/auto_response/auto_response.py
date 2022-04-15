@@ -64,9 +64,9 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
         serializer = AutoResponseSerializer(data=data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        serializer.save()
+        auto_reponse_obj = serializer.save()
         
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(AutoResponseSerializerList(auto_reponse_obj).data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['PUT'], url_path=r'update', permission_classes=(IsAuthenticated,))
     @api_error_handler
@@ -85,7 +85,6 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         serializer.save()
-
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['DELETE'], url_path=r'delete', permission_classes=(IsAuthenticated,))
