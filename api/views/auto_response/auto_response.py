@@ -1,6 +1,6 @@
 from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated
-from api.models.auto_response.auto_response import AutoResponse, AutoResponseSerializer, AutoResponseSerializerList, AutoResponseSerializerUpdate
+from api.models.auto_response.auto_response import AutoResponse, AutoResponseSerializer, AutoResponseSerializerUpdate, AutoResponseSerializerWithFacebookInfo
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from api.models.facebook.facebook_page import FacebookPage
@@ -40,7 +40,7 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
 
         auto_responses = user_subscription.auto_responses.all()
 
-        return Response(AutoResponseSerializerList(auto_responses, many=True).data, status=status.HTTP_200_OK)
+        return Response(AutoResponseSerializerWithFacebookInfo(auto_responses, many=True).data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['POST'], url_path=r'create/(?P<platform_name>[^/.]+)/(?P<platform_id>[^/.]+)', permission_classes=(IsAuthenticated,))
     @api_error_handler
@@ -64,9 +64,9 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
         serializer = AutoResponseSerializer(data=data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        auto_reponse_obj = serializer.save()
+        obj = serializer.save()
         
-        return Response(AutoResponseSerializerList(auto_reponse_obj).data, status=status.HTTP_200_OK)
+        return Response(AutoResponseSerializerWithFacebookInfo(obj).data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['PUT'], url_path=r'update', permission_classes=(IsAuthenticated,))
     @api_error_handler
