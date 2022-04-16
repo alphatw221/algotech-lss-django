@@ -21,7 +21,8 @@ from django.db.models import Q
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import random
-
+from api.utils.advance_query.dashboard import get_total_revenue, get_order_total_sales, get_pre_order_total_sales, get_order_total_sales_by_month, \
+get_pre_order_total_sales_by_month, get_campaign_order_rank, get_campaign_comment_rank
 # class PreOrderPagination(PageNumberPagination):
 #     page_query_param = 'page'
 #     page_size_query_param = 'page_size'
@@ -54,154 +55,186 @@ class DashboardViewSet(viewsets.ModelViewSet):
     @api_error_handler
     def total_sales(self, request):
 
-        # api_user = Verify.get_seller_user(request)
-        # user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        api_user = Verify.get_seller_user(request)
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
 
-        # campaign_id_list = db.api_campaign.find({"user_subscription_id":user_subscription},{ "id": 1})
-        # db.api_order.aggregate([
-        #     {
-        #         '$match': { "campaign_id": {"$in":} }
-        #     },
-        #     {
-        #         '$group': { _id: "$name", totalQuantity: { $sum: "$quantity" } }
-        #     }
-        #             ])
+        total_sales = get_order_total_sales(user_subscription.id)      
+        return Response({ 'total_sales': total_sales } , status=status.HTTP_200_OK)
 
-        api_user = request.user.api_users.get(type='user')
-        is_user = verify_seller_request(api_user)
-        total_sales = 0
+        # api_user = request.user.api_users.get(type='user')
+        # is_user = verify_seller_request(api_user)
+        # total_sales = 0
 
-        if is_user:
-            user_id = api_user.id
-            print (user_id)
-            campaign_id_list = get_camaign_list(user_id)
+        # if is_user:
+        #     user_id = api_user.id
+        #     print (user_id)
+        #     campaign_id_list = get_camaign_list(user_id)
             
-            orders = db.api_order.find({'campaign_id': {'$in': campaign_id_list}})
-            for order in orders:
-                products = order['products']
-                for key, val in products.items():
-                    total_sales += val['qty']
-        salesJson = { 'total_sales': total_sales } 
+        #     orders = db.api_order.find({'campaign_id': {'$in': campaign_id_list}})
+        #     for order in orders:
+        #         products = order['products']
+        #         for key, val in products.items():
+        #             total_sales += val['qty']
+        # salesJson = { 'total_sales': total_sales } 
 
-        return Response(salesJson, status=status.HTTP_200_OK)
+        # return Response(salesJson, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['GET'], url_path=r'total_revenue')
     @api_error_handler
     def seller_total_revenue(self, request):
-        api_user = request.user.api_users.get(type='user')
-        is_user = verify_seller_request(api_user)
-        total_revenue = 0
 
-        if is_user:
-            user_id = api_user.id
-            campaign_id_list = get_camaign_list(user_id)
+        api_user = Verify.get_seller_user(request)
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
 
-            orders = db.api_order.find({'campaign_id': {'$in': campaign_id_list}})
-            for order in orders:
-                total_revenue += order['total']
-        revenueJson = { 'total_revenue': total_revenue }
+        total_revenue = get_total_revenue(user_subscription.id)      
+        return Response({ 'total_revenue': total_revenue } , status=status.HTTP_200_OK)
+
+        # api_user = request.user.api_users.get(type='user')
+        # is_user = verify_seller_request(api_user)
+        # total_revenue = 0
+
+        # if is_user:
+        #     user_id = api_user.id
+        #     campaign_id_list = get_camaign_list(user_id)
+
+        #     orders = db.api_order.find({'campaign_id': {'$in': campaign_id_list}})
+        #     for order in orders:
+        #         total_revenue += order['total']
+        # revenueJson = { 'total_revenue': total_revenue }
         
-        return Response(revenueJson, status=status.HTTP_200_OK)
+        # return Response(revenueJson, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['GET'], url_path=r'total_pending')
     @api_error_handler
     def seller_total_pending(self, request):
-        api_user = request.user.api_users.get(type='user')
-        is_user = verify_seller_request(api_user)
-        total_pending = 0
 
-        if is_user:
-            user_id = api_user.id
-            campaign_id_list = get_camaign_list(user_id)
-            pre_order_total = 0
-            order_total = 0
 
-            pre_orders = db.api_pre_order.find({'campaign_id': {'$in': campaign_id_list}})
-            for pre_order in pre_orders:
-                products = pre_order['products']    
-                for key, val in products.items():
-                    pre_order_total += val['qty']
+        api_user = Verify.get_seller_user(request)
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+
+        order_total = get_order_total_sales(user_subscription.id)   
+        pre_order_total = get_pre_order_total_sales(user_subscription.id)   
+        total_pending = 1 - order_total / (pre_order_total + order_total) if (pre_order_total + order_total) else 0 
+        return Response({ 'total_pending': '{:.2%}'.format(total_pending) } , status=status.HTTP_200_OK)
+        
+        # api_user = request.user.api_users.get(type='user')
+        # is_user = verify_seller_request(api_user)
+        # total_pending = 0
+
+        # if is_user:
+        #     user_id = api_user.id
+        #     campaign_id_list = get_camaign_list(user_id)
+        #     pre_order_total = 0
+        #     order_total = 0
+
+        #     pre_orders = db.api_pre_order.find({'campaign_id': {'$in': campaign_id_list}})
+        #     for pre_order in pre_orders:
+        #         products = pre_order['products']    
+        #         for key, val in products.items():
+        #             pre_order_total += val['qty']
                 
-            orders = db.api_order.find({'campaign_id': {'$in': campaign_id_list}})
-            for order in orders:
-                products = order['products']
-                for key, val in products.items():
-                    order_total += val['qty'] 
-            try:
-                total_pending = 1 - order_total / (pre_order_total + order_total)
-            except:
-                total_pending = 0
-        pendingJson = { 'total_pending': '{:.2%}'.format(total_pending) }
+        #     orders = db.api_order.find({'campaign_id': {'$in': campaign_id_list}})
+        #     for order in orders:
+        #         products = order['products']
+        #         for key, val in products.items():
+        #             order_total += val['qty'] 
+        #     try:
+        #         total_pending = 1 - order_total / (pre_order_total + order_total)
+        #     except:
+        #         total_pending = 0
+        # pendingJson = { 'total_pending': '{:.2%}'.format(total_pending) }
     
-        return Response(pendingJson, status=status.HTTP_200_OK)
+        # return Response(pendingJson, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['GET'], url_path=r'sales_by_month')
     @api_error_handler
     def seller_sales_by_month(self, request):
-        api_user = request.user.api_users.get(type='user')
-        is_user = verify_seller_request(api_user)
-        pending_by_month = {}
 
-        if is_user:
-            user_id = api_user.id
-            campaign_id_list = get_camaign_list(user_id)
+        api_user = Verify.get_seller_user(request)
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
 
-            nowdate = datetime.datetime.now()
-            startDate = datetime.datetime(nowdate.year, nowdate.month, 1) + relativedelta(months=1)
-            endDate = datetime.datetime(2021, 10, 1)
-            while (startDate >= endDate):
-                thisEndDate = startDate + relativedelta(months=-1)
-                date = str(thisEndDate.year) + '-' + str(thisEndDate.month)
-                order_total = 0
-                pre_order_total = 0
+        order_total = get_order_total_sales_by_month(user_subscription.id)   
+        pre_order_total = get_pre_order_total_sales_by_month(user_subscription.id)   
+        total_pending = 1 - order_total / (pre_order_total + order_total) if (pre_order_total + order_total) else 0 
+        return Response({ 'total_pending': '{:.2%}'.format(total_pending) } , status=status.HTTP_200_OK)
+
+
+        # api_user = request.user.api_users.get(type='user')
+        # is_user = verify_seller_request(api_user)
+        # pending_by_month = {}
+
+        # if is_user:
+        #     user_id = api_user.id
+        #     campaign_id_list = get_camaign_list(user_id)
+
+        #     nowdate = datetime.datetime.now()
+        #     startDate = datetime.datetime(nowdate.year, nowdate.month, 1) + relativedelta(months=1)
+        #     endDate = datetime.datetime(2021, 10, 1)
+        #     while (startDate >= endDate):
+        #         thisEndDate = startDate + relativedelta(months=-1)
+        #         date = str(thisEndDate.year) + '-' + str(thisEndDate.month)
+        #         order_total = 0
+        #         pre_order_total = 0
                 
-                pre_orders = db.api_pre_order.find({'campaign_id': {'$in': campaign_id_list}, 'created_at': {'$gte': thisEndDate, '$lt': startDate}})
-                for pre_order in pre_orders:
-                    products = pre_order['products']    
-                    for key, val in products.items():
-                        pre_order_total += val['qty']
+        #         pre_orders = db.api_pre_order.find({'campaign_id': {'$in': campaign_id_list}, 'created_at': {'$gte': thisEndDate, '$lt': startDate}})
+        #         for pre_order in pre_orders:
+        #             products = pre_order['products']    
+        #             for key, val in products.items():
+        #                 pre_order_total += val['qty']
 
-                orders = db.api_order.find({'campaign_id': {'$in': campaign_id_list}, 'created_at': {'$gte': thisEndDate, '$lt': startDate}})
-                for order in orders:
-                    products = order['products']
-                    for key, val in products.items():
-                        order_total += val['qty'] 
+        #         orders = db.api_order.find({'campaign_id': {'$in': campaign_id_list}, 'created_at': {'$gte': thisEndDate, '$lt': startDate}})
+        #         for order in orders:
+        #             products = order['products']
+        #             for key, val in products.items():
+        #                 order_total += val['qty'] 
                 
-                if pre_order_total + order_total == 0:
-                    pending_by_month[date] = '0.00%'
-                else:
-                    total_pending = 1 - order_total / (pre_order_total + order_total)
-                    pending_by_month[date] = '{:.2%}'.format(total_pending)
+        #         if pre_order_total + order_total == 0:
+        #             pending_by_month[date] = '0.00%'
+        #         else:
+        #             total_pending = 1 - order_total / (pre_order_total + order_total)
+        #             pending_by_month[date] = '{:.2%}'.format(total_pending)
 
-                startDate = startDate + relativedelta(months=-1)
+        #         startDate = startDate + relativedelta(months=-1)
             
-        return Response(pending_by_month, status=status.HTTP_200_OK)
+        # return Response(pending_by_month, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET'], url_path=r'top_campaign')
     @api_error_handler
     def seller_top_campaign(self, request):
-        api_user = request.user.api_users.get(type='user')
-        sort = request.query_params.get('sort')
-        is_user = verify_seller_request(api_user)   
-        campaignRank = {}
 
-        if is_user:
-            user_id = api_user.id
-            campaign_id_list = get_camaign_list(user_id)
+        api_user, sort = getparams(request,('sort',),with_user=True, seller=True)
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
 
-            if sort == 'comment':
-                for campaign_id in campaign_id_list:
-                    campaign_count = db.api_campaign_comment.count({'campaign_id': campaign_id})
-                    campaignRank[db.api_campaign.find_one({'id': campaign_id})['title']] = campaign_count
-                campaignRank = dict(sorted(campaignRank.items(), key=operator.itemgetter(1), reverse=True))
-
-            elif sort == 'order': 
-                for campaign_id in campaign_id_list:
-                    campaign_count = db.api_order.count({'campaign_id': campaign_id})
-                    campaignRank[db.api_campaign.find_one({'id': campaign_id})['title']] = campaign_count
-                campaignRank = dict(sorted(campaignRank.items(), key=operator.itemgetter(1), reverse=True))
+        if sort == 'comment':
+            campaignRank = get_campaign_comment_rank(user_subscription.id)
+        elif sort == 'order': 
+            campaignRank = get_campaign_order_rank(user_subscription.id)
+        else:
+            raise ApiVerifyError('not supported ranking field')
 
         return Response(campaignRank, status=status.HTTP_200_OK)
+        # api_user = request.user.api_users.get(type='user')
+        # sort = request.query_params.get('sort')
+        # is_user = verify_seller_request(api_user)   
+        # campaignRank = {}
+
+        # if is_user:
+        #     user_id = api_user.id
+        #     campaign_id_list = get_camaign_list(user_id)
+
+        #     if sort == 'comment':
+        #         for campaign_id in campaign_id_list:
+        #             campaign_count = db.api_campaign_comment.count({'campaign_id': campaign_id})
+        #             campaignRank[db.api_campaign.find_one({'id': campaign_id})['title']] = campaign_count
+        #         campaignRank = dict(sorted(campaignRank.items(), key=operator.itemgetter(1), reverse=True))
+
+        #     elif sort == 'order': 
+        #         for campaign_id in campaign_id_list:
+        #             campaign_count = db.api_order.count({'campaign_id': campaign_id})
+        #             campaignRank[db.api_campaign.find_one({'id': campaign_id})['title']] = campaign_count
+        #         campaignRank = dict(sorted(campaignRank.items(), key=operator.itemgetter(1), reverse=True))
+
+        # return Response(campaignRank, status=status.HTTP_200_OK)
 
     #TODO rewrite campaign_id_list, caculating way 
     @action(detail=False, methods=['GET'], url_path=r'campaign_manage_order', permission_classes=(IsAuthenticated,))
