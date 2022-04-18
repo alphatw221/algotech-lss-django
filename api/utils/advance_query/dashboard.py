@@ -460,7 +460,7 @@ def get_campaign_merge_order_list(campaign_id):
             "$lookup": {
                 "from": "api_order","localField": "id","foreignField": "campaign_id","as": "orders",
                 "pipeline":[
-                    {"$match":{"id":{"$ne":None},"subtotal":{"$ne":0}}},
+                    {"$match":{"id":{"$ne":None}}},
                     {"$addFields": { "type": "order","total_item": {"$size": { "$objectToArray": "$products"}}}},
                 ]
             },
@@ -469,7 +469,7 @@ def get_campaign_merge_order_list(campaign_id):
             "$lookup": {
                 "from": "api_pre_order","localField": "id","foreignField": "campaign_id","as": "pre_orders",
                 "pipeline":[
-                    {"$match":{"id":{"$ne":None}}},
+                    {"$match":{"id":{"$ne":None},"subtotal":{"$ne":0}}},
                     {"$addFields": { "type": "pre_order","total_item": {"$size": { "$objectToArray": "$products"}}}},
                 ]
             },
