@@ -47,5 +47,7 @@ urlpatterns = [
 
     re_path(r'^lss/',TemplateView.as_view(template_name="lss_entry.html")),
 
-    path('email/',TemplateView.as_view(template_name="register_confirmation.html") )
+    path('email/',TemplateView.as_view(template_name="register_confirmation.html") ),
+    
+    path('email_activation/',TemplateView.as_view(template_name="register_activation.html") )
 ]
