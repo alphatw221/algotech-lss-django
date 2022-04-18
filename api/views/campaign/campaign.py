@@ -24,21 +24,10 @@ import requests
 from api.models.user.user_subscription import UserSubscription
 from bson.json_util import loads, dumps
 
+
 def verify_seller_request(api_user):
     Verify.verify_user(api_user)
     return True
-
-# def verify_request(api_user, platform_name, platform_id, campaign_id=None):
-#     Verify.verify_user(api_user)
-#     platform = Verify.get_platform(api_user, platform_name, platform_id)
-
-#     if campaign_id:
-#         if not platform.campaigns.filter(id=campaign_id).exists():
-#             raise ApiVerifyError("no campaign found")
-#         campaign = platform.campaigns.get(id=campaign_id)
-#         return platform, campaign
-
-#     return platform
 
 
 class CampaignPagination(PageNumberPagination):
@@ -99,7 +88,6 @@ class CampaignViewSet(viewsets.ModelViewSet):
             data = serializer.data
         return Response(data, status=status.HTTP_200_OK)
 
-
     #for lss v2
     @action(detail=False, methods=['GET'], url_path=r'search_list', permission_classes=(IsAuthenticated,))
     @api_error_handler
@@ -128,7 +116,6 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         return Response(data, status=status.HTTP_200_OK)
 
-
     @action(detail=False, methods=['POST'], url_path=r'create_campaign', parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated,))
     @api_error_handler
     def create_campaign(self, request):
@@ -144,11 +131,6 @@ class CampaignViewSet(viewsets.ModelViewSet):
         json_data = json.loads(request.data["data"])
         json_data['created_by'] = api_user.id
         json_data['user_subscription'] = user_subscription.id
-        # json_data['facebook_page'] = platform.id if platform_name == 'facebook' else None
-
-        # json_data['youtube_channel'] = platform.id if platform_name == 'youtube' else None
-
-        # json_data['instagram_profile'] = platform.id if platform_name == 'instagram' else None
         print(json_data)
         serializer = CampaignSerializerCreate(data=json_data)
         if not serializer.is_valid():
@@ -176,12 +158,6 @@ class CampaignViewSet(viewsets.ModelViewSet):
     @api_error_handler
     def update_campaign(self, request, pk=None):
 
-        # api_user, platform_name, platform_id = getparams(request, ("platform_name", "platform_id"), with_user=True, seller=True)
-        
-        # platform = Verify.get_platform(api_user, platform_name, platform_id)
-        # campaign = Verify.get_campaign_from_platform(platform, pk)
-        # user_subscription = Verify.get_user_subscription_from_platform(platform)
-
         api_user = Verify.get_seller_user(request)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
         campaign = Verify.get_campaign_from_user_subscription(user_subscription, pk)
@@ -189,13 +165,6 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         #temp solution : no to overide campaign data
         json_data = json.loads(request.data["data"])
-
-        # if 'facebook' not in user_subscription.user_plan.get('activated_platform'):
-        #    json_data['facebook_page_id']=None
-        # if 'youtube' not in user_subscription.user_plan.get('activated_platform'):
-        #    json_data['youtube_channel_id']=None
-        # if 'instagram' not in user_subscription.user_plan.get('activated_platform'):
-        #    json_data['instagram_profile']=None
         
         facebook_campaign = campaign.facebook_campaign.copy()
         facebook_campaign.update(json_data.get("facebook_campaign",{}))
@@ -208,7 +177,6 @@ class CampaignViewSet(viewsets.ModelViewSet):
         instagram_campaign = campaign.instagram_campaign.copy()
         instagram_campaign.update(json_data.get("instagram_campaign",{}))
         json_data['instagram_campaign']=instagram_campaign
-
 
         for key, value in request.data.items():
             if "account" in key:
@@ -227,8 +195,6 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-
-
     @action(detail=True, methods=['DELETE'], url_path=r'delete_campaign', permission_classes = (IsAuthenticated, ))
     @api_error_handler
     def delete_campaign(self, request, pk=None):
@@ -245,8 +211,6 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         return Response({"message": "delete success"}, status=status.HTTP_200_OK)
     
-
-
     @action(detail=True, methods=['GET'], url_path=r'bind_facebook_page', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def bind_facebook_page_to_campaign(self, request, pk=None):
@@ -279,7 +243,6 @@ class CampaignViewSet(viewsets.ModelViewSet):
         campaign.save()
         return Response(CampaignSerializerRetreive(campaign).data, status=status.HTTP_200_OK)
 
-
     @action(detail=True, methods=['GET'], url_path=r'bind_instagram_profile', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def bind_instagram_profile_to_campaign(self, request, pk=None):
@@ -295,7 +258,6 @@ class CampaignViewSet(viewsets.ModelViewSet):
         campaign.instagram_profile = instagram_profile
         campaign.save()
         return Response(CampaignSerializerRetreive(campaign).data, status=status.HTTP_200_OK)
-
 
 
     #TODO @Dereck Move to instagram_profile view
