@@ -21,8 +21,12 @@ from django.db.models import Q
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import random
+
+from bson.json_util import loads, dumps
+
 from api.utils.advance_query.dashboard import get_total_revenue, get_order_total_sales, get_pre_order_total_sales, get_order_total_sales_by_month, \
-get_pre_order_total_sales_by_month, get_campaign_order_rank, get_campaign_comment_rank
+get_pre_order_total_sales_by_month, get_campaign_order_rank, get_campaign_comment_rank, get_campaign_complete_sales, get_total_order_complete_proceed, \
+get_total_pre_order_count, get_campaign_order_complete_proceed, get_total_average_comment_count, get_total_average_sales, get_campaign_merge_order_list
 # class PreOrderPagination(PageNumberPagination):
 #     page_query_param = 'page'
 #     page_size_query_param = 'page_size'
@@ -240,70 +244,119 @@ class DashboardViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'], url_path=r'campaign_manage_order', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def seller_total_sales(self, request):
-        # api_user, platform, campaign, pre_order, order_product, campaign_product, qty, search = Verify.PreOrderApi.FromSeller.verify(request)
-        # is_user = verify_seller_request(api_user)
-
+        
         api_user, campaign_id = getparams(request, ( 'campaign_id', ), with_user=True, seller=True)
 
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
-        campaign = Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
+        Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
+        campaign_id = int(campaign_id)
+        campaign_pre_order_count = db.api_pre_order.find({'campaign_id': campaign_id, 'subtotal': {'$ne': 0}}).count()
+        campaign_order_complete_count,campaign_order_proceed_count = get_campaign_order_complete_proceed(campaign_id)
+        campaign_comment_count = db.api_campaign_comment.find({'campaign_id': campaign_id}).count()
+        campaign_complete_sales = get_campaign_complete_sales(campaign_id)
 
-        user_id, campaign_id = int(api_user.id), int(campaign_id)
-        manage_order = {}
+        campaign_close_rate = campaign_order_complete_count / (campaign_order_complete_count + campaign_order_proceed_count) * 100 \
+                if (campaign_order_complete_count + campaign_order_proceed_count) else 0
 
-        campaigns = db.api_campaign.find({'created_by_id': user_id})
-        campaign_id_list, campaign_count, total_sales = [], 0, 0
-        for campaign in campaigns:
-            campaign_id_list.append(campaign['id'])
-            campaign_count += 1
+        campaign_uncheckout_rate = campaign_order_proceed_count / (campaign_order_complete_count + campaign_order_proceed_count + campaign_pre_order_count) * 100\
+                if (campaign_order_complete_count + campaign_order_proceed_count + campaign_pre_order_count) else 0
 
-        order_complete_count = db.api_order.find({'campaign_id': {'$in': campaign_id_list}, 'status': 'complete'}).count()
-        order_proceed_count = db.api_order.find({'campaign_id': {'$in': campaign_id_list}, 'status': 'review'}).count()
-        pre_order_count = db.api_pre_order.find({'campaign_id': {'$in': campaign_id_list}}).count()
-        orders = db.api_order.find({'campaign_id': {'$in': campaign_id_list}})
-        for order in orders:
-            for key, val in order['products'].items():
-                total_sales += val['subtotal']
+        total_order_complete_count, total_order_proceed_count = get_total_order_complete_proceed(user_subscription.id)
+        total_pre_order_count = get_total_pre_order_count(user_subscription.id)
 
-        average_order_uncheck_rate = 0 if order_complete_count == 0 or order_proceed_count == 0 else order_complete_count / (order_complete_count + order_proceed_count) * 100
-        average_order_close_rate = 0 if order_complete_count == 0 or order_proceed_count == 0 or pre_order_count == 0 else order_complete_count / (order_complete_count + order_proceed_count + pre_order_count) * 100
-        average_sales = 0 if total_sales == 0 else total_sales / campaign_count  # 總campaign完成訂單總金額平均
-        average_comment_count = 0 if db.api_campaign_comment.find({'campaign_id': {'$in': campaign_id_list}}).count() == 0 else db.api_campaign_comment.find({'campaign_id': {'$in': campaign_id_list}}).count() / campaign_count
+        total_average_sales = get_total_average_sales(user_subscription.id)
+        total_average_comment_count = get_total_average_comment_count(user_subscription.id)
 
-        pre_order_qty, order_qty, complete_sales = 0, 0, 0
-        pre_orders = db.api_pre_order.find({'campaign_id': campaign_id})
-        for pre_order in pre_orders:
-            for key, val in pre_order['products'].items():
-                pre_order_qty += val['qty']
-                
-        orders = db.api_order.find({'campaign_id': campaign_id, 'status': 'complete'})
-        for order in orders:
-            for key, val in order['products'].items():
-                order_qty += val['qty']
-                complete_sales += val['subtotal']
+        average_order_uncheck_rate = total_order_complete_count / (total_order_complete_count + total_order_proceed_count) * 100 \
+            if (total_order_complete_count + total_order_proceed_count) else 0
+        average_order_close_rate = total_order_complete_count / (total_order_complete_count + total_order_proceed_count + total_pre_order_count) * 100 \
+            if (total_order_complete_count + total_order_proceed_count + total_pre_order_count) else 0
 
-        pre_order_count = db.api_pre_order.find({'campaign_id': campaign_id, 'subtotal': {'$ne': 0}}).count()
-        order_complete_count = db.api_order.find({'campaign_id': campaign_id, 'status': 'complete'}).count()
-        order_proceed_count = db.api_order.find({'campaign_id': campaign_id, 'status': 'review'}).count()
-        comment_count = db.api_campaign_comment.find({'campaign_id': campaign_id}).count()
+        manage_order = {
+            "order_qty":campaign_order_complete_count,
+            "cart_qty":(campaign_pre_order_count + campaign_order_proceed_count),
 
-        # 訂單成交量
-        close_rate = 0 if order_complete_count == 0 else order_complete_count / (order_complete_count + order_proceed_count) * 100
-        # 未完成付款
-        uncheckout_rate = 0 if order_complete_count == 0 or order_proceed_count == 0 and pre_order_count == 0  else order_proceed_count / (order_complete_count + order_proceed_count + pre_order_count) * 100
-        
-        manage_order['close_rate'] = close_rate
-        manage_order['complete_sales'] = complete_sales
-        manage_order['uncheckout_rate'] = uncheckout_rate
-        manage_order['comment_count'] = comment_count
-        manage_order['cart_qty'] = (pre_order_count + order_proceed_count)
-        manage_order['order_qty'] = order_complete_count
-        manage_order['close_rate_raise'] = close_rate - average_order_close_rate
-        manage_order['uncheckout_rate_raise'] = uncheckout_rate - average_order_uncheck_rate
-        manage_order['campaign_sales_raise'] = 0 if complete_sales == 0 or average_sales == 0 else complete_sales / average_sales
-        manage_order['comment_count_raise'] = 0 if comment_count == 0 or average_comment_count == 0 else comment_count / average_comment_count
+            "comment_count":campaign_comment_count,
+            "complete_sales":campaign_complete_sales,
+            "close_rate":campaign_close_rate,
+            "uncheckout_rate":campaign_uncheckout_rate,
+            
+            "comment_count_raise":campaign_comment_count / total_average_comment_count if total_average_comment_count else 0,
+            "campaign_sales_raise":campaign_complete_sales / total_average_sales if total_average_sales else 0,
+            "close_rate_raise":campaign_close_rate - average_order_close_rate,
+            "uncheckout_rate_raise":campaign_uncheckout_rate - average_order_uncheck_rate,
+        }
 
         return Response(manage_order, status=status.HTTP_200_OK)
+        # pre_order_count = db.api_pre_order.find({'campaign_id': campaign_id, 'subtotal': {'$ne': 0}}).count()
+        # order_complete_count = db.api_order.find({'campaign_id': campaign_id, 'status': 'complete'}).count()
+        # order_proceed_count = db.api_order.find({'campaign_id': campaign_id, 'status': 'review'}).count()
+        # comment_count = db.api_campaign_comment.find({'campaign_id': campaign_id}).count()
+        
+        # api_user, platform, campaign, pre_order, order_product, campaign_product, qty, search = Verify.PreOrderApi.FromSeller.verify(request)
+        # is_user = verify_seller_request(api_user)
+
+        # api_user, campaign_id = getparams(request, ( 'campaign_id', ), with_user=True, seller=True)
+
+        # user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        # campaign = Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
+
+        # user_id, campaign_id = int(api_user.id), int(campaign_id)
+        # manage_order = {}
+
+        # campaigns = db.api_campaign.find({'created_by_id': user_id})
+        # campaign_id_list, campaign_count, total_sales = [], 0, 0
+        # for campaign in campaigns:
+        #     campaign_id_list.append(campaign['id'])
+        #     campaign_count += 1
+
+        # order_complete_count = db.api_order.find({'campaign_id': {'$in': campaign_id_list}, 'status': 'complete'}).count()
+        # order_proceed_count = db.api_order.find({'campaign_id': {'$in': campaign_id_list}, 'status': 'review'}).count()
+        # pre_order_count = db.api_pre_order.find({'campaign_id': {'$in': campaign_id_list}}).count()
+        # orders = db.api_order.find({'campaign_id': {'$in': campaign_id_list}})
+        # for order in orders:
+        #     for key, val in order['products'].items():
+        #         total_sales += val['subtotal']
+
+        # average_order_uncheck_rate = 0 if order_complete_count == 0 or order_proceed_count == 0 else order_complete_count / (order_complete_count + order_proceed_count) * 100
+        # average_order_close_rate = 0 if order_complete_count == 0 or order_proceed_count == 0 or pre_order_count == 0 else order_complete_count / (order_complete_count + order_proceed_count + pre_order_count) * 100
+        # average_sales = 0 if total_sales == 0 else total_sales / campaign_count  # 總campaign完成訂單總金額平均
+        # average_comment_count = 0 if db.api_campaign_comment.find({'campaign_id': {'$in': campaign_id_list}}).count() == 0 else db.api_campaign_comment.find({'campaign_id': {'$in': campaign_id_list}}).count() / campaign_count
+
+        # pre_order_qty, order_qty, complete_sales = 0, 0, 0
+        # pre_orders = db.api_pre_order.find({'campaign_id': campaign_id})
+        # for pre_order in pre_orders:
+        #     for key, val in pre_order['products'].items():
+        #         pre_order_qty += val['qty']
+                
+        # orders = db.api_order.find({'campaign_id': campaign_id, 'status': 'complete'})
+        # for order in orders:
+        #     for key, val in order['products'].items():
+        #         order_qty += val['qty']
+        #         complete_sales += val['subtotal']
+
+        # pre_order_count = db.api_pre_order.find({'campaign_id': campaign_id, 'subtotal': {'$ne': 0}}).count()
+        # order_complete_count = db.api_order.find({'campaign_id': campaign_id, 'status': 'complete'}).count()
+        # order_proceed_count = db.api_order.find({'campaign_id': campaign_id, 'status': 'review'}).count()
+        # comment_count = db.api_campaign_comment.find({'campaign_id': campaign_id}).count()
+
+        # # 訂單成交量
+        # close_rate = 0 if order_complete_count == 0 else order_complete_count / (order_complete_count + order_proceed_count) * 100
+        # # 未完成付款
+        # uncheckout_rate = 0 if order_complete_count == 0 or order_proceed_count == 0 and pre_order_count == 0  else order_proceed_count / (order_complete_count + order_proceed_count + pre_order_count) * 100
+        
+        # manage_order['close_rate'] = close_rate
+        # manage_order['complete_sales'] = complete_sales
+        # manage_order['uncheckout_rate'] = uncheckout_rate
+        # manage_order['comment_count'] = comment_count
+        # manage_order['cart_qty'] = (pre_order_count + order_proceed_count)
+        # manage_order['order_qty'] = order_complete_count
+        # manage_order['close_rate_raise'] = close_rate - average_order_close_rate
+        # manage_order['uncheckout_rate_raise'] = uncheckout_rate - average_order_uncheck_rate
+        # manage_order['campaign_sales_raise'] = 0 if complete_sales == 0 or average_sales == 0 else complete_sales / average_sales
+        # manage_order['comment_count_raise'] = 0 if comment_count == 0 or average_comment_count == 0 else comment_count / average_comment_count
+
+        # return Response(manage_order, status=status.HTTP_200_OK)
                 
     
     @action(detail=False, methods=['GET'], url_path=r'order_list')
@@ -314,59 +367,65 @@ class DashboardViewSet(viewsets.ModelViewSet):
 
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
         campaign = Verify.get_campaign_from_user_subscription(user_subscription,campaign_id)
+        merge_list = get_campaign_merge_order_list(campaign.id)
 
-        pre_orders_queryset = campaign.pre_orders.exclude(subtotal=0).order_by('created_at')
+        merge_list_str = dumps(merge_list)
+        merge_list_json = loads(merge_list_str)
 
-        orders_queryset = campaign.orders.all().order_by('created_at')
-        # if search:
-        #     if search.isnumeric():
-        #         pre_orders_queryset = pre_orders_queryset.filter(Q(id=int(search)) | Q(customer_name__icontains=search) | Q(phone__icontains=search))
-        #         orders_queryset = orders_queryset.filter(Q(id=int(search)) | Q(customer_name__icontains=search) | Q(phone__icontains=search))
-        #     else:
-        #         pre_orders_queryset = pre_orders_queryset.filter(Q(customer_name__icontains=search) | Q(phone__icontains=search))
-        #         orders_queryset = orders_queryset.filter(Q(id=int(search)) | Q(customer_name__icontains=search) | Q(phone__icontains=search))
+        return Response(merge_list_json, status=status.HTTP_200_OK)
+
+        # pre_orders_queryset = campaign.pre_orders.exclude(subtotal=0).order_by('created_at')
+
+        # orders_queryset = campaign.orders.all().order_by('created_at')
+        # # if search:
+        # #     if search.isnumeric():
+        # #         pre_orders_queryset = pre_orders_queryset.filter(Q(id=int(search)) | Q(customer_name__icontains=search) | Q(phone__icontains=search))
+        # #         orders_queryset = orders_queryset.filter(Q(id=int(search)) | Q(customer_name__icontains=search) | Q(phone__icontains=search))
+        # #     else:
+        # #         pre_orders_queryset = pre_orders_queryset.filter(Q(customer_name__icontains=search) | Q(phone__icontains=search))
+        # #         orders_queryset = orders_queryset.filter(Q(id=int(search)) | Q(customer_name__icontains=search) | Q(phone__icontains=search))
 
 
-        # pre_order_paginator = Paginator(pre_orders_queryset, 10) # Show 25 contacts per page.
-        # pre_order_list = pre_order_paginator.get_page(page)
+        # # pre_order_paginator = Paginator(pre_orders_queryset, 10) # Show 25 contacts per page.
+        # # pre_order_list = pre_order_paginator.get_page(page)
 
-        # order_paginator = Paginator(pre_orders_queryset, 10)
-        # order_list = order_paginator.get_page(page)
+        # # order_paginator = Paginator(pre_orders_queryset, 10)
+        # # order_list = order_paginator.get_page(page)
 
-        merge_list=[]
+        # merge_list=[]
 
-        order_index=0
-        pre_order_index=0
-        try:
-            if orders_queryset[0] and pre_orders_queryset[0]:
-                for i in range(len(pre_orders_queryset)+len(orders_queryset)):
-                    if orders_queryset[order_index].created_at>=pre_orders_queryset[pre_order_index].created_at:
+        # order_index=0
+        # pre_order_index=0
+        # try:
+        #     if orders_queryset[0] and pre_orders_queryset[0]:
+        #         for i in range(len(pre_orders_queryset)+len(orders_queryset)):
+        #             if orders_queryset[order_index].created_at>=pre_orders_queryset[pre_order_index].created_at:
                         
-                        merge_list.append({"type":"order","data":OrderSerializer(orders_queryset[order_index]).data})
-                        order_index+=1
-                    else:
-                        # if not pre_orders_queryset[pre_order_index].products:
-                        #     continue
-                        merge_list.append({"type":"pre_order","data":PreOrderSerializer(pre_orders_queryset[pre_order_index]).data})
-                        pre_order_index+=1
-        except IndexError:
-            pass
+        #                 merge_list.append({"type":"order","data":OrderSerializer(orders_queryset[order_index]).data})
+        #                 order_index+=1
+        #             else:
+        #                 # if not pre_orders_queryset[pre_order_index].products:
+        #                 #     continue
+        #                 merge_list.append({"type":"pre_order","data":PreOrderSerializer(pre_orders_queryset[pre_order_index]).data})
+        #                 pre_order_index+=1
+        # except IndexError:
+        #     pass
         
-        if order_index==len(orders_queryset):
-            for i in range(pre_order_index,len(pre_orders_queryset)):
-                # if not pre_orders_queryset[pre_order_index].products:
-                #             continue
-                merge_list.append({"type":"pre_order","data":PreOrderSerializer(pre_orders_queryset[pre_order_index]).data})
-                pre_order_index+=1
+        # if order_index==len(orders_queryset):
+        #     for i in range(pre_order_index,len(pre_orders_queryset)):
+        #         # if not pre_orders_queryset[pre_order_index].products:
+        #         #             continue
+        #         merge_list.append({"type":"pre_order","data":PreOrderSerializer(pre_orders_queryset[pre_order_index]).data})
+        #         pre_order_index+=1
 
-        else:
-            for i in range(order_index,len(orders_queryset)):
-                merge_list.append({"type":"order","data":OrderSerializer(orders_queryset[order_index]).data})
-                order_index+=1
+        # else:
+        #     for i in range(order_index,len(orders_queryset)):
+        #         merge_list.append({"type":"order","data":OrderSerializer(orders_queryset[order_index]).data})
+        #         order_index+=1
 
         
 
-        return Response(merge_list, status=status.HTTP_200_OK)
+        # return Response(merge_list, status=status.HTTP_200_OK)
             
 
     @action(detail=False, methods=['GET'], url_path=r'edit_allow_checkout')
