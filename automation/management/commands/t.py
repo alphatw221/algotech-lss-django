@@ -138,32 +138,11 @@ class Command(BaseCommand):
     
     def test_mongodb_query(self):
         from backend.pymongo.mongodb import db
+        from api.utils.advance_query.dashboard import get_total_revenue, get_order_total_sales, get_pre_order_total_sales, \
+        get_order_total_sales_by_month,get_campaign_comment_rank, get_campaign_order_rank
 
-        test=db.api_user_subscription.aggregate([
-        #     $lookup:
-        #  {
-        #    from: <collection to join>,
-        #    localField: <field from the input documents>,
-        #    foreignField: <field from the documents of the "from" collection>,
-        #    as: <output array field>
-        #  }
-            {
-                "$lookup": {
-                    "from": "api_campaign",
-                    "localField": "id",
-                    "foreignField": "user_subscription_id",
-                    "as": "address"
-                }
-            },
-            # { "$match": { "user_subscription_id": 1 } },
-            
-        ])
+        print(get_campaign_order_rank(1))
 
-        # campaign_id_list = db.api_campaign.find({"user_subscription_id":1},{ "_id":0,"id": 1})
-        for t in test:
-            print(t)
-        # print(list(test))
-        pass
     def test_set_password(self):
 
         from django.contrib.auth.models import User as AuthUser
