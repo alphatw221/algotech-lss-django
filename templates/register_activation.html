@@ -1,0 +1,38 @@
+{% load i18n %}
+
+
+<html>
+    <head>
+    </head>
+    <body style="background-color: darkgray; color:black;">
+        <div>
+            <img src="https://storage.googleapis.com/lss_public_bucket/static/Welcome-400x150.jpg">
+            <h3>{% translate "TITLE_ACTIVATION" %}</h3>
+        </div>
+        <div>
+            <p>Dear {{ firstName }}. </p>
+        </div>
+        <br>
+        <div>
+            <p>{% translate "YOUR_ACTIVATION" %} {{ Plan }} {% translate "PLAN_ACCOUNT_ACTIVATION" %}</p>
+            <p>{% translate "LOGIN_ACTIVATION" %} <a href="https://v1login.liveshowseller.com/login">{% translate "LOGIN_2_WELCOME" %}</a></p>
+        </div>
+        <div>
+            <p>Email: {{ email }}</p>
+            <p>Password: {{ password }}</p>
+        </div>
+        <br>
+        <div>
+            <p>{% translate "STEP1_ACTIVATION" %}</p>
+            <p>{% translate "STEP2_ACTIVATION" %}</p>
+            <p>{% translate "STEP3_ACTIVATION" %} <a href="">lss@algotech.app</a> {% translate "STEP4_ACTIVATION" %}</p>
+        </div>
+        <br>
+        <div>
+            <p>{% translate "REGARDS_ACTIVATION" %}</p>
+            <p>{% translate "CONGRATS_3_WELCOME" %}</p>
+            <img src="https://storage.googleapis.com/lss_public_bucket/static/LSSlogo-300-172.png" style="width: 200px">
+        </div>
+
+    </body>
+</html>   

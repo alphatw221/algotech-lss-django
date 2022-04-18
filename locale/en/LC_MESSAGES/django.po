@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-15 12:39+0000\n"
+"POT-Creation-Date: 2022-04-18 06:39+0000\n"
 "PO-Revision-Date: 2021-12-13 15:51+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -166,6 +166,57 @@ msgstr "{name} Qty:{qty} {dollar_sign}{total}\n"
 msgid "MAIL_SUBJECT_WELCOME"
 msgstr "Welcome to Live Show Seller"
 
+msgid "MAIL_SUBJECT_ACTIVATION"
+msgstr "Activated account details at Live Show Seller."
+
+#: templates/register_activation.html:10
+msgid "TITLE_ACTIVATION"
+msgstr "Activated account details at Live Show Seller."
+
+#: templates/register_activation.html:17
+msgid "YOUR_ACTIVATION"
+msgstr "Your"
+
+#: templates/register_activation.html:17
+msgid "PLAN_ACCOUNT_ACTIVATION"
+msgstr "account at Live Show Seller has been activated."
+
+#: templates/register_activation.html:18
+msgid "LOGIN_ACTIVATION"
+msgstr "You may now log in to the system"
+
+#: templates/register_activation.html:18
+#: templates/register_confirmation.html:30
+msgid "LOGIN_2_WELCOME"
+msgstr "here"
+
+#: templates/register_activation.html:26
+msgid "STEP1_ACTIVATION"
+msgstr "What happens next?"
+
+#: templates/register_activation.html:27
+msgid "STEP2_ACTIVATION"
+msgstr ""
+"Please refer to the user guide below, it will walk you through every step of "
+"the process."
+
+#: templates/register_activation.html:28
+msgid "STEP3_ACTIVATION"
+msgstr "If any further assistance is needed, feel free to contact us at"
+
+#: templates/register_activation.html:28
+msgid "STEP4_ACTIVATION"
+msgstr "during office hours."
+
+#: templates/register_activation.html:32
+msgid "REGARDS_ACTIVATION"
+msgstr "Best regards,"
+
+#: templates/register_activation.html:33
+#: templates/register_confirmation.html:46
+msgid "CONGRATS_3_WELCOME"
+msgstr "The Live Show Seller Team"
+
 #: templates/register_confirmation.html:22
 msgid "TITLE_WELCOME"
 msgstr "Welcome to Live Show Seller"
@@ -179,10 +230,6 @@ msgstr ""
 #: templates/register_confirmation.html:30
 msgid "LOGIN_1_WELCOME"
 msgstr "Please log in"
-
-#: templates/register_confirmation.html:30
-msgid "LOGIN_2_WELCOME"
-msgstr "here"
 
 #: templates/register_confirmation.html:30
 msgid "LOGIN_3_WELCOME"
@@ -212,7 +259,3 @@ msgstr "Let’s start selling live now!"
 #: templates/register_confirmation.html:45
 msgid "CONGRATS_2_WELCOME"
 msgstr "Cheers,"
-
-#: templates/register_confirmation.html:46
-msgid "CONGRATS_3_WELCOME"
-msgstr "The Live Show Seller Team"
