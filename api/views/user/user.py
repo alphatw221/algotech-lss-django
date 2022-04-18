@@ -38,7 +38,7 @@ from django.conf import settings
 import string
 import random
 from api.models.user.user_subscription import UserSubscription
-from backend.i18n.register_confirm_mail import i18n_get_register_confirm_mail_content, i18n_get_register_confirm_mail_subject
+from backend.i18n.register_confirm_mail import i18n_get_register_confirm_mail_content, i18n_get_register_confirm_mail_subject, i18n_get_register_activate_mail_subject
 from lss.views.custom_jwt import CustomTokenObtainPairSerializer
 import requests
 from google.oauth2 import id_token
@@ -628,6 +628,20 @@ class UserViewSet(viewsets.ModelViewSet):
                     'password': password
                 },
             }, result_ttl=10, failure_ttl=10)
+        
+        email_queue.enqueue(
+            send_email_job,
+            kwargs={
+                "subject": i18n_get_register_activate_mail_subject(),
+                "email": email, 
+                "template_name": "register_activation.html",
+                "parameters": {
+                    'firstName': firstName,
+                    'Plan': plan,
+                    'email': email,
+                    'password': password
+                }
+            }, result_ttl=10, failure_ttl=10)
 
         return Response(ret, status=status.HTTP_200_OK)
 
@@ -756,15 +770,28 @@ class UserViewSet(viewsets.ModelViewSet):
             "Receipt":paymentIntent.charges.get('data')[0].get('receipt_url')
         }
         
-        mail_subject = i18n_get_register_confirm_mail_subject()
         email_queue.enqueue(
             send_email_job,
             kwargs={
-                "subject": mail_subject,
+                "subject": i18n_get_register_confirm_mail_subject(),
                 "email": email, 
                 "template_name": "register_confirmation.html",
                 "parameters": {
                     'firstName': firstName,
+                    'email': email,
+                    'password': password
+                }
+            }, result_ttl=10, failure_ttl=10)
+        
+        email_queue.enqueue(
+            send_email_job,
+            kwargs={
+                "subject": i18n_get_register_activate_mail_subject(),
+                "email": email, 
+                "template_name": "register_activation.html",
+                "parameters": {
+                    'firstName': firstName,
+                    'Plan': plan,
                     'email': email,
                     'password': password
                 }
