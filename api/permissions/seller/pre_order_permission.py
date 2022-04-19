@@ -2,6 +2,7 @@ from rest_framework.permissions import BasePermission
 from api.utils.common.verify import Verify
 from api.utils.common.common import getparams
 
+
 class IsSellerCampaignPreOrderRetrievable(BasePermission):
 
     def has_permission(self, request, view):

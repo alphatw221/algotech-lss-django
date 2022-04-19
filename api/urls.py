@@ -4,32 +4,23 @@ from rest_framework import routers
 
 from api.views.test import test
 
-from api.views.user import user
-from api.views.user import user_group
-from api.views.user import user_plan
-from api.views.user import user_subscription
+from api.views.user import user, user_group, user_plan, user_subscription
 
 from api.views.auto_response import auto_response
 
-from api.views.campaign import campaign
-from api.views.campaign import campaign_comment
-from api.views.campaign import campaign_lucky_draw
-from api.views.campaign import campaign_product
+from api.views.campaign import campaign, campaign_comment, campaign_lucky_draw, campaign_product
 
 from api.views.facebook import facebook_page
 
 from api.views.product import product
 
+from api.views.order import order, pre_order
 
-from api.views.order import order
-from api.views.order import pre_order
 from api.views.dashboard import dashboard
-from api.views.payment import payment
-
 
 from api.views.payment import payment
+
 from api.views.youtube import youtube_channel
-from django.views.decorators.csrf import csrf_exempt
 
 
 def url_setup(urlpatterns):
@@ -73,7 +64,6 @@ def url_setup(urlpatterns):
 
     router.register(r'youtube', youtube_channel.YoutubeViewSet)
     
-
     urlpatterns.append(path('', include(router.urls)))
 
 

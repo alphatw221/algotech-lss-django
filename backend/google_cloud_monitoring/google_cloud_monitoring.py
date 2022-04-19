@@ -1,7 +1,6 @@
 from google.cloud import monitoring_v3
 from  django.conf import settings
 
-from google.api import label_pb2 as ga_label
 from google.api import metric_pb2 as ga_metric
 
 import time
@@ -20,7 +19,7 @@ class CommentQueueLengthMetric():
         descriptor.metric_kind = ga_metric.MetricDescriptor.MetricKind.GAUGE
         descriptor.value_type = ga_metric.MetricDescriptor.ValueType.INT64
         descriptor.description = "This is a redis queue length custom metric."
-        descriptor = client.create_metric_descriptor(name=cls.project_name, metric_descriptor=descriptor)
+        client.create_metric_descriptor(name=cls.project_name, metric_descriptor=descriptor)
 
     @classmethod
     def write_time_series(cls, value):
