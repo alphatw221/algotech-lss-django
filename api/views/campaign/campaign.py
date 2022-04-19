@@ -5,7 +5,8 @@ from django.core.files.storage import default_storage
 from rest_framework import status, viewsets
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated
-from api.models.campaign.campaign import Campaign, CampaignSerializer, CampaignSerializerEdit, CampaignSerializerRetreive, CampaignSerializerCreate
+from api.models.campaign.campaign import Campaign, CampaignSerializer, CampaignSerializerEdit, \
+    CampaignSerializerRetreive, CampaignSerializerCreate
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -254,7 +255,6 @@ class CampaignViewSet(viewsets.ModelViewSet):
         api_user = request.user.api_users.get(type='user')
         campaign_id = request.query_params.get('campaign_id')
         comment_id = request.query_params.get('comment_id')
-        platform = request.query_params.get('platform')
         comments_list = []
         is_user = verify_seller_request(api_user)
         if is_user:
