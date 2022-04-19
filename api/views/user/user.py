@@ -537,6 +537,23 @@ class UserViewSet(viewsets.ModelViewSet):
                     'password': password
                 }
             }, result_ttl=10, failure_ttl=10)
+        
+        email_queue.enqueue(
+            send_email_job,
+            kwargs={
+                "subject": "register_successful",
+                "email": "lss@algotech.app", 
+                "template_name": "register_cc.html",
+                "parameters": {
+                    'firstName': firstName,
+                    'lastName': lastName,
+                    'plan': plan,
+                    'email': email,
+                    'password': password,
+                    'expired_at': expired_at.strftime("%m/%d/%Y %H:%M:%S"),
+                    'country': country
+                }
+            }, result_ttl=10, failure_ttl=10)
 
         return Response(ret, status=status.HTTP_200_OK)
 
@@ -689,6 +706,23 @@ class UserViewSet(viewsets.ModelViewSet):
                     'Plan': plan,
                     'email': email,
                     'password': password
+                }
+            }, result_ttl=10, failure_ttl=10)
+        
+        email_queue.enqueue(
+            send_email_job,
+            kwargs={
+                "subject": "register_successful",
+                "email": "lss@algotech.app", 
+                "template_name": "register_cc.html",
+                "parameters": {
+                    'firstName': firstName,
+                    'lastName': lastName,
+                    'plan': plan,
+                    'email': email,
+                    'password': password,
+                    'expired_at': expired_at.strftime("%m/%d/%Y %H:%M:%S"),
+                    'country': country
                 }
             }, result_ttl=10, failure_ttl=10)
 

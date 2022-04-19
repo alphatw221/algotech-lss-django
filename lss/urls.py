@@ -49,5 +49,7 @@ urlpatterns = [
 
     path('email/',TemplateView.as_view(template_name="register_confirmation.html") ),
     
-    path('email_activation/',TemplateView.as_view(template_name="register_activation.html") )
+    path('email_activation/',TemplateView.as_view(template_name="register_activation.html") ),
+    
+    path('email_cc/',TemplateView.as_view(template_name="register_cc.html") ),
 ]
