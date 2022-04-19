@@ -508,7 +508,7 @@ class UserViewSet(viewsets.ModelViewSet):
             "Selling Country":country,
             "Your Plan":plan,
             "Subscription Period":"Monthly",
-            "Subscription End Date":expired_at.strftime("%m/%d/%Y %H:%M:%S"),
+            "Subscription End Date":expired_at.strftime("%m/%d/%Y"),
         }
 
         email_queue.enqueue(
@@ -535,6 +535,23 @@ class UserViewSet(viewsets.ModelViewSet):
                     'Plan': plan,
                     'email': email,
                     'password': password
+                }
+            }, result_ttl=10, failure_ttl=10)
+        
+        email_queue.enqueue(
+            send_email_job,
+            kwargs={
+                "subject": "register_successful",
+                "email": "lss@algotech.app", 
+                "template_name": "register_cc.html",
+                "parameters": {
+                    'firstName': firstName,
+                    'lastName': lastName,
+                    'plan': plan,
+                    'email': email,
+                    'password': password,
+                    'expired_at': expired_at.strftime("%m/%d/%Y %H:%M:%S"),
+                    'country': country
                 }
             }, result_ttl=10, failure_ttl=10)
 
@@ -661,7 +678,7 @@ class UserViewSet(viewsets.ModelViewSet):
             "Selling Country":country, 
             "Your Plan":plan,
             "Subscription Period":"Monthly",
-            "Subscription End Date":expired_at.strftime("%m/%d/%Y %H:%M:%S"),
+            "Subscription End Date":expired_at.strftime("%m/%d/%Y"),
             "Receipt":paymentIntent.charges.get('data')[0].get('receipt_url')
         }
 
@@ -689,6 +706,23 @@ class UserViewSet(viewsets.ModelViewSet):
                     'Plan': plan,
                     'email': email,
                     'password': password
+                }
+            }, result_ttl=10, failure_ttl=10)
+        
+        email_queue.enqueue(
+            send_email_job,
+            kwargs={
+                "subject": "register_successful",
+                "email": "lss@algotech.app", 
+                "template_name": "register_cc.html",
+                "parameters": {
+                    'firstName': firstName,
+                    'lastName': lastName,
+                    'plan': plan,
+                    'email': email,
+                    'password': password,
+                    'expired_at': expired_at.strftime("%m/%d/%Y %H:%M:%S"),
+                    'country': country
                 }
             }, result_ttl=10, failure_ttl=10)
 

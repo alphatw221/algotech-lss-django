@@ -48,6 +48,7 @@ class CampaignProductPagination(PageNumberPagination):
     page_query_param = 'page'
     page_size_query_param = 'page_size'
 
+
 class CampaignProductViewSet(viewsets.ModelViewSet):
     queryset = CampaignProduct.objects.all().order_by('id')
     serializer_class = CampaignProductSerializer

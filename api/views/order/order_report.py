@@ -1,9 +1,8 @@
 from api.utils.common.verify import Verify
-
 from backend.pymongo.mongodb import db
 import openpyxl
 import xlsxwriter, os.path 
-from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
+
 
 def verify_request(api_user, platform_name, platform_id, campaign_id):
     Verify.verify_user(api_user)
@@ -81,10 +80,6 @@ def generate_order_report(campaign_id, column_list, file_path):
             else:
                 worksheet.write(row, column, data)
 
-            # if len(str(data)) > 8:
-            #     worksheet.set_column(row, column, len(str(data)))
-            # else:
-            #     worksheet.set_column(row, column, 8)
             worksheet.set_column(row, column, 10)
             column += 1
         row += 1
