@@ -3,11 +3,9 @@ import random
 from dataclasses import dataclass
 
 import pendulum
-from django.db.utils import DatabaseError
 from api.models.campaign.campaign import Campaign
 from api.models.campaign.campaign_lucky_draw import CampaignLuckyDraw
 from api.models.campaign.campaign_product import CampaignProduct
-from api.models.order import pre_order
 from api.models.order.pre_order import PreOrder
 from api.utils.orm import campaign_lucky_draw
 from api.views.order.pre_order import PreOrderHelper

@@ -22,14 +22,9 @@ class PreOrder(models.Model):
     last_name = models.CharField(max_length=255, null=True, blank=True)
     gender = models.CharField(max_length=255, null=True, blank=True)
     remark = models.TextField(null=True, blank=True, default=None)
-    #comment = models.TextField(null=True, blank=True, default=None)
-    #image = models.CharField(max_length=255, null=True, blank=True)
-    #invoice_no = models.CharField(max_length=255, null=True, blank=True)
 
     subtotal = models.FloatField(null=True, blank=True, default=0)
     total = models.FloatField(null=True, blank=True, default=0)
-    # tax = models.CharField(
-    #    max_length=255, null=True, blank=True, default='0.00')
     currency = models.CharField(
         max_length=255, null=True, blank=True, default=None)
     currency_sign = models.CharField(
@@ -129,6 +124,7 @@ class PreOrder(models.Model):
     buyer = models.ForeignKey(
         User, null=True, default=None, blank=True, on_delete=models.SET_NULL, related_name='pre_orders')
 
+
 class PreOrderSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -187,5 +183,6 @@ class PreOrderAdmin(admin.ModelAdmin):
     model = PreOrder
     list_display = [field.name for field in PreOrder._meta.fields]
     search_fields = [field.name for field in PreOrder._meta.fields]
+
 
 api_pre_order_template={f.get_attname():f.get_default() if f.has_default() else None for f in PreOrder._meta.fields}

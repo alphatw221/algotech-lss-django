@@ -27,10 +27,10 @@ class Campaign(models.Model):
         User, null=True, on_delete=models.SET_NULL, related_name='campaigns')
 
     user_subscription = models.ForeignKey(
-        UserSubscription,  null=True, on_delete=models.SET_NULL, related_name='campaigns')
-    
+        UserSubscription, null=True, on_delete=models.SET_NULL, related_name='campaigns')
+
     dealer = models.ForeignKey(
-        UserSubscription,  null=True, on_delete=models.SET_NULL, related_name='subscriber_campaigns')
+        UserSubscription, null=True, on_delete=models.SET_NULL, related_name='subscriber_campaigns')
 
     title = models.CharField(max_length=255, null=True, blank=True)
     description = models.TextField(null=True, blank=True, default=None)
@@ -85,13 +85,13 @@ class YoutubeCampaignSerializer(serializers.Serializer):
     last_refresh_timestamp = serializers.FloatField(required=False, default=1)
 
 
-
 class InstagramCampaignSerializer(serializers.Serializer):
     live_media_id = serializers.CharField(required=False, default="", allow_blank=True)
     remark = serializers.CharField(required=False, default="", allow_blank=True)
     last_create_message_id = serializers.CharField(required=False, default="", allow_blank=True)
     is_failed = serializers.BooleanField(required=False, default=False)
-    
+
+
 class CampaignSerializer(serializers.ModelSerializer):
     class Meta:
         model = Campaign
@@ -114,7 +114,7 @@ class CampaignSerializerCreate(serializers.ModelSerializer):
     class Meta:
         model = Campaign
         # fields = '__all__'
-        exclude = ['facebook_page','youtube_channel','instagram_profile']
+        exclude = ['facebook_page', 'youtube_channel', 'instagram_profile']
         read_only_fields = ['created_at', 'modified_at']
 
     facebook_campaign = FacebookCampaignSerializer(default=dict)
@@ -130,7 +130,7 @@ class CampaignSerializerEdit(serializers.ModelSerializer):
     class Meta:
         model = Campaign
         # fields = '__all__'
-        exclude = ['facebook_page','youtube_channel','instagram_profile']
+        exclude = ['facebook_page', 'youtube_channel', 'instagram_profile']
         read_only_fields = ['created_at', 'modified_at']
 
     facebook_campaign = FacebookCampaignSerializer(default=dict)
@@ -141,8 +141,8 @@ class CampaignSerializerEdit(serializers.ModelSerializer):
     meta_payment = serializers.JSONField(default=dict)
     meta_logistic = serializers.JSONField(default=dict)
 
-class CampaignSerializerRetreive(CampaignSerializer):
 
+class CampaignSerializerRetreive(CampaignSerializer):
     facebook_page = FacebookPageSerializer(read_only=True)
     youtube_channel = YoutubeChannelSerializer(read_only=True)
     instagram_profile = InstagramProfileSerializer(read_only=True)

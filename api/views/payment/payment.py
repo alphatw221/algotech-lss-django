@@ -1,28 +1,24 @@
 import urllib
 
 import stripe, base64
-from django.shortcuts import redirect
-from rest_framework import views, viewsets, status
 import paypalrestsdk, json
 from django.core.files.base import ContentFile
-from django.http import HttpResponseRedirect
-from rest_framework.decorators import action, api_view, permission_classes
-from rest_framework import views, viewsets, status
-from rest_framework.decorators import action, api_view, permission_classes, parser_classes
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.models import User
-from django.conf import settings
+
 from django.core.files.storage import default_storage
-from rest_framework.parsers import MultiPartParser, FormParser, FileUploadParser
-from api.models.order.pre_order import PreOrder, PreOrderSerializer, PreOrderSerializerUpdatePaymentShipping
+from rest_framework.parsers import MultiPartParser, FormParser
+from api.models.order.pre_order import PreOrder, PreOrderSerializerUpdatePaymentShipping
 
 from api.utils.common.common import getdata, getparams
 from api.models.order.order import Order
 from api.models.facebook.facebook_page import FacebookPage
 from api.models.youtube.youtube_channel import YoutubeChannel
 from api.models.instagram.instagram_profile import InstagramProfile
-import pendulum, time, datetime
+import datetime
 
 from django.http import HttpResponseRedirect
 from api.utils.common.verify import Verify
@@ -317,23 +313,6 @@ class PaymentViewSet(viewsets.GenericViewSet):
             return Response(payment.error)
 
 
-    # @action(detail=False, methods=['GET'], url_path=r'get_ipg_order_data')
-    # @api_error_handler
-    # def get_ipg_order_data(self, request, pk=None):
-    #     api_user, order_id = getparams(
-    #         request, ("order_id", ), seller=False)
-
-    #     if not api_user:
-    #         raise ApiVerifyError("no user found")
-    #     elif api_user.status != "valid":
-    #         raise ApiVerifyError("not activated user")
-
-    #     _, _, pre_order = verify_seller_request(
-    #         api_user, platform_name, platform_id, campaign_id, pre_order_id=pk)
-
-    #     serializer = PreOrderSerializer(pre_order)
-
-    #     return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET'], url_path=r"paypal_cancel")
     def paypal_cancel(self, request, *args, **kwargs):
@@ -353,53 +332,24 @@ class PaymentViewSet(viewsets.GenericViewSet):
             print(e)
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-    # @action(detail=False, methods=['GET'], url_path=r'get_ipg_order_data')
-    # @api_error_handler
-    # def get_ipg_order_data(self, request, pk=None):
-    #     api_user, order_id = getparams(
-    #         request, ("order_id", ), seller=False)
 
-    #     if not api_user:
-    #         raise ApiVerifyError("no user found")
-    #     elif api_user.status != "valid":
-    #         raise ApiVerifyError("not activated user")
-
-    #     _, _, pre_order = verify_seller_request(
-    #         api_user, platform_name, platform_id, campaign_id, pre_order_id=pk)
-
-    #     serializer = PreOrderSerializer(pre_order)
-
-    #     return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET'], url_path=r'hit_pay')
     @api_error_handler
     def hit_pay(self, request):
-        # api_user, order_id = getparams(
-        #     request, ("order_id", ))
 
         order_id = request.query_params.get('order_id')
         order_object = Verify.get_order(order_id)
         campaign = order_object.campaign
         api_key = campaign.meta_payment.get("sg").get("hitpay").get("hitpay_api_key")
 
-        # user_data = db.api_user.find_one({'id': api_user.id})
-        # name = user_data['name']
-        # email = user_data['email']
         order_data = db.api_order.find_one({'id': int(order_id)})
         if not order_data:
             raise ApiVerifyError('no order found')
         currency = 'SGD' if not order_data['currency'] else order_data['currency']
         amount, email = order_data['total'], order_data['shipping_email']
 
-        # params = {
-        #     'email': email,
-        #     'name': name,
-        #     'redirect_url': 'https://v1login.liveshowseller.com/buyer/order/' + order_id + '/confirmation',
-        #     'webhook': 'https://gipassl.algotech.app/api/payment/hit_pay_webhook/',
-        #     'amount': amount,
-        #     'currency': currency,
-        #     'reference_number': order_id,
-        # }
+
         headers = {
             'X-BUSINESS-API-KEY': api_key,
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -722,12 +672,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             request.data['shipping_date'] = datetime.date(int(date_list[0]), int(date_list[1]), int(date_list[2]))
         except:
             pass
-        # OPERATION_CODE_NAME: AGILE
-        # if request.user.id in settings.ADMIN_LIST:
         pre_order=PreOrder.objects.get(id=pk)
-        # pre_meta = pre_order.meta
-        # pre_meta.update(request.data['meta'])
-        # request.data['meta'] = pre_meta
         serializer = PreOrderSerializerUpdatePaymentShipping(pre_order, data=request.data, partial=True)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -735,8 +680,6 @@ class PaymentViewSet(viewsets.GenericViewSet):
         pre_order = PreOrder.objects.get(id=pk)
         verify_message = Verify.PreOrderApi.FromBuyer.verify_delivery_info(pre_order)
         return Response(verify_message, status=status.HTTP_200_OK)
-
-        # api_user, pre_order, order_product, campaign_product, qty = Verify.PreOrderApi.FromBuyer.verify(request, pk)
 
 
     @action(detail=False, methods=['POST'], url_path=r'paymongo_create_link')
