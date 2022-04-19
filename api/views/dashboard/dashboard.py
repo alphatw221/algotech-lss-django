@@ -271,7 +271,7 @@ class DashboardViewSet(viewsets.ModelViewSet):
 
         average_order_uncheck_rate = total_pre_order_count / (total_order_complete_count + total_order_proceed_count + total_pre_order_count) * 100 \
             if (total_order_complete_count + total_order_proceed_count + total_pre_order_count) else 0
-        average_order_close_rate = (total_order_complete_count, total_order_proceed_count) / (total_order_complete_count + total_order_proceed_count + total_pre_order_count) * 100 \
+        average_order_close_rate = (total_order_complete_count + total_order_proceed_count) / (total_order_complete_count + total_order_proceed_count + total_pre_order_count) * 100 \
             if (total_order_complete_count + total_order_proceed_count + total_pre_order_count) else 0
 
         manage_order = {
