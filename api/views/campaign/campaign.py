@@ -14,7 +14,7 @@ from datetime import datetime
 from backend.pymongo.mongodb import db
 from api.utils.common.verify import Verify
 from api.utils.common.verify import ApiVerifyError
-from api.utils.common.common import getdata,getparams
+from api.utils.common.common import getparams
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 from bson.json_util import loads, dumps
 
@@ -263,32 +263,18 @@ class CampaignViewSet(viewsets.ModelViewSet):
         comment_id = request.query_params.get('comment_id')
         platform = request.query_params.get('platform')
         comments_list = []
-
         is_user = verify_seller_request(api_user)
         if is_user:
             if int(comment_id) == 0:
                 comment_datas = db.api_campaign_comment.find({'campaign_id': int(campaign_id), 'platform': 'instagram'})
-                for comment_data in comment_datas:
-                    commentJson = {}
-                    commentJson['customer_name'] = comment_data['customer_name']
-                    commentJson['id'] = comment_data['id']                        
-                    commentJson['message'] = comment_data['message']
-                    commentJson['created_at'] = comment_data['created_time']
-                    commentJson['image'] = comment_data['image']
-                    comments_list.append(commentJson)
+                comments_list = self.__create_comments_list(comment_datas)
             else:
                 last_time = db.api_campaign_comment.find_one({'campaign_id': int(campaign_id), 'id': comment_id, 'platform': 'instagram'})['created_time']
                 comment_datas = db.api_campaign_comment.find({'campaign_id': int(campaign_id), 'created_time': {'$gt': last_time}, 'platform': 'instagram'})
-                for comment_data in comment_datas:
-                    commentJson = {}
-                    commentJson['customer_name'] = comment_data['customer_name']
-                    commentJson['id'] = comment_data['id']                        
-                    commentJson['message'] = comment_data['message']
-                    commentJson['created_at'] = comment_data['created_time']
-                    commentJson['image'] = comment_data['image']
-                    comments_list.append(commentJson)
+                comments_list = self.__create_comments_list(comment_datas)
 
         return Response(comments_list, status=status.HTTP_200_OK)
+
 
 
     @action(detail=True, methods=['GET'], url_path=r'comments/summarize', permission_classes=(IsAuthenticated,))
@@ -323,3 +309,13 @@ class CampaignViewSet(viewsets.ModelViewSet):
         comments_json = loads(comments_str)
         
         return Response(comments_json, status=status.HTTP_200_OK)
+
+    def __create_comments_list(self, comment_datas) -> list:
+        comments_list = []
+        for comment_data in comment_datas:
+            comment_json = {'customer_name': comment_data['customer_name'], 'id': comment_data['id'],
+                            'message': comment_data['message'], 'created_at': comment_data['created_time'],
+                            'image': comment_data['image']}
+            comments_list.append(comment_json)
+
+        return comments_list
