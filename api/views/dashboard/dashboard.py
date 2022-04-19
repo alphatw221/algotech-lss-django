@@ -259,7 +259,8 @@ class DashboardViewSet(viewsets.ModelViewSet):
         campaign_uncheckout_rate = campaign_pre_order_count / (campaign_order_complete_count + campaign_order_proceed_count + campaign_pre_order_count) * 100\
                 if (campaign_order_complete_count + campaign_order_proceed_count + campaign_pre_order_count) else 0
 
-        campaign_close_rate = 100 - campaign_uncheckout_rate
+        campaign_close_rate = (campaign_order_complete_count+campaign_order_proceed_count) / (campaign_order_complete_count + campaign_order_proceed_count + campaign_pre_order_count) * 100\
+                if (campaign_order_complete_count + campaign_order_proceed_count + campaign_pre_order_count) else 0
 
 
         total_order_complete_count, total_order_proceed_count = get_total_order_complete_proceed(user_subscription.id)
@@ -270,7 +271,8 @@ class DashboardViewSet(viewsets.ModelViewSet):
 
         average_order_uncheck_rate = total_pre_order_count / (total_order_complete_count + total_order_proceed_count + total_pre_order_count) * 100 \
             if (total_order_complete_count + total_order_proceed_count + total_pre_order_count) else 0
-        average_order_close_rate = 1 - average_order_uncheck_rate
+        average_order_close_rate = (total_order_complete_count, total_order_proceed_count) / (total_order_complete_count + total_order_proceed_count + total_pre_order_count) * 100 \
+            if (total_order_complete_count + total_order_proceed_count + total_pre_order_count) else 0
 
         manage_order = {
             "order_qty":campaign_order_complete_count,

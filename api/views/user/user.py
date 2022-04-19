@@ -579,7 +579,7 @@ class UserViewSet(viewsets.ModelViewSet):
         
         
         stripe.api_key = STRIPE_API_KEY  
-        intent = stripe.PaymentIntent.create( amount=int(amount*100), currency="SGD",)
+        intent = stripe.PaymentIntent.create( amount=int(amount*100), currency="SGD",receipt_email = email)
         
         return Response({
             "client_secret":intent.client_secret,
