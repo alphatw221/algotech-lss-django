@@ -7,8 +7,6 @@ from api.models.facebook.facebook_page import FacebookPage
 from api.models.youtube.youtube_channel import YoutubeChannel
 
 from api.utils.common.verify import Verify
-from api.utils.common.verify import ApiVerifyError
-from api.utils.common.common import *
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 
 
@@ -97,3 +95,4 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
         auto_response.delete()
 
         return Response({"message": "delete success"}, status=status.HTTP_200_OK)
+

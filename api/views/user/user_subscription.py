@@ -1,11 +1,9 @@
-from platform import platform
 from django.http import HttpResponseRedirect
 from rest_framework import serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from api.code.subscription_code_manager import SubscriptionCodeManager
-from api.models.campaign.campaign import InstagramCampaignSerializer
-from api.models.instagram.instagram_profile import InstagramProfile, InstagramProfileInfoSerializer, InstagramProfileSerializer
+from api.models.instagram.instagram_profile import InstagramProfile, InstagramProfileSerializer
 from api.models.user.user import User,UserSubscriptionSerializerDealerList
 from api.models.user.user_subscription import UserSubscription, UserSubscriptionSerializer, UserSubscriptionSerializerForDealerRetrieve, UserSubscriptionSerializerMeta, UserSubscriptionSerializerSimplify, UserSubscriptionSerializerCreate
 from rest_framework.pagination import PageNumberPagination
@@ -32,8 +30,6 @@ from api.utils.common.common import getparams
 from backend.api.instagram.profile import api_ig_get_profile_info
 from backend.api.youtube.channel import api_youtube_get_list_channel_by_token
 import requests
-from rest_framework_simplejwt.tokens import AccessToken
-from django.contrib.auth.models import User as AuthUser
 from django.conf import settings
 
 
@@ -115,8 +111,6 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'], url_path=r'get_meta', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def get_meta(self, request):
-        # api_user, platform_name, platform_id = getparams(request, ('platform_name', 'platform_id'), with_user=True, seller=True)
-
         api_user = Verify.get_seller_user(request)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
 
@@ -127,8 +121,6 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['POST'], url_path=r'update_hitpay', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def update_hitpay(self, request):
-        # api_user, platform_name, platform_id = getparams(request, ('platform_name', 'platform_id'), with_user=True, seller=True)
-
         api_user = Verify.get_seller_user(request)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
 
@@ -139,7 +131,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             user_subscription, data={"meta_payment": meta_payment}, partial=True)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        user_subscription = serializer.save()
+        serializer.save()
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -158,7 +150,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             user_subscription, data={"meta_payment": meta_payment}, partial=True)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        user_subscription = serializer.save()
+        serializer.save()
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -176,7 +168,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             user_subscription, data={"meta_payment": meta_payment}, partial=True)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        user_subscription = serializer.save()
+        serializer.save()
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -195,7 +187,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             user_subscription, data={"meta_payment": meta_payment}, partial=True)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        user_subscription = serializer.save()
+        serializer.save()
 
         return Response(serializer.data, status=status.HTTP_200_OK)
     
@@ -214,14 +206,13 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             user_subscription, data={"meta_payment": meta_payment}, partial=True)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        user_subscription = serializer.save()
+        serializer.save()
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['POST'], url_path=r'update_direct_payment', parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated,))
     @api_error_handler
     def update_direct_payment(self, request):
-        # api_user, platform_name, platform_id = getparams(request, ('platform_name', 'platform_id'), with_user=True, seller=True)
 
         api_user = Verify.get_seller_user(request)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
@@ -253,7 +244,6 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['POST'], url_path=r'update_logistic', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def update_logistic(self, request):
-        # api_user, platform_name, platform_id = getparams(request, ('platform_name', 'platform_id'), with_user=True, seller=True)
 
         api_user = Verify.get_seller_user(request)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
@@ -262,7 +252,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             user_subscription, data={"meta_logistic": request.data}, partial=True)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        user_subscription = serializer.save()
+        serializer.save()
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -270,7 +260,6 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['PUT'], url_path=r'update_language', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def update_language(self, request):
-        # api_user, platform_name, platform_id = getparams(request, ('platform_name', 'platform_id'), with_user=True, seller=True)
         language, = getdata(request, ('language',))
 
         Verify.language_supported(language)
@@ -286,7 +275,6 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['PUT'], url_path=r'update_note', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def update_note(self, request):
-        # api_user, platform_name, platform_id = getparams(request, ('platform_name', 'platform_id'), with_user=True, seller=True)
         delivery_note, special_note, confirmation_note = getdata(request, ('delivery_note',"special_note", "confirmation_note"))
 
         api_user = Verify.get_seller_user(request)
@@ -455,7 +443,6 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         state = json.loads(state)
         redirect_uri, redirect_route, callback_uri, user_subscription_id = state.get('redirect_uri'),state.get('redirect_route'),state.get('callback_uri'), state.get('user_subscription_id')
 
-
         api_user_user_subscription = Verify.get_user_subscription(user_subscription_id)
 
         response = requests.post(
@@ -465,7 +452,6 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
                     "client_id": "536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com",
                     "client_secret": "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",
                     "redirect_uri": callback_uri,
-                    # "redirect_uri": settings.WEB_SERVER_URL + "/bind_youtube_channels_callback",
                     "grant_type": "authorization_code"
                 }
             )
@@ -563,8 +549,6 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
                 instagram_profile.image = profile_pricure
                 instagram_profile.save()
             else:
-                # instagram_profile = InstagramProfile.objects.create(
-                #     business_id=business_id, name=profile_name, token=page_token, token_update_at=datetime.now(), token_update_by=api_user.facebook_info['id'], image=profile_pricure)
                 instagram_profile = InstagramProfile.objects.create(
                     business_id=business_id, name=profile_name, token=page_token, token_update_at=datetime.now(), image=profile_pricure)
                 instagram_profile.save()

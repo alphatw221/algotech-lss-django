@@ -1,9 +1,7 @@
 import json
 
-from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
-from django.http import HttpResponse
 from rest_framework import status, viewsets
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated
@@ -12,16 +10,12 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from datetime import datetime
-from api.models.youtube.youtube_channel import YoutubeChannel
-from api.permissions.seller.campaign_permission import IsCampaignPlatformValid, IsPlatformCampaignRetrievable
 
 from backend.pymongo.mongodb import db
 from api.utils.common.verify import Verify
 from api.utils.common.verify import ApiVerifyError
 from api.utils.common.common import getdata,getparams
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
-import requests
-from api.models.user.user_subscription import UserSubscription
 from bson.json_util import loads, dumps
 
 
