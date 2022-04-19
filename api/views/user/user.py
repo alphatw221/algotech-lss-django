@@ -483,7 +483,7 @@ class UserViewSet(viewsets.ModelViewSet):
         if plan != 'Free Trial':
             raise ApiVerifyError('plan option error')
 
-        if AuthUser.objects.filter(email = email).exists() or User.objects.filter(email=email).exists():
+        if AuthUser.objects.filter(email = email).exists() or User.objects.filter(email=email, type='user').exists():
             raise ApiVerifyError('email has already been used')
 
 
@@ -573,7 +573,7 @@ class UserViewSet(viewsets.ModelViewSet):
         if promoCode and promoCode != EARLY_BIRD_PROMO_CODE:
             raise ApiVerifyError('invalid promo code')
 
-        if AuthUser.objects.filter(email=email).exists() or User.objects.filter(email=email).exists():
+        if AuthUser.objects.filter(email=email).exists() or User.objects.filter(email=email, type='user').exists():
             raise ApiVerifyError('email has already been used')
         
         if plan == 'Lite(USD 10.00/Month)':
@@ -625,7 +625,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
         #last validation  (require refunds)
         # ------------------------------------------------------------------------------------
-        if AuthUser.objects.filter(email = email).exists() or User.objects.filter(email=email).exists():
+        if AuthUser.objects.filter(email = email).exists() or User.objects.filter(email=email, type='user').exists():
             raise ApiVerifyError('email has already been used')
 
         if plan == 'Lite(USD 10.00/Month)':
