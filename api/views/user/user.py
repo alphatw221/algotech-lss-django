@@ -492,7 +492,6 @@ class UserViewSet(viewsets.ModelViewSet):
 
         redirect = HttpResponseRedirect(redirect_to=redirect_uri+'#/'+redirect_route)
         return redirect
-        # return Response(YoutubeChannelSerializer(api_user_user_subscription.youtube_channels.all(), many = True).data, status=status.HTTP_200_OK)
 
     
     @action(detail=False, methods=['GET'], url_path=r'youtube_channels', permission_classes=(IsAuthenticated,))
@@ -541,8 +540,6 @@ class UserViewSet(viewsets.ModelViewSet):
     # @action(detail=False, methods=['POST'], url_path=r'create/valid_api_user', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def create_valid_api_user(self, request):
-        # return Response("ok", status=status.HTTP_200_OK)
-        # print('test')
         name, email = getdata(request, ("name","email"), required=True)
 
         # print(name,email)
@@ -614,31 +611,6 @@ class UserViewSet(viewsets.ModelViewSet):
             "Expired At":expired_at.strftime("%m/%d/%Y %H:%M:%S"),
             "Receipt":""
         }
-
-        # kwargs={
-        #     "subject": i18n_get_register_confirm_mail_subject(),
-        #     "email": email, 
-        #     "template_name": "register_confirmation.html",
-        #     "parameters": {
-        #         'firstName': firstName,
-        #         'email': email,
-        #         'password': password
-        #     },
-        # }
-        # send_email_job(**kwargs)
-
-        # kwargs={
-        #     "subject": i18n_get_register_activate_mail_subject(),
-        #     "email": email, 
-        #     "template_name": "register_activation.html",
-        #     "parameters": {
-        #         'firstName': firstName,
-        #         'Plan': plan,
-        #         'email': email,
-        #         'password': password
-        #     }
-        # }
-        # send_email_job(**kwargs)
 
         email_queue.enqueue(
             send_email_job,

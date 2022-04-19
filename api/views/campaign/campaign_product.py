@@ -1,7 +1,6 @@
-from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
-from api.models.campaign.campaign_product import CampaignProduct, CampaignProductSerializer, CampaignProductSerializerUpdate
+from api.models.campaign.campaign_product import CampaignProduct, CampaignProductSerializerUpdate
 from rest_framework import status, viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -14,14 +13,13 @@ from django.core.files.base import ContentFile
 from api.models.product.product import Product
 
 from api.utils.common.verify import Verify
-from api.utils.common.verify import ApiVerifyError
 from api.utils.common.common import *
 
 from datetime import datetime
 from django.db.models import Q
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 
-from api.utils.common.common import getdata, getparams
+from api.utils.common.common import getparams
 
 def verify_request(api_user, platform_name, platform_id, campaign_id, campaign_product_id=None, is_fast=None):
     Verify.verify_user(api_user)
@@ -59,13 +57,6 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['GET'], url_path=r'retrieve_campaign_product', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def retrieve_campaign_product(self, request, pk=None):
-        # platform_id = request.query_params.get('platform_id')
-        # platform_name = request.query_params.get('platform_name')
-        # campaign_id = request.query_params.get('campaign_id')
-        # api_user = request.user.api_users.get(type='user')
-
-        # _, _, campaign_product = verify_request(
-        #     api_user, platform_name, platform_id, campaign_id, campaign_product_id=pk)
 
         api_user, campaign_id = getparams(request,("campaign_id",),with_user=True, seller=True)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
@@ -79,19 +70,6 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'], url_path=r'list_campaign_product', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def list_campaign_product(self, request):
-        # platform_id = request.query_params.get('platform_id')
-        # platform_name = request.query_params.get('platform_name')
-        # campaign_id = request.query_params.get('campaign_id')
-        # order_by = request.query_params.get('order_by')
-        # product_status = request.query_params.get('status')
-        # type = request.query_params.get('type')
-        # # exclude = request.query_params.get('exclude')
-        # key_word = request.query_params.get('key_word')
-        # api_user = request.user.api_users.get(type='user')
-        # _, campaign = verify_request(
-        #     api_user, platform_name, platform_id, campaign_id)
-        # # print(campaign)
-
 
         api_user, campaign_id, order_by, product_status, type, key_word = getparams(request,("campaign_id", "order_by", "product_status", "type", "key_word"),with_user=True, seller=True)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
@@ -130,12 +108,6 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'], url_path=r'list_campaign_lucky_draw_product', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def list_campaign_lucky_draw_product(self, request):
-        # platform_id = request.query_params.get('platform_id')
-        # platform_name = request.query_params.get('platform_name')
-        # campaign_id = request.query_params.get('campaign_id')
-        # api_user = request.user.api_users.get(type='user')
-        # _, campaign = verify_request(
-        #     api_user, platform_name, platform_id, campaign_id)
         
         api_user, campaign_id = getparams(request,("campaign_id",),with_user=True, seller=True)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
@@ -151,13 +123,6 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['POST'], url_path=r'create_campaign_product', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def create_campaign_product(self, request):
-        # platform_id = request.query_params.get('platform_id')
-        # platform_name = request.query_params.get('platform_name')
-        # campaign_id = request.query_params.get('campaign_id')
-        # api_user = request.user.api_users.get(type='user')
-
-        # _, campaign = verify_request(
-        #     api_user, platform_name, platform_id, campaign_id)
 
         api_user, campaign_id = getparams(request,("campaign_id",),with_user=True, seller=True)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
@@ -178,13 +143,6 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
     @api_error_handler
     def update_campaign_product(self, request, pk=None):
 
-
-        # api_user, platform_id, platform_name, campaign_id = getparams(request, ("platform_id","platform_name","campaign_id"), with_user=True, seller=True)
-        
-        # platform = Verify.get_platform(api_user, platform_name, platform_id)
-        # campaign = Verify.get_campaign_from_platform(platform, campaign_id)
-        # campaign_product = Verify.get_campaign_product_from_campaign(campaign, pk)
-
         api_user, campaign_id = getparams(request,("campaign_id",),with_user=True, seller=True)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
         campaign = Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
@@ -199,19 +157,11 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         serializer.save()
 
-        # serializer = CampaignProductSerializer(campai)
-
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['DELETE'], url_path=r'delete_campaign_product', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def delete_campaign_product(self, request, pk=None):
-
-        # api_user, platform_id, platform_name, campaign_id = getparams(request,("platform_id", "platform_name", "campaign_id"), with_user=True, seller=True)
-
-        # platform = Verify.get_platform(api_user, platform_name, platform_id)
-        # campaign = Verify.get_campaign_from_platform(platform, campaign_id)
-        # campaign_product = Verify.get_campaign_product_from_campaign(campaign, pk)
 
         api_user, campaign_id = getparams(request,("campaign_id",),with_user=True, seller=True)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
@@ -246,12 +196,6 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
     @api_error_handler
     def fast_add_product(self, request):
 
-        # api_user, platform_id, platform_name, campaign_id, code, price, qty = getparams(request, ("platform_id", "platform_name", "campaign_id", "code", "price", "qty"), with_user=True, seller=True)
-
-        # platform = Verify.get_platform(api_user, platform_name, platform_id)
-        # campaign = Verify.get_campaign_from_platform(platform, campaign_id)
-        # user_subscription = Verify.get_user_subscription_from_platform(platform)
-
         api_user, campaign_id, code, price, qty = getparams(request,("campaign_id","code", "price", "qty"),with_user=True, seller=True)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
         campaign = Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
@@ -265,13 +209,6 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['PUT'], url_path=r'fast_update', parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated,))
     @api_error_handler
     def fast_update_campaign_product(self, request, pk=None):
-        # platform_id = request.query_params.get('platform_id')
-        # platform_name = request.query_params.get('platform_name')
-        # campaign_id = request.query_params.get('campaign_id')
-        # api_user = request.user.api_users.get(type='user')
-
-        # _, campaign, campaign_product, user_subscription = verify_request(
-        #     api_user, platform_name, platform_id, campaign_id, campaign_product_id=pk, is_fast=True)
 
         api_user, campaign_id = getparams(request,("campaign_id",),with_user=True, seller=True)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)

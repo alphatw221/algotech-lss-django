@@ -46,6 +46,7 @@ platform_dict = {'facebook':FacebookPage, 'youtube':YoutubeChannel, 'instagram':
 
 @email_error_handler
 def send_email(order_id):
+
     order_data = db.api_order.find_one({'id': int(order_id)})
     campaign_id = order_data['campaign_id']
     campaign_data = db.api_campaign.find_one({'id': int(campaign_id)})
