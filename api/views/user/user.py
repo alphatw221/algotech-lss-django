@@ -607,12 +607,13 @@ class UserViewSet(viewsets.ModelViewSet):
             name=f'{firstName} {lastName}', email=email, type='user', status='valid', phone=contactNumber, auth_user=auth_user, user_subscription=user_subscription)
         
         ret = {
+            "Customer Name":f'{firstName} {lastName}', 
             "Email":email,
             "Password":password,
-            "Plan":plan,
+            "Selling Country":country,
+            "Your Plan":plan,
             "Subscription Period":"Monthly",
-            "Expired At":expired_at.strftime("%m/%d/%Y %H:%M:%S"),
-            "Receipt":""
+            "Subscription End Date":expired_at.strftime("%m/%d/%Y %H:%M:%S"),
         }
 
         # kwargs={
@@ -689,8 +690,8 @@ class UserViewSet(viewsets.ModelViewSet):
         if AuthUser.objects.filter(email = email).exists() or User.objects.filter(email=email).exists():
             raise ApiVerifyError('email has already been used')
         
-        if plan == 'Lite':
-                amount = 1.00
+        if plan == 'Lite(USD 10.00/Month)':
+                amount = 10.00
         elif plan == 'Standard(USD 30.00/Month)':  
             if period == "Monthly":
                 amount = 30.00
@@ -741,9 +742,9 @@ class UserViewSet(viewsets.ModelViewSet):
         if AuthUser.objects.filter(email = email).exists() or User.objects.filter(email=email).exists():
             raise ApiVerifyError('email has already been used')
 
-        if plan == 'Lite':
-            amount = 1.00
-            subscription_type = "lite"
+        if plan == 'Lite(USD 10.00/Month)':
+            amount = 10.00
+            subscription_type = "lite(USD 10.00/Month)"
 
         elif plan == 'Standard(USD 30.00/Month)':  
             subscription_type = "standard"
@@ -786,11 +787,13 @@ class UserViewSet(viewsets.ModelViewSet):
         
 
         ret = {
+            "Customer Name":f'{firstName} {lastName}',
             "Email":email,
             "Password":password,
-            "Plan":plan,
+            "Selling Country":country, 
+            "Your Plan":plan,
             "Subscription Period":"Monthly",
-            "Expired At":expired_at.strftime("%m/%d/%Y %H:%M:%S"),
+            "Subscription End Date":expired_at.strftime("%m/%d/%Y %H:%M:%S"),
             "Receipt":paymentIntent.charges.get('data')[0].get('receipt_url')
         }
         
