@@ -6,10 +6,12 @@ from backend.api._api_caller import RestApiJsonCaller
 @dataclass
 class YoutubeApiCaller(RestApiJsonCaller):
     domain_url: str = settings.YOUTUBE_API_URL
-    
+
+
 @dataclass
 class GoogleApiCaller(RestApiJsonCaller):
     domain_url: str = settings.GOOGLE_API_URL
+
 
 @dataclass
 class YoutubeGoogleApiCaller(RestApiJsonCaller):
