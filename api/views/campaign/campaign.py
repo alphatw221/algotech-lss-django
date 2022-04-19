@@ -5,16 +5,14 @@ from django.core.files.storage import default_storage
 from rest_framework import status, viewsets
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated
-from api.models.campaign.campaign import Campaign, CampaignSerializer, CampaignSerializerEdit, \
-    CampaignSerializerRetreive, CampaignSerializerCreate
+from api.models.campaign.campaign import Campaign, CampaignSerializer, CampaignSerializerEdit, CampaignSerializerRetreive, CampaignSerializerCreate
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from datetime import datetime
 
 from backend.pymongo.mongodb import db
-from api.utils.common.verify import Verify
-from api.utils.common.verify import ApiVerifyError
+from api.utils.common.verify import Verify, ApiVerifyError
 from api.utils.common.common import getparams
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 from bson.json_util import loads, dumps
@@ -51,8 +49,6 @@ class CampaignViewSet(viewsets.ModelViewSet):
     def retrieve_campaign_buyer(self, request, pk=None):
         campaign_data = db.api_campaign.find_one({'id': int(pk)})
         campaign_data.pop('_id', None)
-        # serializer = Campaign.objects.get(id=pk)
-
         return Response(campaign_data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET'], url_path=r'list_campaign', permission_classes=(IsAuthenticated,))
