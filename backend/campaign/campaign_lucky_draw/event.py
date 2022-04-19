@@ -171,8 +171,7 @@ class DrawFromCampaignCommentsEvent(ABC):
         campaign_comments = orm_campaign_comment.get_keyword_campaign_comments(
             self.campaign, self.keyword,
         )
-        # campaign_comments = db.api_campaign_comment.find({'campaign_id': self.campaign.id, 'message': {'$regex': '.*[' + self.keyword + '].*'}})
-        
+
         winner_set = set()
         if self.unrepeat == 'True':
             winner_set = get_winner_set(self.campaign.id)
@@ -278,7 +277,7 @@ def get_final_set(candidate_set, winner_set, winner_num):
             continue
         else:
             exclusive_set.add(candidate) 
-    if (len(exclusive_set) < winner_num):
+    if len(exclusive_set) < winner_num:
         exclusive_set = candidate_set
     candidate_set = exclusive_set
 

@@ -1,9 +1,7 @@
-from api.models.facebook.facebook_page import (FacebookPage, FacebookPageInfoSerializer,
-                                               FacebookPageSerializer)
+from api.models.facebook.facebook_page import FacebookPage, FacebookPageInfoSerializer
 from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
-from api.models.facebook.facebook_page import FacebookPage
 from api.models.user.user_subscription import UserSubscription
 
 
@@ -12,7 +10,7 @@ class AutoResponse(models.Model):
         db_table = 'api_auto_response'
 
     user_subscription = models.ForeignKey(
-        UserSubscription,  null=True, on_delete=models.SET_NULL, related_name='auto_responses')
+        UserSubscription, null=True, on_delete=models.SET_NULL, related_name='auto_responses')
 
     facebook_page = models.ForeignKey(
         FacebookPage, null=True, on_delete=models.SET_NULL, related_name='auto_responses')
@@ -37,12 +35,15 @@ class AutoResponseSerializer(serializers.ModelSerializer):
 
     meta = serializers.JSONField(default=dict)
 
+
 class AutoResponseSerializerUpdate(serializers.ModelSerializer):
     class Meta:
         model = AutoResponse
-        exclude=['created_at', 'updated_at','user_subscription', 'facebook_page']
+        exclude = ['created_at', 'updated_at', 'user_subscription', 'facebook_page']
 
     meta = serializers.JSONField(default=dict)
+
+
 class AutoResponseSerializerWithFacebookInfo(serializers.ModelSerializer):
     class Meta:
         model = AutoResponse
@@ -51,6 +52,7 @@ class AutoResponseSerializerWithFacebookInfo(serializers.ModelSerializer):
 
     facebook_page = FacebookPageInfoSerializer(read_only=True)
     meta = serializers.JSONField(default=dict)
+
 
 class AutoResponseAdmin(admin.ModelAdmin):
     model = AutoResponse

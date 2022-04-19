@@ -3,11 +3,9 @@ import random
 from dataclasses import dataclass
 
 import pendulum
-from django.db.utils import DatabaseError
 from api.models.campaign.campaign import Campaign
 from api.models.campaign.campaign_lucky_draw import CampaignLuckyDraw
 from api.models.campaign.campaign_product import CampaignProduct
-from api.models.order import pre_order
 from api.models.order.pre_order import PreOrder
 from api.utils.orm import campaign_lucky_draw
 from api.views.order.pre_order import PreOrderHelper
@@ -30,13 +28,13 @@ class CampaignLuckyDrawManager:
     def process(campaign: Campaign, event: CampaignLuckyDrawEvent,
                 prize_campaign_product: CampaignProduct, num_of_winner: int):
 
-        #create lucky_draw instance        
+        # create lucky_draw instance
         lucky_draw = CampaignLuckyDrawProcessor(
             campaign, event,
             prize_campaign_product, num_of_winner
         ).process()
 
-        #add lucky_draw_product add to cart
+        # add lucky_draw_product add to cart
         # cart_product_requests = CampaignLuckyDrawManager._get_cart_product_requests(
         #     lucky_draw, campaign, prize_campaign_product)
         # cart_product_requests, response_result = CampaignLuckyDrawManager._handle_cart_product_requests(
@@ -48,10 +46,12 @@ class CampaignLuckyDrawManager:
         for winner in lucky_draw.winner_list:
             try:
                 # pre_order, created = PreOrder.objects.get_or_create(campaign=campaign, platform=winner[0], customer_id=winner[1], customer_name=winner[2])
-                pre_order = db.api_pre_order.find_one({'campaign_id': int(campaign.id), 'platform': winner[0], 'customer_id': winner[1], 'customer_name': winner[2]})
+                pre_order = db.api_pre_order.find_one(
+                    {'campaign_id': int(campaign.id), 'platform': winner[0], 'customer_id': winner[1],
+                     'customer_name': winner[2]})
                 if not pre_order:
                     increment_id = get_incremented_filed(
-                    collection_name="api_pre_order", field_name="id")
+                        collection_name="api_pre_order", field_name="id")
 
                     template = api_pre_order_template.copy()
                     template.update({
@@ -73,7 +73,8 @@ class CampaignLuckyDrawManager:
                         print('new pre_order error!!!!!')
                         continue
                 else:
-                    pre_order, created = PreOrder.objects.get_or_create(campaign=campaign, platform=winner[0], customer_id=winner[1], customer_name=winner[2])
+                    pre_order, created = PreOrder.objects.get_or_create(campaign=campaign, platform=winner[0],
+                                                                        customer_id=winner[1], customer_name=winner[2])
 
                 PreOrderHelper.add_product(None, pre_order=pre_order, campaign_product=prize_campaign_product, qty=1)
                 result = CampaignAnnouncer.announce_lucky_draw_winner(lucky_draw, winner[2])
@@ -84,7 +85,7 @@ class CampaignLuckyDrawManager:
                 }
                 lucky_draw.save()
             except Exception as e:
-                print (e)
+                print(e)
 
         return lucky_draw
 
@@ -94,8 +95,7 @@ class CampaignLuckyDrawManager:
         response_result = []
         for cart_product_request in cart_product_requests:
             cprv = CartProductRequestValidatorLuckyDraw()
-            cprp = CartProductRequestProcessorLuckyDraw(
-                check_inv=True, cart_product_type=event.get_condition_type())
+            cprp = CartProductRequestProcessorLuckyDraw(check_inv=True, cart_product_type=event.get_condition_type())
             cprv.process(cart_product_request)
             cprp.process(cart_product_request)
 
@@ -107,10 +107,6 @@ class CampaignLuckyDrawManager:
                         response_result.append(result)
                     except CampaignAnnouncerError:
                         raise
-                elif item.state == RequestState.INSUFFICIENT_INV:
-                    ...
-                elif item.state == RequestState.INVALID_NEGATIVE_QTY:
-                    ...
         return cart_product_requests, response_result
 
     @staticmethod
@@ -120,7 +116,7 @@ class CampaignLuckyDrawManager:
         for winner in lucky_draw.winner_list:
             cart_product_request = CartProductRequest(campaign, None,
                                                       winner[0], winner[1], winner[2])
-                                                      #platfrom_name, platform_id, platform_name
+            # platfrom_name, platform_id, platform_name
             cart_product_request.add_item(prize_campaign_product, 1)
             cart_product_requests.append(cart_product_request)
         return cart_product_requests
@@ -155,22 +151,28 @@ class CampaignLuckyDrawProcessor:
             for winner in winner_list:
                 winner_with_img = []
                 if condition_type == 'lucky_draw_campaign_comments':
-                    img_url = db.api_campaign_comment.find_one({'customer_id': winner[1], 'campaign_id': self.campaign.id})['image']
+                    img_url = \
+                    db.api_campaign_comment.find_one({'customer_id': winner[1], 'campaign_id': self.campaign.id})[
+                        'image']
                 elif condition_type == 'lucky_draw_campaign_likes':
-                    img_url = db.api_user.find_one({'facebook_info.id': winner[1], 'type': 'customer'})['facebook_info']['picture']
+                    img_url = \
+                    db.api_user.find_one({'facebook_info.id': winner[1], 'type': 'customer'})['facebook_info'][
+                        'picture']
                 elif condition_type == 'lucky_draw_cart_products':
-                    img_url = db.api_pre_order.find_one({'customer_id': winner[1], 'campaign_id': self.campaign.id})['customer_img']
+                    img_url = db.api_pre_order.find_one({'customer_id': winner[1], 'campaign_id': self.campaign.id})[
+                        'customer_img']
                 elif condition_type == 'lucky_draw_products':
-                    img_url = db.api_pre_order.find({'customer_id': winner[1], 'campaign_id': self.campaign.id})['customer_img']
+                    img_url = db.api_pre_order.find({'customer_id': winner[1], 'campaign_id': self.campaign.id})[
+                        'customer_img']
 
                 winner_with_img.append(winner[0])
                 winner_with_img.append(winner[1])
                 winner_with_img.append(winner[2])
                 winner_with_img.append(img_url)
                 new_winner_list.append(winner_with_img)
-            
+
             winner_list = new_winner_list
-            
+
 
         except Exception:
             winner_list = []

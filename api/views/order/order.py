@@ -1,29 +1,19 @@
-from ast import operator
-import functools
 from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 
-from api.models.order.order import Order, OrderSerializer, OrderSerializerUpdatePaymentShipping
-from api.models.order.pre_order import PreOrder
+from api.models.order.order import Order, OrderSerializer
 from api.utils.common.verify import Verify
-from api.utils.common.verify import ApiVerifyError, platform_dict
 from api.utils.common.common import getparams
 from api.utils.common.order_helper import OrderHelper
 
 from mail.sender.sender import *
 from django.http import HttpResponse
 from backend.pymongo.mongodb import db
-import xlsxwriter, os.path, io, datetime
-from io import StringIO
-from django.conf import settings
-from dateutil import parser
-import functools
- 
-import operator
-from django.db.models import Q
+import xlsxwriter
+
 
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 def get_title_map():
@@ -70,30 +60,30 @@ def verify_seller_request(api_user, platform_name, platform_id, campaign_id, ord
 
     return platform, campaign
 
+
 class OrderPagination(PageNumberPagination):
     page_query_param = 'page'
     page_size_query_param = 'page_size'
 
 
 class OrderViewSet(viewsets.ModelViewSet):
-    
     queryset = Order.objects.all().order_by('id')
     serializer_class = OrderSerializer
     filterset_fields = []
-    
-    @action(detail=True, methods=['GET'], url_path=r'seller_retrieve', permission_classes = (IsAuthenticated,))
+
+    @action(detail=True, methods=['GET'], url_path=r'seller_retrieve', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def seller_retrieve_order(self, request, pk=None):
 
         api_user = Verify.get_seller_user(request)
-        order=Verify.get_order(pk)
+        order = Verify.get_order(pk)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
         Verify.get_campaign_from_user_subscription(user_subscription, order.campaign.id)
         serializer = OrderSerializer(order)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
-    @action(detail=False, methods=['GET'], url_path=r'seller_list', permission_classes = (IsAuthenticated,))
+
+    @action(detail=False, methods=['GET'], url_path=r'seller_list', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def seller_list_order(self, request):
         api_user, platform_id, platform_name, campaign_id, order_by = getparams(
@@ -106,7 +96,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         # TODO filtering
         if order_by:
             queryset = queryset.order_by(order_by)
-        
+
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = OrderSerializer(page, many=True)
@@ -118,59 +108,49 @@ class OrderViewSet(viewsets.ModelViewSet):
             data = serializer.data
 
         return Response(data, status=status.HTTP_200_OK)
-    
-    @action(detail=True, methods=['GET'], url_path=r'seller_cancel', permission_classes = (IsAuthenticated,))
+
+    @action(detail=True, methods=['GET'], url_path=r'seller_cancel', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def seller_cancel_order(self, request, pk=None):
 
         api_user, platform_id, platform_name = getparams(
-            request, ("platform_id", "platform_name"),with_user=True, seller=True)
+            request, ("platform_id", "platform_name"), with_user=True, seller=True)
 
         platform = Verify.get_platform(api_user, platform_name, platform_id)
-        order=Verify.get_order(pk)
+        order = Verify.get_order(pk)
         Verify.get_campaign_from_platform(platform, order.campaign.id)
-        
+
         pre_order = OrderHelper.cancel(api_user, order)
 
         return Response('order canceled', status=status.HTTP_200_OK)
-    
-    @action(detail=True, methods=['GET'], url_path=r'seller_delete', permission_classes = (IsAuthenticated,))
+
+    @action(detail=True, methods=['GET'], url_path=r'seller_delete', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def seller_delete_order(self, request, pk=None):
 
         api_user, platform_id, platform_name = getparams(
-            request, ("platform_id", "platform_name"),with_user=True, seller=True)
+            request, ("platform_id", "platform_name"), with_user=True, seller=True)
 
         platform = Verify.get_platform(api_user, platform_name, platform_id)
-        order=Verify.get_order(pk)
+        order = Verify.get_order(pk)
         Verify.get_campaign_from_platform(platform, order.campaign.id)
-        
+
         order = OrderHelper.delete(api_user, order)
-        
+
         return Response('order deleted', status=status.HTTP_200_OK)
-    
-    @action(detail=False, methods=['GET'], url_path=r'report', permission_classes = (IsAuthenticated,))
+
+    @action(detail=False, methods=['GET'], url_path=r'report', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def seller_order_report(self, request):
         api_user, platform_id, platform_name, campaign_id, column_list = getparams(
             request, ("platform_id", "platform_name", "campaign_id", "column_list"), with_user=True, seller=True)
-        
-        # platform, campaign = verify_seller_request(
-        #     api_user, platform_name, platform_id, campaign_id)
-        
-        #check_download_at:
-        # last_report_download_at = campaign.meta.get('last_report_download_at',None)
-        # if last_report_download_at and datetime.datetime.timestamp(last_report_download_at)+settings.ORDER_REPORT_DOWNLOAD_INTERVAL > datetime.datetime.timestamp(datetime.datetime.now()):
-        #     raise ApiVerifyError('frequently download')
-        # campaign.meta['last_report_download_at']=datetime.datetime.now() 
-        # campaign.save()
 
         column_list = column_list.split(',')
         title_map = get_title_map()
         campaign_title = db.api_campaign.find_one({'id': int(campaign_id)})['title']
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         response['Content-Disposition'] = 'attachment; filename=' + campaign_title + '.xlsx'
- 
+
         workbook = xlsxwriter.Workbook(response, {'in_memory': True})
         worksheet = workbook.add_worksheet()
         header = workbook.add_format({
@@ -196,12 +176,13 @@ class OrderViewSet(viewsets.ModelViewSet):
             'font_size': 13,
             'border': 1
         })
-        
+
         products_count = 0
         campaign_products = db.api_campaign_product.find({'campaign_id': int(campaign_id)})
         for campaign_product in campaign_products:
             products_count += 1
-        worksheet.merge_range(0, 0, 0, len(column_list) + products_count - 1, campaign_title + ' Order Report', title_form)
+        worksheet.merge_range(0, 0, 0, len(column_list) + products_count - 1, campaign_title + ' Order Report',
+                              title_form)
         worksheet.merge_range(1, 0, 1, 5, 'Contact Info', info_form)
         worksheet.merge_range(1, 6, 1, 13, 'Delivery Info', info_form)
         worksheet.merge_range(1, 14, 1, 19, 'Payment Info', info_form)
@@ -211,9 +192,9 @@ class OrderViewSet(viewsets.ModelViewSet):
         for column_title in column_list:
             worksheet.write(row, column, title_map[column_title], header)
             if len(column_title) >= 8:
-                    worksheet.set_column(column, column, len(title_map[column_title]) + 2)
+                worksheet.set_column(column, column, len(title_map[column_title]) + 2)
             column += 1
-        
+
         product_column_dict = {}
         campaign_products = db.api_campaign_product.find({'campaign_id': int(campaign_id)})
         for campaign_product in campaign_products:
@@ -252,14 +233,14 @@ class OrderViewSet(viewsets.ModelViewSet):
                     else:
                         worksheet.write(row, column, col_data)
                 column += 1
-            
+
             products = campaign_order['products']
             for campaing_product_id_str, product in products.items():
                 worksheet.write(row, product_column_dict[campaing_product_id_str], product['qty'])
-                
+
             row += 1
             column = 0
-        
+
         for campaign_pre_order in campaign_pre_orders:
             for column_title in column_list:
                 if column_title in ['pick_up_date', 'pick_up_store', 'last_five_digit']:
@@ -284,20 +265,20 @@ class OrderViewSet(viewsets.ModelViewSet):
                     else:
                         worksheet.write(row, column, col_data)
                 column += 1
-            
+
             products = campaign_pre_order['products']
             for campaing_product_id_str, product in products.items():
                 worksheet.write(row, product_column_dict[campaing_product_id_str], product['qty'])
-                
+
             row += 1
             column = 0
 
-        worksheet.write(row , num_col_total, total_count, int_center)
+        worksheet.write(row, num_col_total, total_count, int_center)
         workbook.close()
-        
+
         return response
 
-# --------------------- buyer --------------------------------------------
+    # --------------------- buyer --------------------------------------------
 
     from rest_framework.permissions import BasePermission
 
@@ -312,7 +293,7 @@ class OrderViewSet(viewsets.ModelViewSet):
             except Exception:
                 return False
             return True
-            
+
     @action(detail=True, methods=['GET'], url_path=r'buyer_retrieve')
     @api_error_handler
     def buyer_retrieve_order(self, request, pk=None):
@@ -324,12 +305,11 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         #     return Response(serializer.data, status=status.HTTP_200_OK)
 
-
         # 先檢查exists 才給request get
         # api_user, = getparams(
         #     request, (), seller=False)
-        api_user=None
-        order = Order.objects.get(id = pk)
+        api_user = None
+        order = Order.objects.get(id=pk)
         Verify.user_match_pre_order(api_user, order)
 
         serializer = OrderSerializer(order)
@@ -339,56 +319,32 @@ class OrderViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['POST'], url_path=r'buyer_submit')
     @api_error_handler
     def update_buyer_submit(self, request, pk=None):
-        # api_user, platform_name, campaign_id = getparams(
-        #     request, ("platform_name", "campaign_id"), seller=False)
 
-        # order = verify_buyer_request(
-        #     api_user, platform_name, campaign_id)
-        platform_name, campaign_id = getparams(
-            request, ("platform_name", "campaign_id"), with_user=False, seller=False)
-        
-        # request.data['status'] = 'complete'
-        # serializer = OrderSerializerUpdatePaymentShipping(order, data=request.data, partial=True)
-        # if not serializer.is_valid():
-        #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        # serializer.save()
-
+        getparams(request, ("platform_name", "campaign_id"), with_user=False, seller=False)
         db.api_order.update_one({'id': int(pk)}, {'$set': {'status': 'complete'}})
-
-        # order = verify_buyer_request(
-        #     api_user, platform_name, campaign_id, check_info=True)
-        order = Order.objects.get(id = pk)
+        order = Order.objects.get(id=pk)
         serializer = OrderSerializer(order)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
     @action(detail=True, methods=['POST'], url_path=r'buyer_cancel')
     @api_error_handler
     def update_buyer_cancel(self, request, pk=None):
-        # api_user, = getparams(
-        #     request, (), seller=False)
         api_user = None
-        order = Order.objects.get(id = pk)
+        order = Order.objects.get(id=pk)
         Verify.user_match_pre_order(api_user, order)
 
-        # api_user, platform_name, campaign_id = getparams(
-        #     request, ("platform_name", "campaign_id"), seller=False)
-        
-        # order = verify_buyer_request(
-        #     api_user, platform_name, campaign_id)
         if order.status != 'unpaid':
-            pre_order = OrderHelper.cancel(api_user, order)
+            OrderHelper.cancel(api_user, order)
 
             return Response('order canceled', status=status.HTTP_200_OK)
         else:
             return Response('order submited, can not cancel by customer', status=status.HTTP_400_BAD_REQUEST)
 
-    
-    @action(detail=False, methods=['GET'], url_path=r'buyer_list', permission_classes = (IsAuthenticated,))
+    @action(detail=False, methods=['GET'], url_path=r'buyer_list', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def list_buyer_history_order(self, request):
         api_user, = getparams(
             request, (), with_user=True, seller=False)
 
         return Response(OrderSerializer(api_user.orders, many=True).data, status=status.HTTP_200_OK)
-        

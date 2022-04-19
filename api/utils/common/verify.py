@@ -14,8 +14,9 @@ from api.models.order.pre_order import PreOrder
 
 from api.utils.error_handle.error.api_error import ApiVerifyError
 
+
 def getparams(request, params: tuple, with_user=True, seller=True):
-    ret=[]
+    ret = []
     if with_user:
         if seller:
             if not request.user.api_users.filter(type='user').exists():
@@ -29,8 +30,8 @@ def getparams(request, params: tuple, with_user=True, seller=True):
         ret.append(request.query_params.get(param, None))
     return ret
 
-platform_dict = {'facebook':FacebookPage, 'youtube':YoutubeChannel, 'instagram':InstagramProfile}
 
+platform_dict = {'facebook': FacebookPage, 'youtube': YoutubeChannel, 'instagram': InstagramProfile}
 
 
 class VerifyRequestFromWhome(ABC):
@@ -39,14 +40,6 @@ class VerifyRequestFromWhome(ABC):
     @abstractmethod
     def verify(request, pk=None):
         ...
-
-
-
-
-
-
-
-
 
 
 class Verify():
@@ -113,7 +106,7 @@ class Verify():
         if api_user.status != "valid":
             raise ApiVerifyError("not activated user")
         return api_user
-        
+
     @staticmethod
     def verify_user(api_user):
         if not api_user:
@@ -132,18 +125,18 @@ class Verify():
         # if not cls.is_platform_admin(api_user, platform_name, platform):
         #     raise ApiVerifyError("user is not platform admin")
         return platform
-    
+
     @classmethod
     def get_platform_from_user_subscription(cls, user_subscription, platform_name, platform_id):
-        attr_dict = {'facebook':'facebook_pages', 'youtube':'youtube_channels', 'instagram':'instagram_profiles'}
+        attr_dict = {'facebook': 'facebook_pages', 'youtube': 'youtube_channels', 'instagram': 'instagram_profiles'}
 
-        if  platform_name not in attr_dict:
+        if platform_name not in attr_dict:
             raise ApiVerifyError('not support platform')
 
-        if not getattr(user_subscription,attr_dict[platform_name]).filter(id=platform_id).exists():
+        if not getattr(user_subscription, attr_dict[platform_name]).filter(id=platform_id).exists():
             raise ApiVerifyError('platform not found')
 
-        return getattr(user_subscription,attr_dict[platform_name]).get(id=platform_id)
+        return getattr(user_subscription, attr_dict[platform_name]).get(id=platform_id)
 
     @classmethod
     def get_platform_verify_with_token(cls, token, platform_name, platform_id):
@@ -151,7 +144,7 @@ class Verify():
             raise ApiVerifyError("no platfrom name found")
         if not platform_dict[platform_name].objects.filter(id=platform_id).exists():
             raise ApiVerifyError("no platfrom found")
-        platform =  platform_dict[platform_name].objects.get(
+        platform = platform_dict[platform_name].objects.get(
             id=platform_id)
         if not cls.check_is_admin_by_token(token, platform_name, platform):
             raise ApiVerifyError("user is not platform admin")
@@ -168,13 +161,12 @@ class Verify():
         if not Order.objects.filter(id=order_id).exists():
             raise ApiVerifyError('no order found')
         return Order.objects.get(id=order_id)
-    
+
     @staticmethod
-    def get_order_by_api_user(api_user,order_id):
+    def get_order_by_api_user(api_user, order_id):
         if not api_user.orders.filter(id=order_id).exists():
             raise ApiVerifyError('order not found')
         return api_user.orders.get(id=order_id)
-
 
     @staticmethod
     def get_user_subscription(user_subscription_id):
@@ -196,11 +188,6 @@ class Verify():
         if not user_subscription:
             raise ApiVerifyError("no user_subscription")
         return user_subscription
-        # user_subscriptions = api_user.user_subscriptions.all()
-        # if not user_subscriptions:
-        #     raise ApiVerifyError("user not in any user_subscription")
-        # user_subscription = user_subscriptions[0]
-        # return user_subscription
 
     @staticmethod
     def get_dealer_user_subscription_from_api_user(api_user):
@@ -211,7 +198,7 @@ class Verify():
             raise ApiVerifyError("not dealer")
         return user_subscription
 
-    def get_user_subscription_from_dealer_user_subscription(dealer_user_subscription,user_subscription_id):
+    def get_user_subscription_from_dealer_user_subscription(dealer_user_subscription, user_subscription_id):
         if not dealer_user_subscription.subscribers.filter(id=user_subscription_id).exists():
             raise ApiVerifyError("no user_subscription")
         return dealer_user_subscription.subscribers.get(id=user_subscription_id)
@@ -249,13 +236,13 @@ class Verify():
 
     @staticmethod
     def get_campaign_from_platform(platform, campaign_id):
-        print (platform.campaigns)
-        print (campaign_id)
+        print(platform.campaigns)
+        print(campaign_id)
         if not platform.campaigns.filter(id=campaign_id).exists():
             raise ApiVerifyError("no campaign found")
         campaign = platform.campaigns.get(id=campaign_id)
         return campaign
-        
+
     @staticmethod
     def get_campaign_from_user_subscription(user_subscription, campaign_id):
         if not user_subscription.campaigns.filter(id=campaign_id).exists():
@@ -340,29 +327,31 @@ class Verify():
 
             @staticmethod
             def verify(request, pk=None):
-                
-                api_user, order_product_id, campaign_product_id, qty = getparams(request, ("order_product_id", "campaign_product_id", "qty"), seller=False)
-                pre_order=Verify.get_pre_order(pk)
+
+                api_user, order_product_id, campaign_product_id, qty = getparams(request, (
+                "order_product_id", "campaign_product_id", "qty"), seller=False)
+                pre_order = Verify.get_pre_order(pk)
                 Verify.user_match_pre_order(api_user, pre_order)
 
                 if order_product_id:
                     order_product = Verify.get_order_product_from_pre_order(pre_order, order_product_id)
                     campaign_product = order_product.campaign_product
                 else:
-                    order_product=None
-                    campaign_product = Verify.get_campaign_product_from_pre_order(pre_order, campaign_product_id) if campaign_product_id else None
+                    order_product = None
+                    campaign_product = Verify.get_campaign_product_from_pre_order(pre_order,
+                                                                                  campaign_product_id) if campaign_product_id else None
 
-
-                if campaign_product and ( campaign_product.type=='lucky_draw' or campaign_product.type=='lucky_draw-fast'):
-                        raise ApiVerifyError("invalid campaign_product")
+                if campaign_product and (
+                        campaign_product.type == 'lucky_draw' or campaign_product.type == 'lucky_draw-fast'):
+                    raise ApiVerifyError("invalid campaign_product")
 
                 return api_user, pre_order, order_product, campaign_product, qty
-            
+
             @staticmethod
             def verify_delivery_info(pre_order):
                 verify_message = {}
                 check_exist = False
-                #TODO 訊息彙整回傳一次
+                # TODO 訊息彙整回傳一次
                 if not pre_order.shipping_first_name:
                     check_exist = True
                     verify_message['shipping_first_name'] = 'not valid'
@@ -412,13 +401,14 @@ class Verify():
                     return verify_message
                 return verify_message
 
-
         class FromSeller(VerifyRequestFromWhome):
             @staticmethod
             def verify(request, pk=None):
-                api_user, platform_id, platform_name, campaign_id, campaign_product_id, qty, order_product_id, search= getparams(
-                request, ("platform_id", "platform_name", "campaign_id", "campaign_product_id", "qty", "order_product_id", "search"))
-                print (api_user)
+                api_user, platform_id, platform_name, campaign_id, campaign_product_id, qty, order_product_id, search = getparams(
+                    request, (
+                    "platform_id", "platform_name", "campaign_id", "campaign_product_id", "qty", "order_product_id",
+                    "search"))
+                print(api_user)
                 Verify.verify_user(api_user)
                 platform = Verify.get_platform(api_user, platform_name, platform_id)
                 campaign = Verify.get_campaign_from_platform(platform, campaign_id)
@@ -427,13 +417,12 @@ class Verify():
                     order_product = Verify.get_order_product_from_pre_order(pre_order, order_product_id)
                     campaign_product = order_product.campaign_product
                 else:
-                    order_product=None
-                    campaign_product = Verify.get_campaign_product_from_pre_order(pre_order, campaign_product_id) if campaign_product_id else None
+                    order_product = None
+                    campaign_product = Verify.get_campaign_product_from_pre_order(pre_order,
+                                                                                  campaign_product_id) if campaign_product_id else None
 
                 return api_user, platform, campaign, pre_order, order_product, campaign_product, qty, search
 
-
-    
     class OrderApi():
 
         class FromBuyer(VerifyRequestFromWhome):
@@ -446,7 +435,7 @@ class Verify():
             @staticmethod
             def verify(request, pk=None):
 
-                params=("platform_name", "platform_id", "campaign_id", "order_id")
+                params = ("platform_name", "platform_id", "campaign_id", "order_id")
                 api_user, platform_name, platform_id, campaign_id, order_id = getparams(request, params)
 
                 Verify.verify_user(api_user)

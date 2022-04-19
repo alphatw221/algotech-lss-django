@@ -10,3 +10,4 @@ __pycache__
 .test.py
 /lss/wsgi.py
 .idea
+.vs

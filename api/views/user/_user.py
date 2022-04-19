@@ -18,11 +18,10 @@ from backend.api.google.user import api_google_get_userinfo
 from backend.api.youtube.channel import api_youtube_get_list_channel_by_token
 from backend.api.youtube.viedo import api_youtube_get_video_info_with_access_token
 from lss.views.custom_jwt import CustomTokenObtainPairSerializer
-from backend.api.instagram.user import *
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
-from django.shortcuts import redirect
 from django.conf import settings
+
 
 def facebook_login_helper(request, user_type='user'):
 
@@ -39,7 +38,6 @@ def facebook_login_helper(request, user_type='user'):
     api_user_exists = User.objects.filter(
         email=email, type=user_type).exists()
     auth_user_exists = AuthUser.objects.filter(email=email).exists()
-
 
     scenario1 = api_user_exists and auth_user_exists
     scenario2 = api_user_exists and not auth_user_exists
@@ -66,7 +64,7 @@ def facebook_login_helper(request, user_type='user'):
         api_user = User.objects.create(
             name=facebook_name, email=email, type=user_type, status='new', auth_user=auth_user)
 
-    if user_type=='user' and api_user.status != 'valid':
+    if user_type == 'user' and api_user.status != 'valid':
         raise ApiVerifyError('account not activated')
 
     api_user.facebook_info["token"] = facebook_user_token
@@ -77,8 +75,6 @@ def facebook_login_helper(request, user_type='user'):
 
     auth_user.last_login = datetime.now()
     auth_user.save()
-
-    # refresh = RefreshToken.for_user(auth_user)
 
     refresh = CustomTokenObtainPairSerializer.get_token(auth_user)
 
@@ -308,15 +304,9 @@ def google_login_helper_v2(request, user_type='customer'):
             'access': str(refresh.access_token),
         }
 
-        # return Response(ret, status=status.HTTP_200_OK)
-
         redirect = HttpResponseRedirect(redirect_to=redirect_uri+'#/'+redirect_route)
         redirect.set_cookie('access_token', str(refresh.access_token),path="/")
         return redirect
-
-        # # red.set_cookie('token', str(refresh.access_token)) #TODO setting domain, expired
-        # red.set_cookie("access_token", str(refresh.access_token), path="/", domain=None, samesite=None, secure=False)
-        # return red
 
 
 def instagram_login_helper(request, user_type='customer'):
@@ -370,8 +360,6 @@ def instagram_login_helper(request, user_type='customer'):
 
     auth_user.last_login = datetime.now()
     auth_user.save()
-
-    # refresh = RefreshToken.for_user(auth_user)
 
     refresh = CustomTokenObtainPairSerializer.get_token(auth_user)
 

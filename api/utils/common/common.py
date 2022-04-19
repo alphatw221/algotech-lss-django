@@ -1,8 +1,9 @@
 from api.utils.error_handle.error.api_error import ApiVerifyError
 
+
 def getparams(request, params: tuple, with_user=True, seller=True):
-    ret=[]
-    print (request.user)
+    ret = []
+    print(request.user)
     if with_user:
         if seller:
             if not request.user.api_users.filter(type='user').exists():
@@ -16,18 +17,14 @@ def getparams(request, params: tuple, with_user=True, seller=True):
         ret.append(request.query_params.get(param, None))
     return ret
 
-def getdata(request, data: tuple, required=False):
 
+def getdata(request, data: tuple, required=False):
     ret = []
     if required:
         for d in data:
-
             if not request.data.get(d):
                 raise ApiVerifyError(f"{d} is required")
             ret.append(request.data.get(d))
         return ret
 
-    for d in data:
-        ret.append(request.data.get(d, None))
-    return ret
-
+    return [request.data.get(d, None) for d in data]

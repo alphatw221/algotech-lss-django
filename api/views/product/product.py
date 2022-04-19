@@ -53,7 +53,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         if key_word:
             queryset = queryset.filter(name__icontains=key_word)
         if order_by:
-            queryset = queryset.order_by(order_by)
+            queryset = queryset.order_by("-"+order_by)
 
         page = self.paginate_queryset(queryset)
         if page is not None:

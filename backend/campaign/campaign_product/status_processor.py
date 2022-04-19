@@ -1,4 +1,3 @@
-
 from enum import Enum, auto
 
 import pendulum
@@ -56,8 +55,9 @@ class CampaignProductStatusProcessor:
     def get_campaign_product_sold_out_task(campaign_product: CampaignProduct):
         def _campaign_product_sold_out_task(campaign_product: CampaignProduct):
             try:
-                campaign_product = CampaignProductStatusProcessor.update_status(
-                    campaign_product, CampaignProductStatusProcessor.Event.SOLD_OUT)
+                CampaignProductStatusProcessor.update_status(campaign_product,
+                                                             CampaignProductStatusProcessor.Event.SOLD_OUT)
             except Exception:
                 ...
+
         return _campaign_product_sold_out_task(campaign_product)
