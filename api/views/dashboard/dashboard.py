@@ -255,11 +255,12 @@ class DashboardViewSet(viewsets.ModelViewSet):
         campaign_comment_count = db.api_campaign_comment.find({'campaign_id': campaign_id}).count()
         campaign_complete_sales = get_campaign_complete_sales(campaign_id)
 
-        campaign_close_rate = campaign_order_complete_count / (campaign_order_complete_count + campaign_order_proceed_count) * 100 \
-                if (campaign_order_complete_count + campaign_order_proceed_count) else 0
 
-        campaign_uncheckout_rate = campaign_order_proceed_count / (campaign_order_complete_count + campaign_order_proceed_count + campaign_pre_order_count) * 100\
+        campaign_uncheckout_rate = campaign_pre_order_count / (campaign_order_complete_count + campaign_order_proceed_count + campaign_pre_order_count) * 100\
                 if (campaign_order_complete_count + campaign_order_proceed_count + campaign_pre_order_count) else 0
+
+        campaign_close_rate = 100 - campaign_uncheckout_rate
+
 
         total_order_complete_count, total_order_proceed_count = get_total_order_complete_proceed(user_subscription.id)
         total_pre_order_count = get_total_pre_order_count(user_subscription.id)
@@ -267,10 +268,9 @@ class DashboardViewSet(viewsets.ModelViewSet):
         total_average_sales = get_total_average_sales(user_subscription.id)
         total_average_comment_count = get_total_average_comment_count(user_subscription.id)
 
-        average_order_uncheck_rate = total_order_complete_count / (total_order_complete_count + total_order_proceed_count) * 100 \
-            if (total_order_complete_count + total_order_proceed_count) else 0
-        average_order_close_rate = total_order_complete_count / (total_order_complete_count + total_order_proceed_count + total_pre_order_count) * 100 \
+        average_order_uncheck_rate = total_pre_order_count / (total_order_complete_count + total_order_proceed_count + total_pre_order_count) * 100 \
             if (total_order_complete_count + total_order_proceed_count + total_pre_order_count) else 0
+        average_order_close_rate = 1 - average_order_uncheck_rate
 
         manage_order = {
             "order_qty":campaign_order_complete_count,
