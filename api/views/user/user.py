@@ -508,7 +508,7 @@ class UserViewSet(viewsets.ModelViewSet):
             "Selling Country":country,
             "Your Plan":plan,
             "Subscription Period":"Monthly",
-            "Subscription End Date":expired_at.strftime("%m/%d/%Y %H:%M:%S"),
+            "Subscription End Date":expired_at.strftime("%m/%d/%Y"),
         }
 
         email_queue.enqueue(
@@ -661,7 +661,7 @@ class UserViewSet(viewsets.ModelViewSet):
             "Selling Country":country, 
             "Your Plan":plan,
             "Subscription Period":"Monthly",
-            "Subscription End Date":expired_at.strftime("%m/%d/%Y %H:%M:%S"),
+            "Subscription End Date":expired_at.strftime("%m/%d/%Y"),
             "Receipt":paymentIntent.charges.get('data')[0].get('receipt_url')
         }
 
