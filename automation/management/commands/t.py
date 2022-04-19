@@ -34,6 +34,7 @@ from api.models.order.order import Order
 from api.models.order.order_product import OrderProduct
 import datetime
 from backend.api.instagram.post import api_ig_private_message, api_ig_get_post_comments
+from backend.api.twitch.post import api_twitch_get_access_token
 
 
 class Command(BaseCommand):
@@ -43,7 +44,10 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.test_mongodb_query()
+        # self.test_mongodb_query()
+        # self.test_send_email()
+        ret = api_twitch_get_access_token()
+        print (ret)
 
 
     # def campaign_test(self):
@@ -157,29 +161,30 @@ class Command(BaseCommand):
 
         from backend.python_rq.python_rq import email_queue
         from automation.jobs.send_email_job import send_email_job
-        kwargs={
-                "email": 'derekhwang33@gmail.com', 
-                "template_name": "register_confirmation.html",
-                "content": None,
-                "parameters": {
-                    'firstName': 'Derek',
-                    'email': 'test@gmail.com',
-                    'password': 'aaaaaaaaaaa'
-                },
-                "file": None, 
-            }
-        send_email_job(**kwargs)
-        
-        # email_queue.enqueue(send_email_job,args=('alphatw22193@gmail.com', None, "test", None, None, None), result_ttl=10, failure_ttl=10)
-        # email_queue.enqueue(
-        #     send_email_job,
-        #     kwargs={
+        # kwargs={
         #         "email": 'derekhwang33@gmail.com', 
         #         "template_name": "register_confirmation.html",
+        #         "content": None,
         #         "parameters": {
         #             'firstName': 'Derek',
         #             'email': 'test@gmail.com',
         #             'password': 'aaaaaaaaaaa'
         #         },
         #         "file": None, 
-        #     }, result_ttl=10, failure_ttl=10)
+        #     }
+        # send_email_job(**kwargs)
+        
+        # email_queue.enqueue(send_email_job,args=('alphatw22193@gmail.com', None, "test", None, None, None), result_ttl=10, failure_ttl=10)
+        email_queue.enqueue(
+            send_email_job,
+            kwargs={
+                "subject": "test",
+                "email": 'derekhwang33@gmail.com', 
+                "template_name": "register_confirmation.html",
+                "parameters": {
+                    'firstName': 'Derek',
+                    'email': 'test@gmail.com',
+                    'password': 'aaaaaaaaaaa'
+                },
+                "file": None, 
+            }, result_ttl=10, failure_ttl=10)
