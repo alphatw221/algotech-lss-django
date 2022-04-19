@@ -70,7 +70,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
         if key_word:
             campaigns = campaigns.filter(title__icontains=str(key_word))
         if order_by:
-            campaigns = campaigns.order_by(order_by)
+            campaigns = campaigns.order_by("-"+order_by)
         
         page = self.paginate_queryset(campaigns)
         if page is not None:
