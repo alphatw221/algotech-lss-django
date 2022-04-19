@@ -1,31 +1,20 @@
-import json
-from math import perm
-import re
 from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import action, permission_classes
 from rest_framework.pagination import PageNumberPagination
-from api.models.campaign.campaign import Campaign
-from api.models.order.order_product import OrderProduct
 
 from api.models.order.pre_order import PreOrder, PreOrderSerializer, PreOrderSerializerUpdatePaymentShipping
-from api.permissions.buyer.pre_order_permission import IsPreOrderCustomer
 from api.utils.common.common import getdata, getparams
 from api.utils.common.verify import Verify
 from api.utils.common.verify import ApiVerifyError, platform_dict
 
 from api.utils.common.order_helper import PreOrderHelper
-from backend.pymongo.mongodb import db      
 
 from django.db.models import Q
 import datetime
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 
-from django.conf import settings
-import traceback
-from api.utils.error_handle.error.pre_order_error import PreOrderErrors
-from django.core.exceptions import ObjectDoesNotExist
 
 class PreOrderPagination(PageNumberPagination):
     page_query_param = 'page'
@@ -33,7 +22,6 @@ class PreOrderPagination(PageNumberPagination):
 
 
 class PreOrderViewSet(viewsets.ModelViewSet):
-    
     queryset = PreOrder.objects.all().order_by('id')
     serializer_class = PreOrderSerializer
     filterset_fields = []
@@ -42,12 +30,11 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['GET'], url_path=r'seller_retrieve', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def seller_retrieve_pre_order(self, request, pk=None):
-        
 
         api_user = Verify.get_seller_user(request)
-        pre_order=Verify.get_pre_order(pk)
+        pre_order = Verify.get_pre_order(pk)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
-        Verify.get_campaign_from_user_subscription(user_subscription,pre_order.campaign.id)
+        Verify.get_campaign_from_user_subscription(user_subscription, pre_order.campaign.id)
 
         serializer = PreOrderSerializer(pre_order)
 
@@ -61,12 +48,13 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
         campaign = Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
-        
+
         queryset = campaign.pre_orders.exclude(subtotal=0).order_by('id')
 
         if search:
             if search.isnumeric():
-                queryset = queryset.filter(Q(id=int(search)) | Q(customer_name__icontains=search) | Q(phone__icontains=search))
+                queryset = queryset.filter(
+                    Q(id=int(search)) | Q(customer_name__icontains=search) | Q(phone__icontains=search))
             else:
                 queryset = queryset.filter(Q(customer_name__icontains=search) | Q(phone__icontains=search))
 
@@ -87,9 +75,9 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     def seller_pre_order_checkout(self, request, pk=None):
 
         api_user = Verify.get_seller_user(request)
-        pre_order=Verify.get_pre_order(pk)
+        pre_order = Verify.get_pre_order(pk)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
-        Verify.get_campaign_from_user_subscription(user_subscription,pre_order.campaign.id)
+        Verify.get_campaign_from_user_subscription(user_subscription, pre_order.campaign.id)
 
         api_order = PreOrderHelper.checkout(api_user, pre_order)
         return Response(api_order, status=status.HTTP_200_OK)
@@ -97,11 +85,12 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['GET'], url_path=r'seller_add', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def seller_add_order_product(self, request, pk=None):
-        api_user, campaign_product_id, qty = getparams(request, ('campaign_product_id', 'qty'), with_user=True, seller=True)
+        api_user, campaign_product_id, qty = getparams(request, ('campaign_product_id', 'qty'), with_user=True,
+                                                       seller=True)
 
-        pre_order=Verify.get_pre_order(pk)
+        pre_order = Verify.get_pre_order(pk)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
-        Verify.get_campaign_from_user_subscription(user_subscription,pre_order.campaign.id)
+        Verify.get_campaign_from_user_subscription(user_subscription, pre_order.campaign.id)
 
         campaign_product = Verify.get_campaign_product_from_pre_order(pre_order, campaign_product_id)
         api_order_product = PreOrderHelper.add_product(
@@ -113,9 +102,9 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     def seller_update_order_product(self, request, pk=None):
         api_user, order_product_id, qty = getparams(request, ('order_product_id', 'qty'), with_user=True, seller=True)
 
-        pre_order=Verify.get_pre_order(pk)
+        pre_order = Verify.get_pre_order(pk)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
-        Verify.get_campaign_from_user_subscription(user_subscription,pre_order.campaign.id)
+        Verify.get_campaign_from_user_subscription(user_subscription, pre_order.campaign.id)
 
         order_product = Verify.get_order_product_from_pre_order(pre_order, order_product_id)
         api_order_product = PreOrderHelper.update_product(
@@ -126,12 +115,12 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     @api_error_handler
     def seller_adjust(self, request, pk=None):
 
-        adjust_price, adjust_title, free_delivery = getdata(request,('adjust_price', 'adjust_title', 'free_delivery'))
+        adjust_price, adjust_title, free_delivery = getdata(request, ('adjust_price', 'adjust_title', 'free_delivery'))
         adjust_price = float(adjust_price)
         api_user = Verify.get_seller_user(request)
-        pre_order=Verify.get_pre_order(pk)
+        pre_order = Verify.get_pre_order(pk)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
-        Verify.get_campaign_from_user_subscription(user_subscription,pre_order.campaign.id)
+        Verify.get_campaign_from_user_subscription(user_subscription, pre_order.campaign.id)
         if type(free_delivery) != bool:
             raise ApiVerifyError("request data error")
 
@@ -146,43 +135,42 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         pre_order.adjust_title = adjust_title
 
         if free_delivery:
-            pre_order.total = pre_order.subtotal + pre_order.adjust_price 
+            pre_order.total = pre_order.subtotal + pre_order.adjust_price
         else:
-            pre_order.total = pre_order.subtotal + pre_order.adjust_price +pre_order.shipping_cost
+            pre_order.total = pre_order.subtotal + pre_order.adjust_price + pre_order.shipping_cost
 
-        seller_adjust_history = pre_order.history.get('seller_adjust',[])
+        seller_adjust_history = pre_order.history.get('seller_adjust', [])
         seller_adjust_history.append(
-            {"original_total":original_total, 
-            "adjusted_total": pre_order.total, 
-            "original_free_delivery_status":original_free_delivery,
-            "adjusted_free_delivery_status":pre_order.free_delivery,
-            "adjusted_at":datetime.datetime.utcnow(), 
-            "adjusted_by":api_user.id
-            }
+            {"original_total": original_total,
+             "adjusted_total": pre_order.total,
+             "original_free_delivery_status": original_free_delivery,
+             "adjusted_free_delivery_status": pre_order.free_delivery,
+             "adjusted_at": datetime.datetime.utcnow(),
+             "adjusted_by": api_user.id
+             }
         )
-        pre_order.history['seller_adjust_history']=seller_adjust_history
+        pre_order.history['seller_adjust_history'] = seller_adjust_history
 
         pre_order.save()
         return Response(PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
-        
+
     @action(detail=True, methods=['GET'], url_path=r'seller_delete', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def seller_delete_order_product(self, request, pk=None):
 
         api_user, order_product_id = getparams(request, ('order_product_id',), seller=True)
-        
-        pre_order=Verify.get_pre_order(pk)
+
+        pre_order = Verify.get_pre_order(pk)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
-        Verify.get_campaign_from_user_subscription(user_subscription,pre_order.campaign.id)
+        Verify.get_campaign_from_user_subscription(user_subscription, pre_order.campaign.id)
 
         order_product = Verify.get_order_product_from_pre_order(pre_order, order_product_id)
-        # api_user, platform, campaign, pre_order, order_product, campaign_product, qty, search = Verify.PreOrderApi.FromSeller.verify(request, pk)
         PreOrderHelper.delete_product(
             api_user, pre_order, order_product)
-        return Response({'message':"delete success"}, status=status.HTTP_200_OK)
-    
-    #------------------buyer---------------------------------------------------------------------------
-    
+        return Response({'message': "delete success"}, status=status.HTTP_200_OK)
+
+    # ------------------buyer---------------------------------------------------------------------------
+
     from rest_framework.permissions import BasePermission
 
     class IsPreOrderCustomer(BasePermission):
@@ -197,54 +185,48 @@ class PreOrderViewSet(viewsets.ModelViewSet):
                 return False
             return True
 
-    # permission_classes=(IsAuthenticated,IsPreOrderCustomer)
-
     @action(detail=True, methods=['GET'], url_path=r'buyer_retrieve', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def buyer_retrieve_pre_order(self, request, pk=None):
 
-        pre_order=Verify.get_pre_order(pk)
-
+        pre_order = Verify.get_pre_order(pk)
         serializer = PreOrderSerializer(pre_order)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-
     @action(detail=True, methods=['GET'], url_path=r'buyer_checkout', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def buyer_pre_order_checkout(self, request, pk=None):
-        
+
         api_user, = getparams(request, (), with_user=True, seller=False)
-        pre_order=Verify.get_pre_order(pk)
+        pre_order = Verify.get_pre_order(pk)
 
         api_order = PreOrderHelper.checkout(api_user, pre_order)
         return Response(api_order, status=status.HTTP_200_OK)
-
 
     @action(detail=True, methods=['GET'], url_path=r'buyer_add', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def buyer_add_order_product(self, request, pk=None):
 
-        api_user, campaign_product_id, qty = getparams(request, ('campaign_product_id', 'qty'), with_user=True, seller=False)
-        pre_order=Verify.get_pre_order(pk)
+        api_user, campaign_product_id, qty = getparams(request, ('campaign_product_id', 'qty'), with_user=True,
+                                                       seller=False)
+        pre_order = Verify.get_pre_order(pk)
         campaign_product = Verify.get_campaign_product_from_pre_order(pre_order, campaign_product_id)
 
         api_order_product = PreOrderHelper.add_product(api_user, pre_order, campaign_product, qty)
 
         return Response(api_order_product, status=status.HTTP_200_OK)
 
-
-
     @action(detail=True, methods=['GET'], url_path=r'buyer_update', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def buyer_update_order_product(self, request, pk=None):
 
         api_user, order_product_id, qty = getparams(request, ('order_product_id', 'qty'), with_user=True, seller=False)
-        pre_order=Verify.get_pre_order(pk)
+        pre_order = Verify.get_pre_order(pk)
         order_product = Verify.get_order_product_from_pre_order(pre_order, order_product_id)
 
         api_order_product = PreOrderHelper.update_product(api_user,
-            pre_order, order_product, qty)
+                                                          pre_order, order_product, qty)
 
         return Response(api_order_product, status=status.HTTP_200_OK)
 
@@ -253,10 +235,10 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     def buyer_delete_order_product(self, request, pk=None):
 
         api_user, order_product_id, = getparams(request, ('order_product_id',), with_user=True, seller=False)
-        pre_order=Verify.get_pre_order(pk)
+        pre_order = Verify.get_pre_order(pk)
         order_product = Verify.get_order_product_from_pre_order(pre_order, order_product_id)
 
         PreOrderHelper.delete_product(
             api_user, pre_order, order_product)
 
-        return Response({'message':"delete success"}, status=status.HTTP_200_OK)
+        return Response({'message': "delete success"}, status=status.HTTP_200_OK)
