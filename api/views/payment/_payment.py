@@ -24,61 +24,61 @@ class PaymentMeta:
                 {"key":"image", "name":None, "type":"file", "r":2, "c":0, "w":11}
             ],
             "tab": "Direct Payment",
-            "request_url": "/user-subscription/direct_payment/"
+            "request_url": "api/user-subscription/direct_payment/"
         }
 
     hitpay = {
             "multiple":False,
             "fields":[
                 {"key":"button_title", "name":"Payment Button Title", "type":"text", "r":0, "c":0, "w":6},
-                {"key":"currency", "name":"Currency Code", "type":"select", "r":0, "c":1, "options":[{'SGD':'SGD'},{'AUD':'AUD'},{'NTD':'NTD'}], "w":6},
-                {"key":"api_key", "name":"API Key", "type":"text", "r":1, "c":0, "w":12},
+                {"key":"currency", "name":"Currency Code", "type":"select", "r":0, "c":1, "options":['SGD','AUD','NTD'], "w":6},
+                {"key":"api_key", "name":"API Key", "type":"password", "r":1, "c":0, "w":12},
                 {"key":"salt", "name":"Salt", "type":"text", "r":2, "c":0, "w":12}
             ],
             "tab": "HitPay",
-            "request_url": "/user-subscription/hitpay/"
+            "request_url": "api/user-subscription/hitpay/"
         }
     
     paypal = {
             "multiple":False,
             "fields":[
-                {"key":"clientId", "name":"Client ID", "type":"text", "r":0, "c":0},
-                {"key":"currency", "name":"Currency Code", "type":"select", "r":0, "c":1, "options":[{'SGD':'SGD'},{'AUD':'AUD'},{'NTD':'NTD'}]},
-                {"key":"secret", "name":"Secret", "type":"secret", "r":1, "c":0},
+                {"key":"clientId", "name":"Client ID", "type":"text", "r":0, "c":0, "w":6},
+                {"key":"currency", "name":"Currency Code", "type":"select", "r":0, "c":1, "w":6, "options":['SGD','AUD','NTD']},
+                {"key":"secret", "name":"Secret", "type":"password", "r":1, "c":0, "w":12},
             ],
             "tab":"PayPal",
-            "request_url": "/user-subscription/paypal/"
+            "request_url": "api/user-subscription/paypal/"
         }
 
     stripe = {
             "multiple":False,
             "fields":[
-                {"key":"secret", "type":"text", "name":"Secret Key", "r":0, "c":0},
-                {"key":"currency", "type":"select", "name":"Currency Code", "r":0, "c":1, "options":[{'SGD':'SGD'},{'AUD':'AUD'},{'NTD':'NTD'}]},
+                {"key":"secret", "type":"password", "name":"Secret Key", "r":0, "c":0, "w":6},
+                {"key":"currency", "type":"select", "name":"Currency Code", "r":0, "c":1, "w":6, "options":['USD','SGD','AUD','NTD']},
             ],
             "tab":"Stripe",
-            "request_url": "/user-subscription/stripe/"
+            "request_url": "api/user-subscription/stripe/"
         }
 
     pay_mongo = {
             "multiple":False,
             "fields":[
-                {"key":"secret", "name":"Secret Key", "type":"text", "r":0, "c":0},
+                {"key":"secret", "name":"Secret Key", "type":"password", "r":0, "c":0, "w":12},
             ],
             "tab":"Pay Mongo",
-            "request_url": "/user-subscription/pay_mongo/"
+            "request_url": "api/user-subscription/pay_mongo/"
         }
 
     first_data = {
             "multiple":False,
             "fields":[
-                {"key":"storeId", "name":"Store ID", "type":"number", "r":0, "c":0},
-                {"key":"sharedSecret", "name":"Share Secret", "type":"secret", "r":0, "c":1},
-                {"key":"currency", "name":"Currency Code", "type":"number", "r":1, "c":0},
-                {"key":"timezone", "name":"Time Zone", "type":"select", "r":1, "c":1, "options":[{'Asia/Singapore':'Asia/Singapore'}]}
+                {"key":"storeId", "name":"Store ID", "type":"text", "r":0, "c":0, "w":6},
+                {"key":"sharedSecret", "name":"Share Secret", "type":"password", "r":0, "c":1, "w":6},
+                {"key":"currency", "name":"Currency Code", "type":"select", "r":1, "c":0, "w":6, "options":['702', '703']},
+                {"key":"timezone", "name":"Time Zone", "type":"select", "r":1, "c":1, "w":6, "options":['Asia/Singapore']}
             ],
             "tab":"First Data IPG (Credit Card)",
-            "request_url": "/user-subscription/first_data/"
+            "request_url": "api/user-subscription/first_data/"
         }
 
 
