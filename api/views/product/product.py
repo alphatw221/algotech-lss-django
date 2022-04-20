@@ -9,6 +9,7 @@ from rest_framework.parsers import MultiPartParser
 import json
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
+from django.db.models import Q
 
 from api.utils.common.verify import Verify
 from api.utils.common.verify import ApiVerifyError
@@ -51,7 +52,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         if product_status:
             queryset = queryset.filter(status=product_status)
         if key_word:
-            queryset = queryset.filter(name__icontains=key_word)
+            queryset = queryset.filter(Q(name__icontains=key_word)|Q(tag=[key_word]))
         if order_by:
             queryset = queryset.order_by("-"+order_by)
         if after_create:

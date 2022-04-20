@@ -36,7 +36,7 @@ from backend.api.facebook.page import api_fb_get_page_business_profile
 from backend.api.instagram.profile import api_ig_get_profile_info
 from rest_framework_simplejwt.tokens import AccessToken
 from django.contrib.auth.models import User as AuthUser
-
+from ._user import LSSPlan
 import stripe
 from backend.python_rq.python_rq import email_queue
 
@@ -474,9 +474,11 @@ class UserViewSet(viewsets.ModelViewSet):
 
         return Response(data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['POST'], url_path=r'register/trial', permission_classes=())
+    @action(detail=False, methods=['POST'], url_path=r'register/trial/(?P<country_code>[^/.]+)', permission_classes=())
     @api_error_handler
-    def register_free_trial(self, request):
+    def register_free_trial(self, request, country_code):
+
+        Verify.is_valid_country_code(country_code)
         email, plan = getdata(request, ("email", "plan"), required=True)
         firstName, lastName, contactNumber, password, country = getdata(request, ("firstName", "lastName", "contactNumber", "password", "country"), required=False)
 
@@ -496,7 +498,7 @@ class UserViewSet(viewsets.ModelViewSet):
             status='valid', 
             expired_at=expired_at, 
             user_plan= {"activated_platform" : ["facebook"]}, 
-            meta_country={ 'country': country },
+            meta_country={ 'activated_country': [country_code] },
             type='trial')
         
         User.objects.create(name=f'{firstName} {lastName}', email=email, type='user', status='valid', phone=contactNumber, auth_user=auth_user, user_subscription=user_subscription)
@@ -557,47 +559,60 @@ class UserViewSet(viewsets.ModelViewSet):
 
         return Response(ret, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['POST'], url_path=r'register/validate', permission_classes=())
+    @action(detail=False, methods=['POST'], url_path=r'register/validate/(?P<country_code>[^/.]+)', permission_classes=())
     @api_error_handler
-    def validate_register_data(self, request):
+    def validate_register_data(self, request, country_code):
 
-        EARLY_BIRD_PROMO_CODE = 'test'
         # STRIPE_API_KEY = "sk_test_51J2aFmF3j9D00CA0KABMZVKtOVnZNbBvM2hcokicJmfx8vvrmNyys5atEAcpp0Au2O3HtX0jz176my7g0ozbinof00RL4QAZrY" #TODO put it in settings
         STRIPE_API_KEY = "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" #TODO put it in settings
-
-
-
+        
         email, plan, period = getdata(request, ("email", "plan", "period"), required=True)
         promoCode, = getdata(request, ("promoCode",), required=False)
 
-        if promoCode and promoCode != EARLY_BIRD_PROMO_CODE:
+        Verify.is_valid_country_code(country_code)
+        country_plan = getattr(LSSPlan, country_code, None)
+        subscription_plan = getattr(country_plan, plan, None)
+        if not subscription_plan:
+            raise ApiVerifyError('invalid plan')
+
+        if promoCode and promoCode != country_plan.promo_code:
             raise ApiVerifyError('invalid promo code')
 
         if AuthUser.objects.filter(email=email).exists() or User.objects.filter(email=email, type='user').exists():
             raise ApiVerifyError('email has already been used')
         
-        if plan == 'Lite(USD 10.00/Month)':
-                amount = 10.00
-        elif plan == 'Standard(USD 30.00/Month)':  
-            if period == "Monthly":
-                amount = 30.00
-            else :
-                amount = 90.00
+        amount = subscription_plan.get('price',{}).get(period)
+        if not amount :
+            raise ApiVerifyError('invalid period')
 
-            amount = amount*0.9 if promoCode == EARLY_BIRD_PROMO_CODE else amount
-        elif plan =='Premium(USD 60.00/Month)':
-            if period == "Monthly":
-                amount = 60.00
-            else :
-                amount = 180.00
-            amount = amount*0.9 if promoCode == EARLY_BIRD_PROMO_CODE else amount
-        else:
-            raise ApiVerifyError('plan option error')
+        if promoCode == country_plan.promo_code:
+            amount = amount*country_plan.promo_discount_rate
+        
+        # if plan == 'Lite(USD 10.00/Month)':
+        #         amount = 10.00
+        # elif plan == 'Standard(USD 30.00/Month)':  
+        #     if period == "Monthly":
+        #         amount = 30.00
+        #     else :
+        #         amount = 90.00
+
+        #     amount = amount*0.9 if promoCode == country_plan.promo_code else amount
+        # elif plan =='Premium(USD 60.00/Month)':
+        #     if period == "Monthly":
+        #         amount = 60.00
+        #     else :
+        #         amount = 180.00
+        #     amount = amount*0.9 if promoCode == country_plan.promo_code else amount
+        # else:
+        #     raise ApiVerifyError('plan option error')
         
         
         stripe.api_key = STRIPE_API_KEY  
-        intent = stripe.PaymentIntent.create( amount=int(amount*100), currency="SGD",receipt_email = email)
-        
+        try:
+            intent = stripe.PaymentIntent.create( amount=int(amount*100), currency=country_plan.currency, receipt_email = email)
+        except Exception:
+            raise ApiCallerError("invalid email")
+
         return Response({
             "client_secret":intent.client_secret,
             "payment_amount":amount,
@@ -605,14 +620,15 @@ class UserViewSet(viewsets.ModelViewSet):
         }, status=status.HTTP_200_OK)
 
 
-    @action(detail=False, methods=['POST'], url_path=r'register', permission_classes=())
+    @action(detail=False, methods=['POST'], url_path=r'register/(?P<country_code>[^/.]+)', permission_classes=())
     @api_error_handler
-    def user_register(self, request):
+    def user_register(self, request, country_code):
 
         EARLY_BIRD_PROMO_CODE = 'test'
         # STRIPE_API_KEY = "sk_test_51J2aFmF3j9D00CA0KABMZVKtOVnZNbBvM2hcokicJmfx8vvrmNyys5atEAcpp0Au2O3HtX0jz176my7g0ozbinof00RL4QAZrY" #TODO put it in settings
         STRIPE_API_KEY = "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" #TODO put it in settings
 
+        Verify.is_valid_country_code(country_code)
         email, password, plan, period, intentSecret = getdata(request,("email", "password", "plan", "period", "intentSecret"),required=True)
         firstName, lastName, contactNumber, country , promoCode = getdata(request, ("firstName", "lastName", "contactNumber", "country", "promoCode"), required=False)
 
@@ -664,7 +680,7 @@ class UserViewSet(viewsets.ModelViewSet):
             status='valid', 
             expired_at=expired_at, 
             user_plan= {"activated_platform" : ["facebook","youtube","instagram"]}, 
-            meta_country={ 'country': country },
+            meta_country={ 'activated_country': [country_code] },
             meta = {"stripe payment intent":intentSecret},
             type=subscription_type)
         

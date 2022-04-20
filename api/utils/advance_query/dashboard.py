@@ -452,7 +452,19 @@ def get_total_average_comment_count(user_subscription_id):
     return l[0].get('average_comment_count',0) if l else 0
 
 
-def get_campaign_merge_order_list(campaign_id):
+def get_campaign_merge_order_list(campaign_id, search, page, page_size):
+
+    # search and paginate by frontend by now
+    # if search:
+    #     match_pipeline = {"$match":{"id":{"$ne":None}, "customer_name":{"$eq":search} }}
+    # else:
+    #     match_pipeline = {"$match":{"id":{"$ne":None} }}
+
+    # if not page.isnumeric() or not page_size.isnumeric():
+    #     return []
+        
+    # page = int(page)
+    # page_size = int(page_size)
 
     cursor=db.api_campaign.aggregate([
         {"$match":{"id":campaign_id}},
@@ -460,7 +472,7 @@ def get_campaign_merge_order_list(campaign_id):
             "$lookup": {
                 "from": "api_order","localField": "id","foreignField": "campaign_id","as": "orders",
                 "pipeline":[
-                    {"$match":{"id":{"$ne":None}}},
+                    {"$match":{"id":{"$ne":None} }},
                     {"$addFields": { "type": "order","total_item": {"$size": { "$objectToArray": "$products"}}}},
                 ]
             },
@@ -469,7 +481,7 @@ def get_campaign_merge_order_list(campaign_id):
             "$lookup": {
                 "from": "api_pre_order","localField": "id","foreignField": "campaign_id","as": "pre_orders",
                 "pipeline":[
-                    {"$match":{"id":{"$ne":None},"subtotal":{"$ne":0}}},
+                    {"$match":{"id":{"$ne":None} }},
                     {"$addFields": { "type": "pre_order","total_item": {"$size": { "$objectToArray": "$products"}}}},
                 ]
             },
@@ -493,7 +505,10 @@ def get_campaign_merge_order_list(campaign_id):
             "status":{"$first":"$data.status"},
             "type":{"$first":"$data.type"}
         }},
-        {"$project":{"_id":0,}}
+        {"$project":{"_id":0,}},
+        # { "$skip": (page-1)*page_size },    # search and paginate by frontend by now
+        # { "$limit": page_size }
+
     ])
     l = list(cursor)
     # print(l)
