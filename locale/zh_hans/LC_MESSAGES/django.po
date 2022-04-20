@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-18 06:39+0000\n"
+"POT-Creation-Date: 2022-04-19 11:18+0000\n"
 "PO-Revision-Date: 2021-12-13 15:50+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -162,49 +162,53 @@ msgstr "{name} 数量：{qty} {dollar_sign}{total}\n"
 msgid "MAIL_SUBJECT_WELCOME"
 msgstr ""
 
+#: backend/i18n/register_confirm_mail.py:22
+msgid "MAIL_SUBJECT_ACTIVATION"
+msgstr ""
+
 #: templates/register_activation.html:10
 msgid "TITLE_ACTIVATION"
 msgstr ""
 
-#: templates/register_activation.html:17
+#: templates/register_activation.html:18
 msgid "YOUR_ACTIVATION"
 msgstr ""
 
-#: templates/register_activation.html:17
+#: templates/register_activation.html:18
 msgid "PLAN_ACCOUNT_ACTIVATION"
 msgstr ""
 
-#: templates/register_activation.html:18
+#: templates/register_activation.html:19
 msgid "LOGIN_ACTIVATION"
 msgstr ""
 
-#: templates/register_activation.html:18
-#: templates/register_confirmation.html:30
+#: templates/register_activation.html:19
+#: templates/register_confirmation.html:31
 msgid "LOGIN_2_WELCOME"
 msgstr ""
 
-#: templates/register_activation.html:26
+#: templates/register_activation.html:27
 msgid "STEP1_ACTIVATION"
 msgstr ""
 
-#: templates/register_activation.html:27
+#: templates/register_activation.html:28
 msgid "STEP2_ACTIVATION"
 msgstr ""
 
-#: templates/register_activation.html:28
+#: templates/register_activation.html:29
 msgid "STEP3_ACTIVATION"
 msgstr ""
 
-#: templates/register_activation.html:28
+#: templates/register_activation.html:29
 msgid "STEP4_ACTIVATION"
 msgstr ""
 
-#: templates/register_activation.html:32
+#: templates/register_activation.html:33
 msgid "REGARDS_ACTIVATION"
 msgstr ""
 
-#: templates/register_activation.html:33
-#: templates/register_confirmation.html:46
+#: templates/register_activation.html:34
+#: templates/register_confirmation.html:47
 msgid "CONGRATS_3_WELCOME"
 msgstr ""
 
@@ -212,39 +216,39 @@ msgstr ""
 msgid "TITLE_WELCOME"
 msgstr ""
 
-#: templates/register_confirmation.html:29
+#: templates/register_confirmation.html:30
 msgid "THANKS_PHRASE_WELCOME"
 msgstr ""
 
-#: templates/register_confirmation.html:30
+#: templates/register_confirmation.html:31
 msgid "LOGIN_1_WELCOME"
 msgstr ""
 
-#: templates/register_confirmation.html:30
+#: templates/register_confirmation.html:31
 msgid "LOGIN_3_WELCOME"
 msgstr ""
 
-#: templates/register_confirmation.html:38
+#: templates/register_confirmation.html:39
 msgid "PLAN_CHOOSE_1_WELCOME"
 msgstr ""
 
-#: templates/register_confirmation.html:39
+#: templates/register_confirmation.html:40
 msgid "PLAN_CHOOSE_2_WELCOME"
 msgstr ""
 
-#: templates/register_confirmation.html:40
+#: templates/register_confirmation.html:41
 msgid "PLAN_CHOOSE_3_WELCOME"
 msgstr ""
 
-#: templates/register_confirmation.html:40
+#: templates/register_confirmation.html:41
 msgid "PLAN_CHOOSE_4_WELCOME"
 msgstr ""
 
-#: templates/register_confirmation.html:44
+#: templates/register_confirmation.html:45
 msgid "CONGRATS_1_WELCOME"
 msgstr ""
 
-#: templates/register_confirmation.html:45
+#: templates/register_confirmation.html:46
 msgid "CONGRATS_2_WELCOME"
 msgstr ""
 
