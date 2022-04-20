@@ -11,7 +11,7 @@ class HitPay_Helper:
 
 
 class PaymentMeta:
-    #country : SG PH IN ID MY TW CN
+    #country : SG PH IN ID MY TW CN VN TH
 
     direct_payment = {
             "multiple":True,
@@ -90,6 +90,8 @@ class PaymentMeta:
         PH = ['direct_payment','hitpay', 'stripe', 'pay_mongo', 'first_data']
 
     IN = ['direct_payment','hitpay','paypal']
+    
+    VN = ['direct_payment','hitpay','paypal', 'stripe', 'pay_mongo', 'first_data']
 
     MY = ['direct_payment','hitpay','paypal', 'stripe', 'pay_mongo', 'first_data']
 
