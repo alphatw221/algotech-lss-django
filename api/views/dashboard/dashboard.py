@@ -365,11 +365,11 @@ class DashboardViewSet(viewsets.ModelViewSet):
     @api_error_handler
     def get_merge_order_list(self, request):
 
-        api_user, campaign_id, search, page=getparams(request, ( 'campaign_id', 'search', 'page'),with_user=True, seller=True)
+        api_user, campaign_id, search, page, page_size=getparams(request, ( 'campaign_id', 'search', 'page', 'page_size'),with_user=True, seller=True)
 
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
         campaign = Verify.get_campaign_from_user_subscription(user_subscription,campaign_id)
-        merge_list = get_campaign_merge_order_list(campaign.id)
+        merge_list = get_campaign_merge_order_list(campaign.id, search, page, page_size)
 
         merge_list_str = dumps(merge_list)
         merge_list_json = loads(merge_list_str)

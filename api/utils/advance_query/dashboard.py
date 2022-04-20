@@ -452,7 +452,13 @@ def get_total_average_comment_count(user_subscription_id):
     return l[0].get('average_comment_count',0) if l else 0
 
 
-def get_campaign_merge_order_list(campaign_id):
+def get_campaign_merge_order_list(campaign_id:int, search:str, page:int, page_size:int):
+
+
+    if search:
+        match_pipeline = {"$match":{"id":{"$ne":None}, "customer_name":{"$eq":search} }}
+    else:
+        match_pipeline = {"$match":{"id":{"$ne":None} }}
 
     cursor=db.api_campaign.aggregate([
         {"$match":{"id":campaign_id}},
@@ -460,7 +466,7 @@ def get_campaign_merge_order_list(campaign_id):
             "$lookup": {
                 "from": "api_order","localField": "id","foreignField": "campaign_id","as": "orders",
                 "pipeline":[
-                    {"$match":{"id":{"$ne":None}}},
+                    match_pipeline,
                     {"$addFields": { "type": "order","total_item": {"$size": { "$objectToArray": "$products"}}}},
                 ]
             },
@@ -469,7 +475,7 @@ def get_campaign_merge_order_list(campaign_id):
             "$lookup": {
                 "from": "api_pre_order","localField": "id","foreignField": "campaign_id","as": "pre_orders",
                 "pipeline":[
-                    {"$match":{"id":{"$ne":None},"subtotal":{"$ne":0}}},
+                    match_pipeline,
                     {"$addFields": { "type": "pre_order","total_item": {"$size": { "$objectToArray": "$products"}}}},
                 ]
             },
@@ -494,7 +500,7 @@ def get_campaign_merge_order_list(campaign_id):
             "type":{"$first":"$data.type"}
         }},
         {"$project":{"_id":0,}}
-    ])
+    ]).skip((page-1)*page_size).limit(page_size)
     l = list(cursor)
     # print(l)
     return l
