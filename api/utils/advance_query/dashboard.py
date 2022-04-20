@@ -452,13 +452,19 @@ def get_total_average_comment_count(user_subscription_id):
     return l[0].get('average_comment_count',0) if l else 0
 
 
-def get_campaign_merge_order_list(campaign_id:int, search:str, page:int, page_size:int):
+def get_campaign_merge_order_list(campaign_id, search, page, page_size):
 
 
     if search:
         match_pipeline = {"$match":{"id":{"$ne":None}, "customer_name":{"$eq":search} }}
     else:
         match_pipeline = {"$match":{"id":{"$ne":None} }}
+
+    if not page.isnumeric() or not page_size.isnumeric():
+        return []
+        
+    page = int(page)
+    page_size = int(page_size)
 
     cursor=db.api_campaign.aggregate([
         {"$match":{"id":campaign_id}},
@@ -499,8 +505,11 @@ def get_campaign_merge_order_list(campaign_id:int, search:str, page:int, page_si
             "status":{"$first":"$data.status"},
             "type":{"$first":"$data.type"}
         }},
-        {"$project":{"_id":0,}}
-    ]).skip((page-1)*page_size).limit(page_size)
+        {"$project":{"_id":0,}},
+        { "$skip": (page-1)*page_size },
+        { "$limit": page_size }
+
+    ])
     l = list(cursor)
     # print(l)
     return l

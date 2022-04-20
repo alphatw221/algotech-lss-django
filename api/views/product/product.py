@@ -52,7 +52,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         if product_status:
             queryset = queryset.filter(status=product_status)
         if key_word:
-            queryset = queryset.filter(Q(name__icontains=key_word)|Q(tag=key_word))
+            queryset = queryset.filter(Q(name__icontains=key_word)|Q(tag=[key_word]))
         if order_by:
             queryset = queryset.order_by("-"+order_by)
 
