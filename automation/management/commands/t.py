@@ -35,6 +35,7 @@ from api.models.order.order_product import OrderProduct
 import datetime
 from backend.api.instagram.post import api_ig_private_message, api_ig_get_post_comments
 from backend.api.twitch.post import api_twitch_get_access_token
+from backend.i18n.register_confirm_mail import i18n_get_register_confirm_mail_content, i18n_get_register_confirm_mail_subject, i18n_get_register_activate_mail_subject
 
 
 class Command(BaseCommand):
@@ -45,9 +46,9 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # self.test_mongodb_query()
-        # self.test_send_email()
-        ret = api_twitch_get_access_token()
-        print (ret)
+        self.test_user_plan()
+        # ret = api_twitch_get_access_token()
+        # print (ret)
 
 
     # def campaign_test(self):
@@ -178,7 +179,7 @@ class Command(BaseCommand):
         email_queue.enqueue(
             send_email_job,
             kwargs={
-                "subject": "test",
+                "subject": i18n_get_register_activate_mail_subject(),
                 "email": 'derekhwang33@gmail.com', 
                 "template_name": "register_confirmation.html",
                 "parameters": {
@@ -188,3 +189,8 @@ class Command(BaseCommand):
                 },
                 "file": None, 
             }, result_ttl=10, failure_ttl=10)
+    
+    def test_user_plan(self):
+        import business_policy
+        
+        # print([cls.__name__ for cls in LSSPlan.__bases__])

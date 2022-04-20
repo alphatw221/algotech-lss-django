@@ -118,128 +118,154 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['POST'], url_path=r'update_hitpay', permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['GET', 'POST'], url_path=r'hitpay', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def update_hitpay(self, request):
         api_user = Verify.get_seller_user(request)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        if request.method == "GET":
+            payment_data = user_subscription.meta_payment.get("hitpay", {})
+            
+            return Response(payment_data, status=status.HTTP_200_OK)
+        else:
+            meta_payment = user_subscription.meta_payment.copy()
+            meta_payment['hitpay'] = request.data
 
-        meta_payment = user_subscription.meta_payment.copy()
-        meta_payment['hitpay'] = request.data
+            serializer = UserSubscriptionSerializerMeta(
+                user_subscription, data={"meta_payment": meta_payment}, partial=True)
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            serializer.save()
 
-        serializer = UserSubscriptionSerializerMeta(
-            user_subscription, data={"meta_payment": meta_payment}, partial=True)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    @action(detail=False, methods=['POST'], url_path=r'update_paypal', permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['GET', 'POST'], url_path=r'paypal', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def update_paypal(self, request):
         # api_user, platform_name, platform_id = getparams(request, ('platform_name', 'platform_id'), with_user=True, seller=True)
 
         api_user = Verify.get_seller_user(request)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        if request.method == "GET":
+            payment_data = user_subscription.meta_payment.get("paypal", {})
+            
+            return Response(payment_data, status=status.HTTP_200_OK)
+        else:
+            meta_payment = user_subscription.meta_payment.copy()
+            meta_payment['paypal'] = request.data
 
-        meta_payment = user_subscription.meta_payment.copy()
-        meta_payment['paypal'] = request.data
+            serializer = UserSubscriptionSerializerMeta(
+                user_subscription, data={"meta_payment": meta_payment}, partial=True)
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            serializer.save()
 
-        serializer = UserSubscriptionSerializerMeta(
-            user_subscription, data={"meta_payment": meta_payment}, partial=True)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    @action(detail=False, methods=['POST'], url_path=r'update_firstdata', permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['GET', 'POST'], url_path=r'first_data', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def update_firstdata(self, request):
         # api_user, platform_name, platform_id = getparams(request, ('platform_name', 'platform_id'), with_user=True, seller=True)
 
         api_user = Verify.get_seller_user(request)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
-        meta_payment = user_subscription.meta_payment.copy()
-        meta_payment['firstdata'] = request.data
+        if request.method == "GET":
+            payment_data = user_subscription.meta_payment.get("firstdata", {})
+            
+            return Response(payment_data, status=status.HTTP_200_OK)
+        else:
+            meta_payment = user_subscription.meta_payment.copy()
+            meta_payment['firstdata'] = request.data
 
-        serializer = UserSubscriptionSerializerMeta(
-            user_subscription, data={"meta_payment": meta_payment}, partial=True)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        serializer.save()
+            serializer = UserSubscriptionSerializerMeta(
+                user_subscription, data={"meta_payment": meta_payment}, partial=True)
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            serializer.save()
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['POST'], url_path=r'update_stripe', permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['GET', 'POST'], url_path=r'stripe', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def update_stripe(self, request):
         # api_user, platform_name, platform_id = getparams(request, ('platform_name', 'platform_id'), with_user=True, seller=True)
 
         api_user = Verify.get_seller_user(request)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        if request.method == "GET":
+            payment_data = user_subscription.meta_payment.get("stripe", {})
+            
+            return Response(payment_data, status=status.HTTP_200_OK)
+        else:
+            meta_payment = user_subscription.meta_payment.copy()
+            meta_payment['stripe'] = request.data
 
-        meta_payment = user_subscription.meta_payment.copy()
-        meta_payment['stripe'] = request.data
+            serializer = UserSubscriptionSerializerMeta(
+                user_subscription, data={"meta_payment": meta_payment}, partial=True)
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            serializer.save()
 
-        serializer = UserSubscriptionSerializerMeta(
-            user_subscription, data={"meta_payment": meta_payment}, partial=True)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        serializer.save()
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.data, status=status.HTTP_200_OK)
     
-    @action(detail=False, methods=['POST'], url_path=r'update_paymongo', permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['GET', 'POST'], url_path=r'pay_mongo', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def update_paymongo(self, request):
         # api_user, platform_name, platform_id = getparams(request, ('platform_name', 'platform_id'), with_user=True, seller=True)
 
         api_user = Verify.get_seller_user(request)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        if request.method == "GET":
+            payment_data = user_subscription.meta_payment.get("paymongo", {})
+            
+            return Response(payment_data, status=status.HTTP_200_OK)
+        else:
+            
+            meta_payment = user_subscription.meta_payment.copy()
+            meta_payment['paymongo'] = request.data
 
-        meta_payment = user_subscription.meta_payment.copy()
-        meta_payment['paymongo'] = request.data
+            serializer = UserSubscriptionSerializerMeta(
+                user_subscription, data={"meta_payment": meta_payment}, partial=True)
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            serializer.save()
 
-        serializer = UserSubscriptionSerializerMeta(
-            user_subscription, data={"meta_payment": meta_payment}, partial=True)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    @action(detail=False, methods=['POST'], url_path=r'update_direct_payment', parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['GET', 'POST'], url_path=r'direct_payment', parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated,))
     @api_error_handler
     def update_direct_payment(self, request):
 
         api_user = Verify.get_seller_user(request)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        if request.method == "GET":
+            payment_data = user_subscription.meta_payment.get("direct_payment", {})
+            
+            return Response(payment_data, status=status.HTTP_200_OK)
+        else: 
+            text = request.data['text']
+            data = json.loads(text)
 
-        text = request.data['text']
-        data = json.loads(text)
+            if 'accounts' in data:
+                for account_number, account_info in data['accounts'].items():
+                    if account_number in request.data and request.data[account_number]:
+                        if account_number in request.data:
+                            image = request.data[account_number]
+                            image_path = default_storage.save(
+                                f'/{user_subscription.id}/payment/direct_payment/{image.name}', ContentFile(image.read()))
+                            print(image_path)
+                            data['accounts'][account_number]['image'] = image_path
 
-        if 'accounts' in data:
-            for account_number, account_info in data['accounts'].items():
-                if account_number in request.data and request.data[account_number]:
-                    if account_number in request.data:
-                        image = request.data[account_number]
-                        image_path = default_storage.save(
-                            f'/{user_subscription.id}/payment/direct_payment/{image.name}', ContentFile(image.read()))
-                        print(image_path)
-                        data['accounts'][account_number]['image'] = image_path
+            meta_payment = user_subscription.meta_payment.copy()
+            meta_payment['direct_payment'] = data
+            
+            serializer = UserSubscriptionSerializerMeta(
+                user_subscription, data={"meta_payment": meta_payment}, partial=True)
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            user_subscription = serializer.save()
 
-        meta_payment = user_subscription.meta_payment.copy()
-        meta_payment['direct_payment'] = data
-        
-        serializer = UserSubscriptionSerializerMeta(
-            user_subscription, data={"meta_payment": meta_payment}, partial=True)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        user_subscription = serializer.save()
-
-        return Response(UserSubscriptionSerializerMeta(user_subscription).data, status=status.HTTP_200_OK)
+            return Response(UserSubscriptionSerializerMeta(user_subscription).data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['POST'], url_path=r'update_logistic', permission_classes=(IsAuthenticated,))
     @api_error_handler

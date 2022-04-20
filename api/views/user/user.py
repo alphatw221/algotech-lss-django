@@ -507,8 +507,7 @@ class UserViewSet(viewsets.ModelViewSet):
             "Password":password,
             "Selling Country":country,
             "Your Plan":plan,
-            "Subscription Period":"Monthly",
-            "Subscription End Date":expired_at.strftime("%m/%d/%Y"),
+            "Subscription End Date":expired_at.strftime("%m/%d/%Y %H:%M"),
         }
 
         email_queue.enqueue(
@@ -550,7 +549,7 @@ class UserViewSet(viewsets.ModelViewSet):
                     'plan': plan,
                     'email': email,
                     'password': password,
-                    'expired_at': expired_at.strftime("%m/%d/%Y %H:%M:%S"),
+                    'expired_at': expired_at.strftime("%m/%d/%Y %H:%M"),
                     'country': country
                 }
             }, result_ttl=10, failure_ttl=10)
@@ -576,16 +575,16 @@ class UserViewSet(viewsets.ModelViewSet):
         if AuthUser.objects.filter(email=email).exists() or User.objects.filter(email=email, type='user').exists():
             raise ApiVerifyError('email has already been used')
         
-        if plan == 'Lite(USD 10.00/Month)':
+        if plan == 'Lite (USD 10.00/Month)':
                 amount = 10.00
-        elif plan == 'Standard(USD 30.00/Month)':  
+        elif plan == 'Standard (USD 30.00/Month)':  
             if period == "Monthly":
                 amount = 30.00
             else :
                 amount = 90.00
 
             amount = amount*0.9 if promoCode == EARLY_BIRD_PROMO_CODE else amount
-        elif plan =='Premium(USD 60.00/Month)':
+        elif plan =='Premium (USD 60.00/Month)':
             if period == "Monthly":
                 amount = 60.00
             else :
@@ -628,11 +627,11 @@ class UserViewSet(viewsets.ModelViewSet):
         if AuthUser.objects.filter(email = email).exists() or User.objects.filter(email=email, type='user').exists():
             raise ApiVerifyError('email has already been used')
 
-        if plan == 'Lite(USD 10.00/Month)':
+        if plan == 'Lite (USD 10.00/Month)':
             amount = 10.00
-            subscription_type = "lite(USD 10.00/Month)"
+            subscription_type = "lite (USD 10.00/Month)"
 
-        elif plan == 'Standard(USD 30.00/Month)':  
+        elif plan == 'Standard (USD 30.00/Month)':  
             subscription_type = "standard"
             if period == "Monthly":
                 amount = 30.00
@@ -640,7 +639,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 amount = 90.00
 
             amount = amount*0.9 if promoCode == EARLY_BIRD_PROMO_CODE else amount
-        elif plan =='Premium(USD 60.00/Month)':
+        elif plan =='Premium (USD 60.00/Month)':
             subscription_type = "premium"
             if period == "Monthly":
                 amount = 60.00
@@ -721,7 +720,7 @@ class UserViewSet(viewsets.ModelViewSet):
                     'plan': plan,
                     'email': email,
                     'password': password,
-                    'expired_at': expired_at.strftime("%m/%d/%Y %H:%M:%S"),
+                    'expired_at': expired_at.strftime("%m/%d/%Y %H:%M"),
                     'country': country
                 }
             }, result_ttl=10, failure_ttl=10)
