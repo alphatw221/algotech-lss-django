@@ -37,7 +37,7 @@ from backend.api.facebook.page import api_fb_get_page_business_profile
 from backend.api.instagram.profile import api_ig_get_profile_info
 from rest_framework_simplejwt.tokens import AccessToken
 from django.contrib.auth.models import User as AuthUser
-
+import pytz
 import stripe
 from backend.python_rq.python_rq import email_queue
 
@@ -479,7 +479,7 @@ class UserViewSet(viewsets.ModelViewSet):
     @api_error_handler
     def register_free_trial(self, request):
         email, plan = getdata(request, ("email", "plan"), required=True)
-        firstName, lastName, contactNumber, password, country = getdata(request, ("firstName", "lastName", "contactNumber", "password", "country"), required=False)
+        firstName, lastName, contactNumber, password, country, timezone = getdata(request, ("firstName", "lastName", "contactNumber", "password", "country", "timezone"), required=False)
 
         if plan != 'Free Trial':
             raise ApiVerifyError('plan option error')
@@ -487,8 +487,10 @@ class UserViewSet(viewsets.ModelViewSet):
         if AuthUser.objects.filter(email = email).exists() or User.objects.filter(email=email, type='user').exists():
             raise ApiVerifyError('email has already been used')
 
+        now = datetime.now(pytz.timezone(timezone)) if timezone in pytz.common_timezones else datetime.now()
+        expired_at = now+timedelta(days=30)
 
-        expired_at = datetime.now()+timedelta(days=30)
+        # expired_at = datetime.now()+timedelta(days=30)
         auth_user = AuthUser.objects.create_user(
             username=f'{firstName} {lastName}', email=email, password=password)
         
@@ -505,8 +507,8 @@ class UserViewSet(viewsets.ModelViewSet):
         ret = {
             "Customer Name":f'{firstName} {lastName}', 
             "Email":email,
-            "Password":password,
-            "Selling Country":country,
+            "Password":password[:4]+"*"*(len(password)-4),
+            "Target Country":country,
             "Your Plan":plan,
             "Subscription End Date":expired_at.strftime("%m/%d/%Y %H:%M"),
         }
@@ -600,7 +602,7 @@ class UserViewSet(viewsets.ModelViewSet):
             intent = stripe.PaymentIntent.create( amount=int(amount*100), currency="SGD",receipt_email = email)
         except Exception:
             raise ApiCallerError("invalid email")
-            
+
         return Response({
             "client_secret":intent.client_secret,
             "payment_amount":amount,
@@ -617,7 +619,7 @@ class UserViewSet(viewsets.ModelViewSet):
         STRIPE_API_KEY = "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" #TODO put it in settings
 
         email, password, plan, period, intentSecret = getdata(request,("email", "password", "plan", "period", "intentSecret"),required=True)
-        firstName, lastName, contactNumber, country , promoCode = getdata(request, ("firstName", "lastName", "contactNumber", "country", "promoCode"), required=False)
+        firstName, lastName, contactNumber, country , promoCode, timezone = getdata(request, ("firstName", "lastName", "contactNumber", "country", "promoCode"), required=False)
 
         payment_intent_id = intentSecret[:27]
         stripe.api_key = STRIPE_API_KEY
@@ -657,7 +659,8 @@ class UserViewSet(viewsets.ModelViewSet):
             raise ApiVerifyError('payment amount error')
         #------------------------------------------------------------------------------------
 
-        expired_at = datetime.now()+timedelta(days=30) if period == "Monthly" else datetime.now()+timedelta(days=60)
+        now = datetime.now(pytz.timezone(timezone)) if timezone in pytz.common_timezones else datetime.now()
+        expired_at = now+timedelta(days=30) if period == "Monthly" else now+timedelta(days=60)
         
         auth_user = AuthUser.objects.create_user(
             username=f'{firstName} {lastName}', email=email, password=password)
@@ -677,11 +680,11 @@ class UserViewSet(viewsets.ModelViewSet):
         ret = {
             "Customer Name":f'{firstName} {lastName}',
             "Email":email,
-            "Password":password,
-            "Selling Country":country, 
+            "Password":password[:4]+"*"*(len(password)-4),
+            "Target Country":country, 
             "Your Plan":plan,
             "Subscription Period":"Monthly",
-            "Subscription End Date":expired_at.strftime("%m/%d/%Y"),
+            "Subscription End Date":expired_at.strftime("%m/%d/%Y %H:%M"),
             "Receipt":paymentIntent.charges.get('data')[0].get('receipt_url')
         }
 
