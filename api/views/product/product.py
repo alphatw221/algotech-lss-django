@@ -44,7 +44,7 @@ class ProductViewSet(viewsets.ModelViewSet):
     @api_error_handler
     def list_product(self, request):
 
-        api_user, key_word, product_status, order_by = getparams(request,("key_word", "status", "order_by"),with_user=True,seller=True)
+        api_user, key_word, product_status, order_by,  after_create= getparams(request,("key_word", "status", "order_by", "after_create",),with_user=True,seller=True)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
         
         queryset = user_subscription.products.all()
@@ -54,6 +54,8 @@ class ProductViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(name__icontains=key_word)
         if order_by:
             queryset = queryset.order_by("-"+order_by)
+        if after_create:
+            queryset = queryset.filter(created_at__gte=after_create)
 
         page = self.paginate_queryset(queryset)
         if page is not None:
