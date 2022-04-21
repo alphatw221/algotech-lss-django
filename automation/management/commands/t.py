@@ -163,13 +163,17 @@ class Command(BaseCommand):
         from backend.python_rq.python_rq import email_queue
         from automation.jobs.send_email_job import send_email_job
         # kwargs={
+        #         "subject": 'test',
         #         "email": 'derekhwang33@gmail.com', 
-        #         "template_name": "register_confirmation.html",
-        #         "content": None,
+        #         "template_name": "register_cc.html",
         #         "parameters": {
-        #             'firstName': 'Derek',
-        #             'email': 'test@gmail.com',
-        #             'password': 'aaaaaaaaaaa'
+        #             'firstName': 'firstName',
+        #             'lastName': 'lastName',
+        #             'plan': 'aaaaaa',
+        #             'email': 'aaaaa',
+        #             'password': 'aaaaa',
+        #             'expired_at': 'aaaaa',
+        #             'country': 'aaaa'
         #         },
         #         "file": None, 
         #     }
@@ -181,11 +185,15 @@ class Command(BaseCommand):
             kwargs={
                 "subject": i18n_get_register_activate_mail_subject(),
                 "email": 'derekhwang33@gmail.com', 
-                "template_name": "register_confirmation.html",
+                "template_name": "register_cc.html",
                 "parameters": {
-                    'firstName': 'Derek',
-                    'email': 'test@gmail.com',
-                    'password': 'aaaaaaaaaaa'
+                    'firstName': 'firstName',
+                    'lastName': 'lastName',
+                    'plan': 'aaaaaa',
+                    'email': 'aaaaa',
+                    'password': 'aaaaa',
+                    'expired_at': 'aaaaa',
+                    'country': 'aaaa'
                 },
                 "file": None, 
             }, result_ttl=10, failure_ttl=10)
