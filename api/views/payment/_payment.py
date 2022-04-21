@@ -11,7 +11,7 @@ class HitPay_Helper:
 
 
 class PaymentMeta:
-    #country : SG PH IN ID MY TW CN VN TH
+    #country : SG PH IN ID MY TW CN VN TH KH HK AU
 
     direct_payment = {
             "multiple":True,
@@ -99,11 +99,17 @@ class PaymentMeta:
 
     CN = ['direct_payment','hitpay','paypal', 'stripe', 'pay_mongo', 'first_data']
 
+    KH = ['direct_payment','hitpay','paypal', 'stripe', 'pay_mongo', 'first_data']
+
+    AU = ['direct_payment','hitpay','paypal', 'stripe', 'pay_mongo', 'first_data']
+
+    HK = ['direct_payment','hitpay','paypal', 'stripe', 'pay_mongo', 'first_data']
+
     @classmethod
     def get_meta(cls,country_code='SG'):
 
         payment_support_list = getattr(cls,country_code)
-        print(payment_support_list)
+        
         meta = {}
         for payment in payment_support_list:
             meta[payment] = getattr(cls,payment)

@@ -1,3 +1,4 @@
+from distutils.sysconfig import EXEC_PREFIX
 import json
 from django.http import HttpResponseRedirect
 from rest_framework import serializers, status, viewsets
@@ -36,9 +37,10 @@ from backend.api.facebook.page import api_fb_get_page_business_profile
 from backend.api.instagram.profile import api_ig_get_profile_info
 from rest_framework_simplejwt.tokens import AccessToken
 from django.contrib.auth.models import User as AuthUser
-from ._user import LSSPlan
+import pytz
 import stripe
 from backend.python_rq.python_rq import email_queue
+from business_policy.subscription_plan import SubscriptionPlan
 
 platform_info_dict={'facebook':'facebook_info', 'youtube':'youtube_info', 'instagram':'instagram_info', 'google':'google_info'}
 
@@ -480,7 +482,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
         Verify.is_valid_country_code(country_code)
         email, plan = getdata(request, ("email", "plan"), required=True)
-        firstName, lastName, contactNumber, password, country = getdata(request, ("firstName", "lastName", "contactNumber", "password", "country"), required=False)
+        firstName, lastName, contactNumber, password, country, timezone = getdata(request, ("firstName", "lastName", "contactNumber", "password", "country", "timezone"), required=False)
 
         if plan != 'Free Trial':
             raise ApiVerifyError('plan option error')
@@ -488,8 +490,10 @@ class UserViewSet(viewsets.ModelViewSet):
         if AuthUser.objects.filter(email = email).exists() or User.objects.filter(email=email, type='user').exists():
             raise ApiVerifyError('email has already been used')
 
+        now = datetime.now(pytz.timezone(timezone)) if timezone in pytz.common_timezones else datetime.now()
+        expired_at = now+timedelta(days=30)
 
-        expired_at = datetime.now()+timedelta(days=30)
+        # expired_at = datetime.now()+timedelta(days=30)
         auth_user = AuthUser.objects.create_user(
             username=f'{firstName} {lastName}', email=email, password=password)
         
@@ -506,11 +510,10 @@ class UserViewSet(viewsets.ModelViewSet):
         ret = {
             "Customer Name":f'{firstName} {lastName}', 
             "Email":email,
-            "Password":password,
-            "Selling Country":country,
+            "Password":password[:4]+"*"*(len(password)-4),
+            "Target Country":country,
             "Your Plan":plan,
-            "Subscription Period":"Monthly",
-            "Subscription End Date":expired_at.strftime("%m/%d/%Y"),
+            "Subscription End Date":expired_at.strftime("%m/%d/%Y %H:%M"),
         }
 
         email_queue.enqueue(
@@ -552,7 +555,7 @@ class UserViewSet(viewsets.ModelViewSet):
                     'plan': plan,
                     'email': email,
                     'password': password,
-                    'expired_at': expired_at.strftime("%m/%d/%Y %H:%M:%S"),
+                    'expired_at': expired_at.strftime("%m/%d/%Y %H:%M"),
                     'country': country
                 }
             }, result_ttl=10, failure_ttl=10)
@@ -570,7 +573,7 @@ class UserViewSet(viewsets.ModelViewSet):
         promoCode, = getdata(request, ("promoCode",), required=False)
 
         Verify.is_valid_country_code(country_code)
-        country_plan = getattr(LSSPlan, country_code, None)
+        country_plan = getattr(SubscriptionPlan, country_code, None)
         subscription_plan = getattr(country_plan, plan, None)
         if not subscription_plan:
             raise ApiVerifyError('invalid plan')
@@ -630,7 +633,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
         Verify.is_valid_country_code(country_code)
         email, password, plan, period, intentSecret = getdata(request,("email", "password", "plan", "period", "intentSecret"),required=True)
-        firstName, lastName, contactNumber, country , promoCode = getdata(request, ("firstName", "lastName", "contactNumber", "country", "promoCode"), required=False)
+        firstName, lastName, contactNumber, country , promoCode, timezone = getdata(request, ("firstName", "lastName", "contactNumber", "country", "promoCode"), required=False)
 
         payment_intent_id = intentSecret[:27]
         stripe.api_key = STRIPE_API_KEY
@@ -644,11 +647,11 @@ class UserViewSet(viewsets.ModelViewSet):
         if AuthUser.objects.filter(email = email).exists() or User.objects.filter(email=email, type='user').exists():
             raise ApiVerifyError('email has already been used')
 
-        if plan == 'Lite(USD 10.00/Month)':
+        if plan == 'Lite (USD 10.00/Month)':
             amount = 10.00
-            subscription_type = "lite(USD 10.00/Month)"
+            subscription_type = "lite (USD 10.00/Month)"
 
-        elif plan == 'Standard(USD 30.00/Month)':  
+        elif plan == 'Standard (USD 30.00/Month)':  
             subscription_type = "standard"
             if period == "Monthly":
                 amount = 30.00
@@ -656,7 +659,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 amount = 90.00
 
             amount = amount*0.9 if promoCode == EARLY_BIRD_PROMO_CODE else amount
-        elif plan =='Premium(USD 60.00/Month)':
+        elif plan =='Premium (USD 60.00/Month)':
             subscription_type = "premium"
             if period == "Monthly":
                 amount = 60.00
@@ -670,7 +673,8 @@ class UserViewSet(viewsets.ModelViewSet):
             raise ApiVerifyError('payment amount error')
         #------------------------------------------------------------------------------------
 
-        expired_at = datetime.now()+timedelta(days=30) if period == "Monthly" else datetime.now()+timedelta(days=60)
+        now = datetime.now(pytz.timezone(timezone)) if timezone in pytz.common_timezones else datetime.now()
+        expired_at = now+timedelta(days=30) if period == "Monthly" else now+timedelta(days=60)
         
         auth_user = AuthUser.objects.create_user(
             username=f'{firstName} {lastName}', email=email, password=password)
@@ -690,11 +694,11 @@ class UserViewSet(viewsets.ModelViewSet):
         ret = {
             "Customer Name":f'{firstName} {lastName}',
             "Email":email,
-            "Password":password,
-            "Selling Country":country, 
+            "Password":password[:4]+"*"*(len(password)-4),
+            "Target Country":country, 
             "Your Plan":plan,
             "Subscription Period":"Monthly",
-            "Subscription End Date":expired_at.strftime("%m/%d/%Y"),
+            "Subscription End Date":expired_at.strftime("%m/%d/%Y %H:%M"),
             "Receipt":paymentIntent.charges.get('data')[0].get('receipt_url')
         }
 
@@ -737,7 +741,7 @@ class UserViewSet(viewsets.ModelViewSet):
                     'plan': plan,
                     'email': email,
                     'password': password,
-                    'expired_at': expired_at.strftime("%m/%d/%Y %H:%M:%S"),
+                    'expired_at': expired_at.strftime("%m/%d/%Y %H:%M"),
                     'country': country
                 }
             }, result_ttl=10, failure_ttl=10)

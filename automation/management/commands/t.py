@@ -46,7 +46,11 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # self.test_mongodb_query()
+<<<<<<< HEAD
         self.test_send_email()
+=======
+        self.test_user_plan()
+>>>>>>> temp
         # ret = api_twitch_get_access_token()
         # print (ret)
 
@@ -189,3 +193,8 @@ class Command(BaseCommand):
                 },
                 "file": None, 
             }, result_ttl=10, failure_ttl=10)
+    
+    def test_user_plan(self):
+        import business_policy
+        
+        # print([cls.__name__ for cls in LSSPlan.__bases__])
