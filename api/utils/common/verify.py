@@ -282,6 +282,12 @@ class Verify():
         return pre_order.campaign.products.get(id=campaign_product_id)
 
     @staticmethod
+    def is_valid_country_code(country_code):
+        if country_code not in ["SG", "PH", "IN", "ID", "MY", "TW", "CN"]:
+            raise ApiVerifyError("country code not valid")
+
+
+    @staticmethod
     def get_auto_response_from_user_subscription(user_subscription, auto_response_id):
 
         if not user_subscription.auto_responses.filter(id=auto_response_id).exists():

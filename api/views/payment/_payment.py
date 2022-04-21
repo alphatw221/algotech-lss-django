@@ -11,74 +11,74 @@ class HitPay_Helper:
 
 
 class PaymentMeta:
-    #country : SG PH IN ID MY TW CN
+    #country : SG PH IN ID MY TW CN VN TH
 
     direct_payment = {
             "multiple":True,
             "fields":[
-                {"key":"bank_number", "name":"Name of Bank/Payment Mode", "type":"number", "r":0, "c":0},
-                {"key":"account_name", "name":"Account Name", "type":"text", "r":0, "c":1},
-                {"key":"account_number", "name":"Account Number", "type":"number", "r":0, "c":2},
-                {"key":"other_note", "name":"Other Note (Press enter to add new line)", "type":"text", "r":1, "c":0},
-                {"key":"require_record", "name":"Require Customer's Payment Record", "type":"checkbox", "r":1, "c":1},
-                {"key":"image", "name":None, "type":"image_file", "r":2, "c":0}
+                {"key":"mode", "name":"Name of Bank/Payment Mode", "type":"text", "r":0, "c":0, "w":4},
+                {"key":"name", "name":"Account Name", "type":"text", "r":0, "c":1, "w":4},
+                {"key":"number", "name":"Account Number", "type":"text", "r":0, "c":2, "w":4},
+                {"key":"note", "name":"Other Note (Press enter to add new line)", "type":"textarea", "r":1, "c":0, "w":6},
+                {"key":"require_customer_return", "name":"Require Customer's Payment Record", "type":"checkbox", "r":1, "c":1, "w":6},
+                {"key":"image", "name":None, "type":"file", "r":2, "c":0, "w":11}
             ],
             "tab": "Direct Payment",
-            "request_url": "/user-subscription/direct_payment/"
+            "request_url": "api/user-subscription/direct_payment/"
         }
 
     hitpay = {
             "multiple":False,
             "fields":[
-                {"key":"payment_title", "name":"Payment Button Title", "type":"text", "r":0, "c":0},
-                {"key":"currency_code", "name":"Currency Code", "type":"select", "r":0, "c":1, "options":[{'SGD':'SGD'},{'AUD':'AUD'},{'NTD':'NTD'}]},
-                {"key":"api_key", "name":"APIKey", "type":"secret", "r":1, "c":0},
-                {"key":"salt", "name":"Salt", "type":"text", "r":2, "c":0}
+                {"key":"button_title", "name":"Payment Button Title", "type":"text", "r":0, "c":0, "w":6},
+                {"key":"currency", "name":"Currency Code", "type":"select", "r":0, "c":1, "options":['SGD','AUD','NTD'], "w":6},
+                {"key":"api_key", "name":"API Key", "type":"password", "r":1, "c":0, "w":12},
+                {"key":"salt", "name":"Salt", "type":"text", "r":2, "c":0, "w":12}
             ],
             "tab": "HitPay",
-            "request_url": "/user-subscription/hitpay/"
+            "request_url": "api/user-subscription/hitpay/"
         }
     
     paypal = {
             "multiple":False,
             "fields":[
-                {"key":"client_id", "name":"Client ID", "type":"text", "r":0, "c":0},
-                {"key":"currency_code", "name":"Currency Code", "type":"select", "r":0, "c":1, "options":[{'SGD':'SGD'},{'AUD':'AUD'},{'NTD':'NTD'}]},
-                {"key":"secret", "name":"Secret", "type":"secret", "r":1, "c":0},
+                {"key":"clientId", "name":"Client ID", "type":"text", "r":0, "c":0, "w":6},
+                {"key":"currency", "name":"Currency Code", "type":"select", "r":0, "c":1, "w":6, "options":['SGD','AUD','NTD']},
+                {"key":"secret", "name":"Secret", "type":"password", "r":1, "c":0, "w":12},
             ],
             "tab":"PayPal",
-            "request_url": "/user-subscription/paypal/"
+            "request_url": "api/user-subscription/paypal/"
         }
 
     stripe = {
             "multiple":False,
             "fields":[
-                {"key":"secret_key", "type":"text", "name":"Secret Key", "r":0, "c":0},
-                {"key":"currency_code", "type":"select", "name":"Currency Code", "r":0, "c":1, "options":[{'SGD':'SGD'},{'AUD':'AUD'},{'NTD':'NTD'}]},
+                {"key":"secret", "type":"password", "name":"Secret Key", "r":0, "c":0, "w":6},
+                {"key":"currency", "type":"select", "name":"Currency Code", "r":0, "c":1, "w":6, "options":['USD','SGD','AUD','NTD']},
             ],
             "tab":"Stripe",
-            "request_url": "/user-subscription/stripe/"
+            "request_url": "api/user-subscription/stripe/"
         }
 
     pay_mongo = {
             "multiple":False,
             "fields":[
-                {"key":"secret_key", "name":"Secret Key", "type":"text", "r":0, "c":0},
+                {"key":"secret", "name":"Secret Key", "type":"password", "r":0, "c":0, "w":12},
             ],
             "tab":"Pay Mongo",
-            "request_url": "/user-subscription/pay_mongo/"
+            "request_url": "api/user-subscription/pay_mongo/"
         }
 
     first_data = {
             "multiple":False,
             "fields":[
-                {"key":"store_id", "name":"Store ID", "type":"number", "r":0, "c":0},
-                {"key":"share_secret", "name":"Share Secret", "type":"secret", "r":0, "c":1},
-                {"key":"currency_code", "name":"Currency Code", "type":"number", "r":1, "c":0},
-                {"key":"time_zone", "name":"Time Zone", "type":"select", "r":1, "c":1, "options":[{'Asia/Singapore':'Asia/Singapore'}]}
+                {"key":"storeId", "name":"Store ID", "type":"text", "r":0, "c":0, "w":6},
+                {"key":"sharedSecret", "name":"Share Secret", "type":"password", "r":0, "c":1, "w":6},
+                {"key":"currency", "name":"Currency Code", "type":"select", "r":1, "c":0, "w":6, "options":['702', '703']},
+                {"key":"timezone", "name":"Time Zone", "type":"select", "r":1, "c":1, "w":6, "options":['Asia/Singapore']}
             ],
             "tab":"First Data IPG (Credit Card)",
-            "request_url": "/user-subscription/first_data/"
+            "request_url": "api/user-subscription/first_data/"
         }
 
 
@@ -90,6 +90,8 @@ class PaymentMeta:
         PH = ['direct_payment','hitpay', 'stripe', 'pay_mongo', 'first_data']
 
     IN = ['direct_payment','hitpay','paypal']
+    
+    VN = ['direct_payment','hitpay','paypal', 'stripe', 'pay_mongo', 'first_data']
 
     MY = ['direct_payment','hitpay','paypal', 'stripe', 'pay_mongo', 'first_data']
 

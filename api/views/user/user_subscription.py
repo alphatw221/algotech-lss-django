@@ -170,12 +170,12 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         api_user = Verify.get_seller_user(request)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
         if request.method == "GET":
-            payment_data = user_subscription.meta_payment.get("firstdata", {})
+            payment_data = user_subscription.meta_payment.get("first_data", {})
             
             return Response(payment_data, status=status.HTTP_200_OK)
         else:
             meta_payment = user_subscription.meta_payment.copy()
-            meta_payment['firstdata'] = request.data
+            meta_payment['first_data'] = request.data
 
             serializer = UserSubscriptionSerializerMeta(
                 user_subscription, data={"meta_payment": meta_payment}, partial=True)
@@ -216,13 +216,13 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         api_user = Verify.get_seller_user(request)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
         if request.method == "GET":
-            payment_data = user_subscription.meta_payment.get("paymongo", {})
+            payment_data = user_subscription.meta_payment.get("pay_mongo", {})
             
             return Response(payment_data, status=status.HTTP_200_OK)
         else:
             
             meta_payment = user_subscription.meta_payment.copy()
-            meta_payment['paymongo'] = request.data
+            meta_payment['pay_mongo'] = request.data
 
             serializer = UserSubscriptionSerializerMeta(
                 user_subscription, data={"meta_payment": meta_payment}, partial=True)
