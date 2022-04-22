@@ -612,7 +612,7 @@ class UserViewSet(viewsets.ModelViewSet):
         STRIPE_API_KEY = "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" #TODO put it in settings
 
         email, password, plan, period, intentSecret = getdata(request,("email", "password", "plan", "period", "intentSecret"),required=True)
-        firstName, lastName, contactNumber, country , promoCode, timezone = getdata(request, ("firstName", "lastName", "contactNumber", "country", "promoCode"), required=False)
+        firstName, lastName, contactNumber, country , promoCode, timezone = getdata(request, ("firstName", "lastName", "contactNumber", "country", "promoCode", "timezone"), required=False)
 
         payment_intent_id = intentSecret[:27]
         stripe.api_key = STRIPE_API_KEY
