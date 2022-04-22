@@ -486,7 +486,7 @@ class UserViewSet(viewsets.ModelViewSet):
             raise ApiVerifyError('plan option error')
 
         if AuthUser.objects.filter(email = email).exists() or User.objects.filter(email=email, type='user').exists():
-            raise ApiVerifyError('email has already been used')
+            raise ApiVerifyError('This email address has already been registered.')
 
 
         expired_at = datetime.now()+timedelta(days=30)
@@ -580,7 +580,7 @@ class UserViewSet(viewsets.ModelViewSet):
             raise ApiVerifyError('invalid promo code')
 
         if AuthUser.objects.filter(email=email).exists() or User.objects.filter(email=email, type='user').exists():
-            raise ApiVerifyError('email has already been used')
+            raise ApiVerifyError('This email address has already been registered.')
         
         amount = subscription_plan.get('price',{}).get(period)
         if not amount :
@@ -643,7 +643,7 @@ class UserViewSet(viewsets.ModelViewSet):
         #last validation  (require refunds)
         # ------------------------------------------------------------------------------------
         if AuthUser.objects.filter(email = email).exists() or User.objects.filter(email=email, type='user').exists():
-            raise ApiVerifyError('email has already been used')
+            raise ApiVerifyError('This email address has already been registered.')
 
         if plan == 'Lite(USD 10.00/Month)':
             amount = 10.00
