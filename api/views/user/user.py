@@ -544,7 +544,7 @@ class UserViewSet(viewsets.ModelViewSet):
             }, result_ttl=10, failure_ttl=10)
         
         lss_email = 'lss@algotech.app'
-        if country == 'Philippines':
+        if country_code == 'PH':
             lss_email = 'hello@liveshowseller.ph'
         email_queue.enqueue(
             send_email_job,
@@ -704,7 +704,7 @@ class UserViewSet(viewsets.ModelViewSet):
             }, result_ttl=10, failure_ttl=10)
         
         lss_email = 'lss@algotech.app'
-        if country == 'Philippines':
+        if country_code == 'PH':
             lss_email = 'hello@liveshowseller.ph'
         email_queue.enqueue(
             send_email_job,
