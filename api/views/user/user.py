@@ -481,7 +481,7 @@ class UserViewSet(viewsets.ModelViewSet):
     def register_free_trial(self, request, country_code):
 
         Verify.is_valid_country_code_for_user_plan(country_code)
-
+        
         email, plan = getdata(request, ("email", "plan"), required=True)
         firstName, lastName, contactNumber, password, country, timezone = getdata(request, ("firstName", "lastName", "contactNumber", "password", "country", "timezone"), required=False)
 
@@ -667,7 +667,7 @@ class UserViewSet(viewsets.ModelViewSet):
             "Email":email,
             "Password":password[:4]+"*"*(len(password)-4),
             "Target Country":country, 
-            "Your Plan":plan,
+            "Your Plan":subscription_plan.get('text'),
             "Subscription Period":"Monthly",
             "Subscription End Date":expired_at.strftime("%m/%d/%Y %H:%M"),
             "Receipt":paymentIntent.charges.get('data')[0].get('receipt_url')
@@ -694,7 +694,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 "template_name": "register_activation.html",
                 "parameters": {
                     'firstName': firstName,
-                    'Plan': plan,
+                    'Plan': subscription_plan.get('text'),
                     'email': email,
                     'password': password
                 }
@@ -709,7 +709,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 "parameters": {
                     'firstName': firstName,
                     'lastName': lastName,
-                    'plan': plan,
+                    'plan': subscription_plan.get('text'),
                     'phone': contactNumber,
                     'email': email,
                     'password': password,

@@ -24,9 +24,10 @@ class SubscriptionPlan:
         promo_discount_rate=0.9
         currency = "USD"
         plans = {
-            "lite" : {"price":{"monthly":10,"quarterly":30}},
-            "standard" : {"price":{"monthly":30,"quarterly":90}},
-            "premium" : {"price":{"monthly":60,"quarterly":180}},
+            "trial" :{"text": "Free Trial", "price":{"monthly":0}},
+            "lite" : {"text": "Lite", "price":{"monthly":10,"quarterly":30}},
+            "standard" : {"text": "Standar", "price":{"monthly":30,"quarterly":90}},
+            "premium" : {"text": "Premium", "price":{"monthly":60,"quarterly":180}},
         }
         
     class PH(CountryPlan):
@@ -34,9 +35,10 @@ class SubscriptionPlan:
         promo_discount_rate=0.9
         currency = "USD"
         plans = {
-            "lite" : {"price":{"monthly":10,"quarterly":30}},
-            "standard" : {"price":{"monthly":18,"quarterly":54}},
-            "premium" : {"price":{"monthly":40,"quarterly":120}},
+            "trial" :{"text": "Free Trial", "price":{"monthly":0}},
+            "lite" : {"text": "Lite", "price":{"monthly":10,"quarterly":30}},
+            "standard" : {"text": "Standar", "price":{"monthly":30,"quarterly":90}},
+            "premium" : {"text": "Premium", "price":{"monthly":60,"quarterly":180}},
         }
     
     class TH(CountryPlan):
@@ -44,9 +46,10 @@ class SubscriptionPlan:
         promo_discount_rate=0.9
         currency = "USD"
         plans = {
-            "lite" : {"price":{"monthly":10,"quarterly":30}},
-            "standard" : {"price":{"monthly":25,"quarterly":75}},
-            "premium" : {"price":{"monthly":42,"quarterly":126}},
+            "trial" :{"text": "Free Trial", "price":{"monthly":0}},
+            "lite" : {"text": "Lite", "price":{"monthly":10,"quarterly":30}},
+            "standard" : {"text": "Standar", "price":{"monthly":25,"quarterly":75}},
+            "premium" : {"text": "Premium", "price":{"monthly":42,"quarterly":126}},
         }
 
     class IN(CountryPlan):
@@ -54,19 +57,22 @@ class SubscriptionPlan:
         promo_discount_rate=0.9
         currency = "USD"
         plans = {
-            "lite" : {"price":{"monthly":10,"quarterly":30}},
-            "standard" : {"price":{"monthly":25,"quarterly":75}},
-            "premium" : {"price":{"monthly":42,"quarterly":126}},
+            "trial" :{"text": "Free Trial", "price":{"monthly":0}},
+            "lite" : {"text": "Lite", "price":{"monthly":10,"quarterly":30}},
+            "standard" : {"text": "Standar", "price":{"monthly":25,"quarterly":75}},
+            "premium" : {"text": "Premium", "price":{"monthly":42,"quarterly":126}},
         }
+        
 
     class ID(CountryPlan):
         promo_code="ALGOTECH"
         promo_discount_rate=0.9
         currency = "USD"
         plans = {
-            "lite" : {"price":{"monthly":10,"quarterly":30}},
-            "standard" : {"price":{"monthly":30,"quarterly":90}},
-            "premium" : {"price":{"monthly":60,"quarterly":180}},
+            "trial" :{"text": "Free Trial", "price":{"monthly":0}},
+            "lite" : {"text": "Lite", "price":{"monthly":10,"quarterly":30}},
+            "standard" : {"text": "Standar", "price":{"monthly":30,"quarterly":90}},
+            "premium" : {"text": "Premium", "price":{"monthly":60,"quarterly":180}},
         }
     
     class MY(CountryPlan):
@@ -74,9 +80,10 @@ class SubscriptionPlan:
         promo_discount_rate=0.9
         currency = "USD"
         plans = {
-            "lite" : {"price":{"monthly":10,"quarterly":30}},
-            "standard" : {"price":{"monthly":30,"quarterly":90}},
-            "premium" : {"price":{"monthly":60,"quarterly":180}},
+            "trial" :{"text": "Free Trial", "price":{"monthly":0}},
+            "lite" : {"text": "Lite", "price":{"monthly":10,"quarterly":30}},
+            "standard" : {"text": "Standar", "price":{"monthly":30,"quarterly":90}},
+            "premium" : {"text": "Premium", "price":{"monthly":60,"quarterly":180}},
         }
 
     class VN(CountryPlan):
@@ -84,9 +91,10 @@ class SubscriptionPlan:
         promo_discount_rate=0.9
         currency = "USD"
         plans = {
-            "lite" : {"price":{"monthly":10,"quarterly":30}},
-            "standard" : {"price":{"monthly":18,"quarterly":54}},
-            "premium" : {"price":{"monthly":40,"quarterly":120}},
+            "trial" :{"text": "Free Trial", "price":{"monthly":0}},
+            "lite" : {"text": "Lite", "price":{"monthly":10,"quarterly":30}},
+            "standard" : {"text": "Standar", "price":{"monthly":18,"quarterly":54}},
+            "premium" : {"text": "Premium", "price":{"monthly":40,"quarterly":120}},
         }
 
     class TW(CountryPlan):
@@ -94,9 +102,10 @@ class SubscriptionPlan:
         promo_discount_rate=0.9
         currency = "USD"
         plans = {
-            "lite" : {"price":{"monthly":10,"quarterly":30}},
-            "standard" : {"price":{"monthly":30,"quarterly":90}},
-            "premium" : {"price":{"monthly":60,"quarterly":180}},
+            "trial" :{"text": "Free Trial", "price":{"monthly":0}},
+            "lite" : {"text": "Lite", "price":{"monthly":10,"quarterly":30}},
+            "standard" : {"text": "Standar", "price":{"monthly":30,"quarterly":90}},
+            "premium" : {"text": "Premium", "price":{"monthly":60,"quarterly":180}},
         }
 
     class CH(CountryPlan):
@@ -104,9 +113,10 @@ class SubscriptionPlan:
         promo_discount_rate=0.9
         currency = "USD"
         plans = {
-            "lite" : {"price":{"monthly":10,"quarterly":30}},
-            "standard" : {"price":{"monthly":30,"quarterly":90}},
-            "premium" : {"price":{"monthly":60,"quarterly":180}},
+            "trial" :{"text": "Free Trial", "price":{"monthly":0}},
+            "lite" : {"text": "Lite", "price":{"monthly":10,"quarterly":30}},
+            "standard" : {"text": "Standar", "price":{"monthly":30,"quarterly":90}},
+            "premium" : {"text": "Premium", "price":{"monthly":60,"quarterly":180}},
         }
 
     class KH(CountryPlan):
@@ -114,7 +124,8 @@ class SubscriptionPlan:
         promo_discount_rate=0.9
         currency = "USD"
         plans = {
-            "lite" : {"price":{"monthly":10,"quarterly":30}},
-            "standard" : {"price":{"monthly":18,"quarterly":54}},
-            "premium" : {"price":{"monthly":40,"quarterly":120}},
+            "trial" :{"text": "Free Trial", "price":{"monthly":0}},
+            "lite" : {"text": "Lite", "price":{"monthly":10,"quarterly":30}},
+            "standard" : {"text": "Standar", "price":{"monthly":18,"quarterly":54}},
+            "premium" : {"text": "Premium", "price":{"monthly":40,"quarterly":120}},
         }
