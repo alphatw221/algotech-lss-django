@@ -93,19 +93,21 @@ class PaymentMeta:
             "request_url": "api/user-subscription/first_data/"
         }
 
-
-    SG = ['direct_payment','hitpay','paypal', 'stripe', 'pay_mongo', 'first_data']
+    # confirmed list
+    SG = ['direct_payment','hitpay','paypal', 'stripe', 'first_data']
+    
+    MY = ['direct_payment','paypal', 'stripe']
+    
+    IN = ['direct_payment','paypal', 'stripe']
+    
+    PH = ['direct_payment', 'paypal', 'hitpay', 'pay_mongo']
     
     if settings.GCP_API_LOADBALANCER_URL == "https://sb.liveshowseller.ph":
         PH = ['direct_payment','paypal']
-    else:
-        PH = ['direct_payment','hitpay', 'stripe', 'pay_mongo', 'first_data']
 
-    IN = ['direct_payment','hitpay','paypal']
     
+    # not confirmed list
     VN = ['direct_payment','hitpay','paypal', 'stripe', 'pay_mongo', 'first_data']
-
-    MY = ['direct_payment','hitpay','paypal', 'stripe', 'pay_mongo', 'first_data']
 
     TW = ['direct_payment','hitpay','paypal', 'stripe', 'pay_mongo', 'first_data']
 
