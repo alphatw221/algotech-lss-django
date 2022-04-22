@@ -45,7 +45,7 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        # self.test_mongodb_query()
+        self.test_mongodb_query()
         # self.test_user_plan()
         # ret = api_twitch_get_access_token()
         # print (ret)
