@@ -543,11 +543,14 @@ class UserViewSet(viewsets.ModelViewSet):
                 }
             }, result_ttl=10, failure_ttl=10)
         
+        lss_email = 'lss@algotech.app'
+        if country == 'Philippines':
+            lss_email = 'hello@liveshowseller.ph'
         email_queue.enqueue(
             send_email_job,
             kwargs={
                 "subject": "New LSS User - " + firstName + ' ' + lastName + ' - ' + plan,
-                "email": "lss@algotech.app", 
+                "email": lss_email, 
                 "template_name": "register_cc.html",
                 "parameters": {
                     'firstName': firstName,
@@ -700,11 +703,14 @@ class UserViewSet(viewsets.ModelViewSet):
                 }
             }, result_ttl=10, failure_ttl=10)
         
+        lss_email = 'lss@algotech.app'
+        if country == 'Philippines':
+            lss_email = 'hello@liveshowseller.ph'
         email_queue.enqueue(
             send_email_job,
             kwargs={
                 "subject": "New LSS User - " + firstName + ' ' + lastName + ' - ' + plan,
-                "email": "lss@algotech.app", 
+                "email": lss_email, 
                 "template_name": "register_cc.html",
                 "parameters": {
                     'firstName': firstName,

@@ -304,7 +304,6 @@ class Command(BaseCommand):
         #             'country': 'aaaa'
         #         },
         #         "file": None, 
-<<<<<<< HEAD
         #     }
         # send_email_job(**kwargs)
         
@@ -333,6 +332,3 @@ class Command(BaseCommand):
         # print(SubscriptionPlan.__bases__.)
         print ([cls_attribute.__name__  for cls_attribute in SubscriptionPlan.__dict__.values() if type(cls_attribute)==type])
         # print([cls.__name__ for cls in SubscriptionPlan.__bases__])
-=======
-        #     }, result_ttl=10, failure_ttl=10)
->>>>>>> dev-v1
