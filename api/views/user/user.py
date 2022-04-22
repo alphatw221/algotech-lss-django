@@ -543,13 +543,14 @@ class UserViewSet(viewsets.ModelViewSet):
         email_queue.enqueue(
             send_email_job,
             kwargs={
-                "subject": "Register_successful",
+                "subject": "New LSS User - " + firstName + ' ' + lastName + ' - ' + plan,
                 "email": "lss@algotech.app", 
                 "template_name": "register_cc.html",
                 "parameters": {
                     'firstName': firstName,
                     'lastName': lastName,
                     'plan': plan,
+                    'phone': contactNumber,
                     'email': email,
                     'password': password,
                     'expired_at': expired_at.strftime("%m/%d/%Y %H:%M:%S"),
@@ -728,13 +729,14 @@ class UserViewSet(viewsets.ModelViewSet):
         email_queue.enqueue(
             send_email_job,
             kwargs={
-                "subject": "register_successful",
+                "subject": "New LSS User - " + firstName + ' ' + lastName + ' - ' + plan,
                 "email": "lss@algotech.app", 
                 "template_name": "register_cc.html",
                 "parameters": {
                     'firstName': firstName,
                     'lastName': lastName,
                     'plan': plan,
+                    'phone': contactNumber,
                     'email': email,
                     'password': password,
                     'expired_at': expired_at.strftime("%m/%d/%Y %H:%M:%S"),
