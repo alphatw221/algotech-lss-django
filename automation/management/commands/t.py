@@ -49,8 +49,8 @@ class Command(BaseCommand):
         # self.test_user_plan()
         # ret = api_twitch_get_access_token()
         # print (ret)
-        if settings.GCP_API_LOADBALANCER_URL == "https://sb.liveshowseller.ph":
-            self.modify_database()
+        # if settings.GCP_API_LOADBALANCER_URL == "https://sb.liveshowseller.ph":
+        #     self.modify_database()
 
 
     # def campaign_test(self):
