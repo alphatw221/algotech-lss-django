@@ -512,7 +512,7 @@ class UserViewSet(viewsets.ModelViewSet):
             "Email":email,
             "Password":password[:4]+"*"*(len(password)-4),
             "Target Country":country,
-            "Your Plan":plan,
+            "Your Plan":"Free Trial",
             "Subscription End Date":expired_at.strftime("%m/%d/%Y %H:%M"),
         }
 
