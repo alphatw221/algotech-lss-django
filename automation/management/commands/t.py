@@ -45,7 +45,8 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.test_mongodb_query()
+        # self.test_mongodb_query()
+        self.test_send_email()
         # self.test_user_plan()
         # ret = api_twitch_get_access_token()
         # print (ret)
@@ -311,7 +312,7 @@ class Command(BaseCommand):
         email_queue.enqueue(
             send_email_job,
             kwargs={
-                "subject": i18n_get_register_activate_mail_subject(),
+                "subject": i18n_get_register_confirm_mail_subject(),
                 "email": 'derekhwang33@gmail.com', 
                 "template_name": "register_cc.html",
                 "parameters": {

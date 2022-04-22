@@ -28,7 +28,7 @@ from django.conf import settings
 import string
 import random
 from api.models.user.user_subscription import UserSubscription
-from backend.i18n.register_confirm_mail import i18n_get_register_confirm_mail_content, i18n_get_register_confirm_mail_subject, i18n_get_register_activate_mail_subject
+from backend.i18n.register_confirm_mail import i18n_get_register_confirm_mail_subject, i18n_get_register_activate_mail_subject
 from lss.views.custom_jwt import CustomTokenObtainPairSerializer
 import requests
 from google.oauth2 import id_token
