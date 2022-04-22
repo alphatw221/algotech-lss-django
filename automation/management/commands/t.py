@@ -46,9 +46,10 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # self.test_mongodb_query()
-        self.test_user_plan()
+        # self.test_user_plan()
         # ret = api_twitch_get_access_token()
         # print (ret)
+        self.modify_database()
 
 
     # def campaign_test(self):
@@ -115,7 +116,107 @@ class Command(BaseCommand):
     #         customer_name, product_name, lang='zh-hans'))
 
 
+    def modify_database(self):
+        from api.models.user.user_subscription import UserSubscription
+        from api.models.user.user import User
+        from django.contrib.auth.models import User as AuthUser
+        from json import loads, dumps
+        from collections import OrderedDict
+        import json
+        import re
+        from api.models.campaign.campaign import Campaign
+        def to_dict(input_ordered_dict):
+            return loads(dumps(input_ordered_dict))
+        
+        def modify_meta_payment_from_user_subscription():
+            for obj in UserSubscription.objects.all():
+                direct_payment = to_dict(obj.meta_payment.get("direct_payment", {}))
+                first_data = to_dict(obj.meta_payment.get("firstdata", {}))
+                pay_mongo = to_dict(obj.meta_payment.get("paymongo", {}))
+                print("-------------------------------")
+                if direct_payment:
+                    string_dp = json.dumps(direct_payment)
+                    regex = re.compile(r"distinct_payment")
+                    string_dp = regex.sub("direct_payment", string_dp)
+                    new_dict = json.loads(string_dp)
+                    
+                    obj.meta_payment["direct_payment"] = new_dict
+                    print(new_dict)
+                    
+                if first_data:
+                    string_dp = json.dumps(first_data)
+                    regex = re.compile(r"firstdata")
+                    string_dp = regex.sub("first_data", string_dp)
+                    regex = re.compile(r"ipg")
+                    string_dp = regex.sub("first_data", string_dp)
+                    new_dict = json.loads(string_dp) 
+                    
+                    obj.meta_payment["first_data"] = new_dict
+                    del obj.meta_payment["firstdata"]
+                    print(new_dict)
+                if pay_mongo:
+                    string_dp = json.dumps(pay_mongo)
+                    regex = re.compile(r"paymongo")
+                    string_dp = regex.sub("pay_mongo", string_dp)
+                    new_dict = json.loads(string_dp)
+                    obj.meta_payment["pay_mongo"] = new_dict
+                    del obj.meta_payment["paymongo"]
+                    print(new_dict)
+                obj.save()
+        def modify_meta_payment_from_campaign():
+            for obj in Campaign.objects.all().order_by("-id"):
+                print("id", obj.id)
+                if obj.id:
+                    new_mata_payment = to_dict(obj.meta_payment.get("sg", {}))
+                #     print(new_mata_payment)
+                    direct_payment = to_dict(new_mata_payment.get("direct_payment", {}))
+                    first_data = to_dict(new_mata_payment.get("firstdata", {}))
+                    pay_mongo = to_dict(new_mata_payment.get("paymongo", {}))
+                #     print(direct_payment)
+                #     print(first_data)
+                #     print(pay_mongo)
+                    print("-------------------------------")
+                    if direct_payment:
+                        string_dp = json.dumps(direct_payment)
+                        regex = re.compile(r"distinct_payment")
+                        string_dp = regex.sub("direct_payment", string_dp)
+                        new_dict = json.loads(string_dp)
 
+                        new_mata_payment["direct_payment"] = new_dict
+                #         print(new_dict)
+
+                    if first_data:
+                        string_dp = json.dumps(first_data)
+                        regex = re.compile(r"firstdata")
+                        string_dp = regex.sub("first_data", string_dp)
+                        regex = re.compile(r"ipg")
+                        string_dp = regex.sub("first_data", string_dp)
+                        new_dict = json.loads(string_dp) 
+
+                        new_mata_payment["first_data"] = new_dict
+                        del new_mata_payment["firstdata"]
+                #         print(new_dict)
+                    if pay_mongo:
+                        string_dp = json.dumps(pay_mongo)
+                        regex = re.compile(r"paymongo")
+                        string_dp = regex.sub("pay_mongo", string_dp)
+                        new_dict = json.loads(string_dp)
+                        new_mata_payment["pay_mongo"] = new_dict
+                        del new_mata_payment["paymongo"]
+                #         print(new_dict)
+                    if new_mata_payment:
+                        print(new_mata_payment)
+                        obj.meta_payment = new_mata_payment
+                        obj.save()
+        
+        modify_meta_payment_from_user_subscription()
+        modify_meta_payment_from_campaign()
+        
+        
+        
+        
+        
+        
     def add_user_subscription_user(self):
         UserSubscription.objects.get(id=1).root_users.add(User.objects.get(id=44))
 
