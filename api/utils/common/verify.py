@@ -13,6 +13,7 @@ from api.models.order.order import Order
 from api.models.order.pre_order import PreOrder
 
 from api.utils.error_handle.error.api_error import ApiVerifyError
+from business_policy.subscription_plan import SubscriptionPlan
 
 
 def getparams(request, params: tuple, with_user=True, seller=True):
@@ -281,6 +282,12 @@ class Verify():
             raise ApiVerifyError("no campaign_product found")
         return pre_order.campaign.products.get(id=campaign_product_id)
 
+    @staticmethod
+    def is_valid_country_code_for_user_plan(country_code):
+        support_country_code = [cls_attribute.__name__  for cls_attribute in SubscriptionPlan.__dict__.values() if type(cls_attribute)==type] #TODO find a better way to do this
+        if country_code not in support_country_code:
+            raise ApiVerifyError("country code not valid")
+            
     @staticmethod
     def is_valid_country_code(country_code):
         if country_code not in ["SG", "PH", "IN", "ID", "MY", "TW", "CN"]:

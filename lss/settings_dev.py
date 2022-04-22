@@ -341,11 +341,11 @@ CHAT_BOT_FACEBOOK = {
 
 # google storage
 DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
-GS_BUCKET_NAME = 'lss_public_bucket'
+GS_BUCKET_NAME = 'lss_dev_bucket'
 GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
     os.path.join(BASE_DIR, "liveshowseller-b4308e2f9dc6.json")
 )
-GS_URL = "https://storage.googleapis.com/lss_public_bucket/"
+GS_URL = "https://storage.googleapis.com/lss_dev_bucket/"
 
 # google monitoring
 GCP_PROJECT_ID = "liveshowseller"
@@ -372,7 +372,7 @@ ORDER_REPORT_DOWNLOAD_INTERVAL = 180
 
 # redis server
 REDIS_SERVER = {
-    "host": "34.124.140.74",
+    "host": "127.0.0.1",
     "port": "6379",
     "username": None,
     "password": r"algo83111T%%"}
@@ -390,8 +390,8 @@ GCP_API_LOADBALANCER_URL = "https://gipassl.algotech.app"
 # for social lab
 # GCP_API_LOADBALANCER_URL = "https://sb.liveshowseller.ph"
 
-LOCAL_API_SERVER = "http://localhost:8001"
-TEST_API_SERVER = "http://192.168.74.114/lss-backend"
+LOCAL_API_SERVER = "http://localhost"
+TEST_API_SERVER = "http://localhost"
 # paypal settings
 # package github: https://github.com/paypal/PayPal-Python-SDK
 

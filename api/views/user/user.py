@@ -480,11 +480,12 @@ class UserViewSet(viewsets.ModelViewSet):
     @api_error_handler
     def register_free_trial(self, request, country_code):
 
-        Verify.is_valid_country_code(country_code)
+        Verify.is_valid_country_code_for_user_plan(country_code)
+
         email, plan = getdata(request, ("email", "plan"), required=True)
         firstName, lastName, contactNumber, password, country, timezone = getdata(request, ("firstName", "lastName", "contactNumber", "password", "country", "timezone"), required=False)
 
-        if plan != 'Free Trial':
+        if plan != 'trial':
             raise ApiVerifyError('plan option error')
 
         if AuthUser.objects.filter(email = email).exists() or User.objects.filter(email=email, type='user').exists():
@@ -493,19 +494,18 @@ class UserViewSet(viewsets.ModelViewSet):
         now = datetime.now(pytz.timezone(timezone)) if timezone in pytz.common_timezones else datetime.now()
         expired_at = now+timedelta(days=30)
 
-        # expired_at = datetime.now()+timedelta(days=30)
-        auth_user = AuthUser.objects.create_user(
-            username=f'{firstName} {lastName}', email=email, password=password)
+        # auth_user = AuthUser.objects.create_user(
+        #     username=f'{firstName} {lastName}', email=email, password=password)
         
-        user_subscription = UserSubscription.objects.create(
-            name=f'{firstName} {lastName}', 
-            status='valid', 
-            expired_at=expired_at, 
-            user_plan= {"activated_platform" : ["facebook"]}, 
-            meta_country={ 'activated_country': [country_code] },
-            type='trial')
+        # user_subscription = UserSubscription.objects.create(
+        #     name=f'{firstName} {lastName}', 
+        #     status='valid', 
+        #     expired_at=expired_at, 
+        #     user_plan= {"activated_platform" : ["facebook"]}, 
+        #     meta_country={ 'activated_country': [country_code] },
+        #     type='trial')
         
-        User.objects.create(name=f'{firstName} {lastName}', email=email, type='user', status='valid', phone=contactNumber, auth_user=auth_user, user_subscription=user_subscription)
+        # User.objects.create(name=f'{firstName} {lastName}', email=email, type='user', status='valid', phone=contactNumber, auth_user=auth_user, user_subscription=user_subscription)
         
         ret = {
             "Customer Name":f'{firstName} {lastName}', 
@@ -572,11 +572,8 @@ class UserViewSet(viewsets.ModelViewSet):
         email, plan, period = getdata(request, ("email", "plan", "period"), required=True)
         promoCode, = getdata(request, ("promoCode",), required=False)
 
-        Verify.is_valid_country_code(country_code)
-        country_plan = getattr(SubscriptionPlan, country_code, None)
-        subscription_plan = getattr(country_plan, plan, None)
-        if not subscription_plan:
-            raise ApiVerifyError('invalid plan')
+        country_plan = SubscriptionPlan.get_country(country_code)
+        subscription_plan = country_plan.get_plan(plan)
 
         if promoCode and promoCode != country_plan.promo_code:
             raise ApiVerifyError('invalid promo code')
@@ -627,11 +624,10 @@ class UserViewSet(viewsets.ModelViewSet):
     @api_error_handler
     def user_register(self, request, country_code):
 
-        EARLY_BIRD_PROMO_CODE = 'test'
+        # EARLY_BIRD_PROMO_CODE = 'test'
         # STRIPE_API_KEY = "sk_test_51J2aFmF3j9D00CA0KABMZVKtOVnZNbBvM2hcokicJmfx8vvrmNyys5atEAcpp0Au2O3HtX0jz176my7g0ozbinof00RL4QAZrY" #TODO put it in settings
         STRIPE_API_KEY = "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" #TODO put it in settings
 
-        Verify.is_valid_country_code(country_code)
         email, password, plan, period, intentSecret = getdata(request,("email", "password", "plan", "period", "intentSecret"),required=True)
         firstName, lastName, contactNumber, country , promoCode, timezone = getdata(request, ("firstName", "lastName", "contactNumber", "country", "promoCode"), required=False)
 
@@ -644,37 +640,52 @@ class UserViewSet(viewsets.ModelViewSet):
 
         #last validation  (require refunds)
         # ------------------------------------------------------------------------------------
+
+        country_plan = SubscriptionPlan.get_country(country_code)
+        subscription_plan = country_plan.get_plan(plan)
+
         if AuthUser.objects.filter(email = email).exists() or User.objects.filter(email=email, type='user').exists():
             raise ApiVerifyError('email has already been used')
 
-        if plan == 'Lite (USD 10.00/Month)':
-            amount = 10.00
-            subscription_type = "lite (USD 10.00/Month)"
+        amount = subscription_plan.get('price',{}).get(period)
 
-        elif plan == 'Standard (USD 30.00/Month)':  
-            subscription_type = "standard"
-            if period == "Monthly":
-                amount = 30.00
-            else :
-                amount = 90.00
+        if not amount :
+            raise ApiVerifyError('invalid period')
 
-            amount = amount*0.9 if promoCode == EARLY_BIRD_PROMO_CODE else amount
-        elif plan =='Premium (USD 60.00/Month)':
-            subscription_type = "premium"
-            if period == "Monthly":
-                amount = 60.00
-            else :
-                amount = 180.00
-            amount = amount*0.9 if promoCode == EARLY_BIRD_PROMO_CODE else amount
-        else:
-            raise ApiVerifyError('plan option error')
+        if promoCode and promoCode != country_plan.promo_code:
+            raise ApiVerifyError('invalid promo code')
+
+        if promoCode :
+            amount = amount*country_plan.promo_discount_rate
+
+        # if plan == 'Lite (USD 10.00/Month)':
+        #     amount = 10.00
+        #     subscription_type = "lite (USD 10.00/Month)"
+
+        # elif plan == 'Standard (USD 30.00/Month)':  
+        #     subscription_type = "standard"
+        #     if period == "Monthly":
+        #         amount = 30.00
+        #     else :
+        #         amount = 90.00
+
+        #     amount = amount*0.9 if promoCode == EARLY_BIRD_PROMO_CODE else amount
+        # elif plan =='Premium (USD 60.00/Month)':
+        #     subscription_type = "premium"
+        #     if period == "Monthly":
+        #         amount = 60.00
+        #     else :
+        #         amount = 180.00
+        #     amount = amount*0.9 if promoCode == EARLY_BIRD_PROMO_CODE else amount
+        # else:
+        #     raise ApiVerifyError('plan option error')
 
         if int(amount*100) != paymentIntent.amount:
             raise ApiVerifyError('payment amount error')
         #------------------------------------------------------------------------------------
 
         now = datetime.now(pytz.timezone(timezone)) if timezone in pytz.common_timezones else datetime.now()
-        expired_at = now+timedelta(days=30) if period == "Monthly" else now+timedelta(days=60)
+        expired_at = now+timedelta(days=30) if period == "monthly" else now+timedelta(days=60)
         
         auth_user = AuthUser.objects.create_user(
             username=f'{firstName} {lastName}', email=email, password=password)
@@ -686,7 +697,7 @@ class UserViewSet(viewsets.ModelViewSet):
             user_plan= {"activated_platform" : ["facebook","youtube","instagram"]}, 
             meta_country={ 'activated_country': [country_code] },
             meta = {"stripe payment intent":intentSecret},
-            type=subscription_type)
+            type=plan)
         
         User.objects.create(
             name=f'{firstName} {lastName}', email=email, type='user', status='valid', phone=contactNumber, auth_user=auth_user, user_subscription=user_subscription)

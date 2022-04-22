@@ -46,11 +46,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # self.test_mongodb_query()
-<<<<<<< HEAD
-        self.test_send_email()
-=======
         self.test_user_plan()
->>>>>>> temp
         # ret = api_twitch_get_access_token()
         # print (ret)
 
@@ -195,6 +191,8 @@ class Command(BaseCommand):
             }, result_ttl=10, failure_ttl=10)
     
     def test_user_plan(self):
-        import business_policy
+        from business_policy.subscription_plan import SubscriptionPlan
         
-        # print([cls.__name__ for cls in LSSPlan.__bases__])
+        # print(SubscriptionPlan.__bases__.)
+        print ([cls_attribute.__name__  for cls_attribute in SubscriptionPlan.__dict__.values() if type(cls_attribute)==type])
+        # print([cls.__name__ for cls in SubscriptionPlan.__bases__])
