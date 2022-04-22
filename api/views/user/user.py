@@ -494,18 +494,18 @@ class UserViewSet(viewsets.ModelViewSet):
         now = datetime.now(pytz.timezone(timezone)) if timezone in pytz.common_timezones else datetime.now()
         expired_at = now+timedelta(days=30)
 
-        # auth_user = AuthUser.objects.create_user(
-        #     username=f'{firstName} {lastName}', email=email, password=password)
+        auth_user = AuthUser.objects.create_user(
+            username=f'{firstName} {lastName}', email=email, password=password)
         
-        # user_subscription = UserSubscription.objects.create(
-        #     name=f'{firstName} {lastName}', 
-        #     status='valid', 
-        #     expired_at=expired_at, 
-        #     user_plan= {"activated_platform" : ["facebook"]}, 
-        #     meta_country={ 'activated_country': [country_code] },
-        #     type='trial')
+        user_subscription = UserSubscription.objects.create(
+            name=f'{firstName} {lastName}', 
+            status='valid', 
+            expired_at=expired_at, 
+            user_plan= {"activated_platform" : ["facebook"]}, 
+            meta_country={ 'activated_country': [country_code] },
+            type='trial')
         
-        # User.objects.create(name=f'{firstName} {lastName}', email=email, type='user', status='valid', phone=contactNumber, auth_user=auth_user, user_subscription=user_subscription)
+        User.objects.create(name=f'{firstName} {lastName}', email=email, type='user', status='valid', phone=contactNumber, auth_user=auth_user, user_subscription=user_subscription)
         
         ret = {
             "Customer Name":f'{firstName} {lastName}', 
@@ -587,26 +587,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
         if promoCode == country_plan.promo_code:
             amount = amount*country_plan.promo_discount_rate
-        
-        # if plan == 'Lite(USD 10.00/Month)':
-        #         amount = 10.00
-        # elif plan == 'Standard(USD 30.00/Month)':  
-        #     if period == "Monthly":
-        #         amount = 30.00
-        #     else :
-        #         amount = 90.00
-
-        #     amount = amount*0.9 if promoCode == country_plan.promo_code else amount
-        # elif plan =='Premium(USD 60.00/Month)':
-        #     if period == "Monthly":
-        #         amount = 60.00
-        #     else :
-        #         amount = 180.00
-        #     amount = amount*0.9 if promoCode == country_plan.promo_code else amount
-        # else:
-        #     raise ApiVerifyError('plan option error')
-        
-        
+    
         stripe.api_key = STRIPE_API_KEY  
         try:
             intent = stripe.PaymentIntent.create( amount=int(amount*100), currency=country_plan.currency, receipt_email = email)
@@ -657,28 +638,6 @@ class UserViewSet(viewsets.ModelViewSet):
 
         if promoCode :
             amount = amount*country_plan.promo_discount_rate
-
-        # if plan == 'Lite (USD 10.00/Month)':
-        #     amount = 10.00
-        #     subscription_type = "lite (USD 10.00/Month)"
-
-        # elif plan == 'Standard (USD 30.00/Month)':  
-        #     subscription_type = "standard"
-        #     if period == "Monthly":
-        #         amount = 30.00
-        #     else :
-        #         amount = 90.00
-
-        #     amount = amount*0.9 if promoCode == EARLY_BIRD_PROMO_CODE else amount
-        # elif plan =='Premium (USD 60.00/Month)':
-        #     subscription_type = "premium"
-        #     if period == "Monthly":
-        #         amount = 60.00
-        #     else :
-        #         amount = 180.00
-        #     amount = amount*0.9 if promoCode == EARLY_BIRD_PROMO_CODE else amount
-        # else:
-        #     raise ApiVerifyError('plan option error')
 
         if int(amount*100) != paymentIntent.amount:
             raise ApiVerifyError('payment amount error')
