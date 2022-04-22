@@ -130,15 +130,25 @@ class CampaignViewSet(viewsets.ModelViewSet):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         campaign = serializer.save()
-
-        for key, value in request.data.items():
-            if "account" in key:
-                account_number = key.split("_")[1]
-                image_path = default_storage.save(
-                    f'/campaign/{campaign.id}/payment/direct_payment/accounts/{account_number}/{value.name}',
-                    ContentFile(value.read()))
-                print(f"image_path: {image_path}")
-                json_data["meta_payment"]["sg"]["direct_payment"]["accounts"][account_number]["image"] = image_path
+        
+        data = json_data['meta_payment']['direct_payment']
+        if 'accounts' in data:
+                for account_number, account_info in data['accounts'].items():
+                    if account_number in request.data and request.data[account_number]:
+                        image = request.data[account_number]
+                        image_path = default_storage.save(
+                            f'/campaign/{campaign.id}/payment/direct_payment/accounts/{account_number}/{image.name}', ContentFile(image.read()))
+                        print(image_path)
+                        data['accounts'][account_number]['image'] = image_path
+                            
+        # for key, value in request.data.items():
+        #     if "account" in key:
+        #         account_number = key.split("_")[1]
+        #         image_path = default_storage.save(
+        #             f'/campaign/{campaign.id}/payment/direct_payment/accounts/{account_number}/{value.name}',
+        #             ContentFile(value.read()))
+        #         print(f"image_path: {image_path}")
+        #         json_data["meta_payment"]["sg"]["direct_payment"]["accounts"][account_number]["image"] = image_path
         
         serializer = self.get_serializer(
             campaign, data=json_data, partial=True)
@@ -172,13 +182,22 @@ class CampaignViewSet(viewsets.ModelViewSet):
         instagram_campaign.update(json_data.get("instagram_campaign",{}))
         json_data['instagram_campaign']=instagram_campaign
 
-        for key, value in request.data.items():
-            if "account" in key:
-                account_number = key.split("_")[1]
-                image_path = default_storage.save(
-                    f'/campaign/{campaign.id}/payment/direct_payment/accounts/{account_number}/{value.name}', ContentFile(value.read()))
-                print(f"image_path: {image_path}")
-                json_data["meta_payment"]["sg"]["direct_payment"]["accounts"][account_number]["image"] = image_path
+        data = json_data['meta_payment']['direct_payment']
+        if 'accounts' in data:
+                for account_number, account_info in data['accounts'].items():
+                    if account_number in request.data and request.data[account_number]:
+                        image = request.data[account_number]
+                        image_path = default_storage.save(
+                            f'/campaign/{campaign.id}/payment/direct_payment/accounts/{account_number}/{image.name}', ContentFile(image.read()))
+                        print(image_path)
+                        data['accounts'][account_number]['image'] = image_path
+        # for key, value in request.data.items():
+        #     if "account" in key:
+        #         account_number = key.split("_")[1]
+        #         image_path = default_storage.save(
+        #             f'/campaign/{campaign.id}/payment/direct_payment/accounts/{account_number}/{value.name}', ContentFile(value.read()))
+        #         print(f"image_path: {image_path}")
+        #         json_data["meta_payment"]["sg"]["direct_payment"]["accounts"][account_number]["image"] = image_path
 
         serializer = CampaignSerializerEdit(
             campaign, data=json_data, partial=True)
