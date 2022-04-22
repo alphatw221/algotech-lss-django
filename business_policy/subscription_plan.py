@@ -17,6 +17,8 @@ class SubscriptionPlan:
         if not country_plan or type(country_plan)!=type:
             raise ApiVerifyError("invalid country_code")
         return country_plan
+
+
     class SG(CountryPlan):
         promo_code="ALGOTECH"
         promo_discount_rate=0.9
@@ -33,8 +35,8 @@ class SubscriptionPlan:
         currency = "USD"
         plans = {
             "lite" : {"price":{"monthly":10,"quarterly":30}},
-            "standard" : {"price":{"monthly":30,"quarterly":90}},
-            "premium" : {"price":{"monthly":60,"quarterly":180}},
+            "standard" : {"price":{"monthly":18,"quarterly":54}},
+            "premium" : {"price":{"monthly":40,"quarterly":120}},
         }
     
     class TH(CountryPlan):
@@ -43,8 +45,8 @@ class SubscriptionPlan:
         currency = "USD"
         plans = {
             "lite" : {"price":{"monthly":10,"quarterly":30}},
-            "standard" : {"price":{"monthly":30,"quarterly":90}},
-            "premium" : {"price":{"monthly":60,"quarterly":180}},
+            "standard" : {"price":{"monthly":25,"quarterly":75}},
+            "premium" : {"price":{"monthly":42,"quarterly":126}},
         }
 
     class IN(CountryPlan):
@@ -53,8 +55,8 @@ class SubscriptionPlan:
         currency = "USD"
         plans = {
             "lite" : {"price":{"monthly":10,"quarterly":30}},
-            "standard" : {"price":{"monthly":30,"quarterly":90}},
-            "premium" : {"price":{"monthly":60,"quarterly":180}},
+            "standard" : {"price":{"monthly":25,"quarterly":75}},
+            "premium" : {"price":{"monthly":42,"quarterly":126}},
         }
 
     class ID(CountryPlan):
@@ -83,8 +85,8 @@ class SubscriptionPlan:
         currency = "USD"
         plans = {
             "lite" : {"price":{"monthly":10,"quarterly":30}},
-            "standard" : {"price":{"monthly":30,"quarterly":90}},
-            "premium" : {"price":{"monthly":60,"quarterly":180}},
+            "standard" : {"price":{"monthly":18,"quarterly":54}},
+            "premium" : {"price":{"monthly":40,"quarterly":120}},
         }
 
     class TW(CountryPlan):
@@ -105,4 +107,14 @@ class SubscriptionPlan:
             "lite" : {"price":{"monthly":10,"quarterly":30}},
             "standard" : {"price":{"monthly":30,"quarterly":90}},
             "premium" : {"price":{"monthly":60,"quarterly":180}},
+        }
+
+    class KH(CountryPlan):
+        promo_code="ALGOTECH"
+        promo_discount_rate=0.9
+        currency = "USD"
+        plans = {
+            "lite" : {"price":{"monthly":10,"quarterly":30}},
+            "standard" : {"price":{"monthly":18,"quarterly":54}},
+            "premium" : {"price":{"monthly":40,"quarterly":120}},
         }
