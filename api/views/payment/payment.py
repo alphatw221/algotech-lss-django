@@ -81,16 +81,16 @@ class PaymentViewSet(viewsets.GenericViewSet):
         order = Verify.get_order_by_api_user(api_user,order_id)
         campaign = Verify.get_campaign_from_order(order)
 
-        firstdata = campaign.meta_payment.get('sg',{}).get('firstdata')   #TODO REMOVE SG layer
+        firstdata = campaign.meta_payment.get('first_data')   #TODO REMOVE SG layer
 
         if not firstdata:
             raise ApiVerifyError('no firstdata credential')
         
         chargetotal = order.total
-        currency = firstdata.get('ipg_currency')
-        storeId = firstdata.get('ipg_storeId')
-        timezone = firstdata.get('ipg_timezone')
-        sharedSecret = firstdata.get('ipg_sharedSecret')
+        currency = firstdata.get('first_data_currency')
+        storeId = firstdata.get('first_data_storeId')
+        timezone = firstdata.get('first_data_timezone')
+        sharedSecret = firstdata.get('first_data_sharedSecret')
         txndatetime = getDateTime(timezone)
 
         credential = {
@@ -151,13 +151,13 @@ class PaymentViewSet(viewsets.GenericViewSet):
         order_id, = getparams(request, ('order_id',), with_user=False)
         order = Verify.get_order(order_id)
         campaign = Verify.get_campaign_from_order(order)
-        firstdata = campaign.meta_payment.get('sg',{}).get('firstdata')   #TODO REMOVE SG layer
+        firstdata = campaign.meta_payment.get('first_data')   #TODO REMOVE SG layer
 
         if not firstdata:
             raise ApiVerifyError('no firstdata credential')
 
-        storeId = firstdata.get('ipg_storeId')
-        sharedSecret = firstdata.get('ipg_sharedSecret')
+        storeId = firstdata.get('first_data_storeId')
+        sharedSecret = firstdata.get('first_data_sharedSecret')
 
         parameter_string = sharedSecret+approval_code+chargetotal+currency+txndatetime+storeId
         ascii = binascii.b2a_hex(parameter_string.encode())   
@@ -187,16 +187,18 @@ class PaymentViewSet(viewsets.GenericViewSet):
         
         return HttpResponseRedirect(redirect_to=settings.WEB_SERVER_URL+f'/buyer/order/{order.id}/confirmation')
         
-    @action(detail=False, methods=['POST'])
-    def direct_payment(self, request, *args, **kwargs):
-        platform_name = request.GET["platform_name"]
-        platform_id = request.GET["platform_id"]
-        return Response({
-            'platform_name': platform_name,
-            'platform_id': platform_id
-        })
+    # @action(detail=False, methods=['POST'])
+    # @api_error_handler
+    # def direct_payment(self, request, *args, **kwargs):
+    #     platform_name = request.GET["platform_name"]
+    #     platform_id = request.GET["platform_id"]
+    #     return Response({
+    #         'platform_name': platform_name,
+    #         'platform_id': platform_id
+    #     })
 
     @action(detail=False, methods=['GET'], url_path=r"paypal_payment_create")
+    @api_error_handler
     def paypal_payment_create(self, request, *args, **kwargs):
         """
 
@@ -219,7 +221,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
 
         amount = order_object.total
         campaign_obj = order_object.campaign
-        currency = campaign_obj.meta_payment["sg"]["paypal"]["paypal_currency"]
+        currency = campaign_obj.meta_payment["paypal"]["paypal_currency"]
         if not currency:
             currency = 'SGD' if not order_object.currency else order_object.currency
 
@@ -240,17 +242,18 @@ class PaymentViewSet(viewsets.GenericViewSet):
                 "currency": currency},
             "description": "This is the payment transaction description."
         }]
-        # 之前寫死
+        # 測試用 credential
         # paypalrestsdk.configure({
-        #     "mode": settings.PAYPAL_CONFIG["mode"],
+        #     "mode": settings.PAYPAL_CONFIG["mode"], # test mode
         #     "client_id": settings.PAYPAL_CONFIG["client_id"],
         #     "client_secret": settings.PAYPAL_CONFIG["client_secret"]
         # })
         paypalrestsdk.configure({
-            "mode": "live",  # live
-            "client_id": campaign_obj.meta_payment["sg"]["paypal"]["paypal_clientId"],
-            "client_secret": campaign_obj.meta_payment["sg"]["paypal"]["paypal_secret"]
+            "mode": "live",  # live mode
+            "client_id": campaign_obj.meta_payment["paypal"]["paypal_clientId"],
+            "client_secret": campaign_obj.meta_payment["paypal"]["paypal_secret"]
         })
+        
         payment = paypalrestsdk.Payment({
             "intent": "sale",
             "payer": {
@@ -261,12 +264,16 @@ class PaymentViewSet(viewsets.GenericViewSet):
             },
             "transactions": data
         })
-        if payment.create():
-            print("Payment created successfully")
-        else:
-            print(payment.error)
-            return Response(payment.error)
         print(payment)
+        try:
+            if payment.create():
+                print("Payment created successfully")
+            else:
+                print("Payment error")
+                print(payment.error)
+                return Response(payment.error)
+        except:
+            raise ApiVerifyError("wrong paypal credential")
         for link in payment.links:
             if link.rel == "approval_url":
                 approval_url = str(link.href)
@@ -288,6 +295,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         })
 
     @action(detail=False, methods=['GET'], url_path=r"paypal_payment_complete_check")
+    @api_error_handler
     def paypal_payment_complete_check(self, request, *args, **kwargs):
 
         paymentId = request.GET["paymentId"]
@@ -298,8 +306,8 @@ class PaymentViewSet(viewsets.GenericViewSet):
 
         paypalrestsdk.configure({
             "mode": "live",  # live
-            "client_id": campaign_obj.meta_payment["sg"]["paypal"]["paypal_clientId"],
-            "client_secret": campaign_obj.meta_payment["sg"]["paypal"]["paypal_secret"]
+            "client_id": campaign_obj.meta_payment["paypal"]["paypal_clientId"],
+            "client_secret": campaign_obj.meta_payment["paypal"]["paypal_secret"]
         })
 
         payment = paypalrestsdk.Payment.find(paymentId)
@@ -315,6 +323,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
 
 
     @action(detail=False, methods=['GET'], url_path=r"paypal_cancel")
+    @api_error_handler
     def paypal_cancel(self, request, *args, **kwargs):
         try:
             order_id = request.GET["order_id"]
@@ -341,7 +350,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         order_id = request.query_params.get('order_id')
         order_object = Verify.get_order(order_id)
         campaign = order_object.campaign
-        api_key = campaign.meta_payment.get("sg").get("hitpay").get("hitpay_api_key")
+        api_key = campaign.meta_payment.get("hitpay").get("hitpay_api_key")
 
         order_data = db.api_order.find_one({'id': int(order_id)})
         if not order_data:
@@ -409,7 +418,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         time.sleep(2)
         order_object = Verify.get_order(order_id)
         campaign = order_object.campaign
-        api_key = campaign.meta_payment.get("sg").get("hitpay").get("hitpay_api_key")
+        api_key = campaign.meta_payment.get("hitpay").get("hitpay_api_key")
 
         payment_request_id = db.api_order.find_one({'id': int(order_id)})['checkout_details']['hitpay']['payment_request_id']
 
@@ -500,7 +509,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             order_id = request.data["order_id"]
             order_object = Verify.get_order(order_id)
             campaign = order_object.campaign
-            stripe.api_key = campaign.meta_payment.get("sg").get("stripe").get("stripe_secret")
+            stripe.api_key = campaign.meta_payment.get("stripe").get("stripe_secret")
 
             # stripe.api_key = settings.STRIPE_API_KEY  # for testing
             
@@ -596,7 +605,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             order_id = request.GET["order_id"]
             order_object = Verify.get_order(order_id)
             campaign_object = order_object.campaign
-            stripe.api_key = campaign_object.meta_payment.get("sg").get("stripe").get("stripe_secret")
+            stripe.api_key = campaign_object.meta_payment.get("stripe").get("stripe_secret")
             # stripe.api_key = settings.STRIPE_API_KEY # for testing
             print("stripe.api_key", stripe.api_key)
             session = stripe.checkout.Session.retrieve(request.GET["session_id"])
@@ -689,8 +698,8 @@ class PaymentViewSet(viewsets.GenericViewSet):
 
         order_object = Verify.get_order(order_id)
         campaign_object = order_object.campaign
-        secret_key = campaign_object.meta_payment.get("sg").get("paymongo").get("paymongo_secret")
-
+        secret_key = campaign_object.meta_payment.get("pay_mongo").get("pay_mongo_secret")
+        print("secret_key", secret_key)
         amount = db.api_order.find_one({'id': int(order_id)})['total'] * 100
         amount = 10000
 
@@ -715,6 +724,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
 
         response = requests.request("POST", settings.PAYMONGO_URL, json=payload, headers=headers)
         payMongoResponse = json.loads(response.text)
+        print(payMongoResponse)
         response = {
             'checkout_url': payMongoResponse['data']['attributes']['checkout_url'],
             'reference_number': payMongoResponse['data']['attributes']['reference_number'],
@@ -731,7 +741,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
 
         order_object = Verify.get_order(order_id)
         campaign_object = order_object.campaign
-        secret_key = campaign_object.meta_payment.get("sg").get("paymongo").get("paymongo_secret")
+        secret_key = campaign_object.meta_payment.get("pay_mongo").get("pay_mongo_secret")
 
         message_bytes = secret_key.encode('ascii')
         base64_bytes = base64.b64encode(message_bytes)
@@ -768,7 +778,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
 
         order_object = Verify.get_order(order_id)
         campaign_object = order_object.campaign
-        secret_key = campaign_object.meta_payment.get("sg").get("paymongo").get("paymongo_secret")
+        secret_key = campaign_object.meta_payment.get("pay_mongo").get("pay_mongo_secret")
 
         message_bytes = secret_key.encode('ascii')
         base64_bytes = base64.b64encode(message_bytes)

@@ -546,7 +546,7 @@ class UserViewSet(viewsets.ModelViewSet):
         email_queue.enqueue(
             send_email_job,
             kwargs={
-                "subject": "register_successful",
+                "subject": "Register_successful",
                 "email": "lss@algotech.app", 
                 "template_name": "register_cc.html",
                 "parameters": {
