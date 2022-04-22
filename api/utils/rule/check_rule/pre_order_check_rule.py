@@ -91,7 +91,7 @@ class PreOrderCheckRule():
             return
         if qty > api_campaign_product['max_order_amount']:
             raise PreOrderErrors.PreOrderException(
-                "exceed max order amount")
+                "Value exceeds max order amount.")
 
     @staticmethod
     def is_order_empty(**kwargs):

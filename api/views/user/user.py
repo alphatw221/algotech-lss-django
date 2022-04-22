@@ -489,7 +489,7 @@ class UserViewSet(viewsets.ModelViewSet):
             raise ApiVerifyError('plan option error')
 
         if AuthUser.objects.filter(email = email).exists() or User.objects.filter(email=email, type='user').exists():
-            raise ApiVerifyError('email has already been used')
+            raise ApiVerifyError('This email address has already been registered.')
 
         now = datetime.now(pytz.timezone(timezone)) if timezone in pytz.common_timezones else datetime.now()
         expired_at = now+timedelta(days=30)
@@ -512,7 +512,7 @@ class UserViewSet(viewsets.ModelViewSet):
             "Email":email,
             "Password":password[:4]+"*"*(len(password)-4),
             "Target Country":country,
-            "Your Plan":plan,
+            "Your Plan":"Free Trial",
             "Subscription End Date":expired_at.strftime("%m/%d/%Y %H:%M"),
         }
 
@@ -546,13 +546,14 @@ class UserViewSet(viewsets.ModelViewSet):
         email_queue.enqueue(
             send_email_job,
             kwargs={
-                "subject": "Register_successful",
+                "subject": "New LSS User - " + firstName + ' ' + lastName + ' - ' + plan,
                 "email": "lss@algotech.app", 
                 "template_name": "register_cc.html",
                 "parameters": {
                     'firstName': firstName,
                     'lastName': lastName,
                     'plan': plan,
+                    'phone': contactNumber,
                     'email': email,
                     'password': password,
                     'expired_at': expired_at.strftime("%m/%d/%Y %H:%M"),
@@ -579,7 +580,7 @@ class UserViewSet(viewsets.ModelViewSet):
             raise ApiVerifyError('invalid promo code')
 
         if AuthUser.objects.filter(email=email).exists() or User.objects.filter(email=email, type='user').exists():
-            raise ApiVerifyError('email has already been used')
+            raise ApiVerifyError('This email address has already been registered.')
         
         amount = subscription_plan.get('price',{}).get(period)
         if not amount :
@@ -626,7 +627,7 @@ class UserViewSet(viewsets.ModelViewSet):
         subscription_plan = country_plan.get_plan(plan)
 
         if AuthUser.objects.filter(email = email).exists() or User.objects.filter(email=email, type='user').exists():
-            raise ApiVerifyError('email has already been used')
+            raise ApiVerifyError('This email address has already been registered.')
 
         amount = subscription_plan.get('price',{}).get(period)
 
@@ -702,13 +703,14 @@ class UserViewSet(viewsets.ModelViewSet):
         email_queue.enqueue(
             send_email_job,
             kwargs={
-                "subject": "register_successful",
+                "subject": "New LSS User - " + firstName + ' ' + lastName + ' - ' + plan,
                 "email": "lss@algotech.app", 
                 "template_name": "register_cc.html",
                 "parameters": {
                     'firstName': firstName,
                     'lastName': lastName,
                     'plan': plan,
+                    'phone': contactNumber,
                     'email': email,
                     'password': password,
                     'expired_at': expired_at.strftime("%m/%d/%Y %H:%M"),
