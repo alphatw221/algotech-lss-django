@@ -49,7 +49,8 @@ class Command(BaseCommand):
         # self.test_user_plan()
         # ret = api_twitch_get_access_token()
         # print (ret)
-        self.modify_database()
+        if settings.GCP_API_LOADBALANCER_URL == "https://sb.liveshowseller.ph":
+            self.modify_database()
 
 
     # def campaign_test(self):
@@ -127,7 +128,10 @@ class Command(BaseCommand):
         from api.models.campaign.campaign import Campaign
         def to_dict(input_ordered_dict):
             return loads(dumps(input_ordered_dict))
-        
+        def add_subscribed_country():
+            for obj in UserSubscription.objects.filter(id=1):
+                obj.meta_country['subscribed_country'] = ["PH"]
+                obj.save()
         def modify_meta_payment_from_user_subscription():
             for obj in UserSubscription.objects.all():
                 direct_payment = to_dict(obj.meta_payment.get("direct_payment", {}))
@@ -209,6 +213,7 @@ class Command(BaseCommand):
                         obj.meta_payment = new_mata_payment
                         obj.save()
         
+        add_subscribed_country()
         modify_meta_payment_from_user_subscription()
         modify_meta_payment_from_campaign()
         
