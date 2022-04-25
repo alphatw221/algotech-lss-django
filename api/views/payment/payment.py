@@ -24,6 +24,7 @@ from django.http import HttpResponseRedirect
 from api.utils.common.verify import Verify
 from api.views.payment._payment import HitPay_Helper
 from backend.pymongo.mongodb import db
+from business_policy.payment import PaymentMeta
 from mail.sender.sender import *
 
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
@@ -36,7 +37,6 @@ from mail.sender.sender import send_smtp_mail
 from django.shortcuts import redirect
 import requests
 import pytz
-from api.views.payment._payment import PaymentMeta
 platform_dict = {'facebook':FacebookPage, 'youtube':YoutubeChannel, 'instagram':InstagramProfile}
 
 
