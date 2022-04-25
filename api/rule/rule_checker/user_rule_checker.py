@@ -28,6 +28,5 @@ class SellerChangePasswordRuleChecker(RuleChecker):
 
     check_list=[
         UserCheckRule.is_password_valid,
-        UserCheckRule.is_password_correct,
         UserCheckRule.is_new_password_valid,
     ]
