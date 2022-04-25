@@ -1,3 +1,4 @@
+from calendar import month
 from distutils.sysconfig import EXEC_PREFIX
 import json
 from django.http import HttpResponseRedirect
@@ -7,6 +8,7 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from api.models.instagram.instagram_profile import InstagramProfile, InstagramProfileSerializer
 from api.models.user.user import User, UserSerializer, UserSerializerAccountInfo
 from api.models.youtube.youtube_channel import YoutubeChannel, YoutubeChannelSerializer
+from api.rule.rule_checker.user_rule_checker import DealerCreateAccountRuleChecker,AdminCreateAccountRuleChecker, SellerChangePasswordRuleChecker
 from api.utils.common.common import getdata, getparams
 from api.utils.common.verify import ApiVerifyError
 from api.utils.error_handle.error.api_error import ApiCallerError
@@ -65,13 +67,9 @@ class UserViewSet(viewsets.ModelViewSet):
         name, email, activated_country, months = getdata(request, ("name", "email", "activated_country", "months"), required=True)
         contact_number, timezone, plan  = getdata(request, ("contact_number", "timezone","plan"), required=False)
         
-        #TODO check role
-        #TODO check activated_country
-        #TODO check months
-        #TODO check plan valid 
-
-        if AuthUser.objects.filter(email = email).exists() or User.objects.filter(email=email, type='user').exists():
-            raise ApiVerifyError('This email address has already been registered.')
+        AdminCreateAccountRuleChecker.check(
+            **{'role':role ,'email':email, 'activated_country':activated_country, 'months':months, 'contact_number':plan}
+        )
 
         now = datetime.now(pytz.timezone(timezone)) if timezone in pytz.common_timezones else datetime.now()
         expired_at = now+timedelta(days=30*months) 
@@ -139,15 +137,9 @@ class UserViewSet(viewsets.ModelViewSet):
         name, email, plan, months, activated_country = getdata(request, ("name", "email", "plan", "months", "activated_country"), required=True)
         contact_number, timezone  = getdata(request, ("contact_number", "timezone"), required=False)
         
-        #TODO check dealer status
-        #TODO check license_count
-        #TODO check dealer license_count
-        #TODO check plan valid 
-        #TODO check activated_country
-
-        if AuthUser.objects.filter(email = email).exists() or User.objects.filter(email=email, type='user').exists():
-            raise ApiVerifyError('This email address has already been registered.')
-
+        DealerCreateAccountRuleChecker.check(
+            **{'dealer_user_subscription':dealer_user_subscription, 'email':email, 'activated_country':activated_country, 'months':months, 'contact_number':plan}
+        )
         now = datetime.now(pytz.timezone(timezone)) if timezone in pytz.common_timezones else datetime.now()
         expired_at = now+timedelta(days=30*months) 
         password = ''.join(random.choice(string.ascii_letters+string.digits) for _ in range(8))
@@ -167,6 +159,8 @@ class UserViewSet(viewsets.ModelViewSet):
         User.objects.create(
             name=f'{name}', email=email, type='user', status='valid', phone=contact_number, auth_user=auth_user, user_subscription=user_subscription)
         
+        #TODO subtract dealer lincense
+
         ret = {
             "name":f'{name}',
             "email":email,
@@ -844,3 +838,21 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(UserSerializerAccountInfo(api_user).data, status=status.HTTP_200_OK)
 
 
+
+    @action(detail=False, methods=['POST'], url_path=r'password/change', permission_classes=(IsAuthenticated))
+    @api_error_handler
+    def general_login(self, request):
+
+        password, new_password = getdata(request, ("password","new_password"), required=True)
+
+        auth_user = request.user
+
+        if not auth_user.check_password(password):
+            return Response({"message": "password incorrect"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        SellerChangePasswordRuleChecker.check(**{"password":password,"new_password":new_password})
+
+        auth_user.set_password(new_password)
+        auth_user.save()
+
+        return Response({"message":"complete"}, status=status.HTTP_200_OK)
