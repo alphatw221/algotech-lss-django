@@ -52,12 +52,11 @@ class ProductViewSet(viewsets.ModelViewSet):
         if product_status:
             queryset = queryset.filter(status=product_status)
         if key_word:
-            queryset = queryset.filter(Q(name__icontains=key_word)|Q(tag=[key_word]))
+            queryset = queryset.filter(Q(name__icontains=key_word)|Q(tag__contains=key_word))
         if order_by:
             queryset = queryset.order_by("-"+order_by)
         if after_create:
             queryset = queryset.filter(created_at__gte=after_create)
-
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
