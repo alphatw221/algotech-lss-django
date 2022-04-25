@@ -43,6 +43,7 @@ import pytz
 import stripe
 from backend.python_rq.python_rq import email_queue
 from business_policy.subscription_plan import SubscriptionPlan
+from service.email.email_service import EmailService
 
 platform_info_dict={'facebook':'facebook_info', 'youtube':'youtube_info', 'instagram':'instagram_info', 'google':'google_info'}
 
@@ -601,51 +602,47 @@ class UserViewSet(viewsets.ModelViewSet):
             "Subscription End Date":expired_at.strftime("%m/%d/%Y %H:%M"),
         }
 
-        email_queue.enqueue(
-            send_email_job,
-            kwargs={
-                "subject": i18n_get_register_confirm_mail_subject(),
-                "email": email, 
-                "template_name": "register_confirmation.html",
-                "parameters": {
-                    'firstName': firstName,
-                    'email': email,
-                    'password': password
-                },
-            }, result_ttl=10, failure_ttl=10)
-        
-        email_queue.enqueue(
-            send_email_job,
-            kwargs={
-                "subject": i18n_get_register_activate_mail_subject(),
-                "email": email, 
-                "template_name": "register_activation.html",
-                "parameters": {
-                    'firstName': firstName,
-                    'Plan': plan,
-                    'email': email,
-                    'password': password
-                }
-            }, result_ttl=10, failure_ttl=10)
-        
+        EmailService.send_email_template(
+            i18n_get_register_confirm_mail_subject(),
+            email,
+            "register_confirmation.html",
+            {
+                'firstName': firstName,
+                'email': email,
+                'password': password
+            }
+        )
+
+        EmailService.send_email_template(
+            i18n_get_register_activate_mail_subject(),
+            email,
+            "register_activation.html",
+            {
+                'firstName': firstName,
+                'Plan': plan,
+                'email': email,
+                'password': password
+            }
+        )
+      
         lss_email = 'hello@liveshowseller.ph' if country_code =='PH' else 'lss@algotech.app'
-        email_queue.enqueue(
-            send_email_job,
-            kwargs={
-                "subject": "New LSS User - " + firstName + ' ' + lastName + ' - ' + plan,
-                "email": lss_email, 
-                "template_name": "register_cc.html",
-                "parameters": {
-                    'firstName': firstName,
-                    'lastName': lastName,
-                    'plan': plan,
-                    'phone': contactNumber,
-                    'email': email,
-                    'password': password,
-                    'expired_at': expired_at.strftime("%m/%d/%Y %H:%M"),
-                    'country': country
-                }
-            }, result_ttl=10, failure_ttl=10)
+
+
+        EmailService.send_email_template(
+            "New LSS User - " + firstName + ' ' + lastName + ' - ' + plan,
+            lss_email,
+            "register_cc.html",
+            {
+                'firstName': firstName,
+                'lastName': lastName,
+                'plan': plan,
+                'phone': contactNumber,
+                'email': email,
+                'password': password,
+                'expired_at': expired_at.strftime("%m/%d/%Y %H:%M"),
+                'country': country
+            }
+        )
 
         return Response(ret, status=status.HTTP_200_OK)
 
@@ -855,4 +852,19 @@ class UserViewSet(viewsets.ModelViewSet):
         auth_user.set_password(new_password)
         auth_user.save()
 
+        return Response({"message":"complete"}, status=status.HTTP_200_OK)
+
+    
+
+    @action(detail=False, methods=['POST'], url_path=r'password/forgot', permission_classes=(IsAuthenticated))
+    @api_error_handler
+    def forget_password(self, request):
+
+        auth_user = request.user
+        new_password = ''.join(random.choice(string.ascii_letters+string.digits) for _ in range(8))
+
+        auth_user.set_password(new_password)
+        auth_user.save()
+
+        EmailService.send_email_template("","","",{})
         return Response({"message":"complete"}, status=status.HTTP_200_OK)
