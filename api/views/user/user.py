@@ -57,17 +57,138 @@ class UserViewSet(viewsets.ModelViewSet):
     filterset_fields = []
     pagination_class = UserPagination
 
+#-----------------------------------------admin----------------------------------------------------------------------------------------------
+
+    @action(detail=False, methods=['POST'], url_path=r'admin/create/(?P<role>[^/.]+)', permission_classes=(IsAdminUser,))
+    @api_error_handler
+    def admin_create_user(self, request, role):
+        name, email, activated_country, months = getdata(request, ("name", "email", "activated_country", "months"), required=True)
+        contact_number, timezone, plan  = getdata(request, ("contact_number", "timezone","plan"), required=False)
+        
+        #TODO check role
+        #TODO check activated_country
+        #TODO check months
+        #TODO check plan valid 
+
+        if AuthUser.objects.filter(email = email).exists() or User.objects.filter(email=email, type='user').exists():
+            raise ApiVerifyError('This email address has already been registered.')
+
+        now = datetime.now(pytz.timezone(timezone)) if timezone in pytz.common_timezones else datetime.now()
+        expired_at = now+timedelta(days=30*months) 
+        password = ''.join(random.choice(string.ascii_letters+string.digits) for _ in range(8))
+
+        auth_user = AuthUser.objects.create_user(
+            username=name, email=email, password=password)
+        
+        user_subscription = UserSubscription.objects.create(
+            name=name, 
+            status='new', 
+            expired_at=expired_at, 
+            user_plan= {"activated_platform" : ["facebook","youtube","instagram"]}, 
+            meta_country={ 'activated_country': activated_country },
+            type='dealer' if role=='dealer' else plan,
+            )
+        
+        User.objects.create(
+            name=name, email=email, type='user', status='valid', phone=contact_number, auth_user=auth_user, user_subscription=user_subscription)
+        
+        ret = {
+            "name":name,
+            "email":email,
+            "pass":password,
+            "activated_country":activated_country, 
+            "plan":plan,
+            "expired_at":expired_at.strftime("%m/%d/%Y %H:%M"),
+        }
+
+        return Response(ret, status=status.HTTP_200_OK)
+
+
+    @action(detail=False, methods=['GET'], url_path=r'search_list', permission_classes=(IsAdminUser,))
+    @api_error_handler
+    def search_api_user(self, request):
+        search_column = request.query_params.get('search_column')
+        keyword = request.query_params.get('keyword')
+        kwargs = { search_column + '__icontains': keyword }
+
+        queryset = User.objects.all().order_by('id')
+
+        if search_column != 'undefined' and keyword != 'undefined':
+            queryset = queryset.filter(**kwargs)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            result = self.get_paginated_response(serializer.data)
+            data = result.data
+        else:
+            serializer = self.get_serializer(queryset, many=True)
+            data = serializer.dat
+
+        return Response(data, status=status.HTTP_200_OK)
+
+
+#-----------------------------------------dealer----------------------------------------------------------------------------------------------
+
+    @action(detail=False, methods=['POST'], url_path=r'dealer/create', permission_classes=(IsAuthenticated,))
+    @api_error_handler
+    def dealer_create_user(self, request):
+
+        api_user = Verify.get_seller_user(request)
+        dealer_user_subscription = Verify.get_dealer_user_subscription_from_api_user(api_user)
+
+        name, email, plan, months, activated_country = getdata(request, ("name", "email", "plan", "months", "activated_country"), required=True)
+        contact_number, timezone  = getdata(request, ("contact_number", "timezone"), required=False)
+        
+        #TODO check dealer status
+        #TODO check license_count
+        #TODO check dealer license_count
+        #TODO check plan valid 
+        #TODO check activated_country
+
+        if AuthUser.objects.filter(email = email).exists() or User.objects.filter(email=email, type='user').exists():
+            raise ApiVerifyError('This email address has already been registered.')
+
+        now = datetime.now(pytz.timezone(timezone)) if timezone in pytz.common_timezones else datetime.now()
+        expired_at = now+timedelta(days=30*months) 
+        password = ''.join(random.choice(string.ascii_letters+string.digits) for _ in range(8))
+
+        auth_user = AuthUser.objects.create_user(
+            username=f'{name}', email=email, password=password)
+        
+        user_subscription = UserSubscription.objects.create(
+            name=f'{name}', 
+            status='new', 
+            expired_at=expired_at, 
+            user_plan= {"activated_platform" : ["facebook","youtube","instagram"]}, 
+            meta_country={ 'activated_country': activated_country },
+            type=plan,
+            dealer = dealer_user_subscription)
+        
+        User.objects.create(
+            name=f'{name}', email=email, type='user', status='valid', phone=contact_number, auth_user=auth_user, user_subscription=user_subscription)
+        
+        ret = {
+            "name":f'{name}',
+            "email":email,
+            "pass":password,
+            "activated_country":activated_country, 
+            "plan":plan,
+            "expired_at":expired_at.strftime("%m/%d/%Y %H:%M"),
+        }
+
+        return Response(ret, status=status.HTTP_200_OK)
+
+
+#-----------------------------------------buyer----------------------------------------------------------------------------------------------
+
+
     #facebook
     @action(detail=False, methods=['POST'], url_path=r'customer_login')
     @api_error_handler
     def customer_login(self, request, pk=None):
         return facebook_login_helper(request, user_type='customer')
 
-    #facebook
-    @action(detail=False, methods=['POST'], url_path=r'user_login')
-    @api_error_handler
-    def user_login(self, request, pk=None):
-        return facebook_login_helper(request, user_type='user')
+    
 
     
     #google
@@ -132,6 +253,18 @@ class UserViewSet(viewsets.ModelViewSet):
 
         return ret
         
+    @action(detail=False, methods=['GET'], url_path=r'google_customer_login_callback')
+    @api_error_handler
+    def google_customer_login_callback(self, request):
+        return google_login_helper(request, user_type='customer')
+
+
+#-----------------------------------------seller----------------------------------------------------------------------------------------------
+    #facebook
+    @action(detail=False, methods=['POST'], url_path=r'user_login')
+    @api_error_handler
+    def user_login(self, request, pk=None):
+        return facebook_login_helper(request, user_type='user')
 
     #google
     @action(detail=False, methods=['POST'], url_path=r'user_google_login')
@@ -227,10 +360,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 
-    @action(detail=False, methods=['GET'], url_path=r'google_customer_login_callback')
-    @api_error_handler
-    def google_customer_login_callback(self, request):
-        return google_login_helper(request, user_type='customer')
+    
 
     @action(detail=False, methods=['GET'], url_path=r'google_user_login_callback')
     @api_error_handler
@@ -436,45 +566,6 @@ class UserViewSet(viewsets.ModelViewSet):
                 pictures.append(picture)
         return Response(pictures, status=status.HTTP_200_OK)
 
-
-    
-    @action(detail=False, methods=['POST'], url_path=r'create/valid_api_user', permission_classes=(IsAdminUser,))
-    # @action(detail=False, methods=['POST'], url_path=r'create/valid_api_user', permission_classes=(IsAuthenticated,))
-    @api_error_handler
-    def create_valid_api_user(self, request):
-        name, email = getdata(request, ("name","email"), required=True)
-
-        # print(name,email)
-        if User.objects.filter(email=email, type='user').exists():
-            api_user = User.objects.get(email=email, type='user')
-            api_user.status='valid'
-            api_user.save()
-        else:
-            User.objects.create(name=name, email=email, type='user', status='valid')
-
-        return Response("ok", status=status.HTTP_200_OK)
-    
-    @action(detail=False, methods=['GET'], url_path=r'search_list', permission_classes=(IsAdminUser,))
-    @api_error_handler
-    def search_api_user(self, request):
-        search_column = request.query_params.get('search_column')
-        keyword = request.query_params.get('keyword')
-        kwargs = { search_column + '__icontains': keyword }
-
-        queryset = User.objects.all().order_by('id')
-
-        if search_column != 'undefined' and keyword != 'undefined':
-            queryset = queryset.filter(**kwargs)
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            result = self.get_paginated_response(serializer.data)
-            data = result.data
-        else:
-            serializer = self.get_serializer(queryset, many=True)
-            data = serializer.dat
-
-        return Response(data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['POST'], url_path=r'register/trial/(?P<country_code>[^/.]+)', permission_classes=())
     @api_error_handler
