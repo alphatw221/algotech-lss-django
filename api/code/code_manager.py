@@ -26,7 +26,6 @@ class CodeManager():
     def _decode(cls, code):
 
         message_string = cls._fernet.decrypt(code.encode()).decode()
-        print(message_string)
         parameters = message_string.split('|')
 
         data = cls.data_format.copy()
