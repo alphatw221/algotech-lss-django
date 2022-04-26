@@ -64,6 +64,6 @@ class UserCheckRule():
         pass
 
     @staticmethod
-    def is_new_password_valid(*kwargs):
+    def is_new_password_valid(**kwargs):
         new_password = kwargs.get('new_password')
         pass
