@@ -297,7 +297,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             
             user_subscription.lang = language
             user_subscription.save()
-            return Response(UserSubscriptionSerializerSimplify(user_subscription).data, status=status.HTTP_200_OK)
+            return Response(UserSubscriptionSerializerSimplify(user_subscription).data['lang'], status=status.HTTP_200_OK)
 
     
     @action(detail=False, methods=['PUT'], url_path=r'update_note', permission_classes=(IsAuthenticated,))
