@@ -5,10 +5,11 @@ from django.http import HttpResponseRedirect
 from rest_framework import serializers, status, viewsets
 from rest_framework.decorators import action, permission_classes
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from api.code.password_code_manager import PasswordResetCodeManager
 from api.models.instagram.instagram_profile import InstagramProfile, InstagramProfileSerializer
 from api.models.user.user import User, UserSerializer, UserSerializerAccountInfo
 from api.models.youtube.youtube_channel import YoutubeChannel, YoutubeChannelSerializer
-from api.rule.rule_checker.user_rule_checker import DealerCreateAccountRuleChecker,AdminCreateAccountRuleChecker, SellerChangePasswordRuleChecker
+from api.rule.rule_checker.user_rule_checker import DealerCreateAccountRuleChecker,AdminCreateAccountRuleChecker, SellerChangePasswordRuleChecker, SellerResetPasswordRuleChecker
 from api.utils.common.common import getdata, getparams
 from api.utils.common.verify import ApiVerifyError
 from api.utils.error_handle.error.api_error import ApiCallerError
@@ -627,12 +628,8 @@ class UserViewSet(viewsets.ModelViewSet):
       
         lss_email = 'hello@liveshowseller.ph' if country_code =='PH' else 'lss@algotech.app'
 
-
-        EmailService.send_email_template(
-            "New LSS User - " + firstName + ' ' + lastName + ' - ' + plan,
-            lss_email,
-            "register_cc.html",
-            {
+        subject = "New LSS User - " + firstName + ' ' + lastName + ' - ' + plan
+        EmailService.send_email_template(subject,lss_email,"register_cc.html",{
                 'firstName': firstName,
                 'lastName': lastName,
                 'plan': plan,
@@ -641,8 +638,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 'password': password,
                 'expired_at': expired_at.strftime("%m/%d/%Y %H:%M"),
                 'country': country
-            }
-        )
+            })
 
         return Response(ret, status=status.HTTP_200_OK)
 
@@ -756,43 +752,25 @@ class UserViewSet(viewsets.ModelViewSet):
             "Receipt":paymentIntent.charges.get('data')[0].get('receipt_url')
         }
 
-        email_queue.enqueue(
-            send_email_job,
-            kwargs={
-                "subject": i18n_get_register_confirm_mail_subject(),
-                "email": email, 
-                "template_name": "register_confirmation.html",
-                "parameters": {
+        EmailService.send_email_template(i18n_get_register_confirm_mail_subject(),email,"register_confirmation.html",{
                     'firstName': firstName,
                     'email': email,
                     'password': password
-                }
-            }, result_ttl=10, failure_ttl=10)
-        
-        email_queue.enqueue(
-            send_email_job,
-            kwargs={
-                "subject": i18n_get_register_activate_mail_subject(),
-                "email": email, 
-                "template_name": "register_activation.html",
-                "parameters": {
+                })
+
+        EmailService.send_email_template(i18n_get_register_activate_mail_subject(),email,"register_activation.html",{
                     'firstName': firstName,
                     'Plan': subscription_plan.get('text'),
                     'email': email,
                     'password': password
-                }
-            }, result_ttl=10, failure_ttl=10)
+                })
         
         lss_email = 'lss@algotech.app'
         if country_code == 'PH':
             lss_email = 'hello@liveshowseller.ph'
-        email_queue.enqueue(
-            send_email_job,
-            kwargs={
-                "subject": "New LSS User - " + firstName + ' ' + lastName + ' - ' + plan,
-                "email": lss_email, 
-                "template_name": "register_cc.html",
-                "parameters": {
+
+        subject = "New LSS User - " + firstName + ' ' + lastName + ' - ' + plan
+        EmailService.send_email_template(subject,lss_email,"register_cc.html",{
                     'firstName': firstName,
                     'lastName': lastName,
                     'plan': subscription_plan.get('text'),
@@ -801,8 +779,7 @@ class UserViewSet(viewsets.ModelViewSet):
                     'password': password,
                     'expired_at': expired_at.strftime("%m/%d/%Y %H:%M"),
                     'country': country
-                }
-            }, result_ttl=10, failure_ttl=10)
+                })
 
         return Response(ret, status=status.HTTP_200_OK)
     
@@ -856,15 +833,29 @@ class UserViewSet(viewsets.ModelViewSet):
 
     
 
-    @action(detail=False, methods=['POST'], url_path=r'password/forgot', permission_classes=(IsAuthenticated))
+    @action(detail=False, methods=['POST'], url_path=r'password/forgot')
     @api_error_handler
     def forget_password(self, request):
 
-        auth_user = request.user
-        new_password = ''.join(random.choice(string.ascii_letters+string.digits) for _ in range(8))
+        email, = getdata(request, ("email",), required=True)
 
-        auth_user.set_password(new_password)
-        auth_user.save()
+        if not AuthUser.objects.filter(email=email).exists() or not User.objects.filter(email=email,type='user').exists():
+            raise ApiVerifyError('email invalid')
 
-        EmailService.send_email_template("","","",{})
-        return Response({"message":"complete"}, status=status.HTTP_200_OK)
+        auth_user = AuthUser.objects.get(email=email)
+        code = PasswordResetCodeManager.generate(auth_user.id)
+
+        EmailService.send_email_template("test",email,"forget_password.html",{"code":code,"username":auth_user.username})
+        return Response({"message":"please check email"}, status=status.HTTP_200_OK)
+
+    
+    @action(detail=False, methods=['POST'], url_path=r'password/reset')
+    @api_error_handler
+    def reset_password(self, request):
+
+        code, new_password = getdata(request, ( "code","new_password"), required=True)
+
+        SellerResetPasswordRuleChecker.check(**{"new_password":new_password})
+        ret = PasswordResetCodeManager.execute(code, new_password)
+        
+        return Response(ret, status=status.HTTP_200_OK)
