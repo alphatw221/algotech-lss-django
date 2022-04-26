@@ -235,16 +235,18 @@ LOCALE_PATHS = [os.path.join(BASE_DIR, 'locale')]
 
 LANGUAGES = [
     ('en', 'English'),
-    ('zh-hans', 'Simplified Chinese'),
-    ('zh-hant', 'Traditional Chinese'),
+    ('cn', 'Simplified Chinese'),
+    ('tw', 'Traditional Chinese'),
     ('id', 'Indonesian'),
+    ('us','English')
 ]
 
 SUPPORTED_LANGUAGES = {
     'en',
-    'zh-hans',
-    'zh-hant',
-    'id'
+    'cn',
+    'tw',
+    'id',
+    'us'
 }
 
 # Static files (CSS, JavaScript, Images)
