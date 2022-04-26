@@ -283,21 +283,26 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-    @action(detail=False, methods=['GET','POST'], url_path=r'update_language', permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['GET'], url_path=r'language', permission_classes=(IsAuthenticated,))
+    @api_error_handler
+    def get_language(self, request):
+
+        api_user = Verify.get_seller_user(request)
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        return Response(user_subscription.lang, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['PUT'], url_path=r'language/update', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def update_language(self, request):
 
         api_user = Verify.get_seller_user(request)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
-        if request.method == "GET":
-            return Response(user_subscription.lang, status=status.HTTP_200_OK)
-        else:
-            language, = getdata(request, ('language',))
-            Verify.language_supported(language)
+        language, = getdata(request, ('language',))
+        Verify.language_supported(language)
             
-            user_subscription.lang = language
-            user_subscription.save()
-            return Response(UserSubscriptionSerializerSimplify(user_subscription).data['lang'], status=status.HTTP_200_OK)
+        user_subscription.lang = language
+        user_subscription.save()
+        return Response(UserSubscriptionSerializerSimplify(user_subscription).data['lang'], status=status.HTTP_200_OK)
 
     
     @action(detail=False, methods=['PUT'], url_path=r'update_note', permission_classes=(IsAuthenticated,))
