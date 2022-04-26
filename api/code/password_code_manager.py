@@ -5,7 +5,8 @@ from datetime import datetime
 from django.contrib.auth.models import User as AuthUser
 
 from service.email.email_service import EmailService
-
+from rest_framework.response import Response
+from rest_framework import status
 class PasswordResetCodeManager(CodeManager):
 
     code_key="reset_password"
@@ -42,4 +43,9 @@ class PasswordResetCodeManager(CodeManager):
         auth_user.set_password(new_password)
         auth_user.save()
 
-        EmailService.send_email_template("","","",{})
+        # EmailService.send_email_template("",auth_user.email,"",{})
+
+        return {
+            "User Name":auth_user.username,
+            "New Password":new_password[:4]+"*"*(len(new_password)-4)
+        }

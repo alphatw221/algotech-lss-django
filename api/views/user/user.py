@@ -837,23 +837,25 @@ class UserViewSet(viewsets.ModelViewSet):
     @api_error_handler
     def forget_password(self, request):
 
-        auth_user = request.user
-        new_password = ''.join(random.choice(string.ascii_letters+string.digits) for _ in range(8))
+        email, = getdata(request, ("email",), required=True)
 
-        auth_user.set_password(new_password)
-        auth_user.save()
+        if not AuthUser.objects.filter(email=email).exists() or not User.objects.filter(email=email,type='user').exists():
+            raise ApiVerifyError('email invalid')
 
-        EmailService.send_email_template("","","",{})
-        return Response({"message":"complete"}, status=status.HTTP_200_OK)
+        auth_user = AuthUser.objects.get(email=email)
+        code = PasswordResetCodeManager.generate(auth_user.id)
+
+        EmailService.send_email_template("test",email,"forget_password.html",{"code":code,"username":auth_user.username})
+        return Response({"message":"please check email"}, status=status.HTTP_200_OK)
 
     
     @action(detail=False, methods=['POST'], url_path=r'password/reset')
     @api_error_handler
-    def general_login(self, request):
+    def reset_password(self, request):
 
-        code, new_password = getdata(request, ("code","new_password"), required=True)
+        code, new_password = getdata(request, ( "code","new_password"), required=True)
 
         SellerResetPasswordRuleChecker.check(**{"new_password":new_password})
-        PasswordResetCodeManager.execute(code,new_password)
+        ret = PasswordResetCodeManager.execute(code, new_password)
         
-        return Response({"message":"complete"}, status=status.HTTP_200_OK)
+        return Response(ret, status=status.HTTP_200_OK)

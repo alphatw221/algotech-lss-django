@@ -24,8 +24,11 @@ class CodeManager():
 
     @classmethod
     def _decode(cls, code):
-
-        message_string = cls._fernet.decrypt(code.encode()).decode()
+        try:
+            message_string = cls._fernet.decrypt(code.encode()).decode()
+        except Exception:
+            raise ApiVerifyError('invalid token')
+            
         parameters = message_string.split('|')
 
         data = cls.data_format.copy()
