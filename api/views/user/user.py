@@ -844,8 +844,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
         auth_user = AuthUser.objects.get(email=email)
         code = PasswordResetCodeManager.generate(auth_user.id)
-
-        EmailService.send_email_template("test",email,"forget_password.html",{"code":code,"username":auth_user.username})
+        EmailService.send_email_template("test",email,"forgot_password.html",{"code":code,"username":auth_user.username})
         return Response({"message":"please check email"}, status=status.HTTP_200_OK)
 
     
