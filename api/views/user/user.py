@@ -833,7 +833,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     
 
-    @action(detail=False, methods=['POST'], url_path=r'password/forgot', permission_classes=(IsAuthenticated))
+    @action(detail=False, methods=['POST'], url_path=r'password/forgot')
     @api_error_handler
     def forget_password(self, request):
 
