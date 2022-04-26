@@ -238,13 +238,15 @@ LANGUAGES = [
     ('zh-hans', 'Simplified Chinese'),
     ('zh-hant', 'Traditional Chinese'),
     ('id', 'Indonesian'),
+    ('us','English')
 ]
 
 SUPPORTED_LANGUAGES = {
     'en',
     'zh-hans',
     'zh-hant',
-    'id'
+    'id',
+    'us'
 }
 
 # Static files (CSS, JavaScript, Images)
