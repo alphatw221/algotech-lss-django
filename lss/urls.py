@@ -24,6 +24,7 @@ from lss.views.custom_jwt import (CustomTokenObtainPairView,
                                   CustomTokenVerifyView)
 from django.views.generic import TemplateView
 
+from lss.views.email import test
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),
@@ -47,5 +48,5 @@ urlpatterns = [
 
     re_path(r'^lss/',TemplateView.as_view(template_name="lss_entry.html")),
 
-    path('email/',TemplateView.as_view(template_name="email_reset_password_link.html") ),
+    path('email/',test,name='test')
 ]
