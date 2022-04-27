@@ -17,6 +17,7 @@ from api.utils.common.verify import ApiVerifyError
 from api.utils.common.common import getdata,getparams
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 from bson.json_util import loads, dumps
+from api.utils.rule.rule_checker.user_subscription_rule_checker import CreateCampaignRuleChecker
 
 
 def verify_seller_request(api_user):
@@ -118,6 +119,9 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         api_user = Verify.get_seller_user(request)
         # platform = verify_request(api_user, platform_name, platform_id)
+        ret = CreateCampaignRuleChecker.check(**{
+            'api_user': api_user
+        })
 
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
         # campaigns = user_subscription.campaigns.all()
@@ -131,7 +135,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         campaign = serializer.save()
         
-        data = json_data['meta_payment']['direct_payment']
+        data = json_data['meta_payment']['sg']['direct_payment']
         if 'accounts' in data:
                 for account_number, account_info in data['accounts'].items():
                     if account_number in request.data and request.data[account_number]:
@@ -276,11 +280,13 @@ class CampaignViewSet(viewsets.ModelViewSet):
     #TODO @Dereck Move to instagram_profile view
     @action(detail=False, methods=['GET'], url_path=r'ig_comment', permission_classes = (IsAuthenticated,))
     @api_error_handler
-    def seller_total_revenue(self, request):
-        api_user = request.user.api_users.get(type='user')
-        campaign_id = request.query_params.get('campaign_id')
-        comment_id = request.query_params.get('comment_id')
-        platform = request.query_params.get('platform')
+    def get_ig_comment(self, request):
+        api_user, campaign_id, comment_id = getparams(request, ('campaign_id', 'comment_id',), with_user=True, seller=True)
+        
+        # api_user = request.user.api_users.get(type='user')
+        # campaign_id = request.query_params.get('campaign_id')
+        # comment_id = request.query_params.get('comment_id')
+        # platform = request.query_params.get('platform')
         comments_list = []
 
         is_user = verify_seller_request(api_user)
@@ -288,23 +294,25 @@ class CampaignViewSet(viewsets.ModelViewSet):
             if int(comment_id) == 0:
                 comment_datas = db.api_campaign_comment.find({'campaign_id': int(campaign_id), 'platform': 'instagram'})
                 for comment_data in comment_datas:
-                    commentJson = {}
-                    commentJson['customer_name'] = comment_data['customer_name']
-                    commentJson['id'] = comment_data['id']                        
-                    commentJson['message'] = comment_data['message']
-                    commentJson['created_at'] = comment_data['created_time']
-                    commentJson['image'] = comment_data['image']
+                    commentJson = {
+                        'customer_name': comment_data['customer_name'],
+                        'id': comment_data['id'],
+                        'message': comment_data['message'],
+                        'created_at': comment_data['created_at'],
+                        'image': comment_data['image'],
+                    }
                     comments_list.append(commentJson)
             else:
                 last_time = db.api_campaign_comment.find_one({'campaign_id': int(campaign_id), 'id': comment_id, 'platform': 'instagram'})['created_time']
                 comment_datas = db.api_campaign_comment.find({'campaign_id': int(campaign_id), 'created_time': {'$gt': last_time}, 'platform': 'instagram'})
                 for comment_data in comment_datas:
-                    commentJson = {}
-                    commentJson['customer_name'] = comment_data['customer_name']
-                    commentJson['id'] = comment_data['id']                        
-                    commentJson['message'] = comment_data['message']
-                    commentJson['created_at'] = comment_data['created_time']
-                    commentJson['image'] = comment_data['image']
+                    commentJson = {
+                        'customer_name': comment_data['customer_name'],
+                        'id': comment_data['id'],
+                        'message': comment_data['message'],
+                        'created_at': comment_data['created_at'],
+                        'image': comment_data['image'],
+                    }
                     comments_list.append(commentJson)
 
         return Response(comments_list, status=status.HTTP_200_OK)
