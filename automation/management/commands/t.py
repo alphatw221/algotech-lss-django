@@ -270,44 +270,6 @@ class Command(BaseCommand):
 
         from backend.python_rq.python_rq import email_queue
         from automation.jobs.send_email_job import send_email_job
-        kwargs={
-                "subject": 'test',
-                "email": 'lss@algotech.app', 
-                "template_name": "register_cc.html",
-                "parameters": {
-                    'firstName': 'firstName',
-                    'lastName': 'lastName',
-                    'phone': '0000000000',
-                    'plan': 'aaaaaa',
-                    'email': 'aaaaa',
-                    'password': 'aaaaa',
-                    'expired_at': 'aaaaa',
-                    'country': 'aaaa'
-                },
-                "file": None, 
-            }
-        send_email_job(**kwargs)
-        
-        # email_queue.enqueue(send_email_job,args=('alphatw22193@gmail.com', None, "test", None, None, None), result_ttl=10, failure_ttl=10)
-        # email_queue.enqueue(
-        #     send_email_job,
-        #     kwargs={
-        #         "subject": "New LSS User - firstName lastName - Free Trial",
-        #         "email": 'derekhwang33@gmail.com', 
-        #         "template_name": "register_cc.html",
-        #         "parameters": {
-        #             'firstName': 'firstName',
-        #             'lastName': 'lastName',
-        #             'phone': '0000000000000',
-        #             'plan': 'aaaaaa',
-        #             'email': 'aaaaa',
-        #             'password': 'aaaaa',
-        #             'expired_at': 'aaaaa',
-        #             'country': 'aaaa'
-        #         },
-        #         "file": None, 
-        #     }
-        # send_email_job(**kwargs)
         
         # email_queue.enqueue(send_email_job,args=('alphatw22193@gmail.com', None, "test", None, None, None), result_ttl=10, failure_ttl=10)
         email_queue.enqueue(
