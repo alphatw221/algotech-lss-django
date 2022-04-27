@@ -129,9 +129,9 @@ class Command(BaseCommand):
         from api.models.campaign.campaign import Campaign
         def to_dict(input_ordered_dict):
             return loads(dumps(input_ordered_dict))
-        def add_subscribed_country():
+        def add_activated_country():
             for obj in UserSubscription.objects.filter(id=1):
-                obj.meta_country['subscribed_country'] = ["PH"]
+                obj.meta_country['activated_country'] = ["PH"]
                 obj.save()
         def modify_meta_payment_from_user_subscription():
             for obj in UserSubscription.objects.all():
@@ -214,7 +214,7 @@ class Command(BaseCommand):
                         obj.meta_payment = new_mata_payment
                         obj.save()
         
-        add_subscribed_country()
+        add_activated_country()
         modify_meta_payment_from_user_subscription()
         modify_meta_payment_from_campaign()
         

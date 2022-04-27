@@ -24,6 +24,7 @@ from django.http import HttpResponseRedirect
 from api.utils.common.verify import Verify
 from api.views.payment._payment import HitPay_Helper
 from backend.pymongo.mongodb import db
+from business_policy.payment import PaymentMeta
 from mail.sender.sender import *
 
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
@@ -36,7 +37,6 @@ from mail.sender.sender import send_smtp_mail
 from django.shortcuts import redirect
 import requests
 import pytz
-from api.views.payment._payment import PaymentMeta
 platform_dict = {'facebook':FacebookPage, 'youtube':YoutubeChannel, 'instagram':InstagramProfile}
 
 
@@ -818,10 +818,10 @@ class PaymentViewSet(viewsets.GenericViewSet):
         payment_method = {}
         api_user = Verify.get_seller_user(request)
         api_user_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
-        subscribed_country = api_user_user_subscription.meta_country.get("subscribed_country", {})
-        if not subscribed_country:
-            raise ApiVerifyError("no subscribed country")
-        for i in subscribed_country:
+        activated_country = api_user_user_subscription.meta_country.get("activated_country", {})
+        if not activated_country:
+            raise ApiVerifyError("no activated country")
+        for i in activated_country:
             print(i)
             payment_method.update(PaymentMeta.get_meta(i))
         return Response(payment_method, status=status.HTTP_200_OK)

@@ -4,9 +4,11 @@ from django.http import HttpResponseRedirect
 from rest_framework import serializers, status, viewsets
 from rest_framework.decorators import action, permission_classes
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from api.code.password_code_manager import PasswordResetCodeManager
 from api.models.instagram.instagram_profile import InstagramProfile, InstagramProfileSerializer
 from api.models.user.user import User, UserSerializer, UserSerializerAccountInfo
 from api.models.youtube.youtube_channel import YoutubeChannel, YoutubeChannelSerializer
+from api.rule.rule_checker.user_rule_checker import DealerCreateAccountRuleChecker,AdminCreateAccountRuleChecker, SellerChangePasswordRuleChecker, SellerResetPasswordRuleChecker
 from api.utils.common.common import getdata, getparams
 from api.utils.common.verify import ApiVerifyError
 from api.utils.error_handle.error.api_error import ApiCallerError
@@ -39,6 +41,7 @@ from django.contrib.auth.models import User as AuthUser
 import pytz, stripe
 from backend.python_rq.python_rq import email_queue
 from business_policy.subscription_plan import SubscriptionPlan
+from service.email.email_service import EmailService
 
 from django.http import HttpResponse
 import xlsxwriter
@@ -61,17 +64,130 @@ class UserViewSet(viewsets.ModelViewSet):
     filterset_fields = []
     pagination_class = UserPagination
 
+#-----------------------------------------admin----------------------------------------------------------------------------------------------
+
+    @action(detail=False, methods=['POST'], url_path=r'admin/create/(?P<role>[^/.]+)', permission_classes=(IsAdminUser,))
+    @api_error_handler
+    def admin_create_user(self, request, role):
+        name, email, activated_country, months = getdata(request, ("name", "email", "activated_country", "months"), required=True)
+        contact_number, timezone, plan  = getdata(request, ("contact_number", "timezone","plan"), required=False)
+        
+        AdminCreateAccountRuleChecker.check(
+            **{'role':role ,'email':email, 'activated_country':activated_country, 'months':months, 'contact_number':plan}
+        )
+
+        now = datetime.now(pytz.timezone(timezone)) if timezone in pytz.common_timezones else datetime.now()
+        expired_at = now+timedelta(days=30*months) 
+        password = ''.join(random.choice(string.ascii_letters+string.digits) for _ in range(8))
+
+        auth_user = AuthUser.objects.create_user(
+            username=name, email=email, password=password)
+        
+        user_subscription = UserSubscription.objects.create(
+            name=name, 
+            status='new', 
+            expired_at=expired_at, 
+            user_plan= {"activated_platform" : ["facebook","youtube","instagram"]}, 
+            meta_country={ 'activated_country': activated_country },
+            type='dealer' if role=='dealer' else plan,
+            )
+        
+        User.objects.create(
+            name=name, email=email, type='user', status='valid', phone=contact_number, auth_user=auth_user, user_subscription=user_subscription)
+        
+        ret = {
+            "name":name,
+            "email":email,
+            "pass":password,
+            "activated_country":activated_country, 
+            "plan":plan,
+            "expired_at":expired_at.strftime("%m/%d/%Y %H:%M"),
+        }
+
+        return Response(ret, status=status.HTTP_200_OK)
+
+
+    @action(detail=False, methods=['GET'], url_path=r'search_list', permission_classes=(IsAdminUser,))
+    @api_error_handler
+    def search_api_user(self, request):
+        search_column = request.query_params.get('search_column')
+        keyword = request.query_params.get('keyword')
+        kwargs = { search_column + '__icontains': keyword }
+
+        queryset = User.objects.all().order_by('id')
+
+        if search_column != 'undefined' and keyword != 'undefined':
+            queryset = queryset.filter(**kwargs)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            result = self.get_paginated_response(serializer.data)
+            data = result.data
+        else:
+            serializer = self.get_serializer(queryset, many=True)
+            data = serializer.dat
+
+        return Response(data, status=status.HTTP_200_OK)
+
+
+#-----------------------------------------dealer----------------------------------------------------------------------------------------------
+
+    @action(detail=False, methods=['POST'], url_path=r'dealer/create', permission_classes=(IsAuthenticated,))
+    @api_error_handler
+    def dealer_create_user(self, request):
+
+        api_user = Verify.get_seller_user(request)
+        dealer_user_subscription = Verify.get_dealer_user_subscription_from_api_user(api_user)
+
+        name, email, plan, months, activated_country = getdata(request, ("name", "email", "plan", "months", "activated_country"), required=True)
+        contact_number, timezone  = getdata(request, ("contact_number", "timezone"), required=False)
+        
+        DealerCreateAccountRuleChecker.check(
+            **{'dealer_user_subscription':dealer_user_subscription, 'email':email, 'activated_country':activated_country, 'months':months, 'contact_number':plan}
+        )
+        now = datetime.now(pytz.timezone(timezone)) if timezone in pytz.common_timezones else datetime.now()
+        expired_at = now+timedelta(days=30*months) 
+        password = ''.join(random.choice(string.ascii_letters+string.digits) for _ in range(8))
+
+        auth_user = AuthUser.objects.create_user(
+            username=f'{name}', email=email, password=password)
+        
+        user_subscription = UserSubscription.objects.create(
+            name=f'{name}', 
+            status='new', 
+            expired_at=expired_at, 
+            user_plan= {"activated_platform" : ["facebook","youtube","instagram"]}, 
+            meta_country={ 'activated_country': activated_country },
+            type=plan,
+            dealer = dealer_user_subscription)
+        
+        User.objects.create(
+            name=f'{name}', email=email, type='user', status='valid', phone=contact_number, auth_user=auth_user, user_subscription=user_subscription)
+        
+        #TODO subtract dealer lincense
+
+        ret = {
+            "name":f'{name}',
+            "email":email,
+            "pass":password,
+            "activated_country":activated_country, 
+            "plan":plan,
+            "expired_at":expired_at.strftime("%m/%d/%Y %H:%M"),
+        }
+
+        return Response(ret, status=status.HTTP_200_OK)
+
+
+#-----------------------------------------buyer----------------------------------------------------------------------------------------------
+
+
     #facebook
     @action(detail=False, methods=['POST'], url_path=r'customer_login')
     @api_error_handler
     def customer_login(self, request, pk=None):
         return facebook_login_helper(request, user_type='customer')
 
-    #facebook
-    @action(detail=False, methods=['POST'], url_path=r'user_login')
-    @api_error_handler
-    def user_login(self, request, pk=None):
-        return facebook_login_helper(request, user_type='user')
+    
 
     
     #google
@@ -136,6 +252,18 @@ class UserViewSet(viewsets.ModelViewSet):
 
         return ret
         
+    @action(detail=False, methods=['GET'], url_path=r'google_customer_login_callback')
+    @api_error_handler
+    def google_customer_login_callback(self, request):
+        return google_login_helper(request, user_type='customer')
+
+
+#-----------------------------------------seller----------------------------------------------------------------------------------------------
+    #facebook
+    @action(detail=False, methods=['POST'], url_path=r'user_login')
+    @api_error_handler
+    def user_login(self, request, pk=None):
+        return facebook_login_helper(request, user_type='user')
 
     #google
     @action(detail=False, methods=['POST'], url_path=r'user_google_login')
@@ -231,10 +359,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 
-    @action(detail=False, methods=['GET'], url_path=r'google_customer_login_callback')
-    @api_error_handler
-    def google_customer_login_callback(self, request):
-        return google_login_helper(request, user_type='customer')
+    
 
     @action(detail=False, methods=['GET'], url_path=r'google_user_login_callback')
     @api_error_handler
@@ -441,6 +566,7 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(pictures, status=status.HTTP_200_OK)
 
 
+<<<<<<< HEAD
     
     @action(detail=False, methods=['POST'], url_path=r'create/valid_api_user', permission_classes=(IsAdminUser,))
     # @action(detail=False, methods=['POST'], url_path=r'create/valid_api_user', permission_classes=(IsAuthenticated,))
@@ -480,6 +606,8 @@ class UserViewSet(viewsets.ModelViewSet):
 
         return Response(data, status=status.HTTP_200_OK)
 
+=======
+>>>>>>> 30c5cfde8d1180b74eec0f0395f868d0dd70e291
     @action(detail=False, methods=['POST'], url_path=r'register/trial/(?P<country_code>[^/.]+)', permission_classes=())
     @api_error_handler
     def register_free_trial(self, request, country_code):
@@ -521,51 +649,42 @@ class UserViewSet(viewsets.ModelViewSet):
             "Subscription End Date":expired_at.strftime("%m/%d/%Y %H:%M"),
         }
 
-        email_queue.enqueue(
-            send_email_job,
-            kwargs={
-                "subject": i18n_get_register_confirm_mail_subject(),
-                "email": email, 
-                "template_name": "register_confirmation.html",
-                "parameters": {
-                    'firstName': firstName,
-                    'email': email,
-                    'password': password
-                },
-            }, result_ttl=10, failure_ttl=10)
-        
-        email_queue.enqueue(
-            send_email_job,
-            kwargs={
-                "subject": i18n_get_register_activate_mail_subject(),
-                "email": email, 
-                "template_name": "register_activation.html",
-                "parameters": {
-                    'firstName': firstName,
-                    'Plan': plan,
-                    'email': email,
-                    'password': password
-                }
-            }, result_ttl=10, failure_ttl=10)
-        
+        EmailService.send_email_template(
+            i18n_get_register_confirm_mail_subject(),
+            email,
+            "register_confirmation.html",
+            {
+                'firstName': firstName,
+                'email': email,
+                'password': password
+            }
+        )
+
+        EmailService.send_email_template(
+            i18n_get_register_activate_mail_subject(),
+            email,
+            "register_activation.html",
+            {
+                'firstName': firstName,
+                'Plan': plan,
+                'email': email,
+                'password': password
+            }
+        )
+      
         lss_email = 'hello@liveshowseller.ph' if country_code =='PH' else 'lss@algotech.app'
-        email_queue.enqueue(
-            send_email_job,
-            kwargs={
-                "subject": "New LSS User - " + firstName + ' ' + lastName + ' - ' + plan,
-                "email": lss_email, 
-                "template_name": "register_cc.html",
-                "parameters": {
-                    'firstName': firstName,
-                    'lastName': lastName,
-                    'plan': plan,
-                    'phone': contactNumber,
-                    'email': email,
-                    'password': password,
-                    'expired_at': expired_at.strftime("%m/%d/%Y %H:%M"),
-                    'country': country
-                }
-            }, result_ttl=10, failure_ttl=10)
+
+        subject = "New LSS User - " + firstName + ' ' + lastName + ' - ' + plan
+        EmailService.send_email_template(subject,lss_email,"register_cc.html",{
+                'firstName': firstName,
+                'lastName': lastName,
+                'plan': plan,
+                'phone': contactNumber,
+                'email': email,
+                'password': password,
+                'expired_at': expired_at.strftime("%m/%d/%Y %H:%M"),
+                'country': country
+            })
 
         return Response(ret, status=status.HTTP_200_OK)
 
@@ -618,8 +737,12 @@ class UserViewSet(viewsets.ModelViewSet):
         STRIPE_API_KEY = "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" #TODO put it in settings
 
         email, password, plan, period, intentSecret = getdata(request,("email", "password", "plan", "period", "intentSecret"),required=True)
+<<<<<<< HEAD
         email = email.lower()
         firstName, lastName, contactNumber, country , promoCode, timezone = getdata(request, ("firstName", "lastName", "contactNumber", "country", "promoCode"), required=False)
+=======
+        firstName, lastName, contactNumber, country , promoCode, timezone = getdata(request, ("firstName", "lastName", "contactNumber", "country", "promoCode", "timezone"), required=False)
+>>>>>>> 30c5cfde8d1180b74eec0f0395f868d0dd70e291
 
         payment_intent_id = intentSecret[:27]
         stripe.api_key = STRIPE_API_KEY
@@ -681,43 +804,25 @@ class UserViewSet(viewsets.ModelViewSet):
             "Receipt":paymentIntent.charges.get('data')[0].get('receipt_url')
         }
 
-        email_queue.enqueue(
-            send_email_job,
-            kwargs={
-                "subject": i18n_get_register_confirm_mail_subject(),
-                "email": email, 
-                "template_name": "register_confirmation.html",
-                "parameters": {
+        EmailService.send_email_template(i18n_get_register_confirm_mail_subject(),email,"register_confirmation.html",{
                     'firstName': firstName,
                     'email': email,
                     'password': password
-                }
-            }, result_ttl=10, failure_ttl=10)
-        
-        email_queue.enqueue(
-            send_email_job,
-            kwargs={
-                "subject": i18n_get_register_activate_mail_subject(),
-                "email": email, 
-                "template_name": "register_activation.html",
-                "parameters": {
+                })
+
+        EmailService.send_email_template(i18n_get_register_activate_mail_subject(),email,"register_activation.html",{
                     'firstName': firstName,
                     'Plan': subscription_plan.get('text'),
                     'email': email,
                     'password': password
-                }
-            }, result_ttl=10, failure_ttl=10)
+                })
         
         lss_email = 'lss@algotech.app'
         if country_code == 'PH':
             lss_email = 'hello@liveshowseller.ph'
-        email_queue.enqueue(
-            send_email_job,
-            kwargs={
-                "subject": "New LSS User - " + firstName + ' ' + lastName + ' - ' + plan,
-                "email": lss_email, 
-                "template_name": "register_cc.html",
-                "parameters": {
+
+        subject = "New LSS User - " + firstName + ' ' + lastName + ' - ' + plan
+        EmailService.send_email_template(subject,lss_email,"register_cc.html",{
                     'firstName': firstName,
                     'lastName': lastName,
                     'plan': subscription_plan.get('text'),
@@ -726,8 +831,7 @@ class UserViewSet(viewsets.ModelViewSet):
                     'password': password,
                     'expired_at': expired_at.strftime("%m/%d/%Y %H:%M"),
                     'country': country
-                }
-            }, result_ttl=10, failure_ttl=10)
+                })
 
         return Response(ret, status=status.HTTP_200_OK)
     
@@ -760,6 +864,7 @@ class UserViewSet(viewsets.ModelViewSet):
         api_user = Verify.get_seller_user(request)
         return Response(UserSerializerAccountInfo(api_user).data, status=status.HTTP_200_OK)
 
+<<<<<<< HEAD
     
     @action(detail=False, methods=['GET'], url_path=r'report', permission_classes=(IsAuthenticated,))
     @api_error_handler
@@ -833,3 +938,52 @@ class UserViewSet(viewsets.ModelViewSet):
         workbook.close()
 
         return response
+=======
+
+
+    @action(detail=False, methods=['POST'], url_path=r'password/change', permission_classes=(IsAuthenticated))
+    @api_error_handler
+    def change_password(self, request):
+
+        password, new_password = getdata(request, ("password","new_password"), required=True)
+
+        auth_user = request.user
+
+        if not auth_user.check_password(password):
+            return Response({"message": "password incorrect"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        SellerChangePasswordRuleChecker.check(**{"password":password,"new_password":new_password})
+
+        auth_user.set_password(new_password)
+        auth_user.save()
+
+        return Response({"message":"complete"}, status=status.HTTP_200_OK)
+
+    
+
+    @action(detail=False, methods=['POST'], url_path=r'password/forgot')
+    @api_error_handler
+    def forget_password(self, request):
+
+        email, = getdata(request, ("email",), required=True)
+
+        if not AuthUser.objects.filter(email=email).exists() or not User.objects.filter(email=email,type='user').exists():
+            raise ApiVerifyError('email invalid')
+
+        auth_user = AuthUser.objects.get(email=email)
+        code = PasswordResetCodeManager.generate(auth_user.id)
+        EmailService.send_email_template("test",email,"forgot_password.html",{"code":code,"username":auth_user.username})
+        return Response({"message":"please check email"}, status=status.HTTP_200_OK)
+
+    
+    @action(detail=False, methods=['POST'], url_path=r'password/reset')
+    @api_error_handler
+    def reset_password(self, request):
+
+        code, new_password = getdata(request, ( "code","new_password"), required=True)
+
+        SellerResetPasswordRuleChecker.check(**{"new_password":new_password})
+        ret = PasswordResetCodeManager.execute(code, new_password)
+        
+        return Response(ret, status=status.HTTP_200_OK)
+>>>>>>> 30c5cfde8d1180b74eec0f0395f868d0dd70e291
