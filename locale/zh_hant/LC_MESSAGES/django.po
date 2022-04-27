@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-22 09:09+0000\n"
+"POT-Creation-Date: 2022-04-27 08:53+0000\n"
 "PO-Revision-Date: 2021-12-13 15:50+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -166,6 +166,67 @@ msgstr ""
 msgid "MAIL_SUBJECT_ACTIVATION"
 msgstr ""
 
+#: business_policy/payment.py:20
+msgid "PAYMENT/DIRECT_PAYMENT/NAME_OF_BANK_OR_PAYMENT_MODE"
+msgstr "銀行名稱 / 付款方式"
+
+#: business_policy/payment.py:21
+msgid "PAYMENT/DIRECT_PAYMENT/ACCOUNT_NAME"
+msgstr "帳戶名稱"
+
+#: business_policy/payment.py:22
+msgid "PAYMENT/DIRECT_PAYMENT/ACCOUNT_NUMBER"
+msgstr "帳號"
+
+#: business_policy/payment.py:23
+msgid "PAYMENT/DIRECT_PAYMENT/OTHER_NOTE"
+msgstr "其他備註 (按enter增加新的欄位)"
+
+#: business_policy/payment.py:24
+msgid "PAYMENT/DIRECT_PAYMENT/REQUIRE_CUSTOMER_PAYMENT_RECORD"
+msgstr "要求客戶附上付款記錄"
+
+#: business_policy/payment.py:34
+msgid "PAYMENT/HIT_PAY/PAYMENT_BUTTON_TITLE"
+msgstr "付款按鈕名稱"
+
+#: business_policy/payment.py:35 business_policy/payment.py:47
+#: business_policy/payment.py:58 business_policy/payment.py:90
+msgid "PAYMENT/CURRENCY_CODE"
+msgstr "貨幣代碼"
+
+#: business_policy/payment.py:36
+msgid "PAYMENT/HIT_PAY/API_KEY"
+msgstr "API 金鑰"
+
+#: business_policy/payment.py:37
+msgid "PAYMENT/HIT_PAY/SALT"
+msgstr "密碼"
+
+#: business_policy/payment.py:46
+msgid "PAYMENT/PAYPAL/CLIENT_ID"
+msgstr "客戶識別碼"
+
+#: business_policy/payment.py:48
+msgid "PAYMENT/PAYPAL/SECRET"
+msgstr "密碼"
+
+#: business_policy/payment.py:57 business_policy/payment.py:79
+msgid "PAYMENT/SECRET_KEY"
+msgstr "密鑰"
+
+#: business_policy/payment.py:88
+msgid "PAYMENT/FIRST_DATA/STORE_ID"
+msgstr "商店識別碼"
+
+#: business_policy/payment.py:89
+msgid "PAYMENT/FIRST_DATA/SHARE_SECRET"
+msgstr "共享密鑰"
+
+#: business_policy/payment.py:91
+msgid "PAYMENT/FIRST_DATA/TIME_ZONE"
+msgstr "時區"
+
 #: templates/register_activation.html:10
 msgid "TITLE_ACTIVATION"
 msgstr ""
@@ -254,51 +315,3 @@ msgstr ""
 
 #~ msgid "MESSAGE_HEADER"
 #~ msgstr "訂單明細："
-
-msgid "CONGRATS_2_WELCOME"
-msgstr ""
-
-msgid "PAYMENT/DIRECT_PAYMENT/NAME_OF_BANK_OR_PAYMENT_MODE"
-msgstr "銀行名稱 / 付款方式"
-
-msgid "PAYMENT/DIRECT_PAYMENT/ACCOUNT_NAME"
-msgstr "帳戶名稱"
-
-msgid "PAYMENT/DIRECT_PAYMENT/ACCOUNT_NUMBER"
-msgstr "帳號"
-
-msgid "PAYMENT/DIRECT_PAYMENT/OTHER_NOTE"
-msgstr "其他備註 (按enter增加新的欄位)"
-
-msgid "PAYMENT/DIRECT_PAYMENT/REQUIRE_CUSTOMER_PAYMENT_RECORD"
-msgstr "要求客戶附上付款記錄"
-
-msgid "PAYMENT/HIT_PAY/PAYMENT_BUTTON_TITLE"
-msgstr "付款按鈕名稱"
-
-msgid "PAYMENT/CURRENCY_CODE"
-msgstr "貨幣代碼"
-
-msgid "PAYMENT/HIT_PAY/API_KEY"
-msgstr "API 金鑰"
-
-msgid "PAYMENT/HIT_PAY/SALT"
-msgstr "密碼"
-
-msgid "PAYMENT/PAYPAL/CLIENT_ID"
-msgstr "客戶識別碼"
-
-msgid "PAYMENT/PAYPAL/SECRET"
-msgstr "密碼"
-
-msgid "PAYMENT/SECRET_KEY"
-msgstr "密鑰"
-
-msgid "PAYMENT/FIRST_DATA/STORE_ID"
-msgstr "商店識別碼"
-
-msgid "PAYMENT/FIRST_DATA/SHARE_SECRET"
-msgstr "共享密鑰"
-
-msgid "PAYMENT/FIRST_DATA/TIME_ZONE"
-msgstr "時區"
