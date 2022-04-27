@@ -135,7 +135,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         campaign = serializer.save()
         
-        data = json_data['meta_payment']['sg']['direct_payment']
+        data = json_data['meta_payment']['direct_payment']
         if 'accounts' in data:
                 for account_number, account_info in data['accounts'].items():
                     if account_number in request.data and request.data[account_number]:
