@@ -566,7 +566,6 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(pictures, status=status.HTTP_200_OK)
 
 
-<<<<<<< HEAD
     
     @action(detail=False, methods=['POST'], url_path=r'create/valid_api_user', permission_classes=(IsAdminUser,))
     # @action(detail=False, methods=['POST'], url_path=r'create/valid_api_user', permission_classes=(IsAuthenticated,))
@@ -606,8 +605,6 @@ class UserViewSet(viewsets.ModelViewSet):
 
         return Response(data, status=status.HTTP_200_OK)
 
-=======
->>>>>>> 30c5cfde8d1180b74eec0f0395f868d0dd70e291
     @action(detail=False, methods=['POST'], url_path=r'register/trial/(?P<country_code>[^/.]+)', permission_classes=())
     @api_error_handler
     def register_free_trial(self, request, country_code):
@@ -737,12 +734,8 @@ class UserViewSet(viewsets.ModelViewSet):
         STRIPE_API_KEY = "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" #TODO put it in settings
 
         email, password, plan, period, intentSecret = getdata(request,("email", "password", "plan", "period", "intentSecret"),required=True)
-<<<<<<< HEAD
         email = email.lower()
         firstName, lastName, contactNumber, country , promoCode, timezone = getdata(request, ("firstName", "lastName", "contactNumber", "country", "promoCode"), required=False)
-=======
-        firstName, lastName, contactNumber, country , promoCode, timezone = getdata(request, ("firstName", "lastName", "contactNumber", "country", "promoCode", "timezone"), required=False)
->>>>>>> 30c5cfde8d1180b74eec0f0395f868d0dd70e291
 
         payment_intent_id = intentSecret[:27]
         stripe.api_key = STRIPE_API_KEY
@@ -864,7 +857,6 @@ class UserViewSet(viewsets.ModelViewSet):
         api_user = Verify.get_seller_user(request)
         return Response(UserSerializerAccountInfo(api_user).data, status=status.HTTP_200_OK)
 
-<<<<<<< HEAD
     
     @action(detail=False, methods=['GET'], url_path=r'report', permission_classes=(IsAuthenticated,))
     @api_error_handler
@@ -938,7 +930,6 @@ class UserViewSet(viewsets.ModelViewSet):
         workbook.close()
 
         return response
-=======
 
 
     @action(detail=False, methods=['POST'], url_path=r'password/change', permission_classes=(IsAuthenticated))
@@ -986,4 +977,3 @@ class UserViewSet(viewsets.ModelViewSet):
         ret = PasswordResetCodeManager.execute(code, new_password)
         
         return Response(ret, status=status.HTTP_200_OK)
->>>>>>> 30c5cfde8d1180b74eec0f0395f868d0dd70e291
