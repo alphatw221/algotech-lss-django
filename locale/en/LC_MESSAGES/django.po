@@ -258,3 +258,48 @@ msgstr "Let’s start selling live now!"
 #: templates/register_confirmation.html:46
 msgid "CONGRATS_2_WELCOME"
 msgstr "Cheers,"
+
+msgid "PAYMENT/DIRECT_PAYMENT/NAME_OF_BANK_OR_PAYMENT_MODE"
+msgstr "Name of Bank/Payment Mode"
+
+msgid "PAYMENT/DIRECT_PAYMENT/ACCOUNT_NAME"
+msgstr "Account Name"
+
+msgid "PAYMENT/DIRECT_PAYMENT/ACCOUNT_NUMBER"
+msgstr "Account Number"
+
+msgid "PAYMENT/DIRECT_PAYMENT/OTHER_NOTE"
+msgstr "Other Note (Press enter to add new line)"
+
+msgid "PAYMENT/DIRECT_PAYMENT/REQUIRE_CUSTOMER_PAYMENT_RECORD"
+msgstr "Require Customer's Payment Record"
+
+msgid "PAYMENT/HIT_PAY/PAYMENT_BUTTON_TITLE"
+msgstr "Payment Button Title"
+
+msgid "PAYMENT/CURRENCY_CODE"
+msgstr "Currency Code"
+
+msgid "PAYMENT/HIT_PAY/API_KEY"
+msgstr "API Key"
+
+msgid "PAYMENT/HIT_PAY/SALT"
+msgstr "Salt"
+
+msgid "PAYMENT/PAYPAL/CLIENT_ID"
+msgstr "Client ID"
+
+msgid "PAYMENT/PAYPAL/SECRET"
+msgstr "Secret"
+
+msgid "PAYMENT/SECRET_KEY"
+msgstr "Secret Key"
+
+msgid "PAYMENT/FIRST_DATA/STORE_ID"
+msgstr "Store ID"
+
+msgid "PAYMENT/FIRST_DATA/SHARE_SECRET"
+msgstr "Share Secret"
+
+msgid "PAYMENT/FIRST_DATA/TIME_ZONE"
+msgstr "Time Zone"

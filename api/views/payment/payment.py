@@ -37,6 +37,7 @@ from mail.sender.sender import send_smtp_mail
 from django.shortcuts import redirect
 import requests
 import pytz
+from django.utils import translation
 platform_dict = {'facebook':FacebookPage, 'youtube':YoutubeChannel, 'instagram':InstagramProfile}
 
 
@@ -817,11 +818,13 @@ class PaymentViewSet(viewsets.GenericViewSet):
     def get_payment_meta(self, request):
         payment_method = {}
         api_user = Verify.get_seller_user(request)
-        api_user_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
-        activated_country = api_user_user_subscription.meta_country.get("activated_country", {})
-        if not activated_country:
-            raise ApiVerifyError("no activated country")
-        for i in activated_country:
-            print(i)
-            payment_method.update(PaymentMeta.get_meta(i))
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        lang = user_subscription.lang
+        with translation.override(lang):
+            activated_country = user_subscription.meta_country.get("activated_country", {})
+            if not activated_country:
+                raise ApiVerifyError("no activated country")
+            for i in activated_country:
+                print(i)
+                payment_method.update(PaymentMeta.get_meta(i))
         return Response(payment_method, status=status.HTTP_200_OK)

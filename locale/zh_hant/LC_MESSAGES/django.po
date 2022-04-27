@@ -254,3 +254,51 @@ msgstr ""
 
 #~ msgid "MESSAGE_HEADER"
 #~ msgstr "訂單明細："
+
+msgid "CONGRATS_2_WELCOME"
+msgstr ""
+
+msgid "PAYMENT/DIRECT_PAYMENT/NAME_OF_BANK_OR_PAYMENT_MODE"
+msgstr "銀行名稱 / 付款方式"
+
+msgid "PAYMENT/DIRECT_PAYMENT/ACCOUNT_NAME"
+msgstr "帳戶名稱"
+
+msgid "PAYMENT/DIRECT_PAYMENT/ACCOUNT_NUMBER"
+msgstr "帳號"
+
+msgid "PAYMENT/DIRECT_PAYMENT/OTHER_NOTE"
+msgstr "其他備註 (按enter增加新的欄位)"
+
+msgid "PAYMENT/DIRECT_PAYMENT/REQUIRE_CUSTOMER_PAYMENT_RECORD"
+msgstr "要求客戶附上付款記錄"
+
+msgid "PAYMENT/HIT_PAY/PAYMENT_BUTTON_TITLE"
+msgstr "付款按鈕名稱"
+
+msgid "PAYMENT/CURRENCY_CODE"
+msgstr "貨幣代碼"
+
+msgid "PAYMENT/HIT_PAY/API_KEY"
+msgstr "API 金鑰"
+
+msgid "PAYMENT/HIT_PAY/SALT"
+msgstr "密碼"
+
+msgid "PAYMENT/PAYPAL/CLIENT_ID"
+msgstr "客戶識別碼"
+
+msgid "PAYMENT/PAYPAL/SECRET"
+msgstr "密碼"
+
+msgid "PAYMENT/SECRET_KEY"
+msgstr "密鑰"
+
+msgid "PAYMENT/FIRST_DATA/STORE_ID"
+msgstr "商店識別碼"
+
+msgid "PAYMENT/FIRST_DATA/SHARE_SECRET"
+msgstr "共享密鑰"
+
+msgid "PAYMENT/FIRST_DATA/TIME_ZONE"
+msgstr "時區"
