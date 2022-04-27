@@ -1,6 +1,5 @@
 from calendar import month
 from distutils.sysconfig import EXEC_PREFIX
-import json
 from django.http import HttpResponseRedirect
 from rest_framework import serializers, status, viewsets
 from rest_framework.decorators import action, permission_classes
@@ -28,8 +27,7 @@ from api.utils.common.verify import Verify
 from rest_framework.pagination import PageNumberPagination
 from backend.api.google.user import api_google_get_userinfo
 from django.conf import settings
-import string
-import random
+import string, random, json
 from api.models.user.user_subscription import UserSubscription
 from backend.i18n.register_confirm_mail import i18n_get_register_confirm_mail_subject, i18n_get_register_activate_mail_subject
 from lss.views.custom_jwt import CustomTokenObtainPairSerializer
@@ -40,11 +38,16 @@ from backend.api.facebook.page import api_fb_get_page_business_profile
 from backend.api.instagram.profile import api_ig_get_profile_info
 from rest_framework_simplejwt.tokens import AccessToken
 from django.contrib.auth.models import User as AuthUser
-import pytz
-import stripe
+import pytz, stripe
 from backend.python_rq.python_rq import email_queue
 from business_policy.subscription_plan import SubscriptionPlan
 from service.email.email_service import EmailService
+
+from django.http import HttpResponse
+import xlsxwriter
+from backend.pymongo.mongodb import db
+from dateutil.relativedelta import relativedelta
+
 
 platform_info_dict={'facebook':'facebook_info', 'youtube':'youtube_info', 'instagram':'instagram_info', 'google':'google_info'}
 
@@ -563,6 +566,45 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(pictures, status=status.HTTP_200_OK)
 
 
+    
+    @action(detail=False, methods=['POST'], url_path=r'create/valid_api_user', permission_classes=(IsAdminUser,))
+    # @action(detail=False, methods=['POST'], url_path=r'create/valid_api_user', permission_classes=(IsAuthenticated,))
+    @api_error_handler
+    def create_valid_api_user(self, request):
+        name, email = getdata(request, ("name","email"), required=True)
+        email = email.lower()
+        # print(name,email)
+        if User.objects.filter(email=email, type='user').exists():
+            api_user = User.objects.get(email=email, type='user')
+            api_user.status='valid'
+            api_user.save()
+        else:
+            User.objects.create(name=name, email=email, type='user', status='valid')
+
+        return Response("ok", status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['GET'], url_path=r'search_list', permission_classes=(IsAdminUser,))
+    @api_error_handler
+    def search_api_user(self, request):
+        search_column = request.query_params.get('search_column')
+        keyword = request.query_params.get('keyword')
+        kwargs = { search_column + '__icontains': keyword }
+
+        queryset = User.objects.all().order_by('id')
+
+        if search_column != 'undefined' and keyword != 'undefined':
+            queryset = queryset.filter(**kwargs)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            result = self.get_paginated_response(serializer.data)
+            data = result.data
+        else:
+            serializer = self.get_serializer(queryset, many=True)
+            data = serializer.dat
+
+        return Response(data, status=status.HTTP_200_OK)
+
     @action(detail=False, methods=['POST'], url_path=r'register/trial/(?P<country_code>[^/.]+)', permission_classes=())
     @api_error_handler
     def register_free_trial(self, request, country_code):
@@ -570,6 +612,7 @@ class UserViewSet(viewsets.ModelViewSet):
         Verify.is_valid_country_code_for_user_plan(country_code)
         
         email, plan = getdata(request, ("email", "plan"), required=True)
+        email = email.lower()
         firstName, lastName, contactNumber, password, country, timezone = getdata(request, ("firstName", "lastName", "contactNumber", "password", "country", "timezone"), required=False)
 
         if plan != 'trial':
@@ -650,6 +693,7 @@ class UserViewSet(viewsets.ModelViewSet):
         STRIPE_API_KEY = "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" #TODO put it in settings
         
         email, plan, period = getdata(request, ("email", "plan", "period"), required=True)
+        email = email.lower()
         promoCode, = getdata(request, ("promoCode",), required=False)
 
         country_plan = SubscriptionPlan.get_country(country_code)
@@ -690,7 +734,8 @@ class UserViewSet(viewsets.ModelViewSet):
         STRIPE_API_KEY = "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" #TODO put it in settings
 
         email, password, plan, period, intentSecret = getdata(request,("email", "password", "plan", "period", "intentSecret"),required=True)
-        firstName, lastName, contactNumber, country , promoCode, timezone = getdata(request, ("firstName", "lastName", "contactNumber", "country", "promoCode", "timezone"), required=False)
+        email = email.lower()
+        firstName, lastName, contactNumber, country , promoCode, timezone = getdata(request, ("firstName", "lastName", "contactNumber", "country", "promoCode"), required=False)
 
         payment_intent_id = intentSecret[:27]
         stripe.api_key = STRIPE_API_KEY
@@ -787,6 +832,7 @@ class UserViewSet(viewsets.ModelViewSet):
     @api_error_handler
     def general_login(self, request):
         email, password = getdata(request, ("email","password"), required=True)
+        email = email.lower()
         
         if not AuthUser.objects.filter(email=email).exists():
             return Response({"message": "email or password incorrect"}, status=status.HTTP_401_UNAUTHORIZED)
@@ -811,6 +857,79 @@ class UserViewSet(viewsets.ModelViewSet):
         api_user = Verify.get_seller_user(request)
         return Response(UserSerializerAccountInfo(api_user).data, status=status.HTTP_200_OK)
 
+    
+    @action(detail=False, methods=['GET'], url_path=r'report', permission_classes=(IsAuthenticated,))
+    @api_error_handler
+    def get_member_grown_report(self, request): 
+        title_map = {
+            'user_subscription_id': 'Subscription Id',
+            'name': 'Name',
+            'email': 'Email',
+            'phone': 'Phone',
+            'country': 'Country',
+            'plan': 'Plan',
+            'created_at': 'Created at',
+            
+        }   
+        column_list = ['user_subscription_id', 'name', 'email', 'phone', 'country', 'plan', 'created_at']
+        datenow = datetime.now().strftime('%Y-%m')
+        startdate = datetime(datetime.now().year, datetime.now().month, 1)
+        enddate = startdate + relativedelta(months=1)
+
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename=LSS_Member_Growing_' + datenow + '.xlsx'
+
+        workbook = xlsxwriter.Workbook(response, {'in_memory': True})
+        worksheet = workbook.add_worksheet()
+        header = workbook.add_format({
+            'bold': True,
+            'bg_color': '#F7F7F7',
+            'color': 'black',
+            'align': 'center',
+            'valign': 'top',
+            'border': 1
+        })
+        int_center = workbook.add_format({
+            'align': 'center'
+        })
+
+        row, column = 1, 0
+        for column_title in column_list:
+            worksheet.write(row, column, title_map[column_title], header)
+            if len(column_title) >= 8:
+                worksheet.set_column(row, column, len(title_map[column_title]) + 2)
+            column += 1
+        row += 1
+        column = 0
+
+        users = db.api_user.find({'created_at': {'$gte': startdate, '$lte': enddate}, 'type': 'user', 'status': 'valid'})
+        for user in users:
+            subscription_id = int(user.get('user_subscription_id', 1))
+            print (user['id'])
+            print (subscription_id)
+            for column_title in column_list:
+                col_data = user.get(column_title, '')
+                if column_title == 'created_at':
+                    col_data = col_data.strftime("%Y-%m-%d")
+                    worksheet.write(row, column, col_data)
+                elif column_title == 'country':
+                    country = db.api_user_subscription.find_one({'id': subscription_id}).get('meta_country', {}).get('country', '')
+                    worksheet.write(row, column, country)
+                elif column_title == 'plan':
+                    plan = db.api_user_subscription.find_one({'id': subscription_id}).get('type', '')
+                    worksheet.write(row, column, plan)
+                else:
+                    if type(col_data) == int or type(col_data) == float:
+                        worksheet.write(row, column, col_data, int_center)
+                    else:
+                        worksheet.write(row, column, col_data)
+                column += 1
+            column = 0
+            row += 1
+
+        workbook.close()
+
+        return response
 
 
     @action(detail=False, methods=['POST'], url_path=r'password/change', permission_classes=(IsAuthenticated))
