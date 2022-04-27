@@ -96,6 +96,8 @@ class PaymentMeta:
     # confirmed list
     SG = ['direct_payment','hitpay','paypal', 'stripe', 'first_data']
     
+    ID = ['direct_payment','hitpay','paypal', 'stripe', 'first_data']
+
     MY = ['direct_payment','paypal', 'stripe']
     
     IN = ['direct_payment','paypal', 'stripe']
