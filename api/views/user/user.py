@@ -47,6 +47,8 @@ from django.http import HttpResponse
 import xlsxwriter
 from backend.pymongo.mongodb import db
 from dateutil.relativedelta import relativedelta
+from backend.i18n.email.subject import i18n_get_reset_password_mail_subject
+
 
 
 platform_info_dict={'facebook':'facebook_info', 'youtube':'youtube_info', 'instagram':'instagram_info', 'google':'google_info'}
@@ -959,10 +961,14 @@ class UserViewSet(viewsets.ModelViewSet):
         email, = getdata(request, ("email",), required=True)
 
         if not AuthUser.objects.filter(email=email).exists() or not User.objects.filter(email=email,type='user').exists():
-            raise ApiVerifyError('email invalid')
+            raise ApiVerifyError('user dosent exists')
 
         auth_user = AuthUser.objects.get(email=email)
         code = PasswordResetCodeManager.generate(auth_user.id)
+
+
+        i18n_get_reset_password_mail_subject()
+        
         EmailService.send_email_template("test",email,"email_reste_password_link.html",{"url":settings.GCP_API_LOADBALANCER_URL +"/#/password/reset","code":code,"username":auth_user.username})
         return Response({"message":"please check email"}, status=status.HTTP_200_OK)
 
