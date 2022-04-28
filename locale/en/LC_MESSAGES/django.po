@@ -172,7 +172,6 @@ msgstr "Welcome to Live Show Seller"
 msgid "MAIL_SUBJECT_ACTIVATION"
 msgstr "Activated account details at Live Show Seller."
 
-<<<<<<< HEAD
 #: templates/email_reset_password_link.html:7
 msgid "EMAIL/PASSWORD_RESET_LINK/SUBJECT"
 msgstr "Live Show Seller Password Reset"
@@ -210,7 +209,6 @@ msgstr "Contact Number: +65 9489 2086"
 #: templates/email_reset_password_link.html:22
 msgid "CONTACT_INFO/ADDRESS"
 msgstr "Address: 8 Burn Road #15-13, Singapore 369977"
-=======
 #: business_policy/payment.py:20
 msgid "PAYMENT/DIRECT_PAYMENT/NAME_OF_BANK_OR_PAYMENT_MODE"
 msgstr "Name of Bank/Payment Mode"
@@ -271,7 +269,6 @@ msgstr "Share Secret"
 #: business_policy/payment.py:91
 msgid "PAYMENT/FIRST_DATA/TIME_ZONE"
 msgstr "Time Zone"
->>>>>>> 1485a389828156135115a7b2d599f71ff9a317d3
 
 #: templates/register_activation.html:10
 msgid "TITLE_ACTIVATION"

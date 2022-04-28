@@ -173,7 +173,6 @@ msgstr ""
 msgid "MAIL_SUBJECT_ACTIVATION"
 msgstr ""
 
-<<<<<<< HEAD
 #: templates/email_reset_password_link.html:7
 msgid "EMAIL/PASSWORD_RESET_LINK/SUBJECT"
 msgstr ""
@@ -205,7 +204,6 @@ msgstr ""
 
 #: templates/email_reset_password_link.html:22
 msgid "CONTACT_INFO/ADDRESS"
-=======
 #: business_policy/payment.py:20
 msgid "PAYMENT/DIRECT_PAYMENT/NAME_OF_BANK_OR_PAYMENT_MODE"
 msgstr ""
@@ -265,7 +263,6 @@ msgstr ""
 
 #: business_policy/payment.py:91
 msgid "PAYMENT/FIRST_DATA/TIME_ZONE"
->>>>>>> 1485a389828156135115a7b2d599f71ff9a317d3
 msgstr ""
 
 #: templates/register_activation.html:10
