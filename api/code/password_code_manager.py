@@ -17,9 +17,10 @@ class PasswordResetCodeManager(CodeManager):
     }
 
     @classmethod
-    def generate(cls,auth_user_id):
+    def generate(cls,auth_user_id,language):
         data = cls.data_format.copy()
         data['auth_user_id']=auth_user_id
+        data['language']=language
         data['expired_time']=datetime.now().timestamp()+3000
         
         return cls._encode(data)
