@@ -23,9 +23,9 @@ class PasswordResetCodeManager(CodeManager):
         data={
             'auth_user_id':auth_user_id,
             'language':language,
-            'expired_time':datetime.now().timestamp()+3000
+            'expired_time':datetime.now().timestamp()+1
         }
-        
+
         return cls._encode(data)
 
     
