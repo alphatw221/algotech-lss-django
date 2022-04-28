@@ -112,13 +112,9 @@ class PaymentMeta():
         return first_data
 
     # confirmed list
-<<<<<<< HEAD
     SG = ['direct_payment','hitpay','paypal', 'stripe', 'first_data']
     
     ID = ['direct_payment','hitpay','paypal', 'stripe', 'first_data']
-=======
-    SG = ['direct_payment','hitpay','paypal', 'stripe', 'pay_mongo', 'first_data']
->>>>>>> 1485a389828156135115a7b2d599f71ff9a317d3
 
     MY = ['direct_payment','paypal', 'stripe']
     
