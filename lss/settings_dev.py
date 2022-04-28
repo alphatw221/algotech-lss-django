@@ -220,7 +220,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'en_us'
 
 TIME_ZONE = 'UTC'
 
@@ -234,15 +234,15 @@ LOCALE_PATHS = [os.path.join(BASE_DIR, 'locale')]
 
 LANGUAGES = [
     ('en', 'English'),
-    ('zh-hans', 'Simplified Chinese'),
-    ('zh-hant', 'Traditional Chinese'),
+    ('zh_hans', 'Simplified Chinese'),
+    ('zh_hant', 'Traditional Chinese'),
     ('id', 'Indonesian'),
 ]
 
 SUPPORTED_LANGUAGES = {
     'en',
-    'zh-hans',
-    'zh-hant',
+    'zh_hans',
+    'zh_hant',
     'id'
 }
 
@@ -320,8 +320,8 @@ YOUTUBE_API_CONFIG = {
 }
 
 # Google API credentials
-GOOGLE_OAUTH_CLIENT_ID_FOR_LIVESHOWSELLER = "536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com"
-GOOGLE_OAUTH_CLIENT_SECRET_FOR_LIVESHOWSELLER = "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"
+GOOGLE_OAUTH_CLIENT_ID_FOR_LIVESHOWSELLER = "715361967747-fvvrbaf18n412htlb92p8k6558kj4ugi.apps.googleusercontent.com"
+GOOGLE_OAUTH_CLIENT_SECRET_FOR_LIVESHOWSELLER = "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"
 
 # backend app
 COMMENT_PROCESSING = {

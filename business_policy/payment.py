@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from backend.api._api_caller import RestApiJsonCaller
 from django.conf import settings
-from django.utils.translation import ugettext as _
-
+from django.utils.translation import gettext as _
+from django.utils import translation
 
 class HitPay_Helper:
 
@@ -11,24 +11,28 @@ class HitPay_Helper:
         domain_url: str = settings.HITPAY_API_URL
 
 
-class PaymentMeta:
+class PaymentMeta():
     #country : SG PH IN ID MY TW CN VN TH KH HK AU
-
-    direct_payment = {
-            "multiple":True,
-            "fields":[
-                {"key":"mode", "name":_("PAYMENT/DIRECT_PAYMENT/NAME_OF_BANK_OR_PAYMENT_MODE"), "type":"text", "r":0, "c":0, "w":4},
-                {"key":"name", "name":_("PAYMENT/DIRECT_PAYMENT/ACCOUNT_NAME"), "type":"text", "r":0, "c":1, "w":4},
-                {"key":"number", "name":_("PAYMENT/DIRECT_PAYMENT/ACCOUNT_NUMBER"), "type":"text", "r":0, "c":2, "w":4},
-                {"key":"note", "name":_("PAYMENT/DIRECT_PAYMENT/OTHER_NOTE"), "type":"textarea", "r":1, "c":0, "w":6},
-                {"key":"require_customer_return", "name":_("PAYMENT/DIRECT_PAYMENT/REQUIRE_CUSTOMER_PAYMENT_RECORD"), "type":"checkbox", "r":1, "c":1, "w":6},
-                {"key":"image", "name":None, "type":"file", "r":2, "c":0, "w":11}
-            ],
-            "tab": "Direct Payment",
-            "request_url": "api/user-subscription/direct_payment/"
-        }
-
-    hitpay = {
+    @classmethod
+    def direct_payment(cls):
+        direct_payment = {
+                "multiple":True,
+                "fields":[
+                    {"key":"mode", "name":_("PAYMENT/DIRECT_PAYMENT/NAME_OF_BANK_OR_PAYMENT_MODE"), "type":"text", "r":0, "c":0, "w":4},
+                    {"key":"name", "name":_("PAYMENT/DIRECT_PAYMENT/ACCOUNT_NAME"), "type":"text", "r":0, "c":1, "w":4},
+                    {"key":"number", "name":_("PAYMENT/DIRECT_PAYMENT/ACCOUNT_NUMBER"), "type":"text", "r":0, "c":2, "w":4},
+                    {"key":"note", "name":_("PAYMENT/DIRECT_PAYMENT/OTHER_NOTE"), "type":"textarea", "r":1, "c":0, "w":6},
+                    {"key":"require_customer_return", "name":_("PAYMENT/DIRECT_PAYMENT/REQUIRE_CUSTOMER_PAYMENT_RECORD"), "type":"checkbox", "r":1, "c":1, "w":6},
+                    {"key":"image", "name":None, "type":"file", "r":2, "c":0, "w":11}
+                ],
+                "tab": "Direct Payment",
+                "request_url": "api/user-subscription/direct_payment/"
+            }
+        return direct_payment
+    
+    @classmethod
+    def hitpay(cls):
+        hitpay = {
             "multiple":False,
             "fields":[
                 {"key":"button_title", "name":_("PAYMENT/HIT_PAY/PAYMENT_BUTTON_TITLE"), "type":"text", "r":0, "c":0, "w":6},
@@ -39,8 +43,11 @@ class PaymentMeta:
             "tab": "HitPay",
             "request_url": "api/user-subscription/hitpay/"
         }
+        return hitpay
     
-    paypal = {
+    @classmethod
+    def paypal(cls):
+        paypal = {
             "multiple":False,
             "fields":[
                 {"key":"clientId", "name":_("PAYMENT/PAYPAL/CLIENT_ID"), "type":"text", "r":0, "c":0, "w":6},
@@ -50,8 +57,11 @@ class PaymentMeta:
             "tab":"PayPal",
             "request_url": "api/user-subscription/paypal/"
         }
+        return paypal
 
-    stripe = {
+    @classmethod
+    def stripe(cls):
+        stripe = {
             "multiple":False,
             "fields":[
                 {"key":"secret", "type":"password", "name":_("PAYMENT/SECRET_KEY"), "r":0, "c":0, "w":6},
@@ -72,8 +82,11 @@ class PaymentMeta:
             "tab":"Stripe",
             "request_url": "api/user-subscription/stripe/"
         }
+        return stripe
 
-    pay_mongo = {
+    @classmethod
+    def pay_mongo(cls):
+        pay_mongo = {
             "multiple":False,
             "fields":[
                 {"key":"secret", "name":_("PAYMENT/SECRET_KEY"), "type":"password", "r":0, "c":0, "w":12},
@@ -81,8 +94,11 @@ class PaymentMeta:
             "tab":"Pay Mongo",
             "request_url": "api/user-subscription/pay_mongo/"
         }
-
-    first_data = {
+        return pay_mongo
+    
+    @classmethod
+    def first_data(cls):
+        first_data = {
             "multiple":False,
             "fields":[
                 {"key":"storeId", "name":_("PAYMENT/FIRST_DATA/STORE_ID"), "type":"text", "r":0, "c":0, "w":6},
@@ -93,10 +109,11 @@ class PaymentMeta:
             "tab":"First Data IPG (Credit Card)",
             "request_url": "api/user-subscription/first_data/"
         }
+        return first_data
 
     # confirmed list
-    SG = ['direct_payment','hitpay','paypal', 'stripe', 'first_data']
-    
+    SG = ['direct_payment','hitpay','paypal', 'stripe', 'pay_mongo', 'first_data']
+
     MY = ['direct_payment','paypal', 'stripe']
     
     IN = ['direct_payment','paypal', 'stripe']
@@ -121,11 +138,12 @@ class PaymentMeta:
     HK = ['direct_payment','hitpay','paypal', 'stripe', 'pay_mongo', 'first_data']
 
     @classmethod
-    def get_meta(cls,country_code='SG'):
-
-        payment_support_list = getattr(cls,country_code)
-        
-        meta = {}
-        for payment in payment_support_list:
-            meta[payment] = getattr(cls,payment)
-        return meta
+    def get_meta(cls, lang, country_code='SG'):
+        with translation.override(lang):
+            print("get_meta lang", lang)
+            payment_support_list = getattr(cls,country_code)
+            
+            meta = {}
+            for payment in payment_support_list:
+                meta[payment] = getattr(cls,payment)()
+            return meta

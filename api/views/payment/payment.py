@@ -38,6 +38,7 @@ from django.shortcuts import redirect
 import requests
 import pytz
 from django.utils import translation
+from django.utils.translation import gettext as _
 platform_dict = {'facebook':FacebookPage, 'youtube':YoutubeChannel, 'instagram':InstagramProfile}
 
 
@@ -820,11 +821,18 @@ class PaymentViewSet(viewsets.GenericViewSet):
         api_user = Verify.get_seller_user(request)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
         lang = user_subscription.lang
-        with translation.override(lang):
-            activated_country = user_subscription.meta_country.get("activated_country", {})
-            if not activated_country:
-                raise ApiVerifyError("no activated country")
-            for i in activated_country:
-                print(i)
-                payment_method.update(PaymentMeta.get_meta(i))
+        print("lang", lang)
+
+        print(_("PAYMENT/DIRECT_PAYMENT/NAME_OF_BANK_OR_PAYMENT_MODE"))
+        # with translation.override(lang):
+
+        print(_("PAYMENT/DIRECT_PAYMENT/NAME_OF_BANK_OR_PAYMENT_MODE"))
+        activated_country = user_subscription.meta_country.get("activated_country", {})
+        if not activated_country:
+            raise ApiVerifyError("no activated country")
+        for i in activated_country:
+            print(i)
+            payment_method.update(PaymentMeta.get_meta(lang, country_code=i))
+    
+        print(payment_method)
         return Response(payment_method, status=status.HTTP_200_OK)
