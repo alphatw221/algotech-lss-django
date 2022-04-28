@@ -13,6 +13,7 @@ class PasswordResetCodeManager(CodeManager):
 
     data_format = {
         "auth_user_id":None,
+        "language":"en",
         "expired_time":None,
     }
 

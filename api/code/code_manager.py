@@ -36,7 +36,7 @@ class CodeManager():
             raise ApiVerifyError('subscription code not valid')
         
         if parameters[-2] != cls.code_key or parameters[-1] != settings.FERNET_KEY:
-            raise ApiVerifyError('subscription code not valid')
+            raise ApiVerifyError('code not valid')
 
         for i ,(key, _) in enumerate(data.items()):
             data[key] = parameters[i]
