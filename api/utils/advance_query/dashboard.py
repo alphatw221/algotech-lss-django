@@ -6,14 +6,22 @@ def get_total_revenue(user_subscription_id):
         {"$match":{"id":user_subscription_id}},
         {
             "$lookup": {
-                "from": "api_campaign","localField": "id","foreignField": "user_subscription_id","as": "campaigns",
+                "from": "api_campaign","as": "campaigns", # "localField": "id","foreignField": "user_subscription_id",
+                'let': {'id': "$id" },
                 "pipeline":[
-                    {"$match":{"id":{"$ne":None}}},
+                    {"$match":{
+                        '$expr': { '$eq': ["$$id", "$user_subscription_id"] },
+                        "id":{"$ne":None}}
+                     },
                     {
                         "$lookup": {
-                            "from": "api_order","localField": "id","foreignField": "campaign_id","as": "orders",
+                            "from": "api_order","as": "orders", # "localField": "id","foreignField": "campaign_id",
+                            'let': {'id': "$id" },
                             "pipeline":[
-                                {"$match":{"id":{"$ne":None}}},
+                                {"$match":{
+                                    '$expr': { '$eq': ["$$id", "$campaign_id"] },
+                                    "id":{"$ne":None}}
+                                 },
                                 {"$project":{"_id":0,"id":1,"total":1}},
                             ]
                         },
@@ -37,19 +45,31 @@ def get_order_total_sales(user_subscription_id):
         {"$match":{"id":user_subscription_id}},
         {
             "$lookup": {
-                "from": "api_campaign","localField": "id","foreignField": "user_subscription_id","as": "campaigns",
+                "from": "api_campaign","as": "campaigns", # "localField": "id","foreignField": "user_subscription_id",
+                'let': {'id': "$id" },
                 "pipeline":[
-                    {"$match":{"id":{"$ne":None}}},
+                    {"$match":{
+                        '$expr': { '$eq': ["$$id", "$user_subscription_id"] },
+                        "id":{"$ne":None}}
+                     },
                     {
                         "$lookup": {
-                            "from": "api_order","localField": "id","foreignField": "campaign_id","as": "orders",
+                            "from": "api_order","as": "orders", # "localField": "id","foreignField": "campaign_id",
+                            'let': {'id': "$id" },
                             "pipeline":[
-                                {"$match":{"id":{"$ne":None}}},
+                                {"$match":{
+                                    '$expr': { '$eq': ["$$id", "$campaign_id"] },
+                                    "id":{"$ne":None}}
+                                 },
                                 {
                                     "$lookup": {
-                                        "from": "api_order_product","localField": "id","foreignField": "order_id","as": "order_products",
+                                        "from": "api_order_product","as": "order_products", # "localField": "id","foreignField": "order_id",
+                                        'let': {'id': "$id" },
                                         "pipeline":[
-                                            {"$match":{"id":{"$ne":None}}},
+                                            {"$match":{
+                                                '$expr': { '$eq': ["$$id", "$order_id"] },
+                                                "id":{"$ne":None}}
+                                             },
                                             {"$project":{"_id":0,"id":1,"qty":1}},
                                         ]
                                     },
@@ -81,19 +101,31 @@ def get_pre_order_total_sales(user_subscription_id):
         {"$match":{"id":user_subscription_id}},
         {
             "$lookup": {
-                "from": "api_campaign","localField": "id","foreignField": "user_subscription_id","as": "campaigns",
+                "from": "api_campaign","as": "campaigns", # "localField": "id","foreignField": "user_subscription_id",
+                'let': {'id': "$id" },
                 "pipeline":[
-                    {"$match":{"id":{"$ne":None}}},
+                    {"$match":{
+                        '$expr': { '$eq': ["$$id", "$user_subscription_id"] },
+                        "id":{"$ne":None}}
+                     },
                     {
                         "$lookup": {
-                            "from": "api_pre_order","localField": "id","foreignField": "campaign_id","as": "pre_orders",
+                            "from": "api_pre_order","as": "pre_orders", # "localField": "id","foreignField": "campaign_id",
+                            'let': {'id': "$id" },
                             "pipeline":[
-                                {"$match":{"id":{"$ne":None}}},
+                                {"$match":{
+                                    '$expr': { '$eq': ["$$id", "$campaign_id"] },
+                                    "id":{"$ne":None}}
+                                 },
                                 {
                                     "$lookup": {
-                                        "from": "api_order_product","localField": "id","foreignField": "order_id","as": "order_products",
+                                        "from": "api_order_product","as": "order_products", # "localField": "id","foreignField": "order_id",
+                                        'let': {'id': "$id" },
                                         "pipeline":[
-                                            {"$match":{"id":{"$ne":None}}},
+                                            {"$match":{
+                                                '$expr': { '$eq': ["$$id", "$order_id"] },
+                                                "id":{"$ne":None}}
+                                             },
                                             {"$project":{"_id":0,"id":1,"qty":1}},
                                         ]
                                     },
@@ -128,19 +160,32 @@ def get_order_total_sales_by_month(user_subscription_id):
         {"$match":{"id":user_subscription_id}},
         {
             "$lookup": {
-                "from": "api_campaign","localField": "id","foreignField": "user_subscription_id","as": "campaigns",
+                "from": "api_campaign","as": "campaigns", # "localField": "id","foreignField": "user_subscription_id",
+                'let': {'id': "$id" },
                 "pipeline":[
-                    {"$match":{"id":{"$ne":None},"start_at":{"$gte":first_day_of_the_month}}},
+                    {"$match":{
+                        '$expr': { '$eq': ["$$id", "$user_subscription_id"] },
+                        "id":{"$ne":None},
+                        "start_at":{"$gte":first_day_of_the_month}}
+                     },
                     {
                         "$lookup": {
-                            "from": "api_order","localField": "id","foreignField": "campaign_id","as": "orders",
+                            "from": "api_order","as": "orders", # "localField": "id","foreignField": "campaign_id",
+                            'let': {'id': "$id" },
                             "pipeline":[
-                                {"$match":{"id":{"$ne":None}}},
+                                {"$match":{
+                                    '$expr': { '$eq': ["$$id", "$campaign_id"] },
+                                    "id":{"$ne":None}}
+                                 },
                                 {
                                     "$lookup": {
-                                        "from": "api_order_product","localField": "id","foreignField": "order_id","as": "order_products",
+                                        "from": "api_order_product","as": "order_products", # "localField": "id","foreignField": "order_id",
+                                        'let': {'id': "$id" },
                                         "pipeline":[
-                                            {"$match":{"id":{"$ne":None}}},
+                                            {"$match":{
+                                                '$expr': { '$eq': ["$$id", "$order_id"] },
+                                                "id":{"$ne":None}}
+                                             },
                                             {"$project":{"_id":0,"id":1,"qty":1}},
                                         ]
                                     },
@@ -174,19 +219,32 @@ def get_pre_order_total_sales_by_month(user_subscription_id):
         {"$match":{"id":user_subscription_id}},
         {
             "$lookup": {
-                "from": "api_campaign","localField": "id","foreignField": "user_subscription_id","as": "campaigns",
+                "from": "api_campaign","as": "campaigns", # "localField": "id","foreignField": "user_subscription_id",
+                'let': {'id': "$id" },
                 "pipeline":[
-                    {"$match":{"id":{"$ne":None},"start_at":{"$gte":first_day_of_the_month}}},
+                    {"$match":{
+                        '$expr': { '$eq': ["$$id", "$user_subscription_id"] },
+                        "id":{"$ne":None},
+                        "start_at":{"$gte":first_day_of_the_month}}
+                     },
                     {
                         "$lookup": {
-                            "from": "api_pre_order","localField": "id","foreignField": "campaign_id","as": "pre_orders",
+                            "from": "api_pre_order","as": "pre_orders", # "localField": "id","foreignField": "campaign_id",
+                            'let': {'id': "$id" },
                             "pipeline":[
-                                {"$match":{"id":{"$ne":None}}},
+                                {"$match":{
+                                    '$expr': { '$eq': ["$$id", "$campaign_id"] },
+                                    "id":{"$ne":None}}
+                                 },
                                 {
                                     "$lookup": {
-                                        "from": "api_order_product","localField": "id","foreignField": "order_id","as": "order_products",
+                                        "from": "api_order_product","as": "order_products", # "localField": "id","foreignField": "order_id",
+                                        'let': {'id': "$id" },
                                         "pipeline":[
-                                            {"$match":{"id":{"$ne":None}}},
+                                            {"$match":{
+                                                '$expr': { '$eq': ["$$id", "$order_id"] },
+                                                "id":{"$ne":None}}
+                                             },
                                             {"$project":{"_id":0,"id":1,"qty":1}},
                                         ]
                                     },
@@ -219,14 +277,22 @@ def get_campaign_order_rank(user_subscription_id):
         {"$match":{"id":user_subscription_id}},
         {
             "$lookup": {
-                "from": "api_campaign","localField": "id","foreignField": "user_subscription_id","as": "campaign_rank",
+                "from": "api_campaign","as": "campaign_rank", # "localField": "id","foreignField": "user_subscription_id",
+                'let': {'id': "$id" },
                 "pipeline":[
-                    {"$match":{"id":{"$ne":None}}},
+                    {"$match":{
+                        '$expr': { '$eq': ["$$id", "$user_subscription_id"] },
+                        "id":{"$ne":None}}
+                     },
                     {
                         "$lookup": {
-                            "from": "api_order","localField": "id","foreignField": "campaign_id","as": "orders",
+                            "from": "api_order","as": "orders", # "localField": "id","foreignField": "campaign_id",
+                            'let': {'id': "$id" },
                             "pipeline":[
-                                {"$match":{"id":{"$ne":None}}},
+                                {"$match":{
+                                    '$expr': { '$eq': ["$$id", "$campaign_id"] },
+                                    "id":{"$ne":None}}
+                                 },
                                 {"$project":{"_id":0,"count":{"$sum":1}}},
                             ]
                         },
@@ -251,14 +317,22 @@ def get_campaign_comment_rank(user_subscription_id):
         {"$match":{"id":user_subscription_id}},
         {
             "$lookup": {
-                "from": "api_campaign","localField": "id","foreignField": "user_subscription_id","as": "campaign_rank",
+                "from": "api_campaign","as": "campaign_rank", # "localField": "id","foreignField": "user_subscription_id",
+                'let': {'id': "$id" },
                 "pipeline":[
-                    {"$match":{"id":{"$ne":None}}},
+                    {"$match":{
+                        '$expr': { '$eq': ["$$id", "$user_subscription_id"] },
+                        "id":{"$ne":None}}
+                     },
                     {
                         "$lookup": {
-                            "from": "api_campaign_comment","localField": "id","foreignField": "campaign_id","as": "comments",
+                            "from": "api_campaign_comment","as": "comments", # "localField": "id","foreignField": "campaign_id",
+                            'let': {'id': "$id" },
                             "pipeline":[
-                                {"$match":{"id":{"$ne":None}}},
+                                {"$match":{
+                                    '$expr': { '$eq': ["$$id", "$campaign_id"] },
+                                    "id":{"$ne":None}}
+                                 },
                                 {"$project":{"_id":0,"count":{"$sum":1}}},
                             ]
                         },
@@ -301,14 +375,22 @@ def get_total_order_complete_proceed(user_subscription_id):
         {"$match":{"id":user_subscription_id}},
         {
             "$lookup": {
-                "from": "api_campaign","localField": "id","foreignField": "user_subscription_id","as": "campaigns",
+                "from": "api_campaign","as": "campaigns", # "localField": "id","foreignField": "user_subscription_id",
+                'let': {'id': "$id" },
                 "pipeline":[
-                    {"$match":{"id":{"$ne":None}}},
+                    {"$match":{
+                        '$expr': { '$eq': ["$$id", "$user_subscription_id"] },
+                        "id":{"$ne":None}}
+                     },
                     {
                         "$lookup": {
-                            "from": "api_order","localField": "id","foreignField": "campaign_id","as": "orders",
+                            "from": "api_order","as": "orders", # "localField": "id","foreignField": "campaign_id",
+                            'let': {'id': "$id" },
                             "pipeline":[
-                                {"$match":{"id":{"$ne":None}}},
+                                {"$match":{
+                                    '$expr': { '$eq': ["$$id", "$campaign_id"] },
+                                    "id":{"$ne":None}}
+                                 },
                                 {"$project":{"_id":0,
                                 "complete": {  "$cond": [ { "$eq": ["$status", "complete" ] }, 1, 0]},
                                 "review": { "$cond": [ { "$eq": [ "$status", "review" ] }, 1, 0]}
@@ -336,9 +418,13 @@ def get_campaign_order_complete_proceed(campaign_id):
         {"$match":{"id":campaign_id}},
         {
             "$lookup": {
-                "from": "api_order","localField": "id","foreignField": "campaign_id","as": "orders",
+                "from": "api_order","as": "orders", # "localField": "id","foreignField": "campaign_id",
+                'let': {'id': "$id" },
                 "pipeline":[
-                    {"$match":{"id":{"$ne":None}}},
+                    {"$match":{
+                        '$expr': { '$eq': ["$$id", "$campaign_id"] },
+                        "id":{"$ne":None}}
+                     },
                     {"$project":{"_id":0,
                     "complete": {  "$cond": [ { "$eq": ["$status", "complete" ] }, 1, 0]},
                     "review": { "$cond": [ { "$eq": [ "$status", "review" ] }, 1, 0]}
@@ -363,14 +449,23 @@ def get_total_pre_order_count(user_subscription_id):
         {"$match":{"id":user_subscription_id}},
         {
             "$lookup": {
-                "from": "api_campaign","localField": "id","foreignField": "user_subscription_id","as": "campaigns",
+                "from": "api_campaign","as": "campaigns", # "localField": "id","foreignField": "user_subscription_id",
+                'let': {'id': "$id" },
                 "pipeline":[
-                    {"$match":{"id":{"$ne":None}}},
+                    {"$match":{
+                        '$expr': { '$eq': ["$$id", "$user_subscription_id"] },
+                        "id":{"$ne":None}}
+                     },
                     {
                         "$lookup": {
-                            "from": "api_pre_order","localField": "id","foreignField": "campaign_id","as": "pre_orders",
+                            "from": "api_pre_order","as": "pre_orders", # "localField": "id","foreignField": "campaign_id",
+                            'let': {'id': "$id" },
                             "pipeline":[
-                                {"$match":{"id":{"$ne":None},"subtotal":{"$ne":0}}},
+                                {"$match":{
+                                    '$expr': { '$eq': ["$$id", "$campaign_id"] },
+                                    "id":{"$ne":None},
+                                    "subtotal":{"$ne":0}}
+                                 },
                                 {"$project":{"_id":0, "count":{"$sum":1}}}
                             ]
                         },
@@ -393,14 +488,22 @@ def get_total_average_sales(user_subscription_id):
         {"$match":{"id":user_subscription_id}},
         {
             "$lookup": {
-                "from": "api_campaign","localField": "id","foreignField": "user_subscription_id","as": "campaigns",
+                "from": "api_campaign","as": "campaigns", # ,"localField": "id","foreignField": "user_subscription_id"
+                'let': {'id': "$id" },
                 "pipeline":[
-                    {"$match":{"id":{"$ne":None}}},
+                    {"$match":{
+                        '$expr': { '$eq': ["$$id", "$user_subscription_id"] },
+                        "id":{"$ne":None}}
+                     },
                     {
                         "$lookup": {
-                            "from": "api_order","localField": "id","foreignField": "campaign_id","as": "orders",
+                            "from": "api_order","as": "orders", #,"localField": "id","foreignField": "campaign_id"
+                            'let': {'id': "$id" },
                             "pipeline":[
-                                {"$match":{"id":{"$ne":None}}},
+                                {"$match":{
+                                    '$expr': { '$eq': ["$$id", "$campaign_id"] },
+                                    "id":{"$ne":None}}
+                                 },
                                 {"$project":{"_id":0,"id":1,"subtotal":1}},
                             ]
                         },
@@ -425,14 +528,22 @@ def get_total_average_comment_count(user_subscription_id):
         {"$match":{"id":user_subscription_id}},
         {
             "$lookup": {
-                "from": "api_campaign","localField": "id","foreignField": "user_subscription_id","as": "campaigns",
+                "from": "api_campaign","as": "campaigns", #"localField": "id","foreignField": "user_subscription_id"
+                'let': {'id': "$id" },
                 "pipeline":[
-                    {"$match":{"id":{"$ne":None}}},
+                    {"$match":{
+                        '$expr': { '$eq': ["$$id", "$user_subscription_id"] },
+                        "id":{"$ne":None}}
+                     },
                     {
                         "$lookup": {
-                            "from": "api_campaign_comment","localField": "id","foreignField": "campaign_id","as": "comments",
+                            "from": "api_campaign_comment","as": "comments", # ,"localField": "id","foreignField": "campaign_id"
+                            'let': {'id': "$id" },
                             "pipeline":[
-                                {"$match":{"id":{"$ne":None}}},
+                                {"$match":{
+                                    '$expr': { '$eq': ["$$id", "$campaign_id"] },
+                                    "id":{"$ne":None}}
+                                 },
                                 {"$project":{"_id":0,"id":1,"count":{"$sum":1}}},
                             ]
                         },
@@ -470,18 +581,26 @@ def get_campaign_merge_order_list(campaign_id, search, page, page_size):
         {"$match":{"id":campaign_id}},
         {
             "$lookup": {
-                "from": "api_order","localField": "id","foreignField": "campaign_id","as": "orders",
+                "from": "api_order","as": "orders",
+                'let': {'id': "$id" },
                 "pipeline":[
-                    {"$match":{"id":{"$ne":None} }},
+                    {"$match":{
+                        '$expr': { '$eq': ["$$id", "$campaign_id"] },
+                        "id":{"$ne":None} }
+                     },
                     {"$addFields": { "type": "order","total_item": {"$size": { "$objectToArray": "$products"}}}},
                 ]
             },
         },
         {
             "$lookup": {
-                "from": "api_pre_order","localField": "id","foreignField": "campaign_id","as": "pre_orders",
+                "from": "api_pre_order","as": "pre_orders",
+                'let': {'id': "$id" },
                 "pipeline":[
-                    {"$match":{"id":{"$ne":None} }},
+                    {"$match":{
+                        '$expr': { '$eq': ["$$id", "$campaign_id"] },
+                        "id":{"$ne":None} }
+                     },
                     {"$addFields": { "type": "pre_order","total_item": {"$size": { "$objectToArray": "$products"}}}},
                 ]
             },
