@@ -11,18 +11,20 @@ class PasswordResetCodeManager(CodeManager):
 
     code_key="reset_password"
 
-    data_format = {
-        "auth_user_id":None,
-        "language":"en",
-        "expired_time":None,
-    }
+    data_format = [
+        "auth_user_id",
+        "language",
+        "expired_time",
+    ]
 
     @classmethod
     def generate(cls,auth_user_id,language):
-        data = cls.data_format.copy()
-        data['auth_user_id']=auth_user_id
-        data['language']=language
-        data['expired_time']=datetime.now().timestamp()+3000
+
+        data={
+            'auth_user_id':auth_user_id,
+            'language':language,
+            'expired_time':datetime.now().timestamp()+3000
+        }
         
         return cls._encode(data)
 
