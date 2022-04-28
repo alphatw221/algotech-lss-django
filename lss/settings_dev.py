@@ -393,7 +393,7 @@ REDIS_SERVER = {
 
 
 # gcp load balancer
-GCP_API_LOADBALANCER_URL = "https://gipassl.algotech.app"
+GCP_API_LOADBALANCER_URL = "http://192.168.74.129:8001"
 # for social lab
 # GCP_API_LOADBALANCER_URL = "https://sb.liveshowseller.ph"
 
