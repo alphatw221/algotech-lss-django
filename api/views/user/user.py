@@ -967,9 +967,9 @@ class UserViewSet(viewsets.ModelViewSet):
         code = PasswordResetCodeManager.generate(auth_user.id)
 
 
-        i18n_get_reset_password_mail_subject()
         
-        EmailService.send_email_template("test",email,"email_reste_password_link.html",{"url":settings.GCP_API_LOADBALANCER_URL +"/#/password/reset","code":code,"username":auth_user.username})
+        
+        EmailService.send_email_template(i18n_get_reset_password_mail_subject(),email,"email_reste_password_link.html",{"url":settings.GCP_API_LOADBALANCER_URL +"/#/password/reset","code":code,"username":auth_user.username})
         return Response({"message":"please check email"}, status=status.HTTP_200_OK)
 
     
