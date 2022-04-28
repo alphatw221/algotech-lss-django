@@ -970,7 +970,7 @@ class UserViewSet(viewsets.ModelViewSet):
         email, = getdata(request, ("email",), required=True)
         email = email.lower()
         email = email.replace(" ", "")
-        
+
         if not AuthUser.objects.filter(email=email).exists() or not User.objects.filter(email=email,type='user').exists():
             raise ApiVerifyError('user dosent exists')
 
@@ -982,7 +982,7 @@ class UserViewSet(viewsets.ModelViewSet):
         EmailService.send_email_template(
             i18n_get_reset_password_mail_subject(user_subscription.lang),
             email,
-            "email_reste_password_link.html",
+            "email_reset_password_link.html",
             {"url":settings.GCP_API_LOADBALANCER_URL +"/#/password/reset","code":code,"username":auth_user.username},
             lang=user_subscription.lang)
 
