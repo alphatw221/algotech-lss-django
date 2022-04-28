@@ -7,7 +7,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
+<<<<<<< HEAD
 "POT-Creation-Date: 2022-04-27 03:04+0000\n"
+=======
+"POT-Creation-Date: 2022-04-27 08:53+0000\n"
+>>>>>>> 1485a389828156135115a7b2d599f71ff9a317d3
 "PO-Revision-Date: 2021-12-13 15:50+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -166,6 +170,7 @@ msgstr ""
 msgid "MAIL_SUBJECT_ACTIVATION"
 msgstr ""
 
+<<<<<<< HEAD
 #: templates/email_reset_password_link.html:7
 msgid "EMAIL/PASSWORD_RESET_LINK/SUBJECT"
 msgstr ""
@@ -197,6 +202,67 @@ msgstr ""
 
 #: templates/email_reset_password_link.html:22
 msgid "CONTACT_INFO/ADDRESS"
+=======
+#: business_policy/payment.py:20
+msgid "PAYMENT/DIRECT_PAYMENT/NAME_OF_BANK_OR_PAYMENT_MODE"
+msgstr ""
+
+#: business_policy/payment.py:21
+msgid "PAYMENT/DIRECT_PAYMENT/ACCOUNT_NAME"
+msgstr ""
+
+#: business_policy/payment.py:22
+msgid "PAYMENT/DIRECT_PAYMENT/ACCOUNT_NUMBER"
+msgstr ""
+
+#: business_policy/payment.py:23
+msgid "PAYMENT/DIRECT_PAYMENT/OTHER_NOTE"
+msgstr ""
+
+#: business_policy/payment.py:24
+msgid "PAYMENT/DIRECT_PAYMENT/REQUIRE_CUSTOMER_PAYMENT_RECORD"
+msgstr ""
+
+#: business_policy/payment.py:34
+msgid "PAYMENT/HIT_PAY/PAYMENT_BUTTON_TITLE"
+msgstr ""
+
+#: business_policy/payment.py:35 business_policy/payment.py:47
+#: business_policy/payment.py:58 business_policy/payment.py:90
+msgid "PAYMENT/CURRENCY_CODE"
+msgstr ""
+
+#: business_policy/payment.py:36
+msgid "PAYMENT/HIT_PAY/API_KEY"
+msgstr ""
+
+#: business_policy/payment.py:37
+msgid "PAYMENT/HIT_PAY/SALT"
+msgstr ""
+
+#: business_policy/payment.py:46
+msgid "PAYMENT/PAYPAL/CLIENT_ID"
+msgstr ""
+
+#: business_policy/payment.py:48
+msgid "PAYMENT/PAYPAL/SECRET"
+msgstr ""
+
+#: business_policy/payment.py:57 business_policy/payment.py:79
+msgid "PAYMENT/SECRET_KEY"
+msgstr ""
+
+#: business_policy/payment.py:88
+msgid "PAYMENT/FIRST_DATA/STORE_ID"
+msgstr ""
+
+#: business_policy/payment.py:89
+msgid "PAYMENT/FIRST_DATA/SHARE_SECRET"
+msgstr ""
+
+#: business_policy/payment.py:91
+msgid "PAYMENT/FIRST_DATA/TIME_ZONE"
+>>>>>>> 1485a389828156135115a7b2d599f71ff9a317d3
 msgstr ""
 
 #: templates/register_activation.html:10
