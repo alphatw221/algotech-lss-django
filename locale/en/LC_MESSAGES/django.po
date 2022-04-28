@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-27 07:53+0000\n"
+"POT-Creation-Date: 2022-04-28 05:48+0000\n"
 "PO-Revision-Date: 2021-12-13 15:51+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -17,6 +17,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 3.0\n"
+
+#: api/views/payment/payment.py:826 api/views/payment/payment.py:829
+#: business_policy/payment.py:21
+msgid "PAYMENT/DIRECT_PAYMENT/NAME_OF_BANK_OR_PAYMENT_MODE"
+msgstr "Name of Bank/Payment Mode"
 
 #: backend/i18n/campaign_announcement.py:8
 #, python-brace-format
@@ -160,13 +165,70 @@ msgstr "Find out details: {link}\n"
 msgid "ITEM_INFO{name}{qty}{dollar_sign}{total}\n"
 msgstr "{name} Qty:{qty} {dollar_sign}{total}\n"
 
-#: backend/i18n/register_confirm_mail.py:17
+#: backend/i18n/email/subject.py:8 backend/i18n/register_confirm_mail.py:17
 msgid "MAIL_SUBJECT_WELCOME"
 msgstr "Welcome to Live Show Seller"
 
 #: backend/i18n/register_confirm_mail.py:22
 msgid "MAIL_SUBJECT_ACTIVATION"
 msgstr "Activated account details at Live Show Seller."
+
+#: business_policy/payment.py:22
+msgid "PAYMENT/DIRECT_PAYMENT/ACCOUNT_NAME"
+msgstr "Account Name"
+
+#: business_policy/payment.py:23
+msgid "PAYMENT/DIRECT_PAYMENT/ACCOUNT_NUMBER"
+msgstr "Account Number"
+
+#: business_policy/payment.py:24
+msgid "PAYMENT/DIRECT_PAYMENT/OTHER_NOTE"
+msgstr "Other Note (Press enter to add new line)"
+
+#: business_policy/payment.py:25
+msgid "PAYMENT/DIRECT_PAYMENT/REQUIRE_CUSTOMER_PAYMENT_RECORD"
+msgstr "Require Customer's Payment Record"
+
+#: business_policy/payment.py:38
+msgid "PAYMENT/HIT_PAY/PAYMENT_BUTTON_TITLE"
+msgstr "Payment Button Title"
+
+#: business_policy/payment.py:39 business_policy/payment.py:54
+#: business_policy/payment.py:68 business_policy/payment.py:106
+msgid "PAYMENT/CURRENCY_CODE"
+msgstr "Currency Code"
+
+#: business_policy/payment.py:40
+msgid "PAYMENT/HIT_PAY/API_KEY"
+msgstr "API Key"
+
+#: business_policy/payment.py:41
+msgid "PAYMENT/HIT_PAY/SALT"
+msgstr "Salt"
+
+#: business_policy/payment.py:53
+msgid "PAYMENT/PAYPAL/CLIENT_ID"
+msgstr "Client ID"
+
+#: business_policy/payment.py:55
+msgid "PAYMENT/PAYPAL/SECRET"
+msgstr "Secret"
+
+#: business_policy/payment.py:67 business_policy/payment.py:92
+msgid "PAYMENT/SECRET_KEY"
+msgstr "Secret Key"
+
+#: business_policy/payment.py:104
+msgid "PAYMENT/FIRST_DATA/STORE_ID"
+msgstr "Store ID"
+
+#: business_policy/payment.py:105
+msgid "PAYMENT/FIRST_DATA/SHARE_SECRET"
+msgstr "Share Secret"
+
+#: business_policy/payment.py:107
+msgid "PAYMENT/FIRST_DATA/TIME_ZONE"
+msgstr "Time Zone"
 
 #: templates/email_reset_password_link.html:7
 msgid "EMAIL/PASSWORD_RESET_LINK/SUBJECT"
@@ -203,66 +265,6 @@ msgstr "Contact Number: +65 9489 2086"
 #: templates/email_reset_password_link.html:25
 msgid "CONTACT_INFO/ADDRESS"
 msgstr "Address: 8 Burn Road #15-13, Singapore 369977"
-#: business_policy/payment.py:20
-msgid "PAYMENT/DIRECT_PAYMENT/NAME_OF_BANK_OR_PAYMENT_MODE"
-msgstr "Name of Bank/Payment Mode"
-
-#: business_policy/payment.py:21
-msgid "PAYMENT/DIRECT_PAYMENT/ACCOUNT_NAME"
-msgstr "Account Name"
-
-#: business_policy/payment.py:22
-msgid "PAYMENT/DIRECT_PAYMENT/ACCOUNT_NUMBER"
-msgstr "Account Number"
-
-#: business_policy/payment.py:23
-msgid "PAYMENT/DIRECT_PAYMENT/OTHER_NOTE"
-msgstr "Other Note (Press enter to add new line)"
-
-#: business_policy/payment.py:24
-msgid "PAYMENT/DIRECT_PAYMENT/REQUIRE_CUSTOMER_PAYMENT_RECORD"
-msgstr "Require Customer's Payment Record"
-
-#: business_policy/payment.py:34
-msgid "PAYMENT/HIT_PAY/PAYMENT_BUTTON_TITLE"
-msgstr "Payment Button Title"
-
-#: business_policy/payment.py:35 business_policy/payment.py:47
-#: business_policy/payment.py:58 business_policy/payment.py:90
-msgid "PAYMENT/CURRENCY_CODE"
-msgstr "Currency Code"
-
-#: business_policy/payment.py:36
-msgid "PAYMENT/HIT_PAY/API_KEY"
-msgstr "API Key"
-
-#: business_policy/payment.py:37
-msgid "PAYMENT/HIT_PAY/SALT"
-msgstr "Salt"
-
-#: business_policy/payment.py:46
-msgid "PAYMENT/PAYPAL/CLIENT_ID"
-msgstr "Client ID"
-
-#: business_policy/payment.py:48
-msgid "PAYMENT/PAYPAL/SECRET"
-msgstr "Secret"
-
-#: business_policy/payment.py:57 business_policy/payment.py:79
-msgid "PAYMENT/SECRET_KEY"
-msgstr "Secret Key"
-
-#: business_policy/payment.py:88
-msgid "PAYMENT/FIRST_DATA/STORE_ID"
-msgstr "Store ID"
-
-#: business_policy/payment.py:89
-msgid "PAYMENT/FIRST_DATA/SHARE_SECRET"
-msgstr "Share Secret"
-
-#: business_policy/payment.py:91
-msgid "PAYMENT/FIRST_DATA/TIME_ZONE"
-msgstr "Time Zone"
 
 #: templates/register_activation.html:10
 msgid "TITLE_ACTIVATION"
