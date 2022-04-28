@@ -614,6 +614,8 @@ class UserViewSet(viewsets.ModelViewSet):
         
         email, plan = getdata(request, ("email", "plan"), required=True)
         email = email.lower()
+        email = email.replace(" ", "")
+
         firstName, lastName, contactNumber, password, country, timezone = getdata(request, ("firstName", "lastName", "contactNumber", "password", "country", "timezone"), required=False)
 
         country_plan = SubscriptionPlan.get_country(country_code)
@@ -699,6 +701,8 @@ class UserViewSet(viewsets.ModelViewSet):
         
         email, plan, period = getdata(request, ("email", "plan", "period"), required=True)
         email = email.lower()
+        email = email.replace(" ", "") #TODO add in checkrule
+
         promoCode, = getdata(request, ("promoCode",), required=False)
 
         country_plan = SubscriptionPlan.get_country(country_code)
@@ -740,6 +744,8 @@ class UserViewSet(viewsets.ModelViewSet):
 
         email, password, plan, period, intentSecret = getdata(request,("email", "password", "plan", "period", "intentSecret"),required=True)
         email = email.lower()
+        email = email.replace(" ", "")
+
         firstName, lastName, contactNumber, country , promoCode, timezone = getdata(request, ("firstName", "lastName", "contactNumber", "country", "promoCode"), required=False)
 
         payment_intent_id = intentSecret[:27]
@@ -838,7 +844,6 @@ class UserViewSet(viewsets.ModelViewSet):
     @api_error_handler
     def general_login(self, request):
         email, password = getdata(request, ("email","password"), required=True)
-        email = email.lower()
         
         if not AuthUser.objects.filter(email=email).exists():
             return Response({"message": "email or password incorrect"}, status=status.HTTP_401_UNAUTHORIZED)
@@ -963,7 +968,9 @@ class UserViewSet(viewsets.ModelViewSet):
     def forget_password(self, request):
 
         email, = getdata(request, ("email",), required=True)
-
+        email = email.lower()
+        email = email.replace(" ", "")
+        
         if not AuthUser.objects.filter(email=email).exists() or not User.objects.filter(email=email,type='user').exists():
             raise ApiVerifyError('user dosent exists')
 
