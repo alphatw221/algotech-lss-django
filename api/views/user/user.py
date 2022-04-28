@@ -983,7 +983,7 @@ class UserViewSet(viewsets.ModelViewSet):
             i18n_get_reset_password_mail_subject(user_subscription.lang),
             email,
             "email_reset_password_link.html",
-            {"url":settings.GCP_API_LOADBALANCER_URL +"/#/password/reset","code":code,"username":auth_user.username},
+            {"url":settings.GCP_API_LOADBALANCER_URL +"/lss/#/password/reset","code":code,"username":auth_user.username},
             lang=user_subscription.lang)
 
         return Response({"message":"please check email"}, status=status.HTTP_200_OK)
