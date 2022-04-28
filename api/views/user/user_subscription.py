@@ -298,7 +298,6 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         api_user = Verify.get_seller_user(request)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
         language, = getdata(request, ('language',))
-        language = language.replace("-", "_")
         Verify.language_supported(language)
             
         user_subscription.lang = language
