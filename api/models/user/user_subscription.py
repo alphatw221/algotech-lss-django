@@ -51,7 +51,7 @@ class UserSubscription(models.Model):
     meta_country = models.JSONField(null=True, blank=True, default=dict)
 
     lang = models.CharField(max_length=255, blank=True,
-                            choices=settings.LANGUAGES, default='en')
+                            choices=settings.LANGUAGES_CHOICES, default='en')
                             
     meta_code = models.JSONField(null=True, blank=True, default=dict)
     user_plan = models.JSONField(null=True, blank=True, default=dict)

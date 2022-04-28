@@ -240,10 +240,17 @@ LANGUAGES = [
     ('id', 'Indonesian'),
 ]
 
+LANGUAGES_CHOICES = [
+    ('en', 'English'),
+    ('zh_hans', 'Simplified Chinese'),
+    ('zh_hant', 'Traditional Chinese'),
+    ('id', 'Indonesian'),
+]
+
 SUPPORTED_LANGUAGES = {
     'en',
-    'zh-hans',
-    'zh-hant',
+    'zh_hans',
+    'zh_hant',
     'id'
 }
 

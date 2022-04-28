@@ -234,6 +234,13 @@ LOCALE_PATHS = [os.path.join(BASE_DIR, 'locale')]
 
 LANGUAGES = [
     ('en', 'English'),
+    ('zh-hans', 'Simplified Chinese'),
+    ('zh-hant', 'Traditional Chinese'),
+    ('id', 'Indonesian'),
+]
+
+LANGUAGES_CHOICES = [
+    ('en', 'English'),
     ('zh_hans', 'Simplified Chinese'),
     ('zh_hant', 'Traditional Chinese'),
     ('id', 'Indonesian'),

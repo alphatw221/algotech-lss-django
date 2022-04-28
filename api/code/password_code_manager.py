@@ -43,7 +43,8 @@ class PasswordResetCodeManager(CodeManager):
 
         auth_user.set_password(new_password)
         auth_user.save()
-
+        
+        # language = data.get('language')
         # EmailService.send_email_template("",auth_user.email,"",{})
 
         return {
