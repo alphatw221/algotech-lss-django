@@ -25,6 +25,7 @@ class UserSubscription(models.Model):
         ('dealer','Dealer')
     ]
 
+    
     class Meta:
         db_table = 'api_user_subscription'
 
@@ -52,7 +53,7 @@ class UserSubscription(models.Model):
 
     lang = models.CharField(max_length=255, blank=True,
                             choices=settings.LANGUAGES_CHOICES, default='en')
-                            
+    currency =   models.CharField(max_length=255, null=True, blank=True, default='SGD')
     meta_code = models.JSONField(null=True, blank=True, default=dict)
     user_plan = models.JSONField(null=True, blank=True, default=dict)
 
