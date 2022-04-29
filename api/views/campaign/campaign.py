@@ -281,12 +281,12 @@ class CampaignViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'], url_path=r'ig_comment', permission_classes = (IsAuthenticated,))
     @api_error_handler
     def get_ig_comment(self, request):
-        api_user, campaign_id, comment_id = getparams(request, ('campaign_id', 'comment_id',), with_user=True, seller=True)
+        # api_user, campaign_id, comment_id = getparams(request, ('campaign_id', 'comment_id',), with_user=True, seller=True)
         
-        # api_user = request.user.api_users.get(type='user')
-        # campaign_id = request.query_params.get('campaign_id')
-        # comment_id = request.query_params.get('comment_id')
-        # platform = request.query_params.get('platform')
+        api_user = request.user.api_users.get(type='user')
+        campaign_id = request.query_params.get('campaign_id')
+        comment_id = request.query_params.get('comment_id')
+        platform = request.query_params.get('platform')
         comments_list = []
 
         is_user = verify_seller_request(api_user)
