@@ -47,6 +47,8 @@ from django.http import HttpResponse
 import xlsxwriter
 from backend.pymongo.mongodb import db
 from dateutil.relativedelta import relativedelta
+from backend.i18n.email.subject import i18n_get_reset_password_mail_subject
+
 
 
 platform_info_dict={'facebook':'facebook_info', 'youtube':'youtube_info', 'instagram':'instagram_info', 'google':'google_info'}
@@ -609,11 +611,14 @@ class UserViewSet(viewsets.ModelViewSet):
     @api_error_handler
     def register_free_trial(self, request, country_code):
 
-        Verify.is_valid_country_code_for_user_plan(country_code)
         
         email, plan = getdata(request, ("email", "plan"), required=True)
         email = email.lower()
+        email = email.replace(" ", "")
+
         firstName, lastName, contactNumber, password, country, timezone = getdata(request, ("firstName", "lastName", "contactNumber", "password", "country", "timezone"), required=False)
+
+        country_plan = SubscriptionPlan.get_country(country_code)
 
         if plan != 'trial':
             raise ApiVerifyError('plan option error')
@@ -633,7 +638,9 @@ class UserViewSet(viewsets.ModelViewSet):
             expired_at=expired_at, 
             user_plan= {"activated_platform" : ["facebook"]}, 
             meta_country={ 'activated_country': [country_code] },
-            type='trial')
+            type='trial',
+            lang=country_plan.language
+            )
         
         User.objects.create(name=f'{firstName} {lastName}', email=email, type='user', status='valid', phone=contactNumber, auth_user=auth_user, user_subscription=user_subscription)
         
@@ -647,18 +654,18 @@ class UserViewSet(viewsets.ModelViewSet):
         }
 
         EmailService.send_email_template(
-            i18n_get_register_confirm_mail_subject(),
+            i18n_get_register_confirm_mail_subject(country_plan.language),
             email,
             "register_confirmation.html",
             {
                 'firstName': firstName,
                 'email': email,
                 'password': password
-            }
+            },lang=country_plan.language
         )
 
         EmailService.send_email_template(
-            i18n_get_register_activate_mail_subject(),
+            i18n_get_register_activate_mail_subject(country_plan.language),
             email,
             "register_activation.html",
             {
@@ -666,7 +673,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 'Plan': plan,
                 'email': email,
                 'password': password
-            }
+            },lang=country_plan.language
         )
       
         lss_email = 'hello@liveshowseller.ph' if country_code =='PH' else 'lss@algotech.app'
@@ -694,6 +701,8 @@ class UserViewSet(viewsets.ModelViewSet):
         
         email, plan, period = getdata(request, ("email", "plan", "period"), required=True)
         email = email.lower()
+        email = email.replace(" ", "") #TODO add in checkrule
+
         promoCode, = getdata(request, ("promoCode",), required=False)
 
         country_plan = SubscriptionPlan.get_country(country_code)
@@ -735,6 +744,8 @@ class UserViewSet(viewsets.ModelViewSet):
 
         email, password, plan, period, intentSecret = getdata(request,("email", "password", "plan", "period", "intentSecret"),required=True)
         email = email.lower()
+        email = email.replace(" ", "")
+
         firstName, lastName, contactNumber, country , promoCode, timezone = getdata(request, ("firstName", "lastName", "contactNumber", "country", "promoCode"), required=False)
 
         payment_intent_id = intentSecret[:27]
@@ -781,7 +792,8 @@ class UserViewSet(viewsets.ModelViewSet):
             user_plan= {"activated_platform" : ["facebook","youtube","instagram"]}, 
             meta_country={ 'activated_country': [country_code] },
             meta = {"stripe payment intent":intentSecret},
-            type=plan)
+            type=plan,
+            lang=country_plan.language)
         
         User.objects.create(
             name=f'{firstName} {lastName}', email=email, type='user', status='valid', phone=contactNumber, auth_user=auth_user, user_subscription=user_subscription)
@@ -797,18 +809,18 @@ class UserViewSet(viewsets.ModelViewSet):
             "Receipt":paymentIntent.charges.get('data')[0].get('receipt_url')
         }
 
-        EmailService.send_email_template(i18n_get_register_confirm_mail_subject(),email,"register_confirmation.html",{
+        EmailService.send_email_template(i18n_get_register_confirm_mail_subject(lang=country_plan.language),email,"register_confirmation.html",{
                     'firstName': firstName,
                     'email': email,
                     'password': password
-                })
+                },lang=country_plan.language)
 
-        EmailService.send_email_template(i18n_get_register_activate_mail_subject(),email,"register_activation.html",{
+        EmailService.send_email_template(i18n_get_register_activate_mail_subject(lang=country_plan.language),email,"register_activation.html",{
                     'firstName': firstName,
                     'Plan': subscription_plan.get('text'),
                     'email': email,
                     'password': password
-                })
+                },lang=country_plan.language)
         
         lss_email = 'lss@algotech.app'
         if country_code == 'PH':
@@ -832,7 +844,6 @@ class UserViewSet(viewsets.ModelViewSet):
     @api_error_handler
     def general_login(self, request):
         email, password = getdata(request, ("email","password"), required=True)
-        email = email.lower()
         
         if not AuthUser.objects.filter(email=email).exists():
             return Response({"message": "email or password incorrect"}, status=status.HTTP_401_UNAUTHORIZED)
@@ -957,13 +968,24 @@ class UserViewSet(viewsets.ModelViewSet):
     def forget_password(self, request):
 
         email, = getdata(request, ("email",), required=True)
+        email = email.lower()
+        email = email.replace(" ", "")
 
         if not AuthUser.objects.filter(email=email).exists() or not User.objects.filter(email=email,type='user').exists():
-            raise ApiVerifyError('email invalid')
+            raise ApiVerifyError('user dosent exists')
 
         auth_user = AuthUser.objects.get(email=email)
-        code = PasswordResetCodeManager.generate(auth_user.id)
-        EmailService.send_email_template("test",email,"forgot_password.html",{"code":code,"username":auth_user.username})
+        api_user = User.objects.get(email=email)
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        code = PasswordResetCodeManager.generate(auth_user.id,user_subscription.lang)
+
+        EmailService.send_email_template(
+            i18n_get_reset_password_mail_subject(user_subscription.lang),
+            email,
+            "email_reset_password_link.html",
+            {"url":settings.GCP_API_LOADBALANCER_URL +"/lss/#/password/reset","code":code,"username":auth_user.username},
+            lang=user_subscription.lang)
+
         return Response({"message":"please check email"}, status=status.HTTP_200_OK)
 
     

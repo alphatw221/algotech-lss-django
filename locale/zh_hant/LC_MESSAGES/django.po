@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-27 03:04+0000\n"
+"POT-Creation-Date: 2022-04-28 05:48+0000\n"
 "PO-Revision-Date: 2021-12-13 15:50+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -17,6 +17,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: Poedit 3.0\n"
+
+#: api/views/payment/payment.py:826 api/views/payment/payment.py:829
+#: business_policy/payment.py:21
+msgid "PAYMENT/DIRECT_PAYMENT/NAME_OF_BANK_OR_PAYMENT_MODE"
+msgstr "銀行名稱 / 付款方式"
 
 #: backend/i18n/campaign_announcement.py:8
 #, python-brace-format
@@ -158,7 +163,7 @@ msgstr "查看購物車：{link}\n"
 msgid "ITEM_INFO{name}{qty}{dollar_sign}{total}\n"
 msgstr "{name} 數量：{qty} {dollar_sign}{total}\n"
 
-#: backend/i18n/register_confirm_mail.py:17
+#: backend/i18n/email/subject.py:8 backend/i18n/register_confirm_mail.py:17
 msgid "MAIL_SUBJECT_WELCOME"
 msgstr ""
 
@@ -166,36 +171,95 @@ msgstr ""
 msgid "MAIL_SUBJECT_ACTIVATION"
 msgstr ""
 
+#: business_policy/payment.py:22
+msgid "PAYMENT/DIRECT_PAYMENT/ACCOUNT_NAME"
+msgstr "帳戶名稱"
+
+#: business_policy/payment.py:23
+msgid "PAYMENT/DIRECT_PAYMENT/ACCOUNT_NUMBER"
+msgstr "帳號"
+
+#: business_policy/payment.py:24
+msgid "PAYMENT/DIRECT_PAYMENT/OTHER_NOTE"
+msgstr "其他備註 (按enter增加新的欄位)"
+
+#: business_policy/payment.py:25
+msgid "PAYMENT/DIRECT_PAYMENT/REQUIRE_CUSTOMER_PAYMENT_RECORD"
+msgstr "要求客戶附上付款記錄"
+
+#: business_policy/payment.py:38
+msgid "PAYMENT/HIT_PAY/PAYMENT_BUTTON_TITLE"
+msgstr "付款按鈕名稱"
+
+#: business_policy/payment.py:39 business_policy/payment.py:54
+#: business_policy/payment.py:68 business_policy/payment.py:106
+msgid "PAYMENT/CURRENCY_CODE"
+msgstr "貨幣代碼"
+
+#: business_policy/payment.py:40
+msgid "PAYMENT/HIT_PAY/API_KEY"
+msgstr "API 金鑰"
+
+#: business_policy/payment.py:41
+msgid "PAYMENT/HIT_PAY/SALT"
+msgstr "密碼"
+
+#: business_policy/payment.py:53
+msgid "PAYMENT/PAYPAL/CLIENT_ID"
+msgstr "客戶識別碼"
+
+#: business_policy/payment.py:55
+msgid "PAYMENT/PAYPAL/SECRET"
+msgstr "密碼"
+
+#: business_policy/payment.py:67 business_policy/payment.py:92
+msgid "PAYMENT/SECRET_KEY"
+msgstr "密鑰"
+
+#: business_policy/payment.py:104
+msgid "PAYMENT/FIRST_DATA/STORE_ID"
+msgstr "商店識別碼"
+
+#: business_policy/payment.py:105
+msgid "PAYMENT/FIRST_DATA/SHARE_SECRET"
+msgstr "共享密鑰"
+
+#: business_policy/payment.py:107
+msgid "PAYMENT/FIRST_DATA/TIME_ZONE"
+msgstr "時區"
+
 #: templates/email_reset_password_link.html:7
 msgid "EMAIL/PASSWORD_RESET_LINK/SUBJECT"
-msgstr ""
-
-#: templates/email_reset_password_link.html:10
-#, python-format
-msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT1%(username)s"
-msgstr ""
+msgstr "Live Show Seller 重設密碼通知"
 
 #: templates/email_reset_password_link.html:12
-msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT2"
-msgstr ""
+msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT1"
+msgstr "您好 "
 
 #: templates/email_reset_password_link.html:15
-msgid "EMAIL/PASSWORD_RESET_LINK/BUTTON"
+msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT2"
 msgstr ""
+"我們收到重設Live Show Seller 密碼的要求。請點擊下方連結, 即可重新設定。"
 
 #: templates/email_reset_password_link.html:18
-msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT3"
-msgstr ""
-
-#: templates/email_reset_password_link.html:20
-msgid "CONTACT_INFO/EMAIL"
-msgstr ""
+msgid "EMAIL/PASSWORD_RESET_LINK/BUTTON"
+msgstr "重設密碼"
 
 #: templates/email_reset_password_link.html:21
-msgid "CONTACT_INFO/PHONE"
+msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT3"
 msgstr ""
+"若您忽略此封信件, 原本的密碼不會有所變更。若您並沒有要求重設密碼, 請與我們聯"
+"繫。"
 
-#: templates/email_reset_password_link.html:22
+#: templates/email_reset_password_link.html:23
+msgid "CONTACT_INFO/EMAIL"
+msgstr "電子信箱: app@algotech.app"
+
+#: templates/email_reset_password_link.html:24
+msgid "CONTACT_INFO/PHONE"
+msgstr "聯絡電話: +65 9489 2086"
+
+#: templates/email_reset_password_link.html:25
 msgid "CONTACT_INFO/ADDRESS"
 msgstr ""
 

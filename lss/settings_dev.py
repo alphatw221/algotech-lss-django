@@ -220,7 +220,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'en_us'
 
 TIME_ZONE = 'UTC'
 
@@ -239,10 +239,17 @@ LANGUAGES = [
     ('id', 'Indonesian'),
 ]
 
+LANGUAGES_CHOICES = [
+    ('en', 'English'),
+    ('zh_hans', 'Simplified Chinese'),
+    ('zh_hant', 'Traditional Chinese'),
+    ('id', 'Indonesian'),
+]
+
 SUPPORTED_LANGUAGES = {
     'en',
-    'zh-hans',
-    'zh-hant',
+    'zh_hans',
+    'zh_hant',
     'id'
 }
 
@@ -320,8 +327,8 @@ YOUTUBE_API_CONFIG = {
 }
 
 # Google API credentials
-GOOGLE_OAUTH_CLIENT_ID_FOR_LIVESHOWSELLER = "536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com"
-GOOGLE_OAUTH_CLIENT_SECRET_FOR_LIVESHOWSELLER = "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"
+GOOGLE_OAUTH_CLIENT_ID_FOR_LIVESHOWSELLER = "715361967747-fvvrbaf18n412htlb92p8k6558kj4ugi.apps.googleusercontent.com"
+GOOGLE_OAUTH_CLIENT_SECRET_FOR_LIVESHOWSELLER = "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"
 
 # backend app
 COMMENT_PROCESSING = {
@@ -386,7 +393,7 @@ REDIS_SERVER = {
 
 
 # gcp load balancer
-GCP_API_LOADBALANCER_URL = "https://gipassl.algotech.app"
+GCP_API_LOADBALANCER_URL = "http://192.168.74.129:8001"
 # for social lab
 # GCP_API_LOADBALANCER_URL = "https://sb.liveshowseller.ph"
 
@@ -419,3 +426,4 @@ WEBPACK_LOADER = {
   }
 }
 
+TWITCH_OAUTH_API_URL = "https://id.twitch.tv/oauth2"

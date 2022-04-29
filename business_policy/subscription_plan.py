@@ -23,6 +23,7 @@ class SubscriptionPlan:
         promo_code="ALGOTECH"
         promo_discount_rate=0.9
         currency = "USD"
+        language = "en"
         plans = {
             "trial" :{"text": "Free Trial", "price":{"monthly":0}},
             "lite" : {"text": "Lite", "price":{"monthly":10,"quarterly":30}},
@@ -34,6 +35,7 @@ class SubscriptionPlan:
         promo_code="ALGOTECH"
         promo_discount_rate=0.9
         currency = "USD"
+        language = "en"
         plans = {
             "trial" :{"text": "Free Trial", "price":{"monthly":0}},
             "lite" : {"text": "Lite", "price":{"monthly":10,"quarterly":30}},
@@ -45,6 +47,7 @@ class SubscriptionPlan:
         promo_code="ALGOTECH"
         promo_discount_rate=0.9
         currency = "USD"
+        language = "en"
         plans = {
             "trial" :{"text": "Free Trial", "price":{"monthly":0}},
             "lite" : {"text": "Lite", "price":{"monthly":10,"quarterly":30}},
@@ -56,6 +59,7 @@ class SubscriptionPlan:
         promo_code="ALGOTECH"
         promo_discount_rate=0.9
         currency = "USD"
+        language = "en"
         plans = {
             "trial" :{"text": "Free Trial", "price":{"monthly":0}},
             "lite" : {"text": "Lite", "price":{"monthly":10,"quarterly":30}},
@@ -68,6 +72,7 @@ class SubscriptionPlan:
         promo_code="ALGOTECH"
         promo_discount_rate=0.9
         currency = "USD"
+        language = "id"
         plans = {
             "trial" :{"text": "Free Trial", "price":{"monthly":0}},
             "lite" : {"text": "Lite", "price":{"monthly":10,"quarterly":30}},
@@ -79,6 +84,7 @@ class SubscriptionPlan:
         promo_code="ALGOTECH"
         promo_discount_rate=0.9
         currency = "USD"
+        language = "en"
         plans = {
             "trial" :{"text": "Free Trial", "price":{"monthly":0}},
             "lite" : {"text": "Lite", "price":{"monthly":10,"quarterly":30}},
@@ -90,6 +96,7 @@ class SubscriptionPlan:
         promo_code="ALGOTECH"
         promo_discount_rate=0.9
         currency = "USD"
+        language = "en"
         plans = {
             "trial" :{"text": "Free Trial", "price":{"monthly":0}},
             "lite" : {"text": "Lite", "price":{"monthly":10,"quarterly":30}},
@@ -101,6 +108,7 @@ class SubscriptionPlan:
         promo_code="ALGOTECH"
         promo_discount_rate=0.9
         currency = "USD"
+        language = "zh_hant"
         plans = {
             "trial" :{"text": "Free Trial", "price":{"monthly":0}},
             "lite" : {"text": "Lite", "price":{"monthly":10,"quarterly":30}},
@@ -112,6 +120,7 @@ class SubscriptionPlan:
         promo_code="ALGOTECH"
         promo_discount_rate=0.9
         currency = "USD"
+        language = "zh_hans"
         plans = {
             "trial" :{"text": "Free Trial", "price":{"monthly":0}},
             "lite" : {"text": "Lite", "price":{"monthly":10,"quarterly":30}},
@@ -123,6 +132,7 @@ class SubscriptionPlan:
         promo_code="ALGOTECH"
         promo_discount_rate=0.9
         currency = "USD"
+        language = "en"
         plans = {
             "trial" :{"text": "Free Trial", "price":{"monthly":0}},
             "lite" : {"text": "Lite", "price":{"monthly":10,"quarterly":30}},

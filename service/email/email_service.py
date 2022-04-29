@@ -5,7 +5,7 @@ from service.email.email_job import send_email_job
 class EmailService:
 
     @staticmethod
-    def send_email(subject, email, content, file = None):
+    def send_email(subject, email, content, file = None, lang = 'en'):
 
         email_queue.enqueue(
             send_email_job,
@@ -13,13 +13,14 @@ class EmailService:
                 "subject": subject,
                 "email": email, 
                 "content":content,
-                "file":file
+                "file":file,
+                "lang":lang
             }, result_ttl=10, failure_ttl=10)
 
 
 
     @staticmethod
-    def send_email_template(subject, email, template, parameters, file=None):
+    def send_email_template(subject, email, template, parameters, file=None, lang="en"):
         email_queue.enqueue(
             send_email_job,
             kwargs={
@@ -27,5 +28,6 @@ class EmailService:
                 "email": email, 
                 "template": template,
                 "parameters": parameters,
-                "file":file
+                "file":file,
+                "lang":lang
             }, result_ttl=10, failure_ttl=10)

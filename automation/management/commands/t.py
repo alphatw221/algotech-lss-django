@@ -46,12 +46,13 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # self.test_mongodb_query()
-        self.test_send_email()
+        # self.test_send_email()
         # self.test_user_plan()
         # ret = api_twitch_get_access_token()
         # print (ret)
         # if settings.GCP_API_LOADBALANCER_URL == "https://sb.liveshowseller.ph":
         #     self.modify_database()
+        self.test_set_password()
 
 
     # def campaign_test(self):
@@ -260,9 +261,9 @@ class Command(BaseCommand):
 
         from django.contrib.auth.models import User as AuthUser
 
-        auth_user = AuthUser.objects.get(id=87)
+        auth_user = AuthUser.objects.get(id=7)
 
-        auth_user.set_password(" ally@algotech.app")
+        auth_user.set_password("123456")
         auth_user.save()
 
     def test_send_email(self):

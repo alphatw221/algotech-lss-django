@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-27 03:04+0000\n"
+"POT-Creation-Date: 2022-04-28 05:48+0000\n"
 "PO-Revision-Date: 2021-12-13 15:50+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -17,6 +17,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 3.0\n"
+
+#: api/views/payment/payment.py:826 api/views/payment/payment.py:829
+#: business_policy/payment.py:21
+msgid "PAYMENT/DIRECT_PAYMENT/NAME_OF_BANK_OR_PAYMENT_MODE"
+msgstr ""
 
 #: backend/i18n/campaign_announcement.py:8
 #, python-brace-format
@@ -161,7 +166,7 @@ msgstr "Pelajari lebih lanjut: {link}\n"
 msgid "ITEM_INFO{name}{qty}{dollar_sign}{total}\n"
 msgstr "{name} Jumlah: {qty} {dollar_sign}{total}\n"
 
-#: backend/i18n/register_confirm_mail.py:17
+#: backend/i18n/email/subject.py:8 backend/i18n/register_confirm_mail.py:17
 msgid "MAIL_SUBJECT_WELCOME"
 msgstr ""
 
@@ -169,38 +174,99 @@ msgstr ""
 msgid "MAIL_SUBJECT_ACTIVATION"
 msgstr ""
 
+#: business_policy/payment.py:22
+msgid "PAYMENT/DIRECT_PAYMENT/ACCOUNT_NAME"
+msgstr ""
+
+#: business_policy/payment.py:23
+msgid "PAYMENT/DIRECT_PAYMENT/ACCOUNT_NUMBER"
+msgstr ""
+
+#: business_policy/payment.py:24
+msgid "PAYMENT/DIRECT_PAYMENT/OTHER_NOTE"
+msgstr ""
+
+#: business_policy/payment.py:25
+msgid "PAYMENT/DIRECT_PAYMENT/REQUIRE_CUSTOMER_PAYMENT_RECORD"
+msgstr ""
+
+#: business_policy/payment.py:38
+msgid "PAYMENT/HIT_PAY/PAYMENT_BUTTON_TITLE"
+msgstr ""
+
+#: business_policy/payment.py:39 business_policy/payment.py:54
+#: business_policy/payment.py:68 business_policy/payment.py:106
+msgid "PAYMENT/CURRENCY_CODE"
+msgstr ""
+
+#: business_policy/payment.py:40
+msgid "PAYMENT/HIT_PAY/API_KEY"
+msgstr ""
+
+#: business_policy/payment.py:41
+msgid "PAYMENT/HIT_PAY/SALT"
+msgstr ""
+
+#: business_policy/payment.py:53
+msgid "PAYMENT/PAYPAL/CLIENT_ID"
+msgstr ""
+
+#: business_policy/payment.py:55
+msgid "PAYMENT/PAYPAL/SECRET"
+msgstr ""
+
+#: business_policy/payment.py:67 business_policy/payment.py:92
+msgid "PAYMENT/SECRET_KEY"
+msgstr ""
+
+#: business_policy/payment.py:104
+msgid "PAYMENT/FIRST_DATA/STORE_ID"
+msgstr ""
+
+#: business_policy/payment.py:105
+msgid "PAYMENT/FIRST_DATA/SHARE_SECRET"
+msgstr ""
+
+#: business_policy/payment.py:107
+msgid "PAYMENT/FIRST_DATA/TIME_ZONE"
+msgstr ""
+
 #: templates/email_reset_password_link.html:7
 msgid "EMAIL/PASSWORD_RESET_LINK/SUBJECT"
-msgstr ""
-
-#: templates/email_reset_password_link.html:10
-#, python-format
-msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT1%(username)s"
-msgstr ""
+msgstr "Live Show Seller Password Reset"
 
 #: templates/email_reset_password_link.html:12
-msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT2"
-msgstr ""
+msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT1"
+msgstr "Hi"
 
 #: templates/email_reset_password_link.html:15
-msgid "EMAIL/PASSWORD_RESET_LINK/BUTTON"
+msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT2"
 msgstr ""
+"Nakuha na namin ang inyong request para i-reset ang inyong Live Show Seller "
+"password. I-click ang link sa ibaba para gumawa ng panibago:"
 
 #: templates/email_reset_password_link.html:18
-msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT3"
-msgstr ""
-
-#: templates/email_reset_password_link.html:20
-msgid "CONTACT_INFO/EMAIL"
-msgstr ""
+msgid "EMAIL/PASSWORD_RESET_LINK/BUTTON"
+msgstr "Reset Your Password"
 
 #: templates/email_reset_password_link.html:21
-msgid "CONTACT_INFO/PHONE"
+msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT3"
 msgstr ""
+"Kung hindi niyo pansinin and message na ito, ang inyong password ay hindi "
+"mapapalitan. Pag hindi kayo ang nagrequest ng password reset, makisabi sa "
+"aming team."
 
-#: templates/email_reset_password_link.html:22
+#: templates/email_reset_password_link.html:23
+msgid "CONTACT_INFO/EMAIL"
+msgstr "Email: app@algotech.app"
+
+#: templates/email_reset_password_link.html:24
+msgid "CONTACT_INFO/PHONE"
+msgstr "Contact Number: +65 9489 2086"
+
+#: templates/email_reset_password_link.html:25
 msgid "CONTACT_INFO/ADDRESS"
-msgstr ""
+msgstr "Address: 8 Burn Road #15-13, Singapore 369977"
 
 #: templates/register_activation.html:10
 msgid "TITLE_ACTIVATION"

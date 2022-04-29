@@ -294,7 +294,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['PUT'], url_path=r'language/update', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def update_language(self, request):
-
+        print("---------------")
         api_user = Verify.get_seller_user(request)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
         language, = getdata(request, ('language',))
@@ -302,7 +302,8 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             
         user_subscription.lang = language
         user_subscription.save()
-        return Response(UserSubscriptionSerializerSimplify(user_subscription).data['lang'], status=status.HTTP_200_OK)
+        print(user_subscription.lang)
+        return Response(UserSubscriptionSerializerSimplify(user_subscription).data, status=status.HTTP_200_OK)
 
     
     @action(detail=False, methods=['PUT'], url_path=r'update_note', permission_classes=(IsAuthenticated,))

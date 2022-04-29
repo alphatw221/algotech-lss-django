@@ -11,17 +11,21 @@ class PasswordResetCodeManager(CodeManager):
 
     code_key="reset_password"
 
-    data_format = {
-        "auth_user_id":None,
-        "expired_time":None,
-    }
+    data_format = [
+        "auth_user_id",
+        "language",
+        "expired_time",
+    ]
 
     @classmethod
-    def generate(cls,auth_user_id):
-        data = cls.data_format.copy()
-        data['auth_user_id']=auth_user_id
-        data['expired_time']=datetime.now().timestamp()+3000
-        
+    def generate(cls,auth_user_id,language):
+
+        data={
+            'auth_user_id':auth_user_id,
+            'language':language,
+            'expired_time':datetime.now().timestamp()+3000
+        }
+
         return cls._encode(data)
 
     
@@ -42,7 +46,8 @@ class PasswordResetCodeManager(CodeManager):
 
         auth_user.set_password(new_password)
         auth_user.save()
-
+        
+        # language = data.get('language')
         # EmailService.send_email_template("",auth_user.email,"",{})
 
         return {
