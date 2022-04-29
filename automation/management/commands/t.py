@@ -10,6 +10,7 @@ from api.models.cart.cart_product import CartProduct
 from api.models.user.user import User
 from api.models.user.user_subscription import UserSubscription
 from api.utils.orm import campaign_comment, cart_product
+import backend
 from backend.api.google.user import api_google_get_userinfo
 from backend.api.youtube.channel import api_youtube_get_list_channel_by_token
 from backend.campaign.campaign.manager import CampaignManager
@@ -52,7 +53,7 @@ class Command(BaseCommand):
         # print (ret)
         # if settings.GCP_API_LOADBALANCER_URL == "https://sb.liveshowseller.ph":
         #     self.modify_database()
-        self.test_set_password()
+        self.test_send_email()
 
 
     # def campaign_test(self):
@@ -268,27 +269,11 @@ class Command(BaseCommand):
 
     def test_send_email(self):
 
-        from backend.python_rq.python_rq import email_queue
-        from automation.jobs.send_email_job import send_email_job
+        from backend import i18n
         
-        # email_queue.enqueue(send_email_job,args=('alphatw22193@gmail.com', None, "test", None, None, None), result_ttl=10, failure_ttl=10)
-        email_queue.enqueue(
-            send_email_job,
-            kwargs={
-                "subject": i18n_get_register_confirm_mail_subject(),
-                "email": 'derekhwang33@gmail.com', 
-                "template_name": "register_cc.html",
-                "parameters": {
-                    'firstName': 'firstName',
-                    'lastName': 'lastName',
-                    'plan': 'aaaaaa',
-                    'email': 'aaaaa',
-                    'password': 'aaaaa',
-                    'expired_at': 'aaaaa',
-                    'country': 'aaaa'
-                },
-                "file": None, 
-            }, result_ttl=10, failure_ttl=10)
+        
+
+        
     
     def test_user_plan(self):
         from business_policy.subscription_plan import SubscriptionPlan

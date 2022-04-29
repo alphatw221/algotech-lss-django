@@ -1,0 +1,1 @@
+from . import password_reset,registration_confirm

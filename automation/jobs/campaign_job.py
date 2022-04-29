@@ -114,7 +114,8 @@ def capture_facebook(campaign):
 
             uni_format_comment = {
                 'platform': 'facebook',
-                'id': comment['id'],
+                # 'id': comment['id'],
+                "comment_id":comment['id'],
                 "campaign_id": campaign['id'],
                 'message': comment['message'],
                 "created_time": comment['created_time'],
@@ -249,7 +250,8 @@ def capture_youtube(campaign):
 
             uni_format_comment = {
                 'platform': 'youtube',
-                'id': comment['id'],
+                # 'id': comment['id'],
+                'comment_id':comment['id'],
                 "campaign_id": campaign['id'],
                 'message': comment['snippet']['displayMessage'],
                 "created_time": comment_time_stamp,
@@ -363,7 +365,8 @@ def capture_instagram(campaign):
 
             uni_format_comment = {
                 'platform': 'instagram',
-                'id': comment['id'],
+                # 'id': comment['id'],
+                'comment_id':comment['id'],
                 "campaign_id": campaign['id'],
                 'message': comment['text'],
                 "created_time": comment['timestamp'],  #parse to timestamp
@@ -454,7 +457,8 @@ def capture_youtube_video(campaign, youtube_channel):
             
             uni_format_comment = {
                 'platform': 'youtube',
-                'id': comment['snippet']['topLevelComment']['id'],
+                # 'id': comment['snippet']['topLevelComment']['id'],
+                'comment_id':comment['snippet']['topLevelComment']['id'],
                 "campaign_id": campaign['id'],
                 'message': comment['snippet']['topLevelComment']['snippet']['textDisplay'],
                 "created_time": comment_time_stamp,
