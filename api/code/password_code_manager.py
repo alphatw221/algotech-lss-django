@@ -51,6 +51,7 @@ class PasswordResetCodeManager(CodeManager):
         # EmailService.send_email_template("",auth_user.email,"",{})
 
         return {
-            "User Name":auth_user.username,
+            "Customer Name":auth_user.username,
+            "Email":auth_user.email,
             "New Password":new_password[:4]+"*"*(len(new_password)-4)
         }
