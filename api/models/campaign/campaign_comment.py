@@ -11,7 +11,7 @@ class CampaignComment(models.Model):
     class Meta:
         db_table = 'api_campaign_comment'
 
-    _id = models.ObjectIdField()
+    id = models.IntegerField(unique=False)  #
     # STATUS_CHOICES = [
     #     (0, 'New'),
     #     (1, 'Processed'),
