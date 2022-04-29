@@ -1,6 +1,7 @@
 from django.conf import settings
 from datetime import datetime
 from api.utils.error_handle.error.pre_order_error import PreOrderErrors
+from api.utils.common.verify import Verify
 
 
 class PreOrderCheckRule():
@@ -122,3 +123,8 @@ class PreOrderCheckRule():
             api_campaign_product['price'] = 0
         elif api_campaign_product['type'] == 'n/a':
             raise PreOrderErrors.UnderStock('out of stock')
+    
+    @staticmethod
+    def orders_limit(**kwargs):
+        api_user = kwargs.get('api_user')
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
