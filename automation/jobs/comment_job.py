@@ -108,7 +108,7 @@ def command_responding(platform_name, platform, campaign, comment, command):
         text = i18n_get_comment_command_response(
             campaign, comment, command, lang=platform['lang'])
         api_fb_post_page_message_on_comment(
-            platform['token'], comment['comment_id'], text)
+            platform['token'], comment['id'], text)
     elif platform_name == 'youtube':
         return
     elif platform_name == 'instagram':
@@ -127,12 +127,12 @@ def comment_responding(platform_name, platform, campaign, pre_order, comment, ca
             shopping_cart_info, info_in_pm_notice = "", ""
 
         code, ret = api_fb_post_page_comment_on_comment(
-            platform['token'], comment['comment_id'], text+info_in_pm_notice)
+            platform['token'], comment['id'], text+info_in_pm_notice)
 
         print("code", code)
         print("response", ret)
         code, ret = api_fb_post_page_message_on_comment(
-            platform['token'], comment['comment_id'], text+shopping_cart_info)
+            platform['token'], comment['id'], text+shopping_cart_info)
         
         print("code", code)
         print("response", ret)
@@ -173,7 +173,7 @@ def comment_responding(platform_name, platform, campaign, pre_order, comment, ca
         # print("response", ret)
 
         code, ret = api_ig_private_message(
-            platform['token'], comment['comment_id'], text+shopping_cart_info)
+            platform['token'], comment['id'], text+shopping_cart_info)
         
         print("code", code)
         print("response", ret)
