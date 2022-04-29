@@ -11,30 +11,31 @@ class CampaignComment(models.Model):
     class Meta:
         db_table = 'api_campaign_comment'
 
-    STATUS_CHOICES = [
-        (0, 'New'),
-        (1, 'Processed'),
-    ]
+    id = models.IntegerField(primary_key=False)
+    # STATUS_CHOICES = [
+    #     (0, 'New'),
+    #     (1, 'Processed'),
+    # ]
 
-    campaign = models.ForeignKey(
-        Campaign, on_delete=models.CASCADE, related_name='comments')
+    # campaign = models.ForeignKey(
+    #     Campaign, on_delete=models.CASCADE, related_name='comments')
 
-    comment_id = models.CharField(max_length=255, null=True, blank=True)
-    message = models.TextField(null=True, blank=True, default=None)
-    commented_at = models.IntegerField(
-        null=True, blank=True, default=time.time)
-    customer_id = models.CharField(max_length=255, null=True, blank=True)
-    customer_name = models.CharField(max_length=255, null=True, blank=True)
-    image = models.CharField(max_length=512, null=True, blank=True)
+    # comment_id = models.CharField(max_length=255, null=True, blank=True)
+    # message = models.TextField(null=True, blank=True, default=None)
+    # commented_at = models.IntegerField(
+    #     null=True, blank=True, default=time.time)
+    # customer_id = models.CharField(max_length=255, null=True, blank=True)
+    # customer_name = models.CharField(max_length=255, null=True, blank=True)
+    # image = models.CharField(max_length=512, null=True, blank=True)
 
-    platform = models.CharField(max_length=255, blank=True,
-                                choices=settings.SUPPORTED_PLATFORMS, default='n/a')
-    type = models.CharField(max_length=255, null=True, blank=True)
-    status = models.IntegerField(blank=True,
-                                 choices=STATUS_CHOICES, default=0)
-    created_at = models.DateTimeField(auto_now_add=True)
+    # platform = models.CharField(max_length=255, blank=True,
+    #                             choices=settings.SUPPORTED_PLATFORMS, default='n/a')
+    # type = models.CharField(max_length=255, null=True, blank=True)
+    # status = models.IntegerField(blank=True,
+    #                              choices=STATUS_CHOICES, default=0)
+    # created_at = models.DateTimeField(auto_now_add=True)
 
-    meta = models.JSONField(null=True, blank=True, default=dict)
+    # meta = models.JSONField(null=True, blank=True, default=dict)
 
 
 class CampaignCommentSerializer(serializers.ModelSerializer):
