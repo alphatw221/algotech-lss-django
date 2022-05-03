@@ -599,7 +599,8 @@ def get_campaign_merge_order_list(campaign_id, search, page, page_size):
                 "pipeline":[
                     {"$match":{
                         '$expr': { '$eq': ["$$id", "$campaign_id"] },
-                        "id":{"$ne":None} }
+                        "id":{"$ne":None} ,
+                        "subtotal":{"$ne":0}}
                      },
                     {"$addFields": { "type": "pre_order","total_item": {"$size": { "$objectToArray": "$products"}}}},
                 ]
