@@ -48,6 +48,7 @@ import xlsxwriter
 from backend.pymongo.mongodb import db
 from dateutil.relativedelta import relativedelta
 from backend.i18n.email.subject import i18n_get_reset_password_mail_subject
+from django.core.exceptions import FieldError
 
 
 
@@ -120,36 +121,45 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'], url_path=r'search_list', permission_classes=(IsAdminUser,))
     @api_error_handler
     def search_api_user(self, request):
-        search_column = request.query_params.get('search_column')
-        keyword = request.query_params.get('keyword')
-        print(search_column)
-        print(keyword)
-        kwargs = {}
-        if (search_column in ["", None]) and (keyword != ""):
-            raise ApiVerifyError("keyword field can not be empty when search_column has value")
-        if (search_column not in ['undefined', '']) and (keyword not in ['undefined', '', None]):
-            kwargs = { search_column + '__icontains': keyword }
+        try:
+            search_column = request.query_params.get('search_column')
+            keyword = request.query_params.get('keyword')
+            print(search_column)
+            print(keyword)
+            kwargs = {}
+            if (search_column in ["", None]) and (keyword not in [None, ""]):
+                raise ApiVerifyError("search_column field can not be empty when keyword has value")
+            if (search_column not in ['undefined', '']) and (keyword not in ['undefined', '', None]):
+                kwargs = { search_column + '__icontains': keyword }
 
-        queryset = User.objects.all().order_by('id').filter(**kwargs)
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            result = self.get_paginated_response(serializer.data)
-            data = result.data
-        else:
-            serializer = self.get_serializer(queryset, many=True)
-            data = serializer.dat
+            queryset = User.objects.all().order_by('id').filter(**kwargs)
+            page = self.paginate_queryset(queryset)
+            if page is not None:
+                serializer = self.get_serializer(page, many=True)
+                result = self.get_paginated_response(serializer.data)
+                data = result.data
+            else:
+                serializer = self.get_serializer(queryset, many=True)
+                data = serializer.dat
 
-        return Response(data, status=status.HTTP_200_OK)
+            return Response(data, status=status.HTTP_200_OK)
+        except FieldError:
+            return Response({"error": f"Cannot resolve search_column '{search_column}'"}, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['POST'], url_path=r'admin/activate_seller', permission_classes=(IsAdminUser,))
     @api_error_handler
     def admin_activate_seller(self, request):
 
         seller_id, activated_country, months = getdata(request, ("seller_id", "activated_country", "months"), required=True)
-        seller_object = User.objects.filter(id=seller_id, type="user")
-        if len(seller_object) == 0:
+        seller_queryset = User.objects.filter(id=seller_id, type="user")
+        
+        if len(seller_queryset) == 0:
             raise ApiVerifyError("no seller found.")
+        elif len(seller_queryset) == 1:
+            seller_object = seller_queryset[0]
+        else:
+            raise ApiVerifyError("multiple seller found.")
+        
         if seller_object.status == "valid":
             raise ApiVerifyError("The seller has been activated.")
         contact_number, timezone, plan  = getdata(request, ("contact_number", "timezone","plan"), required=False)
