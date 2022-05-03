@@ -269,10 +269,11 @@ class Command(BaseCommand):
 
     def test_send_email(self):
 
-        from backend import i18n
         
-        
+        products = db.api_campaign_product.find(
+                {"campaign_id": 413, "$or": [{"type": "product"}, {"type": "product-fast"}]})
 
+        print(list(products))
         
     
     def test_user_plan(self):
