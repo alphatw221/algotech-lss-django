@@ -281,12 +281,12 @@ class CampaignViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'], url_path=r'ig_comment', permission_classes = (IsAuthenticated,))
     @api_error_handler
     def get_ig_comment(self, request):
-        api_user, campaign_id, comment_id = getparams(request, ('campaign_id', 'comment_id',), with_user=True, seller=True)
+        # api_user, campaign_id, comment_id = getparams(request, ('campaign_id', 'comment_id',), with_user=True, seller=True)
         
-        # api_user = request.user.api_users.get(type='user')
-        # campaign_id = request.query_params.get('campaign_id')
-        # comment_id = request.query_params.get('comment_id')
-        # platform = request.query_params.get('platform')
+        api_user = request.user.api_users.get(type='user')
+        campaign_id = request.query_params.get('campaign_id')
+        comment_id = request.query_params.get('comment_id')
+        platform = request.query_params.get('platform')
         comments_list = []
 
         is_user = verify_seller_request(api_user)
@@ -298,7 +298,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
                         'customer_name': comment_data['customer_name'],
                         'id': comment_data['id'],
                         'message': comment_data['message'],
-                        'created_at': comment_data['created_at'],
+                        'created_time': comment_data['created_time'],
                         'image': comment_data['image'],
                     }
                     comments_list.append(commentJson)
@@ -310,7 +310,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
                         'customer_name': comment_data['customer_name'],
                         'id': comment_data['id'],
                         'message': comment_data['message'],
-                        'created_at': comment_data['created_at'],
+                        'created_time': comment_data['created_time'],
                         'image': comment_data['image'],
                     }
                     comments_list.append(commentJson)

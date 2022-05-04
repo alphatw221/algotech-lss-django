@@ -9,7 +9,8 @@ class AdminCreateAccountRuleChecker(RuleChecker):
         UserCheckRule.is_activated_country_valid,
         UserCheckRule.is_months_valid,
         UserCheckRule.is_plan_valid,
-        UserCheckRule.has_email_been_registered
+        UserCheckRule.has_email_been_registered,
+        UserCheckRule.is_timezone_valid,
     ]
 
 

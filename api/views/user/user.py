@@ -48,6 +48,7 @@ import xlsxwriter
 from backend.pymongo.mongodb import db
 from dateutil.relativedelta import relativedelta
 from backend.i18n.email.subject import i18n_get_reset_password_mail_subject
+from django.core.exceptions import FieldError
 
 
 
@@ -75,7 +76,7 @@ class UserViewSet(viewsets.ModelViewSet):
         contact_number, timezone, plan  = getdata(request, ("contact_number", "timezone","plan"), required=False)
         
         AdminCreateAccountRuleChecker.check(
-            **{'role':role ,'email':email, 'activated_country':activated_country, 'months':months, 'contact_number':plan}
+            **{'role':role ,'email':email, 'activated_country':activated_country, 'months':months, 'contact_number':plan, 'timezone': timezone}
         )
 
         now = datetime.now(pytz.timezone(timezone)) if timezone in pytz.common_timezones else datetime.now()
@@ -95,7 +96,15 @@ class UserViewSet(viewsets.ModelViewSet):
             )
         
         User.objects.create(
-            name=name, email=email, type='user', status='valid', phone=contact_number, auth_user=auth_user, user_subscription=user_subscription)
+            name=name, 
+            email=email, 
+            type='user', 
+            status='valid', 
+            timezone=timezone if timezone != "" else "Asia/Singapore",
+            phone=contact_number, 
+            auth_user=auth_user, 
+            user_subscription=user_subscription
+        )
         
         ret = {
             "name":name,
@@ -112,24 +121,87 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'], url_path=r'search_list', permission_classes=(IsAdminUser,))
     @api_error_handler
     def search_api_user(self, request):
-        search_column = request.query_params.get('search_column')
-        keyword = request.query_params.get('keyword')
-        kwargs = { search_column + '__icontains': keyword }
+        try:
+            search_column = request.query_params.get('search_column')
+            keyword = request.query_params.get('keyword')
+            print(search_column)
+            print(keyword)
+            kwargs = {}
+            if (search_column in ["", None]) and (keyword not in [None, ""]):
+                raise ApiVerifyError("search_column field can not be empty when keyword has value")
+            if (search_column not in ['undefined', '']) and (keyword not in ['undefined', '', None]):
+                kwargs = { search_column + '__icontains': keyword }
 
-        queryset = User.objects.all().order_by('id')
+            queryset = User.objects.all().order_by('id').filter(**kwargs)
+            page = self.paginate_queryset(queryset)
+            if page is not None:
+                serializer = self.get_serializer(page, many=True)
+                result = self.get_paginated_response(serializer.data)
+                data = result.data
+            else:
+                serializer = self.get_serializer(queryset, many=True)
+                data = serializer.dat
 
-        if search_column != 'undefined' and keyword != 'undefined':
-            queryset = queryset.filter(**kwargs)
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            result = self.get_paginated_response(serializer.data)
-            data = result.data
+            return Response(data, status=status.HTTP_200_OK)
+        except FieldError:
+            return Response({"error": f"Cannot resolve search_column '{search_column}'"}, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['POST'], url_path=r'admin/activate_seller', permission_classes=(IsAdminUser,))
+    @api_error_handler
+    def admin_activate_seller(self, request):
+
+        seller_id, activated_country, months = getdata(request, ("seller_id", "activated_country", "months"), required=True)
+        seller_queryset = User.objects.filter(id=seller_id, type="user")
+        
+        if len(seller_queryset) == 0:
+            raise ApiVerifyError("no seller found.")
+        elif len(seller_queryset) == 1:
+            seller_object = seller_queryset[0]
         else:
-            serializer = self.get_serializer(queryset, many=True)
-            data = serializer.dat
+            raise ApiVerifyError("multiple seller found.")
+        
+        if seller_object.status == "valid":
+            raise ApiVerifyError("The seller has been activated.")
+        contact_number, timezone, plan  = getdata(request, ("contact_number", "timezone","plan"), required=False)
+        
+        AdminCreateAccountRuleChecker.check(
+            **{'role': "seller" , 'activated_country':activated_country, 'months':months, 'contact_number':plan, 'timezone': timezone}
+        )
 
-        return Response(data, status=status.HTTP_200_OK)
+        now = datetime.now(pytz.timezone(timezone)) if timezone in pytz.common_timezones else datetime.now()
+        expired_at = now+timedelta(days=30*months) 
+        password = ''.join(random.choice(string.ascii_letters+string.digits) for _ in range(8))
+        
+        user_subscription = UserSubscription.objects.create(
+            name=seller_object.name,
+            status='new', 
+            expired_at=expired_at, 
+            user_plan= {"activated_platform" : ["facebook","youtube","instagram"]}, 
+            meta_country={ 'activated_country': activated_country },
+            type=plan,
+            remark=seller_object.email
+        )
+        api_user, created = User.objects.update_or_create(pk=seller_id, defaults={
+            "status": "valid",
+            "timezone": timezone if timezone != "" else "Asia/Singapore",
+            "phone": contact_number if contact_number != "" else None,
+            "user_subscription": user_subscription
+        })
+        
+        auth_user = api_user.auth_user
+        auth_user.set_password(password)
+        auth_user.save()
+        
+        ret = {
+            "name":api_user.name,
+            "email":api_user.email,
+            "pass":password,
+            "activated_country":activated_country, 
+            "plan":plan,
+            "expired_at":expired_at.strftime("%m/%d/%Y %H:%M"),
+        }
+
+        return Response(ret, status=status.HTTP_200_OK)
 
 
 #-----------------------------------------dealer----------------------------------------------------------------------------------------------
@@ -585,27 +657,6 @@ class UserViewSet(viewsets.ModelViewSet):
 
         return Response("ok", status=status.HTTP_200_OK)
     
-    @action(detail=False, methods=['GET'], url_path=r'search_list', permission_classes=(IsAdminUser,))
-    @api_error_handler
-    def search_api_user(self, request):
-        search_column = request.query_params.get('search_column')
-        keyword = request.query_params.get('keyword')
-        kwargs = { search_column + '__icontains': keyword }
-
-        queryset = User.objects.all().order_by('id')
-
-        if search_column != 'undefined' and keyword != 'undefined':
-            queryset = queryset.filter(**kwargs)
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            result = self.get_paginated_response(serializer.data)
-            data = result.data
-        else:
-            serializer = self.get_serializer(queryset, many=True)
-            data = serializer.dat
-
-        return Response(data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['POST'], url_path=r'register/trial/(?P<country_code>[^/.]+)', permission_classes=())
     @api_error_handler
