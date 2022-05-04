@@ -142,9 +142,7 @@ class PaymentMeta():
     @classmethod
     def get_meta(cls, lang, country_code='SG'):
         with translation.override(lang):
-            print("get_meta lang", lang)
             payment_support_list = getattr(cls,country_code)
-            
             meta = {}
             for payment in payment_support_list:
                 meta[payment] = getattr(cls,payment)()
