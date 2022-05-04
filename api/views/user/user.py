@@ -112,7 +112,7 @@ class UserViewSet(viewsets.ModelViewSet):
             "pass":password,
             "activated_country":activated_country, 
             "plan":plan,
-            "expired_at":expired_at.strftime("%B %d, %Y %H:%M"),
+            "expired_at":expired_at.strftime("%d %B %Y %H:%M"),
         }
 
         return Response(ret, status=status.HTTP_200_OK)
@@ -198,7 +198,7 @@ class UserViewSet(viewsets.ModelViewSet):
             "pass":password,
             "activated_country":activated_country, 
             "plan":plan,
-            "expired_at":expired_at.strftime("%B %d, %Y %H:%M"),
+            "expired_at":expired_at.strftime("%d %B %Y %H:%M"),
         }
 
         return Response(ret, status=status.HTTP_200_OK)
@@ -246,7 +246,7 @@ class UserViewSet(viewsets.ModelViewSet):
             "pass":password,
             "activated_country":activated_country, 
             "plan":plan,
-            "expired_at":expired_at.strftime("%B %d, %Y %H:%M"),
+            "expired_at":expired_at.strftime("%d %B %Y %H:%M"),
         }
 
         return Response(ret, status=status.HTTP_200_OK)
@@ -701,7 +701,7 @@ class UserViewSet(viewsets.ModelViewSet):
             "Password":password[:4]+"*"*(len(password)-4),
             "Target Country":country,
             "Your Plan":"Free Trial",
-            "Subscription End Date":expired_at.strftime("%B %d, %Y %H:%M"),
+            "Subscription End Date":expired_at.strftime("%d %B %Y %H:%M"),
         }
 
         EmailService.send_email_template(
@@ -737,7 +737,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 'phone': contactNumber,
                 'email': email,
                 'password': password,
-                'expired_at': expired_at.strftime("%B %d, %Y %H:%M"),
+                'expired_at': expired_at.strftime("%d %B %Y %H:%M"),
                 'country': country
             })
 
@@ -856,7 +856,7 @@ class UserViewSet(viewsets.ModelViewSet):
             "Target Country":country, 
             "Your Plan":subscription_plan.get('text'),
             "Subscription Period":"Monthly",
-            "Subscription End Date":expired_at.strftime("%B %d, %Y %H:%M"),
+            "Subscription End Date":expired_at.strftime("%d %B %Y %H:%M"),
             "Receipt":paymentIntent.charges.get('data')[0].get('receipt_url')
         }
 
@@ -885,7 +885,7 @@ class UserViewSet(viewsets.ModelViewSet):
                     'phone': contactNumber,
                     'email': email,
                     'password': password,
-                    'expired_at': expired_at.strftime("%B %d, %Y %H:%M"),
+                    'expired_at': expired_at.strftime("%d %B %Y %H:%M"),
                     'country': country
                 })
 
