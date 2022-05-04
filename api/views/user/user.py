@@ -1026,7 +1026,7 @@ class UserViewSet(viewsets.ModelViewSet):
             raise ApiVerifyError('user dosent exists')
 
         auth_user = AuthUser.objects.get(email=email)
-        api_user = User.objects.get(email=email)
+        api_user = User.objects.get(email=email,type='user')
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
         code = PasswordResetCodeManager.generate(auth_user.id,user_subscription.lang)
 
