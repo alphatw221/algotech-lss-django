@@ -746,7 +746,7 @@ class UserViewSet(viewsets.ModelViewSet):
         email = email.lower()
         email = email.replace(" ", "")
 
-        firstName, lastName, contactNumber, country , promoCode, timezone = getdata(request, ("firstName", "lastName", "contactNumber", "country", "promoCode"), required=False)
+        firstName, lastName, contactNumber, country , promoCode, timezone = getdata(request, ("firstName", "lastName", "contactNumber", "country", "promoCode", "timezone"), required=False)
 
         payment_intent_id = intentSecret[:27]
         stripe.api_key = STRIPE_API_KEY
