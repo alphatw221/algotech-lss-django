@@ -665,4 +665,21 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         except:
             raise ApiCallerError("no facebook page found")
         return Response({"delete": True}, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['PUT'], url_path=r'update_currency', permission_classes=(IsAuthenticated,))
+    @api_error_handler
+    def update_currency(self, request):
+        api_user, currency, = getparams(request, ("currency",))     
+        api_user_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        
+        api_user_user_subscription.currency = currency
+        api_user_user_subscription.save()
+        return Response(api_user_user_subscription.currency, status=status.HTTP_200_OK)
 
+    @action(detail=False, methods=['GET'], url_path=r'get_currency', permission_classes=(IsAuthenticated,))
+    @api_error_handler
+    def get_currency(self, request, pk=None):
+        api_user = Verify.get_seller_user(request)    
+        api_user_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        
+        return Response(api_user_user_subscription.currency, status=status.HTTP_200_OK)
