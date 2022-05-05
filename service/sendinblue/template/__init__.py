@@ -1,1 +1,1 @@
-from . import registration
+from . import registration, password

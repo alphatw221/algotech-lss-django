@@ -1,1 +1,1 @@
-from . import template
+from . import template, transaction_email

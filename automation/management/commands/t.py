@@ -213,28 +213,13 @@ class Command(BaseCommand):
         # print([cls.__name__ for cls in SubscriptionPlan.__bases__])
 
     def test_sendinblue(self):
-        API_KEY = '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'
-
-        import sib_api_v3_sdk
-        from sib_api_v3_sdk.rest import ApiException
-        import service.sendinblue as sib
-
-        configuration = sib_api_v3_sdk.Configuration()
-        configuration.api_key['api-key'] = API_KEY
-
-        api_instance = sib_api_v3_sdk.TransactionalEmailsApi(sib_api_v3_sdk.ApiClient(configuration))
-        to = [{"email":"alphatw22193@gmail.com","name":"Jane Doe"}]
-        # cc = [{"email":"example2@example2.com","name":"Janice Doe"}]
-        params = {"username":"User Name Params","test":"Test Params"}
-        send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(
-            template_id=sib.template.registration.TEST,
-            to=to, 
-            # cc=cc, 
-            params=params)
-
-        try:
-            api_response = api_instance.send_transac_email(send_smtp_email)
-            print(api_response)
-        except ApiException as e:
-            print("Exception when calling SMTPApi->send_transac_email: %s\n" % e)
         
+        import service
+
+        sib_service = service.sendinblue
+
+        # sib.transaction_email.ResetPasswordLinkEmail(url="url",code="code",username="username",to="alphatw22193@gmail.com").send()
+        
+        sib_service.transaction_email.AccountActivationEmail(first_name="first_name",plan="plan",email="email",password="password", to="alphatw22193@gmail.com", country="SG").send()
+
+        # sib.transaction_email.RegistraionConfirmationEmail(first_name="first_name",email="email",password="password", to="alphatw22193@gmail.com").send()
