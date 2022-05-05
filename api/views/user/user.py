@@ -671,8 +671,8 @@ class UserViewSet(viewsets.ModelViewSet):
         client_secret = '06d95fdd-62ae-4973-b5ab-74ae66a310fe'
         http_method = 'POST'
         http_uri = 'https://gipassl.algotech.app/api/user/register/hubspot/webhook/'
-        request_body = request.data
-
+        request_body = json.dumps(request.data)
+        
         source_string = client_secret + http_method + http_uri + request_body
         # print('source_string: {}'.format(source_string))
 
