@@ -1,5 +1,5 @@
 from lss.settings import *
-
+DEBUG = True
 GCP_API_LOADBALANCER_URL = "http://localhost:8001"
 WEB_SERVER_URL = "https://localhost/algotech_lss/public"
 # for social lab

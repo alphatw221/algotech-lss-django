@@ -1,9 +1,9 @@
 from backend.api.facebook._fb_api_caller import FacebookApiCaller
 
 
-def api_fb_get_page_posts(page_token: str, page_id: str):
+def api_fb_get_page_posts(page_token: str, page_id: str, limit: int):
     params = {
-        'limit': 100
+        'limit': limit
     }
     ret = FacebookApiCaller(f'{page_id}/posts', bearer_token=page_token,
                             params=params).get()

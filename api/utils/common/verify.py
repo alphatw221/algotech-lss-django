@@ -3,6 +3,7 @@ from os import stat
 
 from django.conf import settings
 from api.models.campaign.campaign import Campaign
+from backend.api.facebook.page import api_fb_get_page_posts
 from backend.api.facebook.user import api_fb_get_me_accounts
 from api.models.facebook.facebook_page import FacebookPage
 from api.models.youtube.youtube_channel import YoutubeChannel
@@ -13,6 +14,8 @@ from api.models.order.order import Order
 from api.models.order.pre_order import PreOrder
 
 from api.utils.error_handle.error.api_error import ApiVerifyError
+from backend.api.instagram.profile import api_ig_get_profile_live_media
+from backend.api.youtube.channel import api_youtube_get_list_channel_by_token
 from business_policy.subscription_plan import SubscriptionPlan
 
 
@@ -334,6 +337,30 @@ class Verify():
         # else:
         #     pass
 
+    @staticmethod
+    def check_is_page_token_valid(platform_name, officiall_page_id, officiall_page_token):
+        try:
+            if platform_name == 'facebook':
+                status_code, response = api_fb_get_page_posts(page_token=officiall_page_token, page_id=officiall_page_id, limit=1)
+                print("response", response)
+                if status_code == 200:
+                    return True
+                return False
+            elif platform_name == 'youtube':
+                status_code, response = api_youtube_get_list_channel_by_token(access_token=officiall_page_token)
+                # print("response", response)
+                if status_code == 200:
+                    return True
+                return False
+            elif platform_name == 'instagram':
+                status_code, response = api_ig_get_profile_live_media(page_token=officiall_page_token, profile_id=officiall_page_id)
+                print("response", response)
+                if status_code == 200:
+                    return True
+                return False
+        except Exception as e:
+            return False
+        return False
     class PreOrderApi():
 
         class FromBuyer(VerifyRequestFromWhome):
