@@ -50,6 +50,7 @@ from dateutil.relativedelta import relativedelta
 from backend.i18n.email.subject import i18n_get_reset_password_mail_subject
 from django.core.exceptions import FieldError
 
+import hashlib
 
 
 platform_info_dict={'facebook':'facebook_info', 'youtube':'youtube_info', 'instagram':'instagram_info', 'google':'google_info'}
@@ -663,8 +664,21 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 
-        print(request.META)
-        print(request.data)
+        print(request.META.get('HTTP_X_HUBSPOT_SIGNATURE'))
+        # print(request.data)
+
+
+        client_secret = '06d95fdd-62ae-4973-b5ab-74ae66a310fe'
+        http_method = 'POST'
+        http_uri = 'https://gipassl.algotech.app/api/user/register/hubspot/webhook/'
+        request_body = request.data
+
+        source_string = client_secret + http_method + http_uri + request_body
+        # print('source_string: {}'.format(source_string))
+
+        hash_result = hashlib.sha256(source_string.encode('utf-8')).hexdigest()
+        print(hash_result)
+
 
         # URI = "https://gipassl.algotech.app/api/user/register/hubspot/webhook/"
         # X-HubSpot-Signature
@@ -1067,3 +1081,83 @@ class UserViewSet(viewsets.ModelViewSet):
         ret = PasswordResetCodeManager.execute(code, new_password)
         
         return Response(ret, status=status.HTTP_200_OK)
+
+
+
+
+
+# {'GATEWAY_INTERFACE': 'CGI/1.1',
+# 'SERVER_PROTOCOL': 'HTTP/1.1',
+# 'REQUEST_METHOD': 'POST',
+# 'QUERY_STRING': '',
+# 'REQUEST_URI': '/api/user/register/hubspot/webhook/',
+# 'SCRIPT_NAME': '',
+# 'PATH_INFO': '/api/user/register/hubspot/webhook/',
+# 'PATH_TRANSLATED': '/home/liveshowseller/lss/wsgi.py/api/user/register/hubspot/webhook/',
+# 'CONTENT_TYPE': 'application/json',
+# 'HTTP_ACCEPT': 'application/json',
+
+# 'HTTP_X_HUBSPOT_SIGNATURE': '373fa7e3af2ca3c1c71ea803f093405969e0336950a60b56ceaf54768dc6f090',
+# 'HTTP_X_HUBSPOT_SIGNATURE': 'b7922f4ec4b73000743b0fb88efd236113461748953ca728f209b2c82f58c09f',
+# 'HTTP_X_HUBSPOT_SIGNATURE_VERSION': 'v2',
+# 'HTTP_X_HUBSPOT_REQUEST_TIMESTAMP': '1651741803626',
+# 'HTTP_X_HUBSPOT_SIGNATURE_V3': 'x6oInu9fbFzPSBBnTtIoWVYcOjwk1YXwLVeMw+kQA2g=',
+# 'HTTP_X_HUBSPOT_CORRELATION_ID': 'b0c9130b-95c8-49e7-a4bc-59d39a19f52c',
+# 'HTTP_X_HUBSPOT_REQUESTING_CHAIN_BIN': 'CkwKQEF1dG9tYXRpb25QbGF0Zm9ybUV4ZWN1dGlvbi1leGVjdXRpb25TbG93QWN0aW9uVHlwZUxhbmVXYWxXb3JrZXISCFBST0NGSUxFCjEKJUF1dG9tYXRpb25BY3Rpb25zRXhlY3V0aW9uU2VydmljZS13ZWISCFBST0NGSUxFEgIIAg==',
+# 'HTTP_X_HUBSPOT_CLIENT_IP': '172.16.25.83',
+# 'HTTP_USER_AGENT': 'HubSpot Connect 2.0 (http://dev.hubspot.com/) - WebhooksPlatformService-web',
+# 'HTTP_X_HUBSPOT_TIMEOUT_MILLIS': '44961',
+# 'HTTP_X_TRACE': '2B719DD01D5FCAC56243A34D4E4928213D4C74E399000000000000000000',
+# 'CONTENT_LENGTH': '16866',
+# 'HTTP_HOST': 'gipassl.algotech.app',
+# 'HTTP_X_CLOUD_TRACE_CONTEXT': '06987d685119fa01bdd95c37fedcc2d5/6316343830122525572',
+# 'HTTP_VIA': '1.1 google',
+# 'HTTP_X_FORWARDED_FOR': '54.174.55.1, 34.117.17.250',
+# 'HTTP_X_FORWARDED_PROTO': 'https',
+# 'HTTP_CONNECTION': 'Keep-Alive',
+# 'SERVER_SIGNATURE': '<address>Apache/2.4.41 (Ubuntu) Server at gipassl.algotech.app Port 80</address>\\n',
+# 'SERVER_SOFTWARE': 'Apache/2.4.41 (Ubuntu)',
+# 'SERVER_NAME': 'gipassl.algotech.app',
+# 'SERVER_ADDR': '10.148.15.199',
+# 'SERVER_PORT': '80',
+# 'REMOTE_ADDR': '130.211.3.169',
+# 'DOCUMENT_ROOT': '/var/www/html',
+# 'REQUEST_SCHEME': 'http',
+# 'CONTEXT_PREFIX': '',
+# 'CONTEXT_DOCUMENT_ROOT': '/var/www/html',
+# 'SERVER_ADMIN': 'webmaster@localhost',
+# 'SCRIPT_FILENAME': '/home/liveshowseller/lss/wsgi.py',
+# 'REMOTE_PORT': '53757',
+# 'mod_wsgi.script_name': '',
+# 'mod_wsgi.path_info': '/api/user/register/hubspot/webhook/',
+# 'mod_wsgi.process_group': 'liveshowseller', 
+# 'mod_wsgi.application_group': 'lss-api-instance-group-ndph.c.liveshowseller.internal|', 
+# 'mod_wsgi.callable_object': 'application', 
+# 'mod_wsgi.request_handler': 'wsgi-script', 
+# 'mod_wsgi.handler_script': '', 
+# 'mod_wsgi.script_reloading': '1', 
+# 'mod_wsgi.listener_host': '', 
+# 'mod_wsgi.listener_port': '80', 
+# 'mod_wsgi.enable_sendfile': '0', 
+# 'mod_wsgi.ignore_activity': '0', 
+# 'mod_wsgi.request_start': '1651741803791370', 
+# 'mod_wsgi.request_id': 'CsR5G7iyABI', 
+# 'mod_wsgi.queue_start': '1651741803791540', 
+# 'mod_wsgi.daemon_connects': '1', 
+# 'mod_wsgi.daemon_restarts': '0', 
+# 'mod_wsgi.daemon_start': '1651741803791707', 
+# 'mod_wsgi.script_start': '1651741803791851', 
+# 'wsgi.version': (1, 0), 
+# 'wsgi.multithread': True, 
+# 'wsgi.multiprocess': False, 
+# 'wsgi.run_once': False, 
+# 'wsgi.url_scheme': 'http', 
+# 'wsgi.errors': <_io.TextIOWrapper name='<wsgi.errors>' encoding='utf-8'>, 
+# 'wsgi.input': <mod_wsgi.Input object at 0x7f17da6860a0>, 
+# 'wsgi.input_terminated': True, 
+# 'wsgi.file_wrapper': <class 'mod_wsgi.FileWrapper'>, 
+# 'apache.version': (2, 4, 41), 
+# 'mod_wsgi.version': (4, 6, 8), 
+# 'mod_wsgi.total_requests': 1, 
+# 'mod_wsgi.thread_id': 2, 
+# 'mod_wsgi.thread_requests': 0}

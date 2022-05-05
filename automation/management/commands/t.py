@@ -1,5 +1,6 @@
 import email
 import imp
+from inspect import Parameter
 import pprint
 import requests
 
@@ -46,7 +47,7 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.test_sendinblue()
+        self.test_hubspot_hash()
 
 
     def modify_database(self):
@@ -223,3 +224,19 @@ class Command(BaseCommand):
         sib_service.transaction_email.AccountActivationEmail(first_name="first_name",plan="plan",email="email",password="password", to="alphatw22193@gmail.com", country="SG").send()
 
         # sib.transaction_email.RegistraionConfirmationEmail(first_name="first_name",email="email",password="password", to="alphatw22193@gmail.com").send()
+
+    def test_hubspot_hash(self):
+
+
+        import hashlib
+
+        client_secret = 'yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy'
+        http_method = 'POST'
+        http_uri = 'https://www.example.com/webhook_uri'
+        request_body = '{"example_field":"サンプルデータ"}'
+
+        source_string = client_secret + http_method + http_uri + request_body
+        print('source_string: {}'.format(source_string))
+
+        hash_result = hashlib.sha256(source_string.encode('utf-8')).hexdigest()
+        print(hash_result)
