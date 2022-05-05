@@ -657,6 +657,16 @@ class UserViewSet(viewsets.ModelViewSet):
 
         return Response("ok", status=status.HTTP_200_OK)
     
+    @action(detail=False, methods=['POST'], url_path=r'register/hubspot/webhook', permission_classes=())
+    @api_error_handler
+    def handle_new_registeration_from_hubspot(self, request):
+
+        
+        pass
+        # X-HubSpot-Signature
+        # App secret + http method + URI + request body
+        #  SHA-256
+
 
     @action(detail=False, methods=['POST'], url_path=r'register/trial/(?P<country_code>[^/.]+)', permission_classes=())
     @api_error_handler
