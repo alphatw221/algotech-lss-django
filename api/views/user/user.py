@@ -674,7 +674,7 @@ class UserViewSet(viewsets.ModelViewSet):
         plan = ""
         
         service.sendinblue.transaction_email.RegistraionConfirmationEmail(first_name, email, password, to=email, cc="", country=country).send()
-        service.sendinblue.transaction_email.AccountActivationEmail(first_name,plan, email, password, to=email, cc="", country=country).send()
+        service.sendinblue.transaction_email.AccountActivationEmail(first_name, plan, email, password, to=email, cc="", country=country).send()
 
         return Response("ok", status=status.HTTP_200_OK)
 
