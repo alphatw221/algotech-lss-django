@@ -1023,7 +1023,7 @@ class UserViewSet(viewsets.ModelViewSet):
         email = email.replace(" ", "")
 
         if not AuthUser.objects.filter(email=email).exists() or not User.objects.filter(email=email,type='user').exists():
-            raise ApiVerifyError('user dosent exists')
+            raise ApiVerifyError('The account doesn’t exist')
 
         auth_user = AuthUser.objects.get(email=email)
         api_user = User.objects.get(email=email,type='user')

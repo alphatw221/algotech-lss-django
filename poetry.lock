@@ -1648,6 +1648,20 @@ objc = ["pyobjc-framework-cocoa"]
 win32 = ["pywin32"]
 
 [[package]]
+name = "sib-api-v3-sdk"
+version = "7.4.0"
+description = "SendinBlue API"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+certifi = ">=2017.4.17"
+python-dateutil = ">=2.1"
+six = ">=1.10"
+urllib3 = ">=1.23"
+
+[[package]]
 name = "six"
 version = "1.16.0"
 description = "Python 2 and 3 compatibility utilities"
@@ -1830,7 +1844,7 @@ python-versions = ">=3.4"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "7e74739912ae938a4b3f4855b6f09a62d30e73a7927372a59e38de1eaeb1e809"
+content-hash = "4e642082c18831ce1e9b3e57126f52cae8e5c59f243a27d769da9d7ecda4c6ee"
 
 [metadata.files]
 appnope = [
@@ -2878,6 +2892,9 @@ rsa = [
 send2trash = [
     {file = "Send2Trash-1.8.0-py3-none-any.whl", hash = "sha256:f20eaadfdb517eaca5ce077640cb261c7d2698385a6a0f072a4a5447fd49fa08"},
     {file = "Send2Trash-1.8.0.tar.gz", hash = "sha256:d2c24762fd3759860a0aff155e45871447ea58d2be6bdd39b5c8f966a0c99c2d"},
+]
+sib-api-v3-sdk = [
+    {file = "sib-api-v3-sdk-7.4.0.tar.gz", hash = "sha256:3123585e9ab2825a62bcad0bcaacb129727097a009371cd11137c04a3477d5e2"},
 ]
 six = [
     {file = "six-1.16.0-py2.py3-none-any.whl", hash = "sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254"},
