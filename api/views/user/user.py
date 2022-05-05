@@ -663,13 +663,16 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 
-        print(request.META.get('X-HubSpot-Signature'))
+        print(request.META)
         print(request.data)
 
         # URI = "https://gipassl.algotech.app/api/user/register/hubspot/webhook/"
         # X-HubSpot-Signature
         # App secret + http method + URI + request body
         #  SHA-256
+
+
+
         return Response("ok", status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['POST'], url_path=r'register/trial/(?P<country_code>[^/.]+)', permission_classes=())
