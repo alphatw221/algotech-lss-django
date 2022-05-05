@@ -661,7 +661,7 @@ class UserViewSet(viewsets.ModelViewSet):
     @api_error_handler
     def handle_new_registeration_from_hubspot(self, request):
 
-        
+        return Response("ok", status=status.HTTP_200_OK)
         pass
         # X-HubSpot-Signature
         # App secret + http method + URI + request body
