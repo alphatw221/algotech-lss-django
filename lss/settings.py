@@ -434,3 +434,7 @@ WEBPACK_LOADER = {
 
 # sendinblue api key
 SENDINBLUE_API_KEY = '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'
+
+
+# hubspot client secret
+HUBSPOT_CLIENT_SECRET = '06d95fdd-62ae-4973-b5ab-74ae66a310fe'

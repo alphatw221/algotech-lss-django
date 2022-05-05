@@ -14,7 +14,7 @@ from api.models.order.pre_order import PreOrder
 
 from api.utils.error_handle.error.api_error import ApiVerifyError
 from business_policy.subscription_plan import SubscriptionPlan
-
+import hashlib
 
 def getparams(request, params: tuple, with_user=True, seller=True):
     ret = []
@@ -333,6 +333,15 @@ class Verify():
         #     pass
         # else:
         #     pass
+
+    def is_hubspot_signature_valid(request, http_method, http_uri):
+
+        request_body = request.body.decode('utf-8')
+        
+        source_string = settings.HUBSPOT_CLIENT_SECRET + http_method + http_uri + request_body
+
+        if request.META.get('HTTP_X_HUBSPOT_SIGNATURE') != hashlib.sha256(source_string.encode('utf-8')).hexdigest():
+            raise ApiVerifyError('signature error')
 
     class PreOrderApi():
 
