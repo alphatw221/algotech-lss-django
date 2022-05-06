@@ -1,8 +1,9 @@
-from datetime import datetime, timedelta, timezone
 from api.utils.common.verify import Verify
 from api.utils.error_handle.error.api_error import ApiVerifyError
 from backend.pymongo.mongodb import db
-from datetime import datetime
+from django.conf import settings
+from datetime import datetime, timedelta, timezone
+import business_policy.plan_limitation as business_limitation
 
 class UserSubscriptionCheckRule():
 
@@ -18,11 +19,13 @@ class UserSubscriptionCheckRule():
         api_user = kwargs.get('api_user')
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
         plan, subscription_id = user_subscription.type, user_subscription.id
-        campaign_count = db.api_campaign.find({'$or': [{'start_at': {'$lte': datetime.now()}, 'end_at': {'$gte': datetime.now()}}, {'start_at': {'$gte': datetime.now()}}], 'user_subscription_id': int(subscription_id)}).count()
+        campaigns_count = db.api_campaign.find({'$or': [{'start_at': {'$lte': datetime.now()}, 'end_at': {'$gte': datetime.now()}}, {'start_at': {'$gte': datetime.now()}}], 'user_subscription_id': int(subscription_id)}).count()
 
-        if (plan == 'trial' or plan == 'lite') and campaign_count >= 2:
+        if settings.GCP_API_LOADBALANCER_URL == 'https://sb.liveshowseller.ph':
+            plan_limitation = getattr(business_limitation.social_lab, plan)
+        else:
+            plan_limitation = getattr(business_limitation.live_show_seller, plan)     
+
+        if campaigns_count >= plan_limitation.get('campaigns_limit'):
             raise ApiVerifyError('You\'ve been reached maximum campaign.')
-        elif plan == 'standard' and campaign_count >= 4:
-            raise ApiVerifyError('You\'ve been reached maximum campaign.')
-        elif plan == 'premium' and campaign_count >= 6:
-            raise ApiVerifyError('You\'ve been reached maximum campaign.')
+        

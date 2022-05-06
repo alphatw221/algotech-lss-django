@@ -46,14 +46,14 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        # self.test_mongodb_query()
+        self.test_mongodb_query()
         # self.test_send_email()
         # self.test_user_plan()
         # ret = api_twitch_get_access_token()
         # print (ret)
         # if settings.GCP_API_LOADBALANCER_URL == "https://sb.liveshowseller.ph":
         #     self.modify_database()
-        self.test_send_email()
+        # self.test_set_password()
 
 
     # def campaign_test(self):
@@ -256,7 +256,7 @@ class Command(BaseCommand):
         get_order_total_sales_by_month,get_campaign_comment_rank, get_campaign_order_rank, get_campaign_complete_sales, get_total_order_complete_proceed,\
         get_total_pre_order_count, get_campaign_order_complete_proceed,get_total_average_sales,get_total_average_comment_count,get_campaign_merge_order_list
 
-        print(get_campaign_merge_order_list(381))
+        print(get_total_revenue(1))
 
     def test_set_password(self):
 
