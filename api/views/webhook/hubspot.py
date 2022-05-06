@@ -24,16 +24,12 @@ class HubspotViewSet(viewsets.GenericViewSet):
     @api_error_handler
     def handle_new_registeration_from_hubspot(self, request):
 
-        http_uri = f'{settings.GCP_API_LOADBALANCER_URL}/api/hubspot/registration/webhook/'
-        Verify.is_hubspot_signature_valid(request,'POST',http_uri)
-        
+        Verify.is_hubspot_signature_valid(request,'POST', f'{settings.GCP_API_LOADBALANCER_URL}/api/hubspot/registration/webhook/')
 
         first_name, last_name, email, country, subscription_type, country_code, phone = \
             lib.util.getter.getproperties(request.data.get('properties'),('firstname','lastname','email','country','subscription_type','country_code','phone'), nest_property='value')
 
         password = ''.join(random.choice(string.ascii_letters+string.digits) for _ in range(8))
-        
-
         country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(country)
 
         if AuthUser.objects.filter(email = email).exists() or models.user.user.User.objects.filter(email=email, type='user').exists():
@@ -62,7 +58,7 @@ class HubspotViewSet(viewsets.GenericViewSet):
             auth_user=auth_user, 
             user_subscription=user_subscription)
         
-
+        service.sendinblue.contact.create(email=email)
         service.sendinblue.transaction_email.RegistraionConfirmationEmail(first_name, email, password, to=email, cc="lss@algotech.app", country=country).send()
         service.sendinblue.transaction_email.AccountActivationEmail(first_name, subscription_type, email, password, to=email, cc="lss@algotech.app", country=country).send()
 

@@ -2,12 +2,9 @@
 from django.conf import settings
 import sib_api_v3_sdk
 from sib_api_v3_sdk.rest import ApiException
+from _sendinblue import api_client
 
-
-configuration = sib_api_v3_sdk.Configuration()
-configuration.api_key['api-key'] = settings.SENDINBLUE_API_KEY
-
-api_instance = sib_api_v3_sdk.TransactionalEmailsApi(sib_api_v3_sdk.ApiClient(configuration))
+api_instance = sib_api_v3_sdk.TransactionalEmailsApi(api_client)
 
 
 
