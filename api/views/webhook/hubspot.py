@@ -24,7 +24,7 @@ class HubspotViewSet(viewsets.GenericViewSet):
     @api_error_handler
     def handle_new_registeration_from_hubspot(self, request):
 
-        Verify.is_hubspot_signature_valid(request,'POST', f'{settings.GCP_API_LOADBALANCER_URL}/api/hubspot/registration/webhook/')
+        Verify.is_hubspot_signature_valid(request)
 
         first_name, last_name, email, country, subscription_type, country_code, phone = \
             lib.util.getter.getproperties(request.data.get('properties'),('firstname','lastname','email','country','subscription_type','country_code','phone'), nest_property='value')
