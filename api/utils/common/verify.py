@@ -338,11 +338,8 @@ class Verify():
         #     pass
 
     @staticmethod
-    def is_hubspot_signature_valid(request, http_method, http_uri):
-
-        request_body = request.body.decode('utf-8')
-        
-        source_string = settings.HUBSPOT_CLIENT_SECRET + http_method + http_uri + request_body
+    def is_hubspot_signature_valid(request):
+        source_string = settings.HUBSPOT_CLIENT_SECRET + request.method + request.META['REQUEST_URI'] + request.body.decode('utf-8')
 
         if request.META.get('HTTP_X_HUBSPOT_SIGNATURE') != hashlib.sha256(source_string.encode('utf-8')).hexdigest():
             raise ApiVerifyError('signature error')

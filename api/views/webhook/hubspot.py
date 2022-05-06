@@ -68,7 +68,7 @@ class HubspotViewSet(viewsets.GenericViewSet):
     @api_error_handler
     def handle_new_registeration_from_hubspot(self, request):
 
-        Verify.is_hubspot_signature_valid(request,'POST', f'{settings.GCP_API_LOADBALANCER_URL}/api/send/email/webhook')
+        Verify.is_hubspot_signature_valid(request)
 
         template_id, params_key = lib.util.getter.getparams(request,('template_id','params_key'),with_user=False)
 
