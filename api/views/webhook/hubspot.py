@@ -34,7 +34,7 @@ class HubspotViewSet(viewsets.GenericViewSet):
         password = ''.join(random.choice(string.ascii_letters+string.digits) for _ in range(8))
         
 
-        country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(country_code)
+        country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(country)
 
         if AuthUser.objects.filter(email = email).exists() or models.user.user.User.objects.filter(email=email, type='user').exists():
             raise ApiVerifyError('This email address has already been registered.')

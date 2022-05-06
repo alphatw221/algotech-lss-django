@@ -15,7 +15,7 @@ class SubscriptionPlan:
     def get_country(cls,country_code):
         country_plan = getattr(cls,country_code, None)
         if not country_plan or type(country_plan)!=type:
-            raise ApiVerifyError("invalid country_code")
+            raise ApiVerifyError("invalid country")
         return country_plan
 
 
