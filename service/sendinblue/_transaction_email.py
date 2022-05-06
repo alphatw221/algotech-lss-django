@@ -19,15 +19,15 @@ class TransactionEmail():
         self.country = country
 
     def send(self):
-        to = [{"email":self.to}]
-        cc = [{"email":self.cc}]
-        send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(
-                template_id=self._get_template_id(),
-                to=to, 
-                cc=cc if self.cc else None, 
-                params=self.params)
-
         try:
+            to = [{"email":self.to}]
+            cc = [{"email":self.cc}]
+            send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(
+                    template_id=self._get_template_id(),
+                    to=to, 
+                    cc=cc if self.cc else None, 
+                    params=self.params)
+        
             api_instance.send_transac_email(send_smtp_email)
         except ApiException as e:
             print("Exception when calling SMTPApi->send_transac_email: %s\n" % e)
