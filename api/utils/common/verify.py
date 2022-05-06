@@ -342,7 +342,7 @@ class Verify():
         
         request_body = request.body.decode('utf-8')
         http_method = request.method
-        http_uri = request.get_full_path()
+        http_uri = settings.GCP_API_LOADBALANCER_URL+request.get_full_path()
         source_string = settings.HUBSPOT_CLIENT_SECRET + http_method + http_uri + request_body
 
         print(http_method,http_uri)
