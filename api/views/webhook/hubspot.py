@@ -58,7 +58,7 @@ class HubspotViewSet(viewsets.GenericViewSet):
             auth_user=auth_user, 
             user_subscription=user_subscription)
         
-        service.sendinblue.contact.create(email=email,first_name=first_name, last_name=last_name, country_code=country_code, phone=phone)
+        service.sendinblue.contact.create(email=email,first_name=first_name, last_name=last_name)
         service.sendinblue.transaction_email.RegistraionConfirmationEmail(first_name, email, password, to=email, cc="lss@algotech.app", country=country).send()
         service.sendinblue.transaction_email.AccountActivationEmail(first_name, subscription_type, email, password, to=email, cc="lss@algotech.app", country=country).send()
 
