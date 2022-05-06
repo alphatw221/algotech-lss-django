@@ -348,11 +348,10 @@ class Verify():
             raise ApiVerifyError('signature error')
 
     @staticmethod
-    def check_is_page_token_valid(platform_name, officiall_page_id, officiall_page_token):
+    def check_is_page_token_valid(platform_name, officiall_page_token, officiall_page_id=None):
         try:
             if platform_name == 'facebook':
                 status_code, response = api_fb_get_page_posts(page_token=officiall_page_token, page_id=officiall_page_id, limit=1)
-                print("response", response)
                 if status_code == 200:
                     return True
                 return False
@@ -364,7 +363,6 @@ class Verify():
                 return False
             elif platform_name == 'instagram':
                 status_code, response = api_ig_get_profile_live_media(page_token=officiall_page_token, profile_id=officiall_page_id)
-                print("response", response)
                 if status_code == 200:
                     return True
                 return False
