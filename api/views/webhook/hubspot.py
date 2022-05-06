@@ -63,3 +63,25 @@ class HubspotViewSet(viewsets.GenericViewSet):
         service.sendinblue.transaction_email.AccountActivationEmail(first_name, subscription_type, email, password, to=email, cc="lss@algotech.app", country=country).send()
 
         return Response("ok", status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['POST'], url_path=r'send/email/webhook', permission_classes=())
+    @api_error_handler
+    def handle_new_registeration_from_hubspot(self, request):
+
+        Verify.is_hubspot_signature_valid(request,'POST', f'{settings.GCP_API_LOADBALANCER_URL}/api/send/email/webhook')
+
+        template_id, params_key = lib.util.getter.getparams(request,('template_id','params_key'),with_user=False)
+
+        params_key=params_key.split(',') if type(params_key) is str else ()
+
+        params_value = \
+            lib.util.getter.getproperties(request.data.get('properties'), tuple(params_key), nest_property='value')
+
+        params={params_key[i]:params_value[i] for i in range(len(params_key))}
+
+        service.sendinblue.transaction_email.TransactionEmail(
+            to=request.data.get('properties',{}).get('email',{}).get('value'), 
+            template_id=template_id, 
+            params=params).send()
+
+        return Response("ok", status=status.HTTP_200_OK)

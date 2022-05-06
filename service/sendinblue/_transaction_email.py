@@ -12,11 +12,13 @@ class TransactionEmail():
 
     template_module = None
     template_name = None
-    
-    def __init__(self, to=None, cc=None, country=""):
+
+    def __init__(self, to=None, cc=None, country="",template_id=None, params=None):
         self.to = to
         self.cc = cc
         self.country = country
+        self.template_id = template_id
+        self.params = params
 
     def send(self):
         try:
@@ -33,5 +35,8 @@ class TransactionEmail():
             print("Exception when calling SMTPApi->send_transac_email: %s\n" % e)
 
     def _get_template_id(self):
+        if self.template_id:
+            return int(self.template_id)
+
         template_name = f"{self.template_name}_{self.country}" if self.country else self.template_name
         return getattr(self.template_module, template_name)
