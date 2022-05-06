@@ -21,7 +21,7 @@ class PreOrderCheckRule():
         if api_user.type == 'customer':
             return
         if api_pre_order['lock_at'] and datetime.timestamp(api_pre_order['lock_at'])+settings.CART_LOCK_INTERVAL > datetime.timestamp(datetime.now()):
-            raise PreOrderErrors.PreOrderException('cart in use')
+            raise PreOrderErrors.PreOrderException('Cart in use')
 
     @staticmethod
     def is_qty_valid(**kwargs):

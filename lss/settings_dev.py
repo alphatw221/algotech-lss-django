@@ -27,7 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-_*%^a_086!sv_#y^t(c0(+%dbqufars4zf8##q!yqjlp#c7m!l'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 # ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0',
 #                  "gipassl.algotech.app", '104.199.211.63']
@@ -427,3 +427,6 @@ WEBPACK_LOADER = {
 }
 
 TWITCH_OAUTH_API_URL = "https://id.twitch.tv/oauth2"
+
+# sendinblue api key
+SENDINBLUE_API_KEY = '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'

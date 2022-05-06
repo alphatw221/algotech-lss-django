@@ -240,6 +240,9 @@ class CampaignViewSet(viewsets.ModelViewSet):
            raise ApiVerifyError('facebook not activated')
 
         facebook_page = Verify.get_facebook_page_from_user_subscription(user_subscription, facebook_page_id)
+        is_token_valid = Verify.check_is_page_token_valid('facebook', facebook_page.page_id, facebook_page.token)
+        if not is_token_valid:
+            raise ApiVerifyError(f"Facebook page <{facebook_page.name}>: token expired or invalid, please re-bind your page on Platform page.")
         campaign.facebook_page = facebook_page
         campaign.save()
         return Response(CampaignSerializerRetreive(campaign).data, status=status.HTTP_200_OK)
@@ -256,6 +259,9 @@ class CampaignViewSet(viewsets.ModelViewSet):
            raise ApiVerifyError('youtube not activated')
 
         youtube_channel = Verify.get_youtube_channel_from_user_subscription(user_subscription, youtube_channel_id)
+        is_token_valid = Verify.check_is_page_token_valid('youtube', youtube_channel_id, youtube_channel.token)
+        if not is_token_valid:
+            raise ApiVerifyError(f"YouTube channel <{youtube_channel.name}>: token expired or invalid, please re-bind your channel on Platform page.")
         campaign.youtube_channel = youtube_channel
         campaign.save()
         return Response(CampaignSerializerRetreive(campaign).data, status=status.HTTP_200_OK)
@@ -272,6 +278,9 @@ class CampaignViewSet(viewsets.ModelViewSet):
            raise ApiVerifyError('instagram not activated')
 
         instagram_profile = Verify.get_instagram_profile_from_user_subscription(user_subscription, instagram_profile_id)
+        is_token_valid = Verify.check_is_page_token_valid('instagram', instagram_profile.business_id, instagram_profile.token)
+        if not is_token_valid:
+            raise ApiVerifyError(f"Instagram profile <{instagram_profile.name}>: token expired or invalid, please re-bind your profile on Platform page.")
         campaign.instagram_profile = instagram_profile
         campaign.save()
         return Response(CampaignSerializerRetreive(campaign).data, status=status.HTTP_200_OK)

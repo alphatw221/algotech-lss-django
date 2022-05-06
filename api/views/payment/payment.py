@@ -667,7 +667,8 @@ class PaymentViewSet(viewsets.GenericViewSet):
             'platform': pre_order.platform,
             'platform_id': pre_order.platform_id,
             'meta_logistic': campaign['meta_logistic'],
-            'allow_checkout': campaign['meta'].get('allow_checkout', 1)
+            'allow_checkout': campaign['meta'].get('allow_checkout', 1),
+            'currency': pre_order.currency
         }
 
         return Response(data_dict, status=status.HTTP_200_OK)
@@ -823,16 +824,9 @@ class PaymentViewSet(viewsets.GenericViewSet):
         lang = user_subscription.lang
         print("lang", lang)
 
-        print(_("PAYMENT/DIRECT_PAYMENT/NAME_OF_BANK_OR_PAYMENT_MODE"))
-        # with translation.override(lang):
-
-        print(_("PAYMENT/DIRECT_PAYMENT/NAME_OF_BANK_OR_PAYMENT_MODE"))
         activated_country = user_subscription.meta_country.get("activated_country", {})
         if not activated_country:
             raise ApiVerifyError("no activated country")
         for i in activated_country:
-            print(i)
             payment_method.update(PaymentMeta.get_meta(lang, country_code=i))
-    
-        print(payment_method)
         return Response(payment_method, status=status.HTTP_200_OK)

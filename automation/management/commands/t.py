@@ -1,5 +1,6 @@
 import email
 import imp
+from inspect import Parameter
 import pprint
 import requests
 
@@ -118,6 +119,7 @@ class Command(BaseCommand):
     #         customer_name, product_name, lang='zh-hant'))
     #     print(i18n_get_campaign_announcement_lucky_draw_winner(
     #         customer_name, product_name, lang='zh-hans'))
+        self.test_hubspot_hash()
 
 
     def modify_database(self):
@@ -269,10 +271,11 @@ class Command(BaseCommand):
 
     def test_send_email(self):
 
-        from backend import i18n
         
-        
+        products = db.api_campaign_product.find(
+                {"campaign_id": 413, "$or": [{"type": "product"}, {"type": "product-fast"}]})
 
+        print(list(products))
         
     
     def test_user_plan(self):
@@ -281,3 +284,31 @@ class Command(BaseCommand):
         # print(SubscriptionPlan.__bases__.)
         print ([cls_attribute.__name__  for cls_attribute in SubscriptionPlan.__dict__.values() if type(cls_attribute)==type])
         # print([cls.__name__ for cls in SubscriptionPlan.__bases__])
+
+    def test_sendinblue(self):
+        
+        import service
+
+        sib_service = service.sendinblue
+
+        # sib.transaction_email.ResetPasswordLinkEmail(url="url",code="code",username="username",to="alphatw22193@gmail.com").send()
+        
+        sib_service.transaction_email.AccountActivationEmail(first_name="first_name",plan="plan",email="email",password="password", to="alphatw22193@gmail.com", country="SG").send()
+
+        # sib.transaction_email.RegistraionConfirmationEmail(first_name="first_name",email="email",password="password", to="alphatw22193@gmail.com").send()
+
+    def test_hubspot_hash(self):
+
+
+        import hashlib
+
+        client_secret = 'yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy'
+        http_method = 'POST'
+        http_uri = 'https://www.example.com/webhook_uri'
+        request_body = '{"example_field":"サンプルデータ"}'
+
+        source_string = client_secret + http_method + http_uri + request_body
+        print('source_string: {}'.format(source_string))
+
+        hash_result = hashlib.sha256(source_string.encode('utf-8')).hexdigest()
+        print(hash_result)

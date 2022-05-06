@@ -27,7 +27,7 @@ class SubscriptionPlan:
         plans = {
             "trial" :{"text": "Free Trial", "price":{"monthly":0}},
             "lite" : {"text": "Lite", "price":{"monthly":10,"quarterly":30}},
-            "standard" : {"text": "Standar", "price":{"monthly":30,"quarterly":90}},
+            "standard" : {"text": "Standard", "price":{"monthly":30,"quarterly":90}},
             "premium" : {"text": "Premium", "price":{"monthly":60,"quarterly":180}},
         }
         
@@ -39,7 +39,7 @@ class SubscriptionPlan:
         plans = {
             "trial" :{"text": "Free Trial", "price":{"monthly":0}},
             "lite" : {"text": "Lite", "price":{"monthly":10,"quarterly":30}},
-            "standard" : {"text": "Standar", "price":{"monthly":30,"quarterly":90}},
+            "standard" : {"text": "Standard", "price":{"monthly":30,"quarterly":90}},
             "premium" : {"text": "Premium", "price":{"monthly":60,"quarterly":180}},
         }
     
@@ -51,7 +51,7 @@ class SubscriptionPlan:
         plans = {
             "trial" :{"text": "Free Trial", "price":{"monthly":0}},
             "lite" : {"text": "Lite", "price":{"monthly":10,"quarterly":30}},
-            "standard" : {"text": "Standar", "price":{"monthly":25,"quarterly":75}},
+            "standard" : {"text": "Standard", "price":{"monthly":25,"quarterly":75}},
             "premium" : {"text": "Premium", "price":{"monthly":42,"quarterly":126}},
         }
 
@@ -63,7 +63,7 @@ class SubscriptionPlan:
         plans = {
             "trial" :{"text": "Free Trial", "price":{"monthly":0}},
             "lite" : {"text": "Lite", "price":{"monthly":10,"quarterly":30}},
-            "standard" : {"text": "Standar", "price":{"monthly":25,"quarterly":75}},
+            "standard" : {"text": "Standard", "price":{"monthly":25,"quarterly":75}},
             "premium" : {"text": "Premium", "price":{"monthly":42,"quarterly":126}},
         }
         
@@ -76,7 +76,7 @@ class SubscriptionPlan:
         plans = {
             "trial" :{"text": "Free Trial", "price":{"monthly":0}},
             "lite" : {"text": "Lite", "price":{"monthly":10,"quarterly":30}},
-            "standard" : {"text": "Standar", "price":{"monthly":30,"quarterly":90}},
+            "standard" : {"text": "Standard", "price":{"monthly":30,"quarterly":90}},
             "premium" : {"text": "Premium", "price":{"monthly":60,"quarterly":180}},
         }
     
@@ -88,7 +88,7 @@ class SubscriptionPlan:
         plans = {
             "trial" :{"text": "Free Trial", "price":{"monthly":0}},
             "lite" : {"text": "Lite", "price":{"monthly":10,"quarterly":30}},
-            "standard" : {"text": "Standar", "price":{"monthly":30,"quarterly":90}},
+            "standard" : {"text": "Standard", "price":{"monthly":30,"quarterly":90}},
             "premium" : {"text": "Premium", "price":{"monthly":60,"quarterly":180}},
         }
 
@@ -100,7 +100,7 @@ class SubscriptionPlan:
         plans = {
             "trial" :{"text": "Free Trial", "price":{"monthly":0}},
             "lite" : {"text": "Lite", "price":{"monthly":10,"quarterly":30}},
-            "standard" : {"text": "Standar", "price":{"monthly":18,"quarterly":54}},
+            "standard" : {"text": "Standard", "price":{"monthly":18,"quarterly":54}},
             "premium" : {"text": "Premium", "price":{"monthly":40,"quarterly":120}},
         }
 
@@ -112,7 +112,7 @@ class SubscriptionPlan:
         plans = {
             "trial" :{"text": "Free Trial", "price":{"monthly":0}},
             "lite" : {"text": "Lite", "price":{"monthly":10,"quarterly":30}},
-            "standard" : {"text": "Standar", "price":{"monthly":30,"quarterly":90}},
+            "standard" : {"text": "Standard", "price":{"monthly":30,"quarterly":90}},
             "premium" : {"text": "Premium", "price":{"monthly":60,"quarterly":180}},
         }
 
@@ -124,7 +124,7 @@ class SubscriptionPlan:
         plans = {
             "trial" :{"text": "Free Trial", "price":{"monthly":0}},
             "lite" : {"text": "Lite", "price":{"monthly":10,"quarterly":30}},
-            "standard" : {"text": "Standar", "price":{"monthly":30,"quarterly":90}},
+            "standard" : {"text": "Standard", "price":{"monthly":30,"quarterly":90}},
             "premium" : {"text": "Premium", "price":{"monthly":60,"quarterly":180}},
         }
 
@@ -136,6 +136,6 @@ class SubscriptionPlan:
         plans = {
             "trial" :{"text": "Free Trial", "price":{"monthly":0}},
             "lite" : {"text": "Lite", "price":{"monthly":10,"quarterly":30}},
-            "standard" : {"text": "Standar", "price":{"monthly":18,"quarterly":54}},
+            "standard" : {"text": "Standard", "price":{"monthly":18,"quarterly":54}},
             "premium" : {"text": "Premium", "price":{"monthly":40,"quarterly":120}},
         }
