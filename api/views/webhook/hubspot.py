@@ -73,6 +73,8 @@ class HubspotViewSet(viewsets.GenericViewSet):
 
         template_id, params_key = lib.util.getter.getparams(request,('template_id','params_key'),with_user=False)
 
+        #TODO check template_id
+        
         params_key=params_key.split(',') if type(params_key) is str else ()
 
         params_value = \
