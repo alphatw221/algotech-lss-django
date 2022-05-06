@@ -1,6 +1,6 @@
 import sib_api_v3_sdk
 from sib_api_v3_sdk.rest import ApiException
-from _sendinblue import api_client
+from ._sendinblue import api_client
 
 def create(email, list_ids=None):
     api_instance = sib_api_v3_sdk.ContactsApi(api_client)

@@ -2,7 +2,7 @@
 from django.conf import settings
 import sib_api_v3_sdk
 from sib_api_v3_sdk.rest import ApiException
-from _sendinblue import api_client
+from ._sendinblue import api_client
 
 api_instance = sib_api_v3_sdk.TransactionalEmailsApi(api_client)
 
