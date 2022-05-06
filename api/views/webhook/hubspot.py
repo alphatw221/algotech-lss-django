@@ -15,24 +15,25 @@ from datetime import datetime, timedelta
 class HubspotViewSet(viewsets.GenericViewSet):
     queryset = models.user.user.User.objects.none()
 
-    @action(detail=False, methods=['POST'], url_path=r'registraion/webhook', permission_classes=())
+    @action(detail=False, methods=['POST'], url_path=r'registration/webhook', permission_classes=())
     @api_error_handler
     def handle_new_registeration_from_hubspot(self, request):
 
-        http_uri = f'{settings.GCP_API_LOADBALANCER_URL}/api/hubspot/registraion/webhook/'
+        http_uri = f'{settings.GCP_API_LOADBALANCER_URL}/api/hubspot/registration/webhook/'
         Verify.is_hubspot_signature_valid(request,'POST',http_uri)
         
         #TODO
         properties = request.data.get('properties')
-        print(properties)
         first_name = properties.get('firstname',{}).get('value')
         last_name = properties.get('lastname',{}).get('value')
         email = properties.get('email',{}).get('value')
         password = properties.get('password',{}).get('value')
         country = properties.get('country',{}).get('value')
         plan = properties.get('plan',{}).get('value')
-        phone = properties.get('phone',{}).get('value') # TODO
+        country_code = properties.get('country_code',{}).get('value')
+        phone = properties.get('phone',{}).get('value') 
         
+        print(first_name,last_name,email,password,country,plan,country_code,phone)
         
 
         # if AuthUser.objects.filter(email = email).exists() or models.user.user.User.objects.filter(email=email, type='user').exists():
