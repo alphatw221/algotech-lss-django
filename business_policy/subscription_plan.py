@@ -5,10 +5,10 @@ class CountryPlan:
 
     @classmethod
     def get_plan(cls,plan):
-        subscription_plen = cls.plans.get(plan)
-        if not subscription_plen:
+        subscription_plan = cls.plans.get(plan)
+        if not subscription_plan:
             raise ApiVerifyError("invalid subscription plan")
-        return subscription_plen
+        return subscription_plan
 class SubscriptionPlan: 
 
     @classmethod
