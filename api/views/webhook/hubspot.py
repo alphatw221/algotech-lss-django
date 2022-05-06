@@ -66,7 +66,7 @@ class HubspotViewSet(viewsets.GenericViewSet):
 
     @action(detail=False, methods=['POST'], url_path=r'send/email/webhook', permission_classes=())
     @api_error_handler
-    def handle_new_registeration_from_hubspot(self, request):
+    def send_email_webhook(self, request):
 
         Verify.is_hubspot_signature_valid(request)
 
