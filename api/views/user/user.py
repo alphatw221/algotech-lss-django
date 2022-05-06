@@ -642,41 +642,42 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
     
-    @action(detail=False, methods=['POST'], url_path=r'create/valid_api_user', permission_classes=(IsAdminUser,))
-    # @action(detail=False, methods=['POST'], url_path=r'create/valid_api_user', permission_classes=(IsAuthenticated,))
-    @api_error_handler
-    def create_valid_api_user(self, request):
-        name, email = getdata(request, ("name","email"), required=True)
-        email = email.lower()
-        # print(name,email)
-        if User.objects.filter(email=email, type='user').exists():
-            api_user = User.objects.get(email=email, type='user')
-            api_user.status='valid'
-            api_user.save()
-        else:
-            User.objects.create(name=name, email=email, type='user', status='valid')
+    # @action(detail=False, methods=['POST'], url_path=r'create/valid_api_user', permission_classes=(IsAdminUser,))
+    # # @action(detail=False, methods=['POST'], url_path=r'create/valid_api_user', permission_classes=(IsAuthenticated,))
+    # @api_error_handler
+    # def create_valid_api_user(self, request):
+    #     name, email = getdata(request, ("name","email"), required=True)
+    #     email = email.lower()
+    #     # print(name,email)
+    #     if User.objects.filter(email=email, type='user').exists():
+    #         api_user = User.objects.get(email=email, type='user')
+    #         api_user.status='valid'
+    #         api_user.save()
+    #     else:
+    #         User.objects.create(name=name, email=email, type='user', status='valid')
 
-        return Response("ok", status=status.HTTP_200_OK)
+    #     return Response("ok", status=status.HTTP_200_OK)
     
-    @action(detail=False, methods=['POST'], url_path=r'register/hubspot/webhook', permission_classes=())
-    @api_error_handler
-    def handle_new_registeration_from_hubspot(self, request):
+    # @action(detail=False, methods=['POST'], url_path=r'register/hubspot/webhook', permission_classes=())
+    # @api_error_handler
+    # def handle_new_registeration_from_hubspot(self, request):
 
-        http_uri = f'{settings.GCP_API_LOADBALANCER_URL}/api/user/register/hubspot/webhook/'
-        Verify.is_hubspot_signature_valid(request,'POST',http_uri)
+    #     http_uri = f'{settings.GCP_API_LOADBALANCER_URL}/api/user/register/hubspot/webhook/'
+    #     Verify.is_hubspot_signature_valid(request,'POST',http_uri)
 
-        #TODO
+    #     #TODO
+    #     properties = request.data.get('properties')
 
-        first_name = ""
-        email = ""
-        password = ""
-        country = ""
-        plan = ""
+    #     first_name = properties.get('firstname',{}).get('value')
+    #     email = properties.get('email',{}).get('value')
+    #     password = properties.get('password',{}).get('value')
+    #     country = properties.get('country',{}).get('value')
+    #     plan = properties.get('plan',{}).get('value')
         
-        service.sendinblue.transaction_email.RegistraionConfirmationEmail(first_name, email, password, to=email, cc="", country=country).send()
-        service.sendinblue.transaction_email.AccountActivationEmail(first_name, plan, email, password, to=email, cc="", country=country).send()
+    #     service.sendinblue.transaction_email.RegistraionConfirmationEmail(first_name, email, password, to=email, cc="lss@algotech.app", country=country).send()
+    #     service.sendinblue.transaction_email.AccountActivationEmail(first_name, plan, email, password, to=email, cc="lss@algotech.app", country=country).send()
 
-        return Response("ok", status=status.HTTP_200_OK)
+    #     return Response("ok", status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['POST'], url_path=r'register/trial/(?P<country_code>[^/.]+)', permission_classes=())
     @api_error_handler

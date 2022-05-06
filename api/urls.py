@@ -22,6 +22,7 @@ from api.views.payment import payment
 
 from api.views.youtube import youtube_channel
 
+from api.views.webhook import hubspot
 
 def url_setup(urlpatterns):
     router = routers.DefaultRouter()
@@ -64,6 +65,8 @@ def url_setup(urlpatterns):
 
     router.register(r'youtube', youtube_channel.YoutubeViewSet)
     
+    router.register(r'hubspot', hubspot.HubspotViewSet)
+
     urlpatterns.append(path('', include(router.urls)))
 
 
