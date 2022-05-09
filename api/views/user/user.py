@@ -772,7 +772,7 @@ class UserViewSet(viewsets.ModelViewSet):
         STRIPE_API_KEY = "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" #TODO put it in settings
         
         email, plan, period = getdata(request, ("email", "plan", "period"), required=True)
-        email = email.lower()
+        email = email.lower() #TODO add in checkrule
         email = email.replace(" ", "") #TODO add in checkrule
 
         promoCode, = getdata(request, ("promoCode",), required=False)
@@ -881,34 +881,39 @@ class UserViewSet(viewsets.ModelViewSet):
             "Receipt":paymentIntent.charges.get('data')[0].get('receipt_url')
         }
 
-        EmailService.send_email_template(i18n_get_register_confirm_mail_subject(lang=country_plan.language),email,"register_confirmation.html",{
-                    'firstName': firstName,
-                    'email': email,
-                    'password': password
-                },lang=country_plan.language)
 
-        EmailService.send_email_template(i18n_get_register_activate_mail_subject(lang=country_plan.language),email,"register_activation.html",{
-                    'firstName': firstName,
-                    'Plan': subscription_plan.get('text'),
-                    'email': email,
-                    'password': password
-                },lang=country_plan.language)
+        service.sendinblue.contact.create(email=email,first_name=firstName, last_name=lastName)
+        service.hubspot.contact.create(email=email, first_name=firstName, last_name=lastName,properties={})
+        service.sendinblue.transaction_email.RegistraionConfirmationEmail(firstName, email, password, to=email, cc="lss@algotech.app", country=country).send()
+        service.sendinblue.transaction_email.AccountActivationEmail(firstName, plan, email, password, to=email, cc="lss@algotech.app", country=country).send()
+        # EmailService.send_email_template(i18n_get_register_confirm_mail_subject(lang=country_plan.language),email,"register_confirmation.html",{
+        #             'firstName': firstName,
+        #             'email': email,
+        #             'password': password
+        #         },lang=country_plan.language)
+
+        # EmailService.send_email_template(i18n_get_register_activate_mail_subject(lang=country_plan.language),email,"register_activation.html",{
+        #             'firstName': firstName,
+        #             'Plan': subscription_plan.get('text'),
+        #             'email': email,
+        #             'password': password
+        #         },lang=country_plan.language)
         
-        lss_email = 'lss@algotech.app'
-        if country_code == 'PH':
-            lss_email = 'hello@liveshowseller.ph'
+        # lss_email = 'lss@algotech.app'
+        # if country_code == 'PH':
+        #     lss_email = 'hello@liveshowseller.ph'
 
-        subject = "New LSS User - " + firstName + ' ' + lastName + ' - ' + plan
-        EmailService.send_email_template(subject,lss_email,"register_cc.html",{
-                    'firstName': firstName,
-                    'lastName': lastName,
-                    'plan': subscription_plan.get('text'),
-                    'phone': contactNumber,
-                    'email': email,
-                    'password': password,
-                    'expired_at': expired_at.strftime("%d %B %Y %H:%M"),
-                    'country': country
-                })
+        # subject = "New LSS User - " + firstName + ' ' + lastName + ' - ' + plan
+        # EmailService.send_email_template(subject,lss_email,"register_cc.html",{
+        #             'firstName': firstName,
+        #             'lastName': lastName,
+        #             'plan': subscription_plan.get('text'),
+        #             'phone': contactNumber,
+        #             'email': email,
+        #             'password': password,
+        #             'expired_at': expired_at.strftime("%d %B %Y %H:%M"),
+        #             'country': country
+        #         })
 
         return Response(ret, status=status.HTTP_200_OK)
     
@@ -1040,8 +1045,8 @@ class UserViewSet(viewsets.ModelViewSet):
     def forget_password(self, request):
 
         email, = getdata(request, ("email",), required=True)
-        email = email.lower()
-        email = email.replace(" ", "")
+        email = email.lower() #TODO add in checkrule
+        email = email.replace(" ", "") #TODO add in checkrule
 
         if not AuthUser.objects.filter(email=email).exists() or not User.objects.filter(email=email,type='user').exists():
             raise ApiVerifyError('The account doesn’t exist')

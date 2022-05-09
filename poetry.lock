@@ -748,6 +748,23 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 pyparsing = {version = ">=2.4.2,<3.0.0 || >3.0.0,<3.0.1 || >3.0.1,<3.0.2 || >3.0.2,<3.0.3 || >3.0.3,<4", markers = "python_version > \"3.0\""}
 
 [[package]]
+name = "hubspot-api-client"
+version = "5.0.0"
+description = "HubSpot API client"
+category = "main"
+optional = false
+python-versions = ">=3.5"
+
+[package.dependencies]
+certifi = "*"
+python-dateutil = "*"
+six = ">=1.10"
+urllib3 = ">=1.15"
+
+[package.extras]
+dev = ["pytest", "black"]
+
+[[package]]
 name = "idna"
 version = "3.3"
 description = "Internationalized Domain Names in Applications (IDNA)"
@@ -1844,7 +1861,7 @@ python-versions = ">=3.4"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "4e642082c18831ce1e9b3e57126f52cae8e5c59f243a27d769da9d7ecda4c6ee"
+content-hash = "967307ce98f7deb34c64b3321b476823a1d21cf9aaeb615941296bf9995b835f"
 
 [metadata.files]
 appnope = [
@@ -2262,6 +2279,10 @@ gunicorn = [
 httplib2 = [
     {file = "httplib2-0.20.4-py3-none-any.whl", hash = "sha256:8b6a905cb1c79eefd03f8669fd993c36dc341f7c558f056cb5a33b5c2f458543"},
     {file = "httplib2-0.20.4.tar.gz", hash = "sha256:58a98e45b4b1a48273073f905d2961666ecf0fbac4250ea5b47aef259eb5c585"},
+]
+hubspot-api-client = [
+    {file = "hubspot-api-client-5.0.0.tar.gz", hash = "sha256:04a4fc5f7a48ff17fc5308ae54f910346c2772053fb853a5fbea6c9dff54fc45"},
+    {file = "hubspot_api_client-5.0.0-py3-none-any.whl", hash = "sha256:ae1830bdeb7b69dd1380af7c23aa3093c69864a26ba2fbfd21dc0ac6d656517e"},
 ]
 idna = [
     {file = "idna-3.3-py3-none-any.whl", hash = "sha256:84d9dd047ffa80596e0f246e2eab0b391788b0503584e8945f2368256d2735ff"},
