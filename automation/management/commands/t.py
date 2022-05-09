@@ -227,9 +227,9 @@ class Command(BaseCommand):
     def test_hubspot(self):
         import service
         from datetime import datetime
-
-        service.hubspot.contact.update("651",properties={"expiry_date":datetime.today().timestamp()})
-
+        # import pytz
+        service.hubspot.contact.update("651",properties={"expiry_date":int(datetime.utcnow().replace(hour=0,minute=0,second=0,microsecond=0).timestamp()*1000)})
+        # service.hubspot.contact.update("651",properties={"expiry_date":1652054400})
     def test_nlp(self):
 
         import service
