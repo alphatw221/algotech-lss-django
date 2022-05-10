@@ -84,6 +84,7 @@ class CustomTokenRefreshSerializer(TokenRefreshSerializer):
 
         token['data'] = {
             'auth_user_id': auth_user_id,
+            'email': user.email,
             'seller_id': seller.id if seller else "",
             'customer_id': customer.id if customer else "",
             'name': name,
