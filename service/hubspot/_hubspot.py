@@ -1,4 +1,3 @@
-from turtle import settiltangle
 from django.conf import settings
 import hubspot
 
