@@ -51,7 +51,9 @@ from backend.i18n.email.subject import i18n_get_reset_password_mail_subject
 from django.core.exceptions import FieldError
 
 import hashlib
+from api import rule
 import service
+import business_policy
 
 platform_info_dict={'facebook':'facebook_info', 'youtube':'youtube_info', 'instagram':'instagram_info', 'google':'google_info'}
 
@@ -642,158 +644,24 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
     
-    # @action(detail=False, methods=['POST'], url_path=r'create/valid_api_user', permission_classes=(IsAdminUser,))
-    # # @action(detail=False, methods=['POST'], url_path=r'create/valid_api_user', permission_classes=(IsAuthenticated,))
-    # @api_error_handler
-    # def create_valid_api_user(self, request):
-    #     name, email = getdata(request, ("name","email"), required=True)
-    #     email = email.lower()
-    #     # print(name,email)
-    #     if User.objects.filter(email=email, type='user').exists():
-    #         api_user = User.objects.get(email=email, type='user')
-    #         api_user.status='valid'
-    #         api_user.save()
-    #     else:
-    #         User.objects.create(name=name, email=email, type='user', status='valid')
-
-    #     return Response("ok", status=status.HTTP_200_OK)
-    
-    # @action(detail=False, methods=['POST'], url_path=r'register/hubspot/webhook', permission_classes=())
-    # @api_error_handler
-    # def handle_new_registeration_from_hubspot(self, request):
-
-    #     http_uri = f'{settings.GCP_API_LOADBALANCER_URL}/api/user/register/hubspot/webhook/'
-    #     Verify.is_hubspot_signature_valid(request,'POST',http_uri)
-
-    #     #TODO
-    #     properties = request.data.get('properties')
-
-    #     first_name = properties.get('firstname',{}).get('value')
-    #     email = properties.get('email',{}).get('value')
-    #     password = properties.get('password',{}).get('value')
-    #     country = properties.get('country',{}).get('value')
-    #     plan = properties.get('plan',{}).get('value')
-        
-    #     service.sendinblue.transaction_email.RegistraionConfirmationEmail(first_name, email, password, to=email, cc="lss@algotech.app", country=country).send()
-    #     service.sendinblue.transaction_email.AccountActivationEmail(first_name, plan, email, password, to=email, cc="lss@algotech.app", country=country).send()
-
-    #     return Response("ok", status=status.HTTP_200_OK)
-
-    @action(detail=False, methods=['POST'], url_path=r'register/trial/(?P<country_code>[^/.]+)', permission_classes=())
-    @api_error_handler
-    def register_free_trial(self, request, country_code):
-
-        
-        email, plan = getdata(request, ("email", "plan"), required=True)
-        email = email.lower()
-        email = email.replace(" ", "")
-
-        firstName, lastName, contactNumber, password, country, timezone = getdata(request, ("firstName", "lastName", "contactNumber", "password", "country", "timezone"), required=False)
-
-        country_plan = SubscriptionPlan.get_country(country_code)
-
-        if plan != 'trial':
-            raise ApiVerifyError('plan option error')
-
-        if AuthUser.objects.filter(email = email).exists() or User.objects.filter(email=email, type='user').exists():
-            raise ApiVerifyError('This email address has already been registered.')
-
-        now = datetime.now(pytz.timezone(timezone)) if timezone in pytz.common_timezones else datetime.now()
-        expired_at = now+timedelta(days=30)
-
-        auth_user = AuthUser.objects.create_user(
-            username=f'{firstName} {lastName}', email=email, password=password)
-        
-        user_subscription = UserSubscription.objects.create(
-            name=f'{firstName} {lastName}', 
-            status='valid', 
-            expired_at=expired_at, 
-            user_plan= {"activated_platform" : ["facebook"]}, 
-            meta_country={ 'activated_country': [country_code] },
-            type='trial',
-            lang=country_plan.language
-            )
-        
-        User.objects.create(name=f'{firstName} {lastName}', email=email, type='user', status='valid', phone=contactNumber, auth_user=auth_user, user_subscription=user_subscription)
-        
-        ret = {
-            "Customer Name":f'{firstName} {lastName}', 
-            "Email":email,
-            "Password":password[:4]+"*"*(len(password)-4),
-            "Target Country":country,
-            "Your Plan":"Free Trial",
-            "Subscription End Date":expired_at.strftime("%d %B %Y %H:%M"),
-        }
-
-        EmailService.send_email_template(
-            i18n_get_register_confirm_mail_subject(country_plan.language),
-            email,
-            "register_confirmation.html",
-            {
-                'firstName': firstName,
-                'email': email,
-                'password': password
-            },lang=country_plan.language
-        )
-
-        EmailService.send_email_template(
-            i18n_get_register_activate_mail_subject(country_plan.language),
-            email,
-            "register_activation.html",
-            {
-                'firstName': firstName,
-                'Plan': plan,
-                'email': email,
-                'password': password
-            },lang=country_plan.language
-        )
-      
-        lss_email = 'hello@liveshowseller.ph' if country_code =='PH' else 'lss@algotech.app'
-
-        subject = "New LSS User - " + firstName + ' ' + lastName + ' - ' + plan
-        EmailService.send_email_template(subject,lss_email,"register_cc.html",{
-                'firstName': firstName,
-                'lastName': lastName,
-                'plan': plan,
-                'phone': contactNumber,
-                'email': email,
-                'password': password,
-                'expired_at': expired_at.strftime("%d %B %Y %H:%M"),
-                'country': country
-            })
-
-        return Response(ret, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['POST'], url_path=r'register/validate/(?P<country_code>[^/.]+)', permission_classes=())
     @api_error_handler
     def validate_register_data(self, request, country_code):
 
-        # STRIPE_API_KEY = "sk_test_51J2aFmF3j9D00CA0KABMZVKtOVnZNbBvM2hcokicJmfx8vvrmNyys5atEAcpp0Au2O3HtX0jz176my7g0ozbinof00RL4QAZrY" #TODO put it in settings
-        STRIPE_API_KEY = "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" #TODO put it in settings
-        
         email, plan, period = getdata(request, ("email", "plan", "period"), required=True)
-        email = email.lower() #TODO add in checkrule
-        email = email.replace(" ", "") #TODO add in checkrule
-
         promoCode, = getdata(request, ("promoCode",), required=False)
 
-        country_plan = SubscriptionPlan.get_country(country_code)
+        country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(country_code)
         subscription_plan = country_plan.get_plan(plan)
 
-        if promoCode and promoCode != country_plan.promo_code:
-            raise ApiVerifyError('invalid promo code')
+        kwargs = {'email':email, 'plan':plan, 'period':period, 'promoCode':promoCode, 'country_plan':country_plan, 'subscription_plan':subscription_plan}
+        kwargs = rule.rule_checker.user_rule_checker.RegistrationDataRuleChecker.check(**kwargs)
 
-        if AuthUser.objects.filter(email=email).exists() or User.objects.filter(email=email, type='user').exists():
-            raise ApiVerifyError('This email address has already been registered.')
-        
-        amount = subscription_plan.get('price',{}).get(period)
-        if not amount :
-            raise ApiVerifyError('invalid period')
-
-        if promoCode == country_plan.promo_code:
-            amount = amount*country_plan.promo_discount_rate
+        email = kwargs.get('email')
+        amount = kwargs.get('amount')
     
-        stripe.api_key = STRIPE_API_KEY  
+        stripe.api_key = settings.STRIPE_API_KEY  
         try:
             intent = stripe.PaymentIntent.create( amount=int(amount*100), currency=country_plan.currency, receipt_email = email)
         except Exception:
@@ -810,47 +678,28 @@ class UserViewSet(viewsets.ModelViewSet):
     @api_error_handler
     def user_register(self, request, country_code):
 
-       
-        # STRIPE_API_KEY = "sk_test_51J2aFmF3j9D00CA0KABMZVKtOVnZNbBvM2hcokicJmfx8vvrmNyys5atEAcpp0Au2O3HtX0jz176my7g0ozbinof00RL4QAZrY" #TODO put it in settings
-        STRIPE_API_KEY = "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" #TODO put it in settings
-
         email, password, plan, period, intentSecret = getdata(request,("email", "password", "plan", "period", "intentSecret"),required=True)
-        email = email.lower()
-        email = email.replace(" ", "")
-
         firstName, lastName, contactNumber, country , promoCode, timezone = getdata(request, ("firstName", "lastName", "contactNumber", "country", "promoCode", "timezone"), required=False)
 
         payment_intent_id = intentSecret[:27]
-        stripe.api_key = STRIPE_API_KEY
+        stripe.api_key = settings.STRIPE_API_KEY
         paymentIntent = stripe.PaymentIntent.retrieve(payment_intent_id)
 
-        if paymentIntent.status != "succeeded":
-            raise ApiVerifyError('payment not succeeded')
+        kwargs = {'paymentIntent':paymentIntent,'email':email,'plan':plan,'period':period, 'promoCode':promoCode}
+        kwargs=rule.rule_checker.user_rule_checker.RegistrationPaymentCompleteChecker.check(**kwargs)
 
-        #last validation  (require refunds)
-        # ------------------------------------------------------------------------------------
+        try:
+            country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(country_code)
+            subscription_plan = country_plan.get_plan(plan)
 
-        country_plan = SubscriptionPlan.get_country(country_code)
-        subscription_plan = country_plan.get_plan(plan)
+            kwargs.update({'country_plan':country_plan, 'subscription_plan':subscription_plan})
+            kwargs=rule.rule_checker.user_rule_checker.RegistrationRequireRefundChecker.check(kwargs)
+        except Exception:
+            #TODO refund
+            print('require refund')
+            raise ApiVerifyError('data invalid')
 
-        if AuthUser.objects.filter(email = email).exists() or User.objects.filter(email=email, type='user').exists():
-            raise ApiVerifyError('This email address has already been registered.')
-
-        amount = subscription_plan.get('price',{}).get(period)
-
-        if not amount :
-            raise ApiVerifyError('invalid period')
-
-        if promoCode and promoCode != country_plan.promo_code:
-            raise ApiVerifyError('invalid promo code')
-
-        if promoCode :
-            amount = amount*country_plan.promo_discount_rate
-
-        if int(amount*100) != paymentIntent.amount:
-            raise ApiVerifyError('payment amount error')
-        #------------------------------------------------------------------------------------
-
+        email = kwargs.get('email')
         now = datetime.now(pytz.timezone(timezone)) if timezone in pytz.common_timezones else datetime.now()
         expired_at = now+timedelta(days=30) if period == "monthly" else now+timedelta(days=60)
         
@@ -860,6 +709,7 @@ class UserViewSet(viewsets.ModelViewSet):
         user_subscription = UserSubscription.objects.create(
             name=f'{firstName} {lastName}', 
             status='valid', 
+            #TODO started_at = now
             expired_at=expired_at, 
             user_plan= {"activated_platform" : ["facebook","youtube","instagram"]}, 
             meta_country={ 'activated_country': [country_code] },
@@ -881,40 +731,17 @@ class UserViewSet(viewsets.ModelViewSet):
             "Receipt":paymentIntent.charges.get('data')[0].get('receipt_url')
         }
 
-
         service.sendinblue.contact.create(email=email,first_name=firstName, last_name=lastName)
-        service.hubspot.contact.create(email=email, first_name=firstName, last_name=lastName,properties={})
-        service.sendinblue.transaction_email.RegistraionConfirmationEmail(firstName, email, password, to=email, cc="lss@algotech.app", country=country).send()
-        service.sendinblue.transaction_email.AccountActivationEmail(firstName, plan, email, password, to=email, cc="lss@algotech.app", country=country).send()
-        # EmailService.send_email_template(i18n_get_register_confirm_mail_subject(lang=country_plan.language),email,"register_confirmation.html",{
-        #             'firstName': firstName,
-        #             'email': email,
-        #             'password': password
-        #         },lang=country_plan.language)
-
-        # EmailService.send_email_template(i18n_get_register_activate_mail_subject(lang=country_plan.language),email,"register_activation.html",{
-        #             'firstName': firstName,
-        #             'Plan': subscription_plan.get('text'),
-        #             'email': email,
-        #             'password': password
-        #         },lang=country_plan.language)
+        service.hubspot.contact.create(email=email, first_name=firstName, last_name=lastName,
+            properties={
+                'subscription_type':plan,
+                'subscription_status':"new",
+                'country':country_code,
+                'expiry_date':int(expired_at.replace(hour=0,minute=0,second=0,microsecond=0).timestamp()*1000)}
+        )
+        service.sendinblue.transaction_email.RegistraionConfirmationEmail(firstName, email, password, to=[email], cc=[settings.NOTIFICATION_EMAIL], country=country).send()
+        service.sendinblue.transaction_email.AccountActivationEmail(firstName, plan, email, password, to=[email], cc=[settings.NOTIFICATION_EMAIL], country=country).send()
         
-        # lss_email = 'lss@algotech.app'
-        # if country_code == 'PH':
-        #     lss_email = 'hello@liveshowseller.ph'
-
-        # subject = "New LSS User - " + firstName + ' ' + lastName + ' - ' + plan
-        # EmailService.send_email_template(subject,lss_email,"register_cc.html",{
-        #             'firstName': firstName,
-        #             'lastName': lastName,
-        #             'plan': subscription_plan.get('text'),
-        #             'phone': contactNumber,
-        #             'email': email,
-        #             'password': password,
-        #             'expired_at': expired_at.strftime("%d %B %Y %H:%M"),
-        #             'country': country
-        #         })
-
         return Response(ret, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['POST'], url_path=r'login/general')

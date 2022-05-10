@@ -41,6 +41,13 @@ class UserCheckRule():
             raise ApiVerifyError('This email address has already been registered.')
 
     @staticmethod
+    def is_email_format_valid(**kwargs):
+        email = kwargs.get('email')
+        if type(email) != str:
+            raise ApiVerifyError('invalid email')
+        return {"email":email.lower().replace(" ","")}
+        
+    @staticmethod
     def is_plan_valid(**kwargs):
         pass
         #TODO check is_dealer_license_sufficient

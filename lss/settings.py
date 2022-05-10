@@ -413,7 +413,10 @@ PAYPAL_CONFIG = {
     "client_id": "ASABJtviIflIhkeEH4QBeYuhQoN7RWcPsC6fN-TXIfzhMQ2UDK1raOVd3xBWAmItoAg2WRgI4Nbpde8J",  # it's sandbox
     "client_secret": "EFEGnvXwP8DsSUYF5zoQ5ZkaArtlpzAlgpWJOwBlHRMUP6NwAq8-KmnTv087ihZrAIlyg5VtKo73Wj54",  # it's sandbox
 }
-STRIPE_API_KEY = "sk_test_51J2aFmF3j9D00CA0KABMZVKtOVnZNbBvM2hcokicJmfx8vvrmNyys5atEAcpp0Au2O3HtX0jz176my7g0ozbinof00RL4QAZrY"
+
+# stripe payment
+STRIPE_API_KEY = "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"
+# STRIPE_API_KEY = "sk_test_51J2aFmF3j9D00CA0KABMZVKtOVnZNbBvM2hcokicJmfx8vvrmNyys5atEAcpp0Au2O3HtX0jz176my7g0ozbinof00RL4QAZrY"
 
 # APPEND_SLASH=False
 # OPERATION_CODE_NAME: AGILE
@@ -439,3 +442,6 @@ SENDINBLUE_API_KEY = 'xkeysib-f5f5f2f2c6b17a326bc2abde3d80663a996045f574e7ca2248
 # hubspot client secret
 HUBSPOT_CLIENT_SECRET = '06d95fdd-62ae-4973-b5ab-74ae66a310fe'
 HUBSPOT_API_KEY = 'e9a347e7-8923-4e09-8e57-3fa6fe6acc8b'
+
+# cc to email
+NOTIFICATION_EMAIL = 'lss@algotech.app'

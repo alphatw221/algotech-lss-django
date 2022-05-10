@@ -107,13 +107,13 @@ class SubscriptionPlan:
     class TW(CountryPlan):
         promo_code="ALGOTECH"
         promo_discount_rate=0.9
-        currency = "USD"
+        currency = "TWD"
         language = "zh_hant"
         plans = {
             "trial" :{"text": "Free Trial", "price":{"monthly":0}},
-            "lite" : {"text": "Lite", "price":{"monthly":10,"quarterly":30}},
-            "standard" : {"text": "Standard", "price":{"monthly":30,"quarterly":90}},
-            "premium" : {"text": "Premium", "price":{"monthly":60,"quarterly":180}},
+            "lite" : {"text": "Lite", "price":{"monthly":300,"quarterly":900}},
+            "standard" : {"text": "Standard", "price":{"monthly":600,"quarterly":1800}},
+            "premium" : {"text": "Premium", "price":{"monthly":900,"quarterly":2700}},
         }
 
     class CH(CountryPlan):
