@@ -26,9 +26,9 @@ class HubspotViewSet(viewsets.GenericViewSet):
     def handle_new_registeration_from_hubspot(self, request):
 
         Verify.is_hubspot_signature_valid(request)
-
-        vid, first_name, last_name, email, country, subscription_type, country_code, phone = \
-            lib.util.getter.getproperties(request.data.get('properties'),('vid','firstname','lastname','email','country','subscription_type','country_code','phone'), nest_property='value')
+        vid, = lib.util.getter.getdata(request,('vid',)) 
+        first_name, last_name, email, country, subscription_type, country_code, phone = \
+            lib.util.getter.getproperties(request.data.get('properties'),('firstname','lastname','email','country','subscription_type','country_code','phone'), nest_property='value')
 
         password = ''.join(random.choice(string.ascii_letters+string.digits) for _ in range(8))
         country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(country)
@@ -61,7 +61,7 @@ class HubspotViewSet(viewsets.GenericViewSet):
         
         service.hubspot.contact.update(vid,properties={"expiry_date":int(expired_at.replace(hour=0,minute=0,second=0,microsecond=0).timestamp()*1000)})
         service.sendinblue.contact.create(email=email,first_name=first_name, last_name=last_name)
-        service.sendinblue.transaction_email.RegistraionConfirmationEmail(first_name, email, password, to=[email], cc=[settings.NOTIFICATION_EMAIL], country=country).send()
+        service.sendinblue.transaction_email.AccountActivationEmail(first_name, subscription_type, email, password, to=[email], cc=[settings.NOTIFICATION_EMAIL], country=country).send()
         
 
         return Response("ok", status=status.HTTP_200_OK)
