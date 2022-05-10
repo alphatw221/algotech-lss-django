@@ -10,6 +10,7 @@ from api.utils.common.verify import Verify
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 from api.utils.common.verify import ApiVerifyError
 from api import models
+from api import rule
 
 import service
 import business_policy
@@ -25,15 +26,14 @@ class HubspotViewSet(viewsets.GenericViewSet):
     def handle_new_registeration_from_hubspot(self, request):
 
         Verify.is_hubspot_signature_valid(request)
-
+        vid, = lib.util.getter.getdata(request,('vid',)) 
         first_name, last_name, email, country, subscription_type, country_code, phone = \
             lib.util.getter.getproperties(request.data.get('properties'),('firstname','lastname','email','country','subscription_type','country_code','phone'), nest_property='value')
 
         password = ''.join(random.choice(string.ascii_letters+string.digits) for _ in range(8))
         country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(country)
 
-        if AuthUser.objects.filter(email = email).exists() or models.user.user.User.objects.filter(email=email, type='user').exists():
-            raise ApiVerifyError('This email address has already been registered.')
+        rule.check_rule.user_check_rule.UserCheckRule.has_email_been_registered(email=email)
 
         now = datetime.now() 
         expired_at = now+timedelta(days=30)
@@ -44,6 +44,7 @@ class HubspotViewSet(viewsets.GenericViewSet):
         user_subscription = models.user.user_subscription.UserSubscription.objects.create(
             name=f'{first_name} {last_name}', 
             status='new', 
+            #TODO started_at = now
             expired_at=expired_at, 
             user_plan= {"activated_platform" : ["facebook"]}, 
             meta_country={ 'activated_country': [country] },
@@ -58,9 +59,10 @@ class HubspotViewSet(viewsets.GenericViewSet):
             auth_user=auth_user, 
             user_subscription=user_subscription)
         
+        service.hubspot.contact.update(vid,properties={"expiry_date":int(expired_at.replace(hour=0,minute=0,second=0,microsecond=0).timestamp()*1000)})
         service.sendinblue.contact.create(email=email,first_name=first_name, last_name=last_name)
-        service.sendinblue.transaction_email.RegistraionConfirmationEmail(first_name, email, password, to=email, cc="lss@algotech.app", country=country).send()
-        service.sendinblue.transaction_email.AccountActivationEmail(first_name, subscription_type, email, password, to=email, cc="lss@algotech.app", country=country).send()
+        service.sendinblue.transaction_email.AccountActivationEmail(first_name, subscription_type, email, password, to=[email], cc=[settings.NOTIFICATION_EMAIL], country=country).send()
+        
 
         return Response("ok", status=status.HTTP_200_OK)
 
@@ -83,7 +85,7 @@ class HubspotViewSet(viewsets.GenericViewSet):
         params={params_key[i]:params_value[i] for i in range(len(params_key))}
 
         service.sendinblue.transaction_email.TransactionEmail(
-            to=request.data.get('properties',{}).get('email',{}).get('value'), 
+            to=[request.data.get('properties',{}).get('email',{}).get('value')], 
             template_id=template_id, 
             params=params).send()
 

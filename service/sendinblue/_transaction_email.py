@@ -13,7 +13,7 @@ class TransactionEmail():
     template_module = None
     template_name = None
 
-    def __init__(self, to=None, cc=None, country="",template_id=None, params=None):
+    def __init__(self, to=[], cc=[], country="",template_id=None, params=None):
         self.to = to
         self.cc = cc
         self.country = country
@@ -22,8 +22,8 @@ class TransactionEmail():
 
     def send(self):
         try:
-            to = [{"email":self.to}]
-            cc = [{"email":self.cc}]
+            to = [{"email":email} for email in self.to]
+            cc = [{"email":email} for email in self.cc]
             send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(
                     template_id=self._get_template_id(),
                     to=to, 
