@@ -24,6 +24,7 @@ from django.core.files.base import ContentFile
 
 from api.utils.common.verify import Verify, getparams
 from api.utils.common.verify import ApiVerifyError
+from api.utils.advance_query.user_subscription import get_user_subscription_buyer_list
 
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 from api.utils.common.common import getparams
@@ -683,3 +684,12 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         api_user_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
         
         return Response(api_user_user_subscription.currency, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['GET'], url_path=r'get_buyer_information', permission_classes=(IsAuthenticated,))
+    @api_error_handler
+    def get_buyer_information(self, request, pk=None):
+        api_user = Verify.get_seller_user(request)    
+        api_user_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+
+        buyer_list = get_user_subscription_buyer_list(api_user_user_subscription.id)
+        return Response(buyer_list, status=status.HTTP_200_OK)

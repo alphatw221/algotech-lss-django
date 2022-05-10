@@ -323,7 +323,7 @@ def get_campaign_comment_rank(user_subscription_id):
                     {"$match":{
                         '$expr': { '$eq': ["$$id", "$user_subscription_id"] },
                         "id":{"$ne":None}}
-                     },
+                    },
                     {
                         "$lookup": {
                             "from": "api_campaign_comment","as": "comments", # "localField": "id","foreignField": "campaign_id",
