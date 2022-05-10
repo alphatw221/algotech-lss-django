@@ -244,7 +244,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
         facebook_page = Verify.get_facebook_page_from_user_subscription(user_subscription, facebook_page_id)
         is_token_valid = Verify.check_is_page_token_valid('facebook', facebook_page.token, facebook_page.page_id)
         if not is_token_valid:
-            raise ApiVerifyError(f"Facebook page <{facebook_page.name}>: token expired or invalid, please re-bind your page on Platform page.")
+            raise ApiVerifyError(f"Facebook page <{facebook_page.name}>: token expired or invalid. Please re-bind your page on Platform page.")
         campaign.facebook_page = facebook_page
         campaign.save()
         return Response(CampaignSerializerRetreive(campaign).data, status=status.HTTP_200_OK)
@@ -265,7 +265,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
         print(response)
         is_token_valid = Verify.check_is_page_token_valid('youtube', response['access_token'])
         if not is_token_valid:
-            raise ApiVerifyError(f"YouTube channel <{youtube_channel.name}>: token expired or invalid, please re-bind your channel on Platform page.")
+            raise ApiVerifyError(f"YouTube channel <{youtube_channel.name}>: token expired or invalid. Please re-bind your channel on Platform page.")
         youtube_channel.token = response['access_token']
         youtube_channel.save()
         campaign.youtube_channel = youtube_channel
@@ -286,7 +286,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
         instagram_profile = Verify.get_instagram_profile_from_user_subscription(user_subscription, instagram_profile_id)
         is_token_valid = Verify.check_is_page_token_valid('instagram', instagram_profile.token, instagram_profile.business_id)
         if not is_token_valid:
-            raise ApiVerifyError(f"Instagram profile <{instagram_profile.name}>: token expired or invalid, please re-bind your profile on Platform page.")
+            raise ApiVerifyError(f"Instagram profile <{instagram_profile.name}>: token expired or invalid. Please re-bind your profile on Platform page.")
         campaign.instagram_profile = instagram_profile
         campaign.save()
         return Response(CampaignSerializerRetreive(campaign).data, status=status.HTTP_200_OK)

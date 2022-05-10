@@ -60,10 +60,6 @@ INSTALLED_APPS = [
     'webpack_loader',
 ]
 
-# CORS_ALLOWED_ORIGINS = [
-#     "http://localhost:8080",
-#     "https://localhost",
-# ]
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
