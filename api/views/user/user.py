@@ -884,8 +884,8 @@ class UserViewSet(viewsets.ModelViewSet):
 
         service.sendinblue.contact.create(email=email,first_name=firstName, last_name=lastName)
         service.hubspot.contact.create(email=email, first_name=firstName, last_name=lastName,properties={})
-        service.sendinblue.transaction_email.RegistraionConfirmationEmail(firstName, email, password, to=email, cc="lss@algotech.app", country=country).send()
-        service.sendinblue.transaction_email.AccountActivationEmail(firstName, plan, email, password, to=email, cc="lss@algotech.app", country=country).send()
+        service.sendinblue.transaction_email.RegistraionConfirmationEmail(firstName, email, password, to=[email], cc=[settings.NOTIFICATION_EMAIL], country=country).send()
+        service.sendinblue.transaction_email.AccountActivationEmail(firstName, plan, email, password, to=[email], cc=[settings.NOTIFICATION_EMAIL], country=country).send()
         # EmailService.send_email_template(i18n_get_register_confirm_mail_subject(lang=country_plan.language),email,"register_confirmation.html",{
         #             'firstName': firstName,
         #             'email': email,

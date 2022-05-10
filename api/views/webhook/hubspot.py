@@ -26,8 +26,8 @@ class HubspotViewSet(viewsets.GenericViewSet):
 
         Verify.is_hubspot_signature_valid(request)
 
-        first_name, last_name, email, country, subscription_type, country_code, phone = \
-            lib.util.getter.getproperties(request.data.get('properties'),('firstname','lastname','email','country','subscription_type','country_code','phone'), nest_property='value')
+        vid, first_name, last_name, email, country, subscription_type, country_code, phone = \
+            lib.util.getter.getproperties(request.data.get('properties'),('vid','firstname','lastname','email','country','subscription_type','country_code','phone'), nest_property='value')
 
         password = ''.join(random.choice(string.ascii_letters+string.digits) for _ in range(8))
         country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(country)
@@ -58,9 +58,10 @@ class HubspotViewSet(viewsets.GenericViewSet):
             auth_user=auth_user, 
             user_subscription=user_subscription)
         
+        service.hubspot.contact.update(vid,properties={"expiry_date":int(expired_at.replace(hour=0,minute=0,second=0,microsecond=0).timestamp()*1000)})
         service.sendinblue.contact.create(email=email,first_name=first_name, last_name=last_name)
-        service.sendinblue.transaction_email.RegistraionConfirmationEmail(first_name, email, password, to=email, cc="lss@algotech.app", country=country).send()
-        service.sendinblue.transaction_email.AccountActivationEmail(first_name, subscription_type, email, password, to=email, cc="lss@algotech.app", country=country).send()
+        service.sendinblue.transaction_email.RegistraionConfirmationEmail(first_name, email, password, to=[email], cc=[settings.NOTIFICATION_EMAIL], country=country).send()
+        service.sendinblue.transaction_email.AccountActivationEmail(first_name, subscription_type, email, password, to=[email], cc=[settings.NOTIFICATION_EMAIL], country=country).send()
 
         return Response("ok", status=status.HTTP_200_OK)
 
@@ -83,7 +84,7 @@ class HubspotViewSet(viewsets.GenericViewSet):
         params={params_key[i]:params_value[i] for i in range(len(params_key))}
 
         service.sendinblue.transaction_email.TransactionEmail(
-            to=request.data.get('properties',{}).get('email',{}).get('value'), 
+            to=[request.data.get('properties',{}).get('email',{}).get('value')], 
             template_id=template_id, 
             params=params).send()
 
