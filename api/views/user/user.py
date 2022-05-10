@@ -739,7 +739,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 'country':country_code,
                 'expiry_date':int(expired_at.replace(hour=0,minute=0,second=0,microsecond=0).timestamp()*1000)}
         )
-        service.sendinblue.transaction_email.RegistraionConfirmationEmail(firstName, email, password, to=[email], cc=[settings.NOTIFICATION_EMAIL], country=country).send()
+        
         service.sendinblue.transaction_email.AccountActivationEmail(firstName, plan, email, password, to=[email], cc=[settings.NOTIFICATION_EMAIL], country=country).send()
         
         return Response(ret, status=status.HTTP_200_OK)

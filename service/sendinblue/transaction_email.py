@@ -13,18 +13,6 @@ class ResetPasswordLinkEmail(TransactionEmail):
             "username":username
         }
 
-class RegistraionConfirmationEmail(TransactionEmail):
-    template_module = template.registration
-    template_name = "CONFIRMATION"
-
-    def __init__(self, first_name, email, password, to=None, cc=None, country=""):
-        super().__init__(to, cc, country)
-        self.params = {
-            "first_name":first_name,
-            "email":email,
-            "password":password
-        }
-
 class AccountActivationEmail(TransactionEmail):
     template_module = template.registration
     template_name = "ACTIVATION"
