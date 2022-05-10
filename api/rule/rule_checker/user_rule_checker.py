@@ -35,16 +35,26 @@ class SellerResetPasswordRuleChecker(RuleChecker):
         check_rule.user_check_rule.UserCheckRule.is_new_password_valid,
     ]
 
-class RegistrationRuleChecker(RuleChecker):
+class RegistrationPaymentCompleteChecker(RuleChecker):
     
     check_list=[
-        check_rule.user_check_rule.UserCheckRule.is_email_format_valid,
         check_rule.stripe_check_rule.StripeCheckRule.is_payment_successed,
     ]
 
+
+class RegistrationDataRuleChecker(RuleChecker):
+
+    check_list=[
+        check_rule.user_check_rule.UserCheckRule.is_email_format_valid,
+        check_rule.user_check_rule.UserCheckRule.has_email_been_registered,
+        check_rule.stripe_check_rule.StripeCheckRule.is_period_valid,
+        check_rule.stripe_check_rule.StripeCheckRule.is_promo_code_valid,
+        check_rule.stripe_check_rule.StripeCheckRule.adjust_price_if_promo_code_valid,
+    ]
 class RegistrationRequireRefundChecker(RuleChecker):
 
     check_list=[
+        check_rule.user_check_rule.UserCheckRule.is_email_format_valid,
         check_rule.user_check_rule.UserCheckRule.has_email_been_registered,
         check_rule.stripe_check_rule.StripeCheckRule.is_period_valid,
         check_rule.stripe_check_rule.StripeCheckRule.is_promo_code_valid,

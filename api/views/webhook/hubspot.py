@@ -10,6 +10,7 @@ from api.utils.common.verify import Verify
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 from api.utils.common.verify import ApiVerifyError
 from api import models
+from api import rule
 
 import service
 import business_policy
@@ -32,8 +33,7 @@ class HubspotViewSet(viewsets.GenericViewSet):
         password = ''.join(random.choice(string.ascii_letters+string.digits) for _ in range(8))
         country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(country)
 
-        if AuthUser.objects.filter(email = email).exists() or models.user.user.User.objects.filter(email=email, type='user').exists():
-            raise ApiVerifyError('This email address has already been registered.')
+        rule.check_rule.user_check_rule.UserCheckRule.has_email_been_registered(email=email)
 
         now = datetime.now() 
         expired_at = now+timedelta(days=30)
@@ -44,6 +44,7 @@ class HubspotViewSet(viewsets.GenericViewSet):
         user_subscription = models.user.user_subscription.UserSubscription.objects.create(
             name=f'{first_name} {last_name}', 
             status='new', 
+            #TODO started_at = now
             expired_at=expired_at, 
             user_plan= {"activated_platform" : ["facebook"]}, 
             meta_country={ 'activated_country': [country] },

@@ -22,6 +22,7 @@ class StripeCheckRule():
 
         if not amount :
             raise ApiVerifyError('invalid period')
+        return {'amount':amount}
 
     @staticmethod
     def is_promo_code_valid(**kwargs):
@@ -43,3 +44,13 @@ class StripeCheckRule():
 
         if int(amount*100) != paymentIntent.amount:
             raise ApiVerifyError('payment amount error')
+
+    def adjust_price_if_promo_code_valid(**kwargs):
+
+        promoCode = kwargs.get('promoCode')
+        country_plan = kwargs.get('country_plan')
+        amount = kwargs.get('amount')
+
+        if promoCode and promoCode == country_plan.promo_code:
+            amount = amount*country_plan.promo_discount_rate
+            return {'amount':amount}
