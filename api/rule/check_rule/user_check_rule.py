@@ -45,7 +45,7 @@ class UserCheckRule():
         email = kwargs.get('email')
         if type(email) != str:
             raise ApiVerifyError('invalid email')
-        return {"email",email.lower().replace(" ","")}
+        return {"email":email.lower().replace(" ","")}
         
     @staticmethod
     def is_plan_valid(**kwargs):

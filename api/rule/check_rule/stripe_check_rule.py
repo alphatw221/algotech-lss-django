@@ -38,7 +38,8 @@ class StripeCheckRule():
         promoCode = kwargs.get('promoCode')
         country_plan = kwargs.get('country_plan')
         paymentIntent = kwargs.get('paymentIntent')
-
+        amount = kwargs.get('amount')
+        
         if promoCode :
             amount = amount*country_plan.promo_discount_rate
 
