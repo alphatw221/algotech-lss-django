@@ -338,21 +338,22 @@ class Verify():
         #     pass
 
     @staticmethod
-    def is_hubspot_signature_valid(request, http_method, http_uri):
-
-        request_body = request.body.decode('utf-8')
+    def is_hubspot_signature_valid(request):
         
+        request_body = request.body.decode('utf-8')
+        http_method = request.method
+        http_uri = settings.GCP_API_LOADBALANCER_URL+request.get_full_path()
         source_string = settings.HUBSPOT_CLIENT_SECRET + http_method + http_uri + request_body
 
+        print(http_method,http_uri)
         if request.META.get('HTTP_X_HUBSPOT_SIGNATURE') != hashlib.sha256(source_string.encode('utf-8')).hexdigest():
             raise ApiVerifyError('signature error')
 
     @staticmethod
-    def check_is_page_token_valid(platform_name, officiall_page_id, officiall_page_token):
+    def check_is_page_token_valid(platform_name, officiall_page_token, officiall_page_id=None):
         try:
             if platform_name == 'facebook':
                 status_code, response = api_fb_get_page_posts(page_token=officiall_page_token, page_id=officiall_page_id, limit=1)
-                print("response", response)
                 if status_code == 200:
                     return True
                 return False
@@ -364,7 +365,6 @@ class Verify():
                 return False
             elif platform_name == 'instagram':
                 status_code, response = api_ig_get_profile_live_media(page_token=officiall_page_token, profile_id=officiall_page_id)
-                print("response", response)
                 if status_code == 200:
                     return True
                 return False

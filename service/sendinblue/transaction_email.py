@@ -1,7 +1,6 @@
 from ._transaction_email import TransactionEmail
 from . import template
 
-
 class ResetPasswordLinkEmail(TransactionEmail):
     template_module = template.password
     template_name = "RESET_PASSWORD_LINK"

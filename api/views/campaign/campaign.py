@@ -10,6 +10,8 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from datetime import datetime
+from api.models.youtube.youtube_channel import YoutubeChannelSerializer
+from backend.api.google.user import api_google_post_refresh_token
 
 from backend.pymongo.mongodb import db
 from api.utils.common.verify import Verify
@@ -240,9 +242,9 @@ class CampaignViewSet(viewsets.ModelViewSet):
            raise ApiVerifyError('facebook not activated')
 
         facebook_page = Verify.get_facebook_page_from_user_subscription(user_subscription, facebook_page_id)
-        is_token_valid = Verify.check_is_page_token_valid('facebook', facebook_page.page_id, facebook_page.token)
+        is_token_valid = Verify.check_is_page_token_valid('facebook', facebook_page.token, facebook_page.page_id)
         if not is_token_valid:
-            raise ApiVerifyError(f"Facebook page <{facebook_page.name}>: token expired or invalid, please re-bind your page on Platform page.")
+            raise ApiVerifyError(f"Facebook page <{facebook_page.name}>: token expired or invalid. Please re-bind your page on Platform page.")
         campaign.facebook_page = facebook_page
         campaign.save()
         return Response(CampaignSerializerRetreive(campaign).data, status=status.HTTP_200_OK)
@@ -259,9 +261,13 @@ class CampaignViewSet(viewsets.ModelViewSet):
            raise ApiVerifyError('youtube not activated')
 
         youtube_channel = Verify.get_youtube_channel_from_user_subscription(user_subscription, youtube_channel_id)
-        is_token_valid = Verify.check_is_page_token_valid('youtube', youtube_channel_id, youtube_channel.token)
+        response_status, response = api_google_post_refresh_token(youtube_channel.refresh_token)
+        print(response)
+        is_token_valid = Verify.check_is_page_token_valid('youtube', response['access_token'])
         if not is_token_valid:
-            raise ApiVerifyError(f"YouTube channel <{youtube_channel.name}>: token expired or invalid, please re-bind your channel on Platform page.")
+            raise ApiVerifyError(f"YouTube channel <{youtube_channel.name}>: token expired or invalid. Please re-bind your channel on Platform page.")
+        youtube_channel.token = response['access_token']
+        youtube_channel.save()
         campaign.youtube_channel = youtube_channel
         campaign.save()
         return Response(CampaignSerializerRetreive(campaign).data, status=status.HTTP_200_OK)
@@ -278,9 +284,9 @@ class CampaignViewSet(viewsets.ModelViewSet):
            raise ApiVerifyError('instagram not activated')
 
         instagram_profile = Verify.get_instagram_profile_from_user_subscription(user_subscription, instagram_profile_id)
-        is_token_valid = Verify.check_is_page_token_valid('instagram', instagram_profile.business_id, instagram_profile.token)
+        is_token_valid = Verify.check_is_page_token_valid('instagram', instagram_profile.token, instagram_profile.business_id)
         if not is_token_valid:
-            raise ApiVerifyError(f"Instagram profile <{instagram_profile.name}>: token expired or invalid, please re-bind your profile on Platform page.")
+            raise ApiVerifyError(f"Instagram profile <{instagram_profile.name}>: token expired or invalid. Please re-bind your profile on Platform page.")
         campaign.instagram_profile = instagram_profile
         campaign.save()
         return Response(CampaignSerializerRetreive(campaign).data, status=status.HTTP_200_OK)
