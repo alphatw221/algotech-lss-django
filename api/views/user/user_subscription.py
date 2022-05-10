@@ -32,6 +32,7 @@ from backend.api.instagram.profile import api_ig_get_profile_info
 from backend.api.youtube.channel import api_youtube_get_list_channel_by_token
 import requests
 from django.conf import settings
+from backend.pymongo.mongodb import db
 
 
 class UserSubscriptionPagination(PageNumberPagination):
@@ -685,11 +686,28 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         
         return Response(api_user_user_subscription.currency, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['GET'], url_path=r'get_buyer_information', permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['GET'], url_path=r'get_buyer_list', permission_classes=(IsAuthenticated,))
     @api_error_handler
-    def get_buyer_information(self, request, pk=None):
+    def get_buyer_list(self, request, pk=None):
         api_user = Verify.get_seller_user(request)    
         api_user_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
 
         buyer_list = get_user_subscription_buyer_list(api_user_user_subscription.id)
         return Response(buyer_list, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['GET'], url_path=r'get_seller_information', permission_classes=(IsAuthenticated,))
+    @api_error_handler
+    def get_seller_information(self, request, pk=None):
+        api_user = Verify.get_seller_user(request)    
+        api_user_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+
+        buyer_information = {
+            'plan': api_user_user_subscription.type,
+            'name': api_user_user_subscription.name,
+            'phone': db.api_user.find_one({'user_subscription_id': api_user_user_subscription.id}).get('phone'),
+            'email': db.api_user.find_one({'user_subscription_id': api_user_user_subscription.id}).get('email'),
+            'period': api_user_user_subscription.expired_at.strftime("%Y/%m/%d, %H:%M:%S")
+        }
+        return Response(buyer_information, status=status.HTTP_200_OK)
+
+    
