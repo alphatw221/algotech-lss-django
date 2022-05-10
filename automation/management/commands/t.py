@@ -47,7 +47,8 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.test_mongodb_query()
+        # self.test_mongodb_query()
+        self.test_mongo_aggr()
         # self.test_send_email()
         # self.test_user_plan()
         # ret = api_twitch_get_access_token()
@@ -119,7 +120,7 @@ class Command(BaseCommand):
     #         customer_name, product_name, lang='zh-hant'))
     #     print(i18n_get_campaign_announcement_lucky_draw_winner(
     #         customer_name, product_name, lang='zh-hans'))
-        self.test_hubspot_hash()
+        # self.test_hubspot_hash()
 
 
     def modify_database(self):
@@ -222,11 +223,6 @@ class Command(BaseCommand):
         modify_meta_payment_from_user_subscription()
         modify_meta_payment_from_campaign()
         
-        
-        
-        
-        
-        
     def add_user_subscription_user(self):
         UserSubscription.objects.get(id=1).root_users.add(User.objects.get(id=44))
 
@@ -312,3 +308,95 @@ class Command(BaseCommand):
 
         hash_result = hashlib.sha256(source_string.encode('utf-8')).hexdigest()
         print(hash_result)
+    
+    def test_mongo_aggr(self):
+        from pprint import pprint 
+        # cursor = db.api_user_subscription.aggregate([
+        #     {'$match': {'id': 1}},
+        #     {'$lookup': {
+        #         'from': 'api_campaign',
+        #         'as': 'campaigns',
+        #         'let': { 'id': '$id' },
+        #         'pipeline': [
+        #             {'$match': {
+        #                 '$expr': { '$eq': [ '$$id', '$user_subscription_id' ] },
+        #                 'id': {'$ne': None}
+        #             }},
+        #             {'$project': { '_id': 0, 'id': 1 }}
+        #         ]
+        #     }}
+        # ])
+        # l = list(cursor)
+        # pprint (l)
+
+        # cursor = db.api_campaign.aggregate([
+        #     {'$match': {'id': 118}},
+        #     {'$lookup': {
+        #         'from': 'api_order',
+        #         'as': 'orders',
+        #         'let': { 'id': '$id' },
+        #         'pipeline': [
+        #             {'$match': {
+        #                 '$expr': { '$eq': [ '$$id', '$campaign_id'] }
+        #             }},
+        #             # {'$unwind': '$orders'},
+        #             {'$group': {
+        #                 '_id': '$customer_id',
+        #                 'customer_id': { '$first': '$customer_id'},
+        #                 'customer_name': { '$first': '$customer_name'},
+        #                 'customer_img': { '$first': '$customer_img'},
+        #                 'shipping_email': { '$first': '$shipping_email'},
+        #                 'shipping_phone': { '$first': '$shipping_phone'},
+        #                 'platform': { '$first': '$platform'},
+        #             }}
+        #         ],
+        #     }},
+        #     {'$unwind': '$orders'},
+        #     {'$project': {'_id': 0, 'orders': 1, }},
+        #     # {'$unwind': '$orders'}
+        # ])
+        # l = list(cursor)
+        # pprint (l)
+
+
+        cursor = db.api_user_subscription.aggregate([
+            {'$match': {'id': 1}},
+            {'$lookup': {
+                'from': 'api_campaign',
+                'as': 'campaigns',
+                'let': { 'id': '$id' },
+                'pipeline': [
+                    {'$match': {
+                        '$expr': { '$eq': [ '$$id', '$user_subscription_id' ] },
+                        'id': {'$ne': None}
+                    }},
+                    {'$project': { '_id': 0, 'id': 1 }},
+                    {'$lookup': {
+                        'from': 'api_order',
+                        'as': 'orders',
+                        'let': { 'id': '$id' },
+                        'pipeline': [
+                            {'$match': {
+                                '$expr': { '$eq': [ '$$id', '$campaign_id'] }
+                            }}
+                        ],
+                    }},
+                    {'$unwind': '$orders'},  
+                    {'$match': {'orders': {'$ne': []}}},
+                    {'$project': {'_id': 0, 'orders': 1}},
+                ]
+            }},
+            {'$unwind': '$campaigns'},  
+            {'$project': { '_id': 0, 'campaigns': 1 }},
+            {'$group': {
+                '_id': '$campaigns.orders.customer_id',
+                'customer_id': { '$first': '$campaigns.orders.customer_id'},
+                'customer_name': { '$first': '$campaigns.orders.customer_name'},
+                'customer_img': { '$first': '$campaigns.orders.customer_img'},
+                'shipping_email': { '$first': '$campaigns.orders.shipping_email'},
+                'shipping_phone': { '$first': '$campaigns.orders.shipping_phone'},
+                'platform': { '$first': '$campaigns.orders.platform'},
+            }},
+        ])
+        l = list(cursor)
+        pprint (l)
