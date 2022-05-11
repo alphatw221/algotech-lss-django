@@ -30,9 +30,8 @@ from api.utils.error_handle.error_handler.api_error_handler import api_error_han
 from api.utils.common.common import getparams
 from backend.api.instagram.profile import api_ig_get_profile_info
 from backend.api.youtube.channel import api_youtube_get_list_channel_by_token
-import requests, stripe, pytz
+import requests, stripe, pytz, business_policy, lib
 from django.conf import settings
-import business_policy
 from api import rule
 
 
@@ -711,12 +710,11 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             'period': api_user_user_subscription.expired_at.strftime("%Y/%m/%d, %H:%M:%S")
         }
         return Response(buyer_information, status=status.HTTP_200_OK)
-    
         
     @action(detail=False, methods=['POST'], url_path=r'upgrade/intent/(?P<country_code>[^/.]+)')
     @api_error_handler
     def upgrade_intent(self, request, country_code):
-        email, plan, period = getdata(request, ("email", "plan", "period"), required=True)
+        email, plan, period = lib.util.getter.getdata(request, ("email", "plan", "period"), required=True)
 
         country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(country_code)
         subscription_plan = country_plan.get_plan(plan)
@@ -742,7 +740,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['POST'], url_path=r'upgrade/(?P<country_code>[^/.]+)')
     @api_error_handler
     def upgrade(self, request, country_code):
-        email, password, plan, period, intentSecret, promoCode, timezone = getdata(request,("email", "password", "plan", "period", "intentSecret", "promoCode", "timezone"), required=False)
+        email, password, plan, period, intentSecret, promoCode, timezone = lib.util.getter.getdata(request,("email", "password", "plan", "period", "intentSecret", "promoCode", "timezone"), required=False)
 
         payment_intent_id = intentSecret[:27]
         stripe.api_key = settings.STRIPE_API_KEY
@@ -764,4 +762,23 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
         email = kwargs.get('email')
         now = datetime.now(pytz.timezone(timezone)) if timezone in pytz.common_timezones else datetime.now()
-        expired_at = now + timedelta(days=30) if period == "monthly" else now+timedelta(days=90)
+        expired_at = now+timedelta(days=90) if period == "quarter" else now+timedelta(days=365)
+
+        UserSubscription.objects.filter(email=email).update(
+            type=plan, 
+            expired_at=expired_at, 
+            started_at=now, 
+            user_plan= {"activated_platform" : ["facebook","youtube","instagram"]}, 
+            meta_country={ 'activated_country': [country_code] },
+            meta = {"stripe payment intent":intentSecret}
+        )
+        
+        ret = {
+            "Email": email,
+            "Your Plan": subscription_plan.get('text'),
+            "Subscription Period": period,
+            "Subscription End Date": expired_at.strftime("%d %B %Y %H:%M"),
+            "Receipt": paymentIntent.charges.get('data')[0].get('receipt_url')
+        }
+
+        return Response(ret, status=status.HTTP_200_OK)
