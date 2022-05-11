@@ -15,7 +15,7 @@ class UserSubscriptionCheckRule():
             raise ApiVerifyError('Your membership is out of date.')
     
     @staticmethod
-    def campaigns_limit(**kwargs):
+    def max_concurrent_live(**kwargs):
         api_user = kwargs.get('api_user')
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
         plan, subscription_id = user_subscription.type, user_subscription.id
@@ -26,6 +26,6 @@ class UserSubscriptionCheckRule():
         else:
             plan_limitation = getattr(business_limitation.live_show_seller, plan)     
 
-        if campaigns_count >= plan_limitation.get('campaigns_limit'):
+        if campaigns_count >= plan_limitation.get('max_concurrent_live'):
             raise ApiVerifyError('You\'ve been reached maximum campaign.')
         
