@@ -3,7 +3,8 @@ from backend.api.facebook._fb_api_caller import FacebookApiCaller
 
 def api_fb_get_post_likes(page_token: str, post_id: str, after: str = None):
     params = {
-        'limit': 100
+        'limit': 100,
+        'fields' :'id,name,pic_large'
     }
     if after:
         params['after'] = after
