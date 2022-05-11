@@ -1,16 +1,13 @@
-from django.conf import settings
-import pendulum
-from automation.utils.timeloop import time_loop
-from backend.campaign.campaign.manager import CampaignManager
 from django.core.management.base import BaseCommand
-from backend.python_rq.python_rq import redis_connection, campaign_queue, comment_queue
-from rq.job import Job
-from automation.jobs.campaign_job import campaign_job
 
-from datetime import datetime
-from backend.pymongo.mongodb import db, client
+from automation.utils.timeloop import time_loop
+from api import models
+import pendulum
+import service
+import lib
 
-from backend.google_cloud_monitoring.google_cloud_monitoring import CommentQueueLengthMetric
+
+# from backend.google_cloud_monitoring.google_cloud_monitoring import CommentQueueLengthMetric
 
 
 class Command(BaseCommand):
@@ -22,33 +19,35 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.scan_live_campaign()
 
-    # @time_loop(settings.FACEBOOK_COMMENT_CAPTURING['REST_INTERVAL_SECONDS'])
-    # @time_loop(40)
     @time_loop(10)
     def scan_live_campaign(self):
+        
         self.stdout.write(self.style.SUCCESS(
             f'{pendulum.now()} - scan_live_campaign Module'))
 
         # CommentQueueLengthMetric.write_time_series(len(comment_queue.jobs))
-        for campaign in CampaignManager.get_ordering_campaigns():
-            try:
-                print(campaign.id)
-                if not Job.exists(str(campaign.id), connection=redis_connection):
-                    campaign_queue.enqueue(campaign_job, job_id=str(campaign.id), args=(
-                        campaign.id,), result_ttl=10, failure_ttl=10)
-                    continue
+        rows=[]
+        for campaign in models.campaign.campaign.Campaign.objects.filter(start_at__lt=pendulum.now(),end_at__gt=pendulum.now()):
+            if not service.rq.job.exists(campaign.id):
+                service.rq.job.enqueue_campaign_job(campaign.id)
+                rows.append([campaign.id, ""])
+                continue
 
-                job = Job.fetch(str(campaign.id), connection=redis_connection)
-                job_status = job.get_status(refresh=True)
-                print(job_status)
-                if job_status in ('queued', 'started', 'deferred'):
-                    # job.delete()
-                    continue
-                    # job.delete()
-                elif job_status in ('finished', 'failed', 'canceled'):  #
+            job, job_status = service.rq.job.get_job_status(campaign.id)
+            rows.append([campaign.id, job_status])
+            if job_status == 'queued':
+                count = service.redis.redis.get(campaign.id)
+                if count >5:
                     job.delete()
-                    campaign_queue.enqueue(campaign_job, job_id=str(campaign.id), args=(
-                        campaign.id,), result_ttl=10, failure_ttl=10)
+                    service.redis.redis.delete(campaign.id)
+                else:
+                    service.redis.redis.increment(campaign.id)
+            elif job_status in ('started', 'deferred'):
+                # job.delete()
+                continue
+            elif job_status in ('finished', 'failed', 'canceled'):  #
+                job.delete()
+                service.redis.redis.delete(campaign.id)
+                service.rq.job.enqueue_campaign_job(campaign.id)
 
-            except Exception as e:
-                print(e)
+        lib.util.logger.print_table(["Campaign ID", "Status"],rows)

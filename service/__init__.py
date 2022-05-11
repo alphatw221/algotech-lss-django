@@ -1,1 +1,1 @@
-from . import sendinblue,nlp,hubspot
+from . import sendinblue,nlp,hubspot,rq,redis
