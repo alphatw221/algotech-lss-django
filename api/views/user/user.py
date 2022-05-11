@@ -670,7 +670,8 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response({
             "client_secret":intent.client_secret,
             "payment_amount":amount,
-            "user_plan":plan
+            "user_plan":plan,
+            "currency":country_plan.currency
         }, status=status.HTTP_200_OK)
 
 
@@ -701,7 +702,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
         email = kwargs.get('email')
         now = datetime.now(pytz.timezone(timezone)) if timezone in pytz.common_timezones else datetime.now()
-        expired_at = now+timedelta(days=30) if period == "monthly" else now+timedelta(days=60)
+        expired_at = now+timedelta(days=30) if period == "monthly" else now+timedelta(days=90)
         
         auth_user = AuthUser.objects.create_user(
             username=f'{firstName} {lastName}', email=email, password=password)
