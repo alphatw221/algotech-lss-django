@@ -171,7 +171,7 @@ class DrawFromCampaignCommentsEvent(ABC):
         campaign_comments = orm_campaign_comment.get_keyword_campaign_comments(
             self.campaign, self.keyword,
         )
-
+        print("campaign_comments", campaign_comments)
         winner_set = set()
         if self.unrepeat == 'True':
             winner_set = get_winner_set(self.campaign.id)
