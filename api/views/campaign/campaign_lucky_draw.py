@@ -105,8 +105,6 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
             campaign, DrawFromCampaignLikesEvent(
                 campaign, unrepeat, num_of_winner), prize_campaign_product, num_of_winner,
         )
-        print(lucky_draw)
-        print(lucky_draw.winner_list)
         response_json = get_winner_json(lucky_draw.winner_list)
 
         return Response(response_json, status=status.HTTP_200_OK)
