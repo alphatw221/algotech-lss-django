@@ -131,11 +131,13 @@ class CampaignLuckyDrawProcessor:
 
     def process(self) -> CampaignLuckyDraw:
         candidate_set = self.event.get_candidate_set()
+        print("candidate_set", candidate_set)
         condition_type = self.event.get_condition_type()
         # try:
         if self.num_of_winner > len(candidate_set):
             self.num_of_winner = len(candidate_set)
         winner_list = random.sample(candidate_set, self.num_of_winner)
+        print("winner_list", winner_list)
 
         # update winner_list in 
         meta = db.api_campaign.find_one({'id': self.campaign.id})['meta']
