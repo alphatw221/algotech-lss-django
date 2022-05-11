@@ -150,18 +150,20 @@ class CampaignLuckyDrawProcessor:
             new_winner_list = []
             for winner in winner_list:
                 winner_with_img = []
-                if condition_type == 'lucky_draw_campaign_comments':
-                    img_url = \
-                    db.api_campaign_comment.find_one({'customer_id': winner[1], 'campaign_id': self.campaign.id})[
-                        'image']
-                elif condition_type == 'lucky_draw_campaign_likes':
-                    img_url = winner[3]
-                elif condition_type == 'lucky_draw_cart_products':
-                    img_url = db.api_pre_order.find_one({'customer_id': winner[1], 'campaign_id': self.campaign.id})[
-                        'customer_img']
-                elif condition_type == 'lucky_draw_products':
-                    img_url = db.api_pre_order.find({'customer_id': winner[1], 'campaign_id': self.campaign.id})[
-                        'customer_img']
+                try:
+                    if condition_type == 'lucky_draw_campaign_comments':
+                        img_url = \
+                        db.api_campaign_comment.find_one({'customer_id': winner[1], 'campaign_id': self.campaign.id})[
+                            'image']
+                    elif condition_type == 'lucky_draw_campaign_likes':
+                        img_url = winner[3]
+                    elif condition_type == 'lucky_draw_cart_products':
+                        img_url = winner[3]
+                    elif condition_type == 'lucky_draw_products':
+                        img_url = db.api_pre_order.find({'customer_id': winner[1], 'campaign_id': self.campaign.id})[
+                            'customer_img']
+                except:
+                    img_url = ""
 
                 winner_with_img.append(winner[0])
                 winner_with_img.append(winner[1])

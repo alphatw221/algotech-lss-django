@@ -190,7 +190,7 @@ class DrawFromCampaignCommentsEvent(ABC):
                 # for winner_data in winner_datas:
                 #     img_url = winner_data['image']
                 candidate_set.add(
-                    (campaign_comment['platform'], campaign_comment['customer_id'], campaign_comment['customer_name'])
+                    (campaign_comment['platform'], campaign_comment['customer_id'], campaign_comment['customer_name'], campaign_comment['image'])
                 )
         
         if self.unrepeat == 'True':
