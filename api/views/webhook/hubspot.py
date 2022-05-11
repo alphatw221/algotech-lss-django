@@ -44,7 +44,7 @@ class HubspotViewSet(viewsets.GenericViewSet):
         user_subscription = models.user.user_subscription.UserSubscription.objects.create(
             name=f'{first_name} {last_name}', 
             status='new', 
-            #TODO started_at = now
+            started_at=now,
             expired_at=expired_at, 
             user_plan= {"activated_platform" : ["facebook"]}, 
             meta_country={ 'activated_country': [country] },
@@ -59,17 +59,15 @@ class HubspotViewSet(viewsets.GenericViewSet):
             auth_user=auth_user, 
             user_subscription=user_subscription)
         
-        service.hubspot.contact.update(vid,properties={"expiry_date":int(expired_at.replace(hour=0,minute=0,second=0,microsecond=0).timestamp()*1000)})
+        service.hubspot.contact.update(vid,expiry_date=int(expired_at.replace(hour=0,minute=0,second=0,microsecond=0).timestamp()*1000))
         service.sendinblue.contact.create(email=email,first_name=first_name, last_name=last_name)
         service.sendinblue.transaction_email.AccountActivationEmail(first_name, subscription_type, email, password, to=[email], cc=[settings.NOTIFICATION_EMAIL], country=country).send()
-        
 
         return Response("ok", status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['POST'], url_path=r'send/email/webhook', permission_classes=())
     @api_error_handler
     def send_email_webhook(self, request):
-        
 
         Verify.is_hubspot_signature_valid(request)
 

@@ -55,7 +55,7 @@ class UserSubscription(models.Model):
     currency =   models.CharField(max_length=255, null=True, blank=True, default='SGD')
     user_plan = models.JSONField(null=True, blank=True, default=dict)
 
-
+    started_at = models.DateTimeField(null=True, blank=True, default=None)
     expired_at = models.DateTimeField(null=True, blank=True, default=None)
 
     dealer = models.ForeignKey("self", on_delete=models.SET_NULL, null=True, related_name="subscribers")

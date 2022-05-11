@@ -25,10 +25,10 @@ class SubscriptionPlan:
         currency = "USD"
         language = "en"
         plans = {
-            "trial" :{"text": "Free Trial", "price":{"monthly":0}},
-            "lite" : {"text": "Lite", "price":{"monthly":10,"quarterly":30}},
-            "standard" : {"text": "Standard", "price":{"monthly":30,"quarterly":90}},
-            "premium" : {"text": "Premium", "price":{"monthly":60,"quarterly":180}},
+            "trial" :{"text": "Free Trial", "price":{"month":0}},
+            "lite" : {"text": "Lite", "price":{"quarter":30,"year":108}},
+            "standard" : {"text": "Standard", "price":{"quarter":90,"year":324}},
+            "premium" : {"text": "Premium", "price":{"quarter":180,"year":648}},
         }
         
     class PH(CountryPlan):
@@ -37,10 +37,10 @@ class SubscriptionPlan:
         currency = "USD"
         language = "en"
         plans = {
-            "trial" :{"text": "Free Trial", "price":{"monthly":0}},
-            "lite" : {"text": "Lite", "price":{"monthly":10,"quarterly":30}},
-            "standard" : {"text": "Standard", "price":{"monthly":30,"quarterly":90}},
-            "premium" : {"text": "Premium", "price":{"monthly":60,"quarterly":180}},
+            "trial" :{"text": "Free Trial", "price":{"month":0}},
+            "lite" : {"text": "Lite", "price":{"quarter":30,"year":108}},
+            "standard" : {"text": "Standard", "price":{"quarter":90,"year":324}},
+            "premium" : {"text": "Premium", "price":{"quarter":180,"year":648}},
         }
     
     class TH(CountryPlan):
@@ -49,10 +49,10 @@ class SubscriptionPlan:
         currency = "USD"
         language = "en"
         plans = {
-            "trial" :{"text": "Free Trial", "price":{"monthly":0}},
-            "lite" : {"text": "Lite", "price":{"monthly":10,"quarterly":30}},
-            "standard" : {"text": "Standard", "price":{"monthly":25,"quarterly":75}},
-            "premium" : {"text": "Premium", "price":{"monthly":42,"quarterly":126}},
+            "trial" :{"text": "Free Trial", "price":{"month":0}},
+            "lite" : {"text": "Lite", "price":{"quarter":30,"year":108}},
+            "standard" : {"text": "Standard", "price":{"quarter":75,"year":270}},
+            "premium" : {"text": "Premium", "price":{"quarter":126,"year":454}},
         }
 
     class IN(CountryPlan):
@@ -61,11 +61,12 @@ class SubscriptionPlan:
         currency = "USD"
         language = "en"
         plans = {
-            "trial" :{"text": "Free Trial", "price":{"monthly":0}},
-            "lite" : {"text": "Lite", "price":{"monthly":10,"quarterly":30}},
-            "standard" : {"text": "Standard", "price":{"monthly":25,"quarterly":75}},
-            "premium" : {"text": "Premium", "price":{"monthly":42,"quarterly":126}},
+            "trial" :{"text": "Free Trial", "price":{"month":0}},
+            "lite" : {"text": "Lite", "price":{"quarter":30,"year":108}},
+            "standard" : {"text": "Standard", "price":{"quarter":75,"year":270}},
+            "premium" : {"text": "Premium", "price":{"quarter":126,"year":454}},
         }
+
         
 
     class ID(CountryPlan):
@@ -74,10 +75,10 @@ class SubscriptionPlan:
         currency = "USD"
         language = "id"
         plans = {
-            "trial" :{"text": "Free Trial", "price":{"monthly":0}},
-            "lite" : {"text": "Lite", "price":{"monthly":10,"quarterly":30}},
-            "standard" : {"text": "Standard", "price":{"monthly":30,"quarterly":90}},
-            "premium" : {"text": "Premium", "price":{"monthly":60,"quarterly":180}},
+            "trial" :{"text": "Free Trial", "price":{"month":0}},
+            "lite" : {"text": "Lite", "price":{"quarter":30,"year":108}},
+            "standard" : {"text": "Standard", "price":{"quarter":90,"year":324}},
+            "premium" : {"text": "Premium", "price":{"quarter":180,"year":648}},
         }
     
     class MY(CountryPlan):
@@ -86,10 +87,10 @@ class SubscriptionPlan:
         currency = "USD"
         language = "en"
         plans = {
-            "trial" :{"text": "Free Trial", "price":{"monthly":0}},
-            "lite" : {"text": "Lite", "price":{"monthly":10,"quarterly":30}},
-            "standard" : {"text": "Standard", "price":{"monthly":30,"quarterly":90}},
-            "premium" : {"text": "Premium", "price":{"monthly":60,"quarterly":180}},
+            "trial" :{"text": "Free Trial", "price":{"month":0}},
+            "lite" : {"text": "Lite", "price":{"quarter":30,"year":108}},
+            "standard" : {"text": "Standard", "price":{"quarter":90,"year":324}},
+            "premium" : {"text": "Premium", "price":{"quarter":180,"year":648}},
         }
 
     class VN(CountryPlan):
@@ -98,10 +99,10 @@ class SubscriptionPlan:
         currency = "USD"
         language = "en"
         plans = {
-            "trial" :{"text": "Free Trial", "price":{"monthly":0}},
-            "lite" : {"text": "Lite", "price":{"monthly":10,"quarterly":30}},
-            "standard" : {"text": "Standard", "price":{"monthly":18,"quarterly":54}},
-            "premium" : {"text": "Premium", "price":{"monthly":40,"quarterly":120}},
+            "trial" :{"text": "Free Trial", "price":{"month":0}},
+            "lite" : {"text": "Lite", "price":{"quarter":30,"year":108}},
+            "standard" : {"text": "Standard", "price":{"quarter":54,"year":194}},
+            "premium" : {"text": "Premium", "price":{"quarter":120,"year":432}},
         }
 
     class TW(CountryPlan):
@@ -110,23 +111,12 @@ class SubscriptionPlan:
         currency = "TWD"
         language = "zh_hant"
         plans = {
-            "trial" :{"text": "Free Trial", "price":{"monthly":0}},
-            "lite" : {"text": "Lite", "price":{"monthly":300,"quarterly":900}},
-            "standard" : {"text": "Standard", "price":{"monthly":600,"quarterly":1800}},
-            "premium" : {"text": "Premium", "price":{"monthly":900,"quarterly":2700}},
+            "trial" :{"text": "Free Trial", "price":{"month":0}},
+            "lite" : {"text": "Lite", "price":{"quarter":900,"year":3240}},
+            "standard" : {"text": "Standard", "price":{"quarter":1800,"year":6480}},
+            "premium" : {"text": "Premium", "price":{"quarter":2700,"year":9720}},
         }
-
-    class CH(CountryPlan):
-        promo_code="ALGOTECH"
-        promo_discount_rate=0.9
-        currency = "USD"
-        language = "zh_hans"
-        plans = {
-            "trial" :{"text": "Free Trial", "price":{"monthly":0}},
-            "lite" : {"text": "Lite", "price":{"monthly":10,"quarterly":30}},
-            "standard" : {"text": "Standard", "price":{"monthly":30,"quarterly":90}},
-            "premium" : {"text": "Premium", "price":{"monthly":60,"quarterly":180}},
-        }
+   
 
     class KH(CountryPlan):
         promo_code="ALGOTECH"
@@ -134,8 +124,8 @@ class SubscriptionPlan:
         currency = "USD"
         language = "en"
         plans = {
-            "trial" :{"text": "Free Trial", "price":{"monthly":0}},
-            "lite" : {"text": "Lite", "price":{"monthly":10,"quarterly":30}},
-            "standard" : {"text": "Standard", "price":{"monthly":18,"quarterly":54}},
-            "premium" : {"text": "Premium", "price":{"monthly":40,"quarterly":120}},
+            "trial" :{"text": "Free Trial", "price":{"month":0}},
+            "lite" : {"text": "Lite", "price":{"quarter":30,"year":108}},
+            "standard" : {"text": "Standard", "price":{"quarter":54,"year":194}},
+            "premium" : {"text": "Premium", "price":{"quarter":120,"year":432}},
         }
