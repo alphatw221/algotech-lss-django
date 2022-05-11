@@ -174,7 +174,8 @@ class CampaignLuckyDrawProcessor:
             winner_list = new_winner_list
 
 
-        except Exception:
+        except Exception as e:
+            print(e)
             winner_list = []
 
         return campaign_lucky_draw.create_campaign_lucky_draw(
