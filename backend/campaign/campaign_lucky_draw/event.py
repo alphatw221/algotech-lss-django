@@ -244,13 +244,12 @@ class DrawFromCampaignLikesEvent(ABC):
                         # for winner_data in winner_datas:
                         #     img_url = winner_data['facebook_info']['picture']
                         candidate_set.add(
-                            ('facebook', person['id'], person['name'])
+                            ('facebook', person['id'], person['name'], person['pic_large'])
                         )
                 try:
                     after = response[1]['paging']['cursors']['after']
                 except Exception:
                     break
-
             #TODO remove campaign itself
         if self.unrepeat == 'True':
             candidate_set = get_final_set(candidate_set, winner_set, self.winner_num)

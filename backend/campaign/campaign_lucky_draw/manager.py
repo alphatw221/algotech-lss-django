@@ -157,9 +157,7 @@ class CampaignLuckyDrawProcessor:
                 db.api_campaign_comment.find_one({'customer_id': winner[1], 'campaign_id': self.campaign.id})[
                     'image']
             elif condition_type == 'lucky_draw_campaign_likes':
-                img_url = \
-                db.api_user.find_one({'facebook_info.id': winner[1], 'type': 'customer'})['facebook_info'][
-                    'picture']
+                img_url = winner[3]
             elif condition_type == 'lucky_draw_cart_products':
                 img_url = db.api_pre_order.find_one({'customer_id': winner[1], 'campaign_id': self.campaign.id})[
                     'customer_img']
