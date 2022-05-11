@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from api.models.facebook.facebook_page import FacebookPage, FacebookPageSerializer
 from api.models.youtube.youtube_channel import YoutubeChannel, YoutubeChannelSerializer
-from datetime import datetime
+from datetime import datetime, timedelta
 from api.utils.common.common import getdata
 from api.utils.error_handle.error.api_error import ApiCallerError
 from backend.api.facebook.page import api_fb_get_page_picture, api_fb_get_page_business_profile
@@ -30,9 +30,11 @@ from api.utils.error_handle.error_handler.api_error_handler import api_error_han
 from api.utils.common.common import getparams
 from backend.api.instagram.profile import api_ig_get_profile_info
 from backend.api.youtube.channel import api_youtube_get_list_channel_by_token
-import requests
+import requests, stripe, pytz
 from django.conf import settings
-from backend.pymongo.mongodb import db
+import business_policy
+from api import rule
+
 
 
 class UserSubscriptionPagination(PageNumberPagination):
@@ -686,7 +688,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         
         return Response(api_user_user_subscription.currency, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['GET'], url_path=r'get_buyer_list', permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['GET'], url_path=r'buyer/list', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def get_buyer_list(self, request, pk=None):
         api_user = Verify.get_seller_user(request)    
@@ -695,7 +697,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         buyer_list = get_user_subscription_buyer_list(api_user_user_subscription.id)
         return Response(buyer_list, status=status.HTTP_200_OK)
     
-    @action(detail=False, methods=['GET'], url_path=r'get_seller_information', permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['GET'], url_path=r'me', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def get_seller_information(self, request, pk=None):
         api_user = Verify.get_seller_user(request)    
@@ -704,10 +706,62 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         buyer_information = {
             'plan': api_user_user_subscription.type,
             'name': api_user_user_subscription.name,
-            'phone': db.api_user.find_one({'user_subscription_id': api_user_user_subscription.id}).get('phone'),
-            'email': db.api_user.find_one({'user_subscription_id': api_user_user_subscription.id}).get('email'),
+            'phone': api_user.phone,
+            'email': api_user.email,
             'period': api_user_user_subscription.expired_at.strftime("%Y/%m/%d, %H:%M:%S")
         }
         return Response(buyer_information, status=status.HTTP_200_OK)
-
     
+        
+    @action(detail=False, methods=['POST'], url_path=r'upgrade/intent/(?P<country_code>[^/.]+)')
+    @api_error_handler
+    def upgrade_intent(self, request, country_code):
+        email, plan, period = getdata(request, ("email", "plan", "period"), required=True)
+
+        country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(country_code)
+        subscription_plan = country_plan.get_plan(plan)
+
+        kwargs = {'email':email, 'plan':plan, 'period':period, 'country_plan':country_plan, 'subscription_plan':subscription_plan}
+        kwargs = rule.rule_checker.user_subscription_rule_checker.UpgradeIntentDataRuleChecker.check(**kwargs)
+
+        email = kwargs.get('email')
+        amount = kwargs.get('amount')
+
+        stripe.api_key = settings.STRIPE_API_KEY  
+        try:
+            intent = stripe.PaymentIntent.create( amount=int(amount*100), currency=country_plan.currency, receipt_email = email)
+        except Exception:
+            raise ApiCallerError("invalid email")
+
+        return Response({
+            "client_secret":intent.client_secret,
+            "payment_amount":amount,
+            "user_plan":plan
+        }, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['POST'], url_path=r'upgrade/(?P<country_code>[^/.]+)')
+    @api_error_handler
+    def upgrade(self, request, country_code):
+        email, password, plan, period, intentSecret, promoCode, timezone = getdata(request,("email", "password", "plan", "period", "intentSecret", "promoCode", "timezone"), required=False)
+
+        payment_intent_id = intentSecret[:27]
+        stripe.api_key = settings.STRIPE_API_KEY
+        paymentIntent = stripe.PaymentIntent.retrieve(payment_intent_id)
+
+        kwargs = {'paymentIntent':paymentIntent,'email':email,'plan':plan,'period':period, 'promoCode':promoCode}
+        kwargs = rule.rule_checker.user_rule_checker.RegistrationPaymentCompleteChecker.check(**kwargs)
+
+        try:
+            country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(country_code)
+            subscription_plan = country_plan.get_plan(plan)
+
+            kwargs.update({'country_plan':country_plan, 'subscription_plan':subscription_plan})
+            kwargs = rule.rule_checker.user_rule_checker.RegistrationRequireRefundChecker.check(kwargs)
+        except Exception:
+            #TODO refund
+            print('require refund')
+            raise ApiVerifyError('data invalid')
+
+        email = kwargs.get('email')
+        now = datetime.now(pytz.timezone(timezone)) if timezone in pytz.common_timezones else datetime.now()
+        expired_at = now + timedelta(days=30) if period == "monthly" else now+timedelta(days=90)
