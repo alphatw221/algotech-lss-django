@@ -15,19 +15,18 @@ from backend.pymongo.mongodb import db
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 
 
-def verify_request(api_user, platform_name, platform_id, campaign_id, prize_campaign_product_id,
+def verify_request(api_user, campaign_id, prize_campaign_product_id,
                    campaign_product_id=None):
-    Verify.verify_user(api_user)
-    platform = Verify.get_platform(api_user, platform_name, platform_id)
-    campaign = Verify.get_campaign_from_platform(platform, campaign_id)
+    user_subscription =  Verify.get_user_subscription_from_api_user(api_user)
+    campaign = Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
     prize_campaign_product = Verify.get_campaign_product_from_campaign(campaign, prize_campaign_product_id)
 
     if campaign_product_id:
         campaign_product_id = Verify.get_campaign_product_from_campaign(
             campaign, campaign_product_id)
-        return platform, campaign, prize_campaign_product, campaign_product_id
+        return campaign, prize_campaign_product, campaign_product_id
 
-    return platform, campaign, prize_campaign_product
+    return campaign, prize_campaign_product
 
 
 def verify_user(api_user, platform_name, platform_id):
@@ -99,13 +98,15 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
         )
         num_of_winner = int(num_of_winner)
 
-        _, campaign, prize_campaign_product = verify_request(
-            api_user, platform_name, platform_id, campaign_id, prize_campaign_product_id)
+        campaign, prize_campaign_product = verify_request(
+            api_user, campaign_id, prize_campaign_product_id)
 
         lucky_draw = CampaignLuckyDrawManager.process(
             campaign, DrawFromCampaignLikesEvent(
                 campaign, unrepeat, num_of_winner), prize_campaign_product, num_of_winner,
         )
+        print(lucky_draw)
+        print(lucky_draw.winner_list)
         response_json = get_winner_json(lucky_draw.winner_list)
 
         return Response(response_json, status=status.HTTP_200_OK)
@@ -120,8 +121,8 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
         )
         num_of_winner = int(num_of_winner)
 
-        _, campaign, prize_campaign_product = verify_request(
-            api_user, platform_name, platform_id, campaign_id, prize_campaign_product_id)
+        campaign, prize_campaign_product = verify_request(
+            api_user, campaign_id, prize_campaign_product_id)
 
         lucky_draw = CampaignLuckyDrawManager.process(
             campaign, DrawFromCampaignCommentsEvent(
@@ -140,8 +141,8 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
         )
         num_of_winner = int(num_of_winner)
 
-        _, campaign, prize_campaign_product, campaign_product = verify_request(
-            api_user, platform_name, platform_id, campaign_id, prize_campaign_product_id,
+        campaign, prize_campaign_product, campaign_product = verify_request(
+            api_user, campaign_id, prize_campaign_product_id,
             campaign_product_id=campaign_product_id)
 
         lucky_draw = CampaignLuckyDrawManager.process(
@@ -161,8 +162,8 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
         )
         num_of_winner = int(num_of_winner)
 
-        _, campaign, prize_campaign_product, campaign_product = verify_request(
-            api_user, platform_name, platform_id, campaign_id, prize_campaign_product_id,
+        campaign, prize_campaign_product, campaign_product = verify_request(
+            api_user, campaign_id, prize_campaign_product_id,
             campaign_product_id=campaign_product_id)
 
         lucky_draw = CampaignLuckyDrawManager.process(
