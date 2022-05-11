@@ -12,6 +12,15 @@ class CampaignComment(models.Model):
         db_table = 'api_campaign_comment'
 
     id = models.IntegerField(primary_key=True, unique=False)  
+    platform=models.CharField(max_length=255, null=True, blank=True)
+    campaign=models.ForeignKey(
+        Campaign, null=True, on_delete=models.SET_NULL, related_name='comments')
+    message=models.CharField(max_length=255, null=True, blank=True)
+    created_time=models.FloatField(null=True, blank=True, default=0)
+    customer_id=models.CharField(max_length=255, null=True, blank=True)
+    customer_name=models.CharField(max_length=255, null=True, blank=True)
+    image=models.CharField(max_length=255, null=True, blank=True)
+    categories=models.JSONField(default=list, null=True, blank=True)
 
 class CampaignCommentSerializer(serializers.ModelSerializer):
     class Meta:
@@ -26,3 +35,5 @@ class CampaignCommentAdmin(admin.ModelAdmin):
     model = CampaignComment
     list_display = [field.name for field in CampaignComment._meta.fields]
     search_fields = [field.name for field in CampaignComment._meta.fields]
+
+api_campaign_comment_template={f.get_attname():f.get_default() if f.has_default() else None for f in CampaignComment._meta.fields}
