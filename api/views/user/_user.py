@@ -30,10 +30,13 @@ def facebook_login_helper(request, user_type='user'):
     if status_code / 100 != 2:
         raise ApiVerifyError("facebook user token invalid")
         
-    facebook_id = response['id']
-    facebook_name = response['name']
-    facebook_picture = response['picture']['data']['url']
-    email = response['email']
+    facebook_id = response.get('id')
+    facebook_name = response.get('name')
+    facebook_picture = response.get('picture',{}).get('data',{}).get('url')
+    email = response.get('email')
+
+    if not email:
+        raise ApiVerifyError("can't get email from facebook")
 
     api_user_exists = User.objects.filter(
         email=email, type=user_type).exists()

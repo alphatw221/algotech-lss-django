@@ -54,6 +54,7 @@ import hashlib
 from api import rule
 import service
 import business_policy
+import lib
 
 platform_info_dict={'facebook':'facebook_info', 'youtube':'youtube_info', 'instagram':'instagram_info', 'google':'google_info'}
 
@@ -649,8 +650,8 @@ class UserViewSet(viewsets.ModelViewSet):
     @api_error_handler
     def validate_register_data(self, request, country_code):
 
-        email, plan, period = getdata(request, ("email", "plan", "period"), required=True)
-        promoCode, = getdata(request, ("promoCode",), required=False)
+        email, plan, period = lib.util.getter.getdata(request, ("email", "plan", "period"), required=True)
+        promoCode, = lib.util.getter.getdata(request, ("promoCode",), required=False)
 
         country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(country_code)
         subscription_plan = country_plan.get_plan(plan)
@@ -670,7 +671,8 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response({
             "client_secret":intent.client_secret,
             "payment_amount":amount,
-            "user_plan":plan
+            "user_plan":plan,
+            "currency":country_plan.currency
         }, status=status.HTTP_200_OK)
 
 
@@ -678,8 +680,8 @@ class UserViewSet(viewsets.ModelViewSet):
     @api_error_handler
     def user_register(self, request, country_code):
 
-        email, password, plan, period, intentSecret = getdata(request,("email", "password", "plan", "period", "intentSecret"),required=True)
-        firstName, lastName, contactNumber, country , promoCode, timezone = getdata(request, ("firstName", "lastName", "contactNumber", "country", "promoCode", "timezone"), required=False)
+        email, password, plan, period, intentSecret = lib.util.getter.getdata(request,("email", "password", "plan", "period", "intentSecret"),required=True)
+        firstName, lastName, contactNumber, country, promoCode, timezone = lib.util.getter.getdata(request, ("firstName", "lastName", "contactNumber", "country", "promoCode", "timezone"), required=False)
 
         payment_intent_id = intentSecret[:27]
         stripe.api_key = settings.STRIPE_API_KEY
@@ -701,7 +703,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
         email = kwargs.get('email')
         now = datetime.now(pytz.timezone(timezone)) if timezone in pytz.common_timezones else datetime.now()
-        expired_at = now+timedelta(days=30) if period == "monthly" else now+timedelta(days=60)
+        expired_at = now+timedelta(days=90) if period == "quarter" else now+timedelta(days=365)
         
         auth_user = AuthUser.objects.create_user(
             username=f'{firstName} {lastName}', email=email, password=password)
@@ -709,7 +711,7 @@ class UserViewSet(viewsets.ModelViewSet):
         user_subscription = UserSubscription.objects.create(
             name=f'{firstName} {lastName}', 
             status='valid', 
-            #TODO started_at = now
+            started_at=now,
             expired_at=expired_at, 
             user_plan= {"activated_platform" : ["facebook","youtube","instagram"]}, 
             meta_country={ 'activated_country': [country_code] },
@@ -732,12 +734,13 @@ class UserViewSet(viewsets.ModelViewSet):
         }
 
         service.sendinblue.contact.create(email=email,first_name=firstName, last_name=lastName)
-        service.hubspot.contact.create(email=email, first_name=firstName, last_name=lastName,
-            properties={
-                'subscription_type':plan,
-                'subscription_status':"new",
-                'country':country_code,
-                'expiry_date':int(expired_at.replace(hour=0,minute=0,second=0,microsecond=0).timestamp()*1000)}
+        service.hubspot.contact.create(email=email, 
+            first_name=firstName, 
+            last_name=lastName,
+            subscription_type=plan, 
+            subscription_status="new",
+            country=country_code,
+            expiry_date=int(expired_at.replace(hour=0,minute=0,second=0,microsecond=0).timestamp()*1000)
         )
         
         service.sendinblue.transaction_email.AccountActivationEmail(firstName, plan, email, password, to=[email], cc=[settings.NOTIFICATION_EMAIL], country=country).send()
