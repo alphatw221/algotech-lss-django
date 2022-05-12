@@ -3,6 +3,7 @@ import numpy as np
 
 
 def classify_comment_v1(texts, threshold=0.7):
+    return []
     try:
         categories = np.array(['neutro', 'payment', 'delivery'])
 
