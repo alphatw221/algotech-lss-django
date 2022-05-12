@@ -28,7 +28,7 @@ DATABASES = {
     }
 }
 # Live Show Seller info
-WEB_SERVER_URL = "https://liveshowseller.pagekite.com"
+WEB_SERVER_URL = "https://liveshowseller.pagekite.me/algotech_lss/public"
 
 SHOPPING_CART_URL = f"{WEB_SERVER_URL}/buyer/login_to_cart"
 
