@@ -25,3 +25,13 @@ class AccountActivationEmail(TransactionEmail):
             "email":email,
             "password":password
         }
+
+class WelcomeEmail(TransactionEmail):
+    template_module = template.login
+    template_name = "WELCOME"
+
+    def __init__(self, first_name, to=None, cc=None, country=""):
+        super().__init__(to, cc, country)
+        self.params = {
+            "first_name":first_name
+        }
