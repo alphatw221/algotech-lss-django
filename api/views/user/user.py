@@ -271,63 +271,9 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['POST'], url_path=r'customer_google_login')
     @api_error_handler
     def customer_google_login(self, request):
-        user_type='buyer'
-        token = request.data.get('token')
-        identity_info = id_token.verify_oauth2_token(token, google_requests.Request(), settings.GOOGLE_OAUTH_CLIENT_ID_FOR_LIVESHOWSELLER)
 
-        google_id, google_name, google_picture, email = identity_info["sub"], identity_info["name"], identity_info["picture"], identity_info["email"]
-
-        api_user_exists = User.objects.filter(
-            email=email, type=user_type).exists()
-        auth_user_exists = AuthUser.objects.filter(email=email).exists()
-
-        scenario1 = api_user_exists and auth_user_exists
-        scenario2 = api_user_exists and not auth_user_exists
-        scenario3 = not api_user_exists and auth_user_exists
-
-        # scenario4: both don't exists
-
-        if scenario1:
-            api_user = User.objects.get(email=email, type=user_type)
-            auth_user = AuthUser.objects.get(email=email)
-            if not api_user.auth_user:
-                api_user.auth_user=auth_user
-        elif scenario2:
-            api_user = User.objects.get(email=email, type=user_type)
-            auth_user = AuthUser.objects.create_user(
-                google_name, email, ''.join(random.choice(string.ascii_letters+string.digits) for _ in range(8)))
-            api_user.auth_user = auth_user
-        elif scenario3:
-            auth_user = AuthUser.objects.get(email=email)
-            api_user = User.objects.create(
-                name=google_name, email=email, type=user_type, status='new', auth_user=auth_user)
-        else:  # scenario4
-            auth_user = AuthUser.objects.create_user(
-                google_name, email, ''.join(random.choice(string.ascii_letters+string.digits) for _ in range(8)))
-            api_user = User.objects.create(
-                name=google_name, email=email, type=user_type, status='new', auth_user=auth_user)
-
-        if user_type == 'user' and api_user.status != 'valid':
-            raise ApiVerifyError('account not activated')
-
-        api_user.google_info["id"] = google_id
-        api_user.google_info["name"] = google_name
-        api_user.google_info["picture"] = google_picture
-
-
-        auth_user.last_login = datetime.now()
-        auth_user.save()
-        api_user.save()
-
-
-        refresh = CustomTokenObtainPairSerializer.get_token(auth_user)
-
-        ret = {
-            'refresh': str(refresh),
-            'access': str(refresh.access_token),
-        }
-
-        return ret
+        token = lib.helper.login_helper.GoogleLogin.get_token(token=request.data.get('token'),user_type='customer')
+        return Response(token, status=status.HTTP_200_OK)
         
     @action(detail=False, methods=['GET'], url_path=r'google_customer_login_callback')
     @api_error_handler
@@ -346,88 +292,9 @@ class UserViewSet(viewsets.ModelViewSet):
     #google
     @action(detail=False, methods=['POST'], url_path=r'user_google_login')
     @api_error_handler
-    def user_google_login(self, request, pk=None):
-        user_type='user'
-        google_user_code = request.data.get('code')
-        response = requests.post(
-                url="https://accounts.google.com/o/oauth2/token",
-                data={
-                    "code": google_user_code,
-                    "client_id": settings.GOOGLE_OAUTH_CLIENT_ID_FOR_LIVESHOWSELLER,
-                    "client_secret": settings.GOOGLE_OAUTH_CLIENT_SECRET_FOR_LIVESHOWSELLER,
-                    # "redirect_uri": 'http://localhost:8000/google-redirect',
-                    "redirect_uri": settings.WEB_SERVER_URL + "/google-redirect",
-                    "grant_type": "authorization_code"
-                }
-            )
-
-        if not response.status_code / 100 == 2:
-            print(response.json())
-            raise ApiCallerError('get google token fail')
-
-        access_token = response.json().get("access_token")
-        refresh_token = response.json().get("refresh_token")
-
-        code, response = api_google_get_userinfo(access_token)
-
-        if code / 100 != 2:
-            print(response)
-            raise ApiCallerError("google user token invalid")
-
-        google_id, google_name, google_picture, email = response["id"], response["name"], response["picture"], response["email"]
-
-        api_user_exists = User.objects.filter(
-            email=email, type=user_type).exists()
-        auth_user_exists = AuthUser.objects.filter(email=email).exists()
-
-        scenario1 = api_user_exists and auth_user_exists
-        scenario2 = api_user_exists and not auth_user_exists
-        scenario3 = not api_user_exists and auth_user_exists
-
-        # scenario4: both don't exists
-
-        if scenario1:
-            api_user = User.objects.get(email=email, type=user_type)
-            auth_user = AuthUser.objects.get(email=email)
-            if not api_user.auth_user:
-                api_user.auth_user=auth_user
-        elif scenario2:
-            api_user = User.objects.get(email=email, type=user_type)
-            auth_user = AuthUser.objects.create_user(
-                google_name, email, ''.join(random.choice(string.ascii_letters+string.digits) for _ in range(8)))
-            api_user.auth_user = auth_user
-        elif scenario3:
-            auth_user = AuthUser.objects.get(email=email)
-            api_user = User.objects.create(
-                name=google_name, email=email, type=user_type, status='new', auth_user=auth_user)
-        else:  # scenario4
-            auth_user = AuthUser.objects.create_user(
-                google_name, email, ''.join(random.choice(string.ascii_letters+string.digits) for _ in range(8)))
-            api_user = User.objects.create(
-                name=google_name, email=email, type=user_type, status='new', auth_user=auth_user)
-
-        if user_type == 'user' and api_user.status != 'valid':
-            raise ApiVerifyError('account not activated')
-
-        api_user.google_info["access_token"] = access_token
-        api_user.google_info['refresh_token'] = refresh_token
-        api_user.google_info["id"] = google_id
-        api_user.google_info["name"] = google_name
-        api_user.google_info["picture"] = google_picture
-
-        auth_user.last_login = datetime.now()
-        auth_user.save()
-        api_user.save()
-
-        refresh = CustomTokenObtainPairSerializer.get_token(auth_user)
-
-        ret = {
-            'refresh': str(refresh),
-            'access': str(refresh.access_token),
-        }
-
-        return Response(ret, status=status.HTTP_200_OK)
-
+    def user_google_login(self, request):
+        token = lib.helper.login_helper.GoogleLogin.get_token(code = request.data.get('code'),user_type='user')
+        return Response(token, status=status.HTTP_200_OK)
 
 
     @action(detail=False, methods=['GET'], url_path=r'google_authorize')
@@ -753,6 +620,8 @@ class UserViewSet(viewsets.ModelViewSet):
         email, password = getdata(request, ("email","password"), required=True)
         
         token = lib.helper.login_helper.GeneralLogin.get_token(email, password)
+        if not token:
+            Response({"message": "email or password incorrect"}, status=status.HTTP_401_UNAUTHORIZED)
         return Response(token, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET'], url_path=r'seller/account', permission_classes=(IsAuthenticated,))
