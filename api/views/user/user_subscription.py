@@ -713,19 +713,19 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         }
         return Response(buyer_information, status=status.HTTP_200_OK)
     
-    @action(detail=False, methods=['GET'], url_path=r'get_user_plan_information', permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['GET'], url_path=r'plan', permission_classes=(IsAuthenticated,))
     @api_error_handler
-    def get_user_plan_information(self, request, pk=None):
+    def plan_information(self, request, pk=None):
         api_user = Verify.get_seller_user(request)    
         api_user_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
 
-        user_plan_information = {
+        plan_information = {
             'plan': api_user_user_subscription.type,
             'id': api_user_user_subscription.id,
             'join_time': api_user_user_subscription.created_at.strftime("%Y/%m/%d, %H:%M:%S"),
             'period': api_user_user_subscription.expired_at.strftime("%Y/%m/%d, %H:%M:%S")
         }
-        return Response(user_plan_information, status=status.HTTP_200_OK)
+        return Response(plan_information, status=status.HTTP_200_OK)
         
     @action(detail=False, methods=['POST'], url_path=r'upgrade/intent/(?P<country_code>[^/.]+)')
     @api_error_handler
