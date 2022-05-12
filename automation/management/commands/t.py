@@ -47,7 +47,7 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.test_hubspot()
+        self.test_nlp()
 
     def modify_database(self):
         from api.models.user.user_subscription import UserSubscription
@@ -229,7 +229,7 @@ class Command(BaseCommand):
 
         import service
 
-        print(service.nlp.classification.classify_comment_v1('test test'))
+        print(service.nlp.classification.classify_comment_v1([['test test']]))
     
     def test_mongo_aggr(self):
         from pprint import pprint 
