@@ -1,5 +1,5 @@
 import os
-from ... import config
+import config
 import django
 try:
     os.environ['DJANGO_SETTINGS_MODULE'] = config.DJANGO_SETTINGS  # for rq_job
