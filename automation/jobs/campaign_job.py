@@ -24,7 +24,8 @@ from backend.api.youtube.viedo import api_youtube_get_video_info_with_access_tok
 from api.utils.error_handle.error_handler.campaign_job_error_handler import campaign_job_error_handler
 from api.utils.error_handle.error_handler.capture_platform_error_handler import capture_platform_error_handler
 import traceback
-from backend.api.nlp.classify import classify_comment_v1
+# from backend.api.nlp.classify import classify_comment_v1
+import service
 class OrderCodesMappingSingleton:
 
     order_codes_mapping = None
@@ -122,7 +123,7 @@ def capture_facebook(campaign):
                 "customer_id": comment['from']['id'],
                 "customer_name": comment['from']['name'],
                 "image": comment['from']['picture']['data']['url'],
-                "categories":classify_comment_v1(texts=[[comment['message']]],threshold=0.8)
+                "categories":service.nlp.classification.classify_comment_v1(texts=[[comment['message']]],threshold=0.9)
                 }
             db.api_campaign_comment.insert_one(uni_format_comment)
             comment_queue.enqueue(comment_job, args=(campaign, 'facebook', facebook_page,
@@ -260,7 +261,7 @@ def capture_youtube(campaign):
                 "customer_name": comment['authorDetails']['displayName'],
                 "image": comment['authorDetails']['profileImageUrl'],
                 "live_chat_id": live_chat_id,
-                "categories":classify_comment_v1(texts=[[comment['snippet']['displayMessage']]],threshold=0.8)
+                "categories":service.nlp.classification.classify_comment_v1(texts=[[comment['snippet']['displayMessage']]],threshold=0.9)
             }
             db.api_campaign_comment.insert_one(uni_format_comment)
 
@@ -373,7 +374,7 @@ def capture_instagram(campaign):
                 "customer_id": from_info[1]['from']['username'],   #
                 "customer_name": from_info[1]['from']['username'],  #
                 "image": img_url,
-                "categories":classify_comment_v1(texts=[[comment['text']]],threshold=0.8)
+                "categories":service.nlp.classification.classify_comment_v1(texts=[[comment['text']]],threshold=0.9)
                 }   #
             db.api_campaign_comment.insert_one(uni_format_comment)
             comment_queue.enqueue(comment_job, args=(campaign, 'instagram', instagram_profile,
@@ -464,7 +465,7 @@ def capture_youtube_video(campaign, youtube_channel):
                 "customer_id": comment['snippet']['topLevelComment']['snippet']['authorChannelId']['value'],
                 "customer_name": comment['snippet']['topLevelComment']['snippet']['authorDisplayName'],
                 "image": comment['snippet']['topLevelComment']['snippet']['authorProfileImageUrl'],
-                "categories":classify_comment_v1(texts=[[comment['snippet']['topLevelComment']['snippet']['textDisplay']]],threshold=0.8)
+                "categories":service.nlp.classification.classify_comment_v1(texts=[[comment['snippet']['topLevelComment']['snippet']['textDisplay']]],threshold=0.9)
             }
             db.api_campaign_comment.insert_one(uni_format_comment)
 

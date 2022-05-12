@@ -9,10 +9,10 @@ def classify_comment_v1(texts, threshold=0.9):
         data = {
             "instances": texts
         }
-        code, response = TextClassifierApiCaller("v1/models/lss_comment_classification_v1:predict", data=data).post()
-
+        code, response = TextClassifierApiCaller("v1/models/lss_comment_classification:predict", data=data).post()
+       
         if code != 200:
-            return None
+            return []
 
         predictions = np.array(response.get("predictions"))
         max_index = np.argmax(predictions, axis=1) + 1

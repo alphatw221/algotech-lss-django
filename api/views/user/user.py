@@ -262,16 +262,15 @@ class UserViewSet(viewsets.ModelViewSet):
     #facebook
     @action(detail=False, methods=['POST'], url_path=r'customer_login')
     @api_error_handler
-    def customer_login(self, request, pk=None):
-        return facebook_login_helper(request, user_type='customer')
-
-    
+    def customer_login(self, request):
+        token = lib.helper.login_helper.FacebookLogin.get_token(request.data.get('accessToken'),user_type='customer')
+        return Response(token, status=status.HTTP_200_OK)
 
     
     #google
     @action(detail=False, methods=['POST'], url_path=r'customer_google_login')
     @api_error_handler
-    def customer_google_login(self, request, pk=None):
+    def customer_google_login(self, request):
         user_type='buyer'
         token = request.data.get('token')
         identity_info = id_token.verify_oauth2_token(token, google_requests.Request(), settings.GOOGLE_OAUTH_CLIENT_ID_FOR_LIVESHOWSELLER)
@@ -340,8 +339,9 @@ class UserViewSet(viewsets.ModelViewSet):
     #facebook
     @action(detail=False, methods=['POST'], url_path=r'user_login')
     @api_error_handler
-    def user_login(self, request, pk=None):
-        return facebook_login_helper(request, user_type='user')
+    def user_login(self, request):
+        token = lib.helper.login_helper.FacebookLogin.get_token(request.data.get('accessToken'),user_type='user')
+        return Response(token, status=status.HTTP_200_OK)
 
     #google
     @action(detail=False, methods=['POST'], url_path=r'user_google_login')
@@ -732,7 +732,7 @@ class UserViewSet(viewsets.ModelViewSet):
             "Subscription End Date":expired_at.strftime("%d %B %Y %H:%M"),
             "Receipt":paymentIntent.charges.get('data')[0].get('receipt_url')
         }
-
+ 
         service.sendinblue.contact.create(email=email,first_name=firstName, last_name=lastName)
         service.hubspot.contact.create(email=email, 
             first_name=firstName, 
@@ -752,21 +752,8 @@ class UserViewSet(viewsets.ModelViewSet):
     def general_login(self, request):
         email, password = getdata(request, ("email","password"), required=True)
         
-        if not AuthUser.objects.filter(email=email).exists():
-            return Response({"message": "email or password incorrect"}, status=status.HTTP_401_UNAUTHORIZED)
-
-        auth_user = AuthUser.objects.get(email=email)
-
-        if not auth_user.check_password(password):
-            return Response({"message": "email or password incorrect"}, status=status.HTTP_401_UNAUTHORIZED)
-
-        refresh = CustomTokenObtainPairSerializer.get_token(auth_user)
-
-        ret = {
-            'refresh': str(refresh),
-            'access': str(refresh.access_token),
-        }
-        return Response(ret, status=status.HTTP_200_OK)
+        token = lib.helper.login_helper.GeneralLogin.get_token(email, password)
+        return Response(token, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET'], url_path=r'seller/account', permission_classes=(IsAuthenticated,))
     @api_error_handler

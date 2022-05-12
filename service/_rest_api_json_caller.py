@@ -28,13 +28,17 @@ class RestApiJsonCaller:
     def get(self):
         return self.__request_template(requests.get,
                                        headers=self.headers,
-                                       params=self.params,)
+                                       params=self.params,
+                                       timeout=5
+                                       )
 
     def post(self):
         return self.__request_template(requests.post,
                                        headers=self.headers,
                                        params=self.params,
-                                       json=self.data,)
+                                       json=self.data,
+                                       timeout=5
+                                       )
 
     def _process_response(self, response):
         if response.status_code // 100 == 2:
