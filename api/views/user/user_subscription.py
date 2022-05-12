@@ -713,26 +713,28 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         }
         return Response(buyer_information, status=status.HTTP_200_OK)
     
-    @action(detail=False, methods=['GET'], url_path=r'get_user_plan_information', permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['GET'], url_path=r'plan', permission_classes=(IsAuthenticated,))
     @api_error_handler
-    def get_user_plan_information(self, request, pk=None):
+    def plan_information(self, request, pk=None):
         api_user = Verify.get_seller_user(request)    
         api_user_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
 
-        user_plan_information = {
+        plan_information = {
             'plan': api_user_user_subscription.type,
             'id': api_user_user_subscription.id,
-            'join_time': api_user_user_subscription.created_at.strftime("%Y/%m/%d, %H:%M:%S"),
-            'period': api_user_user_subscription.expired_at.strftime("%Y/%m/%d, %H:%M:%S")
+            'join_time': api_user_user_subscription.created_at.strftime("%d %b %Y, %H:%M"),
+            'period': api_user_user_subscription.expired_at.strftime("%d %b %Y, %H:%M")
         }
-        return Response(user_plan_information, status=status.HTTP_200_OK)
+        return Response(plan_information, status=status.HTTP_200_OK)
         
-    @action(detail=False, methods=['POST'], url_path=r'upgrade/intent/(?P<country_code>[^/.]+)')
+    @action(detail=False, methods=['POST'], url_path=r'upgrade/intent')
     @api_error_handler
-    def upgrade_intent(self, request, country_code):
+    def upgrade_intent(self, request):
         email, plan, period = lib.util.getter.getdata(request, ("email", "plan", "period"), required=True)
+        api_user = Verify.get_seller_user(request)    
+        api_user_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
 
-        country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(country_code)
+        country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(api_user_user_subscription.meta_country.get('activated_country')[0])
         subscription_plan = country_plan.get_plan(plan)
 
         kwargs = {'email':email, 'plan':plan, 'period':period, 'country_plan':country_plan, 'subscription_plan':subscription_plan}
@@ -753,10 +755,12 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             "user_plan":plan
         }, status=status.HTTP_200_OK)
     
-    @action(detail=False, methods=['POST'], url_path=r'upgrade/(?P<country_code>[^/.]+)')
+    @action(detail=False, methods=['POST'], url_path=r'upgrade')
     @api_error_handler
-    def upgrade(self, request, country_code):
+    def upgrade(self, request):
         email, password, plan, period, intentSecret, promoCode, timezone = lib.util.getter.getdata(request,("email", "password", "plan", "period", "intentSecret", "promoCode", "timezone"), required=False)
+        api_user = Verify.get_seller_user(request)    
+        api_user_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
 
         payment_intent_id = intentSecret[:27]
         stripe.api_key = settings.STRIPE_API_KEY
@@ -766,7 +770,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         kwargs = rule.rule_checker.user_rule_checker.RegistrationPaymentCompleteChecker.check(**kwargs)
 
         try:
-            country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(country_code)
+            country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(api_user_user_subscription.meta_country.get('activated_country')[0])
             subscription_plan = country_plan.get_plan(plan)
 
             kwargs.update({'country_plan':country_plan, 'subscription_plan':subscription_plan})
@@ -785,7 +789,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             expired_at=expired_at, 
             started_at=now, 
             user_plan= {"activated_platform" : ["facebook","youtube","instagram"]}, 
-            meta_country={ 'activated_country': [country_code] },
+            meta_country={ 'activated_country': [api_user_user_subscription.meta_country.get('activated_country')[0]] },
             meta = {"stripe payment intent":intentSecret}
         )
         

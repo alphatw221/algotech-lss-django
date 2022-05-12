@@ -599,7 +599,7 @@ class UserViewSet(viewsets.ModelViewSet):
             "Subscription End Date":expired_at.strftime("%d %B %Y %H:%M"),
             "Receipt":paymentIntent.charges.get('data')[0].get('receipt_url')
         }
-
+ 
         service.sendinblue.contact.create(email=email,first_name=firstName, last_name=lastName)
         service.hubspot.contact.create(email=email, 
             first_name=firstName, 
