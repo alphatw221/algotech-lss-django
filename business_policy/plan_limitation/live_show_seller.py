@@ -1,4 +1,5 @@
 trial = {
+    'campaign_limit':5,
     'max_concurrent_live': 2,
     'channel_limit': 1,
     'products_limit': 10,
