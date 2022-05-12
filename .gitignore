@@ -8,6 +8,6 @@ __pycache__
 .pytest_cache
 .venv
 .test.py
-/lss/wsgi.py
 .idea
 .vs
+config.py
