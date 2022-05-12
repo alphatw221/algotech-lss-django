@@ -722,8 +722,8 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         user_plan_information = {
             'plan': api_user_user_subscription.type,
             'id': api_user_user_subscription.id,
-            'join_time': api_user_user_subscription.created_at.strftime("%Y/%m/%d, %H:%M:%S"),
-            'period': api_user_user_subscription.expired_at.strftime("%Y/%m/%d, %H:%M:%S")
+            'join_time': api_user_user_subscription.created_at.strftime("%d %b %Y, %H:%M"),
+            'period': api_user_user_subscription.expired_at.strftime("%d %b %Y, %H:%M")
         }
         return Response(user_plan_information, status=status.HTTP_200_OK)
         
