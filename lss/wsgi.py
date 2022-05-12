@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/3.2/howto/deployment/wsgi/
 
 
 import os
-from .. import config
+import config
 #------add thoes line if server with apache--------
 import sys
 sys.path.append(config.POETRY_ENVIRONMENT)
