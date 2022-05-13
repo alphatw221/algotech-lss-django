@@ -5,7 +5,7 @@ class ResetPasswordLinkEmail(TransactionEmail):
     template_module = template.password
     template_name = "RESET_PASSWORD_LINK"
 
-    def __init__(self, url, code, username, to=None, cc=None, country=""):
+    def __init__(self, url, code, username, to=None, cc=None, country="", lang=""):
         super().__init__(to, cc, country)
         self.params = {
             "url":url,
@@ -17,8 +17,8 @@ class AccountActivationEmail(TransactionEmail):
     template_module = template.registration
     template_name = "ACTIVATION"
 
-    def __init__(self, first_name, plan, email, password, to=None, cc=None, country=""):
-        super().__init__(to, cc, country)
+    def __init__(self, first_name, plan, email, password, to=None, cc=None, country="", lang=""):
+        super().__init__(to, cc, country, lang)
         self.params = {
             "first_name":first_name,
             "plan":plan,
@@ -30,8 +30,8 @@ class WelcomeEmail(TransactionEmail):
     template_module = template.login
     template_name = "WELCOME"
 
-    def __init__(self, first_name, to=None, cc=None, country=""):
-        super().__init__(to, cc, country)
+    def __init__(self, first_name, to=None, cc=None, country="", lang=""):
+        super().__init__(to, cc, country, lang)
         self.params = {
             "first_name":first_name
         }

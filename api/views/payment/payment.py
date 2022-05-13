@@ -30,7 +30,7 @@ from business_policy.payment import PaymentMeta
 from mail.sender.sender import *
 
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
-from api.utils.error_handle.error.api_error import ApiVerifyError
+from api.utils.error_handle.error.api_error import ApiCallerError, ApiVerifyError
 
 import hmac, hashlib, base64, binascii
 from backend.i18n.payment_comfirm_mail import i18n_get_mail_content, i18n_get_mail_subject
@@ -383,7 +383,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         print (code, ret)
 
         if code != 201:
-            raise Exception('hitpay got wrong')
+            raise ApiCallerError('hitpay got wrong, please make sure credentials is valid')
         #TODO record payment not replace   
 
         return Response(ret['url'])

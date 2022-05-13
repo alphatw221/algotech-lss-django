@@ -52,12 +52,14 @@ class HubspotViewSet(viewsets.GenericViewSet):
             lang=country_plan.language  
             )
         
-        models.user.user.User.objects.create(name=f'{first_name} {last_name}', 
+        api_user = models.user.user.User.objects.create(name=f'{first_name} {last_name}', 
             email=email, type='user', 
             status='valid', 
             phone=country_code+phone, 
             auth_user=auth_user, 
             user_subscription=user_subscription)
+
+        lib.util.marking_tool.NewUserMark.mark(api_user, save = True)
         
         service.hubspot.contact.update(vid,expiry_date=int(expired_at.replace(hour=0,minute=0,second=0,microsecond=0).timestamp()*1000))
         service.sendinblue.contact.create(email=email,first_name=first_name, last_name=last_name)

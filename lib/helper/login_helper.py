@@ -1,9 +1,6 @@
 from django.contrib.auth.models import User as AuthUser
 from django.conf import settings
 
-from rest_framework.response import Response
-from rest_framework import status
-
 from api import models
 from api.utils.error_handle.error.api_error import ApiCallerError, ApiVerifyError
 
@@ -11,6 +8,7 @@ from lss.views.custom_jwt import CustomTokenObtainPairSerializer
 from backend.api.facebook.user import api_fb_get_me_login
 from backend.api.google.user import api_google_get_userinfo
 
+import lib
 from datetime import datetime
 import random
 import string
@@ -27,6 +25,9 @@ class GeneralLogin():
             return
 
         auth_user = AuthUser.objects.get(email=email)
+        
+        if auth_user.api_users.filter(type='user').exists():
+            lib.util.marking_tool.NewUserMark.check_mark(auth_user.api_users.get(type='user'))
 
         if not auth_user.check_password(password):
             return
