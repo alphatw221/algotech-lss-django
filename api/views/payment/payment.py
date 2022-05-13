@@ -1,3 +1,4 @@
+import imp
 import urllib
 
 import stripe, base64
@@ -12,6 +13,7 @@ from django.contrib.auth.models import User
 from django.core.files.storage import default_storage
 from rest_framework.parsers import MultiPartParser, FormParser
 from api.models.order.pre_order import PreOrder, PreOrderSerializerUpdatePaymentShipping
+from api.models.campaign.campaign import Campaign
 
 from api.utils.common.common import getdata, getparams
 from api.models.order.order import Order
@@ -684,7 +686,19 @@ class PaymentViewSet(viewsets.GenericViewSet):
             request.data['shipping_date'] = datetime.date(int(date_list[0]), int(date_list[1]), int(date_list[2]))
         except:
             pass
-        pre_order=PreOrder.objects.get(id=pk)
+        pre_order = PreOrder.objects.get(id=pk)
+        meta_logistic = Campaign.objects.get(id=pre_order.campaign_id).meta_logistic
+        
+        ## 判斷賣家設定之運費條件
+        if request.data['shipping_option']:
+            addition_delivery_index = meta_logistic['additional_delivery_charge_title'].index(request.data['shipping_option'])
+            if meta_logistic['additional_delivery_charge_type'][addition_delivery_index] == '+':
+                request.data['total'] = request.data['total'] + int(meta_logistic['additional_delivery_charge_price'][addition_delivery_index]) + int(meta_logistic['delivery_charge'])
+            elif meta_logistic['additional_delivery_charge_type'][addition_delivery_index] == '=':
+                request.data['total'] = request.data['total'] + int(meta_logistic['additional_delivery_charge_price'][addition_delivery_index])
+        if pre_order.subtotal >= int(meta_logistic.get('free_delivery_for_order_above_price')) or len(pre_order.products) >= int(meta_logistic.get('free_delivery_for_how_many_order_minimum')):
+           request.data['total'] = pre_order.subtotal
+
         serializer = PreOrderSerializerUpdatePaymentShipping(pre_order, data=request.data, partial=True)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
