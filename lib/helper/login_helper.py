@@ -26,8 +26,9 @@ class GeneralLogin():
 
         auth_user = AuthUser.objects.get(email=email)
         
+
         if auth_user.api_users.filter(type='user').exists():
-            lib.util.marking_tool.NewUserMark.check_mark(auth_user.api_users.get(type='user'))
+            lib.util.marking_tool.NewUserMark.check_mark(auth_user.api_users.get(type='user'), save=True)
 
         if not auth_user.check_password(password):
             return
@@ -91,6 +92,7 @@ class FacebookLogin():
         api_user.facebook_info["id"] = facebook_id
         api_user.facebook_info["name"] = facebook_name
         api_user.facebook_info["picture"] = facebook_picture
+        lib.util.marking_tool.NewUserMark.check_mark(api_user)
         api_user.save()
 
         auth_user.last_login = datetime.now()
@@ -180,7 +182,7 @@ class GoogleLogin():
         api_user.google_info["id"] = google_id
         api_user.google_info["name"] = google_name
         api_user.google_info["picture"] = google_picture
-
+        lib.util.marking_tool.NewUserMark.check_mark(api_user)
         auth_user.last_login = datetime.now()
         auth_user.save()
         api_user.save()
