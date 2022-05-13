@@ -36,7 +36,7 @@ class Command(BaseCommand):
             job, job_status = service.rq.job.get_job_status(campaign.id)
             rows.append([campaign.id, job_status])
             if job_status == 'queued':
-                count = service.redis.redis.get(campaign.id)
+                count = service.redis.redis.get_count()(campaign.id)
                 if count >5:
                     job.delete()
                     service.redis.redis.delete(campaign.id)
