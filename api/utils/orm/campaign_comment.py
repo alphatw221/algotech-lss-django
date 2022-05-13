@@ -47,13 +47,21 @@ def get_campaign_comments(campaign: Campaign, status: int = None,
         return []
 
 
-def get_keyword_campaign_comments(campaign: Campaign, keyword: str,
-                                  limit: int = 1000):
+def get_keyword_campaign_comments(campaign: Campaign, keyword: str, limit: int = 1000):
     try:
         return CampaignComment.objects.filter(
             campaign=campaign,
             message=keyword,
             # message__contains=keyword,
+        ).values('customer_id', 'customer_name', 'platform', 'image').annotate(count=Count('customer_id')).order_by('pk')[:limit]
+    except Exception:
+        return []
+    
+def get_campaign_comments_who_likes(campaign: Campaign, list_of_customers_who_likes: list, limit: int = 1000):
+    try:
+        return CampaignComment.objects.filter(
+            campaign=campaign,
+            customer_name__in=list_of_customers_who_likes
         ).values('customer_id', 'customer_name', 'platform', 'image').annotate(count=Count('customer_id')).order_by('pk')[:limit]
     except Exception:
         return []

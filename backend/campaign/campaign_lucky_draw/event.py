@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-
+from api.models.order import order
+from api.models.order.pre_order import PreOrder
 from django.db.models.fields import BooleanField
+from stripe import Order
 from api.models import campaign
 
 from api.models.campaign.campaign import Campaign
@@ -42,7 +44,8 @@ class CampaignLuckyDrawEvent(ABC):
 class DrawFromProductsEvent(CampaignLuckyDrawEvent):
     campaign: Campaign
     campaign_product: CampaignProduct
-    unrepeat: str
+    prize_campaign_product: CampaignProduct
+    repeat: bool
     winner_num: int
 
     def get_source_id(self):
@@ -63,12 +66,13 @@ class DrawFromProductsEvent(CampaignLuckyDrawEvent):
         #     ('order_code', 'cart'),
         #     ('valid',)
         # )
-        order_datas = db.api_order.find({'campaign_id': self.campaign.id})
-        pre_order_datas = db.api_pre_order.find({'campaign_id': self.campaign.id})
-
-        winner_set = set()
-        if self.unrepeat == 'True':
-            winner_set = get_winner_set(self.campaign.id)
+        
+        # order_datas = db.api_order.find({'campaign_id': self.campaign.id})
+        order_datas = order.Order.objects.filter(campaign=self.campaign)
+        # pre_order_datas = db.api_pre_order.find({'campaign_id': self.campaign.id})
+        pre_order_datas = PreOrder.objects.filter(campaign=self.campaign)
+        winner_set = get_winner_set(self.campaign.id)
+    
         
         page_id = ''
         if self.campaign.facebook_page_id:
@@ -76,27 +80,29 @@ class DrawFromProductsEvent(CampaignLuckyDrawEvent):
 
         candidate_set = set()
         for order_data in order_datas:
-            if order_data['customer_id'] == page_id:
+            if order_data.customer_id == page_id:
                 continue
-            else:
+            if (not self.repeat) and (order_data.customer_id in winner_set):
+                continue
                 # winner_datas, img_url = db.api_pre_order.find({'customer_id': order_data['customer_id'], 'campaign_id': self.campaign.id}), ''
                 # for winner_data in winner_datas:
                 #     img_url = winner_data['customer_img']
-                candidate_set.add(
-                    (order_data['platform'], order_data['customer_id'], order_data['customer_name'])
-                )
+            candidate_set.add(
+                (order_data.platform, order_data.customer_id, order_data.customer_name, order_data.customer_img)
+            )
         for order_data in pre_order_datas:
-            if order_data['customer_id'] == page_id:
+            if order_data.customer_id == page_id:
                 continue
-            else:
+            if (not self.repeat) and (order_data.customer_id in winner_set):
+                continue
                 # winner_datas, img_url = db.api_pre_order.find({'customer_id': order_data['customer_id'], 'campaign_id': self.campaign.id}), ''
                 # for winner_data in winner_datas:
                 #     img_url = winner_data['customer_img']
-                candidate_set.add(
-                    (order_data['platform'], order_data['customer_id'], order_data['customer_name'])
-                )
-        if self.unrepeat == 'True':
-            candidate_set = get_final_set(candidate_set, winner_set, self.winner_num)
+            candidate_set.add(
+                (order_data.platform, order_data.customer_id, order_data.customer_name, order_data.customer_img)
+            )
+        # if not self.repeat:
+        #     candidate_set = get_final_set(candidate_set, winner_set, self.winner_num)
         
         return candidate_set
 
@@ -105,7 +111,8 @@ class DrawFromProductsEvent(CampaignLuckyDrawEvent):
 class DrawFromCartProductsEvent(CampaignLuckyDrawEvent):
     campaign: Campaign
     campaign_product: CampaignProduct
-    unrepeat: str
+    prize_campaign_product: CampaignProduct
+    repeat: bool
     winner_num: int
 
     def get_source_id(self):
@@ -122,9 +129,10 @@ class DrawFromCartProductsEvent(CampaignLuckyDrawEvent):
 
     def get_candidate_set(self):
         order_products = OrderProduct.objects.filter(campaign=self.campaign, campaign_product=self.campaign_product)
-        winner_set = set()
-        if self.unrepeat == 'True':
-            winner_set = get_winner_set(self.campaign.id)
+        winner_set = get_winner_set(self.campaign.id)
+        # if not self.repeat:
+        #     order_products = order_products.exclude(campaign_product=self.prize_campaign_product)
+            # winner_set = get_winner_set(self.campaign.id)
         
         page_id = ''
         if self.campaign.facebook_page_id:
@@ -134,16 +142,18 @@ class DrawFromCartProductsEvent(CampaignLuckyDrawEvent):
         for order_product in order_products:
             if order_product.customer_id == page_id:
                 continue
-            else:
+            if (not self.repeat) and (order_product.customer_id in winner_set):
+                continue
                 # winner_datas, img_url = db.api_pre_order.find({'customer_id': order_product.customer_id, 'campaign_id': self.campaign.id}), ''
                 # for winner_data in winner_datas:
                 #     img_url = winner_data['customer_img']
-                candidate_set.add(
-                    (order_product.platform, order_product.customer_id, order_product.customer_name)
-                )
+            img_url = db.api_pre_order.find_one({'customer_id':order_product.customer_id, 'campaign_id': self.campaign.id})['customer_img']
+            candidate_set.add(
+                (order_product.platform, order_product.customer_id, order_product.customer_name, img_url)
+            )
         
-        if self.unrepeat == 'True':
-            candidate_set = get_final_set(candidate_set, winner_set, self.winner_num)
+        # if not self.repeat:
+        #     candidate_set = get_final_set(candidate_set, winner_set, self.winner_num)
             
         return candidate_set
 
@@ -151,8 +161,9 @@ class DrawFromCartProductsEvent(CampaignLuckyDrawEvent):
 @dataclass
 class DrawFromCampaignCommentsEvent(ABC):
     campaign: Campaign
+    prize_campaign_product: CampaignProduct
     keyword: str
-    unrepeat: str
+    repeat: bool
     winner_num: int
 
     def get_source_id(self):
@@ -168,13 +179,8 @@ class DrawFromCampaignCommentsEvent(ABC):
         return 'lucky_draw_campaign_comments'
 
     def get_candidate_set(self):
-        campaign_comments = orm_campaign_comment.get_keyword_campaign_comments(
-            self.campaign, self.keyword,
-        )
-        winner_set = set()
-        if self.unrepeat == 'True':
-            winner_set = get_winner_set(self.campaign.id)
-        
+        campaign_comments = orm_campaign_comment.get_keyword_campaign_comments(self.campaign, self.keyword)
+        winner_set = get_winner_set(self.campaign.id)
         page_id = ''
         if self.campaign.facebook_page_id:
             page_id = db.api_facebook_page.find_one({'id': self.campaign.facebook_page_id})['page_id']
@@ -183,17 +189,14 @@ class DrawFromCampaignCommentsEvent(ABC):
         for campaign_comment in campaign_comments:
             if (campaign_comment['customer_id'] == page_id):
                 continue
-            else:
-                #TODO 回傳label到candidate set建完後 再依照label取img
-                # winner_datas, img_url = db.api_campaign_comment.find({'customer_id': campaign_comment['customer_id'], 'campaign_id': self.campaign.id}), ''
-                # for winner_data in winner_datas:
-                #     img_url = winner_data['image']
-                candidate_set.add(
-                    (campaign_comment['platform'], campaign_comment['customer_id'], campaign_comment['customer_name'], campaign_comment['image'])
-                )
+            if (not self.repeat) and (campaign_comment['customer_id'] in winner_set):
+                continue
+            candidate_set.add(
+                (campaign_comment['platform'], campaign_comment['customer_id'], campaign_comment['customer_name'], campaign_comment['image'])
+            )
         
-        if self.unrepeat == 'True':
-            candidate_set = get_final_set(candidate_set, winner_set, self.winner_num)
+        # if not self.repeat:
+        #     candidate_set = get_final_set(candidate_set, winner_set, self.winner_num)
 
         return candidate_set
 
@@ -201,7 +204,8 @@ class DrawFromCampaignCommentsEvent(ABC):
 @dataclass
 class DrawFromCampaignLikesEvent(ABC):
     campaign: Campaign
-    unrepeat: str
+    prize_campaign_product: CampaignProduct
+    repeat: bool
     winner_num: int
 
     def get_source_id(self):
@@ -217,42 +221,48 @@ class DrawFromCampaignLikesEvent(ABC):
         return 'lucky_draw_campaign_likes'
 
     def get_candidate_set(self):
+        print("campaign", self.campaign)
+        print("repeat", self.repeat)
+        print("winner_num", self.winner_num)
+        print("prize_campaign_product", self.prize_campaign_product)
+
         candidate_set = set()
-
-        winner_set = set()
-        if self.unrepeat == 'True':
-            winner_set = get_winner_set(self.campaign.id)
-
+        likes_user_list = []
+        winner_set = get_winner_set(self.campaign.id)
+        print("winner_set", winner_set)
+        
+        page_id = ''
+        if self.campaign.facebook_page_id:
+            page_id = db.api_facebook_page.find_one({'id': self.campaign.facebook_page_id})['page_id']
+            
         if self.campaign.facebook_campaign and (post_id := self.campaign.facebook_campaign.get('post_id')) and \
                 self.campaign.facebook_page and (token := self.campaign.facebook_page.token):
             after = None
-
-            page_id = ''
-            # remove facebook campaign itself
-            if self.campaign.facebook_page_id:
-                page_id = db.api_facebook_page.find_one({'id': self.campaign.facebook_page_id})['page_id']
             
             while True:
                 response = api_fb_get_post_likes(token, post_id, after=after)
-                for person in response[1]['data']:
-                    if (person['id'] == page_id):
-                        continue
-                    else:
-                        #TODO 回傳label到candidate set建完後 再依照label取img
-                        # winner_datas, img_url = db.api_user.find({'facebook_info.id': person['id'], 'type': 'customer'}), ''
-                        # for winner_data in winner_datas:
-                        #     img_url = winner_data['facebook_info']['picture']
-                        candidate_set.add(
-                            ('facebook', person['id'], person['name'], person['pic_large'])
-                        )
+                user_list = [user['name'] for user in response[1]['data']]
+                likes_user_list += user_list
                 try:
                     after = response[1]['paging']['cursors']['after']
                 except Exception:
                     break
-            #TODO remove campaign itself
-        if self.unrepeat == 'True':
-            candidate_set = get_final_set(candidate_set, winner_set, self.winner_num)
-        
+        print("likes_user_list", likes_user_list)
+        campaign_comments = orm_campaign_comment.get_campaign_comments_who_likes(self.campaign, list(set(likes_user_list)))
+        print("campaign_comments", campaign_comments)
+        customer_id_list = []
+        for campaign_comment in campaign_comments:
+            print("customer_id", campaign_comment['customer_id'])
+            if (campaign_comment['customer_id'] == page_id):
+                continue
+            if (not self.repeat) and (campaign_comment['customer_id'] in winner_set):
+                continue
+            if campaign_comment['customer_id'] in customer_id_list:
+                continue
+            candidate_set.add(
+                (campaign_comment['platform'], campaign_comment['customer_id'], campaign_comment['customer_name'], campaign_comment['image'])
+            )
+            customer_id_list.append(campaign_comment['customer_id'])
         return candidate_set
 
 
@@ -281,3 +291,8 @@ def get_final_set(candidate_set, winner_set, winner_num):
 
     return candidate_set
     
+# def get_customer_id_having_prize_in_order_or_preorder(prize_campaign_product):
+#     return set(list(OrderProduct.objects.filter(campaign_product=prize_campaign_product).values_list('customer_id', flat=True)))
+
+# def get_customer_name_having_prize_in_order_or_preorder(prize_campaign_product):
+#     return set(list(OrderProduct.objects.filter(campaign_product=prize_campaign_product).values_list('customer_name', flat=True)))

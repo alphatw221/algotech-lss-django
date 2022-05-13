@@ -33,25 +33,23 @@ class CampaignLuckyDrawManager:
             campaign, event,
             prize_campaign_product, num_of_winner
         ).process()
-
+        print("lucky_draw.winner_list", lucky_draw.winner_list)
         # add lucky_draw_product add to cart
         # cart_product_requests = CampaignLuckyDrawManager._get_cart_product_requests(
         #     lucky_draw, campaign, prize_campaign_product)
         # cart_product_requests, response_result = CampaignLuckyDrawManager._handle_cart_product_requests(
         #     lucky_draw, event, cart_product_requests)
-
+        message = ''
+        error = None
         response_result = []
+        meta_winner_list = []
         if (len(lucky_draw.winner_list) == 0):
             return lucky_draw
         for winner in lucky_draw.winner_list:
-            # try:
-            # pre_order, created = PreOrder.objects.get_or_create(campaign=campaign, platform=winner[0], customer_id=winner[1], customer_name=winner[2])
-            pre_order = db.api_pre_order.find_one(
-                {'campaign_id': int(campaign.id), 'platform': winner[0], 'customer_id': winner[1],
-                    'customer_name': winner[2]})
-            if not pre_order:
-                increment_id = get_incremented_filed(
-                    collection_name="api_pre_order", field_name="id")
+            try:
+                pre_order = PreOrder.objects.get(campaign=campaign, platform=winner[0], customer_id=winner[1], customer_name=winner[2])
+            except:
+                print("create a new pre_oder")
                 platform_map = {
                     'facebook': campaign.facebook_page.id if campaign.facebook_page else None,
                     'youtube': campaign.youtube_channel.id if campaign.youtube_channel else None,
@@ -59,40 +57,53 @@ class CampaignLuckyDrawManager:
                 }
                 template = api_pre_order_template.copy()
                 template.update({
-                    'id': increment_id,
                     'customer_id': winner[1],
                     'customer_name': winner[2],
-                    'customer_img': '',
+                    'customer_img': winner[3],
                     'campaign_id': campaign.id,
+                    'currency': campaign.currency,
                     'platform': winner[0],
                     'platform_id': platform_map[winner[0]],
                     'created_at': datetime.utcnow()
                 })
-
-                try:
-                    _id = db.api_pre_order.insert_one(template).inserted_id
-                    pre_order = db.api_pre_order.find_one(_id)
-                    print("pre_order", pre_order)
-                except Exception as e:
-                    print(e)
-                    print('new pre_order error!!!!!')
-                    continue
-            else:
-                pre_order, created = PreOrder.objects.get_or_create(campaign=campaign, platform=winner[0],
-                                                                    customer_id=winner[1], customer_name=winner[2])
+                pre_order = PreOrder.objects.create(**template)
             print("pre_order", pre_order)
-            PreOrderHelper.add_product(None, pre_order=pre_order, campaign_product=prize_campaign_product, qty=1)
-            result = CampaignAnnouncer.announce_lucky_draw_winner(lucky_draw, winner[2])
-            response_result.append(result)
-            lucky_draw.meta['announcement_history'] = {
-                'time': pendulum.now('UTC'),
-                'response_result': response_result
-            }
-            lucky_draw.save()
-            # except Exception as e:
-            #     print(e)
+            try:
+                if prize_product := pre_order.products.get(str(prize_campaign_product.id), None):
+                    qty = prize_product['qty'] + 1
+                    order_product = pre_order.order_products.get(id=prize_product['order_product_id'])
+                    PreOrderHelper.update_product(None, pre_order=pre_order, order_product=order_product, qty=qty, lucky_draw_repeat=event.repeat)
+                else:
+                    PreOrderHelper.add_product(None, pre_order=pre_order, campaign_product=prize_campaign_product, qty=1)
+                meta_winner_list.append(winner)
+            except Exception as e:
+                error = str(e)
+                print(str(e))
+                if error == "out of stock":
+                    continue
+            try:
+                result = CampaignAnnouncer.announce_lucky_draw_winner(lucky_draw, winner[2])
+                response_result.append(result)
+                lucky_draw.meta['announcement_history'] = {
+                    'time': pendulum.now('UTC'),
+                    'response_result': response_result
+                }
+            except Exception as e:   
+                pass
+        if error == "out of stock":
+            message = f"{prize_campaign_product.name} is out of stock, only {len(meta_winner_list)} winners."
+        lucky_draw.winner_list = meta_winner_list
+        lucky_draw.save()
+        # update winner_list in
+        print("meta_winner_list", meta_winner_list) 
+        meta = db.api_campaign.find_one({'id': campaign.id})['meta']
+        meta['winner_list'] = meta.get('winner_list', []) + meta_winner_list
+        db.api_campaign.update(
+            {'id': campaign.id},
+            {'$set': {'meta': meta}}
+        )
 
-        return lucky_draw
+        return lucky_draw, message
 
     @staticmethod
     def _handle_cart_product_requests(lucky_draw: CampaignLuckyDraw, event: CampaignLuckyDrawEvent,
@@ -141,46 +152,9 @@ class CampaignLuckyDrawProcessor:
             if self.num_of_winner > len(candidate_set):
                 self.num_of_winner = len(candidate_set)
             winner_list = random.sample(candidate_set, self.num_of_winner)
-
-            # update winner_list in 
-            meta = db.api_campaign.find_one({'id': self.campaign.id})['meta']
-            meta_winner_list = meta.get('winner_list', [])
-            meta_winner_list = meta_winner_list + winner_list
-            meta['winner_list'] = meta_winner_list
-            db.api_campaign.update(
-                {'id': self.campaign.id},
-                {'$set': {'meta': meta}}
-            )
-
-            new_winner_list = []
-            for winner in winner_list:
-                winner_with_img = []
-                try:
-                    if condition_type == 'lucky_draw_campaign_comments':
-                        img_url = \
-                        db.api_campaign_comment.find_one({'customer_id': winner[1], 'campaign_id': self.campaign.id})[
-                            'image']
-                    elif condition_type == 'lucky_draw_campaign_likes':
-                        img_url = winner[3]
-                    elif condition_type == 'lucky_draw_cart_products':
-                        img_url = winner[3]
-                    elif condition_type == 'lucky_draw_products':
-                        img_url = db.api_pre_order.find({'customer_id': winner[1], 'campaign_id': self.campaign.id})[
-                            'customer_img']
-                except:
-                    img_url = ""
-
-                winner_with_img.append(winner[0])
-                winner_with_img.append(winner[1])
-                winner_with_img.append(winner[2])
-                winner_with_img.append(img_url)
-                new_winner_list.append(winner_with_img)
-
-            winner_list = new_winner_list
         except Exception as e:
             print(e)
             winner_list = []
-        print("888888")
         return campaign_lucky_draw.create_campaign_lucky_draw(
             campaign=self.campaign,
             prize_campaign_product=self.prize_campaign_product,

@@ -13,7 +13,6 @@ def create_campaign_lucky_draw(campaign: Campaign,
                                candidate_list: list,
                                winner_list: list):
     try:
-        print("999999999999")
         return CampaignLuckyDraw.objects.create(
             campaign=campaign,
             prize_campaign_product=prize_campaign_product,
