@@ -707,7 +707,9 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             'name': api_user_user_subscription.name,
             'phone': api_user.phone,
             'email': api_user.email,
-            'period': api_user_user_subscription.expired_at.strftime("%Y/%m/%d, %H:%M:%S")
+            'period': api_user_user_subscription.expired_at.strftime("%Y/%m/%d, %H:%M:%S"),
+            'country_code': api_user_user_subscription.meta_country.get('activated_country')[0],
+            'currency': api_user_user_subscription.currency
         }
         return Response(buyer_information, status=status.HTTP_200_OK)
         
