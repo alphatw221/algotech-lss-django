@@ -50,7 +50,10 @@ class NewUserMark(MetaMark):
             return
         
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
-        language = user_subscription.lang
-        service.sendinblue.transaction_email.WelcomeEmail(first_name=api_user.name,to=[api_user.email],cc=[settings.NOTIFICATION_EMAIL]).send()
+        service.sendinblue.transaction_email.WelcomeEmail(
+            first_name=api_user.name,
+            to=[api_user.email],
+            cc=[settings.NOTIFICATION_EMAIL],
+            lang=user_subscription.lang).send()
 
         cls._erase_mark(api_user)
