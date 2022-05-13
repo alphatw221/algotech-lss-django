@@ -384,18 +384,17 @@ CART_LOCK_INTERVAL = 180
 ORDER_REPORT_DOWNLOAD_INTERVAL = 180
 
 # redis server
+# REDIS_SERVER = {
+#     "host": "34.124.140.74",
+#     "port": "6379",
+#     "username": None,
+#     "password": r"algo83111T%%"}
+
 REDIS_SERVER = {
-    "host": "34.124.140.74",
+    "host": "127.0.0.1",
     "port": "6379",
     "username": None,
     "password": r"algo83111T%%"}
-
-# for social lab
-# REDIS_SERVER = {
-#     "host": "127.0.0.1",
-#     "port": "6379",
-#     "username": None,
-#     "password": r"1234"}
 
 
 # gcp load balancer
