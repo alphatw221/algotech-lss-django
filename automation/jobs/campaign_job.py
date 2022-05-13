@@ -245,7 +245,7 @@ def capture_youtube(campaign):
             comment_time_stamp = parser.parse(
                 comment['snippet']['publishedAt']).timestamp()
 
-            if comment['authorDetails']['channelId'] == youtube_campaign.get('channel_id'):
+            if comment['authorDetails']['channelId'] == youtube_channel.get('channel_id'):
                 continue
 
             if is_failed and comment_time_stamp > latest_comment_time:
