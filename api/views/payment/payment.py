@@ -702,7 +702,6 @@ class PaymentViewSet(viewsets.GenericViewSet):
             request.data['total'] = request.data['total'] + pre_order.adjust_price
         print (request.data['total'])
 
-        return
         serializer = PreOrderSerializerUpdatePaymentShipping(pre_order, data=request.data, partial=True)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
