@@ -29,3 +29,19 @@ class UserSubscriptionCheckRule():
         if campaigns_count >= plan_limitation.get('max_concurrent_live'):
             raise ApiVerifyError('You\'ve been reached maximum campaign.')
         
+    @staticmethod
+    def campaign_limit(**kwargs):
+        api_user = kwargs.get('api_user')
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        plan = user_subscription.type
+        campaigns = user_subscription.campaigns.filter(id__isnull=False)
+        
+        if settings.GCP_API_LOADBALANCER_URL == 'https://sb.liveshowseller.ph':
+            plan_limitation = getattr(business_limitation.social_lab, plan)
+        else:
+            plan_limitation = getattr(business_limitation.live_show_seller, plan)   
+        
+        if plan == "trial":
+            campaigns_count = campaigns.filter(created_at__gte=user_subscription.started_at).count()
+            if campaigns_count >= plan_limitation.get('campaign_limit'):
+                raise ApiVerifyError('You\'ve been reached maximum campaign.')

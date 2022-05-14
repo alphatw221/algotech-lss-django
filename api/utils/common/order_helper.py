@@ -23,7 +23,7 @@ class PreOrderHelper():
 
     @classmethod
     @pymongo_error_handler
-    def update_product(cls, api_user, pre_order, order_product, qty):
+    def update_product(cls, api_user, pre_order, order_product, qty, lucky_draw_repeat=False):
         with client.start_session() as session:
             with session.start_transaction():
                 api_pre_order = db.api_pre_order.find_one(
@@ -39,6 +39,7 @@ class PreOrderHelper():
                     'api_order_product':api_order_product,
                     'api_campaign_product':api_campaign_product,
                     'qty':qty,
+                    'lucky_draw_repeat': lucky_draw_repeat
                     })
 
                 qty = ret.get('qty')

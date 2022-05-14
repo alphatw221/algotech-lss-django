@@ -670,7 +670,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             'platform_id': pre_order.platform_id,
             'meta_logistic': campaign['meta_logistic'],
             'allow_checkout': campaign['meta'].get('allow_checkout', 1),
-            'currency': pre_order.currency
+            'currency': campaign['currency']
         }
 
         return Response(data_dict, status=status.HTTP_200_OK)
