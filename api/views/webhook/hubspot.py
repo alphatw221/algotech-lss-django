@@ -58,7 +58,7 @@ class HubspotViewSet(viewsets.GenericViewSet):
             phone=country_code+phone, 
             auth_user=auth_user, 
             user_subscription=user_subscription)
-
+        
         lib.util.marking_tool.NewUserMark.mark(api_user, save = True)
         
         service.hubspot.contact.update(vid,expiry_date=int(expired_at.replace(hour=0,minute=0,second=0,microsecond=0).timestamp()*1000))

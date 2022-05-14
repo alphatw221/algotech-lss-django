@@ -33,27 +33,32 @@ class MetaMark():
                 model.save()
         except Exception:
             pass
-        
+
     @abstractclassmethod
     def check_mark(cls):
-        raise NotImplementedError
+        pass
 
 
 class NewUserMark(MetaMark):
 
-    mark_key = ""
-    mark_value = ""
+    mark_key = "new_user"
+    mark_value = True
     
     @classmethod
-    def check_mark(cls, api_user):
-        if not cls._get_mark(api_user):
-            return
-        
-        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
-        service.sendinblue.transaction_email.WelcomeEmail(
-            first_name=api_user.name,
-            to=[api_user.email],
-            cc=[settings.NOTIFICATION_EMAIL],
-            lang=user_subscription.lang).send()
+    def check_mark(cls, api_user, save=False):
+        try:
+            if not cls._get_mark(api_user):
+                return
+            
+            user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+            # service.sendinblue.transaction_email.WelcomeEmail(
+            #     first_name=api_user.name,
+            #     to=[api_user.email],
+            #     cc=[settings.NOTIFICATION_EMAIL],
+            #     lang=user_subscription.lang).send()
+            print('first login')
 
-        cls._erase_mark(api_user)
+            cls._erase_mark(api_user, save = save)
+        except Exception as e:
+            pass
+        
