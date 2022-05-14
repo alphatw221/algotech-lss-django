@@ -693,17 +693,16 @@ class PaymentViewSet(viewsets.GenericViewSet):
         if request.data['shipping_option']:
             addition_delivery_index = meta_logistic['additional_delivery_charge_title'].index(request.data['shipping_option'])
             if meta_logistic['additional_delivery_charge_type'][addition_delivery_index] == '+':
-                request.data['total'] = request.data['total'] + int(meta_logistic['additional_delivery_charge_price'][addition_delivery_index]) + int(meta_logistic['delivery_charge'])
+                request.data['total'] = request.data['total'] + float(meta_logistic['additional_delivery_charge_price'][addition_delivery_index]) + float(meta_logistic['delivery_charge'])
             elif meta_logistic['additional_delivery_charge_type'][addition_delivery_index] == '=':
-                request.data['total'] = request.data['total'] + int(meta_logistic['additional_delivery_charge_price'][addition_delivery_index])
+                request.data['total'] = request.data['total'] + float(meta_logistic['additional_delivery_charge_price'][addition_delivery_index])
         
         free_delivery_for_order_above_price = meta_logistic.get('free_delivery_for_order_above_price') if meta_logistic.get('is_free_delivery_for_order_above_price') == 1 else 0
         free_delivery_for_how_many_order_minimum = meta_logistic.get('free_delivery_for_how_many_order_minimum') if meta_logistic.get('is_free_delivery_for_how_many_order_minimum') == 1 else 0
-        if pre_order.free_delivery == True or pre_order.subtotal >= int(free_delivery_for_order_above_price) or len(pre_order.products) >= int(free_delivery_for_how_many_order_minimum):
+        if pre_order.free_delivery == True or pre_order.subtotal >= float(free_delivery_for_order_above_price) or len(pre_order.products) >= float(free_delivery_for_how_many_order_minimum):
            request.data['total'] = pre_order.subtotal
         if pre_order.adjust_price != 0:
             request.data['total'] = request.data['total'] + pre_order.adjust_price
-        print (request.data['total'])
 
         serializer = PreOrderSerializerUpdatePaymentShipping(pre_order, data=request.data, partial=True)
         if not serializer.is_valid():
