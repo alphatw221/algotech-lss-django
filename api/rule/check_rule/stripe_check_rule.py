@@ -55,3 +55,22 @@ class StripeCheckRule():
         if promoCode and promoCode == country_plan.promo_code:
             amount = amount*country_plan.promo_discount_rate
             return {'amount':amount}
+
+    def is_upgrade_plan_valid(**kwargs):
+
+        upgrade_avaliable_dict={
+            'trial':['lite','standard','premium'],
+            'lite':['lite','standard','premium'],
+            'standard':['standard','premium'],
+            'premium':['premium']
+        }
+
+        api_user_subscription = kwargs.get('api_user_subscription')
+        plan = kwargs.get('plan')
+
+        upgrade_avaliable_list=upgrade_avaliable_dict.get(api_user_subscription.type)
+
+        if plan not in upgrade_avaliable_list:
+            raise ApiVerifyError('not valid upgrade plan')
+
+ 
