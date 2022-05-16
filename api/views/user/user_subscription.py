@@ -690,10 +690,10 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'], url_path=r'buyer/list', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def get_buyer_list(self, request, pk=None):
-        api_user = Verify.get_seller_user(request)    
+        api_user, search_column, keyword, page, page_size = getparams(request,('search_column', 'keyword', 'page', 'page_size'),with_user=True, seller=True)
         api_user_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
 
-        buyer_list = get_user_subscription_buyer_list(api_user_user_subscription.id)
+        buyer_list = get_user_subscription_buyer_list(api_user_user_subscription.id, search_column, keyword, int(page), int(page_size))
         return Response(buyer_list, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['GET'], url_path=r'me', permission_classes=(IsAuthenticated,))
@@ -767,14 +767,14 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         paymentIntent = stripe.PaymentIntent.retrieve(payment_intent_id)
 
         kwargs = {'paymentIntent':paymentIntent,'email':email,'plan':plan,'period':period, 'promoCode':promoCode}
-        kwargs = rule.rule_checker.user_rule_checker.RegistrationPaymentCompleteChecker.check(**kwargs)
+        kwargs = rule.rule_checker.user_subscription_rule_checker.UpgradePaymentCompleteChecker.check(**kwargs)
 
         try:
             country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(api_user_user_subscription.meta_country.get('activated_country')[0])
             subscription_plan = country_plan.get_plan(plan)
 
             kwargs.update({'country_plan':country_plan, 'subscription_plan':subscription_plan})
-            kwargs = rule.rule_checker.user_rule_checker.RegistrationRequireRefundChecker.check(kwargs)
+            kwargs = rule.rule_checker.user_subscription_rule_checker.UpgradeRequireRefundChecker.check(**kwargs)
         except Exception:
             #TODO refund
             print('require refund')
@@ -784,7 +784,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         now = datetime.now(pytz.timezone(timezone)) if timezone in pytz.common_timezones else datetime.now()
         expired_at = now+timedelta(days=90) if period == "quarter" else now+timedelta(days=365)
 
-        UserSubscription.objects.filter(email=email).update(
+        UserSubscription.objects.filter(id=api_user_user_subscription.id).update(
             type=plan, 
             expired_at=expired_at, 
             started_at=now, 
