@@ -732,9 +732,9 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
     def upgrade_intent(self, request):
         email, plan, period = lib.util.getter.getdata(request, ("email", "plan", "period"), required=True)
         api_user = Verify.get_seller_user(request)    
-        api_user_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        api_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
 
-        country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(api_user_user_subscription.meta_country.get('activated_country')[0])
+        country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(api_user_subscription.country)
         subscription_plan = country_plan.get_plan(plan)
 
         kwargs = {'email':email, 'plan':plan, 'period':period, 'country_plan':country_plan, 'subscription_plan':subscription_plan}
@@ -758,9 +758,10 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['POST'], url_path=r'upgrade')
     @api_error_handler
     def upgrade(self, request):
-        email, password, plan, period, intentSecret, promoCode, timezone = lib.util.getter.getdata(request,("email", "password", "plan", "period", "intentSecret", "promoCode", "timezone"), required=False)
+        email, password, plan, period, intentSecret, promoCode, timezone = \
+            lib.util.getter.getdata(request,("email", "password", "plan", "period", "intentSecret", "promoCode", "timezone"), required=False)
         api_user = Verify.get_seller_user(request)    
-        api_user_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        api_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
 
         payment_intent_id = intentSecret[:27]
         stripe.api_key = settings.STRIPE_API_KEY
@@ -770,26 +771,24 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         kwargs = rule.rule_checker.user_subscription_rule_checker.UpgradePaymentCompleteChecker.check(**kwargs)
 
         try:
-            country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(api_user_user_subscription.meta_country.get('activated_country')[0])
+            country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(api_user_subscription.country)
             subscription_plan = country_plan.get_plan(plan)
 
             kwargs.update({'country_plan':country_plan, 'subscription_plan':subscription_plan})
             kwargs = rule.rule_checker.user_subscription_rule_checker.UpgradeRequireRefundChecker.check(**kwargs)
         except Exception:
-            #TODO refund
-            print('require refund')
-            raise ApiVerifyError('data invalid')
+            raise ApiVerifyError('data invalid, please contact support team for refunding')
 
         email = kwargs.get('email')
         now = datetime.now(pytz.timezone(timezone)) if timezone in pytz.common_timezones else datetime.now()
         expired_at = now+timedelta(days=90) if period == "quarter" else now+timedelta(days=365)
 
-        UserSubscription.objects.filter(id=api_user_user_subscription.id).update(
+        api_user_subscription.update(
             type=plan, 
             expired_at=expired_at, 
             started_at=now, 
             user_plan= {"activated_platform" : ["facebook","youtube","instagram"]}, 
-            meta_country={ 'activated_country': [api_user_user_subscription.meta_country.get('activated_country')[0]] },
+            meta_country={ 'activated_country': [api_user_subscription.meta_country.get('activated_country')[0]] },
             meta = {"stripe payment intent":intentSecret}
         )
         

@@ -584,13 +584,15 @@ class UserViewSet(viewsets.ModelViewSet):
             meta_country={ 'activated_country': [country_code] },
             meta = {"stripe payment intent":intentSecret},
             type=plan,
-            lang=country_plan.language)
+            lang=country_plan.language,
+            country = country_code
+            )
         
         api_user = User.objects.create(
             name=f'{firstName} {lastName}', email=email, type='user', status='valid', phone=contactNumber, auth_user=auth_user, user_subscription=user_subscription)
         
         lib.util.marking_tool.NewUserMark.mark(api_user, save = True)
-        
+
         ret = {
             "Customer Name":f'{firstName} {lastName}',
             "Email":email,

@@ -1,5 +1,3 @@
-
-from more_itertools import last
 from ._hubspot import client
 from hubspot.crm.contacts import SimplePublicObjectInput, ApiException
 

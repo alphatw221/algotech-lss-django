@@ -52,6 +52,8 @@ class UserSubscription(models.Model):
 
     lang = models.CharField(max_length=255, blank=True,
                             choices=settings.LANGUAGES_CHOICES, default='en')
+    country = models.CharField(max_length=255, blank=True, default='SG', null=True)
+
     currency =   models.CharField(max_length=255, null=True, blank=True, default='SGD')
     user_plan = models.JSONField(null=True, blank=True, default=dict)
 

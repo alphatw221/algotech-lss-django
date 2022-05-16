@@ -4,11 +4,9 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from datetime import datetime
-from api.utils.error_handle.error_handler.pymongo_error_handler import pymongo_error_handler
 from backend.google_cloud_logging.google_cloud_logging import ApiLogEntry
 import functools, logging, traceback
 from django.core.exceptions import ObjectDoesNotExist
-from pymongo import errors as pymongo_errors
 logger = logging.getLogger(__name__)
 
 
