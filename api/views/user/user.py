@@ -586,8 +586,10 @@ class UserViewSet(viewsets.ModelViewSet):
             type=plan,
             lang=country_plan.language)
         
-        User.objects.create(
+        api_user = User.objects.create(
             name=f'{firstName} {lastName}', email=email, type='user', status='valid', phone=contactNumber, auth_user=auth_user, user_subscription=user_subscription)
+        
+        lib.util.marking_tool.NewUserMark.mark(api_user, save = True)
         
         ret = {
             "Customer Name":f'{firstName} {lastName}',

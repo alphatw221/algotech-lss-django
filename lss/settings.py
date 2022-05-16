@@ -390,12 +390,11 @@ REDIS_SERVER = {
     "username": None,
     "password": r"algo83111T%%"}
 
-# for social lab
 # REDIS_SERVER = {
 #     "host": "127.0.0.1",
 #     "port": "6379",
 #     "username": None,
-#     "password": r"1234"}
+#     "password": r"algo83111T%%"}
 
 
 # gcp load balancer

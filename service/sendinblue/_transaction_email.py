@@ -13,10 +13,11 @@ class TransactionEmail():
     template_module = None
     template_name = None
 
-    def __init__(self, to=[], cc=[], country="",template_id=None, params=None):
+    def __init__(self, to=[], cc=[], country="", lang="", template_id=None, params=None):
         self.to = to
         self.cc = cc
         self.country = country
+        self.lang = lang
         self.template_id = template_id
         self.params = params
 
@@ -37,6 +38,11 @@ class TransactionEmail():
     def _get_template_id(self):
         if self.template_id:
             return int(self.template_id)
-
-        template_name = f"{self.template_name}_{self.country}" if self.country else self.template_name
+        if self.country:
+            template_name = f"{self.template_name}_{self.country}"
+        elif self.lang:
+            template_name = f"{self.template_name}_{self.lang}"
+        else:
+            template_name = self.template_name
+            
         return getattr(self.template_module, template_name)
