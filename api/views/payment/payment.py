@@ -670,7 +670,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             'platform_id': pre_order.platform_id,
             'meta_logistic': campaign['meta_logistic'],
             'allow_checkout': campaign['meta'].get('allow_checkout', 1),
-            'currency': pre_order.currency
+            'currency': campaign['currency']
         }
 
         return Response(data_dict, status=status.HTTP_200_OK)
@@ -696,9 +696,13 @@ class PaymentViewSet(viewsets.GenericViewSet):
                 request.data['total'] = request.data['total'] + int(meta_logistic['additional_delivery_charge_price'][addition_delivery_index]) + int(meta_logistic['delivery_charge'])
             elif meta_logistic['additional_delivery_charge_type'][addition_delivery_index] == '=':
                 request.data['total'] = request.data['total'] + int(meta_logistic['additional_delivery_charge_price'][addition_delivery_index])
-        if pre_order.subtotal >= int(meta_logistic.get('free_delivery_for_order_above_price')) or len(pre_order.products) >= int(meta_logistic.get('free_delivery_for_how_many_order_minimum')):
+        if pre_order.free_delivery == True or pre_order.subtotal >= int(meta_logistic.get('free_delivery_for_order_above_price')) or len(pre_order.products) >= int(meta_logistic.get('free_delivery_for_how_many_order_minimum')):
            request.data['total'] = pre_order.subtotal
+        if pre_order.adjust_price != 0:
+            request.data['total'] = request.data['total'] + pre_order.adjust_price
+        print (request.data['total'])
 
+        return
         serializer = PreOrderSerializerUpdatePaymentShipping(pre_order, data=request.data, partial=True)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

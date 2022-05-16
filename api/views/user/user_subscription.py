@@ -690,10 +690,10 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'], url_path=r'buyer/list', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def get_buyer_list(self, request, pk=None):
-        api_user = Verify.get_seller_user(request)    
+        api_user, search_column, keyword, page, page_size = getparams(request,('search_column', 'keyword', 'page', 'page_size'),with_user=True, seller=True)
         api_user_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
 
-        buyer_list = get_user_subscription_buyer_list(api_user_user_subscription.id)
+        buyer_list = get_user_subscription_buyer_list(api_user_user_subscription.id, search_column, keyword, int(page), int(page_size))
         return Response(buyer_list, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['GET'], url_path=r'me', permission_classes=(IsAuthenticated,))
