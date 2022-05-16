@@ -1,7 +1,7 @@
 
 from api.utils.error_handle.error.api_error import ApiVerifyError
 
-
+from datetime import datetime
 class StripeCheckRule():
 
     @staticmethod
@@ -35,16 +35,12 @@ class StripeCheckRule():
 
     def does_amount_match(**kwargs):
 
-        promoCode = kwargs.get('promoCode')
-        country_plan = kwargs.get('country_plan')
-        paymentIntent = kwargs.get('paymentIntent')
         amount = kwargs.get('amount')
-        
-        if promoCode :
-            amount = amount*country_plan.promo_discount_rate
+        paymentIntent = kwargs.get('paymentIntent')
 
         if int(amount*100) != paymentIntent.amount:
             raise ApiVerifyError('payment amount error')
+
 
     def adjust_price_if_promo_code_valid(**kwargs):
 
@@ -73,4 +69,20 @@ class StripeCheckRule():
         if plan not in upgrade_avaliable_list:
             raise ApiVerifyError('not valid upgrade plan')
 
- 
+    def adjust_amount_if_subscription_undue(**kwargs):
+
+        amount = kwargs.get('amount')
+
+        api_user_subscription = kwargs.get('api_user_subscription')
+
+        if datetime.timestamp(datetime.now())>datetime.timestamp(api_user_subscription.expired_at):
+            return {'adjust_amount':0.0}
+
+        expired_date = api_user_subscription.expired_at.date()
+        started_date = api_user_subscription.started_at.date()
+
+        adjust_amount = api_user_subscription.purchase_price*((expired_date-datetime.now().date()).days/(expired_date-started_date).days)
+        return {'amount':amount-adjust_amount,'adjust_amount':adjust_amount}
+
+
+        

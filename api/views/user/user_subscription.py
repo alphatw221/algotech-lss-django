@@ -737,11 +737,12 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(api_user_subscription.country)
         subscription_plan = country_plan.get_plan(plan)
 
-        kwargs = {'email':email, 'plan':plan, 'period':period, 'country_plan':country_plan, 'subscription_plan':subscription_plan}
+        kwargs = {'email':email, 'plan':plan, 'period':period, 'country_plan':country_plan, 'subscription_plan':subscription_plan, 'api_user_subscription':api_user_subscription}
         kwargs = rule.rule_checker.user_subscription_rule_checker.UpgradeIntentDataRuleChecker.check(**kwargs)
 
         email = kwargs.get('email')
         amount = kwargs.get('amount')
+        adjust_amount = kwargs.get('adjust_amount')
 
         stripe.api_key = settings.STRIPE_API_KEY  
         try:
@@ -752,7 +753,8 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         return Response({
             "client_secret":intent.client_secret,
             "payment_amount":amount,
-            "user_plan":plan
+            "user_plan":plan,
+            "adjust_amount":adjust_amount
         }, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['POST'], url_path=r'upgrade')
@@ -767,7 +769,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         stripe.api_key = settings.STRIPE_API_KEY
         paymentIntent = stripe.PaymentIntent.retrieve(payment_intent_id)
 
-        kwargs = {'paymentIntent':paymentIntent,'email':email,'plan':plan,'period':period, 'promoCode':promoCode}
+        kwargs = {'paymentIntent':paymentIntent,'email':email,'plan':plan,'period':period, 'promoCode':promoCode, 'api_user_subscription':api_user_subscription}
         kwargs = rule.rule_checker.user_subscription_rule_checker.UpgradePaymentCompleteChecker.check(**kwargs)
 
         try:
@@ -780,6 +782,8 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             raise ApiVerifyError('data invalid, please contact support team for refunding')
 
         email = kwargs.get('email')
+        amount = kwargs.get('amount')
+
         now = datetime.now(pytz.timezone(timezone)) if timezone in pytz.common_timezones else datetime.now()
         expired_at = now+timedelta(days=90) if period == "quarter" else now+timedelta(days=365)
 
@@ -789,7 +793,8 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             started_at=now, 
             user_plan= {"activated_platform" : ["facebook","youtube","instagram"]}, 
             meta_country={ 'activated_country': [api_user_subscription.meta_country.get('activated_country')[0]] },
-            meta = {"stripe payment intent":intentSecret}
+            meta = {"stripe payment intent":intentSecret},
+            purchase_price=amount
         )
         
         ret = {
