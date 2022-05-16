@@ -49,7 +49,8 @@ class HubspotViewSet(viewsets.GenericViewSet):
             user_plan= {"activated_platform" : ["facebook"]}, 
             meta_country={ 'activated_country': [country] },
             type='trial',
-            lang=country_plan.language  
+            lang=country_plan.language ,
+            country = country
             )
         
         api_user = models.user.user.User.objects.create(name=f'{first_name} {last_name}', 
