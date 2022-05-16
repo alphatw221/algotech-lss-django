@@ -43,8 +43,8 @@ class CampaignLuckyDrawManager:
         error = None
         response_result = []
         meta_winner_list = []
-        if (len(lucky_draw.winner_list) == 0):
-            return lucky_draw
+        if len(lucky_draw.winner_list) == 0:
+            return lucky_draw, message
         for winner in lucky_draw.winner_list:
             try:
                 pre_order = PreOrder.objects.get(campaign=campaign, platform=winner[0], customer_id=winner[1], customer_name=winner[2])
@@ -90,8 +90,11 @@ class CampaignLuckyDrawManager:
                 }
             except Exception as e:   
                 pass
+        if num_of_winner > len(meta_winner_list):
+            message = f"Only {len(meta_winner_list)} winner{'s' if len(meta_winner_list) > 1 else ''} match the condition."
         if error == "out of stock":
-            message = f"{prize_campaign_product.name} is out of stock, only {len(meta_winner_list)} winners."
+            message = f"{prize_campaign_product.name} is out of stock, only {len(meta_winner_list)} winner{'s' if len(meta_winner_list) > 1 else ''}."
+        
         lucky_draw.winner_list = meta_winner_list
         lucky_draw.save()
         # update winner_list in
@@ -102,7 +105,6 @@ class CampaignLuckyDrawManager:
             {'id': campaign.id},
             {'$set': {'meta': meta}}
         )
-
         return lucky_draw, message
 
     @staticmethod
