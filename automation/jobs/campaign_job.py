@@ -123,6 +123,7 @@ def capture_facebook(campaign, logs):
 
 @lib.error_handle.error_handler.capture_platform_error_handler.capture_platform_error_handler
 def capture_youtube(campaign, logs):
+    logs.append(["youtube",""])
     # if not campaign['youtube_channel_id']:
     #     return
 
@@ -273,7 +274,7 @@ def capture_youtube(campaign, logs):
 # @capture_platform_error_handler
 @lib.error_handle.error_handler.capture_platform_error_handler.capture_platform_error_handler
 def capture_instagram(campaign, logs):
-
+    logs.append(["instagram",""])
     
     if not campaign['instagram_profile_id']:
         return
