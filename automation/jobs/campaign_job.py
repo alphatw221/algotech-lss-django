@@ -43,7 +43,7 @@ def campaign_job(campaign_id):
     lib.util.logger.print_table(["Campaign ID", campaign_id],logs)
 
 # @capture_platform_error_handler
-@lib.error_handle.error_handler.campaign_job_error_handler.capture_platform_error_handler
+@lib.error_handle.error_handler.capture_platform_error_handler.capture_platform_error_handler
 def capture_facebook(campaign, logs):
     logs.append(["facebook",""])
     if not campaign['facebook_page_id']:
@@ -121,7 +121,7 @@ def capture_facebook(campaign, logs):
     db.api_campaign.update_one({'id': campaign['id']}, {
                                "$set": {'facebook_campaign': facebook_campaign}})
 
-@lib.error_handle.error_handler.campaign_job_error_handler.capture_platform_error_handler
+@lib.error_handle.error_handler.capture_platform_error_handler.capture_platform_error_handler
 def capture_youtube(campaign, logs):
     # if not campaign['youtube_channel_id']:
     #     return
@@ -271,7 +271,7 @@ def capture_youtube(campaign, logs):
         return
 
 # @capture_platform_error_handler
-@lib.error_handle.error_handler.campaign_job_error_handler.capture_platform_error_handler
+@lib.error_handle.error_handler.capture_platform_error_handler.capture_platform_error_handler
 def capture_instagram(campaign, logs):
 
     
