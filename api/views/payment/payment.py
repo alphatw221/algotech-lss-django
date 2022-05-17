@@ -678,29 +678,31 @@ class PaymentViewSet(viewsets.GenericViewSet):
 
 
     #TODO transfer to campaign or payment  , permission_classes=(IsAuthenticated,)
-    @action(detail=True, methods=['POST'], url_path=r'delivery_info')
+    @action(detail=True, methods=['POST'], url_path=r'delivery_info', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def update_buyer_submit(self, request, pk=None):
+        pre_order_data = request.data
         try:
             date_list = request.data['shipping_date'].split('-')
             request.data['shipping_date'] = datetime.date(int(date_list[0]), int(date_list[1]), int(date_list[2]))
         except:
             pass
         pre_order = PreOrder.objects.get(id=pk)
+        campaign = Campaign.objects.get(id=pre_order.campaign_id)
         meta_logistic = Campaign.objects.get(id=pre_order.campaign_id).meta_logistic
         
         ## 判斷賣家設定之運費條件
         if request.data['shipping_option']:
-            addition_delivery_index = meta_logistic['additional_delivery_charge_title'].index(request.data['shipping_option'])
-            if meta_logistic['additional_delivery_charge_type'][addition_delivery_index] == '+':
-                request.data['total'] = float(pre_order.subtotal) + float(meta_logistic['additional_delivery_charge_price'][addition_delivery_index]) + float(meta_logistic['delivery_charge'])
-            elif meta_logistic['additional_delivery_charge_type'][addition_delivery_index] == '=':
-                request.data['total'] = float(pre_order.subtotal) + float(meta_logistic['additional_delivery_charge_price'][addition_delivery_index])
+            addition_delivery_index = campaign.meta_logistic['additional_delivery_charge_title'].index(request.data['shipping_option'])
+            if campaign.meta_logistic['additional_delivery_charge_type'][addition_delivery_index] == '+':
+                request.data['total'] = float(pre_order.subtotal) + float(campaign.meta_logistic['additional_delivery_charge_price'][addition_delivery_index]) + float(meta_logistic['delivery_charge'])
+            elif campaign.meta_logistic['additional_delivery_charge_type'][addition_delivery_index] == '=':
+                request.data['total'] = float(pre_order.subtotal) + float(campaign.meta_logistic['additional_delivery_charge_price'][addition_delivery_index])
         
-        free_delivery_for_order_above_price = meta_logistic.get('free_delivery_for_order_above_price') if meta_logistic.get('is_free_delivery_for_order_above_price') == 1 else 0
-        free_delivery_for_how_many_order_minimum = meta_logistic.get('free_delivery_for_how_many_order_minimum') if meta_logistic.get('is_free_delivery_for_how_many_order_minimum') == 1 else 0
+        free_delivery_for_order_above_price = campaign.meta_logistic.get('free_delivery_for_order_above_price') if campaign.meta_logistic.get('is_free_delivery_for_order_above_price') == 1 else 0
+        free_delivery_for_how_many_order_minimum = campaign.meta_logistic.get('free_delivery_for_how_many_order_minimum') if campaign.meta_logistic.get('is_free_delivery_for_how_many_order_minimum') == 1 else 0
         if pre_order.free_delivery == True or pre_order.subtotal >= float(free_delivery_for_order_above_price) or len(pre_order.products) >= float(free_delivery_for_how_many_order_minimum):
-           request.data['total'] = pre_order.subtotal
+           pre_order_data['total'] = pre_order.subtotal
         if pre_order.adjust_price != 0:
             request.data['total'] = float(request.data['total']) + float(pre_order.adjust_price)
 
