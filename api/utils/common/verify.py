@@ -239,6 +239,13 @@ class Verify():
         return order.campaign
 
     @staticmethod
+    def get_campaign_from_pre_order(pre_order):
+        if not pre_order.campaign:
+            raise ApiVerifyError("no campaign found")
+        return pre_order.campaign
+
+
+    @staticmethod
     def get_campaign_from_platform(platform, campaign_id):
         print(platform.campaigns)
         print(campaign_id)

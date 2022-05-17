@@ -682,37 +682,58 @@ class PaymentViewSet(viewsets.GenericViewSet):
     @api_error_handler
     def update_buyer_submit(self, request, pk=None):
         pre_order_data = request.data
+
         try:
             date_list = pre_order_data['shipping_date'].split('-')
             pre_order_data['shipping_date'] = datetime.date(int(date_list[0]), int(date_list[1]), int(date_list[2]))
         except:
             pass
-        pre_order = PreOrder.objects.get(id=pk)
-        campaign = Campaign.objects.get(id=pre_order.campaign_id)
-        # meta_logistic = Campaign.objects.get(id=pre_order.campaign_id).meta_logistic
+
+        pre_order = Verify.get_pre_order(pk)
+        campaign = Verify.get_campaign_from_pre_order(pre_order)
         
         ## 判斷賣家設定之運費條件
-        if pre_order_data['shipping_option']:
-            addition_delivery_index = campaign.meta_logistic['additional_delivery_charge_title'].index(pre_order_data['shipping_option'])
-            if campaign.meta_logistic['additional_delivery_charge_type'][addition_delivery_index] == '+':
-                pre_order_data['total'] = float(pre_order.subtotal) + float(campaign.meta_logistic['additional_delivery_charge_price'][addition_delivery_index]) + float(campaign.meta_logistic['delivery_charge'])
-            elif campaign.meta_logistic['additional_delivery_charge_type'][addition_delivery_index] == '=':
-                pre_order_data['total'] = float(pre_order.subtotal) + float(campaign.meta_logistic['additional_delivery_charge_price'][addition_delivery_index])
+        delivery_titles = campaign.meta_logistic.get('additional_delivery_charge_title')
+        delivery_types = campaign.meta_logistic.get('additional_delivery_charge_type')
+        delivery_prices = campaign.meta_logistic.get('additional_delivery_charge_price')
+        shipping_option = pre_order_data.get('shipping_option')
         
+        delivery_charge = float(campaign.meta_logistic.get('delivery_charge',0))
+
+        if (shipping_option and delivery_titles and delivery_types and delivery_prices and shipping_option):
+
+            addition_delivery_index = delivery_titles.index(shipping_option)
+
+            if delivery_types[addition_delivery_index] == '+':
+
+                delivery_charge += float(delivery_prices[addition_delivery_index]) 
+
+            elif delivery_types[addition_delivery_index] == '=':
+                delivery_charge =  float(delivery_prices[addition_delivery_index])
+
         free_delivery_for_order_above_price = campaign.meta_logistic.get('free_delivery_for_order_above_price') if campaign.meta_logistic.get('is_free_delivery_for_order_above_price') == 1 else 0
         free_delivery_for_how_many_order_minimum = campaign.meta_logistic.get('free_delivery_for_how_many_order_minimum') if campaign.meta_logistic.get('is_free_delivery_for_how_many_order_minimum') == 1 else 0
-        if pre_order.free_delivery == True or pre_order.subtotal >= float(free_delivery_for_order_above_price) or len(pre_order.products) >= float(free_delivery_for_how_many_order_minimum):
-           pre_order_data['total'] = pre_order.subtotal
-        if pre_order.adjust_price != 0:
-            pre_order_data['total'] = float(pre_order_data['total']) + float(pre_order.adjust_price)
+        
+        is_subtotal_over_free_delivery_threshold = pre_order.subtotal >= float(free_delivery_for_order_above_price)
+        is_items_over_free_delivery_threshold = len(pre_order.products) >= float(free_delivery_for_how_many_order_minimum)
+
+        if pre_order.free_delivery :
+            delivery_charge = 0
+        if is_subtotal_over_free_delivery_threshold :
+            delivery_charge = 0
+            pre_order_data['meta']['subtotal_over_free_delivery_threshold']=True
+        if is_items_over_free_delivery_threshold:
+            delivery_charge = 0
+            pre_order_data['meta']['items_over_free_delivery_threshold']=True
+
+        pre_order_data['total'] = float(pre_order_data.get('subtotal',0)) + float(pre_order_data.get('adjust_price',0)) + delivery_charge
 
         serializer = PreOrderSerializerUpdatePaymentShipping(pre_order, data=pre_order_data, partial=True)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        serializer.save()
-        pre_order = PreOrder.objects.get(id=pk)
-        verify_message = Verify.PreOrderApi.FromBuyer.verify_delivery_info(pre_order)
-        return Response(verify_message, status=status.HTTP_200_OK)
+        pre_order = serializer.save()
+        
+        return Response(PreOrderSerializerUpdatePaymentShipping(pre_order).data, status=status.HTTP_200_OK)
 
 
     @action(detail=False, methods=['POST'], url_path=r'paymongo_create_link')
