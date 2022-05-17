@@ -566,9 +566,11 @@ class UserViewSet(viewsets.ModelViewSet):
         except Exception:
             #TODO refund
             print('require refund')
-            raise ApiVerifyError('data invalid')
+            raise ApiVerifyError('data invalid, please contact support for refunding')
 
         email = kwargs.get('email')
+        amount = kwargs.get('amount')
+
         now = datetime.now(pytz.timezone(timezone)) if timezone in pytz.common_timezones else datetime.now()
         expired_at = now+timedelta(days=90) if period == "quarter" else now+timedelta(days=365)
         
@@ -585,7 +587,8 @@ class UserViewSet(viewsets.ModelViewSet):
             meta = {"stripe payment intent":intentSecret},
             type=plan,
             lang=country_plan.language,
-            country = country_code
+            country = country_code,
+            purchase_price = amount
             )
         
         api_user = User.objects.create(

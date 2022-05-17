@@ -34,12 +34,12 @@ from api.models.campaign.campaign_product import CampaignProduct
 from api.models.product.product import Product
 from api.models.order.order import Order
 from api.models.order.order_product import OrderProduct
-import datetime
+from datetime import datetime
 from backend.api.instagram.post import api_ig_private_message, api_ig_get_post_comments
 from backend.api.twitch.post import api_twitch_get_access_token
 from backend.i18n.register_confirm_mail import i18n_get_register_confirm_mail_content, i18n_get_register_confirm_mail_subject, i18n_get_register_activate_mail_subject
 
-
+from api import models
 class Command(BaseCommand):
     help = ''
 
@@ -47,7 +47,7 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.test_nlp()
+        self.test_user_plan()
 
     def modify_database(self):
         from api.models.user.user_subscription import UserSubscription
@@ -201,11 +201,21 @@ class Command(BaseCommand):
         
     
     def test_user_plan(self):
-        from business_policy.subscription_plan import SubscriptionPlan
+
+        api_user_subscription = models.user.user_subscription.UserSubscription.objects.get(id=1)
         
-        # print(SubscriptionPlan.__bases__.)
-        print ([cls_attribute.__name__  for cls_attribute in SubscriptionPlan.__dict__.values() if type(cls_attribute)==type])
-        # print([cls.__name__ for cls in SubscriptionPlan.__bases__])
+        if datetime.timestamp(datetime.now())>datetime.timestamp(api_user_subscription.expired_at):
+            print('true')
+            return
+        print('false')
+        expired_date = api_user_subscription.expired_at.date()
+        started_date = api_user_subscription.started_at.date()
+        
+        today = datetime.now().date()
+        # print((expired_date-today).days)
+        # print((expired_date-started_date).days)
+        adjust_amount = api_user_subscription.purchase_price*((expired_date-today).days/(expired_date-started_date).days)
+        print(adjust_amount)
 
     def test_sendinblue(self):
         
