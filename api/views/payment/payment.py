@@ -726,7 +726,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             delivery_charge = 0
             pre_order_data['meta']['items_over_free_delivery_threshold']=True
 
-        pre_order_data['total'] = pre_order.subtotal + float(pre_order_data.get('adjust_price',0)) + delivery_charge
+        pre_order_data['total'] = pre_order.subtotal + pre_order.adjust_price + delivery_charge
 
         serializer = PreOrderSerializerUpdatePaymentShipping(pre_order, data=pre_order_data, partial=True)
         if not serializer.is_valid():
