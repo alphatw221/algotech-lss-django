@@ -693,9 +693,9 @@ class PaymentViewSet(viewsets.GenericViewSet):
         if request.data['shipping_option']:
             addition_delivery_index = meta_logistic['additional_delivery_charge_title'].index(request.data['shipping_option'])
             if meta_logistic['additional_delivery_charge_type'][addition_delivery_index] == '+':
-                request.data['total'] = float(request.data['total']) + float(meta_logistic['additional_delivery_charge_price'][addition_delivery_index]) + float(meta_logistic['delivery_charge'])
+                request.data['total'] = float(pre_order.subtotal) + float(meta_logistic['additional_delivery_charge_price'][addition_delivery_index]) + float(meta_logistic['delivery_charge'])
             elif meta_logistic['additional_delivery_charge_type'][addition_delivery_index] == '=':
-                request.data['total'] = float(request.data['total']) + float(meta_logistic['additional_delivery_charge_price'][addition_delivery_index])
+                request.data['total'] = float(pre_order.subtotal) + float(meta_logistic['additional_delivery_charge_price'][addition_delivery_index])
         
         free_delivery_for_order_above_price = meta_logistic.get('free_delivery_for_order_above_price') if meta_logistic.get('is_free_delivery_for_order_above_price') == 1 else 0
         free_delivery_for_how_many_order_minimum = meta_logistic.get('free_delivery_for_how_many_order_minimum') if meta_logistic.get('is_free_delivery_for_how_many_order_minimum') == 1 else 0
