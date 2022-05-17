@@ -71,6 +71,8 @@ class PreOrderCheckRule():
             return
         if not api_campaign_product.get('customer_editable',False):
             raise PreOrderErrors.EditNotAllowed("not editable")
+        if api_campaign_product.get('type') == "lucky_draw":
+            raise PreOrderErrors.EditNotAllowed("not editable")
 
 
     @staticmethod
@@ -78,7 +80,6 @@ class PreOrderCheckRule():
 
         api_pre_order = kwargs.get('api_pre_order')
         api_campaign_product = kwargs.get('api_campaign_product')
-
         if str(api_campaign_product["id"]) in api_pre_order["products"]:
             raise PreOrderErrors.PreOrderException(
                 "product already in pre_order")
@@ -88,11 +89,12 @@ class PreOrderCheckRule():
 
         api_campaign_product = kwargs.get('api_campaign_product')
         qty = kwargs.get('qty')
+        lucky_draw_repeat = kwargs.get('lucky_draw_repeat')
         if not api_campaign_product or not qty:
             return
-        if qty > api_campaign_product['max_order_amount']:
+        if qty > api_campaign_product['max_order_amount'] and lucky_draw_repeat == False:
             raise PreOrderErrors.PreOrderException(
-                "Value exceeds max order amount.")
+                "Product quantity exceeds max order amount.")
 
     @staticmethod
     def is_order_empty(**kwargs):
