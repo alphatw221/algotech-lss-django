@@ -730,7 +730,8 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['POST'], url_path=r'upgrade/intent')
     @api_error_handler
     def upgrade_intent(self, request):
-        email, plan, period, promoCode = lib.util.getter.getdata(request, ("email", "plan", "period", "promoCode"), required=True)
+        email, plan, period = lib.util.getter.getdata(request, ("email", "plan", "period", "promoCode"), required=True)
+        promoCode = lib.util.getter.getdata(request, ("promoCode"), required=False)
         api_user = Verify.get_seller_user(request)    
         api_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
 
