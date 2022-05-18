@@ -73,6 +73,7 @@ def capture_facebook(campaign, logs):
     logs.append(["code",code])
 
     if code // 100 != 2 :
+        print(data)
         facebook_campaign['post_id'] = ''
         facebook_campaign['remark'] = f'Facebook API error: {data["error"]}'
         db.api_campaign.update_one({'id': campaign.get('id')}, {
@@ -160,10 +161,10 @@ def capture_youtube(campaign, logs):
         
         code, data = service.youtube.viedo.get_video_info_with_access_token(access_token, live_video_id)
         if code // 100 != 2:
+            print(data)
             if code == 401:
                 refresh_youtube_channel_token(youtube_channel)
             logs.append(["error", "video info error"])
-            print(data)
             return
         items = data.get("items")
         if not items:
@@ -200,6 +201,7 @@ def capture_youtube(campaign, logs):
     logs.append(["code", code])
 
     if code // 100 != 2 and 'error' in data:
+        print(data)
         if code == 401:
             access_token = refresh_youtube_channel_token(youtube_channel)
             return
@@ -310,6 +312,7 @@ def capture_instagram(campaign, logs):
 
         if code // 100 != 2 and 'error' in get_ig_comments_response and get_ig_comments_response['error']['type'] in ('GraphMethodException', 'OAuthException'):
             # instagram_campaign['live_media_id'] = ''
+            print(get_ig_comments_response)
             instagram_campaign['remark'] = f'Instagram API error: {get_ig_comments_response["error"]}'
             db.api_campaign.update_one({'id': campaign['id']}, {
                                     '$set': {"instagram_campaign": instagram_campaign}})
@@ -391,7 +394,7 @@ def capture_youtube_video(campaign, youtube_channel, logs):
         logs.append(["code", code])
 
         if code // 100 != 2 and 'error' in get_yt_video_data:
-
+            print(get_yt_video_data)
 
             #TODO handle token expired:
 
