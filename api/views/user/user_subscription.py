@@ -730,14 +730,15 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['POST'], url_path=r'upgrade/intent')
     @api_error_handler
     def upgrade_intent(self, request):
-        email, plan, period = lib.util.getter.getdata(request, ("email", "plan", "period"), required=True)
+        email, plan, period, promoCode = lib.util.getter.getdata(request, ("email", "plan", "period", "promoCode"), required=True)
         api_user = Verify.get_seller_user(request)    
         api_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
 
         country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(api_user_subscription.country)
         subscription_plan = country_plan.get_plan(plan)
 
-        kwargs = {'email':email, 'plan':plan, 'period':period, 'country_plan':country_plan, 'subscription_plan':subscription_plan, 'api_user_subscription':api_user_subscription}
+        kwargs = {'email':email, 'plan':plan, 'period':period, 'country_plan':country_plan, 'subscription_plan':subscription_plan, 'api_user_subscription':api_user_subscription, 'promoCode': promoCode}
+        print (kwargs)
         kwargs = rule.rule_checker.user_subscription_rule_checker.UpgradeIntentDataRuleChecker.check(**kwargs)
 
         email = kwargs.get('email')
