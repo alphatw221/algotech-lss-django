@@ -793,7 +793,6 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             expired_at=expired_at, 
             started_at=now, 
             user_plan= {"activated_platform" : ["facebook","youtube","instagram"]}, 
-            meta_country={ 'activated_country': [api_user_subscription.meta_country.get('activated_country')[0]] },
             meta = {"stripe payment intent":intentSecret},
             purchase_price=amount
         )

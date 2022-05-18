@@ -81,7 +81,7 @@ class StripeCheckRule():
         expired_date = api_user_subscription.expired_at.date()
         started_date = api_user_subscription.started_at.date()
 
-        adjust_amount = api_user_subscription.purchase_price*((expired_date-datetime.now().date()).days/(expired_date-started_date).days)
+        adjust_amount = int(api_user_subscription.purchase_price*((expired_date-datetime.now().date()).days/(expired_date-started_date).days))
         return {'amount':amount-adjust_amount,'adjust_amount':adjust_amount}
 
 
