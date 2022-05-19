@@ -520,7 +520,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         items = []
         for key, product in order.products.items():
             stripe_product = stripe.Product.create(
-                name=product.name,
+                name=product.get('name',''),
                 images=[urllib.parse.quote(f"{settings.GS_URL}{product.get('image','')}").replace("%3A", ":")]
             )
             price = stripe.Price.create(
