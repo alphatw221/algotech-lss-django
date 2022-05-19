@@ -518,20 +518,20 @@ class PaymentViewSet(viewsets.GenericViewSet):
         currency = campaign.user_subscription.currency if campaign.user_subscription.currency else "SGD"
 
         items = []
-        for product in order.products.all():
-            product = stripe.Product.create(
+        for key, product in order.products.items():
+            stripe_product = stripe.Product.create(
                 name=product.name,
-                images=[urllib.parse.quote(f"{settings.GS_URL}{product.image}").replace("%3A", ":")]
+                images=[urllib.parse.quote(f"{settings.GS_URL}{product.get('image','')}").replace("%3A", ":")]
             )
             price = stripe.Price.create(
-                product=product.id,
-                unit_amount=int(product.price*100),
+                product=stripe_product.id,
+                unit_amount=int(product.get('price',0)*100),
                 currency=currency,
             )
             items.append(
                 {
                     'price': price.id,
-                    "quantity": product.qty
+                    "quantity": product.get('qty',0)
                 },
             )
 
