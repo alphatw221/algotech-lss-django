@@ -108,7 +108,7 @@ class SubscriptionPlan:
     class TW(CountryPlan):
         promo_code="ALGOTECH"
         promo_discount_rate=0.9
-        currency = "NTD"
+        currency = "TWD"
         language = "zh_hant"
         plans = {
             "trial" :{"text": "Free Trial", "price":{"month":0}},

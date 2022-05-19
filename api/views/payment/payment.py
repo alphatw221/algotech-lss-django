@@ -45,6 +45,7 @@ platform_dict = {'facebook':FacebookPage, 'youtube':YoutubeChannel, 'instagram':
 import service
 sib_service = service.sendinblue
 
+import lib
 
 @email_error_handler
 def send_email(order_id):
@@ -528,96 +529,90 @@ class PaymentViewSet(viewsets.GenericViewSet):
     @api_error_handler
     def stripe_pay_create_checkout_session(self, request):
         
-        try:
-            order_id = request.data["order_id"]
-            order_object = Verify.get_order(order_id)
-            campaign = order_object.campaign
-            stripe.api_key = campaign.meta_payment.get("stripe").get("stripe_secret")
+        order = Verify.get_order(request.data.get("order_id"))
+        campaign = Verify.get_campaign_from_order(order)
+        
+        stripe.api_key = campaign.meta_payment.get("stripe",{}).get("stripe_secret")
 
-            # stripe.api_key = settings.STRIPE_API_KEY  # for testing
-            
-            print("stripe.api_key", stripe.api_key)
-            currency = "SGD" if order_object.currency is None else order_object.currency
-            item_list = []
-            for key, values in order_object.products.items():
-                image = urllib.parse.quote(f"{settings.GS_URL}{values.get('image', '')}").replace("%3A", ":")
-                product = stripe.Product.create(
-                    name=values.get("name", ""),
-                    images=[image]
-                )
-                price = stripe.Price.create(
-                    product=product.id,
-                    unit_amount=int(values.get("price", 0)*100),
-                    currency=currency,
-                )
-                item_list.append(
-                    {
-                        # Provide the exact Price ID (for example, pr_1234) of the product you want to sell
-                        'price': price.id,
-                        "quantity": values.get("qty", 0)
-                    },
-                )
-            print(item_list)
-            discounts = []
-            if order_object.adjust_price:
-                discount = stripe.Coupon.create(
-                    amount_off=int(-order_object.adjust_price * 100),
-                    currency=currency
-                )
-                discounts.append(
-                    {
-                        'coupon': discount.id,
-                    }
-                )
-            shipping_options = []
-            if order_object.shipping_cost:
-                shipping_rate = stripe.ShippingRate.create(
-                    display_name="General Shipping",
-                    type="fixed_amount",
-                    fixed_amount={
-                        'amount': int(order_object.shipping_cost * 100),
-                        'currency': currency,
-                    }
-                )
-                shipping_options.append(
-                    {
-                        'shipping_rate': shipping_rate.id,
-                    }
-                )
-            elif order_object.free_delivery:
-                shipping_rate = stripe.ShippingRate.create(
-                    display_name="Free Delivery",
-                    type="fixed_amount",
-                    fixed_amount={
-                        'amount': 0,
-                        'currency': currency,
-                    }
-                )
-                shipping_options.append(
-                    {
-                        'shipping_rate': shipping_rate.id,
-                    }
-                )
-            checkout_session = stripe.checkout.Session.create(
-                line_items=item_list,
-                shipping_options=shipping_options,
-                discounts=discounts,
-                mode='payment',
-                success_url=settings.GCP_API_LOADBALANCER_URL + '/api/payment/strip_success?session_id={CHECKOUT_SESSION_ID}&order_id=' + str(order_object.id),
-                cancel_url=f"{settings.GCP_API_LOADBALANCER_URL}/api/payment/strip_cancel?order_id={order_object.id}",
+        currency = campaign.user_subscription.currency if campaign.user_subscription.currency else "SGD"
 
+        items = []
+        for key, product in order.products.items():
+            stripe_product = stripe.Product.create(
+                name=product.get('name',''),
+                images=[urllib.parse.quote(f"{settings.GS_URL}{product.get('image','')}").replace("%3A", ":")]
             )
-            
-            order_object.checkout_details["checkout_session"] = checkout_session
-            order_object.history[str(len(order_object.history) + 1)] = {
-                "action": "checkout",
-                "time": pendulum.now("UTC").to_iso8601_string()
-            }
-            order_object.save()
-            return Response(checkout_session.url, status=status.HTTP_303_SEE_OTHER)
-        except Exception as e:
-            print(e)
-            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            price = stripe.Price.create(
+                product=stripe_product.id,
+                unit_amount=int(product.get('price',0)*100),
+                currency=currency,
+            )
+            items.append(
+                {
+                    'price': price.id,
+                    "quantity": product.get('qty',0)
+                },
+            )
+
+        discounts = []
+        if order.adjust_price:
+            discount = stripe.Coupon.create(
+                amount_off=int(-order.adjust_price * 100),
+                currency=currency
+            )
+            discounts.append(
+                {
+                    'coupon': discount.id,
+                }
+            )
+
+        shipping_options = []
+
+        if order.free_delivery or order.meta.get('subtotal_over_free_delivery_threshold') or order.meta.get('items_over_free_delivery_threshold'):
+            shipping_rate = stripe.ShippingRate.create(
+                display_name="Free Delivery",
+                type="fixed_amount",
+                fixed_amount={
+                    'amount': 0,
+                    'currency': currency,
+                }
+            )
+            shipping_options.append(
+                {
+                    'shipping_rate': shipping_rate.id,
+                }
+            )
+        else :
+            shipping_rate = stripe.ShippingRate.create(
+                display_name="General Shipping",
+                type="fixed_amount",
+                fixed_amount={
+                    'amount': int(order.shipping_cost * 100),
+                    'currency': currency,
+                }
+            )
+            shipping_options.append(
+                {
+                    'shipping_rate': shipping_rate.id,
+                }
+            )
+
+        checkout_session = stripe.checkout.Session.create(
+            line_items=items,
+            shipping_options=shipping_options,
+            discounts=discounts,
+            mode='payment',
+            success_url=settings.GCP_API_LOADBALANCER_URL + '/api/payment/strip_success?session_id={CHECKOUT_SESSION_ID}&order_id=' + str(order.id),
+            cancel_url=f"{settings.GCP_API_LOADBALANCER_URL}/api/payment/strip_cancel?order_id={order.id}",
+        )
+        
+        order.checkout_details["checkout_session"] = checkout_session
+        order.history[str(len(order.history) + 1)] = {
+            "action": "checkout",
+            "time": pendulum.now("UTC").to_iso8601_string()
+        }
+        order.save()
+        return Response(checkout_session.url, status=status.HTTP_303_SEE_OTHER)
 
     @action(detail=False, methods=['GET'], url_path=r'strip_success',)
     @api_error_handler
