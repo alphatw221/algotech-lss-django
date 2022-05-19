@@ -47,7 +47,8 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.test_user_plan()
+        # self.test_user_plan()
+        self.test_sendinblue()
 
     def modify_database(self):
         from api.models.user.user_subscription import UserSubscription
@@ -225,7 +226,18 @@ class Command(BaseCommand):
 
         # sib.transaction_email.ResetPasswordLinkEmail(url="url",code="code",username="username",to="alphatw22193@gmail.com").send()
         
-        sib_service.transaction_email.AccountActivationEmail(first_name="first_name",plan="plan",email="email",password="password", to="alphatw22193@gmail.com", country="SG").send()
+        # sib_service.transaction_email.AccountActivationEmail(first_name="first_name",plan="plan",email="email",password="password", to="alphatw22193@gmail.com", country="SG").send()
+
+        order = db.api_order.find_one({'id': 32410})
+        del order['_id']
+        campaign_id = order['campaign_id']
+        campaign = db.api_campaign.find_one({'id': int(campaign_id)})
+        del campaign['_id']
+        facebook_page_id = campaign['facebook_page_id']
+        shop = db.api_facebook_page.find_one({'id': int(facebook_page_id)})['name']
+        
+        sib_service.transaction_email.OrderConfirmationEmail(shop=shop, order=order, campaign=campaign, to=["derekhwang33@gmail.com"], cc=[]).send()
+        print ('poooooop')
 
         # sib.transaction_email.RegistraionConfirmationEmail(first_name="first_name",email="email",password="password", to="alphatw22193@gmail.com").send()
 
