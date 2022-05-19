@@ -518,7 +518,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         currency = campaign.user_subscription.currency if campaign.user_subscription.currency else "SGD"
 
         items = []
-        for product in order.order_products:
+        for product in order.order_products.all():
             product = stripe.Product.create(
                 name=product.name,
                 images=[urllib.parse.quote(f"{settings.GS_URL}{product.image}").replace("%3A", ":")]
