@@ -144,7 +144,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 data = result.data
             else:
                 serializer = self.get_serializer(queryset, many=True)
-                data = serializer.dat
+                data = serializer.data
 
             return Response(data, status=status.HTTP_200_OK)
         except FieldError:
