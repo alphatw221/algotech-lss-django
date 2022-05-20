@@ -1,8 +1,9 @@
 import os
+import config
 import django
 
 try:
-    os.environ['DJANGO_SETTINGS_MODULE'] = 'lss.settings'  # for rq_job
+    os.environ['DJANGO_SETTINGS_MODULE'] = config.DJANGO_SETTINGS  # for rq_job
     django.setup()
 except Exception:
     pass
