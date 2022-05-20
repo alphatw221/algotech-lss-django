@@ -756,7 +756,7 @@ class UserViewSet(viewsets.ModelViewSet):
             {"url":settings.GCP_API_LOADBALANCER_URL +"/lss/#/password/reset","code":code,"username":auth_user.username},
             lang=user_subscription.lang)
 
-        return Response({"message":"The email has been sent"}, status=status.HTTP_200_OK)
+        return Response({"message":"The email has been sent. If you haven't received the email after a few minutes, please check your spam folder. "}, status=status.HTTP_200_OK)
 
     
     @action(detail=False, methods=['POST'], url_path=r'password/reset')
