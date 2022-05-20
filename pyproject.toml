@@ -39,6 +39,8 @@ numpy = "^1.22.3"
 sib-api-v3-sdk = "^7.4.0"
 hubspot-api-client = "^5.0.0"
 prettytable = "^3.3.0"
+channels = "^3.0.4"
+channels-redis = "^3.4.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

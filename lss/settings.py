@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'django_extensions',
     'webpack_loader',
+    'channels'
 ]
 
 LOGGING = {
@@ -444,3 +445,16 @@ HUBSPOT_API_KEY = 'e9a347e7-8923-4e09-8e57-3fa6fe6acc8b'
 
 # cc to email
 NOTIFICATION_EMAIL = 'lss@algotech.app'
+
+
+# Channels
+ASGI_APPLICATION = 'lss.asgi.application'
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+            # "hosts": [('127.0.0.1', 6379)],
+        },
+    },
+}
