@@ -20,6 +20,5 @@ class EmailService:
 
     @staticmethod
     def send_email_template(subject, email, template, parameters, file=None, lang="en"):
-        
 
         enqueue_email_queue(jobs.send_email_job.send_email_job, subject, email, template, parameters, file, lang)

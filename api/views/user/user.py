@@ -41,7 +41,7 @@ from django.contrib.auth.models import User as AuthUser
 import pytz, stripe
 from backend.python_rq.python_rq import email_queue
 from business_policy.subscription_plan import SubscriptionPlan
-from service.email.email_service import EmailService
+
 
 from django.http import HttpResponse
 import xlsxwriter
@@ -749,7 +749,7 @@ class UserViewSet(viewsets.ModelViewSet):
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
         code = PasswordResetCodeManager.generate(auth_user.id,user_subscription.lang)
 
-        EmailService.send_email_template(
+        service.email.email_service.EmailService.send_email_template(
             i18n_get_reset_password_mail_subject(user_subscription.lang),
             email,
             "email_reset_password_link.html",
