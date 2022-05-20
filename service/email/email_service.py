@@ -3,7 +3,6 @@ from backend.python_rq.python_rq import email_queue
 from automation import jobs
 from ..rq.job import enqueue_email_queue
 class EmailService:
-    jobs.send_email_job.send_email_job
     @staticmethod
     def send_email(subject, email, content, file = None, lang = 'en'):
 
@@ -21,5 +20,6 @@ class EmailService:
 
     @staticmethod
     def send_email_template(subject, email, template, parameters, file=None, lang="en"):
+        
 
         enqueue_email_queue(jobs.send_email_job.send_email_job, subject, email, template, parameters, file, lang)

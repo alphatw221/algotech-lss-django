@@ -18,16 +18,16 @@ from api.utils.error_handle.error_handler.email_error_handler import email_error
 from django.utils import translation
 
 @email_error_handler
-def send_email_job(subject, email, template_name=None, content=None, parameters={}, file=None, lang='en'):
+def send_email_job(subject, email, template=None, content=None, parameters={}, file=None, lang='en'):
     
     mail = MIMEMultipart()
     mail['Subject'] = subject
     mail['From'] = settings.EMAIL_HOST_USER
     mail['To'] = email
 
-    if template_name:
+    if template:
         with translation.override(lang):
-            rendered = render_to_string(template_name, parameters)
+            rendered = render_to_string(template, parameters)
         mail.attach(MIMEText(rendered, 'html'))
     elif content:
         mail.attach(MIMEText(content, 'html'))
