@@ -188,8 +188,9 @@ class PaymentViewSet(viewsets.GenericViewSet):
             order.meta['ipg_fail']=request.data
         
         order.save()
-        shop, order, campaign = confirmation_email_info(order_id)
-        sib_service.transaction_email.OrderConfirmationEmail(shop=shop, order=order, campaign=campaign, to=[order.get('shipping_email')], cc=[]).send()
+        send_email(order_id)
+        # shop, order, campaign = confirmation_email_info(order_id)
+        # sib_service.transaction_email.OrderConfirmationEmail(shop=shop, order=order, campaign=campaign, to=[order.get('shipping_email')], cc=[]).send()
 
         return HttpResponseRedirect(redirect_to=settings.WEB_SERVER_URL+f'/buyer/order/{order.id}/confirmation')
 
@@ -334,8 +335,9 @@ class PaymentViewSet(viewsets.GenericViewSet):
             print("Payment execute successfully")
             order_object.status = "complete"
             order_object.save()
-            shop, order, campaign = confirmation_email_info(order_id)
-            sib_service.transaction_email.OrderConfirmationEmail(shop=shop, order=order, campaign=campaign, to=[order.get('shipping_email')], cc=[]).send()
+            send_email(order_id)
+            # shop, order, campaign = confirmation_email_info(order_id)
+            # sib_service.transaction_email.OrderConfirmationEmail(shop=shop, order=order, campaign=campaign, to=[order.get('shipping_email')], cc=[]).send()
             return HttpResponseRedirect(redirect_to=f'{settings.WEB_SERVER_URL}/buyer/order/{order_object.id}/confirmation')
         else:
             print(payment.error)  # Error Hash
@@ -427,8 +429,9 @@ class PaymentViewSet(viewsets.GenericViewSet):
                 { '$set': {'status': 'complete', 'checkout_details': hitpay_dict, 'payment_method': 'hitpay'} }
             )
 
-        shop, order, campaign = confirmation_email_info(order_id)
-        sib_service.transaction_email.OrderConfirmationEmail(shop=shop, order=order, campaign=campaign, to=[order.get('shipping_email')], cc=[]).send()
+        send_email(order_id)
+        # shop, order, campaign = confirmation_email_info(order_id)
+        # sib_service.transaction_email.OrderConfirmationEmail(shop=shop, order=order, campaign=campaign, to=[order.get('shipping_email')], cc=[]).send()
 
         return Response('hitpay succed')
     
@@ -502,8 +505,9 @@ class PaymentViewSet(viewsets.GenericViewSet):
         order.payment_method = "Direct Payment"
         order.status = "complete"
         order.save()
-        shop, order, campaign = confirmation_email_info(order_id)
-        sib_service.transaction_email.OrderConfirmationEmail(shop=shop, order=order, campaign=campaign, to=[order.get('shipping_email')], cc=[]).send()
+        send_email(order_id)
+        # shop, order, campaign = confirmation_email_info(order_id)
+        # sib_service.transaction_email.OrderConfirmationEmail(shop=shop, order=order, campaign=campaign, to=[order.get('shipping_email')], cc=[]).send()
 
         return Response({"message": "upload succeed"}, status=status.HTTP_200_OK)
 
@@ -647,8 +651,9 @@ class PaymentViewSet(viewsets.GenericViewSet):
                     "time": pendulum.now("UTC").to_iso8601_string()
                 }
                 order_object.save()
-                shop, order, campaign = confirmation_email_info(order_id)
-                sib_service.transaction_email.OrderConfirmationEmail(shop=shop, order=order, campaign=campaign, to=[order.get('shipping_email')], cc=[]).send()
+                send_email(order_id)
+                # shop, order, campaign = confirmation_email_info(order_id)
+                # sib_service.transaction_email.OrderConfirmationEmail(shop=shop, order=order, campaign=campaign, to=[order.get('shipping_email')], cc=[]).send()
             return HttpResponseRedirect(redirect_to=f'{settings.WEB_SERVER_URL}/buyer/order/{order_object.id}/confirmation')
         except Exception as e:
             print(e)
@@ -869,8 +874,9 @@ class PaymentViewSet(viewsets.GenericViewSet):
                 {'id': order_id},
                 {'$set': {'status': 'complete'}}
             )
-        shop, order, campaign = confirmation_email_info(order_id)
-        sib_service.transaction_email.OrderConfirmationEmail(shop=shop, order=order, campaign=campaign, to=[order.get('shipping_email')], cc=[]).send()
+        send_email(order_id)
+        # shop, order, campaign = confirmation_email_info(order_id)
+        # sib_service.transaction_email.OrderConfirmationEmail(shop=shop, order=order, campaign=campaign, to=[order.get('shipping_email')], cc=[]).send()
         
         return Response('response', status=status.HTTP_200_OK)
 
