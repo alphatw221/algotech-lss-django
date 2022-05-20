@@ -27,7 +27,7 @@ class UserSubscriptionCheckRule():
             plan_limitation = getattr(business_limitation.live_show_seller, plan)     
 
         if campaigns_count >= plan_limitation.get('max_concurrent_live'):
-            raise ApiVerifyError('You\'ve been reached maximum campaign.')
+            raise ApiVerifyError('You have reached maximum allowed number of concurrent campaigns.')
         
     @staticmethod
     def campaign_limit(**kwargs):

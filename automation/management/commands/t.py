@@ -2,6 +2,7 @@ import email
 import imp
 from inspect import Parameter
 import pprint
+from grpc import server
 import requests
 
 
@@ -38,7 +39,7 @@ from datetime import datetime
 from backend.api.instagram.post import api_ig_private_message, api_ig_get_post_comments
 from backend.api.twitch.post import api_twitch_get_access_token
 from backend.i18n.register_confirm_mail import i18n_get_register_confirm_mail_content, i18n_get_register_confirm_mail_subject, i18n_get_register_activate_mail_subject
-
+import service
 from api import models
 class Command(BaseCommand):
     help = ''
@@ -48,7 +49,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # self.test_user_plan()
-        self.test_sendinblue()
+        self.test_send_email()
 
     def modify_database(self):
         from api.models.user.user_subscription import UserSubscription
@@ -193,13 +194,11 @@ class Command(BaseCommand):
         auth_user.save()
 
     def test_send_email(self):
-
         
-        products = db.api_campaign_product.find(
-                {"campaign_id": 413, "$or": [{"type": "product"}, {"type": "product-fast"}]})
-
-        print(list(products))
-        
+        service.email.email_service.EmailService.send_email_template('test','alphatw22193@gmail.com',
+            "email_reset_password_link.html",
+            {"url":settings.GCP_API_LOADBALANCER_URL +"/lss/#/password/reset","code":"1234","username":"test"},
+            lang='en')
     
     def test_user_plan(self):
 
