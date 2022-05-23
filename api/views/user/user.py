@@ -55,6 +55,7 @@ from api import rule
 import service
 import business_policy
 import lib
+from automation import jobs
 
 platform_info_dict={'facebook':'facebook_info', 'youtube':'youtube_info', 'instagram':'instagram_info', 'google':'google_info'}
 
@@ -750,6 +751,7 @@ class UserViewSet(viewsets.ModelViewSet):
         code = PasswordResetCodeManager.generate(auth_user.id,user_subscription.lang)
 
         service.email.email_service.EmailService.send_email_template(
+            jobs.send_email_job.send_email_job,
             i18n_get_reset_password_mail_subject(user_subscription.lang),
             email,
             "email_reset_password_link.html",
