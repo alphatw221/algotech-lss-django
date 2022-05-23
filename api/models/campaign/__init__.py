@@ -1,1 +1,1 @@
-from . import campaign
+from . import campaign, campaign_comment

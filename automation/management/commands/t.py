@@ -2,6 +2,7 @@ import email
 import imp
 from inspect import Parameter
 import pprint
+from grpc import server
 import requests
 
 
@@ -38,7 +39,7 @@ from datetime import datetime
 from backend.api.instagram.post import api_ig_private_message, api_ig_get_post_comments
 from backend.api.twitch.post import api_twitch_get_access_token
 from backend.i18n.register_confirm_mail import i18n_get_register_confirm_mail_content, i18n_get_register_confirm_mail_subject, i18n_get_register_activate_mail_subject
-
+import service
 from api import models
 class Command(BaseCommand):
     help = ''
@@ -47,7 +48,8 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.test_user_plan()
+        # self.test_user_plan()
+        self.test_send_email()
 
     def modify_database(self):
         from api.models.user.user_subscription import UserSubscription
@@ -192,13 +194,11 @@ class Command(BaseCommand):
         auth_user.save()
 
     def test_send_email(self):
-
         
-        products = db.api_campaign_product.find(
-                {"campaign_id": 413, "$or": [{"type": "product"}, {"type": "product-fast"}]})
-
-        print(list(products))
-        
+        service.email.email_service.EmailService.send_email_template('test','alphatw22193@gmail.com',
+            "email_reset_password_link.html",
+            {"url":settings.GCP_API_LOADBALANCER_URL +"/lss/#/password/reset","code":"1234","username":"test"},
+            lang='en')
     
     def test_user_plan(self):
 
@@ -225,7 +225,18 @@ class Command(BaseCommand):
 
         # sib.transaction_email.ResetPasswordLinkEmail(url="url",code="code",username="username",to="alphatw22193@gmail.com").send()
         
-        sib_service.transaction_email.AccountActivationEmail(first_name="first_name",plan="plan",email="email",password="password", to="alphatw22193@gmail.com", country="SG").send()
+        # sib_service.transaction_email.AccountActivationEmail(first_name="first_name",plan="plan",email="email",password="password", to="alphatw22193@gmail.com", country="SG").send()
+
+        order = db.api_order.find_one({'id': 32410})
+        del order['_id']
+        campaign_id = order['campaign_id']
+        campaign = db.api_campaign.find_one({'id': int(campaign_id)})
+        del campaign['_id']
+        facebook_page_id = campaign['facebook_page_id']
+        shop = db.api_facebook_page.find_one({'id': int(facebook_page_id)})['name']
+        
+        sib_service.transaction_email.OrderConfirmationEmail(shop=shop, order=order, campaign=campaign, to=["derekhwang33@gmail.com"], cc=[]).send()
+        print ('poooooop')
 
         # sib.transaction_email.RegistraionConfirmationEmail(first_name="first_name",email="email",password="password", to="alphatw22193@gmail.com").send()
 

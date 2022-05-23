@@ -1,4 +1,4 @@
-from ._rq import redis_connection,campaign_queue,comment_queue
+from ._rq import redis_connection,campaign_queue,comment_queue, email_queue
 from rq.job import Job
 
 def exists(job_id):
@@ -12,6 +12,20 @@ def enqueue_comment_queue(job,campaign, platform_name, platform, uni_format_comm
     comment_queue.enqueue(job, args=(campaign, platform_name, platform,
                                   uni_format_comment, order_codes_mapping), result_ttl=10, failure_ttl=10)
     pass
+
+def enqueue_email_queue(job, subject, email, template, parameters, file, lang):
+
+    email_queue.enqueue(
+        job,
+        kwargs={
+            "subject": subject,
+            "email": email, 
+            "template":template,
+            "parameters":parameters,
+            "file":file,
+            "lang":lang
+        }, result_ttl=10, failure_ttl=10)
+
 def get_job_status(job_id):
     job = Job.fetch(str(job_id), connection=redis_connection)
     return job, job.get_status(refresh=True)

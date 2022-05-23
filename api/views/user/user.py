@@ -41,7 +41,7 @@ from django.contrib.auth.models import User as AuthUser
 import pytz, stripe
 from backend.python_rq.python_rq import email_queue
 from business_policy.subscription_plan import SubscriptionPlan
-from service.email.email_service import EmailService
+
 
 from django.http import HttpResponse
 import xlsxwriter
@@ -144,7 +144,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 data = result.data
             else:
                 serializer = self.get_serializer(queryset, many=True)
-                data = serializer.dat
+                data = serializer.data
 
             return Response(data, status=status.HTTP_200_OK)
         except FieldError:
@@ -749,14 +749,14 @@ class UserViewSet(viewsets.ModelViewSet):
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
         code = PasswordResetCodeManager.generate(auth_user.id,user_subscription.lang)
 
-        EmailService.send_email_template(
+        service.email.email_service.EmailService.send_email_template(
             i18n_get_reset_password_mail_subject(user_subscription.lang),
             email,
             "email_reset_password_link.html",
             {"url":settings.GCP_API_LOADBALANCER_URL +"/lss/#/password/reset","code":code,"username":auth_user.username},
             lang=user_subscription.lang)
 
-        return Response({"message":"The email has been sent"}, status=status.HTTP_200_OK)
+        return Response({"message":"The email has been sent. If you haven't received the email after a few minutes, please check your spam folder. "}, status=status.HTTP_200_OK)
 
     
     @action(detail=False, methods=['POST'], url_path=r'password/reset')

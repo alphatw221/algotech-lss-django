@@ -707,7 +707,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             'name': api_user_user_subscription.name,
             'phone': api_user.phone,
             'email': api_user.email,
-            'period': api_user_user_subscription.expired_at.strftime("%Y/%m/%d, %H:%M:%S"),
+            'period': api_user_user_subscription.expired_at.strftime("%d %b %Y, %H:%M"),
             'country_code': api_user_user_subscription.meta_country.get('activated_country')[0],
             'currency': api_user_user_subscription.currency
         }
@@ -756,7 +756,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             "payment_amount":amount,
             "user_plan":plan,
             "adjust_amount":adjust_amount,
-            "currency": api_user_subscription.currency
+            "currency": country_plan.currency
         }, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['POST'], url_path=r'upgrade')
@@ -785,6 +785,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
         email = kwargs.get('email')
         amount = kwargs.get('amount')
+        adjust_amount = kwargs.get('adjust_amount')
 
         now = datetime.now(pytz.timezone(timezone)) if timezone in pytz.common_timezones else datetime.now()
         expired_at = now+timedelta(days=90) if period == "quarter" else now+timedelta(days=365)
@@ -795,7 +796,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             started_at=now, 
             user_plan= {"activated_platform" : ["facebook","youtube","instagram"]}, 
             meta = {"stripe payment intent":intentSecret},
-            purchase_price=amount
+            purchase_price=amount+adjust_amount
         )
         
         ret = {

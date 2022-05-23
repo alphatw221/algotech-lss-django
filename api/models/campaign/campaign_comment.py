@@ -21,6 +21,15 @@ class CampaignComment(models.Model):
     customer_name=models.CharField(max_length=255, null=True, blank=True)
     image=models.CharField(max_length=255, null=True, blank=True)
     categories=models.JSONField(default=list, null=True, blank=True)
+    main_categories=models.JSONField(default=list, null=True, blank=True)
+
+
+
+class CampaignCommentSerializerTest(serializers.ModelSerializer):
+    class Meta:
+        model = CampaignComment
+        exclude=['id', 'created_time']
+
 
 class CampaignCommentSerializer(serializers.ModelSerializer):
     class Meta:
