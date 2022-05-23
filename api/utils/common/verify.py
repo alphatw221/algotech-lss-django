@@ -363,6 +363,7 @@ class Verify():
                 status_code, response = api_fb_get_page_posts(page_token=officiall_page_token, page_id=officiall_page_id, limit=1)
                 if status_code == 200:
                     return True
+                print(response)    #for debug
                 return False
             elif platform_name == 'youtube':
                 status_code, response = api_youtube_get_list_channel_by_token(access_token=officiall_page_token)
