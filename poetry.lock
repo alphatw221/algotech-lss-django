@@ -402,6 +402,19 @@ argon2 = ["argon2-cffi (>=19.1.0)"]
 bcrypt = ["bcrypt"]
 
 [[package]]
+name = "django-channels-jwt-auth-middleware"
+version = "1.0.0"
+description = "JWT Auth Middleware for Django Channels"
+category = "main"
+optional = false
+python-versions = ">=3.8"
+
+[package.dependencies]
+channels = ">=3.0.0"
+django = ">=3.1.0"
+pyjwt = ">=2.0.0"
+
+[[package]]
 name = "django-common-helpers"
 version = "0.9.2"
 description = "Common things every Django app needs!"
@@ -2132,7 +2145,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "994521c584170c23dcdb40d3bf72202b06a1f03300b9d3bae209f594bd8b01f5"
+content-hash = "d785b7d748be26b70f4c113d15b29b38f9bc2992953fd8b3e4266df31815e9bc"
 
 [metadata.files]
 aioredis = [
@@ -2366,6 +2379,9 @@ deprecated = [
 django = [
     {file = "Django-3.2.8-py3-none-any.whl", hash = "sha256:42573831292029639b798fe4d3812996bfe4ff3275f04566da90764daec011a5"},
     {file = "Django-3.2.8.tar.gz", hash = "sha256:f6d2c4069c9b9bfac03bedff927ea1f9e0d29e34525cec8a68fd28eb2a8df7af"},
+]
+django-channels-jwt-auth-middleware = [
+    {file = "django-channels-jwt-auth-middleware-1.0.0.tar.gz", hash = "sha256:7fdaaf419ef7f800d0da990d8e0ca53f7d120a66de7fb4446f77607ea3b3dd76"},
 ]
 django-common-helpers = [
     {file = "django-common-helpers-0.9.2.tar.gz", hash = "sha256:2d56be6fa261d829a6a224f189bf276267b9082a17d613fe5f015dd4d65c17b4"},

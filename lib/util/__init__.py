@@ -1,1 +1,1 @@
-from . import getter, logger, marking_tool
+from . import getter, logger, marking_tool,  verify
