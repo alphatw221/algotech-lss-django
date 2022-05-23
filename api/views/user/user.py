@@ -128,8 +128,6 @@ class UserViewSet(viewsets.ModelViewSet):
         try:
             search_column = request.query_params.get('search_column')
             keyword = request.query_params.get('keyword')
-            print(search_column)
-            print(keyword)
             kwargs = {}
             if (search_column in ["", None]) and (keyword not in [None, ""]):
                 raise ApiVerifyError("search_column field can not be empty when keyword has value")
