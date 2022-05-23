@@ -1,7 +1,9 @@
 from django.urls import re_path
-
-from . import consumers
+from lss import consumers
 
 websocket_urlpatterns = [
-    re_path(r'ws/chat/(?P<room_name>\w+)/$', consumers.ChatConsumer.as_asgi()),
+    
+    re_path(r'ws/campaign/(?P<campaign_id>\w+)/$', consumers.campaign.CampaignLiveConsumer.as_asgi()),
+    re_path(r'ws/login/', consumers.user.LoginConsumer.as_asgi()),
+
 ]

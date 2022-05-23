@@ -49,7 +49,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # self.test_user_plan()
-        self.test_send_email()
+        self.test_websocket()
 
     def modify_database(self):
         from api.models.user.user_subscription import UserSubscription
@@ -343,3 +343,11 @@ class Command(BaseCommand):
         ])
         l = list(cursor)
         pprint(l)
+
+    def test_websocket(self):
+
+        from asgiref.sync import async_to_sync
+        from channels.layers import get_channel_layer
+        channel_layer = get_channel_layer()
+        # async_to_sync(channel_layer.send)("channel_name", {"type": "chat.force_disconnect"})
+        async_to_sync(channel_layer.group_send)("user_subscription_1", {"type": "notification_message","message":"testtest"})
