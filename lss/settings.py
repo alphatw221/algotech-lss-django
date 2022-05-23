@@ -452,9 +452,11 @@ ASGI_APPLICATION = 'lss.asgi.application'
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            "hosts": [('127.0.0.1', 6379)],
+        'CONFIG': 
+        {
             # "hosts": [('127.0.0.1', 6379)],
-        },
+            "hosts": [r"redis://:algo83111T%%@34.124.140.74:6379/0"],
+        }
+        ,
     },
 }
