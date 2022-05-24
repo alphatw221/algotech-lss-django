@@ -13,11 +13,7 @@
         const roomName = JSON.parse(document.getElementById('room-name').textContent);
 
         const chatSocket = new WebSocket(
-            'ws://'
-            + window.location.host
-            + '/ws/chat/'
-            + roomName
-            + '/'
+            'ws://gipassl.algotech.app:80/ws/login/?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjUzODg5MzE5LCJpYXQiOjE2NTMyODQ1MTksImp0aSI6IjFmMjM4Y2FjYzQ0YzQxMjg4NThmNDdiNzFjMjExMTNkIiwidXNlcl9pZCI6MzQxLCJkYXRhIjp7ImF1dGhfdXNlcl9pZCI6MzQxLCJzZWxsZXJfaWQiOjM3NSwiY3VzdG9tZXJfaWQiOjM4MiwibmFtZSI6IllpLUhzdWVoIExpbiIsImVtYWlsIjoiYWxwaGF0dzIyMTkzQGdtYWlsLmNvbSJ9fQ.ZiJMQVXi1ereZAqhtmewXuN6xLFSGoFqxrPVLQTAeaQ'
         );
 
         chatSocket.onmessage = function(e) {
@@ -26,7 +22,9 @@
             console.log(data)
             document.querySelector('#chat-log').value += (data.message + '\n');
         };
-
+        chatSocket.onopen = ()=>{
+            console.log('connected')
+        }
         chatSocket.onclose = function(e) {
             console.error('Chat socket closed unexpectedly');
         };

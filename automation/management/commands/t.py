@@ -353,6 +353,6 @@ class Command(BaseCommand):
         # async_to_sync(channel_layer.send)("channel_name", {"type": "chat.force_disconnect"})
         # async_to_sync(channel_layer.group_send)("user_subscription_1", {"type": "notification_message","data":{"message":"testmessage"}})
 
-        async_to_sync(channel_layer.group_send)("campaign_440", {"type": "comment_data","data":{"message":"testmessage"}})
-        async_to_sync(channel_layer.group_send)("campaign_440", {"type": "order_data","data":{"message":"testmessage"}})
-        async_to_sync(channel_layer.group_send)("campaign_440", {"type": "product_data","data":{"message":"testmessage"}})
+        async_to_sync(channel_layer.group_send)("campaign_443", {"type": "comment_data","data":{"message":"testmessage"}})
+        # async_to_sync(channel_layer.group_send)("campaign_440", {"type": "order_data","data":{"message":"testmessage"}})
+        # async_to_sync(channel_layer.group_send)("campaign_440", {"type": "product_data","data":{"message":"testmessage"}})
