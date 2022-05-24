@@ -58,7 +58,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'django_extensions',
     'webpack_loader',
-    'channels'
+    'channels',
+    'api_v2'
 ]
 
 LOGGING = {

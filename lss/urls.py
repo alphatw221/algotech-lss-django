@@ -29,6 +29,7 @@ from lss.views.chat import index,room
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),
+    path('api/v2/', include('api_v2.urls')),
     path('chat_bot/', include('chat_bot.urls')),
 
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
