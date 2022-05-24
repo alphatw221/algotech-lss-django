@@ -1,3 +1,7 @@
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+
+from rest_framework.parsers import MultiPartParser
 from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
@@ -9,6 +13,7 @@ from api import utils
 
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 
+import json
 
 class ProductPagination(PageNumberPagination):
     page_query_param = 'page'
@@ -44,3 +49,28 @@ class ProductViewSet(viewsets.ModelViewSet):
             data = serializer.data
 
         return Response(data, status=status.HTTP_200_OK)
+    
+    # @action(detail=True, methods=['PUT'], url_path=r'update_product', parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated,))
+    # @api_error_handler
+    # def update_product(self, request, pk=None):
+
+    #     api_user = utils.common.verify.Verify.get_seller_user(request)
+    #     user_subscription = utils.common.verify.Verify.get_user_subscription_from_api_user(api_user)
+    #     product = utils.common.verify.Verify.get_product_from_user_subscription(user_subscription, pk)
+
+    #     text = request.data['text']
+    #     data = json.loads(text)
+
+    #     image = request.data.get('image',None)
+    #     if image:
+    #         image_path = default_storage.save(
+    #             f'{user_subscription.id}/product/{product.id}/{image.name}', ContentFile(image.read()))
+    #         data['image'] = image_path
+            
+    #     serializer = models.product.product.ProductSerializer(
+    #         product, data=data, partial=True)
+    #     if not serializer.is_valid():
+    #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    #     serializer.save()
+
+    #     return Response(serializer.data, status=status.HTTP_200_OK)
