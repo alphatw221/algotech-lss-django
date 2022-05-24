@@ -1,6 +1,7 @@
 from abc import abstractclassmethod
 from django.conf import settings
 from api.utils.common.verify import Verify
+import business_policy
 import service
 
 class MetaMark():
@@ -51,12 +52,13 @@ class NewUserMark(MetaMark):
                 return
             
             user_subscription = Verify.get_user_subscription_from_api_user(api_user)
-            # service.sendinblue.transaction_email.WelcomeEmail(
-            #     first_name=api_user.name,
-            #     to=[api_user.email],
-            #     cc=[settings.NOTIFICATION_EMAIL],
-            #     lang=user_subscription.lang).send()
-            print('first login')
+
+            country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(user_subscription.country)
+            service.sendinblue.transaction_email.WelcomeEmail(
+                first_name=api_user.name,
+                to=[api_user.email],
+                cc=country_plan.cc,
+                lang=user_subscription.lang).send()
 
             cls._erase_mark(api_user, save = save)
         except Exception as e:
