@@ -112,7 +112,7 @@ def capture_facebook(campaign, logs):
                 }
             db.api_campaign_comment.insert_one(uni_format_comment)
             
-            service.channels.campaign.send_comment_data(campaign.id, uni_format_comment)
+            service.channels.campaign.send_comment_data(campaign['id'], uni_format_comment)
             service.rq.job.enqueue_comment_queue(jobs.comment_job.comment_job,campaign, 'facebook', facebook_page, uni_format_comment, order_codes_mapping)
             comment_capture_since = comment['created_time']
     except Exception as e:
