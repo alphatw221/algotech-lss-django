@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'django_extensions',
     'webpack_loader',
     'channels'
+    'api_v2'
 ]
 
 LOGGING = {

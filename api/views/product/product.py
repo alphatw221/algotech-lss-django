@@ -20,10 +20,8 @@ from api.utils.error_handle.error_handler.api_error_handler import api_error_han
 
 
 class ProductPagination(PageNumberPagination):
-
     page_query_param = 'page'
     page_size_query_param = 'page_size'
-
 
 class ProductViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
