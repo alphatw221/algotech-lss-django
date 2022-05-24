@@ -16,7 +16,6 @@ import service
 import requests
 import traceback
 from dateutil import parser
-
 class OrderCodesMappingSingleton:
 
     order_codes_mapping = None
@@ -112,6 +111,8 @@ def capture_facebook(campaign, logs):
                 "categories":service.nlp.classification.classify_comment_v1(texts=[[comment['message']]],threshold=0.9)
                 }
             db.api_campaign_comment.insert_one(uni_format_comment)
+            
+            service.channels.campaign.send_comment_data(campaign.id, uni_format_comment)
             service.rq.job.enqueue_comment_queue(jobs.comment_job.comment_job,campaign, 'facebook', facebook_page, uni_format_comment, order_codes_mapping)
             comment_capture_since = comment['created_time']
     except Exception as e:
