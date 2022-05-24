@@ -121,8 +121,8 @@ class SubscriptionPlan:
         plans = {
             "trial" :{"text": "Free Trial", "price":{"month":0}},
             "lite" : {"text": "Lite", "price":{"quarter":900,"year":3240}},
-            "standard" : {"text": "Standard", "price":{"quarter":1800,"year":6480}},
-            "premium" : {"text": "Premium", "price":{"quarter":2700,"year":9720}},
+            "standard" : {"text": "Standard", "price":{"quarter":2700,"year":9720}},
+            "premium" : {"text": "Premium", "price":{"quarter":5400,"year":19440}},
         }
    
 
