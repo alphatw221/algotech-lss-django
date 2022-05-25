@@ -31,7 +31,7 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(token, status=status.HTTP_200_OK)
 
 
-    @action(detail=False, methods=['POST'], url_path=r'buyer/login/google')
+    @action(detail=False, methods=['POST'], url_path=r'buyer/login/google', permission_classes=())
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def customer_google_login(self, request):
 
