@@ -55,6 +55,7 @@ from api import rule
 import service
 import business_policy
 import lib
+from automation import jobs
 
 platform_info_dict={'facebook':'facebook_info', 'youtube':'youtube_info', 'instagram':'instagram_info', 'google':'google_info'}
 
@@ -128,8 +129,6 @@ class UserViewSet(viewsets.ModelViewSet):
         try:
             search_column = request.query_params.get('search_column')
             keyword = request.query_params.get('keyword')
-            print(search_column)
-            print(keyword)
             kwargs = {}
             if (search_column in ["", None]) and (keyword not in [None, ""]):
                 raise ApiVerifyError("search_column field can not be empty when keyword has value")
@@ -617,7 +616,7 @@ class UserViewSet(viewsets.ModelViewSet):
             expiry_date=int(expired_at.replace(hour=0,minute=0,second=0,microsecond=0).timestamp()*1000)
         )
         
-        service.sendinblue.transaction_email.AccountActivationEmail(firstName, plan, email, password, to=[email], cc=[settings.NOTIFICATION_EMAIL], country=country).send()
+        service.sendinblue.transaction_email.AccountActivationEmail(firstName, plan, email, password, to=[email], cc=country_plan.cc, country=country).send()
         
         return Response(ret, status=status.HTTP_200_OK)
     
@@ -750,6 +749,7 @@ class UserViewSet(viewsets.ModelViewSet):
         code = PasswordResetCodeManager.generate(auth_user.id,user_subscription.lang)
 
         service.email.email_service.EmailService.send_email_template(
+            jobs.send_email_job.send_email_job,
             i18n_get_reset_password_mail_subject(user_subscription.lang),
             email,
             "email_reset_password_link.html",

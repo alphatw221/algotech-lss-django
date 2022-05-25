@@ -112,6 +112,18 @@ class Verify():
         return api_user
 
     @staticmethod
+    def get_seller_user_from_scope(scope):
+        auth_user = scope.get('user')
+        if not auth_user:
+            raise ApiVerifyError('no api_user found')
+        if not auth_user.api_users.filter(type='user').exists():
+            raise ApiVerifyError('no api_user found')
+        api_user = auth_user.api_users.get(type='user')
+        if api_user.status != "valid":
+            raise ApiVerifyError("not activated user")
+        return api_user
+
+    @staticmethod
     def verify_user(api_user):
         if not api_user:
             raise ApiVerifyError("no user found")
@@ -363,7 +375,6 @@ class Verify():
                 status_code, response = api_fb_get_page_posts(page_token=officiall_page_token, page_id=officiall_page_id, limit=1)
                 if status_code == 200:
                     return True
-                print(response)    #for debug
                 return False
             elif platform_name == 'youtube':
                 status_code, response = api_youtube_get_list_channel_by_token(access_token=officiall_page_token)

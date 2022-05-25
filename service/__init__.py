@@ -1,1 +1,1 @@
-from . import sendinblue,nlp,hubspot,rq,redis,facebook,youtube,instagram,email
+from . import sendinblue,nlp,hubspot,rq,redis,facebook,youtube,instagram,email,channels

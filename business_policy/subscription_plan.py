@@ -24,6 +24,7 @@ class SubscriptionPlan:
         promo_discount_rate=0.9
         currency = "USD"
         language = "en"
+        cc = ['lss@algotech.app']
         plans = {
             "trial" :{"text": "Free Trial", "price":{"month":0}},
             "lite" : {"text": "Lite", "price":{"quarter":30,"year":108}},
@@ -36,6 +37,7 @@ class SubscriptionPlan:
         promo_discount_rate=0.9
         currency = "USD"
         language = "en"
+        cc = ['lss@algotech.app', 'hello@liveshowseller.ph']
         plans = {
             "trial" :{"text": "Free Trial", "price":{"month":0}},
             "lite" : {"text": "Lite", "price":{"quarter":30,"year":108}},
@@ -48,6 +50,7 @@ class SubscriptionPlan:
         promo_discount_rate=0.9
         currency = "USD"
         language = "en"
+        cc = ['lss@algotech.app']
         plans = {
             "trial" :{"text": "Free Trial", "price":{"month":0}},
             "lite" : {"text": "Lite", "price":{"quarter":30,"year":108}},
@@ -60,6 +63,7 @@ class SubscriptionPlan:
         promo_discount_rate=0.9
         currency = "USD"
         language = "en"
+        cc = ['lss@algotech.app']
         plans = {
             "trial" :{"text": "Free Trial", "price":{"month":0}},
             "lite" : {"text": "Lite", "price":{"quarter":30,"year":108}},
@@ -74,6 +78,7 @@ class SubscriptionPlan:
         promo_discount_rate=0.9
         currency = "USD"
         language = "id"
+        cc = ['lss@algotech.app', 'contact@liveshowseller.id']
         plans = {
             "trial" :{"text": "Free Trial", "price":{"month":0}},
             "lite" : {"text": "Lite", "price":{"quarter":30,"year":108}},
@@ -86,6 +91,7 @@ class SubscriptionPlan:
         promo_discount_rate=0.9
         currency = "USD"
         language = "en"
+        cc = ['lss@algotech.app']
         plans = {
             "trial" :{"text": "Free Trial", "price":{"month":0}},
             "lite" : {"text": "Lite", "price":{"quarter":30,"year":108}},
@@ -98,6 +104,7 @@ class SubscriptionPlan:
         promo_discount_rate=0.9
         currency = "USD"
         language = "en"
+        cc = ['lss@algotech.app']
         plans = {
             "trial" :{"text": "Free Trial", "price":{"month":0}},
             "lite" : {"text": "Lite", "price":{"quarter":30,"year":108}},
@@ -110,11 +117,12 @@ class SubscriptionPlan:
         promo_discount_rate=0.9
         currency = "TWD"
         language = "zh_hant"
+        cc = ['lss@algotech.app']
         plans = {
             "trial" :{"text": "Free Trial", "price":{"month":0}},
             "lite" : {"text": "Lite", "price":{"quarter":900,"year":3240}},
-            "standard" : {"text": "Standard", "price":{"quarter":1800,"year":6480}},
-            "premium" : {"text": "Premium", "price":{"quarter":2700,"year":9720}},
+            "standard" : {"text": "Standard", "price":{"quarter":2700,"year":9720}},
+            "premium" : {"text": "Premium", "price":{"quarter":5400,"year":19440}},
         }
    
 
@@ -123,6 +131,7 @@ class SubscriptionPlan:
         promo_discount_rate=0.9
         currency = "USD"
         language = "en"
+        cc = ['lss@algotech.app']
         plans = {
             "trial" :{"text": "Free Trial", "price":{"month":0}},
             "lite" : {"text": "Lite", "price":{"quarter":30,"year":108}},

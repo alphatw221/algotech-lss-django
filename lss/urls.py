@@ -25,9 +25,11 @@ from lss.views.custom_jwt import (CustomTokenObtainPairView,
 from django.views.generic import TemplateView
 
 from lss.views.email import test
+from lss.views.chat import index,room
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),
+    path('api/v2/', include('api_v2.urls')),
     path('chat_bot/', include('chat_bot.urls')),
 
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
@@ -48,5 +50,10 @@ urlpatterns = [
 
     re_path(r'^lss/',TemplateView.as_view(template_name="lss_entry.html")),
 
-    path('email/',test,name='test')
+    path('email/',test,name='test'),
+
+
+
+    path('chat/', index, name='index'),
+    path('chat/<str:room_name>/', room, name='room'),
 ]
