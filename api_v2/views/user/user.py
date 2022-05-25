@@ -26,14 +26,14 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['POST'], url_path=r'buyer/login/facebook', permission_classes=())
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def customer_login(self, request):
+    def buyer_login_with_facebook(self, request):
         token = lib.helper.login_helper.FacebookLogin.get_token(request.data.get('facebook_token'),user_type='customer')
         return Response(token, status=status.HTTP_200_OK)
 
 
     @action(detail=False, methods=['POST'], url_path=r'buyer/login/google', permission_classes=())
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def customer_google_login(self, request):
+    def buyer_login_with_google(self, request):
 
         token = lib.helper.login_helper.GoogleLogin.get_token(token=request.data.get('google_token'),user_type='customer')
         return Response(token, status=status.HTTP_200_OK)
@@ -41,6 +41,19 @@ class UserViewSet(viewsets.ModelViewSet):
 
 #-----------------------------------------seller----------------------------------------------------------------------------------------------
     
+    @action(detail=False, methods=['POST'], url_path=r'seller/login/facebook', permission_classes=())
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def seller_login_with_facebook(self, request):
+        token = lib.helper.login_helper.FacebookLogin.get_token(request.data.get('facebook_token'),user_type='user')
+        return Response(token, status=status.HTTP_200_OK)
+
+
+    @action(detail=False, methods=['POST'], url_path=r'seller/login/google', permission_classes=())
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def seller_login_with_google(self, request):
+
+        token = lib.helper.login_helper.GoogleLogin.get_token(token=request.data.get('google_token'),user_type='user')
+        return Response(token, status=status.HTTP_200_OK)
 
 
 
