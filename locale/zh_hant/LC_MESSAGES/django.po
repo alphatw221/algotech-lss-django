@@ -252,7 +252,7 @@ msgstr "重設密碼"
 
 #: templates/email_reset_password_link.html:21
 msgid "EMAIL/IF_YOU_CAN_NOT_CLICK"
-msgstr "如果無法點擊，請使用此連結:"
+msgstr "若您無法重設密碼，請在您的瀏覽器輸入此網址:"
 
 #: templates/email_reset_password_link.html:23
 msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT3"

@@ -735,7 +735,6 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['POST'], url_path=r'password/forgot')
     @api_error_handler
     def forget_password(self, request):
-        print("-----------------")
         email, = getdata(request, ("email",), required=True)
         email = email.lower() #TODO add in checkrule
         email = email.replace(" ", "") #TODO add in checkrule
@@ -778,7 +777,8 @@ class UserViewSet(viewsets.ModelViewSet):
             email,
             "reset_password_success_email.html",
             {"email":email,"username":auth_user.username},
-            lang=user_subscription.lang)
+            lang=user_subscription.lang
+        )
         
         return Response(ret, status=status.HTTP_200_OK)
 

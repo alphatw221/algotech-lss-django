@@ -255,7 +255,7 @@ msgstr "Reset Password"
 
 #: templates/email_reset_password_link.html:21
 msgid "EMAIL/IF_YOU_CAN_NOT_CLICK"
-msgstr "If you can't click, use this link:"
+msgstr "If you are having trouble resetting your password, please enter the URL in your browser."
 
 #: templates/email_reset_password_link.html:23
 msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT3"
