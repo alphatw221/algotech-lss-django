@@ -10,8 +10,9 @@ from rest_framework.response import Response
 
 from api import models
 from api import utils
-
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
+
+from backend.pymongo.mongodb import db
 
 import json
 
@@ -26,10 +27,10 @@ class ProductViewSet(viewsets.ModelViewSet):
     serializer_class = models.product.product.ProductSerializer
     pagination_class = ProductPagination
 
-    @action(detail=False, methods=['GET'], url_path=r'list_product', permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['GET'], url_path=r'list', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def list_product(self, request):
-        api_user, search_column, keyword = utils.common.common.getparams(request,("search_column", "keyword",),with_user=True,seller=True)
+        api_user, search_column, keyword, product_status = utils.common.common.getparams(request, ("search_column", "keyword", "product_status"), with_user=True, seller=True)
         user_subscription = utils.common.verify.Verify.get_user_subscription_from_api_user(api_user)
         
         kwargs = {}
@@ -37,6 +38,7 @@ class ProductViewSet(viewsets.ModelViewSet):
             raise utils.common.verify.ApiVerifyError("search_column field can not be empty when keyword has value")
         if (search_column not in ['undefined', '']) and (keyword not in ['undefined', '', None]):
             kwargs = { search_column + '__icontains': keyword }
+        kwargs['status'] = product_status
 
         queryset = user_subscription.products.all().order_by('id').filter(**kwargs)
         page = self.paginate_queryset(queryset)
@@ -49,7 +51,32 @@ class ProductViewSet(viewsets.ModelViewSet):
             data = serializer.data
 
         return Response(data, status=status.HTTP_200_OK)
+
+
+    @action(detail=False, methods=['GET'], url_path=r'list/category', permission_classes=(IsAuthenticated,))
+    @api_error_handler
+    def list_category(self, request):
+        api_user, = utils.common.common.getparams(request, (), with_user=True, seller=True)
+        user_subscription = utils.common.verify.Verify.get_user_subscription_from_api_user(api_user)
+
+        categories_list = user_subscription.meta.get('categories', [])
+        return Response(categories_list, status=status.HTTP_200_OK)
     
+
+    @action(detail=False, methods=['GET'], url_path=r'create/category', permission_classes=(IsAuthenticated,))
+    @api_error_handler
+    def create_category(self, request):
+        api_user, category_name = utils.common.common.getparams(request, ("category_name", ), with_user=True, seller=True)
+        user_subscription = utils.common.verify.Verify.get_user_subscription_from_api_user(api_user)
+
+        categories_list = user_subscription.meta.get('categories', [])
+        categories_list.append(category_name)
+        user_subscription.meta['categories'] = categories_list
+        user_subscription.save()
+
+        return Response(categories_list, status=status.HTTP_200_OK)
+    
+
     # @action(detail=True, methods=['PUT'], url_path=r'update_product', parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated,))
     # @api_error_handler
     # def update_product(self, request, pk=None):

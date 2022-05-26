@@ -207,7 +207,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         total_count, num_col_total = 0, 0
 
         campaign_orders = db.api_order.find({'campaign_id': int(campaign_id)})
-        campaign_pre_orders = db.api_pre_order.find({'campaign_id': int(campaign_id)})
+        campaign_pre_orders = db.api_pre_order.find({'campaign_id': int(campaign_id), 'products': {'$ne': {}}})
 
         for campaign_order in campaign_orders:
             for column_title in column_list:
