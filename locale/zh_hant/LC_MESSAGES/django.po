@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-04 10:08+0000\n"
+"POT-Creation-Date: 2022-05-26 04:00+0000\n"
 "PO-Revision-Date: 2021-12-13 15:50+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -159,8 +159,13 @@ msgid "ITEM_INFO{name}{qty}{dollar_sign}{total}\n"
 msgstr "{name} 數量：{qty} {dollar_sign}{total}\n"
 
 #: backend/i18n/email/subject.py:8 templates/email_reset_password_link.html:7
+#: templates/reset_password_success_email.html:7
 msgid "EMAIL/PASSWORD_RESET_LINK/SUBJECT"
 msgstr "Live Show Seller 重設密碼通知"
+
+#: backend/i18n/email/subject.py:11
+msgid "EMAIL/PASSWORD_RESET_SUCCESS/SUBJECT"
+msgstr "Live Show Seller 修改密碼成功通知"
 
 #: backend/i18n/register_confirm_mail.py:17 lib/i18n/email/password_reset.py:5
 msgid "MAIL_SUBJECT_WELCOME"
@@ -232,6 +237,7 @@ msgid "PAYMENT/FIRST_DATA/TIME_ZONE"
 msgstr "時區"
 
 #: templates/email_reset_password_link.html:12
+#: templates/reset_password_success_email.html:12
 msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT1"
 msgstr "您好 "
 
@@ -245,20 +251,25 @@ msgid "EMAIL/PASSWORD_RESET_LINK/BUTTON"
 msgstr "重設密碼"
 
 #: templates/email_reset_password_link.html:21
+msgid "EMAIL/IF_YOU_CAN_NOT_CLICK"
+msgstr "如果無法點擊，請使用此連結:"
+
+#: templates/email_reset_password_link.html:23
 msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT3"
 msgstr ""
 "若您忽略此封信件, 原本的密碼不會有所變更。若您並沒有要求重設密碼, 請與我們聯"
 "繫。"
 
-#: templates/email_reset_password_link.html:23
+#: templates/email_reset_password_link.html:25
+#: templates/reset_password_success_email.html:17
 msgid "CONTACT_INFO/EMAIL"
 msgstr "電子信箱: app@algotech.app"
 
-#: templates/email_reset_password_link.html:24
+#: templates/email_reset_password_link.html:26
 msgid "CONTACT_INFO/PHONE"
 msgstr "聯絡電話: +65 9489 2086"
 
-#: templates/email_reset_password_link.html:25
+#: templates/email_reset_password_link.html:27
 msgid "CONTACT_INFO/ADDRESS"
 msgstr ""
 
@@ -348,17 +359,13 @@ msgstr ""
 msgid "CONGRATS_2_WELCOME"
 msgstr ""
 
-#~ msgid "MESSAGE_HEADER"
-#~ msgstr "訂單明細："
-
-msgid "EMAIL/PASSWORD_RESET_SUCCESS/SUBJECT"
-msgstr "Live Show Seller - 修改密碼成功通知"
-
+#: templates/reset_password_success_email.html:15
 msgid "EMAIL/PASSWORD_RESET_SUCCESS/CONTENT1"
 msgstr "您在Live Show Seller 所使用的帳號"
 
+#: templates/reset_password_success_email.html:15
 msgid "EMAIL/PASSWORD_RESET_SUCCESS/CONTENT2"
 msgstr "已成功修改密碼. 若您沒有要求修改密碼, 請立即聯絡我們的客服專員。"
 
-msgid "EMAIL/IF_YOU_CAN_NOT_CLICK"
-msgstr "如果無法點擊，請使用此連結:"
+#~ msgid "MESSAGE_HEADER"
+#~ msgstr "訂單明細："
