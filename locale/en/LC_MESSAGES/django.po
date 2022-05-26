@@ -355,3 +355,16 @@ msgstr "Let’s start selling live now!"
 #: templates/register_confirmation.html:46
 msgid "CONGRATS_2_WELCOME"
 msgstr "Cheers,"
+
+msgid "EMAIL/PASSWORD_RESET_SUCCESS/SUBJECT"
+msgstr "Your Live Show Seller password has been successfully changed"
+
+msgid "EMAIL/PASSWORD_RESET_SUCCESS/CONTENT1"
+msgstr "The password for your Live Show Seller account"
+
+msgid "EMAIL/PASSWORD_RESET_SUCCESS/CONTENT2"
+msgstr "has been successfully changed . If you did not request this change, please contact support immediately."
+
+msgid "EMAIL/IF_YOU_CAN_NOT_CLICK"
+msgstr "If you can't click, use this link:"
+

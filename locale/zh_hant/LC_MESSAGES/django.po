@@ -350,3 +350,15 @@ msgstr ""
 
 #~ msgid "MESSAGE_HEADER"
 #~ msgstr "訂單明細："
+
+msgid "EMAIL/PASSWORD_RESET_SUCCESS/SUBJECT"
+msgstr "Live Show Seller - 修改密碼成功通知"
+
+msgid "EMAIL/PASSWORD_RESET_SUCCESS/CONTENT1"
+msgstr "您在Live Show Seller 所使用的帳號"
+
+msgid "EMAIL/PASSWORD_RESET_SUCCESS/CONTENT2"
+msgstr "已成功修改密碼. 若您沒有要求修改密碼, 請立即聯絡我們的客服專員。"
+
+msgid "EMAIL/IF_YOU_CAN_NOT_CLICK"
+msgstr "如果無法點擊，請使用此連結:"
