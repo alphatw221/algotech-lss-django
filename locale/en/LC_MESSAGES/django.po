@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-04 10:08+0000\n"
+"POT-Creation-Date: 2022-05-26 06:46+0000\n"
 "PO-Revision-Date: 2021-12-13 15:51+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -161,8 +161,13 @@ msgid "ITEM_INFO{name}{qty}{dollar_sign}{total}\n"
 msgstr "{name} Qty:{qty} {dollar_sign}{total}\n"
 
 #: backend/i18n/email/subject.py:8 templates/email_reset_password_link.html:7
+#: templates/reset_password_success_email.html:7
 msgid "EMAIL/PASSWORD_RESET_LINK/SUBJECT"
 msgstr "Live Show Seller Password Reset"
+
+#: backend/i18n/email/subject.py:12
+msgid "EMAIL/PASSWORD_RESET_SUCCESS/SUBJECT"
+msgstr "Your Live Show Seller password has been successfully changed"
 
 #: backend/i18n/register_confirm_mail.py:17 lib/i18n/email/password_reset.py:5
 msgid "MAIL_SUBJECT_WELCOME"
@@ -234,6 +239,7 @@ msgid "PAYMENT/FIRST_DATA/TIME_ZONE"
 msgstr "Time Zone"
 
 #: templates/email_reset_password_link.html:12
+#: templates/reset_password_success_email.html:12
 msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT1"
 msgstr "Hello "
 
@@ -248,20 +254,27 @@ msgid "EMAIL/PASSWORD_RESET_LINK/BUTTON"
 msgstr "Reset Password"
 
 #: templates/email_reset_password_link.html:21
+msgid "EMAIL/IF_YOU_CAN_NOT_CLICK"
+msgstr ""
+"If you are having trouble resetting your password, please enter the URL in "
+"your browser."
+
+#: templates/email_reset_password_link.html:23
 msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT3"
 msgstr ""
 "If you ignore this message, your password will not be changed. If you didn’t "
 "request a password reset, let us know. "
 
-#: templates/email_reset_password_link.html:23
+#: templates/email_reset_password_link.html:25
+#: templates/reset_password_success_email.html:17
 msgid "CONTACT_INFO/EMAIL"
 msgstr "Email: app@algotech.app"
 
-#: templates/email_reset_password_link.html:24
+#: templates/email_reset_password_link.html:26
 msgid "CONTACT_INFO/PHONE"
 msgstr "Contact Number: +65 9489 2086"
 
-#: templates/email_reset_password_link.html:25
+#: templates/email_reset_password_link.html:27
 msgid "CONTACT_INFO/ADDRESS"
 msgstr "Address: 8 Burn Road #15-13, Singapore 369977"
 
@@ -355,3 +368,13 @@ msgstr "Let’s start selling live now!"
 #: templates/register_confirmation.html:46
 msgid "CONGRATS_2_WELCOME"
 msgstr "Cheers,"
+
+#: templates/reset_password_success_email.html:15
+msgid "EMAIL/PASSWORD_RESET_SUCCESS/CONTENT1"
+msgstr "The password for your Live Show Seller account"
+
+#: templates/reset_password_success_email.html:15
+msgid "EMAIL/PASSWORD_RESET_SUCCESS/CONTENT2"
+msgstr ""
+"has been successfully changed.\n"
+"If you did not request this change, please contact support immediately."
