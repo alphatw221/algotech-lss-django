@@ -746,10 +746,9 @@ class UserViewSet(viewsets.ModelViewSet):
         api_user = User.objects.get(email=email,type='user')
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
         code = PasswordResetCodeManager.generate(auth_user.id,user_subscription.lang)
-
         service.email.email_service.EmailService.send_email_template(
             jobs.send_email_job.send_email_job,
-            i18n_get_reset_password_mail_subject(user_subscription.lang),
+            i18n_get_reset_password_mail_subject(lang=user_subscription.lang),
             email,
             "email_reset_password_link.html",
             {"url":settings.GCP_API_LOADBALANCER_URL +"/lss/#/password/reset","code":code,"username":auth_user.username},
@@ -773,7 +772,7 @@ class UserViewSet(viewsets.ModelViewSet):
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
         service.email.email_service.EmailService.send_email_template(
             jobs.send_email_job.send_email_job,
-            i18n_get_reset_password_success_mail_subject(user_subscription.lang),
+            i18n_get_reset_password_success_mail_subject(lang=user_subscription.lang),
             email,
             "reset_password_success_email.html",
             {"email":email,"username":auth_user.username},
