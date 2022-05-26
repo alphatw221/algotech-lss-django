@@ -208,7 +208,7 @@ class PreOrderHelper():
                     'api_pre_order':api_pre_order,
                     })
 
-                api_pre_order['total']=api_pre_order['subtotal']+api_pre_order['shipping_cost']+api_pre_order['adjust_price']
+                # api_pre_order['total']=api_pre_order['subtotal']+api_pre_order['shipping_cost']+api_pre_order['adjust_price']
 
                 increment_id = get_incremented_filed(
                     collection_name="api_order", field_name="id", session=session)
