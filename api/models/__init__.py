@@ -1,1 +1,1 @@
-from . import auto_response,campaign,facebook,instagram,youtube,order,user
+from . import auto_response,campaign,facebook,instagram,youtube,order,user,product
