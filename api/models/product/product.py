@@ -64,7 +64,7 @@ class Product(models.Model):
 
     meta = models.JSONField(default=dict, null=True, blank=True)
     meta_logistic = models.JSONField(default=dict, null=True, blank=True)
-    tag = models.JSONField(default=dict, null=True, blank=True)
+    tag = models.JSONField(default=list, null=True, blank=True)
 
     def __str__(self):
         return self.name
