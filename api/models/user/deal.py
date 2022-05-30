@@ -26,17 +26,19 @@ class Deal(models.Model):
     PAYMENT_STATUS = [
         ('success', 'Success'),
         ('fail', 'Fail'),
+        ('processing', 'Processing'),
     ]
     user_subscription = models.ForeignKey(
         UserSubscription,  null=True, on_delete=models.SET_NULL, related_name='deals')
     original_plan = models.CharField(max_length=255, null=False, blank=False, choices=TYPE_CHOICES)
     purchased_plan = models.CharField(max_length=255, null=False, blank=False, choices=TYPE_CHOICES)
+    total = models.DecimalField(max_digits=99, decimal_places=2, blank=False, null=False)
     status = models.CharField(max_length=255, null=False, blank=False, choices=PAYMENT_STATUS)
     payer = models.ForeignKey(
         User,  null=True, on_delete=models.SET_NULL, related_name='deals')
-    payment_time = models.DateTimeField(auto_now_add=True)
+    payment_time = models.DateTimeField()
     meta = models.JSONField(null=True, blank=True, default=dict)
-    total = models.DecimalField(decimal_places=2, blank=False, null=False)
+    
     
     def __str__(self):
         return f'{str(self.purchased_plan)}'
