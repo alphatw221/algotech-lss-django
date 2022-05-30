@@ -82,7 +82,7 @@ class ProductViewSet(viewsets.ModelViewSet):
 
         return Response(categories_list, status=status.HTTP_200_OK)
 
-    
+    #TODO update all db product category
     @action(detail=False, methods=['POST'], url_path=r'update/category', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def update_category(self, request):
