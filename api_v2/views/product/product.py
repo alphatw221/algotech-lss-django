@@ -76,15 +76,17 @@ class ProductViewSet(viewsets.ModelViewSet):
 
         return Response(product_categories, status=status.HTTP_200_OK)
     
-    @action(detail=False, methods=['POST'], url_path=r'update/category', permission_classes=(IsAuthenticated,))
-    @api_error_handler
-    def update_category(self, request):
-        api_user, old_category, new_category = utils.common.common.getparams(request, ("old_category", "new_category"), with_user=True, seller=True)
-        user_subscription = utils.common.verify.Verify.get_user_subscription_from_api_user(api_user)
+    @action(detail=False, methods=['PUT'], url_path=r'category/update/(?P<category_name>[^/.]+)', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def update_category(self, request, category_name):
+        
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        update_name, = lib.util.getter.getdata(request,('category_name',),required=True)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
 
-        if old_category not in ['undefined', ''] and new_category not in ['undefined', '']:
+        if category_name not in ['undefined', ''] and update_name not in ['undefined', '']:
             categories_list = user_subscription.meta.get('categories', [])
-            categories_list = list(map(lambda x: x.replace(old_category, new_category), categories_list))            
+            categories_list = list(map(lambda x: x.replace(category_name, update_name), categories_list))            
             user_subscription.meta['categories'] = categories_list
             user_subscription.save()
 
