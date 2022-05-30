@@ -17,8 +17,8 @@ from api.utils.common.common import getdata
 from api.utils.common.common import getparams
 
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
-
-
+from api import rule
+import lib
 class ProductPagination(PageNumberPagination):
     page_query_param = 'page'
     page_size_query_param = 'page_size'
@@ -67,7 +67,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         return Response(data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['POST'], url_path=r'create_product', parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated,))
-    @api_error_handler
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def create_product(self, request):
 
         api_user = Verify.get_seller_user(request)
@@ -75,6 +75,8 @@ class ProductViewSet(viewsets.ModelViewSet):
 
         text = request.data['text']
         data = json.loads(text)
+
+        rule.rule_checker.product_rule_checker.ProductCreateRuleChecker.check(product_data = data)
         data['user_subscription'] = user_subscription.id
         serializer = self.get_serializer(data=data)
 
@@ -93,7 +95,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         return Response(ProductSerializer(product).data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['PUT'], url_path=r'update_product', parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated,))
-    @api_error_handler
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def update_product(self, request, pk=None):
 
         api_user = Verify.get_seller_user(request)
@@ -103,6 +105,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         text = request.data['text']
         data = json.loads(text)
 
+        rule.rule_checker.product_rule_checker.ProductCreateRuleChecker.check(product_data = data)
         image = request.data.get('image',None)
         if image:
             image_path = default_storage.save(
