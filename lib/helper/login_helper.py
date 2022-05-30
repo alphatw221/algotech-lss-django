@@ -108,40 +108,12 @@ class FacebookLogin():
 class GoogleLogin():
 
     @classmethod
-    def get_token(cls, code="", token="", user_type='customer'):
+    def get_token(cls, token="", user_type='customer'):
 
-        if user_type == 'customer':
-            identity_info = id_token.verify_oauth2_token(token, google_requests.Request(), settings.GOOGLE_OAUTH_CLIENT_ID_FOR_LIVESHOWSELLER)
+        identity_info = id_token.verify_oauth2_token(token, google_requests.Request(), settings.GOOGLE_OAUTH_CLIENT_ID_FOR_LIVESHOWSELLER)
 
-            google_id, google_name, google_picture, email = identity_info["sub"], identity_info["name"], identity_info["picture"], identity_info["email"]
-        elif user_type == 'user':
-            response = requests.post(
-                    url="https://accounts.google.com/o/oauth2/token",
-                    data={
-                        "code": code,
-                        "client_id": settings.GOOGLE_OAUTH_CLIENT_ID_FOR_LIVESHOWSELLER,
-                        "client_secret": settings.GOOGLE_OAUTH_CLIENT_SECRET_FOR_LIVESHOWSELLER,
-                        "redirect_uri": settings.WEB_SERVER_URL + "/google-redirect",
-                        "grant_type": "authorization_code"
-                    }
-                )
-
-            if not response.status_code / 100 == 2:
-                print(response.json())
-                raise ApiCallerError('get google token fail')
-
-            access_token = response.json().get("access_token")
-            refresh_token = response.json().get("refresh_token")
-
-            code, response = api_google_get_userinfo(access_token)
-
-            if code / 100 != 2:
-                print(response)
-                raise ApiCallerError("google user token invalid")
-
-            google_id, google_name, google_picture, email = response["id"], response["name"], response["picture"], response["email"]
-
-
+        google_id, google_name, google_picture, email = identity_info.get("sub"), identity_info.get("name"), identity_info.get("picture"), identity_info.get("email")
+        
 
         api_user_exists = models.user.user.User.objects.filter(
             email=email, type=user_type).exists()
@@ -176,9 +148,6 @@ class GoogleLogin():
         if user_type == 'user' and api_user.status != 'valid':
             raise ApiVerifyError('account not activated')
 
-        if user_type == 'user':
-            api_user.google_info["access_token"] = access_token
-            api_user.google_info['refresh_token'] = refresh_token
         api_user.google_info["id"] = google_id
         api_user.google_info["name"] = google_name
         api_user.google_info["picture"] = google_picture
@@ -194,5 +163,3 @@ class GoogleLogin():
             'access': str(refresh.access_token),
         }
 
-
-# def _

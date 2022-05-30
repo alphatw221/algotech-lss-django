@@ -47,7 +47,7 @@ from django.http import HttpResponse
 import xlsxwriter
 from backend.pymongo.mongodb import db
 from dateutil.relativedelta import relativedelta
-from backend.i18n.email.subject import i18n_get_reset_password_mail_subject
+from backend.i18n.email.subject import i18n_get_reset_password_mail_subject, i18n_get_reset_password_success_mail_subject
 from django.core.exceptions import FieldError
 
 import hashlib
@@ -735,7 +735,6 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['POST'], url_path=r'password/forgot')
     @api_error_handler
     def forget_password(self, request):
-
         email, = getdata(request, ("email",), required=True)
         email = email.lower() #TODO add in checkrule
         email = email.replace(" ", "") #TODO add in checkrule
@@ -747,10 +746,9 @@ class UserViewSet(viewsets.ModelViewSet):
         api_user = User.objects.get(email=email,type='user')
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
         code = PasswordResetCodeManager.generate(auth_user.id,user_subscription.lang)
-
         service.email.email_service.EmailService.send_email_template(
             jobs.send_email_job.send_email_job,
-            i18n_get_reset_password_mail_subject(user_subscription.lang),
+            i18n_get_reset_password_mail_subject(lang=user_subscription.lang),
             email,
             "email_reset_password_link.html",
             {"url":settings.GCP_API_LOADBALANCER_URL +"/lss/#/password/reset","code":code,"username":auth_user.username},
@@ -767,6 +765,19 @@ class UserViewSet(viewsets.ModelViewSet):
 
         SellerResetPasswordRuleChecker.check(**{"new_password":new_password})
         ret = PasswordResetCodeManager.execute(code, new_password)
+        
+        email = ret["Email"]
+        auth_user = AuthUser.objects.get(email=email)
+        api_user = User.objects.get(email=email,type='user')
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        service.email.email_service.EmailService.send_email_template(
+            jobs.send_email_job.send_email_job,
+            i18n_get_reset_password_success_mail_subject(lang=user_subscription.lang),
+            email,
+            "reset_password_success_email.html",
+            {"email":email,"username":auth_user.username},
+            lang=user_subscription.lang
+        )
         
         return Response(ret, status=status.HTTP_200_OK)
 
