@@ -10,8 +10,8 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 
 from api import models
-from api import utils
 import lib, json
+from api import rule
 
 class ProductPagination(PageNumberPagination):
     page_query_param = 'page'
@@ -38,7 +38,7 @@ class ProductViewSet(viewsets.ModelViewSet):
             raise lib.error_handle.error.api_error.ApiVerifyError("search_column field can not be empty when keyword has value")
         if (search_column not in ['undefined', '']) and (keyword not in ['undefined', '', None]):
             kwargs = { search_column + '__icontains': keyword }
-        if category not in ['undefined', '']:
+        if category not in ['undefined', '', None]:
             kwargs = { 'tag__icontains': category }
 
         queryset = user_subscription.products.filter(**kwargs)
@@ -60,30 +60,31 @@ class ProductViewSet(viewsets.ModelViewSet):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
 
-        text = request.data['text']
-        data = json.loads(text)
-        data['user_subscription'] = user_subscription.id
-        data['tag'] = data['categories']
-        
-        categories_list = user_subscription.meta.get('categories', [])
-        for category in data['categories']:
-            if category not in categories_list:
-                categories_list.append(category)
-                user_subscription.meta['categories'] = categories_list
-                user_subscription.save()
+        image, category = lib.util.getter.getdata(request,('image', 'category'), required=False)
+        data, = lib.util.getter.getdata(request,('data',),required=True)
+        data = json.loads(data)
 
-        serializer = self.get_serializer(data=data)
+        rule.rule_checker.product_rule_checker.ProductCreateRuleChecker.check(product_data=data)
+
+        serializer=models.product.product.ProductSerializerCreate(data = data) 
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         product = serializer.save()
-
-        image = request.data.get('image',None)
+        
         if image:
             image_path = default_storage.save(
                 f'{user_subscription.id}/product/{product.id}/{image.name}', ContentFile(image.read()))
             product.image = image_path
+        
+        product.user_subscription = user_subscription
+        product.category = category if category else None
+        product.save()
 
-            product.save()
+        product_categories = user_subscription.meta.get('product_categories', [])
+        if category and category not in product_categories:
+            product_categories.append(category)
+            user_subscription.meta['product_categories'] = product_categories
+            user_subscription.save()
 
         return Response(models.product.product.ProductSerializer(product).data, status=status.HTTP_200_OK)
 
@@ -93,35 +94,44 @@ class ProductViewSet(viewsets.ModelViewSet):
     def update_product(self, request, pk=None):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
-        product = utils.common.verify.Verify.get_product_from_user_subscription(user_subscription, pk)
+        product = lib.util.verify.Verify.get_product_from_user_subscription(user_subscription, pk)
 
-        text = request.data['text']
-        data = json.loads(text)
-        print (data)
-        data['user_subscription'] = user_subscription.id
-        data['tag'] = data['categories']
+        image, category = lib.util.getter.getdata(request,('image', 'category'), required=False)
+        data, = lib.util.getter.getdata(request,('data',),required=True)
+        data = json.loads(data)
         
-        categories_list = user_subscription.meta.get('categories', [])
-        for category in data['categories']:
-            if category not in categories_list:
-                categories_list.append(category)
-                user_subscription.meta['categories'] = categories_list
-                user_subscription.save()
+        rule.rule_checker.product_rule_checker.ProductCreateRuleChecker.check(product_data=data)
 
-        image = request.data.get('image', None)
+        serializer=models.product.product.ProductSerializerUpdate(product, data=data, partial=True) 
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        product = serializer.save()
 
         if image:
             image_path = default_storage.save(
                 f'{user_subscription.id}/product/{product.id}/{image.name}', ContentFile(image.read()))
-            data['image'] = image_path
-            
-        serializer = models.product.product.ProductSerializer(
-            product, data=data, partial=True)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        serializer.save()
+            product.image = image_path
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        product.category = category if category else None
+        product.save()
+
+        product_categories = user_subscription.meta.get('product_categories', [])
+        if category and category not in product_categories:
+            product_categories.append(category)
+            user_subscription.meta['product_categories'] = product_categories
+            user_subscription.save()
+
+        return Response(models.product.product.ProductSerializer(product).data, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['DELETE'], url_path=r'delete', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def delete_product(self, request, pk=None):
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        product = lib.util.verify.Verify.get_product_from_user_subscription(user_subscription, pk)
+
+        product.delete()
+        return Response({"message": "delete success"}, status=status.HTTP_200_OK)
 
 
     @action(detail=False, methods=['GET'], url_path=r'categories', permission_classes=(IsAuthenticated,))
@@ -148,6 +158,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         product_categories.append(category_name)
         user_subscription.meta['product_categories'] = product_categories
         user_subscription.save()
+
         return Response(product_categories, status=status.HTTP_200_OK)
     
 
@@ -159,11 +170,19 @@ class ProductViewSet(viewsets.ModelViewSet):
         update_name, = lib.util.getter.getdata(request, ('category_name',), required=True)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
 
-        if category_name not in ['undefined', ''] and update_name not in ['undefined', '']:
-            categories_list = user_subscription.meta.get('product_categories', [])
-            categories_list = list(map(lambda x: x.replace(category_name, update_name), categories_list))            
-            user_subscription.meta['product_categories'] = categories_list
-            user_subscription.save()
+        if category_name in ['undefined', '', None] or update_name in ['undefined', '', None]:
+            raise lib.error_handle.error.api_error.ApiVerifyError("invalid category name")
+        
+        categories_list = user_subscription.meta.get('product_categories', [])
+
+        if category_name not in categories_list:
+            raise lib.error_handle.error.api_error.ApiVerifyError("category doesn't exists ")
+
+        categories_list = list(map(lambda x: x.replace(category_name, update_name), categories_list))            
+        user_subscription.meta['product_categories'] = categories_list
+        user_subscription.save()
+
+        models.product.product.Product.objects.filter(user_subscription=user_subscription, category=category_name ).update(category=update_name)
 
         return Response(categories_list, status=status.HTTP_200_OK)
     
@@ -174,10 +193,18 @@ class ProductViewSet(viewsets.ModelViewSet):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
 
+        if category_name in ['undefined', '', None] :
+            raise lib.error_handle.error.api_error.ApiVerifyError("invalid category name")
+
         categories_list = user_subscription.meta.get('product_categories', [])
-        if category_name not in ['undefined', '']:
-            categories_list.remove(category_name)
-            user_subscription.meta['product_categories'] = categories_list
-            user_subscription.save()
+
+        if category_name not in categories_list:
+            raise lib.error_handle.error.api_error.ApiVerifyError("category doesn't exists ")
+            
+        categories_list.remove(category_name)
+        user_subscription.meta['product_categories'] = categories_list
+        user_subscription.save()
+
+        models.product.product.Product.objects.filter(user_subscription=user_subscription, category=category_name ).delete()
 
         return Response(categories_list, status=status.HTTP_200_OK)
