@@ -1,1 +1,1 @@
-from . import user,user_subscription
+from . import user,user_subscription, deal, promotion_code
