@@ -70,12 +70,30 @@ class Product(models.Model):
         return self.name
 
 
+
+class ProductSerializerCreate(serializers.ModelSerializer):
+
+    class Meta:
+        model = Product
+        exclude=['user_subscription', 'created_by', 'category', 'image']
+        read_only_fields = ['created_at', 'updated_at']
+
+
+
+class ProductSerializerUpdate(serializers.ModelSerializer):
+
+    class Meta:
+        model = Product
+        exclude=['user_subscription', 'created_by', 'category', 'image']
+        read_only_fields = ['created_at', 'updated_at']
+
+
 class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
         fields = '__all__'
-        read_only_fields = ['created_at', 'modified_at']
+        read_only_fields = ['created_at', 'updated_at']
 
     # user_subscription = UserSubscriptionSerializer(read_only=True)
     created_by = UserSerializer(read_only=True)
