@@ -57,6 +57,6 @@ class PreOrderViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         pre_order = serializer.save()
         
-        pre_order = lib.helper.order_helper.PreOrderHelper.summarize_pre_order(pre_order,campaign, save=True)
+        # pre_order = lib.helper.order_helper.PreOrderHelper.summarize_pre_order(pre_order,campaign, save=True)
 
-        return Response(PreOrderSerializerUpdatePaymentShipping(pre_order).data, status=status.HTTP_200_OK)
+        return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
