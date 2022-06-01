@@ -9,9 +9,7 @@ from api import models
 from api import utils
 from api.utils.common.verify import Verify
 from api.models.order.pre_order import PreOrder, PreOrderSerializerUpdatePaymentShipping
-from api.utils.common.order_helper import PreOrderHelper
 
-import datetime
 import lib
 
 
@@ -27,9 +25,9 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     pagination_class = PreOrderPagination
 
 
-    @action(detail=True, methods=['GET'], url_path=r'buyer/retrieve', permission_classes=(IsAuthenticated,))
+    @action(detail=True, methods=['GET'], url_path=r'retrieve', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def buyer_retrieve_pre_order(self, request, pk=None):
+    def retrieve_pre_order(self, request, pk=None):
         pre_order = lib.util.verify.Verify.get_pre_order(pk)
         campaign = lib.util.verify.Verify.get_campaign_from_pre_order(pre_order)
         pre_order = lib.helper.order_helper.PreOrderHelper.summarize_pre_order(pre_order, campaign, save=True)
@@ -37,25 +35,28 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
       
       
-    @action(detail=True, methods=['POST'], url_path=r'delivery_info', permission_classes=(IsAuthenticated,))
+    @action(detail=True, methods=['PUT'], url_path=r'delivery', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def buyer_delivery_info_submit(self, request, pk=None):
-        pre_order_data = request.data
+    def update_delivery_info(self, request, pk=None):
 
-        try:
-            date_list = pre_order_data['shipping_date'].split('-')
-            pre_order_data['shipping_date'] = datetime.date(int(date_list[0]), int(date_list[1]), int(date_list[2]))
-        except:
-            pass
+        method, = \
+            lib.util.getter.getdata(request, ( "method",), required=True)
+        delivery_info, pickup_info = \
+            lib.util.getter.getdata(request, ("delivery_info", "pickup_info"), required=False)
 
         pre_order = Verify.get_pre_order(pk)
         campaign = Verify.get_campaign_from_pre_order(pre_order)
+
+        pre_order.shipping_method = method
+        pre_order.save()   #make sure this line is necessary
+
+        serializer = models.order.pre_order.PreOrderSerializerUpdateDelivery(pre_order, data=delivery_info, partial=True) \
+            if method=='delivery' else models.order.pre_order.PreOrderSerializerUpdatePickup(pre_order, data=pickup_info, partial=True)
         
-        pre_order_data = PreOrderHelper.count_buyer_pre_order_detail(pre_order,campaign,pre_order_data)['pre_order_data']
-        
-        serializer = PreOrderSerializerUpdatePaymentShipping(pre_order, data=pre_order_data, partial=True)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         pre_order = serializer.save()
         
+        pre_order = lib.helper.order_helper.PreOrderHelper.summarize_pre_order(pre_order,campaign, save=True)
+
         return Response(PreOrderSerializerUpdatePaymentShipping(pre_order).data, status=status.HTTP_200_OK)
