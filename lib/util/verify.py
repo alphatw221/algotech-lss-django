@@ -12,6 +12,7 @@ from api.models.user.user_subscription import UserSubscription
 
 from api.models.order.order import Order
 from api.models.order.pre_order import PreOrder
+from api.models.order.order_product import OrderProduct
 
 from lib.error_handle.error.api_error import ApiVerifyError
 from backend.api.instagram.profile import api_ig_get_profile_live_media
@@ -173,6 +174,14 @@ class Verify():
         return PreOrder.objects.get(id=pre_order_id)
 
     @staticmethod
+    def get_order_product(order_product_id):
+        if not OrderProduct.objects.filter(id=order_product_id).exists():
+            raise ApiVerifyError('no order product found')
+        return OrderProduct.objects.get(id=order_product_id)
+
+  
+
+    @staticmethod
     def get_order(order_id):
         if not Order.objects.filter(id=order_id).exists():
             raise ApiVerifyError('no order found')
@@ -285,6 +294,8 @@ class Verify():
             raise ApiVerifyError('no campaign product found')
         campaign_product = campaign.products.get(id=campaign_product_id)
         return campaign_product
+
+    
 
     @staticmethod
     def get_pre_order_from_campaign(campaign, pre_order_id):
