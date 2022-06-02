@@ -37,7 +37,7 @@ class OrderProductViewSet(viewsets.ModelViewSet):
         PreOrderHelper.delete_product(
             api_user, order_product.pre_order, order_product)
 
-        return Response({'message': "delete success"}, status=status.HTTP_200_OK)
+        return Response(models.order.pre_order.PreOrderSerializer(order_product.pre_order).data, status=status.HTTP_200_OK)
 
 
     @action(detail=True, methods=['PUT'], url_path=r'buyer/update', permission_classes=(IsAuthenticated,))
@@ -48,6 +48,6 @@ class OrderProductViewSet(viewsets.ModelViewSet):
 
         order_product = lib.util.verify.Verify.get_order_product(pk)
 
-        api_order_product = PreOrderHelper.update_product(
+        PreOrderHelper.update_product(
             api_user, order_product.pre_order, order_product, qty)
-        return Response(api_order_product, status=status.HTTP_200_OK)
+        return Response(models.order.pre_order.PreOrderSerializer(order_product.pre_order).data, status=status.HTTP_200_OK)

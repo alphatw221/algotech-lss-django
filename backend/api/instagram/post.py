@@ -23,8 +23,7 @@ def api_ig_get_post_comments(page_token: str, post_id: str, after_page):
 
     params = {
         'limit': 25, 'after': after_page,
-        'pretty': 0,
-        'fields': 'from,text,timestamp'
+        'pretty': 0
     }
     return FacebookApiV12Caller(f'{post_id}/comments', bearer_token=page_token, params=params).get()
 

@@ -36,7 +36,7 @@ class HubspotViewSet(viewsets.GenericViewSet):
         rule.check_rule.user_check_rule.UserCheckRule.has_email_been_registered(email=email)
 
         now = datetime.now() 
-        expired_at = now+timedelta(days=30)
+        expired_at = now+timedelta(days=90)
 
         auth_user = AuthUser.objects.create_user(
             username=f'{first_name} {last_name}', email=email, password=password)
@@ -46,7 +46,7 @@ class HubspotViewSet(viewsets.GenericViewSet):
             status='new', 
             started_at=now,
             expired_at=expired_at, 
-            user_plan= {"activated_platform" : ["facebook"]}, 
+            user_plan= {"activated_platform" : ["facebook", "instagram"]}, 
             meta_country={ 'activated_country': [country] },
             type='trial',
             lang=country_plan.language ,
