@@ -12,6 +12,20 @@ class OrderProductViewSet(viewsets.ModelViewSet):
     queryset = models.order.order_product.OrderProduct.objects.all().order_by('id')
 
 
+    @action(detail=True, methods=['GET'], url_path=r'buyer/add', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    @lib.error_handle.error_handler.order_operation_error_handler.order_operation_error_handler
+    def buyer_add_order_product(self, request, pk=None):
+        api_user, campaign_product_id, qty = lib.util.getter.getparams(request, ('campaign_product_id', 'qty',), with_user=True, seller=False)
+
+        pre_order = lib.util.verify.Verify.get_pre_order(pk)
+        campaign_product = lib.util.verify.Verify.get_campaign_product_from_pre_order(pre_order, campaign_product_id)
+
+        api_order_product = PreOrderHelper.add_product(api_user, pre_order, campaign_product, qty)
+
+        return Response(api_order_product, status=status.HTTP_200_OK)
+
+
     @action(detail=True, methods=['DELETE'], url_path=r'buyer/delete', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     @lib.error_handle.error_handler.order_operation_error_handler.order_operation_error_handler
