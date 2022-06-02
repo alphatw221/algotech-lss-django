@@ -323,7 +323,7 @@ def capture_instagram(campaign, logs):
 
         if not comments:
             return 
-
+        
         if not after_page:
             new_last_crelast_create_message_id = comments[0]['id']
 
@@ -343,7 +343,7 @@ def capture_instagram(campaign, logs):
             if profile_img_url[0] == 400:
                 img_url == ''
             if profile_img_url[0] == 200:
-                img_url = profile_img_url[1]['profile_picture_url']
+                img_url = profile_img_url[1]['profile_pic']
 
             uni_format_comment = {
                 'platform': 'instagram',

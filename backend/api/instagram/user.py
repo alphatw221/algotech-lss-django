@@ -28,7 +28,7 @@ def api_ig_get_id_from(token: str, post_id: str):
 
 def api_ig_get_profile_picture(token: str, user_id: str):
     params = {
-        'fields': 'profile_picture_url'
+        'fields': 'profile_pic'
     }
     ret = FacebookApiCaller(user_id, bearer_token=token, params=params).get()
     return ret
