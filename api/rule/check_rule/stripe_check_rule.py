@@ -1,7 +1,10 @@
 
+from api.models.user.promotion_code import PromotionCode
 from api.utils.error_handle.error.api_error import ApiVerifyError
 
 from datetime import datetime
+
+from business_policy.marketing_plan import MarketingPlan
 class StripeCheckRule():
 
     @staticmethod
@@ -51,6 +54,15 @@ class StripeCheckRule():
         if promoCode and promoCode == country_plan.promo_code:
             amount = amount*country_plan.promo_discount_rate
             return {'amount':amount}
+        
+    def adjust_price_if_marketing_plan(**kwargs):
+        amount = kwargs.get('amount')
+        plans_detail = MarketingPlan.get_plans("current_plans")
+        for key, val in plans_detail.items():
+            if not val['expire_time']:
+                if val['discount_rate']:
+                    amount = amount * val['discount_rate']
+        return {'amount':amount, 'marketing_plans':plans_detail}
 
     def is_upgrade_plan_valid(**kwargs):
 

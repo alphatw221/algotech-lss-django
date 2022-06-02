@@ -6,6 +6,8 @@ from rest_framework.decorators import action, permission_classes
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from api.code.password_code_manager import PasswordResetCodeManager
 from api.models.instagram.instagram_profile import InstagramProfile, InstagramProfileSerializer
+from api.models.user.deal import Deal
+from api.models.user.promotion_code import PromotionCode
 from api.models.user.user import User, UserSerializer, UserSerializerAccountInfo
 from api.models.youtube.youtube_channel import YoutubeChannel, YoutubeChannelSerializer
 from api.rule.rule_checker.user_rule_checker import DealerCreateAccountRuleChecker,AdminCreateAccountRuleChecker, SellerChangePasswordRuleChecker, SellerResetPasswordRuleChecker
@@ -527,8 +529,8 @@ class UserViewSet(viewsets.ModelViewSet):
 
         email = kwargs.get('email')
         amount = kwargs.get('amount')
-    
-        stripe.api_key = settings.STRIPE_API_KEY  
+        marketing_plans = kwargs.get('marketing_plans')
+        stripe.api_key = settings.STRIPE_API_KEY
         try:
             intent = stripe.PaymentIntent.create( amount=int(amount*100), currency=country_plan.currency, receipt_email = email)
         except Exception:
@@ -538,21 +540,29 @@ class UserViewSet(viewsets.ModelViewSet):
             "client_secret":intent.client_secret,
             "payment_amount":amount,
             "user_plan":plan,
-            "currency":country_plan.currency
+            "currency":country_plan.currency,
+            "marketing_plans":marketing_plans
         }, status=status.HTTP_200_OK)
 
 
     @action(detail=False, methods=['POST'], url_path=r'register/(?P<country_code>[^/.]+)', permission_classes=())
     @api_error_handler
     def user_register(self, request, country_code):
-
+        def record_subscription_payment(user_subscription, plan, amount, api_user):
+            Deal.objects.create(
+                user_subscription=user_subscription,
+                purchased_plan=plan, 
+                total=amount, 
+                status="success", 
+                payer=api_user, 
+                payment_time=datetime.utcnow()
+            )
         email, password, plan, period, intentSecret = lib.util.getter.getdata(request,("email", "password", "plan", "period", "intentSecret"),required=True)
         firstName, lastName, contactNumber, country, promoCode, timezone = lib.util.getter.getdata(request, ("firstName", "lastName", "contactNumber", "country", "promoCode", "timezone"), required=False)
 
         payment_intent_id = intentSecret[:27]
         stripe.api_key = settings.STRIPE_API_KEY
         paymentIntent = stripe.PaymentIntent.retrieve(payment_intent_id)
-
         kwargs = {'paymentIntent':paymentIntent,'email':email,'plan':plan,'period':period, 'promoCode':promoCode}
         kwargs=rule.rule_checker.user_rule_checker.RegistrationPaymentCompleteChecker.check(**kwargs)
 
@@ -561,7 +571,7 @@ class UserViewSet(viewsets.ModelViewSet):
             subscription_plan = country_plan.get_plan(plan)
 
             kwargs.update({'country_plan':country_plan, 'subscription_plan':subscription_plan})
-            kwargs=rule.rule_checker.user_rule_checker.RegistrationRequireRefundChecker.check(kwargs)
+            kwargs=rule.rule_checker.user_rule_checker.RegistrationRequireRefundChecker.check(**kwargs)
         except Exception:
             #TODO refund
             print('require refund')
@@ -589,11 +599,32 @@ class UserViewSet(viewsets.ModelViewSet):
             country = country_code,
             purchase_price = amount
             )
-        
+            
         api_user = User.objects.create(
             name=f'{firstName} {lastName}', email=email, type='user', status='valid', phone=contactNumber, auth_user=auth_user, user_subscription=user_subscription)
         
+        record_subscription_payment(user_subscription, plan, amount, api_user)
+        
         lib.util.marking_tool.NewUserMark.mark(api_user, save = True)
+        
+        marketing_plans = kwargs.get('marketing_plans')
+        for key, val in marketing_plans.items():
+            if key == "welcome_gift":
+                lib.util.marking_tool.WelcomeGiftUsedMark.mark(api_user, save = True)
+                PromotionCode.objects.create(
+                    name=key,
+                    user=api_user,
+                    user_subscription=user_subscription,
+                    used_at=datetime.utcnow()
+                )
+            # name = models.CharField(max_length=255, null=True, blank=True)
+            # code = models.TextField(null=True, blank=True)
+            # user = models.ForeignKey(
+            #     User,  null=True, on_delete=models.SET_NULL, related_name='promotion_code')
+            # user_subscription = models.ForeignKey(
+            #     UserSubscription,  null=True, on_delete=models.SET_NULL, related_name='promotion_code')
+            # used_at = models.DateTimeField()
+            # meta = models.JSONField(null=True, blank=True, default=dict)
 
         ret = {
             "Customer Name":f'{firstName} {lastName}',

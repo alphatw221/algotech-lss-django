@@ -64,3 +64,26 @@ class NewUserMark(MetaMark):
         except Exception as e:
             pass
         
+class WelcomeGiftUsedMark(MetaMark):
+
+    mark_key = "welcome_gift_used"
+    mark_value = True
+    
+    @classmethod
+    def check_mark(cls, api_user, save=False):
+        try:
+            if not cls._get_mark(api_user):
+                return
+            
+            user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+
+            country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(user_subscription.country)
+            service.sendinblue.transaction_email.WelcomeEmail(
+                first_name=api_user.name,
+                to=[api_user.email],
+                cc=country_plan.cc,
+                lang=user_subscription.lang).send()
+
+            cls._erase_mark(api_user, save = save)
+        except Exception as e:
+            pass        
