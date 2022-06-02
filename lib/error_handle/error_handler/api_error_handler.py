@@ -33,9 +33,6 @@ def api_error_handler(func):
             print(traceback.format_exc())
             # ApiLogEntry.write_entry(str(datetime.now()) + ' - ' +  traceback.format_exc())
             return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        except PreOrderErrors.PreOrderException as e:
-            print(traceback.format_exc())
-            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             print(traceback.format_exc())
             # ApiLogEntry.write_entry(str(datetime.now()) + ' - ' +  traceback.format_exc())

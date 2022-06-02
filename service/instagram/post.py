@@ -19,11 +19,12 @@ def get_post_likes(token: str, post_id: str, after: str = None):
 
 def get_post_comments(page_token: str, post_id: str, after_page):
     if not after_page:
-        return FacebookApiCaller(f'{post_id}/comments', bearer_token=page_token).get()
+        return FacebookApiV12Caller(f'{post_id}/comments', bearer_token=page_token).get()
 
     params = {
         'limit': 25, 'after': after_page,
-        'pretty': 0
+        'pretty': 0,
+        'fields': 'from,text,timestamp'
     }
     return FacebookApiV12Caller(f'{post_id}/comments', bearer_token=page_token, params=params).get()
 

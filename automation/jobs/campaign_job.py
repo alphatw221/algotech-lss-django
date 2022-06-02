@@ -335,9 +335,9 @@ def capture_instagram(campaign, logs):
                 keep_capturing = False
                 break
 
-            from_info = service.instagram.user.get_id_from(page_token, comment['id'])
+            # from_info = service.instagram.user.get_id_from(page_token, comment['id'])
             profile_img_url = service.instagram.user.get_profile_picture(
-                page_token, from_info[1]['from']['id'])
+                page_token, comment['from']['id'])
             img_url = ''
 
             if profile_img_url[0] == 400:
@@ -351,8 +351,8 @@ def capture_instagram(campaign, logs):
                 "campaign_id": campaign['id'],
                 'message': comment['text'],
                 "created_time": comment['timestamp'],  #parse to timestamp
-                "customer_id": from_info[1]['from']['username'],   #
-                "customer_name": from_info[1]['from']['username'],  #
+                "customer_id": comment['from']['id'],   #
+                "customer_name": comment['from']['username'],  #
                 "image": img_url,
                 "categories":service.nlp.classification.classify_comment_v1(texts=[[comment['text']]],threshold=0.9)
                 }   #
