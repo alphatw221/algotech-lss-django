@@ -46,6 +46,7 @@ class PreOrderHelper():
             pre_order.meta['items_over_free_delivery_threshold'] = True
 
         pre_order.total = pre_order.subtotal + pre_order.adjust_price + delivery_charge
+        pre_order.shipping_cost = delivery_charge
         
         if save:
             pre_order.save()
