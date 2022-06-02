@@ -34,7 +34,6 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         last_five_digit, image, =lib.util.getter.getdata(request,('last_five_digit', 'image'), required=False)
         
-        
         if image and image != "undefined":
             image_path = default_storage.save(
                 f'campaign/{order.campaign.id}/order/{order.id}/receipt/{image.name}', 

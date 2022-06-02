@@ -100,7 +100,7 @@ class PreOrderCheckRule():
     def is_order_empty(**kwargs):
 
         api_pre_order = kwargs.get('api_pre_order')
-        print(api_pre_order['products'])
+
         if not bool(api_pre_order['products']):
             raise PreOrderErrors.PreOrderException('cart is empty')
 

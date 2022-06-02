@@ -247,8 +247,6 @@ class Verify():
 
     @staticmethod
     def get_campaign_from_platform(platform, campaign_id):
-        print(platform.campaigns)
-        print(campaign_id)
         if not platform.campaigns.filter(id=campaign_id).exists():
             raise ApiVerifyError("no campaign found")
         campaign = platform.campaigns.get(id=campaign_id)
@@ -352,7 +350,6 @@ class Verify():
         http_uri = settings.GCP_API_LOADBALANCER_URL+request.get_full_path()
         source_string = settings.HUBSPOT_CLIENT_SECRET + http_method + http_uri + request_body
 
-        print(http_method,http_uri)
         if request.META.get('HTTP_X_HUBSPOT_SIGNATURE') != hashlib.sha256(source_string.encode('utf-8')).hexdigest():
             raise ApiVerifyError('signature error')
 
@@ -466,7 +463,7 @@ class Verify():
                     request, (
                     "platform_id", "platform_name", "campaign_id", "campaign_product_id", "qty", "order_product_id",
                     "search"))
-                print(api_user)
+
                 Verify.verify_user(api_user)
                 platform = Verify.get_platform(api_user, platform_name, platform_id)
                 campaign = Verify.get_campaign_from_platform(platform, campaign_id)
