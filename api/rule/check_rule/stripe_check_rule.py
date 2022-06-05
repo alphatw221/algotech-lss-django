@@ -5,6 +5,7 @@ from api.utils.error_handle.error.api_error import ApiVerifyError
 from datetime import datetime
 
 from business_policy.marketing_plan import MarketingPlan
+import lib
 class StripeCheckRule():
 
     @staticmethod
@@ -63,7 +64,17 @@ class StripeCheckRule():
                 if val['discount_rate']:
                     amount = amount * val['discount_rate']
         return {'amount':amount, 'marketing_plans':plans_detail}
-
+    
+    @staticmethod
+    def adjust_price_if_welcome_gift_not_used(**kwargs):
+        result = {}
+        amount1 = kwargs.get('amount')
+        api_user = kwargs.get('api_user')
+        amount2 = lib.util.marking_tool.WelcomeGiftUsedMark.check_mark(api_user, amount1)
+        result['amount'] = amount2
+        if amount1 != amount2:
+            result['marketing_plans'] = [MarketingPlan.welcome_gift()]
+        return result
     def is_upgrade_plan_valid(**kwargs):
 
         upgrade_avaliable_dict={

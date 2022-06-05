@@ -4,6 +4,7 @@ from django.contrib.auth.models import User as AuthUser
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from api.models.user.promotion_code import PromotionCode
 
 
 from api.utils.common.verify import Verify
@@ -11,6 +12,8 @@ from api.utils.error_handle.error_handler.api_error_handler import api_error_han
 from api.utils.common.verify import ApiVerifyError
 from api import models
 from api import rule
+from api.utils.orm.deal import record_subscription_for_trial_user
+from business_policy.marketing_plan import MarketingPlan
 
 import service
 import business_policy
@@ -60,7 +63,18 @@ class HubspotViewSet(viewsets.GenericViewSet):
             auth_user=auth_user, 
             user_subscription=user_subscription)
         
+        record_subscription_for_trial_user(user_subscription, api_user)
+        
         lib.util.marking_tool.NewUserMark.mark(api_user, save = True)
+        marketing_plans = MarketingPlan.get_plans("current_plans")
+        for key, val in marketing_plans.items():
+            if key == "welcome_gift":
+                lib.util.marking_tool.WelcomeGiftUsedMark.mark(api_user, save = True, mark_value=False)
+                PromotionCode.objects.create(
+                    name=key,
+                    user=api_user,
+                    user_subscription=user_subscription,
+                )
         
         service.hubspot.contact.update(vid,expiry_date=int(expired_at.replace(hour=0,minute=0,second=0,microsecond=0).timestamp()*1000))
         service.sendinblue.contact.create(email=email,first_name=first_name, last_name=last_name)

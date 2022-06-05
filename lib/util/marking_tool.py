@@ -2,6 +2,7 @@ from abc import abstractclassmethod
 from django.conf import settings
 from api.utils.common.verify import Verify
 import business_policy
+from business_policy.marketing_plan import MarketingPlan
 import service
 
 class MetaMark():
@@ -10,9 +11,12 @@ class MetaMark():
     mark_value = ""
 
     @classmethod
-    def mark(cls, model, save=False):
+    def mark(cls, model, save=False, mark_value=None):
         try:
-            model.meta[cls.mark_key] = cls.mark_value
+            if mark_value == None:
+                model.meta[cls.mark_key] = cls.mark_value
+            else:
+                model.meta[cls.mark_key] = mark_value
             if save:
                 model.save()
         except Exception:
@@ -70,20 +74,12 @@ class WelcomeGiftUsedMark(MetaMark):
     mark_value = True
     
     @classmethod
-    def check_mark(cls, api_user, save=False):
+    def check_mark(cls, api_user, original_price):
         try:
-            if not cls._get_mark(api_user):
-                return
-            
-            user_subscription = Verify.get_user_subscription_from_api_user(api_user)
-
-            country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(user_subscription.country)
-            service.sendinblue.transaction_email.WelcomeEmail(
-                first_name=api_user.name,
-                to=[api_user.email],
-                cc=country_plan.cc,
-                lang=user_subscription.lang).send()
-
-            cls._erase_mark(api_user, save = save)
+            if cls._get_mark(api_user) != False:
+                return original_price
+            # cls.mark(api_user, save=True)
+            discount_rate = MarketingPlan.welcome_gift().get('discount_rate')
+            return original_price * discount_rate
         except Exception as e:
             pass        

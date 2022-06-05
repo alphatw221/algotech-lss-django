@@ -4,6 +4,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from api.code.subscription_code_manager import SubscriptionCodeManager
 from api.models.instagram.instagram_profile import InstagramProfile, InstagramProfileSerializer
+from api.models.user.promotion_code import PromotionCode
 from api.models.user.user import User,UserSubscriptionSerializerDealerList
 from api.models.user.user_subscription import UserSubscription, UserSubscriptionSerializer, UserSubscriptionSerializerForDealerRetrieve, UserSubscriptionSerializerMeta, UserSubscriptionSerializerSimplify, UserSubscriptionSerializerCreate
 from rest_framework.pagination import PageNumberPagination
@@ -722,7 +723,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         plan_information = {
             'plan': api_user_user_subscription.type,
             'id': api_user_user_subscription.id,
-            'join_time': api_user_user_subscription.created_at.strftime("%d %b %Y, %H:%M"),
+            'join_time': api_user_user_subscription.started_at.strftime("%d %b %Y, %H:%M"),
             'period': api_user_user_subscription.expired_at.strftime("%d %b %Y, %H:%M")
         }
         return Response(plan_information, status=status.HTTP_200_OK)
@@ -738,12 +739,13 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(api_user_subscription.country)
         subscription_plan = country_plan.get_plan(plan)
 
-        kwargs = {'email':email, 'plan':plan, 'period':period, 'country_plan':country_plan, 'subscription_plan':subscription_plan, 'api_user_subscription':api_user_subscription, 'promoCode': promoCode}
+        kwargs = {'email':email, 'plan':plan, 'period':period, 'country_plan':country_plan, 'subscription_plan':subscription_plan, 'api_user': api_user, 'api_user_subscription':api_user_subscription, 'promoCode': promoCode}
         kwargs = rule.rule_checker.user_subscription_rule_checker.UpgradeIntentDataRuleChecker.check(**kwargs)
 
         email = kwargs.get('email')
         amount = kwargs.get('amount')
         adjust_amount = kwargs.get('adjust_amount')
+        marketign_plans = kwargs.get('marketign_plans')
 
         stripe.api_key = settings.STRIPE_API_KEY  
         try:
@@ -756,7 +758,8 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             "payment_amount":amount,
             "user_plan":plan,
             "adjust_amount":adjust_amount,
-            "currency": country_plan.currency
+            "currency": country_plan.currency,
+            "marketign_plans": marketign_plans
         }, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['POST'], url_path=r'upgrade')
@@ -798,7 +801,16 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             meta = {"stripe payment intent":intentSecret},
             purchase_price=amount+adjust_amount
         )
-        
+        marketing_plans = kwargs.get('marketing_plans')
+        for key, val in marketing_plans.items():
+            if key == "welcome_gift":
+                lib.util.marking_tool.WelcomeGiftUsedMark.mark(api_user, save = True)
+                PromotionCode.objects.create(
+                    name=key,
+                    user=api_user,
+                    user_subscription=api_user_subscription,
+                    used_at=datetime.utcnow()
+                )
         ret = {
             "Email": email,
             "Your Plan": subscription_plan.get('text'),

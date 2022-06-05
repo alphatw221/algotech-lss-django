@@ -14,6 +14,7 @@ from api.rule.rule_checker.user_rule_checker import DealerCreateAccountRuleCheck
 from api.utils.common.common import getdata, getparams
 from api.utils.common.verify import ApiVerifyError
 from api.utils.error_handle.error.api_error import ApiCallerError
+from api.utils.orm.deal import record_subscription_for_paid_user
 from api.views.user._user import facebook_login_helper, google_login_helper, google_authorize_helper
 from automation.jobs.send_email_job import send_email_job
 from backend.api.facebook.user import api_fb_get_accounts_from_user
@@ -32,6 +33,7 @@ from django.conf import settings
 import string, random, json
 from api.models.user.user_subscription import UserSubscription
 from backend.i18n.register_confirm_mail import i18n_get_register_confirm_mail_subject, i18n_get_register_activate_mail_subject
+from business_policy.marketing_plan import MarketingPlan
 from lss.views.custom_jwt import CustomTokenObtainPairSerializer
 import requests
 from google.oauth2 import id_token
@@ -517,7 +519,6 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['POST'], url_path=r'register/validate/(?P<country_code>[^/.]+)', permission_classes=())
     @api_error_handler
     def validate_register_data(self, request, country_code):
-
         email, plan, period = lib.util.getter.getdata(request, ("email", "plan", "period"), required=True)
         promoCode, = lib.util.getter.getdata(request, ("promoCode",), required=False)
 
@@ -548,15 +549,6 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['POST'], url_path=r'register/(?P<country_code>[^/.]+)', permission_classes=())
     @api_error_handler
     def user_register(self, request, country_code):
-        def record_subscription_payment(user_subscription, plan, amount, api_user):
-            Deal.objects.create(
-                user_subscription=user_subscription,
-                purchased_plan=plan, 
-                total=amount, 
-                status="success", 
-                payer=api_user, 
-                payment_time=datetime.utcnow()
-            )
         email, password, plan, period, intentSecret = lib.util.getter.getdata(request,("email", "password", "plan", "period", "intentSecret"),required=True)
         firstName, lastName, contactNumber, country, promoCode, timezone = lib.util.getter.getdata(request, ("firstName", "lastName", "contactNumber", "country", "promoCode", "timezone"), required=False)
 
@@ -603,7 +595,7 @@ class UserViewSet(viewsets.ModelViewSet):
         api_user = User.objects.create(
             name=f'{firstName} {lastName}', email=email, type='user', status='valid', phone=contactNumber, auth_user=auth_user, user_subscription=user_subscription)
         
-        record_subscription_payment(user_subscription, plan, amount, api_user)
+        record_subscription_for_paid_user(user_subscription, plan, amount, api_user)
         
         lib.util.marking_tool.NewUserMark.mark(api_user, save = True)
         
