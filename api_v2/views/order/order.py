@@ -1,5 +1,6 @@
 from rest_framework.response import Response
 from rest_framework import viewsets,status
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action, permission_classes
 from rest_framework.parsers import MultiPartParser
@@ -12,9 +13,17 @@ from api import models
 from api.utils.common.order_helper import PreOrderHelper
 import lib
 
+
+class OrderPagination(PageNumberPagination):
+    page_query_param = 'page'
+    page_size_query_param = 'page_size'
+
+
 class OrderViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     queryset = models.order.order.Order.objects.all().order_by('id')
+    pagination_class = OrderPagination
+
 
     @action(detail=True, methods=['GET'], url_path=r'buyer/retrieve', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
@@ -60,7 +69,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         api_user = lib.util.verify.Verify.get_customer_user(request)
 
-        page = self.paginate_queryset(api_user.orders)
+        page = self.paginate_queryset(api_user.orders.all())
         if page is not None:
             serializer = models.order.order.OrderSerializer(page, many=True)
             data = self.get_paginated_response(serializer.data).data
