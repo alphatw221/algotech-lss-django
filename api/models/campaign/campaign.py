@@ -6,7 +6,7 @@ from api.models.facebook.facebook_page import (FacebookPage,
 from api.models.instagram.instagram_profile import (
     InstagramProfile, InstagramProfileSerializer, InstagramProfileInfoSerializer)
 from api.models.user.user import User
-from api.models.user.user_subscription import UserSubscription
+from api.models.user.user_subscription import UserSubscription, UserSubscriptionSerializer
 from api.models.youtube.youtube_channel import (YoutubeChannel,
                                                 YoutubeChannelInfoSerializer, YoutubeChannelSerializer)
 from django.contrib import admin
@@ -147,6 +147,12 @@ class CampaignSerializerRetreive(CampaignSerializer):
     youtube_channel = YoutubeChannelSerializer(read_only=True)
     instagram_profile = InstagramProfileSerializer(read_only=True)
 
+class CampaignSerializerForBuyerRetreive(CampaignSerializer):
+
+    user_subscription = UserSubscriptionSerializer(read_only=True)
+    facebook_page = FacebookPageSerializer(read_only=True)
+    youtube_channel = YoutubeChannelSerializer(read_only=True)
+    instagram_profile = InstagramProfileSerializer(read_only=True)
 
 class CampaignAdmin(admin.ModelAdmin):
     model = Campaign

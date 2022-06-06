@@ -1,6 +1,6 @@
 
 # TODO: WIP
-from api.models.campaign.campaign import Campaign, CampaignSerializerRetreive
+from api.models.campaign.campaign import Campaign, CampaignSerializerRetreive, CampaignSerializerForBuyerRetreive
 from django.conf import settings
 from django.contrib import admin
 from djongo import models
@@ -139,6 +139,19 @@ class OrderSerializer(serializers.ModelSerializer):
     checkout_details = serializers.JSONField(default=dict)
     history = serializers.JSONField(default=dict)
 
+
+class OrderSerializerForBuyerRetrieve(serializers.ModelSerializer):
+
+    class Meta:
+        model = Order
+        fields = '__all__'
+        read_only_fields = ['created_at', 'modified_at']
+
+    campaign = CampaignSerializerForBuyerRetreive()
+    meta = serializers.JSONField(default=dict)
+    products = serializers.JSONField(default=dict)
+    checkout_details = serializers.JSONField(default=dict)
+    history = serializers.JSONField(default=dict)
 
 class OrderSerializerUpdateShipping(serializers.ModelSerializer):
 
