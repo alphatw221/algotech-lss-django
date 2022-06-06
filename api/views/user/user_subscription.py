@@ -711,7 +711,8 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             'email': api_user.email,
             'period': api_user_user_subscription.expired_at.strftime("%d %b %Y, %H:%M"),
             'country_code': api_user_user_subscription.meta_country.get('activated_country')[0],
-            'currency': api_user_user_subscription.currency
+            'currency': api_user_user_subscription.currency,
+            'is_welcome_gift_used': api_user.meta.get('welcome_gift_used', None)
         }
         return Response(buyer_information, status=status.HTTP_200_OK)
     
