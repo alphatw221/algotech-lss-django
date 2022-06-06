@@ -68,4 +68,12 @@ class OrderViewSet(viewsets.ModelViewSet):
             data = models.order.order.OrderSerializer(api_user.orders, many=True).data
 
         return Response(data, status=status.HTTP_200_OK)
-                
+    
+
+    @action(detail=True, methods=['GET'], url_path=r'buyer/retrieve/state', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def check_buyer_order_state(self, request, pk):
+        api_user = lib.util.verify.Verify.get_customer_user(request)
+        order = lib.util.verify.Verify.get_order_by_api_user(api_user, pk)
+
+        return Response(order.status, status=status.HTTP_200_OK)
