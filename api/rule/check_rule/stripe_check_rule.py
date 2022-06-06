@@ -94,7 +94,7 @@ class StripeCheckRule():
     def adjust_amount_if_subscription_undue(**kwargs):
 
         amount = kwargs.get('amount')
-
+        # print(amount)
         api_user_subscription = kwargs.get('api_user_subscription')
 
         if datetime.timestamp(datetime.now())>datetime.timestamp(api_user_subscription.expired_at):
@@ -102,8 +102,9 @@ class StripeCheckRule():
 
         expired_date = api_user_subscription.expired_at.date()
         started_date = api_user_subscription.started_at.date()
-
+        # print(api_user_subscription.purchase_price)
         adjust_amount = int(api_user_subscription.purchase_price*((expired_date-datetime.now().date()).days/(expired_date-started_date).days))
+        # print(f'{adjust_amount} = int({api_user_subscription.purchase_price}*{(expired_date-datetime.now().date()).days})/{(expired_date-started_date).days}')
         return {'amount':amount-adjust_amount,'adjust_amount':adjust_amount}
 
 
