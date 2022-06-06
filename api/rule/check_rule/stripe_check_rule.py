@@ -67,14 +67,13 @@ class StripeCheckRule():
     
     @staticmethod
     def adjust_price_if_welcome_gift_not_used(**kwargs):
-        result = {}
         amount1 = kwargs.get('amount')
+        marketing_plans = kwargs.get('marketing_plans', {})
         api_user = kwargs.get('api_user')
         amount2 = lib.util.marking_tool.WelcomeGiftUsedMark.check_mark(api_user, amount1)
-        result['amount'] = amount2
         if amount1 != amount2:
-            result['marketing_plans'] = [MarketingPlan.welcome_gift()]
-        return result
+            marketing_plans['welcome_gift'] =  MarketingPlan.welcome_gift()
+        return {"amount": amount2, "marketing_plans": marketing_plans}
     def is_upgrade_plan_valid(**kwargs):
 
         upgrade_avaliable_dict={

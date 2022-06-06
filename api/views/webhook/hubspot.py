@@ -72,7 +72,7 @@ class HubspotViewSet(viewsets.GenericViewSet):
                 lib.util.marking_tool.WelcomeGiftUsedMark.mark(api_user, save = True, mark_value=False)
                 PromotionCode.objects.create(
                     name=key,
-                    user=api_user,
+                    api_user=api_user,
                     user_subscription=user_subscription,
                 )
         

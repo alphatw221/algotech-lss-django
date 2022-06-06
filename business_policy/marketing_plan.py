@@ -17,7 +17,7 @@ class MarketingPlan:
             "name": "Welcome Gift",
             "expire_time": None,
             "discount_rate":0.95,
-            "description": "5% discount for fisrt time pay."
+            "description": "5% discount applied."
         }
     
    

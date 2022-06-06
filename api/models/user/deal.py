@@ -2,7 +2,6 @@
 from api.models.facebook.facebook_page import FacebookPageInfoSerializer
 from api.models.instagram.instagram_profile import InstagramProfileInfoSerializer
 from api.models.user.facebook_info import FacebookInfoSerializer
-from api.models.user.promotion_code import PromotionCode
 from api.models.user.user_plan import UserPlan
 from django.contrib import admin
 from django.contrib.auth.models import User as AuthUser

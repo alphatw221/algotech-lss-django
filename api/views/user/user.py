@@ -595,7 +595,7 @@ class UserViewSet(viewsets.ModelViewSet):
         api_user = User.objects.create(
             name=f'{firstName} {lastName}', email=email, type='user', status='valid', phone=contactNumber, auth_user=auth_user, user_subscription=user_subscription)
         
-        record_subscription_for_paid_user(user_subscription, plan, amount, api_user)
+        deal_obj = record_subscription_for_paid_user(user_subscription, plan, amount, api_user)
         
         lib.util.marking_tool.NewUserMark.mark(api_user, save = True)
         
@@ -605,9 +605,10 @@ class UserViewSet(viewsets.ModelViewSet):
                 lib.util.marking_tool.WelcomeGiftUsedMark.mark(api_user, save = True)
                 PromotionCode.objects.create(
                     name=key,
-                    user=api_user,
+                    api_user=api_user,
                     user_subscription=user_subscription,
-                    used_at=datetime.utcnow()
+                    used_at=datetime.utcnow(),
+                    deal=deal_obj
                 )
             # name = models.CharField(max_length=255, null=True, blank=True)
             # code = models.TextField(null=True, blank=True)

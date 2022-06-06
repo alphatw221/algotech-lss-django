@@ -6,7 +6,7 @@ from api.code.subscription_code_manager import SubscriptionCodeManager
 from api.models.instagram.instagram_profile import InstagramProfile, InstagramProfileSerializer
 from api.models.user.promotion_code import PromotionCode
 from api.models.user.user import User,UserSubscriptionSerializerDealerList
-from api.models.user.user_subscription import UserSubscription, UserSubscriptionSerializer, UserSubscriptionSerializerForDealerRetrieve, UserSubscriptionSerializerMeta, UserSubscriptionSerializerSimplify, UserSubscriptionSerializerCreate
+from api.models.user.user_subscription import UserSubscription, UserSubscriptionSerializer, UserSubscriptionSerializerForDealerRetrieve, UserSubscriptionSerializerMeta, UserSubscriptionSerializerSimplify, UserSubscriptionSerializerCreate, UserSubscriptionSerializerUpdate
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework import status
@@ -15,6 +15,7 @@ from api.models.youtube.youtube_channel import YoutubeChannel, YoutubeChannelSer
 from datetime import datetime, timedelta
 from api.utils.common.common import getdata
 from api.utils.error_handle.error.api_error import ApiCallerError
+from api.utils.orm.deal import record_subscription_for_paid_user
 from backend.api.facebook.page import api_fb_get_page_picture, api_fb_get_page_business_profile
 from backend.api.facebook.user import api_fb_get_me_accounts
 
@@ -745,7 +746,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         email = kwargs.get('email')
         amount = kwargs.get('amount')
         adjust_amount = kwargs.get('adjust_amount')
-        marketign_plans = kwargs.get('marketign_plans')
+        marketing_plans = kwargs.get('marketing_plans')
 
         stripe.api_key = settings.STRIPE_API_KEY  
         try:
@@ -759,7 +760,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             "user_plan":plan,
             "adjust_amount":adjust_amount,
             "currency": country_plan.currency,
-            "marketign_plans": marketign_plans
+            "marketing_plans": marketing_plans
         }, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['POST'], url_path=r'upgrade')
@@ -769,12 +770,12 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             lib.util.getter.getdata(request,("email", "password", "plan", "period", "intentSecret", "promoCode", "timezone"), required=False)
         api_user = Verify.get_seller_user(request)    
         api_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
-
+        original_plan = api_user_subscription.type
         payment_intent_id = intentSecret[:27]
         stripe.api_key = settings.STRIPE_API_KEY
         paymentIntent = stripe.PaymentIntent.retrieve(payment_intent_id)
 
-        kwargs = {'paymentIntent':paymentIntent,'email':email,'plan':plan,'period':period, 'promoCode':promoCode, 'api_user_subscription':api_user_subscription}
+        kwargs = {'paymentIntent':paymentIntent,'email':email,'plan':plan,'period':period, 'promoCode':promoCode, 'api_user_subscription':api_user_subscription, 'api_user': api_user}
         kwargs = rule.rule_checker.user_subscription_rule_checker.UpgradePaymentCompleteChecker.check(**kwargs)
 
         try:
@@ -793,24 +794,49 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         now = datetime.now(pytz.timezone(timezone)) if timezone in pytz.common_timezones else datetime.now()
         expired_at = now+timedelta(days=90) if period == "quarter" else now+timedelta(days=365)
 
-        api_user_subscription.update(
-            type=plan, 
-            expired_at=expired_at, 
-            started_at=now, 
-            user_plan= {"activated_platform" : ["facebook","youtube","instagram"]}, 
-            meta = {"stripe payment intent":intentSecret},
-            purchase_price=amount+adjust_amount
+        serializer = UserSubscriptionSerializerUpdate(
+            api_user_subscription, 
+            data={
+                'type': plan,
+                'expired_at': expired_at,
+                'started_at': now,
+                'user_plan': {"activated_platform" : ["facebook","youtube","instagram"]},
+                'purchase_price': amount
+            },
+            partial=True
         )
+        if serializer.is_valid():
+            api_user_subscription = serializer.save()
+            
+        serializer = UserSubscriptionSerializerMeta(
+            api_user_subscription, 
+            data={
+                "meta": {"stripe payment intent":intentSecret}
+            },
+            partial=True
+        )
+        if serializer.is_valid():
+            api_user_subscription = serializer.save()
+        
+        deal_obj = record_subscription_for_paid_user(api_user_subscription, plan, amount, api_user, original_plan=original_plan)
+        
         marketing_plans = kwargs.get('marketing_plans')
         for key, val in marketing_plans.items():
             if key == "welcome_gift":
                 lib.util.marking_tool.WelcomeGiftUsedMark.mark(api_user, save = True)
-                PromotionCode.objects.create(
-                    name=key,
-                    user=api_user,
-                    user_subscription=api_user_subscription,
-                    used_at=datetime.utcnow()
-                )
+                try:
+                    promocode_obj = PromotionCode.objects.get(name=key, api_user=api_user, user_subscription=api_user_subscription)
+                    promocode_obj.used_at=datetime.utcnow()
+                    promocode_obj.deal = deal_obj
+                    promocode_obj.save()
+                except:
+                    PromotionCode.objects.create(
+                        name=key,
+                        api_user=api_user,
+                        user_subscription=api_user_subscription,
+                        used_at=datetime.utcnow(),
+                        deal=deal_obj
+                    )
         ret = {
             "Email": email,
             "Your Plan": subscription_plan.get('text'),
@@ -818,5 +844,4 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             "Subscription End Date": expired_at.strftime("%d %B %Y %H:%M"),
             "Receipt": paymentIntent.charges.get('data')[0].get('receipt_url')
         }
-
         return Response(ret, status=status.HTTP_200_OK)
