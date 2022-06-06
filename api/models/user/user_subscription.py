@@ -125,6 +125,18 @@ class UserSubscriptionSerializerCreate(UserSubscriptionSerializer):
         fields = ['name', 'description', 'remark', 'type', 'status', 'lang']
         read_only_fields = ['created_at', 'modified_at']
 
+class UserSubscriptionSerializerUpdate(serializers.ModelSerializer):
+    class Meta:
+        model = UserSubscription
+        fields = [
+            "type",
+            "expired_at",
+            "started_at",
+            "user_plan",
+            "purchase_price"
+        ]
+        read_only_fields = ['created_at', 'modified_at']
+
 class UserSubscriptionSerializerSimplify(serializers.ModelSerializer):
     class Meta:
         model = UserSubscription
@@ -154,6 +166,7 @@ class UserSubscriptionSerializerMeta(serializers.ModelSerializer):
     meta_logistic = serializers.JSONField(default=dict, required=False)
     meta_country = serializers.JSONField(default=dict, required=False)
 
+        
 class UserSubscriptionAdmin(admin.ModelAdmin):
     model = UserSubscription
     list_display = [field.name for field in UserSubscription._meta.fields]

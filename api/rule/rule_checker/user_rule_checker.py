@@ -51,6 +51,7 @@ class RegistrationDataRuleChecker(RuleChecker):
         check_rule.stripe_check_rule.StripeCheckRule.is_period_valid,
         check_rule.stripe_check_rule.StripeCheckRule.is_promo_code_valid,
         check_rule.stripe_check_rule.StripeCheckRule.adjust_price_if_promo_code_valid,
+        check_rule.stripe_check_rule.StripeCheckRule.adjust_price_if_marketing_plan, # This is a activity, if activity end, remove this rule, also remove from RegistrationRequireRefundChecker class below
     ]
 class RegistrationRequireRefundChecker(RuleChecker):
 
@@ -60,5 +61,6 @@ class RegistrationRequireRefundChecker(RuleChecker):
         check_rule.stripe_check_rule.StripeCheckRule.is_period_valid,
         check_rule.stripe_check_rule.StripeCheckRule.is_promo_code_valid,
         check_rule.stripe_check_rule.StripeCheckRule.adjust_price_if_promo_code_valid,
+        check_rule.stripe_check_rule.StripeCheckRule.adjust_price_if_marketing_plan, # remove it if this rule is not in RegistrationDataRuleChecker class above
         check_rule.stripe_check_rule.StripeCheckRule.does_amount_match,
     ]

@@ -1,7 +1,11 @@
 
+from api.models.user.promotion_code import PromotionCode
 from api.utils.error_handle.error.api_error import ApiVerifyError
 
 from datetime import datetime
+
+from business_policy.marketing_plan import MarketingPlan
+import lib
 class StripeCheckRule():
 
     @staticmethod
@@ -51,7 +55,25 @@ class StripeCheckRule():
         if promoCode and promoCode == country_plan.promo_code:
             amount = amount*country_plan.promo_discount_rate
             return {'amount':amount}
-
+        
+    def adjust_price_if_marketing_plan(**kwargs):
+        amount = kwargs.get('amount')
+        plans_detail = MarketingPlan.get_plans("current_plans")
+        for key, val in plans_detail.items():
+            if not val['expire_time']:
+                if val['discount_rate']:
+                    amount = amount * val['discount_rate']
+        return {'amount':amount, 'marketing_plans':plans_detail}
+    
+    @staticmethod
+    def adjust_price_if_welcome_gift_not_used(**kwargs):
+        amount1 = kwargs.get('amount')
+        marketing_plans = kwargs.get('marketing_plans', {})
+        api_user = kwargs.get('api_user')
+        amount2 = lib.util.marking_tool.WelcomeGiftUsedMark.check_mark(api_user, amount1)
+        if amount1 != amount2:
+            marketing_plans['welcome_gift'] =  MarketingPlan.welcome_gift()
+        return {"amount": amount2, "marketing_plans": marketing_plans}
     def is_upgrade_plan_valid(**kwargs):
 
         upgrade_avaliable_dict={
@@ -72,7 +94,7 @@ class StripeCheckRule():
     def adjust_amount_if_subscription_undue(**kwargs):
 
         amount = kwargs.get('amount')
-
+        # print(amount)
         api_user_subscription = kwargs.get('api_user_subscription')
 
         if datetime.timestamp(datetime.now())>datetime.timestamp(api_user_subscription.expired_at):
@@ -80,8 +102,9 @@ class StripeCheckRule():
 
         expired_date = api_user_subscription.expired_at.date()
         started_date = api_user_subscription.started_at.date()
-
+        # print(api_user_subscription.purchase_price)
         adjust_amount = int(api_user_subscription.purchase_price*((expired_date-datetime.now().date()).days/(expired_date-started_date).days))
+        # print(f'{adjust_amount} = int({api_user_subscription.purchase_price}*{(expired_date-datetime.now().date()).days})/{(expired_date-started_date).days}')
         return {'amount':amount-adjust_amount,'adjust_amount':adjust_amount}
 
 
