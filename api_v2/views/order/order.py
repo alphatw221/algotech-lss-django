@@ -80,7 +80,6 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         return Response(data, status=status.HTTP_200_OK)
     
-<<<<<<< HEAD
     @action(detail=True, methods=['GET'], url_path=r'buyer/detail', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def buyer_order_detail(self, request, pk):
@@ -91,7 +90,6 @@ class OrderViewSet(viewsets.ModelViewSet):
         return Response(models.order.order.OrderSerializer(order).data, status=status.HTTP_200_OK)
     
                 
-=======
 
     @action(detail=True, methods=['GET'], url_path=r'buyer/retrieve/state', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
@@ -100,4 +98,3 @@ class OrderViewSet(viewsets.ModelViewSet):
         order = lib.util.verify.Verify.get_order_by_api_user(api_user, pk)
 
         return Response(order.status, status=status.HTTP_200_OK)
->>>>>>> 5ff229e39633a7a8786d77a18d1f54e8933040ec
