@@ -6,12 +6,15 @@ from rest_framework.decorators import action, permission_classes
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from api.code.password_code_manager import PasswordResetCodeManager
 from api.models.instagram.instagram_profile import InstagramProfile, InstagramProfileSerializer
+from api.models.user.deal import Deal
+from api.models.user.promotion_code import PromotionCode
 from api.models.user.user import User, UserSerializer, UserSerializerAccountInfo
 from api.models.youtube.youtube_channel import YoutubeChannel, YoutubeChannelSerializer
 from api.rule.rule_checker.user_rule_checker import DealerCreateAccountRuleChecker,AdminCreateAccountRuleChecker, SellerChangePasswordRuleChecker, SellerResetPasswordRuleChecker
 from api.utils.common.common import getdata, getparams
 from api.utils.common.verify import ApiVerifyError
 from api.utils.error_handle.error.api_error import ApiCallerError
+from api.utils.orm.deal import record_subscription_for_paid_user
 from api.views.user._user import facebook_login_helper, google_login_helper, google_authorize_helper
 from automation.jobs.send_email_job import send_email_job
 from backend.api.facebook.user import api_fb_get_accounts_from_user
@@ -30,6 +33,7 @@ from django.conf import settings
 import string, random, json
 from api.models.user.user_subscription import UserSubscription
 from backend.i18n.register_confirm_mail import i18n_get_register_confirm_mail_subject, i18n_get_register_activate_mail_subject
+from business_policy.marketing_plan import MarketingPlan
 from lss.views.custom_jwt import CustomTokenObtainPairSerializer
 import requests
 from google.oauth2 import id_token
@@ -515,7 +519,6 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['POST'], url_path=r'register/validate/(?P<country_code>[^/.]+)', permission_classes=())
     @api_error_handler
     def validate_register_data(self, request, country_code):
-
         email, plan, period = lib.util.getter.getdata(request, ("email", "plan", "period"), required=True)
         promoCode, = lib.util.getter.getdata(request, ("promoCode",), required=False)
 
@@ -527,8 +530,8 @@ class UserViewSet(viewsets.ModelViewSet):
 
         email = kwargs.get('email')
         amount = kwargs.get('amount')
-    
-        stripe.api_key = settings.STRIPE_API_KEY  
+        marketing_plans = kwargs.get('marketing_plans')
+        stripe.api_key = settings.STRIPE_API_KEY
         try:
             intent = stripe.PaymentIntent.create( amount=int(amount*100), currency=country_plan.currency, receipt_email = email)
         except Exception:
@@ -538,21 +541,20 @@ class UserViewSet(viewsets.ModelViewSet):
             "client_secret":intent.client_secret,
             "payment_amount":amount,
             "user_plan":plan,
-            "currency":country_plan.currency
+            "currency":country_plan.currency,
+            "marketing_plans":marketing_plans
         }, status=status.HTTP_200_OK)
 
 
     @action(detail=False, methods=['POST'], url_path=r'register/(?P<country_code>[^/.]+)', permission_classes=())
     @api_error_handler
     def user_register(self, request, country_code):
-
         email, password, plan, period, intentSecret = lib.util.getter.getdata(request,("email", "password", "plan", "period", "intentSecret"),required=True)
         firstName, lastName, contactNumber, country, promoCode, timezone = lib.util.getter.getdata(request, ("firstName", "lastName", "contactNumber", "country", "promoCode", "timezone"), required=False)
 
         payment_intent_id = intentSecret[:27]
         stripe.api_key = settings.STRIPE_API_KEY
         paymentIntent = stripe.PaymentIntent.retrieve(payment_intent_id)
-
         kwargs = {'paymentIntent':paymentIntent,'email':email,'plan':plan,'period':period, 'promoCode':promoCode}
         kwargs=rule.rule_checker.user_rule_checker.RegistrationPaymentCompleteChecker.check(**kwargs)
 
@@ -561,7 +563,7 @@ class UserViewSet(viewsets.ModelViewSet):
             subscription_plan = country_plan.get_plan(plan)
 
             kwargs.update({'country_plan':country_plan, 'subscription_plan':subscription_plan})
-            kwargs=rule.rule_checker.user_rule_checker.RegistrationRequireRefundChecker.check(kwargs)
+            kwargs=rule.rule_checker.user_rule_checker.RegistrationRequireRefundChecker.check(**kwargs)
         except Exception:
             #TODO refund
             print('require refund')
@@ -589,11 +591,33 @@ class UserViewSet(viewsets.ModelViewSet):
             country = country_code,
             purchase_price = amount
             )
-        
+            
         api_user = User.objects.create(
             name=f'{firstName} {lastName}', email=email, type='user', status='valid', phone=contactNumber, auth_user=auth_user, user_subscription=user_subscription)
         
+        deal_obj = record_subscription_for_paid_user(user_subscription, plan, amount, api_user)
+        
         lib.util.marking_tool.NewUserMark.mark(api_user, save = True)
+        
+        marketing_plans = kwargs.get('marketing_plans')
+        for key, val in marketing_plans.items():
+            if key == "welcome_gift":
+                lib.util.marking_tool.WelcomeGiftUsedMark.mark(api_user, save = True)
+                PromotionCode.objects.create(
+                    name=key,
+                    api_user=api_user,
+                    user_subscription=user_subscription,
+                    used_at=datetime.utcnow(),
+                    deal=deal_obj
+                )
+            # name = models.CharField(max_length=255, null=True, blank=True)
+            # code = models.TextField(null=True, blank=True)
+            # user = models.ForeignKey(
+            #     User,  null=True, on_delete=models.SET_NULL, related_name='promotion_code')
+            # user_subscription = models.ForeignKey(
+            #     UserSubscription,  null=True, on_delete=models.SET_NULL, related_name='promotion_code')
+            # used_at = models.DateTimeField()
+            # meta = models.JSONField(null=True, blank=True, default=dict)
 
         ret = {
             "Customer Name":f'{firstName} {lastName}',
@@ -616,7 +640,7 @@ class UserViewSet(viewsets.ModelViewSet):
             expiry_date=int(expired_at.replace(hour=0,minute=0,second=0,microsecond=0).timestamp()*1000)
         )
         
-        service.sendinblue.transaction_email.AccountActivationEmail(firstName, plan, email, password, to=[email], cc=country_plan.cc, country=country).send()
+        service.sendinblue.transaction_email.AccountActivationEmail(firstName, plan, email, password, to=[email], cc=country_plan.cc, country=country_code).send()
         
         return Response(ret, status=status.HTTP_200_OK)
     

@@ -2,6 +2,7 @@ from abc import abstractclassmethod
 from django.conf import settings
 from api.utils.common.verify import Verify
 import business_policy
+from business_policy.marketing_plan import MarketingPlan
 import service
 
 class MetaMark():
@@ -10,9 +11,12 @@ class MetaMark():
     mark_value = ""
 
     @classmethod
-    def mark(cls, model, save=False):
+    def mark(cls, model, save=False, mark_value=None):
         try:
-            model.meta[cls.mark_key] = cls.mark_value
+            if mark_value == None:
+                model.meta[cls.mark_key] = cls.mark_value
+            else:
+                model.meta[cls.mark_key] = mark_value
             if save:
                 model.save()
         except Exception:
@@ -64,3 +68,18 @@ class NewUserMark(MetaMark):
         except Exception as e:
             pass
         
+class WelcomeGiftUsedMark(MetaMark):
+
+    mark_key = "welcome_gift_used"
+    mark_value = True
+    
+    @classmethod
+    def check_mark(cls, api_user, original_price):
+        try:
+            if cls._get_mark(api_user) != False:
+                return original_price
+            # cls.mark(api_user, save=True)
+            discount_rate = MarketingPlan.welcome_gift().get('discount_rate')
+            return original_price * discount_rate
+        except Exception as e:
+            pass        
