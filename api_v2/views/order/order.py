@@ -80,7 +80,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         return Response(data, status=status.HTTP_200_OK)
     
-
+    
     @action(detail=True, methods=['GET'], url_path=r'buyer/detail', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def buyer_order_detail(self, request, pk):
