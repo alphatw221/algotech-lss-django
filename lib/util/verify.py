@@ -268,8 +268,6 @@ class Verify():
 
     @staticmethod
     def get_campaign_from_platform(platform, campaign_id):
-        print(platform.campaigns)
-        print(campaign_id)
         if not platform.campaigns.filter(id=campaign_id).exists():
             raise ApiVerifyError("no campaign found")
         campaign = platform.campaigns.get(id=campaign_id)
