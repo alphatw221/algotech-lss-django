@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 
 from api import models
-from api.utils.common.verify import Verify
+from django.db.models import Q
 from api.utils.common.order_helper import PreOrderHelper
 import lib
 
@@ -21,6 +21,8 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     filterset_fields = []
     pagination_class = PreOrderPagination
 
+
+# ---------------------------------------------- buyer ------------------------------------------------------
 
     @action(detail=True, methods=['GET'], url_path=r'retrieve', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
@@ -41,8 +43,8 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         delivery_info, pickup_info = \
             lib.util.getter.getdata(request, ("delivery_info", "pickup_info"), required=False)
 
-        pre_order = Verify.get_pre_order(pk)
-        campaign = Verify.get_campaign_from_pre_order(pre_order)
+        pre_order = lib.util.verify.Verify.get_pre_order(pk)
+        campaign = lib.util.verify.Verify.get_campaign_from_pre_order(pre_order)
 
         pre_order.shipping_method = method
         pre_order.save()   #make sure this line is necessary
@@ -70,3 +72,36 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         PreOrderHelper.add_product(api_user, pre_order, campaign_product, qty)
         pre_order = lib.util.verify.Verify.get_pre_order(pk)
         return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
+
+# ---------------------------------------------- seller ------------------------------------------------------
+
+    @action(detail=False, methods=['GET'], url_path=r'seller/list', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def seller_list_pre_order(self, request):
+
+        api_user, campaign_id, search = lib.util.getter.getparams(request, ('campaign_id', 'search'), with_user=True, seller=True)
+
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        print (user_subscription.campaigns.filter(id='452'))
+        campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
+
+        queryset = campaign.pre_orders.exclude(subtotal=0).order_by('id')
+
+        if search:
+            if search.isnumeric():
+                queryset = queryset.filter(
+                    Q(id=int(search)) | Q(customer_name__icontains=search) | Q(phone__icontains=search))
+            else:
+                queryset = queryset.filter(Q(customer_name__icontains=search) | Q(phone__icontains=search))
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = models.order.pre_order.PreOrderSerializer(page, many=True)
+            result = self.get_paginated_response(
+                serializer.data)
+            data = result.data
+        else:
+            serializer = models.order.pre_order.PreOrderSerializer(queryset, many=True)
+            data = serializer.data
+
+        return Response(data, status=status.HTTP_200_OK)

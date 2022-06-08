@@ -37,7 +37,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         user_subscription = \
             lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
 
-        kwargs = {'status':product_status if product_status else 'enabled'}
+        kwargs = {'status': product_status if product_status else 'enabled'}
         if (search_column in ["", None]) and (keyword not in [None, ""]):
             raise lib.error_handle.error.api_error.ApiVerifyError("search_column field can not be empty when keyword has value")
         if (search_column not in ['undefined', '']) and (keyword not in ['undefined', '', None]):

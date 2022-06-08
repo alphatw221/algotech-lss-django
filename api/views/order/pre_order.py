@@ -58,16 +58,20 @@ class PreOrderViewSet(viewsets.ModelViewSet):
             else:
                 queryset = queryset.filter(Q(customer_name__icontains=search) | Q(phone__icontains=search))
 
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = PreOrderSerializer(page, many=True)
-            result = self.get_paginated_response(
-                serializer.data)
-            data = result.data
+        if request.query_params.get('page'):
+            page = self.paginate_queryset(queryset)
+            if page is not None:
+                serializer = PreOrderSerializer(page, many=True)
+                result = self.get_paginated_response(
+                    serializer.data)
+                data = result.data
+            else:
+                serializer = PreOrderSerializer(queryset, many=True)
+                data = serializer.data
         else:
-            serializer = PreOrderSerializer(queryset, many=True)
+            serializer = self.get_serializer(queryset, many=True)
             data = serializer.data
-
+            
         return Response(data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['GET'], url_path=r'seller_checkout', permission_classes=(IsAuthenticated,))
