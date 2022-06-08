@@ -46,7 +46,9 @@ urlpatterns = [
     path('backend/', include('backend.urls')),
 
     re_path(r'^lss/',TemplateView.as_view(template_name="lss_entry.html")),
-    
+    re_path(r'^seller/',TemplateView.as_view(template_name="lss_enigma_entry.html")),
+    re_path(r'^buyer/',TemplateView.as_view(template_name="lss_enigma_entry.html")),
+
     path('test',TemplateView.as_view(template_name="email_reset_password_link.html")),
     path('test2',TemplateView.as_view(template_name="reset_password_success_email.html")),
 ]

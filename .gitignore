@@ -11,3 +11,4 @@ __pycache__
 .idea
 .vs
 config.py
+/static

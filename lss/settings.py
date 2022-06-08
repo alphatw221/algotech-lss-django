@@ -59,7 +59,8 @@ INSTALLED_APPS = [
     'django_extensions',
     'webpack_loader',
     'channels',
-    'api_v2'
+    'api_v2',
+    'django_vite',
 ]
 
 LOGGING = {
@@ -260,10 +261,12 @@ SUPPORTED_LANGUAGES = {
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
-# STATIC_ROOT = os.path.join(BASE_DIR, "static")
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
+# STATIC_ROOT = os.path.join(BASE_DIR.parent,"lss_vue_enigma/static2")
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static"),
-    os.path.join(BASE_DIR.parent,"lss_vue/static")
+    # os.path.join(BASE_DIR, "static"),
+    os.path.join(BASE_DIR.parent,"lss_vue/static"),
+    os.path.join(BASE_DIR.parent,"lss_vue_enigma/static")
 ]
 
 
@@ -461,3 +464,9 @@ CHANNEL_LAYERS = {
         ,
     },
 }
+
+#vite
+DJANGO_VITE_ASSETS_PATH = os.path.join(BASE_DIR.parent,"lss_vue_enigma/static")
+DJANGO_VITE_MANIFEST_PATH = os.path.join(BASE_DIR.parent,"lss_vue_enigma/static/manifest.json")
+# DJANGO_VITE_STATIC_URL_PREFIX = 'test'
+DJANGO_VITE_DEV_MODE = DEBUG
