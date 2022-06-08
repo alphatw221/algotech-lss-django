@@ -6,9 +6,9 @@ class PreOrderHelper():
     
     
     @classmethod
-    def summarize_pre_order(cls, pre_order, campaign, shipping_option=None, shipping_method=None , save=False):
+    def summarize_pre_order(cls, pre_order, campaign, shipping_option=None, save=False):
 
-        if shipping_method and shipping_method == 'in_store':
+        if pre_order.shipping_method == 'pickup':
             pre_order.total = pre_order.subtotal + pre_order.adjust_price
             if save:
                 pre_order.save()

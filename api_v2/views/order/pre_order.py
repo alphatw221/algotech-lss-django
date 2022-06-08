@@ -38,16 +38,16 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def update_delivery_info(self, request, pk=None):
 
-        method, = \
-            lib.util.getter.getdata(request, ( "method",), required=True)
+        api_user = lib.util.verify.Verify.get_customer_user(request)
+        method, shipping_option = \
+            lib.util.getter.getdata(request, ( "method", "shipping_option"), required=True)
         delivery_info, pickup_info = \
             lib.util.getter.getdata(request, ("delivery_info", "pickup_info"), required=False)
 
         pre_order = lib.util.verify.Verify.get_pre_order(pk)
         campaign = lib.util.verify.Verify.get_campaign_from_pre_order(pre_order)
 
-        pre_order.shipping_method = method
-        pre_order.save()   #make sure this line is necessary
+        
 
         serializer = models.order.pre_order.PreOrderSerializerUpdateDelivery(pre_order, data=delivery_info, partial=True) \
             if method=='delivery' else models.order.pre_order.PreOrderSerializerUpdatePickup(pre_order, data=pickup_info, partial=True)
@@ -56,9 +56,17 @@ class PreOrderViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         pre_order = serializer.save()
         
-        # pre_order = lib.helper.order_helper.PreOrderHelper.summarize_pre_order(pre_order,campaign, save=True)
+        pre_order.shipping_method = method
+        # pre_order.save()   #make sure this line is necessary
+        pre_order = lib.helper.order_helper.PreOrderHelper.summarize_pre_order(pre_order, campaign, shipping_option, save=True)
 
-        return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
+        #checkout
+
+        api_order = PreOrderHelper.checkout(api_user, pre_order)
+        order = lib.util.verify.Verify.get_order(api_order['id'])
+
+
+        return Response(models.order.order.OrderSerializer(order).data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['PUT'], url_path=r'buyer/add', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler

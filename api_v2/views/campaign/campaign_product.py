@@ -33,11 +33,13 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def buyer_list(self, request):
         pre_order_id = request.query_params.get('pre_order_id')
-        pre_order = utils.common.verify.Verify.get_pre_order(pre_order_id)
+        pre_order = lib.util.verify.Verify.get_pre_order((pre_order_id))
+        # pre_order = utils.common.verify.Verify.get_pre_order(pre_order_id)
         
-        pre_order_products = list(pre_order.products.keys())
-        campaign_products = pre_order.campaign.products.filter(Q(type='product') | Q(type="product-fast")).exclude(id__in=pre_order_products)
-        serializer = self.get_serializer(campaign_products, many=True)
-        data = serializer.data
+        # pre_order_products = list(pre_order.products.keys())
+        # campaign_products = pre_order.campaign.products.filter(Q(type='product') | Q(type="product-fast")).exclude(id__in=pre_order_products)
+        campaign_products = pre_order.campaign.products.filter(Q(type='product') | Q(type="product-fast"))
+        # serializer = models.campaign.campaign_product.CampaignProductSerializer(campaign_products, many=True)
+        # serializer = self.get_serializer(campaign_products, many=True)
         
-        return Response(data, status=status.HTTP_200_OK)
+        return Response(models.campaign.campaign_product.CampaignProductSerializer(campaign_products, many=True).data, status=status.HTTP_200_OK)

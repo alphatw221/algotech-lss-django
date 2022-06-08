@@ -1,1 +1,1 @@
-from . import campaign, campaign_comment
+from . import campaign, campaign_comment, campaign_product
