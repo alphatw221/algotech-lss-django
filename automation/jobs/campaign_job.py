@@ -164,7 +164,7 @@ def capture_youtube(campaign, logs):
         if code // 100 != 2:
             print(data)
             if code == 401:
-                refresh_youtube_channel_token(youtube_channel)
+                refresh_youtube_channel_token(youtube_channel, logs)
             logs.append(["error", "video info error"])
             return
         items = data.get("items")
@@ -192,7 +192,7 @@ def capture_youtube(campaign, logs):
         #start of every youtube live chat:
         youtube_campaign['live_chat_id'] = live_chat_id
         db.api_campaign.update_one({'id': campaign['id']}, { "$set": {'youtube_campaign': youtube_campaign}})
-        access_token = refresh_youtube_channel_token(youtube_channel)
+        access_token = refresh_youtube_channel_token(youtube_channel, logs)
 
     
     code, data = service.youtube.live_chat.get_live_chat_comment_with_access_token(access_token, next_page_token, live_chat_id, 100)
@@ -204,7 +204,7 @@ def capture_youtube(campaign, logs):
     if code // 100 != 2 and 'error' in data:
         print(data)
         if code == 401:
-            access_token = refresh_youtube_channel_token(youtube_channel)
+            access_token = refresh_youtube_channel_token(youtube_channel, logs)
             return
 
         youtube_campaign['live_chat_id'] = ''

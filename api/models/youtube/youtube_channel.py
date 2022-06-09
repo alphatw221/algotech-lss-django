@@ -40,7 +40,7 @@ class YoutubeChannel(models.Model):
 class YoutubeChannelInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = YoutubeChannel
-        fields = [ 'name', 'remark', 'image', 'lang']
+        fields = [ 'channel_id', 'name', 'remark', 'image', 'lang']
         read_only_fields = ['created_at', 'modified_at']
 
 
