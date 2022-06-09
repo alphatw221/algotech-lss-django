@@ -45,7 +45,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         if category not in ['undefined', '', None]:
             kwargs = { 'tag__icontains': category }
 
-        queryset = user_subscription.products.filter(**kwargs)
+        queryset = user_subscription.products.filter(**kwargs).order_by("-created_at")
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
@@ -56,6 +56,16 @@ class ProductViewSet(viewsets.ModelViewSet):
             data = serializer.data
 
         return Response(data, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['GET'], url_path=r'retrieve', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def retrieve_product(self, request, pk):
+
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        product = lib.util.verify.Verify.get_product_from_user_subscription(user_subscription, pk)
+
+        return Response(models.product.product.ProductSerializer(product).data, status=status.HTTP_200_OK)
 
     
     @action(detail=False, methods=['POST'], url_path=r'create', parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated,))
