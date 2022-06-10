@@ -56,7 +56,8 @@ class PreOrderHelper():
                 shipping_cost = 0 if free_delivery else api_pre_order.get('shipping_cost',0)
                 adjust_price = api_pre_order.get("adjust_price",0)
                 total = subtotal+ float(shipping_cost)+float(adjust_price)
-
+                total = 0 if total<0 else total
+                
                 db.api_pre_order.update_one(
                     {'id': pre_order.id},
                     {
@@ -131,6 +132,7 @@ class PreOrderHelper():
                 shipping_cost = 0 if free_delivery else api_pre_order.get('shipping_cost',0)
                 adjust_price = api_pre_order.get("adjust_price",0)
                 total = subtotal+ float(shipping_cost)+float(adjust_price)
+                total = 0 if total<0 else total
 
                 db.api_pre_order.update_one(
                     {'id': pre_order.id},
@@ -178,6 +180,7 @@ class PreOrderHelper():
                 shipping_cost = 0 if free_delivery else api_pre_order.get('shipping_cost',0)
                 adjust_price = api_pre_order.get("adjust_price",0)
                 total = subtotal+ float(shipping_cost)+float(adjust_price)
+                total = 0 if total<0 else total
 
                 db.api_pre_order.update_one(
                     {'id': pre_order.id},
