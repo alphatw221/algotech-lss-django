@@ -10,6 +10,8 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from datetime import datetime
+from api.models.facebook.facebook_page import FacebookPageSerializer
+from api.models.instagram.instagram_profile import InstagramProfileSerializer
 from api.models.youtube.youtube_channel import YoutubeChannelSerializer
 from backend.api.google.user import api_google_post_refresh_token
 
@@ -65,5 +67,84 @@ class CampaignViewSet(viewsets.ModelViewSet):
         else:
             serializer = self.get_serializer(campaigns, many=True)
             data = serializer.data
-
+        
         return Response(data, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['GET'], url_path=r'check_facebook_page_token', permission_classes=(IsAuthenticated,))
+    @api_error_handler
+    def check_facebook_page_token(self, request):
+
+        api_user, facebook_page_id = getparams(request, ('facebook_page_id',),with_user=True, seller=True)
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        
+        if 'facebook' not in user_subscription.user_plan.get('activated_platform'):
+           raise ApiVerifyError('facebook not activated')
+       
+        facebook_page = Verify.get_facebook_page_from_user_subscription(user_subscription, facebook_page_id)
+        is_token_valid = Verify.check_is_page_token_valid('facebook', facebook_page.token, facebook_page.page_id)
+        if not is_token_valid:
+            raise ApiVerifyError(f"Facebook page <{facebook_page.name}>: token expired or invalid. Please re-bind your page on Platform page.")
+        return Response(FacebookPageSerializer(facebook_page).data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['GET'], url_path=r'check_youtube_channel_token', permission_classes=(IsAuthenticated,))
+    @api_error_handler
+    def check_youtube_channel_token(self, request):
+
+        api_user, youtube_channel_id = getparams(request, ('youtube_channel_id',),with_user=True, seller=True)
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+
+        if 'youtube' not in user_subscription.user_plan.get('activated_platform'):
+           raise ApiVerifyError('youtube not activated')
+
+        youtube_channel = Verify.get_youtube_channel_from_user_subscription(user_subscription, youtube_channel_id)
+        print(youtube_channel)
+        response_status, response = api_google_post_refresh_token(youtube_channel.refresh_token)
+        print(response)
+        is_token_valid = Verify.check_is_page_token_valid('youtube', response['access_token'])
+        if not is_token_valid:
+            raise ApiVerifyError(f"YouTube channel <{youtube_channel.name}>: token expired or invalid. Please re-bind your channel on Platform page.")
+        youtube_channel.token = response['access_token']
+        youtube_channel.save()
+        return Response(YoutubeChannelSerializer(youtube_channel).data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['GET'], url_path=r'check_instagram_profile_token', permission_classes=(IsAuthenticated,))
+    @api_error_handler
+    def check_instagram_profile_token(self, request):
+
+        api_user, instagram_profile_id = getparams(request, ('instagram_profile_id',),with_user=True, seller=True)
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+
+        if 'instagram' not in user_subscription.user_plan.get('activated_platform'):
+           raise ApiVerifyError('instagram not activated')
+
+        instagram_profile = Verify.get_instagram_profile_from_user_subscription(user_subscription, instagram_profile_id)
+        is_token_valid = Verify.check_is_page_token_valid('instagram', instagram_profile.token, instagram_profile.business_id)
+        if not is_token_valid:
+            raise ApiVerifyError(f"Instagram profile <{instagram_profile.name}>: token expired or invalid. Please re-bind your profile on Platform page.")
+        return Response(InstagramProfileSerializer(instagram_profile).data, status=status.HTTP_200_OK)
+    
+    @action(detail=True, methods=['PUT'], url_path=r'save_pages_info', permission_classes=(IsAuthenticated,))
+    @api_error_handler
+    def save_pages_info(self, request, pk):
+        api_user = Verify.get_seller_user(request)
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        campaign = Verify.get_campaign_from_user_subscription(user_subscription, pk)
+        
+        data = request.data
+        print(data)
+        if post_id := data.get("facebook", {}).get("post_id", {}):
+            facebook_page = Verify.get_facebook_page_from_user_subscription(user_subscription, data.get("facebook", {}).get("page_id", {}), field="page_id")
+            campaign.facebook_page = facebook_page
+            campaign.facebook_campaign['post_id'] = post_id
+        if live_video_id := data.get("youtube", {}).get("live_video_id", {}):
+            youtube_channel = Verify.get_youtube_channel_from_user_subscription(user_subscription, data.get("youtube", {}).get("channel_id", {}), field="channel_id")
+            campaign.youtube_channel = youtube_channel
+            campaign.youtube_campaign['live_video_id'] = live_video_id
+        if live_media_id := data.get("instagram", {}).get("live_media_id", {}):
+            instagram_profile = Verify.get_instagram_profile_from_user_subscription(user_subscription, data.get("instagram", {}).get("profile_id", {}), field="business_id")
+            campaign.instagram_profile = instagram_profile
+            campaign.instagram_campaign['live_media_id'] = live_media_id
+        campaign.save()
+        
+        return Response("ok", status=status.HTTP_200_OK)
+

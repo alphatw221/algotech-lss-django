@@ -208,22 +208,22 @@ class Verify():
         return dealer_user_subscription.subscribers.get(id=user_subscription_id)
 
     @staticmethod
-    def get_facebook_page_from_user_subscription(user_subscription, facebook_page_id):
-        if not user_subscription.facebook_pages.filter(id=facebook_page_id).exists():
+    def get_facebook_page_from_user_subscription(user_subscription, facebook_page_id, field="id"):
+        if not user_subscription.facebook_pages.filter(**{field:facebook_page_id}).exists():
             raise ApiVerifyError("facebook page not bound to user_subscription")
-        return user_subscription.facebook_pages.get(id=facebook_page_id)
+        return user_subscription.facebook_pages.get(**{field:facebook_page_id})
 
     @staticmethod
-    def get_youtube_channel_from_user_subscription(user_subscription, youtube_channel_id):
-        if not user_subscription.youtube_channels.filter(id=youtube_channel_id).exists():
+    def get_youtube_channel_from_user_subscription(user_subscription, youtube_channel_id, field="id"):
+        if not user_subscription.youtube_channels.filter(**{field:youtube_channel_id}).exists():
             raise ApiVerifyError("youtube channel not bound to user_subscription")
-        return user_subscription.youtube_channels.get(id=youtube_channel_id)
+        return user_subscription.youtube_channels.get(**{field:youtube_channel_id})
 
     @staticmethod
-    def get_instagram_profile_from_user_subscription(user_subscription, instagram_profile_id):
-        if not user_subscription.instagram_profiles.filter(id=instagram_profile_id).exists():
+    def get_instagram_profile_from_user_subscription(user_subscription, instagram_profile_id, field="id"):
+        if not user_subscription.instagram_profiles.filter(**{field:instagram_profile_id}).exists():
             raise ApiVerifyError("instagram profile not bound to user_subscription")
-        return user_subscription.instagram_profiles.get(id=instagram_profile_id)
+        return user_subscription.instagram_profiles.get(**{field:instagram_profile_id})
 
     @staticmethod
     def get_campaign(campaign_id):

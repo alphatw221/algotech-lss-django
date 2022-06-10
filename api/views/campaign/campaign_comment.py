@@ -21,9 +21,9 @@ class CampaignCommentViewSet(viewsets.ModelViewSet):
     serializer_class = CampaignCommentSerializer
     filterset_fields = []
 
-    @action(detail=False, methods=['GET'], url_path=r'(?P<campaign_id>[^/.]+)', permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['GET'], url_path=r'summerize_comment/<campaign_id>[^/.]+', permission_classes=(IsAuthenticated,))
     @api_error_handler
-    def get_comment_main_categories(self, request, campaign_id):
+    def get_summerize_comment_main_categories(self, request, campaign_id):
 
         since, count = lib.util.getter.getparams(
             request, ('since', 'count',), with_user=False)
@@ -39,12 +39,38 @@ class CampaignCommentViewSet(viewsets.ModelViewSet):
         main_categories = serializers.serialize("json", comments.all(), fields=("id","categories", "message", "main_categories"))
         res = loads(main_categories)
 
-        # main_categories = CampaignCommentSerializerTest(comments.all(),many=True)
-        # print(main_categories)
-        # res = main_categories.data
+        main_categories = CampaignCommentSerializerTest(comments.all(),many=True)
+        print(main_categories)
+        res = main_categories.data
 
         return Response(res, status=status.HTTP_200_OK)
     
+    @action(detail=False, methods=['GET'], url_path=r'(?P<campaign_id>[^/.]+)', permission_classes=(IsAuthenticated,))
+    @api_error_handler
+    def get_comment(self, request, campaign_id):
+        api_user = Verify.get_seller_user(request)
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        campaign = Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
+        comments = models.campaign.campaign_comment.CampaignComment.objects.filter(campaign=campaign_id)
+        fb_comments = comments.filter(platform='facebook').order_by('-created_time')
+        ig_comments = comments.filter(platform='instagram').order_by('-created_time')
+        yt_comments = comments.filter(platform='youtube').order_by('-created_time')
+        
+        res = {
+            "facebook": {
+                "comments":CampaignCommentSerializer(fb_comments, many=True).data,
+                "fully_setup": True if (campaign.facebook_campaign.get("post_id", None) and campaign.facebook_page) else False
+            },
+            "instagram": {
+                "comments":CampaignCommentSerializer(ig_comments, many=True).data,
+                "fully_setup": True if (campaign.instagram_campaign.get("live_media_id", None) and campaign.instagram_profile) else False
+            },
+            "youtube": {
+                "comments":CampaignCommentSerializer(yt_comments, many=True).data,
+                "fully_setup": True if (campaign.youtube_campaign.get("live_video_id", None) and campaign.youtube_channel) else False
+            }
+        }
+        return Response(res, status=status.HTTP_200_OK)    
 
 
 
