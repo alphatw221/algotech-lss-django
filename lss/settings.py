@@ -276,12 +276,22 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 
+# gcp load balancer
+GCP_API_LOADBALANCER_URL = "https://gipassl.algotech.app"
+# for social lab
+# GCP_API_LOADBALANCER_URL = "https://sb.liveshowseller.ph"
+
+LOCAL_API_SERVER = "http://localhost:8001"
+TEST_API_SERVER = "http://192.168.74.114/lss-backend"
+
 # Live Show Seller info
 WEB_SERVER_URL = "https://v1login.liveshowseller.com"
 # for social lab
 # WEB_SERVER_URL = "https://plusone.sociallab.ph/lss/public"
 
-SHOPPING_CART_URL = f"{WEB_SERVER_URL}/buyer/login_to_cart"
+# SHOPPING_CART_URL = f"{WEB_SERVER_URL}/buyer/login_to_cart"
+SHOPPING_CART_URL = f"{GCP_API_LOADBALANCER_URL}/buyer/login"
+
 SUPPORTED_PLATFORMS = [
     ("n/a", "No specific platform"),
     ("facebook", "Facebook"),
@@ -402,13 +412,7 @@ REDIS_SERVER = {
 #     "password": r"algo83111T%%"}
 
 
-# gcp load balancer
-GCP_API_LOADBALANCER_URL = "https://gipassl.algotech.app"
-# for social lab
-# GCP_API_LOADBALANCER_URL = "https://sb.liveshowseller.ph"
 
-LOCAL_API_SERVER = "http://localhost:8001"
-TEST_API_SERVER = "http://192.168.74.114/lss-backend"
 # paypal settings
 # package github: https://github.com/paypal/PayPal-Python-SDK
 
