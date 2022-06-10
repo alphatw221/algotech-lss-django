@@ -40,9 +40,9 @@ class SubscriptionPlan:
         cc = ['lss@algotech.app', 'hello@liveshowseller.ph']
         plans = {
             "trial" :{"text": "Free Trial", "price":{"month":0}},
-            "lite" : {"text": "Lite", "price":{"quarter":30,"year":108}},
-            "standard" : {"text": "Standard", "price":{"quarter":90,"year":324}},
-            "premium" : {"text": "Premium", "price":{"quarter":180,"year":648}},
+             "lite" : {"text": "Lite", "price":{"quarter":30,"year":108}},
+            "standard" : {"text": "Standard", "price":{"quarter":54,"year":194}},
+            "premium" : {"text": "Premium", "price":{"quarter":120,"year":432}},
         }
     
     class TH(CountryPlan):

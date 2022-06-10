@@ -62,7 +62,7 @@ class NewUserMark(MetaMark):
                 first_name=api_user.name,
                 to=[api_user.email],
                 cc=country_plan.cc,
-                lang=user_subscription.lang).send()
+                country=user_subscription.country,).send()
 
             cls._erase_mark(api_user, save = save)
         except Exception as e:
