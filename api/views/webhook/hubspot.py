@@ -79,7 +79,7 @@ class HubspotViewSet(viewsets.GenericViewSet):
         
         service.hubspot.contact.update(vid,expiry_date=int(expired_at.replace(hour=0,minute=0,second=0,microsecond=0).timestamp()*1000))
         service.sendinblue.contact.create(email=email,first_name=first_name, last_name=last_name)
-        service.sendinblue.transaction_email.AccountActivationEmail(first_name, subscription_type, email, password, to=[email], cc=country_plan.cc, country=country_code).send()
+        service.sendinblue.transaction_email.AccountActivationEmail(first_name, subscription_type, email, password, to=[email], cc=country_plan.cc, country=country).send()
 
         return Response("ok", status=status.HTTP_200_OK)
 
