@@ -8,7 +8,9 @@ from api_v2.views.user import user
 from api_v2.views.order import pre_order
 from api_v2.views.order import order_product
 from api_v2.views.order import order
-
+from api_v2.views.facebook import facebook_page
+from api_v2.views.youtube import youtube_channel
+from api_v2.views.instagram import instagram_profile
 router = routers.DefaultRouter()
 router.register(r'product', product.ProductViewSet)
 router.register(r'campaign',campaign.CampaignViewSet)
@@ -17,6 +19,9 @@ router.register(r'user', user.UserViewSet)
 router.register(r'pre_order', pre_order.PreOrderViewSet)
 router.register(r'order-product', order_product.OrderProductViewSet)
 router.register(r'order', order.OrderViewSet)
+router.register(r'facebook-page', facebook_page.FacebookPageViewSet)
+router.register(r'youtube-channel', youtube_channel.YoutubeChannelViewSet)
+router.register(r'instagram-profile', instagram_profile.InstagramProfileViewSet)
 
 urlpatterns = [
     url(r'^', include(router.urls)),
