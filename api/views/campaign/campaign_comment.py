@@ -15,6 +15,8 @@ import lib
 from django.core import serializers
 from bson.json_util import loads, dumps
 
+from service.instagram.post import get_post_media_url
+
 class CampaignCommentViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     queryset = CampaignComment.objects.all().order_by('id')
@@ -55,19 +57,29 @@ class CampaignCommentViewSet(viewsets.ModelViewSet):
         fb_comments = comments.filter(platform='facebook').order_by('-created_time')
         ig_comments = comments.filter(platform='instagram').order_by('-created_time')
         yt_comments = comments.filter(platform='youtube').order_by('-created_time')
-        
+        ig_media_url = None
+        try:
+            status_code, response = get_post_media_url(campaign.instagram_profile.token, campaign.instagram_campaign.get("live_media_id", ""))
+            if status_code == 200:
+                ig_media_url = response["media_url"]
+        except Exception as e:
+            print(e)
         res = {
             "facebook": {
                 "comments":CampaignCommentSerializer(fb_comments, many=True).data,
-                "fully_setup": True if (campaign.facebook_campaign.get("post_id", None) and campaign.facebook_page) else False
+                "fully_setup": True if (campaign.facebook_campaign.get("post_id", None) and campaign.facebook_page) else False,
+                "page_id": campaign.facebook_page.page_id,
+                "post_id": campaign.facebook_campaign.get("post_id", None),
             },
             "instagram": {
                 "comments":CampaignCommentSerializer(ig_comments, many=True).data,
-                "fully_setup": True if (campaign.instagram_campaign.get("live_media_id", None) and campaign.instagram_profile) else False
+                "fully_setup": True if (campaign.instagram_campaign.get("live_media_id", None) and campaign.instagram_profile) else False,
+                "media_url": ig_media_url
             },
             "youtube": {
                 "comments":CampaignCommentSerializer(yt_comments, many=True).data,
-                "fully_setup": True if (campaign.youtube_campaign.get("live_video_id", None) and campaign.youtube_channel) else False
+                "fully_setup": True if (campaign.youtube_campaign.get("live_video_id", None) and campaign.youtube_channel) else False,
+                "live_video_id": campaign.youtube_campaign.get("live_video_id", None)
             }
         }
         return Response(res, status=status.HTTP_200_OK)    
