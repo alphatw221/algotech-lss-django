@@ -41,7 +41,7 @@ class InstagramProfile(models.Model):
 class InstagramProfileInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = InstagramProfile
-        fields = ['profile_id', 'name', 'remark', 'image', 'lang']
+        fields = ['profile_id', 'business_id', 'name', 'remark', 'image', 'lang']
         read_only_fields = ['created_at', 'modified_at']
 
 

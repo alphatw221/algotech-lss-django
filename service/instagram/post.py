@@ -28,7 +28,13 @@ def get_post_comments(page_token: str, post_id: str, after_page):
         
     return FacebookApiV12Caller(f'{post_id}/comments', bearer_token=page_token, params=params).get()
 
-
+def get_post_media_url(page_token: str, media_id: str):
+    params = {
+        'fields': 'media_url'
+    }
+    return FacebookApiV12Caller(f'{media_id}/', bearer_token=page_token, params=params).get()
+        
+    return FacebookApiV12Caller(f'{post_id}/comments', bearer_token=page_token, params=params).get()
 def post_page_message_on_comment(page_token: str, comment_id: str, message: dict):
     data = {
         "message": message
