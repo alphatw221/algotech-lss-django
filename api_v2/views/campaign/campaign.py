@@ -25,6 +25,8 @@ from api.utils.rule.rule_checker.user_subscription_rule_checker import CreateCam
 
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 
+from api import models
+import lib
 class CampaignPagination(PageNumberPagination):
     page_query_param = 'page'
     page_size_query_param = 'page_size'
@@ -148,3 +150,20 @@ class CampaignViewSet(viewsets.ModelViewSet):
         
         return Response("ok", status=status.HTTP_200_OK)
 
+    @action(detail=True, methods=['PUT'], url_path=r'live/update', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def update_campaign_live_data(self, request, pk):
+        api_user, platform, post_id = \
+            lib.util.getter.getparams(request, ("platform", "post_id"), with_user=True, seller=True)
+
+        user_subscription = \
+            lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, pk)
+        if platform=='facebook':
+            campaign.facebook_campaign['post_id']=post_id
+        elif platform =='youtube':
+            campaign.youtube_campaign['live_video_id']=post_id
+        elif platform =='instagram':
+            campaign.instagram_campaign['live_media_id']=post_id
+        campaign.save()
+        return Response(models.campaign.campaign.CampaignSerializerRetreive(campaign).data, status=status.HTTP_200_OK)

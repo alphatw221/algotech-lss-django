@@ -21,7 +21,7 @@ class CampaignCommentViewSet(viewsets.ModelViewSet):
     serializer_class = CampaignCommentSerializer
     filterset_fields = []
 
-    @action(detail=False, methods=['GET'], url_path=r'summerize_comment/<campaign_id>[^/.]+', permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['GET'], url_path=r'summerize/<campaign_id>[^/.]+', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def get_summerize_comment_main_categories(self, request, campaign_id):
 
