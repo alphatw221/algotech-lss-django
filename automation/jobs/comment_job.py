@@ -1,6 +1,8 @@
 import os
 import config
 import django
+
+import service
 try:
     os.environ['DJANGO_SETTINGS_MODULE'] = config.DJANGO_SETTINGS  # for rq_job
     django.setup()
@@ -87,6 +89,7 @@ def comment_job(campaign, platform_name, platform, comment, order_codes_mapping)
         try:
             _id = db.api_pre_order.insert_one(template).inserted_id
             pre_order = db.api_pre_order.find_one(_id)
+            
         except Exception as e:
             print(e)
             print('new pre_order error!!!!!')
@@ -123,6 +126,30 @@ def comment_responding(platform_name, platform, campaign, pre_order, comment, ca
             state, campaign_product, qty, lang=platform['lang'])
 
         if state in [ RequestState.ADDED, RequestState.UPDATED, RequestState.DELETED]:
+            # order_format_comment = {
+            #     "id": pre_order.id,
+            #     'customer_id': pre_order.customer_id,
+            #     'customer_name': pre_order.customer_name,
+            #     'customer_img': pre_order.customer_img,
+            #     'campaign_id': pre_order.campaign.id,
+            #     'platform': pre_order.platform,
+            #     'platform_id': pre_order.platform.id,
+            #     'currency_sign': pre_order.pre_order,
+            #     'subtotal': pre_order.subtotal
+            # }
+            # product_format_comment = {
+            #     "id": campaign_product.id,
+            #     'campaign': campaign_product.campaign.id,
+            #     'image': campaign_product.image,
+            #     'name': campaign_product.name,
+            #     'order_code': campaign_product.order_code,
+            #     'qty_sold': campaign_product.qty_sold,
+            #     'qty_for_sale': campaign_product.qty_for_sale,
+            #     'price': campaign_product.price,
+            #     'status': campaign_product.status,
+            #     'currency_sign': campaign_product.currency_sign
+            # }
+            
             shopping_cart_info, info_in_pm_notice = i18n_get_additional_text(pre_order, lang=platform['lang'])
         else:
             shopping_cart_info, info_in_pm_notice = "", ""
