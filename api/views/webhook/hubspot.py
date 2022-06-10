@@ -30,9 +30,10 @@ class HubspotViewSet(viewsets.GenericViewSet):
 
         Verify.is_hubspot_signature_valid(request)
         vid, = lib.util.getter.getdata(request,('vid',)) 
-        first_name, last_name, email, country, subscription_type, country_code, phone = \
-            lib.util.getter.getproperties(request.data.get('properties'),('firstname','lastname','email','country','subscription_type','country_code','phone'), nest_property='value')
+        first_name, last_name, email, subscription_type, country_code, phone = \
+            lib.util.getter.getproperties(request.data.get('properties'),('firstname','lastname','email','subscription_type','country_code','phone'), nest_property='value')
 
+        country = lib.util.country_mapping.country_code_to_country.get(country_code,'SG')
         password = ''.join(random.choice(string.ascii_letters+string.digits) for _ in range(8))
         country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(country)
 

@@ -33,7 +33,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
     filterset_fields = []
     pagination_class = CampaignPagination
 
-    @action(detail=False, methods=['GET'], url_path=r'list_campaign', permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['GET'], url_path=r'list', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def list_campaign(self, request):
         api_user, keyword, campaign_status, order_by, search_column = getparams(request,("keyword", "status", "order_by","searchColumn"), with_user=True, seller=True)
@@ -42,7 +42,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
         campaigns = user_subscription.campaigns.filter(id__isnull=False) # Due to problematic dirty data
         if campaign_status == 'history':
             campaigns = campaigns.filter(end_at__lt=datetime.utcnow())
-        elif campaign_status == 'schedule':
+        elif campaign_status == 'scheduled':
             campaigns = campaigns.filter(end_at__gte=datetime.utcnow())
         elif campaign_status == 'ongoing':
             campaigns = campaigns.filter(end_at__gte=datetime.utcnow())
