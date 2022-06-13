@@ -83,25 +83,17 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     def update_delivery_info(self, request, pk=None):
 
         api_user = lib.util.verify.Verify.get_customer_user(request)
-        method, shipping_option = \
-            lib.util.getter.getdata(request, ( "method", "shipping_option"), required=True)
-        delivery_info, pickup_info = \
-            lib.util.getter.getdata(request, ("delivery_info", "pickup_info"), required=False)
-
+        
+        shipping_option, shipping_data = \
+            lib.util.getter.getdata(request, ( "shipping_option", "shipping_data"), required=True)
         pre_order = lib.util.verify.Verify.get_pre_order(pk)
         campaign = lib.util.verify.Verify.get_campaign_from_pre_order(pre_order)
 
-        
-
-        serializer = models.order.pre_order.PreOrderSerializerUpdateDelivery(pre_order, data=delivery_info, partial=True) \
-            if method=='delivery' else models.order.pre_order.PreOrderSerializerUpdatePickup(pre_order, data=pickup_info, partial=True)
-        
+        serializer = models.order.pre_order.PreOrderSerializerUpdateDelivery(pre_order, data=shipping_data, partial=True) 
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         pre_order = serializer.save()
         
-        pre_order.shipping_method = method
-        # pre_order.save()   #make sure this line is necessary
         pre_order = lib.helper.order_helper.PreOrderHelper.summarize_pre_order(pre_order, campaign, shipping_option, save=True)
 
         #checkout
