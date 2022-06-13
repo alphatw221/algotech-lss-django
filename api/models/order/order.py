@@ -140,18 +140,18 @@ class OrderSerializer(serializers.ModelSerializer):
     history = serializers.JSONField(default=dict)
 
 
-class OrderSerializerForBuyerRetrieve(serializers.ModelSerializer):
+# class OrderSerializerForBuyerRetrieve(serializers.ModelSerializer):
 
-    class Meta:
-        model = Order
-        fields = '__all__'
-        read_only_fields = ['created_at', 'modified_at']
+#     class Meta:
+#         model = Order
+#         fields = '__all__'
+#         read_only_fields = ['created_at', 'modified_at']
 
-    campaign = CampaignSerializerForBuyerRetreive()
-    meta = serializers.JSONField(default=dict)
-    products = serializers.JSONField(default=dict)
-    checkout_details = serializers.JSONField(default=dict)
-    history = serializers.JSONField(default=dict)
+#     campaign = CampaignSerializerForBuyerRetreive()
+#     meta = serializers.JSONField(default=dict)
+#     products = serializers.JSONField(default=dict)
+#     checkout_details = serializers.JSONField(default=dict)
+#     history = serializers.JSONField(default=dict)
 
 class OrderSerializerUpdateShipping(serializers.ModelSerializer):
 

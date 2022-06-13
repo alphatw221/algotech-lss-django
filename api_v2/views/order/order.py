@@ -35,6 +35,14 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         return Response(models.order.order.OrderSerializer(order).data, status=status.HTTP_200_OK)
 
+    @action(detail=False, methods=['GET'], url_path=r'buyer/retrieve/latest/shipping', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def buyer_retrieve_order(self, request, pk=None):
+        api_user = lib.util.verify.Verify.get_customer_user(request)
+        # order = lib.util.verify.Verify.get_order_by_api_user(api_user, pk)
+        order = api_user.orders.last()
+
+        return Response(models.order.order.OrderSerializerUpdateShipping(order).data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['PUT'], url_path=r'buyer/receipt/upload', parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
@@ -71,7 +79,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         api_user = lib.util.verify.Verify.get_customer_user(request)
 
-        page = self.paginate_queryset(api_user.orders.all())
+        page = self.paginate_queryset(api_user.orders.all().order_by('-created_at'))
         if page is not None:
             serializer = models.order.order.OrderSerializerForBuyerRetrieve(page, many=True)
             data = self.get_paginated_response(serializer.data).data

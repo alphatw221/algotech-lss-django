@@ -6,6 +6,7 @@ from rest_framework.decorators import action
 
 from api import models
 from django.db.models import Q
+from api.models import campaign
 from api.utils.common.order_helper import PreOrderHelper
 import lib
 
@@ -24,16 +25,59 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
 # ---------------------------------------------- buyer ------------------------------------------------------
 
+    @action(detail=False, methods=['GET'], url_path=r'(?P<campaign_id>[^/.]+)/(?P<login_with>[^/.]+)/buyer/create', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def buyer_create_pre_order(self, request, campaign_id, login_with):
+
+        api_user = lib.util.verify.Verify.get_customer_user(request)
+
+        customer_id= getattr(api_user,f'{login_with}_info',{}).get('id')    #Facebook App Scope ID Here
+        customer_name= getattr(api_user,f'{login_with}_info',{}).get('name')
+        customer_img= getattr(api_user,f'{login_with}_info',{}).get('picture')
+
+        if not customer_id or not customer_name :
+            raise lib.error_handle.error.api_error.ApiVerifyError('Invalid User')
+
+        campaign = lib.util.verify.Verify.get_campaign(campaign_id)
+
+        pre_order, _ = models.order.pre_order.PreOrder.objects.get_or_create(
+            customer_id = customer_id,
+            customer_name = customer_name,
+            customer_img = customer_img,
+            campaign = campaign,
+            buyer = api_user,
+            platform = None,
+            platform_id = None)
+
+        return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
+
+
     @action(detail=True, methods=['GET'], url_path=r'retrieve', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def retrieve_pre_order(self, request, pk=None):
+
         pre_order = lib.util.verify.Verify.get_pre_order(pk)
         campaign = lib.util.verify.Verify.get_campaign_from_pre_order(pre_order)
         pre_order = lib.helper.order_helper.PreOrderHelper.summarize_pre_order(pre_order, campaign, save=True)
 
         return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
       
-      
+    
+    @action(detail=True, methods=['GET'], url_path=r'buyer/retrieve', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def retrieve_pre_order(self, request, pk=None):
+
+        api_user = lib.util.verify.Verify.get_customer_user(request)
+        pre_order = lib.util.verify.Verify.get_pre_order(pk)
+
+        if pre_order.buyer and pre_order.buyer != api_user:
+            raise lib.error_handle.error.api_error.ApiVerifyError('Invalid User')
+
+        campaign = lib.util.verify.Verify.get_campaign_from_pre_order(pre_order)
+        pre_order = lib.helper.order_helper.PreOrderHelper.summarize_pre_order(pre_order, campaign, save=True)
+
+        return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
+
     @action(detail=True, methods=['PUT'], url_path=r'delivery', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def update_delivery_info(self, request, pk=None):
