@@ -153,18 +153,28 @@ class CampaignViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['PUT'], url_path=r'live/update', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def update_campaign_live_data(self, request, pk):
-        api_user, platform, post_id = \
-            lib.util.getter.getparams(request, ("platform", "post_id"), with_user=True, seller=True)
+        api_user, platform, platform_id, post_id = \
+            lib.util.getter.getparams(request, ("platform", "platform_id", "post_id"), with_user=True, seller=True)
 
         user_subscription = \
             lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, pk)
+
+        if platform not in user_subscription.user_plan.get('activated_platform'):
+            raise lib.error_handle.error.api_error.ApiCallerError('facebook not activated')
+
         if platform=='facebook':
+            facebook_page = lib.util.verify.Verify.get_facebook_page_from_user_subscription(user_subscription, platform_id)
             campaign.facebook_campaign['post_id']=post_id
+            campaign.facebook_page = facebook_page
         elif platform =='youtube':
+            youtube_channel = lib.util.verify.Verify.get_youtube_channel_from_user_subscription()(user_subscription, platform_id)
             campaign.youtube_campaign['live_video_id']=post_id
+            campaign.youtube_channel = youtube_channel
         elif platform =='instagram':
+            instagram_profile = lib.util.verify.Verify.get_instagram_profile_from_user_subscription((user_subscription, platform_id))
             campaign.instagram_campaign['live_media_id']=post_id
+            campaign.instagram_profile = instagram_profile
         campaign.save()
         return Response(models.campaign.campaign.CampaignSerializerRetreive(campaign).data, status=status.HTTP_200_OK)
     
