@@ -43,3 +43,11 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
         # serializer = self.get_serializer(campaign_products, many=True)
         
         return Response(models.campaign.campaign_product.CampaignProductSerializer(campaign_products, many=True).data, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['GET'], url_path=r'buyer/cart/list', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def prodcut_list(self, request):
+        pre_order_id = request.query_params.get('pre_order_id')
+        pre_order = utils.common.verify.Verify.get_pre_order(pre_order_id)
+        campaign_products = pre_order.campaign.products.values()
+        return Response(campaign_products, status=status.HTTP_200_OK)
