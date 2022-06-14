@@ -50,4 +50,10 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
         pre_order_id = request.query_params.get('pre_order_id')
         pre_order = utils.common.verify.Verify.get_pre_order(pre_order_id)
         campaign_products = pre_order.campaign.products.values()
+        
+        # campaign_products_list = []
+        # for item in campaign_products.iterator():
+        #     if (item.get('qty_for_sale', 0) > 0):
+        #         campaign_products_list.append(item)
+        
         return Response(campaign_products, status=status.HTTP_200_OK)

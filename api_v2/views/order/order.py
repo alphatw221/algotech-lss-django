@@ -5,16 +5,30 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action, permission_classes
 from rest_framework.parsers import MultiPartParser
 
+from backend.pymongo.mongodb import db
 from django.core.files.storage import default_storage
 from django.conf import settings
 from django.core.files.base import ContentFile
 from rsa import verify
 
+# from api.utils.error_handle.error_handler.email_error_handler import email_error_handler
+from api import utils
 from api import models
-from api.models import order
-from api.utils.common.order_helper import PreOrderHelper
-import lib
+import lib, service
+sib_service = service.sendinblue
 
+
+@utils.error_handle.error_handler.email_error_handler.email_error_handler
+def confirmation_email_info(order_id):
+    order = db.api_order.find_one({'id': int(order_id)})
+    del order['_id']
+    campaign_id = order['campaign_id']
+    campaign = db.api_campaign.find_one({'id': int(campaign_id)})
+    del campaign['_id']
+    facebook_page_id = campaign['facebook_page_id']
+    shop = db.api_facebook_page.find_one({'id': int(facebook_page_id)})['name']
+    
+    return shop, order, campaign
 
 class OrderPagination(PageNumberPagination):
     page_query_param = 'page'
@@ -66,9 +80,8 @@ class OrderViewSet(viewsets.ModelViewSet):
         order.payment_method = "Direct Payment"
         order.status = "complete"
         order.save()
-        # send_email(order_id)
-        # shop, order, campaign = confirmation_email_info(order_id)
-        # sib_service.transaction_email.OrderConfirmationEmail(shop=shop, order=order, campaign=campaign, to=[order.get('shipping_email')], cc=[]).send()
+        shop, order, campaign = confirmation_email_info(pk)
+        sib_service.transaction_email.OrderConfirmationEmail(shop=shop, order=order, campaign=campaign, to=[order.get('shipping_email')], cc=[]).send()
 
         return Response(models.order.order.OrderSerializerForBuyerRetrieve(order).data, status=status.HTTP_200_OK)
 
