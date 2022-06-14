@@ -40,7 +40,10 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
         campaign = lib.util.verify.Verify.get_campaign(campaign_id)
 
-        pre_order, _ = models.order.pre_order.PreOrder.objects.get_or_create(
+        if models.order.pre_order.PreOrder.objects.filter(customer_id = customer_id, campaign = campaign, platform = None,).exists():
+            pre_order = models.order.pre_order.PreOrder.objects.get(customer_id = customer_id, campaign = campaign, platform = None,)
+        else:
+            pre_order = models.order.pre_order.PreOrder.objects.create(
             customer_id = customer_id,
             customer_name = customer_name,
             customer_img = customer_img,
