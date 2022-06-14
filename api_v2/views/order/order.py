@@ -11,24 +11,26 @@ from django.conf import settings
 from django.core.files.base import ContentFile
 from rsa import verify
 
-# from api.utils.error_handle.error_handler.email_error_handler import email_error_handler
+from backend.i18n.payment_comfirm_mail import i18n_get_mail_content, i18n_get_mail_subject
+from mail.sender.sender import send_smtp_mail
 from api import utils
 from api import models
-import lib, service
-sib_service = service.sendinblue
+import lib
 
 
 @utils.error_handle.error_handler.email_error_handler.email_error_handler
-def confirmation_email_info(order_id):
-    order = db.api_order.find_one({'id': int(order_id)})
-    del order['_id']
-    campaign_id = order['campaign_id']
-    campaign = db.api_campaign.find_one({'id': int(campaign_id)})
-    del campaign['_id']
-    facebook_page_id = campaign['facebook_page_id']
-    shop = db.api_facebook_page.find_one({'id': int(facebook_page_id)})['name']
-    
-    return shop, order, campaign
+def send_email(order_id):
+    order_data = db.api_order.find_one({'id': int(order_id)})
+    campaign_id = order_data['campaign_id']
+    campaign_data = db.api_campaign.find_one({'id': int(campaign_id)})
+    facebook_page_id = campaign_data['facebook_page_id']
+    shop_name = db.api_facebook_page.find_one({'id': int(facebook_page_id)})['name']
+    customer_email = order_data['shipping_email']
+
+    mail_subject = i18n_get_mail_subject(shop_name)
+    mail_content = i18n_get_mail_content(order_id, campaign_data, order_data, shop_name)
+
+    send_smtp_mail(customer_email, mail_subject, mail_content)
 
 class OrderPagination(PageNumberPagination):
     page_query_param = 'page'
@@ -80,8 +82,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         order.payment_method = "Direct Payment"
         order.status = "complete"
         order.save()
-        shop, order, campaign = confirmation_email_info(pk)
-        sib_service.transaction_email.OrderConfirmationEmail(shop=shop, order=order, campaign=campaign, to=[order.get('shipping_email')], cc=[]).send()
+        send_email(pk)
 
         return Response(models.order.order.OrderSerializer(order).data, status=status.HTTP_200_OK)
 
