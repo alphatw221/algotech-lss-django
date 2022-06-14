@@ -350,7 +350,7 @@ class PreOrderHelper():
                     },
                     "product": {
                         "id": api_campaign_product['id'],
-                        'qty_sold': api_campaign_product['qty_sold']
+                        'qty_sold': api_campaign_product['qty_sold'] + qty_difference
                     }
                 }
                 service.channels.campaign.send_order_data(api_campaign_product["campaign_id"], websocket_send_data['pre_order'])
@@ -397,7 +397,7 @@ class PreOrderHelper():
                 
                 websocket_send_data = {
                     "id": api_campaign_product['id'],
-                    'qty_sold': api_campaign_product['qty_sold']
+                    'qty_sold': api_campaign_product['qty_sold'] + qty_difference
                 }
                 service.channels.campaign.send_product_data(api_campaign_product["campaign_id"], websocket_send_data)
 
@@ -438,7 +438,7 @@ class PreOrderHelper():
                 
                 websocket_send_data = {
                     "id": api_campaign_product['id'],
-                    'qty_sold': api_campaign_product['qty_sold']
+                    'qty_sold': api_campaign_product['qty_sold'] - api_order_product['qty']
                 }
                 service.channels.campaign.send_product_data(api_campaign_product["campaign_id"], websocket_send_data)
     
