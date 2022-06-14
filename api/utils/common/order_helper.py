@@ -343,10 +343,9 @@ class PreOrderHelper():
                         'customer_id': api_pre_order['customer_id'],
                         'customer_name': api_pre_order['customer_name'],
                         'customer_img': api_pre_order['customer_img'],
-                        'campaign_id': api_pre_order['campaign.id'],
+                        'campaign_id': api_pre_order['campaign_id'],
                         'platform': api_pre_order['platform'],
-                        'platform_id': api_pre_order['platform.id'],
-                        'currency_sign': api_pre_order['api_pre_order'],
+                        'currency_sign': api_pre_order['currency_sign'],
                         'subtotal': api_pre_order['subtotal']
                     },
                     "product": {
