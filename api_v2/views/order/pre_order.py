@@ -89,8 +89,8 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         
         shipping_data, = \
             lib.util.getter.getdata(request, ("shipping_data",), required=True)
-        shipping_option, = lib.util.getter.getdata(request, ("shipping_option",), required=False)
-        
+        # shipping_option, = lib.util.getter.getdata(request, ("shipping_option",), required=False)
+        print(shipping_data)
         pre_order = lib.util.verify.Verify.get_pre_order(pk)
         campaign = lib.util.verify.Verify.get_campaign_from_pre_order(pre_order)
 
@@ -99,7 +99,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         pre_order = serializer.save()
         
-        pre_order = lib.helper.order_helper.PreOrderHelper.summarize_pre_order(pre_order, campaign, shipping_option, save=True)
+        pre_order = lib.helper.order_helper.PreOrderHelper.summarize_pre_order(pre_order, campaign, save=True)
 
         #checkout
 

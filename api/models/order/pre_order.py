@@ -97,6 +97,8 @@ class PreOrder(models.Model):
         blank=True, null=True, default=None)
     shipping_time = models.TimeField(
         blank=True, null=True, default=None)
+    shipping_option = models.CharField(
+        max_length=32, blank=True, default='')
     tracking = models.CharField(
         max_length=32, blank=True, default='')
 
@@ -174,6 +176,7 @@ class PreOrderSerializerUpdatePaymentShipping(serializers.ModelSerializer):
                   "payment_method",
                   "payment_status",
                   "payment_remark",
+                  "shipping_option",
                   "remark",
                   "meta",
                 ]
@@ -200,6 +203,7 @@ class PreOrderSerializerUpdateDelivery(serializers.ModelSerializer):
                   "shipping_remark",
                   "shipping_date",
                   "shipping_time",
+                  "shipping_option",
                   "remark",
                 ]
 

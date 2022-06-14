@@ -99,6 +99,8 @@ class Order(models.Model):
         blank=True, null=True, default=None)
     shipping_time = models.TimeField(
         blank=True, null=True, default=None)
+    shipping_option = models.CharField(
+        max_length=32, blank=True, default='')
     tracking = models.CharField(
         max_length=32, blank=True, default='')
 
@@ -173,7 +175,8 @@ class OrderSerializerUpdateShipping(serializers.ModelSerializer):
                   "shipping_details",
                   "shipping_remark",
                   "shipping_date",
-                  "shipping_time", ]
+                  "shipping_time", 
+                  "shipping_option"]
 
 
 class OrderSerializerUpdatePaymentShipping(serializers.ModelSerializer):
