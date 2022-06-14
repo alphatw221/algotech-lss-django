@@ -70,7 +70,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         # shop, order, campaign = confirmation_email_info(order_id)
         # sib_service.transaction_email.OrderConfirmationEmail(shop=shop, order=order, campaign=campaign, to=[order.get('shipping_email')], cc=[]).send()
 
-        return Response(models.order.order.OrderSerializerForBuyerRetrieve(order).data, status=status.HTTP_200_OK)
+        return Response(models.order.order.OrderSerializer(order).data, status=status.HTTP_200_OK)
 
 
     @action(detail=False, methods=['GET'], url_path=r'buyer/history', permission_classes=(IsAuthenticated,))
