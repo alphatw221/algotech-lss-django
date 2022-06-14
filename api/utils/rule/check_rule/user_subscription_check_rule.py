@@ -42,7 +42,7 @@ class UserSubscriptionCheckRule():
             plan_limitation = getattr(business_limitation.live_show_seller, plan)   
         
         if plan == "trial":
-            queryset = campaigns.filter(created_at__gte=user_subscription.started_at)
-            campaigns_count = queryset.count() if queryset else 0
+
+            campaigns_count = campaigns.filter(created_at__gte=user_subscription.started_at).count() if campaigns else 0
             if campaigns_count >= plan_limitation.get('campaign_limit'):
                 raise ApiVerifyError('You have reached the maximum campaign limit')
