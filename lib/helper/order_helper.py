@@ -9,6 +9,7 @@ class PreOrderHelper():
     def summarize_pre_order(cls, pre_order, campaign, shipping_option=None, save=False):
 
         if pre_order.shipping_method == 'pickup':
+            pre_order.shipping_cost = 0
             pre_order.total = pre_order.subtotal + pre_order.adjust_price
             if save:
                 pre_order.save()
