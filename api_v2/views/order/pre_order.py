@@ -113,3 +113,16 @@ class PreOrderViewSet(viewsets.ModelViewSet):
             data = serializer.data
 
         return Response(data, status=status.HTTP_200_OK)
+    
+    @action(detail=True, methods=['GET'], url_path=r'seller/retrieve', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def seller_retrieve_pre_order(self, request, pk=None):
+
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        pre_order = lib.util.verify.Verify.get_pre_order(pk)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, pre_order.campaign.id)
+
+        serializer = models.order.pre_order.PreOrderSerializer(pre_order)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
