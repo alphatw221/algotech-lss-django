@@ -9,6 +9,7 @@ class PreOrderHelper():
     def summarize_pre_order(cls, pre_order, campaign, shipping_option=None, save=False):
 
         if pre_order.shipping_method == 'pickup':
+            pre_order.shipping_cost = 0
             pre_order.total = pre_order.subtotal + pre_order.adjust_price
             if save:
                 pre_order.save()
@@ -27,8 +28,8 @@ class PreOrderHelper():
         is_subtotal_over_free_delivery_threshold = pre_order.subtotal >= float(free_delivery_for_order_above_price)
         is_items_over_free_delivery_threshold = len(pre_order.products) >= float(free_delivery_for_how_many_order_minimum)
 
-        if (shipping_option and delivery_titles and delivery_types and delivery_prices ):
-            addition_delivery_index = delivery_titles.index(shipping_option)
+        if (pre_order.shipping_option and delivery_titles and delivery_types and delivery_prices ):
+            addition_delivery_index = delivery_titles.index(pre_order.shipping_option)
 
             if delivery_types[addition_delivery_index] == '+':
                 delivery_charge += float(delivery_prices[addition_delivery_index]) 
