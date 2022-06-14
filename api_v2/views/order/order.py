@@ -96,3 +96,18 @@ class OrderViewSet(viewsets.ModelViewSet):
         order = lib.util.verify.Verify.get_order_by_api_user(api_user, pk)
 
         return Response(order.status, status=status.HTTP_200_OK)
+    
+    # ------------------------------------seller----------------------------------------
+    
+    @action(detail=True, methods=['GET'], url_path=r'seller/retrieve', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def seller_retrieve_order(self, request, pk=None):
+
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        order = lib.util.verify.Verify.get_order(pk)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, order.campaign.id)
+        serializer = models.order.order.OrderSerializer(order)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
