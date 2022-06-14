@@ -177,3 +177,32 @@ class CampaignViewSet(viewsets.ModelViewSet):
             campaign.instagram_profile = instagram_profile
         campaign.save()
         return Response(models.campaign.campaign.CampaignSerializerRetreive(campaign).data, status=status.HTTP_200_OK)
+    
+
+    @action(detail=False, methods=['PUT'], url_path=r'delivery/setting/update', permission_classes=(IsAuthenticated,))
+    @api_error_handler
+    def save_delivery_default_settings(self, request):
+        api_user = Verify.get_seller_user(request)
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        delivery_setting = request.data
+        delivery_setting = delivery_setting.get('_value', {})
+
+        for key, value in delivery_setting.items():
+            if value == True:
+                delivery_setting[key] = 1
+            elif value == False:
+                delivery_setting[key] = 0
+        user_subscription.meta_logistic = delivery_setting
+        user_subscription.save()
+
+        return Response("success", status=status.HTTP_200_OK) 
+    
+
+    @action(detail=False, methods=['GET'], url_path=r'delivery/setting/list', permission_classes=(IsAuthenticated,))
+    @api_error_handler
+    def list_delivery_default_settings(self, request):
+        api_user = Verify.get_seller_user(request)
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+
+        data = user_subscription.meta_logistic
+        return Response(data, status=status.HTTP_200_OK)
