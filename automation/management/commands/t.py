@@ -48,8 +48,7 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        # self.test_user_plan()
-        self.test_websocket()
+        self.test_send_email()
 
     def modify_database(self):
         from api.models.user.user_subscription import UserSubscription
@@ -195,10 +194,18 @@ class Command(BaseCommand):
 
     def test_send_email(self):
         
-        service.email.email_service.EmailService.send_email_template('test','alphatw22193@gmail.com',
-            "email_reset_password_link.html",
-            {"url":settings.GCP_API_LOADBALANCER_URL +"/lss/#/password/reset","code":"1234","username":"test"},
-            lang='en')
+        import lib
+        from automation import jobs
+        from api import models
+        order = models.order.order.Order.objects.get(id=32560)
+        content = lib.helper.order_helper.OrderHelper.get_confirmation_email_content(order)
+        jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)
+
+
+        # service.email.email_service.EmailService.send_email_template('test','alphatw22193@gmail.com',
+        #     "email_reset_password_link.html",
+        #     {"url":settings.GCP_API_LOADBALANCER_URL +"/lss/#/password/reset","code":"1234","username":"test"},
+        #     lang='en')
     
     def test_user_plan(self):
 

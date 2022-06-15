@@ -53,3 +53,38 @@ class PreOrderHelper():
         if save:
             pre_order.save()
             return pre_order
+
+
+class OrderHelper():
+
+    @classmethod
+    def get_confirmation_email_content(cls, order, lang=None):
+        mail_content = f'<h3>Order # {str(order.id)}</h3>'
+        mail_content+= f'<h3>{order.campaign.title}</h3>----------------------------------------<br>'
+        mail_content+= f'<b>Customer Name : </b>{order.customer_name}<br>'
+        mail_content+= f'<b>Delivery To : </b><br>' 
+        mail_content+= f'{order.shipping_first_name} {order.shipping_last_name}<br>'
+        mail_content+= f'{order.shipping_phone}<br>'
+        mail_content+= f'<b>Delivery way : </b>{order.shipping_method}<br>'
+        try:
+            if order.shipping_method == 'pickup':
+                mail_content+= f'<b>Pick up store : </b>{order.shipping_option} ,  {order.pickup_address}<br>'
+                # mail_content+= f'<b>Pick up date : </b>{meta["pick_up_date"]}<br><br>'
+            else:
+                mail_content+= f'<b>Delivery address : </b>{order.shipping_address_1}, {order.shipping_location}, {order.shipping_region}, {order.shipping_postcode}<br>'
+                # mail_content+= f'<b>Delivery date : </b>{order_data["shipping_date"].strftime("%m/%d/%Y")}<br><br>'
+        except:
+            pass
+
+        mail_content+= f'<b>Payment method : </b>{order.payment_method}<br>'
+        mail_content+= '<table style="border-collapse: collapse;"><tr><th style="border: 1px solid black;">Item</th><th style="border: 1px solid black;">Price</th><th style="border: 1px solid black;">Qty</th><th style="border: 1px solid black;">Totoal</th></tr>'
+        for key, product in order.products.items():
+            mail_content+= f'<tr><td style="border: 1px solid black;">{product["name"]}</td><td style="border: 1px solid black;">${product["price"]}</td><td style="border: 1px solid black;">{product["qty"]}</td><td style="border: 1px solid black;">{product["subtotal"]}</td></tr>'
+        mail_content+= '</table>'
+        
+        mail_content+= '<br>Delivery Charge: ' 
+        mail_content+= '$'+ str("%.2f" % float(order.shipping_cost))+'<br>'
+        mail_content+= 'Total : $' + str("%.2f" % float(order.total))
+
+        return mail_content
+

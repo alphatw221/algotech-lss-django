@@ -11,27 +11,11 @@ from django.conf import settings
 from django.core.files.base import ContentFile
 from rsa import verify
 
-from backend.i18n.payment_comfirm_mail import i18n_get_mail_content, i18n_get_mail_subject
-from mail.sender.sender import send_smtp_mail
-from api import utils
+
 from api import models
 import lib
 
-
-@utils.error_handle.error_handler.email_error_handler.email_error_handler
-def send_email(order_id):
-    order_data = db.api_order.find_one({'id': int(order_id)})
-    campaign_id = order_data['campaign_id']
-    campaign_data = db.api_campaign.find_one({'id': int(campaign_id)})
-    facebook_page_id = campaign_data['facebook_page_id']
-    shop_name = db.api_facebook_page.find_one({'id': int(facebook_page_id)})['name']
-    customer_email = order_data['shipping_email']
-
-    mail_subject = i18n_get_mail_subject(shop_name)
-    mail_content = i18n_get_mail_content(order_id, campaign_data, order_data, shop_name)
-
-    send_smtp_mail(customer_email, mail_subject, mail_content)
-
+from automation import jobs
 class OrderPagination(PageNumberPagination):
     page_query_param = 'page'
     page_size_query_param = 'page_size'
@@ -68,8 +52,8 @@ class OrderViewSet(viewsets.ModelViewSet):
         order = lib.util.verify.Verify.get_order_by_api_user(api_user, pk)
 
         last_five_digit, image, =lib.util.getter.getdata(request,('last_five_digit', 'image'), required=False)
-        print(image)
-        if image and image != "undefined":
+
+        if image not in [None, '', "undefined", 'null']:
             image_path = default_storage.save(
                 f'campaign/{order.campaign.id}/order/{order.id}/receipt/{image.name}', 
                 ContentFile(image.read())
@@ -82,7 +66,9 @@ class OrderViewSet(viewsets.ModelViewSet):
         order.payment_method = "Direct Payment"
         order.status = "complete"
         order.save()
-        send_email(pk)
+
+        content = lib.helper.order_helper.OrderHelper.get_confirmation_email_content(order)
+        jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)     #queue this to redis if needed
 
         return Response(models.order.order.OrderSerializer(order).data, status=status.HTTP_200_OK)
 
