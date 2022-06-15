@@ -48,7 +48,7 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.test_send_email()
+        self.test_set_password()
 
     def modify_database(self):
         from api.models.user.user_subscription import UserSubscription
@@ -187,9 +187,9 @@ class Command(BaseCommand):
 
         from django.contrib.auth.models import User as AuthUser
 
-        auth_user = AuthUser.objects.get(id=7)
+        auth_user = AuthUser.objects.get(id=422)
 
-        auth_user.set_password("123456")
+        auth_user.set_password("12345678")
         auth_user.save()
 
     def test_send_email(self):
