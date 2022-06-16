@@ -62,7 +62,15 @@ class UserSubscription(models.Model):
     expired_at = models.DateTimeField(null=True, blank=True, default=None)
 
     dealer = models.ForeignKey("self", on_delete=models.SET_NULL, null=True, related_name="subscribers")
+
+    campaign_limit=models.IntegerField(blank=False, null=False, default=5)
+    campaign_live_limit=models.IntegerField(blank=False, null=False, default=2)
+    channel_limit=models.IntegerField(blank=False, null=False, default=1)
+    product_limit=models.IntegerField(blank=False, null=False, default=10)
+    order_limit=models.IntegerField(blank=False, null=False, default=100)
+
     
+
     def __str__(self) -> str:
         return str(self.name)
     
