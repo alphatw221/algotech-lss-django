@@ -133,7 +133,7 @@ class UserSubscriptionSerializerCreate(UserSubscriptionSerializer):
         fields = ['name', 'description', 'remark', 'type', 'status', 'lang']
         read_only_fields = ['created_at', 'modified_at']
 
-class UserSubscriptionSerializerUpdate(serializers.ModelSerializer):
+class UserSubscriptionSerializerUpgrade(serializers.ModelSerializer):
     class Meta:
         model = UserSubscription
         fields = [
@@ -141,7 +141,12 @@ class UserSubscriptionSerializerUpdate(serializers.ModelSerializer):
             "expired_at",
             "started_at",
             "user_plan",
-            "purchase_price"
+            "purchase_price",
+            "campaign_limit",
+            "campaign_live_limit",
+            "channel_limit",
+            "product_limit",
+            "order_limit",
         ]
         read_only_fields = ['created_at', 'modified_at']
 

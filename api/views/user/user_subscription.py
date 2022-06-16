@@ -6,7 +6,7 @@ from api.code.subscription_code_manager import SubscriptionCodeManager
 from api.models.instagram.instagram_profile import InstagramProfile, InstagramProfileSerializer
 from api.models.user.promotion_code import PromotionCode
 from api.models.user.user import User,UserSubscriptionSerializerDealerList
-from api.models.user.user_subscription import UserSubscription, UserSubscriptionSerializer, UserSubscriptionSerializerForDealerRetrieve, UserSubscriptionSerializerMeta, UserSubscriptionSerializerSimplify, UserSubscriptionSerializerCreate, UserSubscriptionSerializerUpdate
+from api.models.user.user_subscription import UserSubscription, UserSubscriptionSerializer, UserSubscriptionSerializerForDealerRetrieve, UserSubscriptionSerializerMeta, UserSubscriptionSerializerSimplify, UserSubscriptionSerializerCreate, UserSubscriptionSerializerUpgrade
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework import status
@@ -795,17 +795,15 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         now = datetime.now(pytz.timezone(timezone)) if timezone in pytz.common_timezones else datetime.now()
         expired_at = now+timedelta(days=90) if period == "quarter" else now+timedelta(days=365)
 
-        serializer = UserSubscriptionSerializerUpdate(
-            api_user_subscription, 
-            data={
+        data={
                 'type': plan,
                 'expired_at': expired_at,
                 'started_at': now,
                 'user_plan': {"activated_platform" : ["facebook","youtube","instagram"]},
                 'purchase_price': amount
-            },
-            partial=True
-        )
+            }
+        data.update(business_policy.subscription_plan.SubscriptionPlan.get_plan_limit(plan))
+        serializer = UserSubscriptionSerializerUpgrade(api_user_subscription, data=data,partial=True)
         if serializer.is_valid():
             api_user_subscription = serializer.save()
             
