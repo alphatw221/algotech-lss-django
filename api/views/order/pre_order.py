@@ -153,7 +153,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
              "adjusted_by": api_user.id
              }
         )
-        pre_order.history['seller_adjust_history'] = seller_adjust_history
+        pre_order.history['seller_adjust'] = seller_adjust_history
 
         pre_order.save()
         return Response(PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
