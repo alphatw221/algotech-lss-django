@@ -51,7 +51,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         api_user = lib.util.verify.Verify.get_customer_user(request)
         order = lib.util.verify.Verify.get_order_by_api_user(api_user, pk)
 
-        last_five_digit, image, =lib.util.getter.getdata(request,('last_five_digit', 'image'), required=False)
+        last_five_digit, image, account_name =lib.util.getter.getdata(request,('last_five_digit', 'image', 'account_name'), required=False)
 
         if image not in [None, '', "undefined", 'null']:
             image_path = default_storage.save(
@@ -60,9 +60,9 @@ class OrderViewSet(viewsets.ModelViewSet):
             )
             order.meta["receipt_image"] = settings.GS_URL + image_path
 
-        if last_five_digit:
-            order.meta["last_five_digit"] = last_five_digit
 
+        order.meta["last_five_digit"] = last_five_digit
+        order.meta['account_name'] = account_name
         order.payment_method = "Direct Payment"
         order.status = "complete"
         order.save()
