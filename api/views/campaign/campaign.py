@@ -120,13 +120,14 @@ class CampaignViewSet(viewsets.ModelViewSet):
         # platform_id = request.query_params.get('platform_id')
 
         api_user = Verify.get_seller_user(request)
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
         # platform = verify_request(api_user, platform_name, platform_id)
         ret = CreateCampaignRuleChecker.check(**{
-            'api_user': api_user
+            'api_user': api_user, 'user_subscription': user_subscription
         })
 
-        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
-        # campaigns = user_subscription.campaigns.all()
+
+
         
         json_data = json.loads(request.data["data"])
         json_data['created_by'] = api_user.id

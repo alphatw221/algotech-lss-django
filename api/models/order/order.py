@@ -87,6 +87,8 @@ class Order(models.Model):
         max_length=128, blank=True, default='')
     shipping_address_2 = models.CharField(
         max_length=128, blank=True, default='')
+    pickup_address = models.CharField(
+        max_length=128, blank=True, default='')
     shipping_method = models.CharField(
         max_length=32, blank=True, default='')
     shipping_status = models.CharField(
@@ -176,7 +178,8 @@ class OrderSerializerUpdateShipping(serializers.ModelSerializer):
                   "shipping_remark",
                   "shipping_date",
                   "shipping_time", 
-                  "shipping_option"]
+                  "shipping_option",
+                  "pickup_address"]
 
 
 class OrderSerializerUpdatePaymentShipping(serializers.ModelSerializer):
@@ -211,6 +214,7 @@ class OrderSerializerUpdatePaymentShipping(serializers.ModelSerializer):
                   "payment_location",
                   "payment_address_1",
                   "payment_address_2",
+                  "pickup_address",
                   "payment_method",
                   "payment_status",
                   "payment_remark",

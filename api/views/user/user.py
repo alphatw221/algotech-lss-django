@@ -1,5 +1,6 @@
 from calendar import month
 from distutils.sysconfig import EXEC_PREFIX
+from attr import field
 from django.http import HttpResponseRedirect
 from rest_framework import serializers, status, viewsets
 from rest_framework.decorators import action, permission_classes
@@ -10,6 +11,7 @@ from api.models.user.deal import Deal
 from api.models.user.promotion_code import PromotionCode
 from api.models.user.user import User, UserSerializer, UserSerializerAccountInfo
 from api.models.youtube.youtube_channel import YoutubeChannel, YoutubeChannelSerializer
+from api.rule import check_rule
 from api.rule.rule_checker.user_rule_checker import DealerCreateAccountRuleChecker,AdminCreateAccountRuleChecker, SellerChangePasswordRuleChecker, SellerResetPasswordRuleChecker
 from api.utils.common.common import getdata, getparams
 from api.utils.common.verify import ApiVerifyError
@@ -45,7 +47,6 @@ from django.contrib.auth.models import User as AuthUser
 import pytz, stripe
 from backend.python_rq.python_rq import email_queue
 from business_policy.subscription_plan import SubscriptionPlan
-
 
 from django.http import HttpResponse
 import xlsxwriter
@@ -139,7 +140,7 @@ class UserViewSet(viewsets.ModelViewSet):
             if (search_column not in ['undefined', '']) and (keyword not in ['undefined', '', None]):
                 kwargs = { search_column + '__icontains': keyword }
 
-            queryset = User.objects.all().order_by('id').filter(**kwargs)
+            queryset = User.objects.filter(**kwargs).filter(type="user").order_by("id")
             page = self.paginate_queryset(queryset)
             if page is not None:
                 serializer = self.get_serializer(page, many=True)
@@ -148,7 +149,6 @@ class UserViewSet(viewsets.ModelViewSet):
             else:
                 serializer = self.get_serializer(queryset, many=True)
                 data = serializer.data
-
             return Response(data, status=status.HTTP_200_OK)
         except FieldError:
             return Response({"error": f"Cannot resolve search_column '{search_column}'"}, status=status.HTTP_200_OK)
@@ -210,7 +210,27 @@ class UserViewSet(viewsets.ModelViewSet):
 
         return Response(ret, status=status.HTTP_200_OK)
 
-
+    @action(detail=True, methods=['PUT'], url_path=r'password/reset', permission_classes=(IsAdminUser,))
+    @api_error_handler
+    def admin_reset_password(self, request, pk):
+        auth_user = User.objects.get(id=pk).auth_user
+        new_password, = getdata(request, ("new_password",), required=True)
+        SellerResetPasswordRuleChecker.check(**{"new_password":new_password})
+        print(new_password)
+        auth_user.set_password(new_password)
+        auth_user.save()
+        return Response({}, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['GET'], url_path=r'email/validate', permission_classes=(IsAdminUser,))
+    @api_error_handler
+    def admin_email_validate(self, request):
+        new_email, api_user_id = getparams(request,("new_email", 'api_user_id'), with_user=False, seller=True)
+        if api_user_id:
+            api_user = User.objects.get(type='user', id=api_user_id)
+            if new_email == api_user.email:
+                return Response({"email": "valid"}, status=status.HTTP_200_OK)
+        check_rule.user_check_rule.UserCheckRule.has_email_been_registered(**{"email": new_email})
+        return Response({"email": "valid"}, status=status.HTTP_200_OK)
 #-----------------------------------------dealer----------------------------------------------------------------------------------------------
 
     @action(detail=False, methods=['POST'], url_path=r'dealer/create', permission_classes=(IsAuthenticated,))
@@ -589,7 +609,8 @@ class UserViewSet(viewsets.ModelViewSet):
             type=plan,
             lang=country_plan.language,
             country = country_code,
-            purchase_price = amount
+            purchase_price = amount,
+            **business_policy.subscription_plan.SubscriptionPlan.get_plan_limit(plan)
             )
             
         api_user = User.objects.create(
@@ -600,6 +621,10 @@ class UserViewSet(viewsets.ModelViewSet):
         lib.util.marking_tool.NewUserMark.mark(api_user, save = True)
         
         marketing_plans = kwargs.get('marketing_plans')
+
+
+
+
         for key, val in marketing_plans.items():
             if key == "welcome_gift":
                 lib.util.marking_tool.WelcomeGiftUsedMark.mark(api_user, save = True)
@@ -610,15 +635,6 @@ class UserViewSet(viewsets.ModelViewSet):
                     used_at=datetime.utcnow(),
                     deal=deal_obj
                 )
-            # name = models.CharField(max_length=255, null=True, blank=True)
-            # code = models.TextField(null=True, blank=True)
-            # user = models.ForeignKey(
-            #     User,  null=True, on_delete=models.SET_NULL, related_name='promotion_code')
-            # user_subscription = models.ForeignKey(
-            #     UserSubscription,  null=True, on_delete=models.SET_NULL, related_name='promotion_code')
-            # used_at = models.DateTimeField()
-            # meta = models.JSONField(null=True, blank=True, default=dict)
-
         ret = {
             "Customer Name":f'{firstName} {lastName}',
             "Email":email,
@@ -804,6 +820,7 @@ class UserViewSet(viewsets.ModelViewSet):
         )
         
         return Response(ret, status=status.HTTP_200_OK)
+    
 
 
 

@@ -1,3 +1,4 @@
+import arrow
 from django.http import HttpResponseRedirect
 from rest_framework import serializers, status, viewsets
 from rest_framework.decorators import action
@@ -6,7 +7,7 @@ from api.code.subscription_code_manager import SubscriptionCodeManager
 from api.models.instagram.instagram_profile import InstagramProfile, InstagramProfileSerializer
 from api.models.user.promotion_code import PromotionCode
 from api.models.user.user import User,UserSubscriptionSerializerDealerList
-from api.models.user.user_subscription import UserSubscription, UserSubscriptionSerializer, UserSubscriptionSerializerForDealerRetrieve, UserSubscriptionSerializerMeta, UserSubscriptionSerializerSimplify, UserSubscriptionSerializerCreate, UserSubscriptionSerializerUpdate
+from api.models.user.user_subscription import UserSubscription, UserSubscriptionSerializer, UserSubscriptionSerializerForDealerRetrieve, UserSubscriptionSerializerMeta, UserSubscriptionSerializerSimplify, UserSubscriptionSerializerCreate, UserSubscriptionSerializerUpgrade
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework import status
@@ -335,6 +336,31 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         kwargs = { search_column + '__icontains': keyword }
 
         queryset = UserSubscription.objects.all().order_by('id')
+
+        if search_column != 'undefined' and keyword != 'undefined':
+            queryset = queryset.filter(**kwargs)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            result = self.get_paginated_response(serializer.data)
+            data = result.data
+        else:
+            serializer = self.get_serializer(queryset, many=True)
+            data = serializer.data
+
+        return Response(data, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['GET'], url_path=r'expired_in_one_month', permission_classes=(IsAdminUser,))
+    @api_error_handler
+    def expired_in_one_month(self, request):
+        search_column = request.query_params.get('search_column')
+        keyword = request.query_params.get('keyword')
+        kwargs = { search_column + '__icontains': keyword }
+        
+        utc_now = arrow.utcnow().format('YYYY-MM-DD HH:mm:ss')
+        utc_after_30_days = arrow.utcnow().shift(days=+30).format('YYYY-MM-DD HH:mm:ss')
+        
+        queryset = UserSubscription.objects.filter(expired_at__range=[utc_now, utc_after_30_days]).order_by('id')
 
         if search_column != 'undefined' and keyword != 'undefined':
             queryset = queryset.filter(**kwargs)
@@ -795,17 +821,15 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         now = datetime.now(pytz.timezone(timezone)) if timezone in pytz.common_timezones else datetime.now()
         expired_at = now+timedelta(days=90) if period == "quarter" else now+timedelta(days=365)
 
-        serializer = UserSubscriptionSerializerUpdate(
-            api_user_subscription, 
-            data={
+        data={
                 'type': plan,
                 'expired_at': expired_at,
                 'started_at': now,
                 'user_plan': {"activated_platform" : ["facebook","youtube","instagram"]},
                 'purchase_price': amount
-            },
-            partial=True
-        )
+            }
+        data.update(business_policy.subscription_plan.SubscriptionPlan.get_plan_limit(plan))
+        serializer = UserSubscriptionSerializerUpgrade(api_user_subscription, data=data,partial=True)
         if serializer.is_valid():
             api_user_subscription = serializer.save()
             
