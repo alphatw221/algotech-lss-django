@@ -162,10 +162,22 @@ class UserSubscriptionSerializerSimplify(serializers.ModelSerializer):
             'remark', 
             'type', 
             'status', 
-            'lang'
+            'lang',
+            'expired_at',
+            "started_at",
+            "purchase_price",
+            "campaign_limit",
+            "campaign_live_limit",
+            "channel_limit",
+            "product_limit",
+            "order_limit",
             ]
         read_only_fields = ['created_at', 'modified_at']
-
+    
+    meta = serializers.JSONField(default=dict, required=False)
+    # meta_payment = serializers.JSONField(default=dict, required=False)
+    # meta_logistic = serializers.JSONField(default=dict, required=False)
+    meta_country = serializers.JSONField(default=dict, required=False)
 
 class UserSubscriptionSerializerMeta(serializers.ModelSerializer):
     class Meta:
