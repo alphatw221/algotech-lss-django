@@ -9,7 +9,7 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.parsers import MultiPartParser
+from rest_framework.parsers import MultiPartParser, JSONParser, FormParser
 
 from api.code.subscription_code_manager import SubscriptionCodeManager
 from api.models.instagram.instagram_profile import InstagramProfile, InstagramProfileSerializer
@@ -234,40 +234,44 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
             return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['GET', 'POST'], url_path=r'direct_payment', parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['GET', 'POST', 'DELETE'], url_path=r'direct_payment', parser_classes=(MultiPartParser, JSONParser, FormParser), permission_classes=(IsAuthenticated,))
     @api_error_handler
     def update_direct_payment(self, request):
-
         api_user = Verify.get_seller_user(request)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        
         if request.method == "GET":
             payment_data = user_subscription.meta_payment.get("direct_payment", {})
-            
             return Response(payment_data, status=status.HTTP_200_OK)
+        elif request.method == "DELETE":
+            meta_payment = user_subscription.meta_payment.copy()
+            meta_payment['direct_payment'] = {}
         else: 
-            text = request.data['text']
-            data = json.loads(text)
+            image, data = lib.util.getter.getdata(request, ('image', 'data'), required=False)
+            data = json.loads(data)
 
-            if 'accounts' in data:
-                for account_number, account_info in data['accounts'].items():
-                    if account_number in request.data and request.data[account_number]:
-                        if account_number in request.data:
-                            image = request.data[account_number]
-                            image_path = default_storage.save(
-                                f'/{user_subscription.id}/payment/direct_payment/{image.name}', ContentFile(image.read()))
-                            print(image_path)
-                            data['accounts'][account_number]['image'] = image_path
+            if image:
+                image_path = default_storage.save(
+                    f'/{user_subscription.id}/payment/direct_payment/{image.name}', ContentFile(image.read()))
+                data['image'] = image_path
 
             meta_payment = user_subscription.meta_payment.copy()
-            meta_payment['direct_payment'] = data
-            
-            serializer = UserSubscriptionSerializerMeta(
-                user_subscription, data={"meta_payment": meta_payment}, partial=True)
-            if not serializer.is_valid():
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            user_subscription = serializer.save()
+            direct_payment = meta_payment.get('direct_payment', {})
+            accounts = direct_payment.get('accounts', [])
 
-            return Response(UserSubscriptionSerializerMeta(user_subscription).data, status=status.HTTP_200_OK)
+            accounts.append(data)
+            direct_payment['button_title'] = 'Direct Payment'
+            direct_payment['activated'] = True
+            direct_payment['accounts'] = accounts
+            meta_payment['direct_payment'] = direct_payment
+
+        serializer = UserSubscriptionSerializerMeta(
+            user_subscription, data={"meta_payment": meta_payment}, partial=True)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        user_subscription = serializer.save()
+
+        return Response(UserSubscriptionSerializerMeta(user_subscription).data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['POST'], url_path=r'update_logistic', permission_classes=(IsAuthenticated,))
     @api_error_handler
