@@ -213,10 +213,21 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['PUT'], url_path=r'password/reset', permission_classes=(IsAdminUser,))
     @api_error_handler
     def admin_reset_password(self, request, pk):
-        auth_user = User.objects.get(id=pk).auth_user
+        try:
+            api_user = User.objects.get(id=pk, type='user')
+        except:
+            raise ApiVerifyError("no seller user found.")
+        auth_user = api_user.auth_user
+        
         new_password, = getdata(request, ("new_password",), required=True)
         SellerResetPasswordRuleChecker.check(**{"new_password":new_password})
-        print(new_password)
+        if not auth_user:
+            auth_user = AuthUser.objects.create_user(
+                username=api_user.name, email=api_user.email, password=new_password)
+            api_user.auth_user = auth_user
+            api_user.save()
+            return Response({}, status=status.HTTP_200_OK)
+        
         auth_user.set_password(new_password)
         auth_user.save()
         return Response({}, status=status.HTTP_200_OK)
@@ -663,8 +674,7 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['POST'], url_path=r'login/general')
     @api_error_handler
     def general_login(self, request):
-        email, password = getdata(request, ("email","password"), required=True)
-        
+        email, password = getdata(request, ("email","password",), required=True)
         token = lib.helper.login_helper.GeneralLogin.get_token(email, password)
         if not token:
             Response({"message": "email or password incorrect"}, status=status.HTTP_401_UNAUTHORIZED)
