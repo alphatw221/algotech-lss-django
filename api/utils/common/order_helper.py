@@ -343,18 +343,19 @@ class PreOrderHelper():
                         'customer_id': api_pre_order['customer_id'],
                         'customer_name': api_pre_order['customer_name'],
                         'customer_img': api_pre_order['customer_img'],
-                        'campaign_id': api_pre_order['campaign.id'],
+                        'campaign_id': api_pre_order['campaign_id'],
                         'platform': api_pre_order['platform'],
-                        'platform_id': api_pre_order['platform.id'],
-                        'currency_sign': api_pre_order['api_pre_order'],
-                        'subtotal': api_pre_order['subtotal']
+                        'currency_sign': api_pre_order['currency_sign'],
+                        'subtotal': subtotal
                     },
                     "product": {
                         "id": api_campaign_product['id'],
-                        'qty_sold': api_campaign_product['qty_sold']
+                        'qty_sold': api_campaign_product['qty_sold'] + qty_difference
                     }
                 }
-                service.channels.campaign.send_add_product_and_order_data(api_campaign_product["campaign_id"], websocket_send_data)
+                service.channels.campaign.send_order_data(api_campaign_product["campaign_id"], websocket_send_data['pre_order'])
+                service.channels.campaign.send_product_data(api_campaign_product["campaign_id"], websocket_send_data['product'])
+                
 
     @classmethod
     def update_product_by_comment(cls, api_pre_order, api_campaign_product, qty):
@@ -395,16 +396,10 @@ class PreOrderHelper():
                     },session=session)
                 
                 websocket_send_data = {
-                    'pre_order': {
-                        "id": api_pre_order['id'],
-                        'subtotal': api_pre_order['subtotal']
-                    },
-                    "product": {
-                        "id": api_campaign_product['id'],
-                        'qty_sold': api_campaign_product['qty_sold']
-                    }
+                    "id": api_campaign_product['id'],
+                    'qty_sold': api_campaign_product['qty_sold'] + qty_difference
                 }
-                service.channels.campaign.send_update_product_and_order_data(api_campaign_product["campaign_id"], websocket_send_data)
+                service.channels.campaign.send_product_data(api_campaign_product["campaign_id"], websocket_send_data)
 
     @classmethod
     def delete_product_by_comment(cls, api_pre_order, api_campaign_product):
@@ -440,17 +435,12 @@ class PreOrderHelper():
                             "total": total
                         }
                     },session=session)
+                
                 websocket_send_data = {
-                    'pre_order': {
-                        "id": api_pre_order['id'],
-                        'subtotal': api_pre_order['subtotal']
-                    },
-                    "product": {
-                        "id": api_campaign_product['id'],
-                        'qty_sold': api_campaign_product['qty_sold']
-                    }
+                    "id": api_campaign_product['id'],
+                    'qty_sold': api_campaign_product['qty_sold'] - api_order_product['qty']
                 }
-                service.channels.campaign.send_delete_product_and_order_data(api_campaign_product["campaign_id"], websocket_send_data)
+                service.channels.campaign.send_product_data(api_campaign_product["campaign_id"], websocket_send_data)
     
     @classmethod
     def count_buyer_pre_order_detail(cls, pre_order, campaign, pre_order_data=None):

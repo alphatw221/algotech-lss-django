@@ -37,13 +37,16 @@ class HubspotViewSet(viewsets.GenericViewSet):
         password = ''.join(random.choice(string.ascii_letters+string.digits) for _ in range(8))
         country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(country)
 
-        rule.check_rule.user_check_rule.UserCheckRule.has_email_been_registered(email=email)
+        rule.check_rule.user_check_rule.UserCheckRule.has_email_been_registered_as_seller(email=email)
 
         now = datetime.now() 
         expired_at = now+timedelta(days=90)
 
-        auth_user = AuthUser.objects.create_user(
-            username=f'{first_name} {last_name}', email=email, password=password)
+        if AuthUser.objects.filter(email=email).exists():
+            auth_user = AuthUser.objects.get(email=email)
+        else:
+            auth_user = AuthUser.objects.create_user(
+                username=f'{first_name} {last_name}', email=email, password=password)
         
         user_subscription = models.user.user_subscription.UserSubscription.objects.create(
             name=f'{first_name} {last_name}', 

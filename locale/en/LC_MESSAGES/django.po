@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-26 06:46+0000\n"
+"POT-Creation-Date: 2022-06-17 10:20+0000\n"
 "PO-Revision-Date: 2021-12-13 15:51+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -42,7 +42,9 @@ msgstr "Live Show Seller: "
 #: backend/i18n/cart_product_request.py:21
 #, python-brace-format
 msgid "SHOPPING_CART_INFO{link}"
-msgstr "Shopping cart: {link}"
+msgstr ""
+"please press/hold the Shopping Cart Link below and open on Safari or Chrome: "
+"{link}"
 
 #: backend/i18n/cart_product_request.py:23
 msgid "MORE_INFO_IN_PM_NOTICE"

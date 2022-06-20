@@ -187,11 +187,6 @@ class CampaignViewSet(viewsets.ModelViewSet):
         delivery_setting = request.data
         delivery_setting = delivery_setting.get('_value', {})
 
-        for key, value in delivery_setting.items():
-            if value == True:
-                delivery_setting[key] = 1
-            elif value == False:
-                delivery_setting[key] = 0
         user_subscription.meta_logistic = delivery_setting
         user_subscription.save()
 

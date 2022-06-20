@@ -85,6 +85,8 @@ class PreOrder(models.Model):
         max_length=128, blank=True, default='')
     shipping_address_2 = models.CharField(
         max_length=128, blank=True, default='')
+    pickup_address = models.CharField(
+        max_length=128, blank=True, default='')
     shipping_method = models.CharField(
         max_length=32, blank=True, default='')
     shipping_status = models.CharField(
@@ -97,6 +99,8 @@ class PreOrder(models.Model):
         blank=True, null=True, default=None)
     shipping_time = models.TimeField(
         blank=True, null=True, default=None)
+    shipping_option = models.CharField(
+        max_length=32, blank=True, default='')
     tracking = models.CharField(
         max_length=32, blank=True, default='')
 
@@ -174,6 +178,8 @@ class PreOrderSerializerUpdatePaymentShipping(serializers.ModelSerializer):
                   "payment_method",
                   "payment_status",
                   "payment_remark",
+                  "shipping_option",
+                  "pickup_address",
                   "remark",
                   "meta",
                 ]
@@ -200,6 +206,8 @@ class PreOrderSerializerUpdateDelivery(serializers.ModelSerializer):
                   "shipping_remark",
                   "shipping_date",
                   "shipping_time",
+                  "shipping_option",
+                  "pickup_address",
                   "remark",
                 ]
 
@@ -213,7 +221,7 @@ class PreOrderSerializerUpdatePickup(serializers.ModelSerializer):
                   "shipping_phone",
                   "shipping_gender",
                   "shipping_company",
-                 
+                    "pickup_address",
                   "remark",
                 ]
 

@@ -11,7 +11,8 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         customer = None
         seller_image = ""
         customer_image = ""
-
+        name = None
+        
         if user.api_users.filter(type='user').exists():
             seller = user.api_users.get(type='user')
             name = seller.name

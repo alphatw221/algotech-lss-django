@@ -62,7 +62,15 @@ class UserSubscription(models.Model):
     expired_at = models.DateTimeField(null=True, blank=True, default=None)
 
     dealer = models.ForeignKey("self", on_delete=models.SET_NULL, null=True, related_name="subscribers")
+
+    campaign_limit=models.IntegerField(blank=False, null=False, default=5)
+    campaign_live_limit=models.IntegerField(blank=False, null=False, default=2)
+    channel_limit=models.IntegerField(blank=False, null=False, default=1)
+    product_limit=models.IntegerField(blank=False, null=False, default=10)
+    order_limit=models.IntegerField(blank=False, null=False, default=100)
+
     
+
     def __str__(self) -> str:
         return str(self.name)
     
@@ -125,7 +133,7 @@ class UserSubscriptionSerializerCreate(UserSubscriptionSerializer):
         fields = ['name', 'description', 'remark', 'type', 'status', 'lang']
         read_only_fields = ['created_at', 'modified_at']
 
-class UserSubscriptionSerializerUpdate(serializers.ModelSerializer):
+class UserSubscriptionSerializerUpgrade(serializers.ModelSerializer):
     class Meta:
         model = UserSubscription
         fields = [
@@ -133,7 +141,12 @@ class UserSubscriptionSerializerUpdate(serializers.ModelSerializer):
             "expired_at",
             "started_at",
             "user_plan",
-            "purchase_price"
+            "purchase_price",
+            "campaign_limit",
+            "campaign_live_limit",
+            "channel_limit",
+            "product_limit",
+            "order_limit",
         ]
         read_only_fields = ['created_at', 'modified_at']
 
@@ -149,10 +162,22 @@ class UserSubscriptionSerializerSimplify(serializers.ModelSerializer):
             'remark', 
             'type', 
             'status', 
-            'lang'
+            'lang',
+            'expired_at',
+            "started_at",
+            "purchase_price",
+            "campaign_limit",
+            "campaign_live_limit",
+            "channel_limit",
+            "product_limit",
+            "order_limit",
             ]
         read_only_fields = ['created_at', 'modified_at']
-
+    
+    meta = serializers.JSONField(default=dict, required=False)
+    # meta_payment = serializers.JSONField(default=dict, required=False)
+    # meta_logistic = serializers.JSONField(default=dict, required=False)
+    meta_country = serializers.JSONField(default=dict, required=False)
 
 class UserSubscriptionSerializerMeta(serializers.ModelSerializer):
     class Meta:

@@ -41,6 +41,12 @@ class UserCheckRule():
             raise ApiVerifyError('This email address has already been registered.')
 
     @staticmethod
+    def has_email_been_registered_as_seller(**kwargs):
+        email = kwargs.get('email')
+        if User.objects.filter(email=email, type='user').exists():
+            raise ApiVerifyError('This email address has already been registered.')
+
+    @staticmethod
     def is_email_format_valid(**kwargs):
         email = kwargs.get('email')
         if type(email) != str:

@@ -109,8 +109,8 @@ class GoogleLogin():
 
     @classmethod
     def get_token(cls, token="", user_type='customer'):
-
-        identity_info = id_token.verify_oauth2_token(token, google_requests.Request(), settings.GOOGLE_OAUTH_CLIENT_ID_FOR_LIVESHOWSELLER, clock_skew_in_seconds=5)
+        GOOGLE_OAUTH_CLIENT_ID_FOR_LIVESHOWSELLER = "647555482564-u2s769q2ve0b270gnmr5bpqdfmc9tphl.apps.googleusercontent.com"      #temporarily     as v2 is on different domain
+        identity_info = id_token.verify_oauth2_token(token, google_requests.Request(), GOOGLE_OAUTH_CLIENT_ID_FOR_LIVESHOWSELLER, clock_skew_in_seconds=5)
 
         google_id, google_name, google_picture, email = identity_info.get("sub"), identity_info.get("name"), identity_info.get("picture"), identity_info.get("email")
         

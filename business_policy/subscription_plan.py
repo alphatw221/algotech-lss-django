@@ -11,12 +11,14 @@ class CountryPlan:
         return subscription_plan
 class SubscriptionPlan: 
 
+    support_country=['SG', 'PH', 'TH', 'IN', 'ID', 'MY', 'VN', 'TW', 'KH']
+    support_plan=['trial', 'lite', 'standard', 'premium', 'dealer']
+
     @classmethod
     def get_country(cls,country_code):
-        country_plan = getattr(cls,country_code, None)
-        if not country_plan or type(country_plan)!=type:
+        if country_code not in cls.support_country:
             raise ApiVerifyError("invalid country")
-        return country_plan
+        return getattr(cls,country_code, None)
 
 
     class SG(CountryPlan):
@@ -138,3 +140,45 @@ class SubscriptionPlan:
             "standard" : {"text": "Standard", "price":{"quarter":54,"year":194}},
             "premium" : {"text": "Premium", "price":{"quarter":120,"year":432}},
         }
+
+    @classmethod
+    def get_plan_limit(cls,plan):
+        if plan not in cls.support_plan:
+            raise ApiVerifyError("invalid subscription plan")
+        return getattr(cls, plan)
+
+    trial = {
+        'campaign_limit':5,
+        'campaign_live_limit': 2,
+        'channel_limit': 1,
+        'products_limit': 10,
+        'orders_limit': 100
+    }
+    lite = {
+        'campaign_limit':0,
+        'campaign_live_limit': 2,
+        'channel_limit': 1,
+        'products_limit': 30,
+        'orders_limit': 300
+    }
+    standard = {
+        'campaign_limit':0,
+        'campaign_live_limit': 4,
+        'channel_limit': 2,
+        'products_limit': 100,
+        'orders_limit': 1000
+    }
+    premium = {
+        'campaign_limit':0,
+        'campaign_live_limit': 6,
+        'channel_limit': 3,
+        'products_limit': 300,
+        'orders_limit': 5000
+    }
+    dealer = {
+        'campaign_limit':0,
+        'campaign_live_limit': 100,
+        'channel_limit': 30,
+        'products_limit': 3000,
+        'orders_limit': 500000
+    } 
