@@ -312,21 +312,33 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         return Response(UserSubscriptionSerializerSimplify(user_subscription).data, status=status.HTTP_200_OK)
 
     
-    @action(detail=False, methods=['PUT'], url_path=r'update_note', permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['GET', 'PUT'], url_path=r'notes', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def update_note(self, request):
-        delivery_note, special_note, confirmation_note = getdata(request, ('delivery_note',"special_note", "confirmation_note"))
-
         api_user = Verify.get_seller_user(request)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
 
-        user_subscription.meta['delivery_note']=delivery_note
-        user_subscription.meta['special_note']=special_note
-        user_subscription.meta['confirmation_note']=confirmation_note
+        if request.method == "GET":
+            noteJson = {
+                'delivery_note': user_subscription.meta_logistic.get('delivery_note', ''),
+                'special_note' : user_subscription.meta_payment.get('special_note', ''),
+                'confirmation_note': user_subscription.meta_payment.get('confirmation_note', '')
+            }
+            return Response(noteJson, status=status.HTTP_200_OK)
+        else:
+            api_user, delivery_note, special_note, confirmation_note = getparams(request,('delivery_note','special_note', 'confirmation_note'),with_user=True, seller=True)
 
-        user_subscription.save()
+            meta_logistic = user_subscription.meta_logistic.copy()
+            meta_payment = user_subscription.meta_payment.copy()
+            meta_logistic['delivery_note'] = delivery_note
+            meta_payment['special_note'] = special_note
+            meta_payment['confirmation_note'] = confirmation_note
 
-        return Response(UserSubscriptionSerializerMeta(user_subscription).data, status=status.HTTP_200_OK)
+            user_subscription.meta_logistic = meta_logistic
+            user_subscription.meta_payment = meta_payment
+            user_subscription.save()
+
+            return Response(UserSubscriptionSerializerMeta(user_subscription).data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET'], url_path=r'admin_search_list', permission_classes=(IsAdminUser,))
     @api_error_handler
