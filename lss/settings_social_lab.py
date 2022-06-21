@@ -1,5 +1,4 @@
 from lss.settings import *
-DEBUG = True
 DATABASES = {
     # for social lab
     'default': {
