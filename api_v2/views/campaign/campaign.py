@@ -22,6 +22,7 @@ from api.utils.common.common import getdata,getparams
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 from bson.json_util import loads, dumps
 from api.utils.rule.rule_checker.user_subscription_rule_checker import CreateCampaignRuleChecker
+from backend.api import facebook
 
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 
@@ -187,11 +188,6 @@ class CampaignViewSet(viewsets.ModelViewSet):
         delivery_setting = request.data
         delivery_setting = delivery_setting.get('_value', {})
 
-        for key, value in delivery_setting.items():
-            if value == True:
-                delivery_setting[key] = 1
-            elif value == False:
-                delivery_setting[key] = 0
         user_subscription.meta_logistic = delivery_setting
         user_subscription.save()
 
@@ -205,4 +201,36 @@ class CampaignViewSet(viewsets.ModelViewSet):
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
 
         data = user_subscription.meta_logistic
+        return Response(data, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['GET'], url_path=r'facebook/comment-on-comment', permission_classes=(IsAuthenticated,))
+    @api_error_handler
+    def facebook_post_comment(self, request):
+        api_user, campaign_id, comment_id, message = \
+            lib.util.getter.getparams(request, ("campaign_id","comment_id", "message"), with_user=True, seller=True)
+        
+        api_user = Verify.get_seller_user(request)
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        campaign = Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
+        page_token = campaign.facebook_page.token
+        
+        data = facebook.post.api_fb_post_page_comment_on_comment(page_token,comment_id,message)
+        
+
+        return Response(data, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['GET'], url_path=r'facebook/comment-reply', permission_classes=(IsAuthenticated,))
+    @api_error_handler
+    def facebook_get_comment_reply(self, request):
+        api_user, campaign_id, comment_id = \
+            lib.util.getter.getparams(request, ("campaign_id","comment_id"), with_user=True, seller=True)
+        
+        api_user = Verify.get_seller_user(request)
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        campaign = Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
+        page_token = campaign.facebook_page.token
+        
+        data = facebook.page.api_fb_get_comments_on_comment(page_token,comment_id)
+        
+
         return Response(data, status=status.HTTP_200_OK)

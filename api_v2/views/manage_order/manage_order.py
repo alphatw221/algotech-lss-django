@@ -19,7 +19,7 @@ class DashboardViewSet(viewsets.ModelViewSet):
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def get_merge_order_list(self, request):
 
-        api_user, campaign_id, search, page, page_size=getparams(request, ( 'campaign_id', 'search', 'page', 'page_size'),with_user=True, seller=True)
+        api_user, campaign_id, search, page, page_size= lib.util.getter.getparams(request, ( 'campaign_id', 'search', 'page', 'page_size'),with_user=True, seller=True)
 
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription,campaign_id)
@@ -29,3 +29,18 @@ class DashboardViewSet(viewsets.ModelViewSet):
         merge_list_json = loads(merge_list_str)
 
         return Response(merge_list_json, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['GET'], url_path=r'edit_allow_checkout')
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def campaign_edit_allow_checkout(self, request):
+
+        api_user, campaign_id, _status= lib.util.getter.getparams(request, ('campaign_id', 'status'))
+
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription,campaign_id)
+
+        campaign.meta['allow_checkout']=1 if int(_status) else 0
+        campaign.save()
+
+        return Response({"allow_checkout":campaign.meta['allow_checkout']
+                         }, status=status.HTTP_200_OK)

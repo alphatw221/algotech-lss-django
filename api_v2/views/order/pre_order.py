@@ -8,9 +8,13 @@ from api import models
 from django.db.models import Q
 
 from api.utils.common.order_helper import PreOrderHelper
+from api.utils.common.verify import ApiVerifyError
 import lib
 from backend.pymongo.mongodb import db
 from automation import jobs
+import datetime
+
+
 class PreOrderPagination(PageNumberPagination):
     page_query_param = 'page'
     page_size_query_param = 'page_size'
@@ -226,3 +230,74 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         lib.util.verify.Verify.get_campaign_from_user_subscription(api_user.user_subscription, pre_order.campaign.id)
         oid=str(db.api_pre_order.find_one({"id":pre_order.id})['_id'])
         return Response(oid, status=status.HTTP_200_OK)
+    @action(detail=True, methods=['PUT'], url_path=r'seller/adjust', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def seller_adjust(self, request, pk=None):
+
+        adjust_price, adjust_title, free_delivery = lib.util.getter.getdata(request, ('adjust_price', 'adjust_title', 'free_delivery'))
+        adjust_price = float(adjust_price)
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        pre_order = lib.util.verify.Verify.get_pre_order(pk)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, pre_order.campaign.id)
+        if type(free_delivery) != bool:
+            raise ApiVerifyError("request data error")
+
+        original_total = pre_order.total
+        original_free_delivery = pre_order.free_delivery
+
+        if pre_order.subtotal + adjust_price < 0:
+            adjust_price = -pre_order.subtotal
+
+        pre_order.adjust_price = adjust_price
+        pre_order.free_delivery = free_delivery
+        pre_order.adjust_title = adjust_title
+
+        if free_delivery:
+            pre_order.total = pre_order.subtotal + pre_order.adjust_price
+        else:
+            pre_order.total = pre_order.subtotal + pre_order.adjust_price + pre_order.shipping_cost
+
+        seller_adjust_history = pre_order.history.get('seller_adjust', [])
+        seller_adjust_history.append(
+            {"original_total": original_total,
+             "adjusted_total": pre_order.total,
+             "original_free_delivery_status": original_free_delivery,
+             "adjusted_free_delivery_status": pre_order.free_delivery,
+             "adjusted_at": datetime.datetime.utcnow(),
+             "adjusted_by": api_user.id
+             }
+        )
+        pre_order.history['seller_adjust_history'] = seller_adjust_history
+
+        pre_order.save()
+        return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
+    
+    @action(detail=True, methods=['GET'], url_path=r'seller/delete', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def seller_delete_order_product(self, request, pk=None):
+
+        api_user, order_product_id = lib.util.getter.getparams(request, ('order_product_id',), seller=True)
+
+        pre_order = lib.util.verify.Verify.get_pre_order(pk)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, pre_order.campaign.id)
+
+        order_product = lib.util.verify.Verify.get_order_product_from_pre_order(pre_order, order_product_id)
+        PreOrderHelper.delete_product(
+            api_user, pre_order, order_product)
+        return Response({'message': "delete success"}, status=status.HTTP_200_OK)
+    
+    @action(detail=True, methods=['GET'], url_path=r'seller/update', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def seller_update_order_product(self, request, pk=None):
+        api_user, order_product_id, qty = lib.util.getter.getparams(request, ('order_product_id', 'qty'), with_user=True, seller=True)
+
+        pre_order = lib.util.verify.Verify.get_pre_order(pk)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, pre_order.campaign.id)
+
+        order_product = lib.util.verify.Verify.get_order_product_from_pre_order(pre_order, order_product_id)
+        api_order_product = PreOrderHelper.update_product(
+            api_user, pre_order, order_product, qty)
+        return Response(api_order_product, status=status.HTTP_200_OK)

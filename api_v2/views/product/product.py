@@ -74,9 +74,10 @@ class ProductViewSet(viewsets.ModelViewSet):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
 
-        image, category = lib.util.getter.getdata(request,('image', 'category'), required=False)
+        image, = lib.util.getter.getdata(request,('image', ), required=False)
         data, = lib.util.getter.getdata(request,('data',),required=True)
         data = json.loads(data)
+        categories = data.get('tag', [])
 
         rule.rule_checker.product_rule_checker.ProductCreateRuleChecker.check(product_data=data)
 
@@ -91,14 +92,15 @@ class ProductViewSet(viewsets.ModelViewSet):
             product.image = image_path
         
         product.user_subscription = user_subscription
-        product.category = category if category else None
+        product.category = categories if categories else None
         product.save()
 
         product_categories = user_subscription.meta.get('product_categories', [])
-        if category and category not in product_categories:
-            product_categories.append(category)
-            user_subscription.meta['product_categories'] = product_categories
-            user_subscription.save()
+        for category in categories:
+            if category and category not in product_categories:    
+                product_categories.append(category)
+        user_subscription.meta['product_categories'] = product_categories
+        user_subscription.save()
 
         return Response(models.product.product.ProductSerializer(product).data, status=status.HTTP_200_OK)
 
@@ -110,9 +112,10 @@ class ProductViewSet(viewsets.ModelViewSet):
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         product = lib.util.verify.Verify.get_product_from_user_subscription(user_subscription, pk)
 
-        image, category = lib.util.getter.getdata(request,('image', 'category'), required=False)
+        image, = lib.util.getter.getdata(request,('image', ), required=False)
         data, = lib.util.getter.getdata(request,('data',),required=True)
         data = json.loads(data)
+        categories = data.get('tag', [])
         
         rule.rule_checker.product_rule_checker.ProductCreateRuleChecker.check(product_data=data)
 
@@ -126,14 +129,15 @@ class ProductViewSet(viewsets.ModelViewSet):
                 f'{user_subscription.id}/product/{product.id}/{image.name}', ContentFile(image.read()))
             product.image = image_path
 
-        product.category = category if category else None
+        product.category = categories if categories else None
         product.save()
 
         product_categories = user_subscription.meta.get('product_categories', [])
-        if category and category not in product_categories:
-            product_categories.append(category)
-            user_subscription.meta['product_categories'] = product_categories
-            user_subscription.save()
+        for category in categories:
+            if category and category not in product_categories:    
+                product_categories.append(category)
+        user_subscription.meta['product_categories'] = product_categories
+        user_subscription.save()
 
         return Response(models.product.product.ProductSerializer(product).data, status=status.HTTP_200_OK)
 

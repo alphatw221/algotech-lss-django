@@ -1,3 +1,4 @@
+import arrow
 from django.http import HttpResponseRedirect
 from rest_framework import serializers, status, viewsets
 from rest_framework.decorators import action
@@ -335,6 +336,31 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         kwargs = { search_column + '__icontains': keyword }
 
         queryset = UserSubscription.objects.all().order_by('id')
+
+        if search_column != 'undefined' and keyword != 'undefined':
+            queryset = queryset.filter(**kwargs)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            result = self.get_paginated_response(serializer.data)
+            data = result.data
+        else:
+            serializer = self.get_serializer(queryset, many=True)
+            data = serializer.data
+
+        return Response(data, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['GET'], url_path=r'expired_in_one_month', permission_classes=(IsAdminUser,))
+    @api_error_handler
+    def expired_in_one_month(self, request):
+        search_column = request.query_params.get('search_column')
+        keyword = request.query_params.get('keyword')
+        kwargs = { search_column + '__icontains': keyword }
+        
+        utc_now = arrow.utcnow().format('YYYY-MM-DD HH:mm:ss')
+        utc_after_30_days = arrow.utcnow().shift(days=+30).format('YYYY-MM-DD HH:mm:ss')
+        
+        queryset = UserSubscription.objects.filter(expired_at__range=[utc_now, utc_after_30_days]).order_by('id')
 
         if search_column != 'undefined' and keyword != 'undefined':
             queryset = queryset.filter(**kwargs)
