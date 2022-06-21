@@ -205,7 +205,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['GET'], url_path=r'facebook/comment-on-comment', permission_classes=(IsAuthenticated,))
     @api_error_handler
-    def list_delivery_default_settings(self, request):
+    def facebook_post_comment(self, request):
         api_user, campaign_id, comment_id, message = \
             lib.util.getter.getparams(request, ("campaign_id","comment_id", "message"), with_user=True, seller=True)
         
@@ -221,7 +221,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['GET'], url_path=r'facebook/comment-reply', permission_classes=(IsAuthenticated,))
     @api_error_handler
-    def list_delivery_default_settings(self, request):
+    def facebook_get_comment_reply(self, request):
         api_user, campaign_id, comment_id = \
             lib.util.getter.getparams(request, ("campaign_id","comment_id"), with_user=True, seller=True)
         
