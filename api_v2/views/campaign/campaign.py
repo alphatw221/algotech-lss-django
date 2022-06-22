@@ -63,6 +63,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         campaigns = campaigns.filter(**kwargs)
         page = self.paginate_queryset(campaigns)
+        print(page)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
             result = self.get_paginated_response(serializer.data)
