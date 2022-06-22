@@ -249,6 +249,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         else: 
             image, data = lib.util.getter.getdata(request, ('image', 'data'), required=False)
             data = json.loads(data)
+            print (data)
 
             if image:
                 image_path = default_storage.save(
