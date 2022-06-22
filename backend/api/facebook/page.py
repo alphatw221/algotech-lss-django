@@ -46,6 +46,9 @@ def api_fb_get_page_business_profile(page_token: str, page_id: str):
     return ret
 
 def api_fb_get_comments_on_comment(page_token: str, comment_id: str):
-    ret = FacebookApiCaller(f'{comment_id}/comments', bearer_token=page_token
-                            ).get()
+    params = {
+        'fields': 'created_time,from{picture,name,id},message,id',
+    }
+    ret = FacebookApiCaller(f'{comment_id}/comments', bearer_token=page_token,
+                            params=params).get()
     return ret
