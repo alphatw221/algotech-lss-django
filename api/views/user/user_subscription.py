@@ -360,19 +360,18 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         utc_now = arrow.utcnow().format('YYYY-MM-DD HH:mm:ss')
         utc_after_30_days = arrow.utcnow().shift(days=+30).format('YYYY-MM-DD HH:mm:ss')
         
-        queryset = UserSubscription.objects.filter(expired_at__range=[utc_now, utc_after_30_days]).order_by('id')
+        qs = UserSubscription.objects.filter(expired_at__range=[utc_now, utc_after_30_days]).order_by('id')
 
-        if search_column != 'undefined' and keyword != 'undefined':
-            queryset = queryset.filter(**kwargs)
-        page = self.paginate_queryset(queryset)
+        if (search_column not in ['undefined', '']) and (keyword not in ['undefined', '']):
+            qs = qs.filter(**kwargs)
+        page = self.paginate_queryset(qs)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
             result = self.get_paginated_response(serializer.data)
             data = result.data
         else:
-            serializer = self.get_serializer(queryset, many=True)
+            serializer = self.get_serializer(qs, many=True)
             data = serializer.data
-
         return Response(data, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['GET'], url_path=r'facebook_pages', permission_classes=(IsAuthenticated,))
