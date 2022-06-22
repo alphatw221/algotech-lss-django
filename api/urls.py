@@ -33,7 +33,7 @@ def url_setup(urlpatterns):
         path('test-api/<path>/', test.test_api, name='test_api'),
         path('test_error/', test.test_error, name='test_error'),
     ]
-    router.register(r'sample', test.SampleViewSet)
+
 
     router.register(r'user', user.UserViewSet)
     router.register(r'user-group', user_group.UserGroupViewSet)

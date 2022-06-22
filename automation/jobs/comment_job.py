@@ -174,7 +174,7 @@ def comment_responding(platform_name, platform, campaign, pre_order, comment, ca
         
 
         customer_name =comment['customer_name']
-        link = settings.SHOPPING_CART_URL + '/' + str(pre_order['id'])
+        link = settings.SHOPPING_CART_URL + '/' + str(pre_order['_id'])
         text = f"@{customer_name}"+ text+f"Shopping Cart: {link}"
         live_chat_id = comment.get("live_chat_id")
         

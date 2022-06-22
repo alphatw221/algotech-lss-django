@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from django.contrib.auth.models import User
 from django.conf import settings
-from api.models.test.sample import Sample, SampleSerializer
+
 
 from django.core.files.storage import default_storage
 from api.utils.common.common import * 
@@ -52,8 +52,4 @@ class TestViewSet(viewsets.GenericViewSet):
         return Response({'msg': 'TestViewSet test accomplished.'})
 
 
-class SampleViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated,)
-    queryset = Sample.objects.all().order_by('id')
-    serializer_class = SampleSerializer
-    filterset_fields = []
+

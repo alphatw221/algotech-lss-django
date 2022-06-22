@@ -290,7 +290,7 @@ WEB_SERVER_URL = "https://v1login.liveshowseller.com"
 # WEB_SERVER_URL = "https://plusone.sociallab.ph/lss/public"
 
 # SHOPPING_CART_URL = f"{WEB_SERVER_URL}/buyer/login_to_cart"
-SHOPPING_CART_URL = f"{GCP_API_LOADBALANCER_URL}/buyer/login/enter"
+SHOPPING_CART_URL = f"{GCP_API_LOADBALANCER_URL}/buyer/cart"
 
 SUPPORTED_PLATFORMS = [
     ("n/a", "No specific platform"),

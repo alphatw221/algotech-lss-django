@@ -39,7 +39,7 @@ def i18n_get_comment_command_cart(campaign, comment):
     text.append(_('TOTAL{dollar_sign}{total}\n'
                   ).format(total="{:.2f}".format(pre_order['subtotal']), dollar_sign=campaign["currency_sign"]))
     text.append(_('DETAIL{link}\n'
-                  ).format(link=settings.SHOPPING_CART_URL + '/' + str(pre_order['id'])))
+                  ).format(link=settings.SHOPPING_CART_URL + '/' + str(pre_order['_id'])))
 
     return ''.join(text)
 

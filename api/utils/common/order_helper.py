@@ -222,7 +222,7 @@ class PreOrderHelper():
                 del api_order_data['_id']
                 api_order_data['id'] = increment_id
                 api_order_data['created_at'] = datetime.utcnow()
-                api_order_data['buyer_id'] = api_user.id
+                api_order_data['buyer_id'] = api_user.id if api_user else None
                 template = api_order_template.copy()
                 template.update(api_order_data)
                 db.api_order.insert_one(template, session=session)
@@ -232,7 +232,7 @@ class PreOrderHelper():
                 db.api_pre_order.update_one({"id": api_pre_order["id"]}, {
                                             "$set": {"products": {}, "total": 0, "subtotal": 0, "adjust_price":0, "adjust_title":"", "free_delivery":False, "history":{}, "meta":{}}}, session=session)
       
-        return db.api_order.find_one({"id": increment_id}, {"_id": False})
+        return db.api_order.find_one({"id": increment_id})
 
     
 
