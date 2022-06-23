@@ -13,6 +13,8 @@ from api_v2.views.facebook import facebook_page
 from api_v2.views.youtube import youtube_channel
 from api_v2.views.instagram import instagram_profile
 from api_v2.views.manage_order import manage_order
+from api_v2.views.payment import payment
+
 router = routers.DefaultRouter()
 router.register(r'product', product.ProductViewSet)
 router.register(r'campaign',campaign.CampaignViewSet)
@@ -26,6 +28,7 @@ router.register(r'facebook-page', facebook_page.FacebookPageViewSet)
 router.register(r'youtube-channel', youtube_channel.YoutubeChannelViewSet)
 router.register(r'instagram-profile', instagram_profile.InstagramProfileViewSet)
 router.register(r'manage-order', manage_order.DashboardViewSet)
+router.register(r'payment', payment.PaymentViewSet)
 
 urlpatterns = [
     url(r'^', include(router.urls)),
