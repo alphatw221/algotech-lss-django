@@ -566,10 +566,15 @@ def get_total_average_comment_count(user_subscription_id):
 def get_campaign_merge_order_list(campaign_id, search, page, page_size):
 
     # search and paginate by frontend by now
-    # if search:
-    #     match_pipeline = {"$match":{"id":{"$ne":None}, "customer_name":{"$eq":search} }}
+    # if search not in ["",None,'undefined']:
+    #     try:
+    #         isearch = int(search)
+    #     except:
+    #         isearch = 0
+    #     match_pipeline = {"$match":{"$or":[{"id":{"$eq":isearch}}, {"customer_name":{"$regex":str(search),"$options": 'i'}}] }}
     # else:
     #     match_pipeline = {"$match":{"id":{"$ne":None} }}
+    # print(match_pipeline)
 
     # if not page.isnumeric() or not page_size.isnumeric():
     #     return []
@@ -626,6 +631,94 @@ def get_campaign_merge_order_list(campaign_id, search, page, page_size):
             "type":{"$first":"$data.type"}
         }},
         {"$project":{"_id":0,}},
+        # { "$skip": (page-1)*page_size },    # search and paginate by frontend by now
+        # { "$limit": page_size }
+
+    ])
+    l = list(cursor)
+    # print(l)
+    return l
+
+def get_campaign_merge_order_list_v2(campaign_id, search, f_payment,f_delivery,f_platform):
+
+    # search and paginate by frontend by now
+    if search not in ["",None,'undefined']:
+        try:
+            isearch = int(search)
+        except:
+            isearch = 0
+        match_pipeline = {"$match":{"$or":[{"id":{"$eq":isearch}}, {"customer_name":{"$regex":str(search),"$options": 'i'}}] }}
+    else:
+        match_pipeline = {"$match":{"id":{"$ne":None} }}
+        
+    if f_payment not in [[],None]:
+        filter_payment = {"$match":{"id":{"$ne":None},"payment_method":{"$in": f_payment} }}
+    else:
+        filter_payment = {"$match":{"id":{"$ne":None} }}
+        
+    if f_platform not in [[],None]:
+        filter_platform = {"$match":{"id":{"$ne":None},"platform":{"$in": f_platform} }}
+    else:
+        filter_platform = {"$match":{"id":{"$ne":None} }}
+
+    # if not page.isnumeric() or not page_size.isnumeric():
+    #     return []
+        
+    # page = int(page)
+    # page_size = int(page_size)
+
+    cursor=db.api_campaign.aggregate([
+        {"$match":{"id":campaign_id}},
+        {
+            "$lookup": {
+                "from": "api_order","as": "orders",
+                'let': {'id': "$id" },
+                "pipeline":[
+                    {"$match":{
+                        '$expr': { '$eq': ["$$id", "$campaign_id"] },
+                        "id":{"$ne":None} }
+                     },
+                    {"$addFields": { "type": "order","total_item": {"$size": { "$objectToArray": "$products"}}}},
+                ]
+            },
+        },
+        {
+            "$lookup": {
+                "from": "api_pre_order","as": "pre_orders",
+                'let': {'id': "$id" },
+                "pipeline":[
+                    {"$match":{
+                        '$expr': { '$eq': ["$$id", "$campaign_id"] },
+                        "id":{"$ne":None} ,
+                        "subtotal":{"$ne":0}}
+                     },
+                    {"$addFields": { "type": "pre_order","total_item": {"$size": { "$objectToArray": "$products"}}}},
+                ]
+            },
+        },
+        {"$project":{"_id":0,"data":{"$concatArrays":["$orders","$pre_orders"]}}},
+        { "$unwind": "$data" },
+        { "$sort" : { "data.created_at" : -1 } },
+        {"$group":{
+            "_id": {
+                "id": "$data.id",
+                "type": "$data.type"
+            },
+            "id":{"$first":"$data.id"},
+            "platform":{"$first":"$data.platform"},
+            "customer_name":{"$first":"$data.customer_name"},
+            "customer_img":{"$first":"$data.customer_img"},
+            "total_item":{"$first":"$data.total_item"},
+            "subtotal":{"$first":"$data.subtotal"},
+            "total":{"$first":"$data.total"},
+            "payment_method":{"$first":"$data.payment_method"},
+            "status":{"$first":"$data.status"},
+            "type":{"$first":"$data.type"}
+        }},
+        {"$project":{"_id":0,}},
+        match_pipeline,
+        filter_payment,
+        filter_platform,
         # { "$skip": (page-1)*page_size },    # search and paginate by frontend by now
         # { "$limit": page_size }
 
