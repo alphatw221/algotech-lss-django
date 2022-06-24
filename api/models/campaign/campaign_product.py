@@ -18,11 +18,6 @@ class CampaignProduct(models.Model):
         ('lucky_draw-fast', 'Lucky Draw from fast-add'),
     ]
 
-    STATUS_CHOICES = [
-        (0, 'Deactivated'),
-        (1, 'Activated'),
-    ]
-
     campaign = models.ForeignKey(
         Campaign, on_delete=models.SET_NULL, null=True, related_name='products')
 
@@ -71,8 +66,7 @@ class CampaignProduct(models.Model):
 
     type = models.CharField(max_length=255, blank=True,
                             choices=TYPE_CHOICES, default='n/a')
-    status = models.IntegerField(blank=True,
-                                 choices=STATUS_CHOICES, default=0)
+    status = models.BooleanField(blank=False, null=False, default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
