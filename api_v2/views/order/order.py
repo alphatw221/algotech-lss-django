@@ -179,7 +179,7 @@ class OrderViewSet(viewsets.ModelViewSet):
     def seller_retrieve_order_oid(self, request, pk=None):
 
         api_user = lib.util.verify.Verify.get_seller_user(request)
-        order = lib.util.verify.Verify.get_order()(pk)
+        order = lib.util.verify.Verify.get_order(pk)
         lib.util.verify.Verify.get_campaign_from_user_subscription(api_user.user_subscription, order.campaign.id)
         oid=str(db.api_order.find_one({"id":order.id})['_id'])
         return Response(oid, status=status.HTTP_200_OK)
