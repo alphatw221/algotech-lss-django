@@ -21,7 +21,7 @@ class DashboardViewSet(viewsets.ModelViewSet):
 
         api_user, campaign_id, search, page, page_size= lib.util.getter.getparams(request, ( 'campaign_id', 'search', 'page', 'page_size'),with_user=True, seller=True)
         f_payment,f_delivery,f_platform = lib.util.getter.getdata(request,('payment','delivery','platform'))
-        print(f_payment,f_delivery,f_platform)
+        
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription,campaign_id)
         merge_list = get_campaign_merge_order_list_v2(campaign.id, search,f_payment,f_delivery,f_platform)

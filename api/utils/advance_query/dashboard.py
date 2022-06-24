@@ -660,7 +660,6 @@ def get_campaign_merge_order_list_v2(campaign_id, search, f_payment,f_delivery,f
         filter_platform = {"$match":{"id":{"$ne":None},"platform":{"$in": f_platform} }}
     else:
         filter_platform = {"$match":{"id":{"$ne":None} }}
-    print(filter_platform)
 
     # if not page.isnumeric() or not page_size.isnumeric():
     #     return []
