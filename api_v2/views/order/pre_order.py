@@ -1,3 +1,6 @@
+from django.http import JsonResponse
+from django.db.models import Q
+
 from rest_framework import viewsets, status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
@@ -5,16 +8,17 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 
 from api import models
-from django.db.models import Q
-
 from api.utils.common.order_helper import PreOrderHelper
 from api.utils.common.verify import ApiVerifyError
-import lib
+
 from backend.pymongo.mongodb import db
+
 from automation import jobs
+
+import lib
 import datetime
-
-
+import uuid
+import service
 class PreOrderPagination(PageNumberPagination):
     page_query_param = 'page'
     page_size_query_param = 'page_size'
@@ -81,6 +85,42 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
         #send email to customer over here order detail link
         return Response(data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['GET'], url_path=r'(?P<campaign_id>[^/.]+)/guest/create', permission_classes=(), authentication_classes=[])
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def guest_create_pre_order(self, request, campaign_id):
+
+        recaptcha_token, client_uuid = lib.util.getter.getparams(request, ('recaptcha_token', 'client_uuid'), with_user=False)
+        
+        code, response = service.recaptcha.recaptcha.verify_token(recaptcha_token)
+
+        if code!=200 or not response.get('success'):
+            raise lib.error_handle.error.api_error.ApiVerifyError('Please Refresh The Page And Retry Again')
+        
+        if not client_uuid or client_uuid in ['null', 'undefined']:
+            client_uuid = str(uuid.uuid4())
+
+        customer_id= client_uuid   #Facebook App Scope ID Here
+        customer_name= ''
+
+        campaign = lib.util.verify.Verify.get_campaign(campaign_id)
+
+        if models.order.pre_order.PreOrder.objects.filter(customer_id = customer_id, campaign = campaign, platform = None,).exists():
+            pre_order = models.order.pre_order.PreOrder.objects.get(customer_id = customer_id, campaign = campaign, platform = None,)
+        else:
+            pre_order = models.order.pre_order.PreOrder.objects.create(
+            customer_id = customer_id,
+            customer_name = customer_name,
+            campaign = campaign,
+            platform = None,
+            platform_id = None)
+
+        pre_order_oid=str(db.api_pre_order.find_one({"id":pre_order.id})['_id'])
+        response = JsonResponse({'client_uuid':client_uuid, 'pre_order_oid':pre_order_oid})
+        response.set_cookie('client_uuid', client_uuid, path="/")
+
+        return response
+
 # ---------------------------------------------- buyer ------------------------------------------------------
 
     @action(detail=False, methods=['GET'], url_path=r'(?P<campaign_id>[^/.]+)/(?P<login_with>[^/.]+)/buyer/create', permission_classes=(IsAuthenticated,))
@@ -110,7 +150,8 @@ class PreOrderViewSet(viewsets.ModelViewSet):
             platform = None,
             platform_id = None)
 
-        return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
+        pre_order_oid=str(db.api_pre_order.find_one({"id":pre_order.id})['_id'])
+        return Response({ 'pre_order_oid':pre_order_oid}, status=status.HTTP_200_OK)
 
 
     
@@ -137,8 +178,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         
         shipping_data, = \
             lib.util.getter.getdata(request, ("shipping_data",), required=True)
-        # shipping_option, = lib.util.getter.getdata(request, ("shipping_option",), required=False)
-        print(shipping_data)
+
         pre_order = lib.util.verify.Verify.get_pre_order_with_oid(pre_order_oid)
         campaign = lib.util.verify.Verify.get_campaign_from_pre_order(pre_order)
 

@@ -28,6 +28,12 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     # ----------------------------------------------- guest ----------------------------------------------------
 
+    @action(detail=False, methods=['GET'], url_path=r'guest/retrieve/(?P<order_oid>[^/.]+)/subscription', permission_classes=(), authentication_classes=[])
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def guest_retrieve_order_with_user_subscription(self, request, order_oid):
+        order = lib.util.verify.Verify.get_order_with_oid(order_oid)
+        return Response(models.order.order.OrderSerializerWithUserSubscription(order).data, status=status.HTTP_200_OK)
+
     @action(detail=False, methods=['GET'], url_path=r'guest/retrieve/(?P<order_oid>[^/.]+)', permission_classes=(), authentication_classes=[])
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def guest_retrieve_order(self, request, order_oid):
@@ -70,6 +76,13 @@ class OrderViewSet(viewsets.ModelViewSet):
 
 
     # ----------------------------------------------- buyer ----------------------------------------------------
+
+    @action(detail=False, methods=['GET'], url_path=r'buyer/retrieve/(?P<order_oid>[^/.]+)/subscription', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def buyer_retrieve_order_with_user_subscription(self, request, order_oid):
+        order = lib.util.verify.Verify.get_order_with_oid(order_oid)
+        return Response(models.order.order.OrderSerializerWithUserSubscription(order).data, status=status.HTTP_200_OK)
+
     @action(detail=False, methods=['GET'], url_path=r'buyer/retrieve/(?P<order_oid>[^/.]+)', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def buyer_retrieve_order(self, request, order_oid):

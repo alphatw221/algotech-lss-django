@@ -5,10 +5,13 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from api.models.facebook.facebook_page import FacebookPage
 from api.models.youtube.youtube_channel import YoutubeChannel
-
+from rest_framework.pagination import PageNumberPagination
 from api.utils.common.verify import Verify
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 
+class AutoResponsePagination(PageNumberPagination):
+    page_query_param = 'page'
+    page_size_query_param = 'page_size'
 
 class AutoResponseViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
@@ -19,6 +22,8 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
     platform_dict = {'facebook': FacebookPage,
                      'youtube': YoutubeChannel}
 
+    pagination_class = AutoResponsePagination
+    
     @action(detail=True, methods=['GET'], url_path=r'retrieve', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def retrieve_auto_response(self, request, pk=None):
@@ -37,8 +42,16 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
 
         auto_responses = user_subscription.auto_responses.all()
+        page = self.paginate_queryset(auto_responses)
+        if page is not None:
+            serializer = AutoResponseSerializerWithFacebookInfo(page, many=True)
+            result = self.get_paginated_response(serializer.data)
+            data = result.data
+        else:
+            serializer = AutoResponseSerializerWithFacebookInfo(auto_responses, many=True)
+            data = serializer.data
 
-        return Response(AutoResponseSerializerWithFacebookInfo(auto_responses, many=True).data, status=status.HTTP_200_OK)
+        return Response(data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['POST'], url_path=r'create/(?P<platform_name>[^/.]+)/(?P<platform_id>[^/.]+)', permission_classes=(IsAuthenticated,))
     @api_error_handler

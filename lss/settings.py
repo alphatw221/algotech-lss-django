@@ -474,3 +474,7 @@ DJANGO_VITE_ASSETS_PATH = os.path.join(BASE_DIR.parent,"lss_vue_enigma/static")
 DJANGO_VITE_MANIFEST_PATH = os.path.join(BASE_DIR.parent,"lss_vue_enigma/static/manifest.json")
 # DJANGO_VITE_STATIC_URL_PREFIX = 'test'
 DJANGO_VITE_DEV_MODE = DEBUG
+
+
+#Recaptcha V2
+RECAPTCHA_SECRET_KEY='6LcPbpMgAAAAAIsKGaFVGusS14ok5L8XwOizmYBG'
