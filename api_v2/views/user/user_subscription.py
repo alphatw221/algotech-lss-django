@@ -249,7 +249,6 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         else: 
             image, data = lib.util.getter.getdata(request, ('image', 'data'), required=False)
             data = json.loads(data)
-            print (data)
 
             if image:
                 image_path = default_storage.save(
@@ -262,7 +261,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
             accounts.append(data)
             direct_payment['button_title'] = 'Direct Payment'
-            direct_payment['activated'] = True
+            direct_payment['enabled'] = True
             direct_payment['accounts'] = accounts
             meta_payment['direct_payment'] = direct_payment
 

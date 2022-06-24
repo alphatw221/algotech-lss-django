@@ -76,7 +76,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['POST'], url_path=r'create', parser_classes=(MultiPartParser, ), permission_classes=(IsAuthenticated, ))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def create_campaign(self, request):
-        api_user= lib.util.verify.Verify.get_seller_user(request)
+        api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
 
         # ret = CreateCampaignRuleChecker.check(**{
@@ -126,7 +126,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         serializer.save()
 
-        return Response('ok', status=status.HTTP_200_OK)
+        return Response(campaign.id, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['GET'], url_path=r'check_facebook_page_token', permission_classes=(IsAuthenticated, ))
     @api_error_handler
