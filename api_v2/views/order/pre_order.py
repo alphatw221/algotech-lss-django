@@ -268,12 +268,8 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         pre_order = lib.util.verify.Verify.get_pre_order(pk)
         lib.util.verify.Verify.get_campaign_from_user_subscription(api_user.user_subscription, pre_order.campaign.id)
-<<<<<<< HEAD
-        oid = str(db.api_pre_order.find_one({"id":pre_order.id})['_id'])
-=======
         oid = database.lss.pre_order.get_oid_by_id(pre_order.id)
 
->>>>>>> 0f18378374717870be304c8fca6b530a74fa43e2
         return Response(oid, status=status.HTTP_200_OK)
     @action(detail=True, methods=['PUT'], url_path=r'seller/adjust', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
