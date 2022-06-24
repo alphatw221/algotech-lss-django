@@ -87,6 +87,25 @@ class CampaignProductSerializer(serializers.ModelSerializer):
     tag = serializers.JSONField(default=list)
 
 
+class CampaignProductSerializerAssign(serializers.ModelSerializer):
+    class Meta:
+        model = CampaignProduct
+        fields = [
+            'qty_for_sale',
+            'name',
+            'description',
+            'price',
+            'image',
+            'order_code',
+            'max_order_amount',
+            'customer_removable',
+            'customer_editable',
+            'type',
+            'status',
+            'tag'
+        ]
+
+
 class CampaignProductSerializerUpdate(CampaignProductSerializer):
     class Meta:
         model = CampaignProduct

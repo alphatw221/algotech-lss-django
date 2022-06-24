@@ -92,7 +92,9 @@ class PreOrderCheckRule():
         lucky_draw_repeat = kwargs.get('lucky_draw_repeat')
         if not api_campaign_product or not qty:
             return
-        if api_campaign_product.get('max_order_amount') and qty > api_campaign_product.get('max_order_amount') and lucky_draw_repeat == False:
+        if lucky_draw_repeat:
+            return
+        if api_campaign_product.get('max_order_amount') and qty > api_campaign_product.get('max_order_amount'):
             raise PreOrderErrors.PreOrderException(
                 "Product quantity exceeds max order amount.")
 

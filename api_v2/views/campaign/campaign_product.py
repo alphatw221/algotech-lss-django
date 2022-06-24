@@ -73,17 +73,25 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
         api_user, campaign_id = lib.util.getter.getparams(request, ("campaign_id", ), with_user=True, seller=True)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
-        products = request.data
+        campaign_products_data = request.data
+        errors = []
 
-        for product in products:
-            product['campaign'] = campaign.id
-            product['created_by'] = api_user.id
-            product['customer_editable'] = product['editable']
-            product['customer_removable'] = product['deletable']
+        for campaign_product_data in campaign_products_data:
+            try:
+                product = lib.util.verify.Verify.get_product_from_user_subscription(user_subscription, campaign_product_data.get('product_id'))
+                serializer = models.campaign.campaign_product.CampaignProductSerializerAssign(data=campaign_product_data)
+                if not serializer.is_valid():
+                    errors.append({"product_id": campaign_product_data.get('product_id')})
+                    continue
+                campaign_product = serializer.save()
+
+                campaign_product.campaign = campaign
+                campaign_product.product = product
+                campaign_product.created_by = api_user
+                campaign_product.save()
+            except lib.error_handle.error.api_error.ApiVerifyError as e:
+                errors.append({"product_id": campaign_product_data.get('product_id')})
+                continue
         
-            serializer = models.campaign.campaign_product.CampaignProductSerializer(data=product)
-            if not serializer.is_valid():
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            serializer.save()
 
         return Response('success', status=status.HTTP_200_OK)
