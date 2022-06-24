@@ -19,9 +19,9 @@ from backend.api.instagram.profile import api_ig_get_profile_live_media
 from backend.api.youtube.channel import api_youtube_get_list_channel_by_token
 from business_policy.subscription_plan import SubscriptionPlan
 import hashlib
-from backend.pymongo.mongodb import db
-from bson.objectid import ObjectId
 
+from bson.objectid import ObjectId
+import database
 def getparams(request, params: tuple, with_user=True, seller=True):
     ret = []
     if with_user:
@@ -181,7 +181,9 @@ class Verify():
             _id=ObjectId(oid)
         except Exception:
             raise ApiVerifyError('no pre_order found')
-        pre_order=db.api_pre_order.find_one({"_id":_id})
+        
+        pre_order = database.lss.pre_order.PreOrder.get(_id=_id)
+        # pre_order=db.api_pre_order.find_one({"_id":_id})
         if not pre_order:
             raise ApiVerifyError('no pre_order found')
         return PreOrder.objects.get(id=pre_order['id'])
@@ -206,7 +208,8 @@ class Verify():
             _id=ObjectId(oid)
         except Exception:
             raise ApiVerifyError('no order found')
-        order=db.api_order.find_one({"_id":_id})
+        # order=db.api_order.find_one({"_id":_id})
+        order = database.lss.order.Order.get(_id=_id)
         if not order:
             raise ApiVerifyError('no order found')
         return Order.objects.get(id=order['id'])

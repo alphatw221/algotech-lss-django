@@ -11,14 +11,13 @@ from api import models
 from api.utils.common.order_helper import PreOrderHelper
 from api.utils.common.verify import ApiVerifyError
 
-from backend.pymongo.mongodb import db
-
 from automation import jobs
 
 import lib
 import datetime
 import uuid
 import service
+import database
 class PreOrderPagination(PageNumberPagination):
     page_query_param = 'page'
     page_size_query_param = 'page_size'
@@ -115,7 +114,8 @@ class PreOrderViewSet(viewsets.ModelViewSet):
             platform = None,
             platform_id = None)
 
-        pre_order_oid=str(db.api_pre_order.find_one({"id":pre_order.id})['_id'])
+        pre_order_oid = database.lss.pre_order.get_oid_by_id(pre_order.id)
+        
         response = JsonResponse({'client_uuid':client_uuid, 'pre_order_oid':pre_order_oid})
         response.set_cookie('client_uuid', client_uuid, path="/")
 
@@ -150,7 +150,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
             platform = None,
             platform_id = None)
 
-        pre_order_oid=str(db.api_pre_order.find_one({"id":pre_order.id})['_id'])
+        pre_order_oid = database.lss.pre_order.get_oid_by_id(pre_order.id)
         return Response({ 'pre_order_oid':pre_order_oid}, status=status.HTTP_200_OK)
 
 
@@ -268,7 +268,8 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         pre_order = lib.util.verify.Verify.get_pre_order(pk)
         lib.util.verify.Verify.get_campaign_from_user_subscription(api_user.user_subscription, pre_order.campaign.id)
-        oid=str(db.api_pre_order.find_one({"id":pre_order.id})['_id'])
+        oid = database.lss.pre_order.get_oid_by_id(pre_order.id)
+
         return Response(oid, status=status.HTTP_200_OK)
     @action(detail=True, methods=['PUT'], url_path=r'seller/adjust', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler

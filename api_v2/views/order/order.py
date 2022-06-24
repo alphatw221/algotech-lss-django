@@ -2,20 +2,21 @@ from rest_framework.response import Response
 from rest_framework import viewsets,status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import action, permission_classes
+from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser
 
-from backend.pymongo.mongodb import db
+
 from django.core.files.storage import default_storage
 from django.conf import settings
 from django.core.files.base import ContentFile
-from rsa import verify
 
 
 from api import models
+import database
 import lib
 
 from automation import jobs
+
 class OrderPagination(PageNumberPagination):
     page_query_param = 'page'
     page_size_query_param = 'page_size'
@@ -156,8 +157,8 @@ class OrderViewSet(viewsets.ModelViewSet):
         
         api_user = lib.util.verify.Verify.get_customer_user(request)
         order = lib.util.verify.Verify.get_order_by_api_user(api_user,pk)
-        
-        oid=str(db.api_order.find_one({"id":order.id})['_id'])
+        oid = database.lss.order.get_oid_by_id(order.id)
+
         return Response(oid, status=status.HTTP_200_OK)
     # ------------------------------------seller----------------------------------------
     
@@ -181,5 +182,6 @@ class OrderViewSet(viewsets.ModelViewSet):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         order = lib.util.verify.Verify.get_order()(pk)
         lib.util.verify.Verify.get_campaign_from_user_subscription(api_user.user_subscription, order.campaign.id)
-        oid=str(db.api_order.find_one({"id":order.id})['_id'])
+        oid = database.lss.order.get_oid_by_id(order.id)
+
         return Response(oid, status=status.HTTP_200_OK)
