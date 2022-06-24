@@ -14,8 +14,8 @@ def i18n_get_request_response(state, api_campaign_product, qty, lang=None):
 
 @lang_translate_default_en
 def i18n_get_additional_text(pre_order, lang=None):
-    link = settings.SHOPPING_CART_URL + '/' + str(pre_order['id'])
-
+    # link = settings.SHOPPING_CART_URL + '/' + str(pre_order['id'])
+    link = settings.SHOPPING_CART_URL + '/' + str(pre_order['_id'])
     print(f"pre_order_id:{pre_order['id']}")
     print(f"link: {link}")
     shopping_cart_info = _('SHOPPING_CART_INFO{link}'

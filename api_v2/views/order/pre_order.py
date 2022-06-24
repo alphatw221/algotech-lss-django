@@ -1,3 +1,6 @@
+from django.http import JsonResponse
+from django.db.models import Q
+
 from rest_framework import viewsets, status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
@@ -5,14 +8,17 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 
 from api import models
-from django.db.models import Q
-from api.models import campaign
 from api.utils.common.order_helper import PreOrderHelper
 from api.utils.common.verify import ApiVerifyError
+
+from backend.pymongo.mongodb import db
+
+from automation import jobs
+
 import lib
 import datetime
-
-
+import uuid
+import service
 class PreOrderPagination(PageNumberPagination):
     page_query_param = 'page'
     page_size_query_param = 'page_size'
@@ -24,6 +30,96 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     filterset_fields = []
     pagination_class = PreOrderPagination
 
+# ---------------------------------------------- guest ------------------------------------------------------
+
+    @action(detail=False, methods=['GET'], url_path=r'guest/retrieve/(?P<pre_order_oid>[^/.]+)', permission_classes=(), authentication_classes=[])
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def guest_retrieve_pre_order(self, request, pre_order_oid):
+        pre_order = lib.util.verify.Verify.get_pre_order_with_oid(pre_order_oid)
+
+        campaign = lib.util.verify.Verify.get_campaign_from_pre_order(pre_order)
+        pre_order = lib.helper.order_helper.PreOrderHelper.summarize_pre_order(pre_order, campaign, save=True)
+
+        return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['PUT'], url_path=r'(?P<pre_order_oid>[^/.]+)/guest/add', permission_classes=(), authentication_classes=[])
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    @lib.error_handle.error_handler.order_operation_error_handler.order_operation_error_handler
+    def guest_add_order_product(self, request, pre_order_oid):
+
+        campaign_product_id, qty = lib.util.getter.getparams(request, ('campaign_product_id', 'qty',), with_user=False)
+
+        pre_order = lib.util.verify.Verify.get_pre_order_with_oid(pre_order_oid)
+        campaign_product = lib.util.verify.Verify.get_campaign_product_from_pre_order(pre_order, campaign_product_id)
+
+        PreOrderHelper.add_product(None, pre_order, campaign_product, qty)
+        pre_order = lib.util.verify.Verify.get_pre_order(pre_order.id)
+        return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['PUT'], url_path=r'(?P<pre_order_oid>[^/.]+)/guest/delivery', permission_classes=(), authentication_classes=[])
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def guest_update_delivery_info(self, request, pre_order_oid):
+        
+        shipping_data, = \
+            lib.util.getter.getdata(request, ("shipping_data",), required=True)
+        pre_order = lib.util.verify.Verify.get_pre_order_with_oid(pre_order_oid)
+        campaign = lib.util.verify.Verify.get_campaign_from_pre_order(pre_order)
+
+        serializer = models.order.pre_order.PreOrderSerializerUpdateDelivery(pre_order, data=shipping_data, partial=True) 
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        pre_order = serializer.save()
+        
+        pre_order = lib.helper.order_helper.PreOrderHelper.summarize_pre_order(pre_order, campaign, save=True)
+
+        #checkout
+
+        api_order = PreOrderHelper.checkout(None, pre_order)
+        order = lib.util.verify.Verify.get_order(api_order['id'])
+
+        content = lib.helper.order_helper.OrderHelper.get_checkout_email_content(order,api_order['_id'])
+        jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)     #queue this to redis if needed
+        
+        data = models.order.order.OrderSerializer(order).data
+        data['oid']=str(api_order['_id'])
+
+        #send email to customer over here order detail link
+        return Response(data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['GET'], url_path=r'(?P<campaign_id>[^/.]+)/guest/create', permission_classes=(), authentication_classes=[])
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def guest_create_pre_order(self, request, campaign_id):
+
+        recaptcha_token, client_uuid = lib.util.getter.getparams(request, ('recaptcha_token', 'client_uuid'), with_user=False)
+        
+        code, response = service.recaptcha.recaptcha.verify_token(recaptcha_token)
+
+        if code!=200 or not response.get('success'):
+            raise lib.error_handle.error.api_error.ApiVerifyError('Please Refresh The Page And Retry Again')
+        
+        if not client_uuid or client_uuid in ['null', 'undefined']:
+            client_uuid = str(uuid.uuid4())
+
+        customer_id= client_uuid   #Facebook App Scope ID Here
+        customer_name= ''
+
+        campaign = lib.util.verify.Verify.get_campaign(campaign_id)
+
+        if models.order.pre_order.PreOrder.objects.filter(customer_id = customer_id, campaign = campaign, platform = None,).exists():
+            pre_order = models.order.pre_order.PreOrder.objects.get(customer_id = customer_id, campaign = campaign, platform = None,)
+        else:
+            pre_order = models.order.pre_order.PreOrder.objects.create(
+            customer_id = customer_id,
+            customer_name = customer_name,
+            campaign = campaign,
+            platform = None,
+            platform_id = None)
+
+        pre_order_oid=str(db.api_pre_order.find_one({"id":pre_order.id})['_id'])
+        response = JsonResponse({'client_uuid':client_uuid, 'pre_order_oid':pre_order_oid})
+        response.set_cookie('client_uuid', client_uuid, path="/")
+
+        return response
 
 # ---------------------------------------------- buyer ------------------------------------------------------
 
@@ -54,26 +150,17 @@ class PreOrderViewSet(viewsets.ModelViewSet):
             platform = None,
             platform_id = None)
 
-        return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
+        pre_order_oid=str(db.api_pre_order.find_one({"id":pre_order.id})['_id'])
+        return Response({ 'pre_order_oid':pre_order_oid}, status=status.HTTP_200_OK)
 
 
-    @action(detail=True, methods=['GET'], url_path=r'retrieve', permission_classes=(IsAuthenticated,))
-    @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def retrieve_pre_order(self, request, pk=None):
-
-        pre_order = lib.util.verify.Verify.get_pre_order(pk)
-        campaign = lib.util.verify.Verify.get_campaign_from_pre_order(pre_order)
-        pre_order = lib.helper.order_helper.PreOrderHelper.summarize_pre_order(pre_order, campaign, save=True)
-
-        return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
-      
     
-    @action(detail=True, methods=['GET'], url_path=r'buyer/retrieve', permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['GET'], url_path=r'buyer/retrieve/(?P<pre_order_oid>[^/.]+)', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def retrieve_pre_order(self, request, pk=None):
+    def buyer_retrieve_pre_order(self, request, pre_order_oid):
 
         api_user = lib.util.verify.Verify.get_customer_user(request)
-        pre_order = lib.util.verify.Verify.get_pre_order(pk)
+        pre_order = lib.util.verify.Verify.get_pre_order_with_oid(pre_order_oid)
 
         if pre_order.buyer and pre_order.buyer != api_user:
             raise lib.error_handle.error.api_error.ApiVerifyError('Invalid User')
@@ -83,17 +170,16 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
         return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['PUT'], url_path=r'delivery', permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['PUT'], url_path=r'(?P<pre_order_oid>[^/.]+)/buyer/delivery', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def update_delivery_info(self, request, pk=None):
+    def buyer_update_delivery_info(self, request, pre_order_oid):
 
         api_user = lib.util.verify.Verify.get_customer_user(request)
         
         shipping_data, = \
             lib.util.getter.getdata(request, ("shipping_data",), required=True)
-        # shipping_option, = lib.util.getter.getdata(request, ("shipping_option",), required=False)
-        print(shipping_data)
-        pre_order = lib.util.verify.Verify.get_pre_order(pk)
+
+        pre_order = lib.util.verify.Verify.get_pre_order_with_oid(pre_order_oid)
         campaign = lib.util.verify.Verify.get_campaign_from_pre_order(pre_order)
 
         serializer = models.order.pre_order.PreOrderSerializerUpdateDelivery(pre_order, data=shipping_data, partial=True) 
@@ -109,19 +195,24 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         order = lib.util.verify.Verify.get_order(api_order['id'])
 
 
-        return Response(models.order.order.OrderSerializer(order).data, status=status.HTTP_200_OK)
+        
 
-    @action(detail=True, methods=['PUT'], url_path=r'buyer/add', permission_classes=(IsAuthenticated,))
+        data = models.order.order.OrderSerializer(order).data
+        data['oid']=str(api_order['_id'])
+
+        return Response(data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['PUT'], url_path=r'(?P<pre_order_oid>[^/.]+)/buyer/add', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     @lib.error_handle.error_handler.order_operation_error_handler.order_operation_error_handler
-    def buyer_add_order_product(self, request, pk=None):
+    def buyer_add_order_product(self, request, pre_order_oid):
         api_user, campaign_product_id, qty = lib.util.getter.getparams(request, ('campaign_product_id', 'qty',), with_user=True, seller=False)
 
-        pre_order = lib.util.verify.Verify.get_pre_order(pk)
+        pre_order = lib.util.verify.Verify.get_pre_order_with_oid(pre_order_oid)
         campaign_product = lib.util.verify.Verify.get_campaign_product_from_pre_order(pre_order, campaign_product_id)
 
         PreOrderHelper.add_product(api_user, pre_order, campaign_product, qty)
-        pre_order = lib.util.verify.Verify.get_pre_order(pk)
+        pre_order = lib.util.verify.Verify.get_pre_order(pre_order.id)
         return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
 
 # ---------------------------------------------- seller ------------------------------------------------------
@@ -170,6 +261,15 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
     
+    @action(detail=True, methods=['GET'], url_path=r'seller/retrieve/oid', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def seller_retrieve_pre_order_oid(self, request, pk=None):
+
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        pre_order = lib.util.verify.Verify.get_pre_order(pk)
+        lib.util.verify.Verify.get_campaign_from_user_subscription(api_user.user_subscription, pre_order.campaign.id)
+        oid=str(db.api_pre_order.find_one({"id":pre_order.id})['_id'])
+        return Response(oid, status=status.HTTP_200_OK)
     @action(detail=True, methods=['PUT'], url_path=r'seller/adjust', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def seller_adjust(self, request, pk=None):

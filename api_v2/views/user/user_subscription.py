@@ -261,7 +261,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
             accounts.append(data)
             direct_payment['button_title'] = 'Direct Payment'
-            direct_payment['activated'] = True
+            direct_payment['enabled'] = True
             direct_payment['accounts'] = accounts
             meta_payment['direct_payment'] = direct_payment
 

@@ -19,6 +19,8 @@ from backend.api.instagram.profile import api_ig_get_profile_live_media
 from backend.api.youtube.channel import api_youtube_get_list_channel_by_token
 from business_policy.subscription_plan import SubscriptionPlan
 import hashlib
+from backend.pymongo.mongodb import db
+from bson.objectid import ObjectId
 
 def getparams(request, params: tuple, with_user=True, seller=True):
     ret = []
@@ -174,6 +176,17 @@ class Verify():
         return PreOrder.objects.get(id=pre_order_id)
 
     @staticmethod
+    def get_pre_order_with_oid(oid):
+        try:
+            _id=ObjectId(oid)
+        except Exception:
+            raise ApiVerifyError('no pre_order found')
+        pre_order=db.api_pre_order.find_one({"_id":_id})
+        if not pre_order:
+            raise ApiVerifyError('no pre_order found')
+        return PreOrder.objects.get(id=pre_order['id'])
+
+    @staticmethod
     def get_order_product(order_product_id):
         if not OrderProduct.objects.filter(id=order_product_id).exists():
             raise ApiVerifyError('no order product found')
@@ -186,6 +199,17 @@ class Verify():
         if not Order.objects.filter(id=order_id).exists():
             raise ApiVerifyError('no order found')
         return Order.objects.get(id=order_id)
+
+    @staticmethod
+    def get_order_with_oid(oid):
+        try:
+            _id=ObjectId(oid)
+        except Exception:
+            raise ApiVerifyError('no order found')
+        order=db.api_order.find_one({"_id":_id})
+        if not order:
+            raise ApiVerifyError('no order found')
+        return Order.objects.get(id=order['id'])
 
     @staticmethod
     def get_order_by_api_user(api_user, order_id):

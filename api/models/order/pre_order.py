@@ -5,58 +5,60 @@ from djongo import models
 from rest_framework import serializers
 from api.models.user.user import User
 
+import uuid
 class PreOrder(models.Model):
     class Meta:
         db_table = 'api_pre_order'
         unique_together = ['platform', 'customer_id', 'campaign']
 
+    
     campaign = models.ForeignKey(
         Campaign, null=True, on_delete=models.CASCADE, related_name='pre_orders')
 
     customer_id = models.CharField(max_length=255, null=True, blank=True)
     customer_name = models.CharField(max_length=255, null=True, blank=True)
     customer_img = models.CharField(max_length=255, null=True, blank=True)
-    email = models.CharField(max_length=255, null=True, blank=True)
-    phone = models.CharField(max_length=255, null=True, blank=True)
-    first_name = models.CharField(max_length=255, null=True, blank=True)
-    last_name = models.CharField(max_length=255, null=True, blank=True)
-    gender = models.CharField(max_length=255, null=True, blank=True)
+    email = models.CharField(max_length=255, null=True, blank=True) #delete
+    phone = models.CharField(max_length=255, null=True, blank=True) #delete
+    first_name = models.CharField(max_length=255, null=True, blank=True) #delete
+    last_name = models.CharField(max_length=255, null=True, blank=True) #delete
+    gender = models.CharField(max_length=255, null=True, blank=True) #delete
     remark = models.TextField(null=True, blank=True, default=None)
 
     subtotal = models.FloatField(null=True, blank=True, default=0)
     total = models.FloatField(null=True, blank=True, default=0)
     currency = models.CharField(
-        max_length=255, null=True, blank=True, default=None)
+        max_length=255, null=True, blank=True, default=None) #delete
     currency_sign = models.CharField(
-        max_length=255, null=True, blank=True, default='$')
-    cost = models.FloatField(null=True, blank=True, default=0)
+        max_length=255, null=True, blank=True, default='$') #delete
+    cost = models.FloatField(null=True, blank=True, default=0) #delete
     cost_currency = models.CharField(
-        max_length=8, null=True, blank=True, default=None)
+        max_length=8, null=True, blank=True, default=None) #delete
     cost_currency_sign = models.CharField(
-        max_length=255, null=True, blank=True, default='$')
+        max_length=255, null=True, blank=True, default='$') #delete
 
     payment_first_name = models.CharField(
-        max_length=64, blank=True, default='')
+        max_length=64, blank=True, default='') #delete
     payment_last_name = models.CharField(
-        max_length=64, blank=True, default='')
+        max_length=64, blank=True, default='') #delete
     payment_gender = models.CharField(
-        max_length=8, blank=True, default='')
+        max_length=8, blank=True, default='') #delete
     payment_company = models.CharField(
-        max_length=64, blank=True, default='')
+        max_length=64, blank=True, default='') #delete
     payment_postcode = models.CharField(
-        max_length=10, blank=True, default='')
+        max_length=10, blank=True, default='') #delete
     payment_region = models.CharField(
-        max_length=32, blank=True, default='')
+        max_length=32, blank=True, default='') #delete
     payment_location = models.CharField(
-        max_length=32, blank=True, default='')
+        max_length=32, blank=True, default='') #delete
     payment_address_1 = models.CharField(
-        max_length=128, blank=True, default='')
+        max_length=128, blank=True, default='') #delete
     payment_address_2 = models.CharField(
-        max_length=128, blank=True, default='')
+        max_length=128, blank=True, default='') #delete
     payment_method = models.CharField(
         max_length=32, blank=True, default='')
     payment_status = models.CharField(
-        max_length=16, blank=True, default='')
+        max_length=16, blank=True, default='') #delete
     payment_remark = models.TextField(
         blank=True, default='')
     paid_at = models.DateTimeField(
@@ -72,9 +74,9 @@ class PreOrder(models.Model):
     shipping_phone = models.CharField(
         max_length=64, blank=True, default='')
     shipping_gender = models.CharField(
-        max_length=8, blank=True, default='')
+        max_length=8, blank=True, default='') #delete
     shipping_company = models.CharField(
-        max_length=64, blank=True, default='')
+        max_length=64, blank=True, default='') #delete
     shipping_postcode = models.CharField(
         max_length=10, blank=True, default='')
     shipping_region = models.CharField(
@@ -84,30 +86,30 @@ class PreOrder(models.Model):
     shipping_address_1 = models.CharField(
         max_length=128, blank=True, default='')
     shipping_address_2 = models.CharField(
-        max_length=128, blank=True, default='')
+        max_length=128, blank=True, default='') #delete
     pickup_address = models.CharField(
         max_length=128, blank=True, default='')
     shipping_method = models.CharField(
         max_length=32, blank=True, default='')
     shipping_status = models.CharField(
-        max_length=16, blank=True, default='')
+        max_length=16, blank=True, default='') #delete
     shipping_details = models.TextField(
-        blank=True, default='')
+        blank=True, default='')                 #delete
     shipping_remark = models.TextField(
         blank=True, default='')
     shipping_date = models.DateField(
         blank=True, null=True, default=None)
     shipping_time = models.TimeField(
-        blank=True, null=True, default=None)
+        blank=True, null=True, default=None) #delete
     shipping_option = models.CharField(
         max_length=32, blank=True, default='')
     tracking = models.CharField(
-        max_length=32, blank=True, default='')
+        max_length=32, blank=True, default='') #delete
 
     platform = models.CharField(max_length=255, blank=True,
                                 choices=settings.SUPPORTED_PLATFORMS, default='n/a')
     platform_id = models.IntegerField(blank=True, null=True, default=None)
-    type = models.CharField(max_length=255, null=True, blank=True)
+    type = models.CharField(max_length=255, null=True, blank=True) #delete
     status = models.CharField(max_length=255, null=True, blank=True, default='review')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -127,6 +129,7 @@ class PreOrder(models.Model):
 
     buyer = models.ForeignKey(
         User, null=True, default=None, blank=True, on_delete=models.SET_NULL, related_name='pre_orders')
+
 
 
 class PreOrderSerializer(serializers.ModelSerializer):

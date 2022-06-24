@@ -290,7 +290,7 @@ WEB_SERVER_URL = "https://v1login.liveshowseller.com"
 # WEB_SERVER_URL = "https://plusone.sociallab.ph/lss/public"
 
 # SHOPPING_CART_URL = f"{WEB_SERVER_URL}/buyer/login_to_cart"
-SHOPPING_CART_URL = f"{GCP_API_LOADBALANCER_URL}/buyer/login/enter"
+SHOPPING_CART_URL = f"{GCP_API_LOADBALANCER_URL}/buyer/cart"
 
 SUPPORTED_PLATFORMS = [
     ("n/a", "No specific platform"),
@@ -474,3 +474,7 @@ DJANGO_VITE_ASSETS_PATH = os.path.join(BASE_DIR.parent,"lss_vue_enigma/static")
 DJANGO_VITE_MANIFEST_PATH = os.path.join(BASE_DIR.parent,"lss_vue_enigma/static/manifest.json")
 # DJANGO_VITE_STATIC_URL_PREFIX = 'test'
 DJANGO_VITE_DEV_MODE = DEBUG
+
+
+#Recaptcha V2
+RECAPTCHA_SECRET_KEY='6LcPbpMgAAAAAIsKGaFVGusS14ok5L8XwOizmYBG'

@@ -54,11 +54,11 @@ class RestApiJsonCaller:
 
     def __request_template(self, request_func, *args, **kwargs):
         try:
-            response = request_func(url=self.__get_url(), *args, **kwargs)
+            response = request_func(url=self._get_url(), *args, **kwargs)
             self._process_response(response)
             return self._format_response(response)
         except Exception as e:
             return 0, {'RestApiJsonCaller error': e}
 
-    def __get_url(self):
+    def _get_url(self):
         return f"{self.domain_url}/{f'{self.path}' if self.path else ''}"

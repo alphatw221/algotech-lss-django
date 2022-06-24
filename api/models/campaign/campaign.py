@@ -147,7 +147,7 @@ class CampaignSerializerRetreive(CampaignSerializer):
     youtube_channel = YoutubeChannelSerializer(read_only=True)
     instagram_profile = InstagramProfileSerializer(read_only=True)
 
-class CampaignSerializerForBuyerRetreive(CampaignSerializer):
+class CampaignSerializerWithUserSubscription(CampaignSerializer):
 
     user_subscription = UserSubscriptionSerializer(read_only=True)
     facebook_page = FacebookPageSerializer(read_only=True)
