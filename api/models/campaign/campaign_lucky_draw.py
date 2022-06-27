@@ -9,44 +9,28 @@ class CampaignLuckyDraw(models.Model):
     class Meta:
         db_table = 'api_campaign_lucky_draw'
 
-    SOURCE_TYPE_CHOICES = [
-        ('n/a', 'Not available'),
-        ('cart_product', 'Cart Product'),
-        ('campaign_comment', 'Campaign Comment'),
-        ('campaign_likes', 'Campaign Likes'),
-    ]
-
-    CONDITION_TYPE_CHOICES = [
-        ('n/a', 'Not available'),
-        ('lucky_draw_cart_products', 'Draw from Cart Products'),
-        ('lucky_draw_campaign_comments', 'Draw from Campaign Comments'),
-        ('lucky_draw_campaign_likes', 'Draw from Campaign Likes'),
-
-    ]
-
     campaign = models.ForeignKey(
         Campaign, blank=True, null=True, on_delete=models.CASCADE, related_name='campaign_lucky_draws')
-    prize_campaign_product = models.ForeignKey(
+    campaign_product = models.ForeignKey(
         CampaignProduct, blank=True, null=True, on_delete=models.SET_NULL, related_name='campaign_lucky_draws')
 
-    source_id = models.IntegerField(null=True, blank=True, default=None)
-    source_type = models.CharField(max_length=255, blank=True,
-                                   choices=SOURCE_TYPE_CHOICES, default='n/a')
-    condition = models.CharField(max_length=255, null=True, blank=True)
-    condition_type = models.CharField(max_length=255, blank=True,
-                                      choices=CONDITION_TYPE_CHOICES, default='n/a')
+
     num_of_winner = models.IntegerField(null=True, blank=True, default=1)
-    candidate_list = models.JSONField(default=list, null=True, blank=True)
     winner_list = models.JSONField(default=list, null=True, blank=True)
 
-    type = models.CharField(max_length=255, null=True, blank=True)
-    status = models.CharField(max_length=255, null=True, blank=True)
+    type = models.CharField(max_length=255, null=True, blank=True)    #'like, perchase, product, keyword'
+    status = models.CharField(max_length=255, null=True, blank=True)    #'initiate, finish'
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     meta = models.JSONField(default=dict, null=True, blank=True)
 
-
+    repeatable = models.BooleanField(default=True ,null=False, blank=False)
+    animation = models.CharField(max_length=255, null=True, blank=True)
+    spin_time = models.IntegerField(null=False, blank=False, default=2)
+    comment = models.CharField(max_length=255, null=True, blank=True)
+    title = models.CharField(max_length=255, null=True, blank=True, default='')
+    
 class CampaignLuckyDrawSerializer(serializers.ModelSerializer):
     class Meta:
         model = CampaignLuckyDraw

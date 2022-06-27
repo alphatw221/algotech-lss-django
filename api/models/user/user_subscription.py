@@ -69,7 +69,8 @@ class UserSubscription(models.Model):
     product_limit=models.IntegerField(blank=False, null=False, default=10)
     order_limit=models.IntegerField(blank=False, null=False, default=100)
 
-    
+    logos = models.JSONField(null=True, blank=True, default=[])
+    animations = models.JSONField(null=True, blank=True, default=[])
 
     def __str__(self) -> str:
         return str(self.name)
