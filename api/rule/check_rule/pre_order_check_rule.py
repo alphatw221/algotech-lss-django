@@ -111,20 +111,12 @@ class PreOrderCheckRule():
 
         api_user = kwargs.get('api_user')
         pre_order = kwargs.get('pre_order')
-        if not pre_order:       #temp only
-            campaign = kwargs.get('campaign')
-            if api_user and api_user.type=="user":
-                return
-            if not campaign.data.get('meta',{}).get('allow_checkout', True):
-                raise PreOrderErrors.PreOrderException('Sorry, you are unable to make that purchase right now.')
+        campaign = pre_order.campaign
 
-        else:
-            campaign = pre_order.campaign
-
-            if api_user and api_user.type=="user":
-                return
-            if not campaign.meta.get('allow_checkout', 1):
-                raise PreOrderErrors.PreOrderException('Sorry, you are unable to make that purchase right now.')
+        if api_user and api_user.type=="user":
+            return
+        if not campaign.meta.get('allow_checkout', 1):
+            raise PreOrderErrors.PreOrderException('Sorry, you are unable to make that purchase right now.')
 
     @staticmethod
     def campaign_product_type(**kwargs):

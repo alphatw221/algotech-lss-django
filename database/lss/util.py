@@ -17,3 +17,6 @@ def get_incremented_filed(collection_name, field_name, session=None):
             db['__schema__'].update_one({"name":collection_name},{"$inc":{"auto.seq":1}}, session=session)
             
     return int(doc['auto']['seq']+1)
+
+def start_session():
+    return client.start_session()

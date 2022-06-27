@@ -9,3 +9,16 @@ def get_oid_by_id(id):
 class PreOrder(Collection):
 
     _collection = db.api_pre_order
+    collection_name='api_pre_order'
+
+    def delete_product(self, campaign_product, sync=True, session=None, **kwargs):
+        db.api_pre_order.update_one(
+            {'id': self.id},
+            {
+                "$unset":{
+                    f"products.{str(campaign_product.id)}": "",
+                },
+                "$set": kwargs,
+            },session=session)
+        if sync:
+            self.__sync(session=session)

@@ -4,11 +4,13 @@ from inspect import Parameter
 import pprint
 from grpc import server
 import requests
+from api.models.campaign import campaign_product
 
 
 from api.models.campaign.campaign import Campaign
 from api.models.campaign.campaign_product import CampaignProduct
 from api.models.cart.cart_product import CartProduct
+from api.models.order import pre_order
 from api.models.user.user import User
 from api.models.user.user_subscription import UserSubscription
 from api.utils.orm import campaign_comment, cart_product
@@ -48,7 +50,7 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.test_set_password()
+        self.test_lucky_draw()
 
     def modify_database(self):
         from api.models.user.user_subscription import UserSubscription
@@ -363,3 +365,30 @@ class Command(BaseCommand):
         async_to_sync(channel_layer.group_send)("campaign_443", {"type": "comment_data","data":{"message":"testmessage"}})
         # async_to_sync(channel_layer.group_send)("campaign_440", {"type": "order_data","data":{"message":"testmessage"}})
         # async_to_sync(channel_layer.group_send)("campaign_440", {"type": "product_data","data":{"message":"testmessage"}})
+
+    def test_lucky_draw(self):
+
+        import lib
+        from api import models
+
+        campaign = models.campaign.campaign.Campaign.objects.get(id=510)
+        candidate_set = lib.helper.lucky_draw.KeywordCandidateSetGenerator.get_candidate_set(campaign,'cart',repeatable=True)
+        campaign_product = models.campaign.campaign_product.CampaignProduct.objects.get(id=7819)
+
+        print(candidate_set)
+
+        winner_list = lib.helper.lucky_draw.LuckyDraw.draw_from_candidate(campaign, campaign_product,  candidate_set=candidate_set)
+
+        print(winner_list)
+
+    def test_order_helper(self):
+
+        import lib
+        from api import models
+
+
+        # lib.helper.order_helper.PreOrderHelper.add_product(None, pre_order_id=975, campaign_product_id=7817,qty=1)
+        # lib.helper.order_helper.PreOrderHelper.update_product(None, 975, 253601, 2)
+        # lib.helper.order_helper.PreOrderHelper.delete_product(None, 975, 253601)
+        # lib.helper.order_helper.PreOrderHelper.checkout(None, campaign_id=510, pre_order_id=975)
+        

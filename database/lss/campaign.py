@@ -7,3 +7,4 @@ __collection = db.api_campaign
 class Campaign(Collection):
 
     _collection = db.api_campaign
+    collection_name='api_campaign'
