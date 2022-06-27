@@ -83,8 +83,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
         #     'api_user': api_user, 'user_subscription': user_subscription
         # })
 
-        title, period, delivery_info, payments, notes = lib.util.getter.getdata(request, ('campaignTitle', 'campaignPeriod', 'deliverySettings', 'paymentSettings', 'notes'), required=False)
-        notes = json.loads(notes)
+        title, period, delivery_info, payments = lib.util.getter.getdata(request, ('campaignTitle', 'campaignPeriod', 'deliverySettings', 'paymentSettings'), required=False)
         campaing_json = { 
             'title': json.loads(title), 
             'start_at': json.loads(period).get('start', None),
@@ -99,24 +98,22 @@ class CampaignViewSet(viewsets.ModelViewSet):
         campaign = serializer.save()
 
         meta_logistic = json.loads(delivery_info)
-        meta_logistic['delivery_note'] = notes.get('delivery_note', '')
         meta_payment = {}
         for name, payment in json.loads(payments).items():
-            if name == 'directPayment':
+            if name == 'direct_payment':
                 for key, value in payment.items():
                     if key == 'accounts':
                         for account in value:
-                            account.pop('previewImage', None)
+                            del account['previewImage']
                             account_number = account.get('number', '')
                             account_image, = lib.util.getter.getdata(request, (account_number, ), required=False)
                             if account_image:
                                 image_path = default_storage.save(f'/campaign/{campaign.id}/payment/direct_payment/accounts/{account_number}/{account_image.name}', ContentFile(account_image.read()))
                                 account['image'] = image_path
+                    
                 meta_payment['direct_payment'] = payment
             else:
                 meta_payment[name] = payment
-        meta_payment['special_note'] = notes.get('special_note', '')
-        meta_payment['confirmation_note'] = notes.get('confirmation_note', '')
 
         campaing_json['meta_payment'] = meta_payment
         campaing_json['meta_logistic'] = meta_logistic
