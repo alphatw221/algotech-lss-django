@@ -16,7 +16,7 @@ from api.models.instagram.instagram_profile import InstagramProfile, InstagramPr
 from api.models.user.user import User,UserSubscriptionSerializerDealerList
 from api.models.user.user_subscription import UserSubscription, UserSubscriptionSerializer, UserSubscriptionSerializerForDealerRetrieve, UserSubscriptionSerializerMeta, UserSubscriptionSerializerSimplify, UserSubscriptionSerializerCreate
 from api.models.facebook.facebook_page import FacebookPage, FacebookPageSerializer
-from api.models.youtube.youtube_channel import YoutubeChannel, YoutubeChannelSerializer
+from api.models.youtube.youtube_channel import YoutubeChannel, YoutubeChannelInfoSerializer, YoutubeChannelSerializer
 from api.utils.common.common import getdata
 from api.utils.error_handle.error.api_error import ApiCallerError
 from api.utils.common.verify import Verify, getparams
@@ -422,7 +422,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['POST'], url_path=r'bind_youtube_channels', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def bind_youtube_channels_frontend(self, request):
-        google_user_code, redirect_uri = getdata(request,("code", "redirect_uri"))
+        google_user_code, = getdata(request,("code",))
         api_user = Verify.get_seller_user(request)    
         api_user_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
         print(request.META["HTTP_ORIGIN"])
@@ -483,8 +483,9 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
             if youtube_channel not in api_user_user_subscription.youtube_channels.all():
                 api_user_user_subscription.youtube_channels.add(youtube_channel)
-
-        return Response({}, status=status.HTTP_200_OK)
+        qs = api_user_user_subscription.youtube_channels.all()
+        print(qs)
+        return Response(YoutubeChannelInfoSerializer(qs, many=True).data, status=status.HTTP_200_OK)
     
     
     @action(detail=False, methods=['GET'], url_path=r'v2/bind_youtube_channels_callback', permission_classes=())
