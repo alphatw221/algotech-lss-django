@@ -1,8 +1,8 @@
 from ._fb_api_caller import FacebookApiCaller
 
-def get_post_likes(page_token: str, post_id: str, after: str = None):
+def get_post_likes(page_token: str, post_id: str, after: str = None, limit=100):
     params = {
-        'limit': 100,
+        'limit': limit,
         'fields' :'id,name,pic_large'
     }
     if after:

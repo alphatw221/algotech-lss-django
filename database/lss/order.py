@@ -9,3 +9,4 @@ def get_oid_by_id(id):
 class Order(Collection):
 
     _collection = db.api_order
+    collection_name='api_order'

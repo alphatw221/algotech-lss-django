@@ -7,7 +7,7 @@ __collection = db.api_user_subscription
 class UserSubscription(Collection):
 
     _collection = db.api_user_subscription
-
+    collection_name='api_user_subscription'
 
 from pprint import pprint
 def get_user_subscription_campaign_count():
