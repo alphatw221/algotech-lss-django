@@ -15,13 +15,13 @@ def create_campaign_lucky_draw(campaign: Campaign,
     try:
         return CampaignLuckyDraw.objects.create(
             campaign=campaign,
-            prize_campaign_product=prize_campaign_product,
-            source_id=source_id,
-            source_type=source_type,
-            condition=condition,
-            condition_type=condition_type,
+            campaign_product=prize_campaign_product,
+            # source_id=source_id,
+            # source_type=source_type,
+            # condition=condition,
+            # condition_type=condition_type,
             num_of_winner=num_of_winner,
-            candidate_list=candidate_list,
+            # candidate_list=candidate_list,
             winner_list=winner_list)
         
     except Exception:
