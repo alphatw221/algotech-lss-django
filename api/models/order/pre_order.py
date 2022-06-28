@@ -105,38 +105,21 @@ class PreOrderSerializerUpdatePaymentShipping(serializers.ModelSerializer):
                   "shipping_last_name",
                   "shipping_email",
                   "shipping_phone",
-                  "shipping_gender",
-                  "shipping_company",
                   "shipping_postcode",
                   "shipping_region",
                   "shipping_location",
                   "shipping_address_1",
-                  "shipping_address_2",
                   "shipping_method",
-                  "shipping_status",
-                  "shipping_details",
                   "shipping_remark",
                   "shipping_date",
-                  "shipping_time",
                   "shipping_cost",
                   "total",
-                  "payment_first_name",
-                  "payment_last_name",
-                  "payment_gender",
-                  "payment_company",
-                  "payment_postcode",
-                  "payment_region",
-                  "payment_location",
-                  "payment_address_1",
-                  "payment_address_2",
                   "payment_method",
-                  "payment_status",
                   "payment_remark",
-                  "shipping_option",
-                  "pickup_address",
                   "remark",
-                  "meta",
-                ]
+                  "paid_at",
+                  "status",
+                  "meta" ]
 
 
 class PreOrderSerializerUpdateDelivery(serializers.ModelSerializer):
@@ -147,19 +130,13 @@ class PreOrderSerializerUpdateDelivery(serializers.ModelSerializer):
                   "shipping_last_name",
                   "shipping_email",
                   "shipping_phone",
-                  "shipping_gender",
-                  "shipping_company",
                   "shipping_postcode",
                   "shipping_region",
                   "shipping_location",
                   "shipping_address_1",
-                  "shipping_address_2",
                   "shipping_method",
-                  "shipping_status",
-                  "shipping_details",
                   "shipping_remark",
                   "shipping_date",
-                  "shipping_time",
                   "shipping_option",
                   "pickup_address",
                   "remark",
@@ -169,15 +146,14 @@ class PreOrderSerializerUpdatePickup(serializers.ModelSerializer):
 
     class Meta:
         model = PreOrder
-        fields = ["shipping_first_name",
-                  "shipping_last_name",
-                  "shipping_email",
-                  "shipping_phone",
-                  "shipping_gender",
-                  "shipping_company",
-                    "pickup_address",
-                  "remark",
-                ]
+        fields = [
+                "shipping_first_name",
+                "shipping_last_name",
+                "shipping_email",
+                "shipping_phone",
+                "pickup_address",
+                "remark",
+            ]
 
 
 class PreOrderAdmin(admin.ModelAdmin):

@@ -11,23 +11,12 @@ from api.models.youtube.youtube_channel import (YoutubeChannel,
 from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
-from django.conf import settings
-
+import business_policy
 
 class UserSubscription(models.Model):
 
-    TYPE_CHOICES = [
-        ('trial', 'Trial'),
-        ('lite', 'Lite'),
-        ('standard', 'Standard'),
-        ('premium', 'Premium'),
-        ('dealer','Dealer')
-    ]
-
-    
     class Meta:
         db_table = 'api_user_subscription'
-
 
     facebook_pages = models.ManyToManyField(
         FacebookPage, related_name='user_subscriptions')
@@ -40,7 +29,8 @@ class UserSubscription(models.Model):
     description = models.TextField(null=True, blank=True, default=None)
     remark = models.TextField(null=True, blank=True, default=None)
 
-    type = models.CharField(max_length=255, null=True, blank=True, choices=TYPE_CHOICES, default='trial')
+    type = models.CharField(max_length=255, null=True, blank=True, 
+        choices=business_policy.subscription.TYPE_CHOICES, default=business_policy.subscription.TYPE_TRIAL)
     status = models.CharField(max_length=255, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -50,13 +40,16 @@ class UserSubscription(models.Model):
     meta_logistic = models.JSONField(null=True, blank=True, default=dict)
     meta_country = models.JSONField(null=True, blank=True, default=dict)
     buyer_lang = models.CharField(max_length=255, blank=True,
-                            choices=settings.LANGUAGES_CHOICES, default='en')
+                            choices=business_policy.subscription.LANGUAGE_CHOICES, default=business_policy.subscription.LANGUAGE_ENGLICH)
     lang = models.CharField(max_length=255, blank=True,
-                            choices=settings.LANGUAGES_CHOICES, default='en')
+                            choices=business_policy.subscription.LANGUAGE_CHOICES, default=business_policy.subscription.LANGUAGE_ENGLICH)
     country = models.CharField(max_length=255, blank=True, default='SG', null=True)
 
-    decimal_places = models.IntegerField(default=2, blank=False, null=False)
-    currency =   models.CharField(max_length=255, null=True, blank=True, default='SGD')
+    decimal_places = models.IntegerField( blank=False, null=False, 
+        choices=business_policy.subscription.DECIMAL_CHOICES, default=business_policy.subscription.DECIMAL_001)
+    currency =   models.CharField(max_length=255, null=True, blank=True,
+        choices=business_policy.subscription.CURRENCY_CHOICES, default=business_policy.subscription.CURRENCY_SGD)
+
     user_plan = models.JSONField(null=True, blank=True, default=dict)
     purchase_price = models.FloatField(null=True, blank=True, default=0)
 
@@ -201,7 +194,11 @@ class UserSubscriptionAdmin(admin.ModelAdmin):
     search_fields = [field.name for field in UserSubscription._meta.fields]
 
 
-
+class UserSubscriptionSerializerLocalization(serializers.ModelSerializer):
+    class Meta:
+        model = UserSubscription
+        fields = ['currency','lang','buyer_lang','decimal_places']
+        read_only_fields = ['created_at', 'modified_at']
 
 
 
