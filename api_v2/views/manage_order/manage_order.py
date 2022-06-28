@@ -26,6 +26,7 @@ class DashboardViewSet(viewsets.ModelViewSet):
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription,campaign_id)
         merge_list = get_campaign_merge_order_list_v2(campaign.id, search,f_payment,f_delivery,f_platform)
         
+        count = len(merge_list)
         page,page_size = int(page),int(page_size)
         skip = (page-1)*page_size
         if len(merge_list) >= page_size:
@@ -33,7 +34,7 @@ class DashboardViewSet(viewsets.ModelViewSet):
         merge_list_str = dumps(merge_list)
         merge_list_json = loads(merge_list_str)
 
-        return Response({'count':len(merge_list),'data':merge_list_json}, status=status.HTTP_200_OK)
+        return Response({'count':count,'data':merge_list_json}, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['GET'], url_path=r'edit_allow_checkout')
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
