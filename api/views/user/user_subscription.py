@@ -12,7 +12,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework import status
 from api.models.facebook.facebook_page import FacebookPage, FacebookPageSerializer
-from api.models.youtube.youtube_channel import YoutubeChannel, YoutubeChannelSerializer
+from api.models.youtube.youtube_channel import YoutubeChannel, YoutubeChannelInfoSerializer, YoutubeChannelSerializer
 from datetime import datetime, timedelta
 from api.utils.common.common import getdata
 from api.utils.error_handle.error.api_error import ApiCallerError
@@ -449,7 +449,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
                     "grant_type": "authorization_code"
                 }
             )
-
+        
 
         if not response.status_code / 100 == 2:
             print(response.json())
@@ -496,7 +496,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             if youtube_channel not in api_user_user_subscription.youtube_channels.all():
                 api_user_user_subscription.youtube_channels.add(youtube_channel)
 
-        return Response({}, status=status.HTTP_200_OK)
+        return Response(YoutubeChannelSerializer(api_user_user_subscription.youtube_channels.all(), many=True).data, status=status.HTTP_200_OK)
     
     
     @action(detail=False, methods=['GET'], url_path=r'v2/bind_youtube_channels_callback', permission_classes=())
@@ -620,7 +620,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             if instagram_profile not in api_user_user_subscription.instagram_profiles.all():
                 api_user_user_subscription.instagram_profiles.add(instagram_profile)
 
-        return Response(FacebookPageSerializer(api_user_user_subscription.facebook_pages.all(),many=True).data, status=status.HTTP_200_OK)
+        return Response(InstagramProfileSerializer(api_user_user_subscription.instagram_profiles.all(),many=True).data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET'], url_path=r'dealer_search_list', permission_classes=(IsAuthenticated,))
     @api_error_handler
@@ -654,47 +654,61 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
         return Response(UserSubscriptionSerializerForDealerRetrieve(user_subscription).data, status=status.HTTP_200_OK)
     
-    @action(detail=False, methods=['PUT'], url_path=r'unsubscribe_facebook_page', permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['PUT'], url_path=r'unbind_facebook_page', permission_classes=(IsAuthenticated,))
     @api_error_handler
-    def unsubscribe_facebook_page(self, request):
-        facebook_page_id, = getdata(request,("facebook_page_id",))
-        api_user = Verify.get_seller_user(request)       
+    def unbind_facebook_page(self, request):
+        facebook_page_id,= getdata(request,("id",))
+        api_user = Verify.get_seller_user(request)
+        platform = Verify.get_platform(api_user, "facebook", facebook_page_id)
         api_user_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
         
         try:
-            facebook_page = api_user_user_subscription.facebook_pages.filter(id=facebook_page_id)
-            facebook_page.delete()
+            api_user_user_subscription.facebook_pages.remove(platform)
         except:
             raise ApiCallerError("no facebook page found")
-        return Response({"delete": True}, status=status.HTTP_200_OK)
+        
+        if not platform.user_subscriptions.all().exists():
+            platform.delete()
+        
+        return Response(FacebookPageSerializer(api_user_user_subscription.facebook_pages.all(),many=True).data, status=status.HTTP_200_OK)
     
-    @action(detail=False, methods=['PUT'], url_path=r'unsubscribe_youtube_channel', permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['PUT'], url_path=r'unbind_instagram_profile', permission_classes=(IsAuthenticated,))
     @api_error_handler
-    def unsubscribe_youtube_channel(self, request):
-        youtube_channel_id, = getdata(request,("youtube_channel_id",))
-        api_user = Verify.get_seller_user(request)       
+    def unbind_instagram_profile(self, request):
+        instagram_profile_id, = getdata(request,("id",))
+        api_user = Verify.get_seller_user(request)
+        platform = Verify.get_platform(api_user, "instagram", instagram_profile_id)
         api_user_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
         
         try:
-            youtube_channel = api_user_user_subscription.youtube_channels.filter(id=youtube_channel_id)
-            youtube_channel.delete()
+            api_user_user_subscription.instagram_profiles.remove(platform)
         except:
-            raise ApiCallerError("no facebook page found")
-        return Response({"delete": True}, status=status.HTTP_200_OK)
+            raise ApiCallerError("no Instagram profiles found")
+        
+        if not platform.user_subscriptions.all().exists():
+            platform.delete()
+
+        return Response(InstagramProfileSerializer(api_user_user_subscription.instagram_profiles.all(),many=True).data, status=status.HTTP_200_OK)
     
-    @action(detail=False, methods=['PUT'], url_path=r'unsubscribe_instagram_profile', permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['PUT'], url_path=r'unbind_youtube_channel', permission_classes=(IsAuthenticated,))
     @api_error_handler
-    def unsubscribe_instagram_profile(self, request):
-        instagram_profile_id, = getdata(request,("instagram_profile_id",))
-        api_user = Verify.get_seller_user(request)       
+    def unbind_youtube_channel(self, request):
+        youtube_channel_id, = getdata(request,("id",))
+        api_user = Verify.get_seller_user(request)
+        platform = Verify.get_platform(api_user, "youtube", youtube_channel_id)    
         api_user_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
         
         try:
-            instagram_profile = api_user_user_subscription.instagram_profiles.filter(id=instagram_profile_id)
-            instagram_profile.delete()
+            api_user_user_subscription.youtube_channels.remove(platform)
         except:
-            raise ApiCallerError("no facebook page found")
-        return Response({"delete": True}, status=status.HTTP_200_OK)
+            raise ApiCallerError("no YouTube channels found")
+        
+        if not platform.user_subscriptions.all().exists():
+            platform.delete()
+            
+        return Response(YoutubeChannelSerializer(api_user_user_subscription.youtube_channels.all(),many=True).data, status=status.HTTP_200_OK)
+    
+   
     
     @action(detail=False, methods=['PUT'], url_path=r'update_currency', permission_classes=(IsAuthenticated,))
     @api_error_handler
