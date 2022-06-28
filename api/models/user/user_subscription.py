@@ -64,8 +64,6 @@ class UserSubscription(models.Model):
     product_limit=models.IntegerField(blank=False, null=False, default=10)
     order_limit=models.IntegerField(blank=False, null=False, default=100)
 
-    logos = models.JSONField(null=True, blank=True, default=[])
-    animations = models.JSONField(null=True, blank=True, default=[])
 
     def __str__(self) -> str:
         return str(self.name)
@@ -146,6 +144,12 @@ class UserSubscriptionSerializerUpgrade(serializers.ModelSerializer):
         ]
         read_only_fields = ['created_at', 'modified_at']
 
+class UserSubscriptionSerializerUpdate(serializers.ModelSerializer):
+    class Meta:
+        model = UserSubscription
+        fields = ['currency','lang','buyer_lang','decimal_places']
+
+
 class UserSubscriptionSerializerSimplify(serializers.ModelSerializer):
     class Meta:
         model = UserSubscription
@@ -194,11 +198,6 @@ class UserSubscriptionAdmin(admin.ModelAdmin):
     search_fields = [field.name for field in UserSubscription._meta.fields]
 
 
-class UserSubscriptionSerializerLocalization(serializers.ModelSerializer):
-    class Meta:
-        model = UserSubscription
-        fields = ['currency','lang','buyer_lang','decimal_places']
-        read_only_fields = ['created_at', 'modified_at']
 
 
 

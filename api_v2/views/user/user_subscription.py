@@ -11,6 +11,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser, JSONParser, FormParser
+from uritemplate import partial
 
 
 from api import rule
@@ -32,19 +33,19 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
     queryset = models.user.user_subscription.UserSubscription.objects.all().order_by('id')
     pagination_class = UserSubscriptionPagination
 
-    @action(detail=False, methods=['POST'], url_path=r'localization', permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['PUT'], url_path=r'seller/update', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def update_user_subscription(self, request):
-        currency, seller_language, buyer_language, decimal_places = lib.util.getter.getdata(request,('currency', 'seller_language', 'buyer_language', 'decimal_places'), required=True)
+    def seller_update_subscription(self, request):
+
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
 
-        user_subscription.currency = currency
-        user_subscription.lang = seller_language
-        user_subscription.buyer_lang = buyer_language
-        user_subscription.decimal_places = decimal_places
-        user_subscription.save()
-        
+        serializer = models.user.user_subscription.UserSubscriptionSerializerUpdate(user_subscription,data=request.data, partial=True)
+
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
+
         return Response(models.user.user.UserSerializerAccountInfo(api_user).data, status=status.HTTP_200_OK)
     # @action(detail=False, methods=['POST'], url_path=r'admin_create_user_subscription', permission_classes=(IsAdminUser,))
     # @api_error_handler
