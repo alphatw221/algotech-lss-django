@@ -142,6 +142,17 @@ class CampaignSerializerEdit(serializers.ModelSerializer):
     meta_logistic = serializers.JSONField(default=dict)
 
 
+class CampaignSerializerUpdate(serializers.ModelSerializer):
+    class Meta:
+        model = Campaign
+        fields = '__all__'
+        read_only_fields = ['created_at', 'modified_at']
+
+    meta = serializers.JSONField(default={"allow_checkout": 1})
+    meta_payment = serializers.JSONField(default=dict)
+    meta_logistic = serializers.JSONField(default=dict)
+
+
 class CampaignSerializerRetreive(CampaignSerializer):
     facebook_page = FacebookPageSerializer(read_only=True)
     youtube_channel = YoutubeChannelSerializer(read_only=True)
