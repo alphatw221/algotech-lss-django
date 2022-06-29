@@ -37,6 +37,8 @@ import requests, stripe, pytz, business_policy, lib
 from django.conf import settings
 from api import rule
 
+from business_policy.plan_limitation.live_show_seller import *
+
 
 
 class UserSubscriptionPagination(PageNumberPagination):
@@ -385,7 +387,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['POST'], url_path=r'v2/bind_facebook_pages', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def bind_user_facebook_pages(self, request):
-
+        
         token, = getdata(request,('accessToken',), required=True)
 
         api_user = Verify.get_seller_user(request)
@@ -883,3 +885,30 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             "Receipt": paymentIntent.charges.get('data')[0].get('receipt_url')
         }
         return Response(ret, status=status.HTTP_200_OK)
+    
+    
+    @action(detail=False, methods=['get'], url_path=r'check_activated_platform')
+    @api_error_handler
+    def check_activated_platform(self, request):
+        def get_current_connected_socail_media(user_subscription):
+            platform = []
+            if user_subscription.facebook_pages.all().exists():
+                platform.append("facebook")
+            if user_subscription.instagram_profiles.all().exists():
+                platform.append("instagram")
+            if user_subscription.youtube_channels.all().exists():
+                platform.append("youtube")
+            return platform
+        api_user = Verify.get_seller_user(request)    
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        user_plan = user_subscription.user_plan
+        activated_platform = user_plan.get("activated_platform", [])
+        type = user_subscription.type
+
+        social_meida_connect_limit = globals()[type]['social_meida_connect']
+        current_connected_social_media = get_current_connected_socail_media(user_subscription)
+        if social_meida_connect_limit == len(current_connected_social_media):
+            return Response({"activated_platform": current_connected_social_media}, status=status.HTTP_200_OK)
+        return Response({"activated_platform": activated_platform}, status=status.HTTP_200_OK)
+    
+    

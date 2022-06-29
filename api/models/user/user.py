@@ -34,11 +34,11 @@ class User(models.Model):
     remark = models.TextField(null=True, blank=True, default=None)
     email = models.CharField(max_length=255, null=True, blank=True)
     phone = models.CharField(max_length=255, null=True, blank=True)
-    image = models.CharField(max_length=512, null=True, blank=True)
-    ip = models.CharField(max_length=255, null=True, blank=True)
+    image = models.CharField(max_length=512, null=True, blank=True) 
+    ip = models.CharField(max_length=255, null=True, blank=True) #delete
     region = models.CharField(max_length=255, null=True, blank=True)
     timezone = models.CharField(
-        max_length=255, null=True, blank=True, default='Asia/Singapore')
+        max_length=255, null=True, blank=True, default='Asia/Singapore')  #delete
 
     type = models.CharField(max_length=255, null=True,
                             blank=True, choices=TYPE_CHOICES, default='customer')

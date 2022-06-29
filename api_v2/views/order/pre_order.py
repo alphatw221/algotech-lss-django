@@ -57,6 +57,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['PUT'], url_path=r'(?P<pre_order_oid>[^/.]+)/guest/delivery', permission_classes=(), authentication_classes=[])
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    @lib.error_handle.error_handler.order_operation_error_handler.order_operation_error_handler
     def guest_update_delivery_info(self, request, pre_order_oid):
         
         shipping_data, = \
@@ -172,6 +173,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['PUT'], url_path=r'(?P<pre_order_oid>[^/.]+)/buyer/delivery', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    @lib.error_handle.error_handler.order_operation_error_handler.order_operation_error_handler
     def buyer_update_delivery_info(self, request, pre_order_oid):
 
         api_user = lib.util.verify.Verify.get_customer_user(request)

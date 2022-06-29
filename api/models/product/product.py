@@ -6,13 +6,16 @@ from djongo import models
 from rest_framework import serializers
 
 
+TYPE_PRODUCT='product'
+TYPE_LUCY_DRAW='lucky_draw'
+
 class Product(models.Model):
     STATUS_CHOICES = [
         ('enabled', 'Enabled'),
         ('disabled', 'Disabled'),
         ('archived', 'Archived'),
     ]
-
+    
     user_subscription = models.ForeignKey(
         UserSubscription, null=True, on_delete=models.SET_NULL, related_name='products')
     created_by = models.ForeignKey(
