@@ -240,7 +240,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             data, = lib.util.getter.getdata(request, ('data',), required=False)
             data = json.loads(data)
 
-            for account in data.get('accounts'):
+            for account in data.get('v2_accounts'):
                 if image:=request.data.get('_'+account.get('name')):
                     image_path = default_storage.save(
                         f'/{user_subscription.id}/payment/direct_payment/{image.name}', ContentFile(image.read()))
