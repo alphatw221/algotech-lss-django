@@ -93,8 +93,9 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
             except lib.error_handle.error.api_error.ApiVerifyError as e:
                 errors.append({"product_id": campaign_product_data.get('product_id')})
                 continue
-
-        return Response('success', status=status.HTTP_200_OK)
+        campaign_products = campaign.products.all()
+        serializer = self.get_serializer(campaign_products, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     
 
     @action(detail=False, methods=['GET'], url_path=r'seller/retrieve', permission_classes=(IsAuthenticated,))
