@@ -11,7 +11,6 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser, JSONParser, FormParser
-from uritemplate import partial
 
 
 from api import rule
@@ -19,6 +18,8 @@ from api import models
 from api.models.user import user_subscription
 import lib
 import service
+
+import json
 class UserSubscriptionPagination(PageNumberPagination):
 
     page_query_param = 'page'
@@ -229,44 +230,43 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
     #         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    # @action(detail=False, methods=['GET', 'POST', 'DELETE'], url_path=r'direct_payment', parser_classes=(MultiPartParser, JSONParser, FormParser), permission_classes=(IsAuthenticated,))
-    # @api_error_handler
-    # def update_direct_payment(self, request):
-    #     api_user = Verify.get_seller_user(request)
-    #     user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+    @action(detail=False, methods=['PUT'], url_path=r'payment/(?P<payment_key>[^/.]+)', parser_classes=(MultiPartParser, JSONParser, FormParser), permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def update_payment(self, request, payment_key):
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         
-    #     if request.method == "GET":
-    #         payment_data = user_subscription.meta_payment.get("direct_payment", {})
-    #         return Response(payment_data, status=status.HTTP_200_OK)
-    #     elif request.method == "DELETE":
-    #         meta_payment = user_subscription.meta_payment.copy()
-    #         meta_payment['direct_payment'] = {}
-    #     else: 
-    #         image, data = lib.util.getter.getdata(request, ('image', 'data'), required=False)
-    #         data = json.loads(data)
+        if payment_key == 'direct_payment':
+            data, = lib.util.getter.getdata(request, ('data',), required=False)
+            data = json.loads(data)
 
-    #         if image:
-    #             image_path = default_storage.save(
-    #                 f'/{user_subscription.id}/payment/direct_payment/{image.name}', ContentFile(image.read()))
-    #             data['image'] = image_path
+            for account in data.get('v2_accounts'):
+                if image:=request.data.get('_'+account.get('name')):
+                    image_path = default_storage.save(
+                        f'/{user_subscription.id}/payment/direct_payment/{image.name}', ContentFile(image.read()))
+                    account['image'] = image_path
+        else:
+            data = request.data
 
-    #         meta_payment = user_subscription.meta_payment.copy()
-    #         direct_payment = meta_payment.get('direct_payment', {})
-    #         accounts = direct_payment.get('accounts', [])
+        if type(user_subscription.meta_payment[payment_key])==dict:
+            user_subscription.meta_payment[payment_key].update(data)
+        else:
+            user_subscription.meta_payment[payment_key]=data
 
-    #         accounts.append(data)
-    #         direct_payment['button_title'] = 'Direct Payment'
-    #         direct_payment['enabled'] = True
-    #         direct_payment['accounts'] = accounts
-    #         meta_payment['direct_payment'] = direct_payment
+        user_subscription.save()
 
-    #     serializer = UserSubscriptionSerializerMeta(
-    #         user_subscription, data={"meta_payment": meta_payment}, partial=True)
-    #     if not serializer.is_valid():
-    #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    #     user_subscription = serializer.save()
+        return Response(models.user.user.UserSerializerAccountInfo(api_user).data, status=status.HTTP_200_OK)
 
-    #     return Response(UserSubscriptionSerializerMeta(user_subscription).data, status=status.HTTP_200_OK)
+    @action(detail=False, methods=['PUT'], url_path=r'delivery', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def update_delivery(self, request):
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        
+        user_subscription.meta_logistic.update(request.data)
+        user_subscription.save()
+
+        return Response(models.user.user.UserSerializerAccountInfo(api_user).data, status=status.HTTP_200_OK)
 
     # @action(detail=False, methods=['POST'], url_path=r'update_logistic', permission_classes=(IsAuthenticated,))
     # @api_error_handler
