@@ -104,7 +104,8 @@ class CampaignViewSet(viewsets.ModelViewSet):
                 for key, value in payment.items():
                     if key == 'accounts':
                         for account in value:
-                            del account['previewImage']
+                            if 'previewImage' in account:
+                                del account['previewImage']
                             account_number = account.get('number', '')
                             account_image, = lib.util.getter.getdata(request, (account_number, ), required=False)
                             if account_image:
@@ -148,7 +149,8 @@ class CampaignViewSet(viewsets.ModelViewSet):
                 for key, value in payment.items():
                     if key == 'accounts':
                         for account in value:
-                            del account['previewImage']
+                            if 'previewImage' in account:
+                                del account['previewImage']
                             account_number = account.get('number', '')
                             account_image, = lib.util.getter.getdata(request, (account_number, ), required=False)
                             if account_image:
