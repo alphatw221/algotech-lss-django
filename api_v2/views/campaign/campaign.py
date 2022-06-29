@@ -1,10 +1,12 @@
 import json
+from pyexpat import model
 
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from rest_framework import status, viewsets
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated
+from api.models import user
 from api.models.campaign.campaign import Campaign, CampaignSerializer, CampaignSerializerCreate
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
@@ -13,6 +15,7 @@ from datetime import datetime
 from api.models.facebook.facebook_page import FacebookPageSerializer
 from api.models.instagram.instagram_profile import InstagramProfileSerializer
 from api.models.youtube.youtube_channel import YoutubeChannelSerializer
+from backend import api
 from backend.api.google.user import api_google_post_refresh_token
 
 from backend.pymongo.mongodb import db
@@ -104,7 +107,8 @@ class CampaignViewSet(viewsets.ModelViewSet):
                 for key, value in payment.items():
                     if key == 'accounts':
                         for account in value:
-                            del account['previewImage']
+                            if 'previewImage' in account:
+                                del account['previewImage']
                             account_number = account.get('number', '')
                             account_image, = lib.util.getter.getdata(request, (account_number, ), required=False)
                             if account_image:
@@ -148,7 +152,8 @@ class CampaignViewSet(viewsets.ModelViewSet):
                 for key, value in payment.items():
                     if key == 'accounts':
                         for account in value:
-                            del account['previewImage']
+                            if 'previewImage' in account:
+                                del account['previewImage']
                             account_number = account.get('number', '')
                             account_image, = lib.util.getter.getdata(request, (account_number, ), required=False)
                             if account_image:
@@ -356,3 +361,22 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         return Response({"allow_checkout":campaign.meta['allow_checkout']
                          }, status=status.HTTP_200_OK)
+
+
+    @action(detail=True, methods=['POST'], url_path=r'fast_add_product', permission_classes=(IsAuthenticated,) )
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def fast_add_product(self, request, pk):
+
+        save_to_stock, name, category, code, price, qty = lib.util.getter.getdata(request,("save_to_stock", "name", "category", "code", "price", "qty"), required=True)
+        
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        campaign = Verify.get_campaign_from_user_subscription(user_subscription, pk)
+
+        product=None
+        if save_to_stock:
+            product = models.product.product.Product.objects.create(user_subscription=user_subscription, created_by=api_user, name=name, category=category, code=code, price=price, qty=0, type=models.product.product.TYPE_PRODUCT)
+
+        campaign_product = models.campaign.campaign_product.CampaignProduct.objects.create(campaign=campaign, created_by=api_user, product=product,  status=True, type=models.product.product.TYPE_PRODUCT, name=name, order_code=code, price=float(price), qty_for_sale=int(qty))
+
+        return Response(models.campaign.campaign_product.CampaignProductSerializer(campaign_product).data, status=status.HTTP_200_OK)
