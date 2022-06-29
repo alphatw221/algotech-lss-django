@@ -323,18 +323,11 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
     
     @action(detail=False, methods=['GET', 'PUT'], url_path=r'notes', permission_classes=(IsAuthenticated,))
-<<<<<<< HEAD
-    @api_error_handler
-    def update_note(self, request):
-        api_user = Verify.get_seller_user(request)
-        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
-=======
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def update_note(self, request):
 
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
->>>>>>> 80ee3a952449c38de0a104b070662cb1acbc8ab2
 
         if request.method == "GET":
             noteJson = {
@@ -344,21 +337,6 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             }
             return Response(noteJson, status=status.HTTP_200_OK)
         else:
-<<<<<<< HEAD
-            api_user, delivery_note, special_note, confirmation_note = getparams(request,('delivery_note','special_note', 'confirmation_note'),with_user=True, seller=True)
-
-            meta_logistic = user_subscription.meta_logistic.copy()
-            meta_payment = user_subscription.meta_payment.copy()
-            meta_logistic['delivery_note'] = delivery_note
-            meta_payment['special_note'] = special_note
-            meta_payment['confirmation_note'] = confirmation_note
-
-            user_subscription.meta_logistic = meta_logistic
-            user_subscription.meta_payment = meta_payment
-            user_subscription.save()
-
-            return Response(UserSubscriptionSerializerMeta(user_subscription).data, status=status.HTTP_200_OK)
-=======
             api_user, delivery_note, special_note, confirmation_note = lib.util.getter.getparams(request,('delivery_note','special_note', 'confirmation_note'),with_user=True, seller=True)
 
             user_subscription.meta_logistic['delivery_note'] = delivery_note
@@ -368,7 +346,6 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             user_subscription.save()
 
             return Response(models.user.user_subscription.UserSubscriptionSerializerMeta(user_subscription).data, status=status.HTTP_200_OK)
->>>>>>> 80ee3a952449c38de0a104b070662cb1acbc8ab2
 
     # @action(detail=False, methods=['GET'], url_path=r'admin_search_list', permission_classes=(IsAdminUser,))
     # @api_error_handler
