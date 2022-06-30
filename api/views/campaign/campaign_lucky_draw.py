@@ -74,7 +74,7 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
                     response = get_winner_json(winner_info['winner_list'])
                     for winner in response['winner_list']:
                         json = {}
-                        prize_name = db.api_campaign_product.find_one({'id': winner_info['prize_campaign_product_id']})[
+                        prize_name = db.api_campaign_product.find_one({'id': winner_info['campaign_product_id']})[
                             'name']
                         json['name'] = winner['customer_name']
                         try:

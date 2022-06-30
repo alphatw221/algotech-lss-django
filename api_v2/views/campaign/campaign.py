@@ -1,52 +1,36 @@
-import json
-from pyexpat import model
-
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
+from itsdangerous import Serializer
+
 from rest_framework import status, viewsets
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated
-from api.models import user
-from api.models.campaign.campaign import Campaign, CampaignSerializer, CampaignSerializerCreate
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.decorators import action
+
 from datetime import datetime
-from api.models.facebook.facebook_page import FacebookPageSerializer
-from api.models.instagram.instagram_profile import InstagramProfileSerializer
-from api.models.youtube.youtube_channel import YoutubeChannelSerializer
-from backend import api
-from backend.api.google.user import api_google_post_refresh_token
-
-from backend.pymongo.mongodb import db
-from api.utils.common.verify import Verify
-from api.utils.common.verify import ApiVerifyError
-from api.utils.common.common import getdata,getparams
-from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
-from bson.json_util import loads, dumps
-from api.utils.rule.rule_checker.user_subscription_rule_checker import CreateCampaignRuleChecker
-from backend.api import facebook
-
-from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
-
 from api import models
 import lib
+import json
+import service
 class CampaignPagination(PageNumberPagination):
     page_query_param = 'page'
     page_size_query_param = 'page_size'
     
 class CampaignViewSet(viewsets.ModelViewSet):
-    queryset = Campaign.objects.all().order_by('id')
-    serializer_class = CampaignSerializer
-    filterset_fields = []
+    queryset = models.campaign.campaign.Campaign.objects.all().order_by('id')
+    serializer_class = models.campaign.campaign.CampaignSerializer
     pagination_class = CampaignPagination
 
     @action(detail=False, methods=['GET'], url_path=r'list', permission_classes=(IsAuthenticated,))
-    @api_error_handler
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def list_campaign(self, request):
-        api_user, keyword, campaign_status, order_by, search_column = getparams(request,("keyword", "status", "order_by","searchColumn"), with_user=True, seller=True)
+
+        api_user, keyword, campaign_status, order_by, search_column = \
+            lib.util.getter.getparams(request,("keyword", "status", "order_by","searchColumn"), with_user=True, seller=True)
         
-        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         campaigns = user_subscription.campaigns.filter(id__isnull=False) # Due to problematic dirty data
         if campaign_status == 'history':
             campaigns = campaigns.filter(end_at__lt=datetime.utcnow())
@@ -60,7 +44,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
         
         kwargs = {}
         if (search_column in ["", None]) and (keyword not in [None, ""]):
-            raise ApiVerifyError("search_column field can not be empty when keyword has value")
+            raise lib.error_handle.error.api_error.ApiVerifyError("search_column field can not be empty when keyword has value")
         if (search_column not in ['undefined', '']) and (keyword not in ['undefined', '', None]):
             kwargs = { search_column + '__icontains': keyword }
 
@@ -82,58 +66,77 @@ class CampaignViewSet(viewsets.ModelViewSet):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
 
-        # ret = CreateCampaignRuleChecker.check(**{
-        #     'api_user': api_user, 'user_subscription': user_subscription
-        # })
+        campaignData, = lib.util.getter.getdata(request, ('data',), required=True)
+        campaignData = json.loads(campaignData)
 
-        title, period, delivery_info, payments = lib.util.getter.getdata(request, ('campaignTitle', 'campaignPeriod', 'deliverySettings', 'paymentSettings'), required=False)
-        campaing_json = { 
-            'title': json.loads(title), 
-            'start_at': json.loads(period).get('start', None),
-            'end_at': json.loads(period).get('end', None),
-        }
-        campaing_json['created_by'] = api_user.id
-        campaing_json['user_subscription'] = user_subscription.id
-        
-        serializer = CampaignSerializerCreate(data=campaing_json)
+        serializer = models.campaign.campaign.CampaignSerializerCreate(data=campaignData)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         campaign = serializer.save()
+        campaign.created_by = api_user
+        campaign.user_subscription = user_subscription
 
-        meta_logistic = json.loads(delivery_info)
-        meta_payment = {}
-        for name, payment in json.loads(payments).items():
-            if name == 'direct_payment':
-                for key, value in payment.items():
-                    if key == 'accounts':
-                        for account in value:
-                            del account['previewImage']
-                            account_number = account.get('number', '')
-                            account_image, = lib.util.getter.getdata(request, (account_number, ), required=False)
-                            if account_image:
-                                image_path = default_storage.save(f'/campaign/{campaign.id}/payment/direct_payment/accounts/{account_number}/{account_image.name}', ContentFile(account_image.read()))
-                                account['image'] = image_path
-                    
-                meta_payment['direct_payment'] = payment
-            else:
-                meta_payment[name] = payment
+        if accounts:=campaign.meta_payment.get('direct_payment',{}).get('v2_accounts'):
+            for account in accounts:
+                image=request.data.get('_'+account.get('name'))
+                if image in ['null', None, '', 'undefined']:
+                    continue
+                account_name = account.get('name','')
+                image_path = default_storage.save(f'/campaign/{campaign.id}/payment/direct_payment/accounts/{account_name}/{image.name}', ContentFile(image.read()))
+                account['image'] = image_path
 
-        campaing_json['meta_payment'] = meta_payment
-        campaing_json['meta_logistic'] = meta_logistic
-        serializer = self.get_serializer(
-            campaign, data=campaing_json, partial=True)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        serializer.save()
-
+        campaign.save()
+        
         return Response(models.campaign.campaign.CampaignSerializer(campaign).data, status=status.HTTP_200_OK)
+
+        # title, period, delivery_info, payments = lib.util.getter.getdata(request, ('campaignTitle', 'campaignPeriod', 'deliverySettings', 'paymentSettings'), required=False)
+        # campaing_json = { 
+        #     'title': json.loads(title), 
+        #     'start_at': json.loads(period).get('start', None),
+        #     'end_at': json.loads(period).get('end', None),
+        # }
+        # campaing_json['created_by'] = api_user.id
+        # campaing_json['user_subscription'] = user_subscription.id
+        
+        # serializer = CampaignSerializerCreate(data=campaing_json)
+        # if not serializer.is_valid():
+        #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # campaign = serializer.save()
+
+        # meta_logistic = json.loads(delivery_info)
+        # meta_payment = {}
+        # for name, payment in json.loads(payments).items():
+        #     if name == 'direct_payment':
+        #         for key, value in payment.items():
+        #             if key == 'accounts':
+        #                 for account in value:
+        #                     del account['previewImage']
+        #                     account_number = account.get('number', '')
+        #                     account_image, = lib.util.getter.getdata(request, (account_number, ), required=False)
+        #                     if account_image:
+        #                         image_path = default_storage.save(f'/campaign/{campaign.id}/payment/direct_payment/accounts/{account_number}/{account_image.name}', ContentFile(account_image.read()))
+        #                         account['image'] = image_path
+                    
+        #         meta_payment['direct_payment'] = payment
+        #     else:
+        #         meta_payment[name] = payment
+
+        # campaing_json['meta_payment'] = meta_payment
+        # campaing_json['meta_logistic'] = meta_logistic
+        # serializer = self.get_serializer(
+        #     campaign, data=campaing_json, partial=True)
+        # if not serializer.is_valid():
+        #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # serializer.save()
+
+        # return Response(models.campaign.campaign.CampaignSerializer(campaign).data, status=status.HTTP_200_OK)
     
     @action(detail=True, methods=['PUT'], url_path=r'update', parser_classes=(MultiPartParser, ), permission_classes=(IsAuthenticated, ))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def update_campaign(self, request, pk=None):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
-        campaign = Verify.get_campaign_from_user_subscription(user_subscription, pk)
+        campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, pk)
 
         title, period, delivery_info, payments = lib.util.getter.getdata(request, ('campaignTitle', 'campaignPeriod', 'deliverySettings', 'paymentSettings'), required=False)
         campaing_json = { 
@@ -177,84 +180,85 @@ class CampaignViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'], url_path=r'retrieve', permission_classes=(IsAuthenticated, ))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def retrieve_campaign(self, request):
-        api_user, campaign_id = getparams(request,("campaign_id", ), with_user=True, seller=True)
+        api_user, campaign_id = lib.util.getter.getparams(request,("campaign_id", ), with_user=True, seller=True)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
 
         return Response(models.campaign.campaign.CampaignSerializer(campaign).data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET'], url_path=r'check_facebook_page_token', permission_classes=(IsAuthenticated, ))
-    @api_error_handler
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def check_facebook_page_token(self, request):
 
-        api_user, facebook_page_id = getparams(request, ('facebook_page_id',),with_user=True, seller=True)
-        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        api_user, facebook_page_id = lib.util.getter.getparams(request, ('facebook_page_id',),with_user=True, seller=True)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         
         if 'facebook' not in user_subscription.user_plan.get('activated_platform'):
-           raise ApiVerifyError('facebook not activated')
+           raise lib.error_handle.error.api_error.ApiVerifyError('facebook not activated')
        
-        facebook_page = Verify.get_facebook_page_from_user_subscription(user_subscription, facebook_page_id)
-        is_token_valid = Verify.check_is_page_token_valid('facebook', facebook_page.token, facebook_page.page_id)
+        facebook_page = lib.util.verify.Verify.get_facebook_page_from_user_subscription(user_subscription, facebook_page_id)
+        is_token_valid = lib.util.verify.Verify.check_is_page_token_valid('facebook', facebook_page.token, facebook_page.page_id)
         if not is_token_valid:
-            raise ApiVerifyError(f"Facebook page <{facebook_page.name}>: token expired or invalid. Please re-bind your page on Platform page.")
-        return Response(FacebookPageSerializer(facebook_page).data, status=status.HTTP_200_OK)
+            raise lib.error_handle.error.api_error.ApiVerifyError(f"Facebook page <{facebook_page.name}>: token expired or invalid. Please re-bind your page on Platform page.")
+        return Response(models.facebook.facebook_page.FacebookPageSerializer(facebook_page).data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET'], url_path=r'check_youtube_channel_token', permission_classes=(IsAuthenticated,))
-    @api_error_handler
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def check_youtube_channel_token(self, request):
 
-        api_user, youtube_channel_id = getparams(request, ('youtube_channel_id',),with_user=True, seller=True)
-        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        api_user, youtube_channel_id = lib.util.getter.getparams(request, ('youtube_channel_id',),with_user=True, seller=True)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
 
         if 'youtube' not in user_subscription.user_plan.get('activated_platform'):
-           raise ApiVerifyError('youtube not activated')
+           raise lib.error_handle.error.api_error.ApiVerifyError('youtube not activated')
 
-        youtube_channel = Verify.get_youtube_channel_from_user_subscription(user_subscription, youtube_channel_id)
+        youtube_channel = lib.util.verify.Verify.get_youtube_channel_from_user_subscription(user_subscription, youtube_channel_id)
         print(youtube_channel)
-        response_status, response = api_google_post_refresh_token(youtube_channel.refresh_token)
+        
+        response_status, response = service.google.user.api_google_post_refresh_token(youtube_channel.refresh_token)
         print(response)
-        is_token_valid = Verify.check_is_page_token_valid('youtube', response['access_token'])
+        is_token_valid = lib.util.verify.Verify.check_is_page_token_valid('youtube', response['access_token'])
         if not is_token_valid:
-            raise ApiVerifyError(f"YouTube channel <{youtube_channel.name}>: token expired or invalid. Please re-bind your channel on Platform page.")
+            raise lib.error_handle.error.api_error.ApiVerifyError(f"YouTube channel <{youtube_channel.name}>: token expired or invalid. Please re-bind your channel on Platform page.")
         youtube_channel.token = response['access_token']
         youtube_channel.save()
-        return Response(YoutubeChannelSerializer(youtube_channel).data, status=status.HTTP_200_OK)
+        return Response(models.youtube.youtube_channel.YoutubeChannelSerializer(youtube_channel).data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET'], url_path=r'check_instagram_profile_token', permission_classes=(IsAuthenticated,))
-    @api_error_handler
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def check_instagram_profile_token(self, request):
 
-        api_user, instagram_profile_id = getparams(request, ('instagram_profile_id',),with_user=True, seller=True)
-        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        api_user, instagram_profile_id = lib.util.getter.getparams(request, ('instagram_profile_id',),with_user=True, seller=True)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
 
         if 'instagram' not in user_subscription.user_plan.get('activated_platform'):
-           raise ApiVerifyError('instagram not activated')
+           raise lib.error_handle.error.api_error.ApiVerifyError('instagram not activated')
 
-        instagram_profile = Verify.get_instagram_profile_from_user_subscription(user_subscription, instagram_profile_id)
-        is_token_valid = Verify.check_is_page_token_valid('instagram', instagram_profile.token, instagram_profile.business_id)
+        instagram_profile = lib.util.verify.Verify.get_instagram_profile_from_user_subscription(user_subscription, instagram_profile_id)
+        is_token_valid = lib.util.verify.Verify.check_is_page_token_valid('instagram', instagram_profile.token, instagram_profile.business_id)
         if not is_token_valid:
-            raise ApiVerifyError(f"Instagram profile <{instagram_profile.name}>: token expired or invalid. Please re-bind your profile on Platform page.")
-        return Response(InstagramProfileSerializer(instagram_profile).data, status=status.HTTP_200_OK)
+            raise lib.error_handle.error.api_error.ApiVerifyError(f"Instagram profile <{instagram_profile.name}>: token expired or invalid. Please re-bind your profile on Platform page.")
+        return Response(models.instagram.instagram_profile.InstagramProfileSerializer(instagram_profile).data, status=status.HTTP_200_OK)
     
     @action(detail=True, methods=['PUT'], url_path=r'save_pages_info', permission_classes=(IsAuthenticated,))
-    @api_error_handler
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def save_pages_info(self, request, pk):
-        api_user = Verify.get_seller_user(request)
-        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
-        campaign = Verify.get_campaign_from_user_subscription(user_subscription, pk)
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, pk)
         
         data = request.data
         print(data)
         if post_id := data.get("facebook", {}).get("post_id", {}):
-            facebook_page = Verify.get_facebook_page_from_user_subscription(user_subscription, data.get("facebook", {}).get("page_id", {}), field="page_id")
+            facebook_page = lib.util.verify.Verify.get_facebook_page_from_user_subscription(user_subscription, data.get("facebook", {}).get("page_id", {}), field="page_id")
             campaign.facebook_page = facebook_page
             campaign.facebook_campaign['post_id'] = post_id
         if live_video_id := data.get("youtube", {}).get("live_video_id", {}):
-            youtube_channel = Verify.get_youtube_channel_from_user_subscription(user_subscription, data.get("youtube", {}).get("channel_id", {}), field="channel_id")
+            youtube_channel = lib.util.verify.Verify.get_youtube_channel_from_user_subscription(user_subscription, data.get("youtube", {}).get("channel_id", {}), field="channel_id")
             campaign.youtube_channel = youtube_channel
             campaign.youtube_campaign['live_video_id'] = live_video_id
         if live_media_id := data.get("instagram", {}).get("live_media_id", {}):
-            instagram_profile = Verify.get_instagram_profile_from_user_subscription(user_subscription, data.get("instagram", {}).get("profile_id", {}), field="business_id")
+            instagram_profile = lib.util.verify.Verify.get_instagram_profile_from_user_subscription(user_subscription, data.get("instagram", {}).get("profile_id", {}), field="business_id")
             campaign.instagram_profile = instagram_profile
             campaign.instagram_campaign['live_media_id'] = live_media_id
         campaign.save()
@@ -291,10 +295,10 @@ class CampaignViewSet(viewsets.ModelViewSet):
     
 
     @action(detail=False, methods=['PUT'], url_path=r'delivery/setting/update', permission_classes=(IsAuthenticated,))
-    @api_error_handler
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def save_delivery_default_settings(self, request):
-        api_user = Verify.get_seller_user(request)
-        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         delivery_setting = request.data
         delivery_setting = delivery_setting.get('_value', {})
 
@@ -305,42 +309,41 @@ class CampaignViewSet(viewsets.ModelViewSet):
     
 
     @action(detail=False, methods=['GET'], url_path=r'delivery/setting/list', permission_classes=(IsAuthenticated,))
-    @api_error_handler
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def list_delivery_default_settings(self, request):
-        api_user = Verify.get_seller_user(request)
-        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
 
         data = user_subscription.meta_logistic
         return Response(data, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['GET'], url_path=r'facebook/comment-on-comment', permission_classes=(IsAuthenticated,))
-    @api_error_handler
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def facebook_post_comment(self, request):
         api_user, campaign_id, comment_id, message = \
             lib.util.getter.getparams(request, ("campaign_id","comment_id", "message"), with_user=True, seller=True)
         
-        api_user = Verify.get_seller_user(request)
-        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
-        campaign = Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
         page_token = campaign.facebook_page.token
-        
-        data = facebook.post.api_fb_post_page_comment_on_comment(page_token,comment_id,message)
+
+        data = service.facebook.post.post_page_comment_on_comment(page_token,comment_id,message)
         
 
         return Response(data, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['GET'], url_path=r'facebook/comment-reply', permission_classes=(IsAuthenticated,))
-    @api_error_handler
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def facebook_get_comment_reply(self, request):
         api_user, campaign_id, comment_id = \
             lib.util.getter.getparams(request, ("campaign_id","comment_id"), with_user=True, seller=True)
         
-        api_user = Verify.get_seller_user(request)
-        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
-        campaign = Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
         page_token = campaign.facebook_page.token
-        
-        data = facebook.page.api_fb_get_comments_on_comment(page_token,comment_id)
+        data = service.facebook.page.get_comments_on_comment(page_token,comment_id)
         
 
         return Response(data, status=status.HTTP_200_OK)
@@ -353,8 +356,8 @@ class CampaignViewSet(viewsets.ModelViewSet):
         save_to_stock, name, category, code, price, qty = lib.util.getter.getdata(request,("save_to_stock", "name", "category", "code", "price", "qty"), required=True)
         
         api_user = lib.util.verify.Verify.get_seller_user(request)
-        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
-        campaign = Verify.get_campaign_from_user_subscription(user_subscription, pk)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, pk)
 
         product=None
         if save_to_stock:
