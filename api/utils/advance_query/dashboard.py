@@ -639,7 +639,7 @@ def get_campaign_merge_order_list(campaign_id, search, page, page_size):
     # print(l)
     return l
 
-def get_campaign_merge_order_list_v2(campaign_id, search, f_payment,f_delivery,f_platform):
+def get_campaign_merge_order_list_v2(campaign_id, search,status, f_payment,f_delivery,f_platform):
 
     # search and paginate by frontend by now
     if search not in ["",None,'undefined']:
@@ -650,6 +650,11 @@ def get_campaign_merge_order_list_v2(campaign_id, search, f_payment,f_delivery,f
         match_pipeline = {"$match":{"$or":[{"id":{"$eq":isearch}}, {"customer_name":{"$regex":str(search),"$options": 'i'}}] }}
     else:
         match_pipeline = {"$match":{"id":{"$ne":None} }}
+        
+    if status != 'All':
+        status_match_pipeline = {"$match":{"id":{"$ne":None},"status":{"$regex":str(status),"$options": 'i'} }}
+    else:
+        status_match_pipeline = {"$match":{"id":{"$ne":None} }}
         
     if f_payment not in [[],None]:
         filter_payment = {"$match":{"id":{"$ne":None},"payment_method":{"$in": f_payment} }}
@@ -716,6 +721,7 @@ def get_campaign_merge_order_list_v2(campaign_id, search, f_payment,f_delivery,f
             "type":{"$first":"$data.type"}
         }},
         {"$project":{"_id":0,}},
+        status_match_pipeline,
         match_pipeline,
         filter_payment,
         filter_platform,

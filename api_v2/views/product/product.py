@@ -41,9 +41,9 @@ class ProductViewSet(viewsets.ModelViewSet):
         if (search_column in ["", None]) and (keyword not in [None, ""]):
             raise lib.error_handle.error.api_error.ApiVerifyError("search_column field can not be empty when keyword has value")
         if (search_column not in ['undefined', '']) and (keyword not in ['undefined', '', None]):
-            kwargs = { search_column + '__icontains': keyword }
+            kwargs[search_column + '__icontains'] = keyword
         if category not in ['undefined', '', None]:
-            kwargs = { 'tag__icontains': category }
+            kwargs['tag__icontains'] = category 
 
         queryset = user_subscription.products.filter(**kwargs).order_by("-created_at")
         page = self.paginate_queryset(queryset)
