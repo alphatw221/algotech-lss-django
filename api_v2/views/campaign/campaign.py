@@ -76,7 +76,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
         campaign.created_by = api_user
         campaign.user_subscription = user_subscription
         campaign.currency = user_subscription.currency
-        campaign.currency_sign = user_subscription.currency_sign
+
 
         if accounts:=campaign.meta_payment.get('direct_payment',{}).get('v2_accounts'):
             for account in accounts:
