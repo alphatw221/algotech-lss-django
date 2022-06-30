@@ -75,6 +75,8 @@ class CampaignViewSet(viewsets.ModelViewSet):
         campaign = serializer.save()
         campaign.created_by = api_user
         campaign.user_subscription = user_subscription
+        campaign.currency = user_subscription.currency
+        campaign.currency_sign = user_subscription.currency_sign
 
         if accounts:=campaign.meta_payment.get('direct_payment',{}).get('v2_accounts'):
             for account in accounts:
@@ -134,49 +136,80 @@ class CampaignViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['PUT'], url_path=r'update', parser_classes=(MultiPartParser, ), permission_classes=(IsAuthenticated, ))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def update_campaign(self, request, pk=None):
+
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, pk)
 
-        title, period, delivery_info, payments = lib.util.getter.getdata(request, ('campaignTitle', 'campaignPeriod', 'deliverySettings', 'paymentSettings'), required=False)
-        campaing_json = { 
-            'title': json.loads(title), 
-            'start_at': json.loads(period).get('start', None),
-            'end_at': json.loads(period).get('end', None),
-        }
-        campaing_json['created_by'] = api_user.id
-        campaing_json['user_subscription'] = user_subscription.id
+        campaignData, = lib.util.getter.getdata(request, ('data',), required=True)
+        campaignData = json.loads(campaignData)
 
-        meta_logistic = json.loads(delivery_info)
-        meta_payment = {}
-        for name, payment in json.loads(payments).items():
-            if name == 'direct_payment':
-                for key, value in payment.items():
-                    if key == 'accounts':
-                        for account in value:
-                            if 'previewImage' in account:
-                                del account['previewImage']
-                            account_number = account.get('number', '')
-                            account_image, = lib.util.getter.getdata(request, (account_number, ), required=False)
-                            if account_image:
-                                image_path = default_storage.save(f'/campaign/{campaign.id}/payment/direct_payment/accounts/{account_number}/{account_image.name}', ContentFile(account_image.read()))
-                                account['image'] = image_path
-                    
-                meta_payment['direct_payment'] = payment
-            else:
-                meta_payment[name] = payment
-
-        campaing_json['meta_payment'] = meta_payment
-        campaing_json['meta_logistic'] = meta_logistic
-
-        serializer = models.campaign.campaign.CampaignSerializerUpdate(
-            campaign, data=campaing_json, partial=True)
+        serializer = models.campaign.campaign.CampaignSerializerUpdate(campaign, data=campaignData, partial=True)
         if not serializer.is_valid():
-            print(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         campaign = serializer.save()
 
-        return Response(campaign.id, status=status.HTTP_200_OK)
+        save = False
+        if accounts:=campaign.meta_payment.get('direct_payment',{}).get('v2_accounts'):
+            for account in accounts:
+                image=request.data.get('_'+account.get('name'))
+                if image in ['null', None, '', 'undefined']:
+                    continue
+                account_name = account.get('name','')
+                image_path = default_storage.save(f'/campaign/{campaign.id}/payment/direct_payment/accounts/{account_name}/{image.name}', ContentFile(image.read()))
+                account['image'] = image_path
+                save=True
+
+        if save:
+            campaign.save()
+        
+        return Response(models.campaign.campaign.CampaignSerializer(campaign).data, status=status.HTTP_200_OK)
+
+        # api_user = lib.util.verify.Verify.get_seller_user(request)
+
+        
+        # user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        # campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, pk)
+
+        # title, period, delivery_info, payments = lib.util.getter.getdata(request, ('campaignTitle', 'campaignPeriod', 'deliverySettings', 'paymentSettings'), required=False)
+        # campaing_json = { 
+        #     'title': json.loads(title), 
+        #     'start_at': json.loads(period).get('start', None),
+        #     'end_at': json.loads(period).get('end', None),
+        # }
+        # campaing_json['created_by'] = api_user.id
+        # campaing_json['user_subscription'] = user_subscription.id
+
+        # meta_logistic = json.loads(delivery_info)
+        # meta_payment = {}
+        # for name, payment in json.loads(payments).items():
+        #     if name == 'direct_payment':
+        #         for key, value in payment.items():
+        #             if key == 'accounts':
+        #                 for account in value:
+        #                     if 'previewImage' in account:
+        #                         del account['previewImage']
+        #                     account_number = account.get('number', '')
+        #                     account_image, = lib.util.getter.getdata(request, (account_number, ), required=False)
+        #                     if account_image:
+        #                         image_path = default_storage.save(f'/campaign/{campaign.id}/payment/direct_payment/accounts/{account_number}/{account_image.name}', ContentFile(account_image.read()))
+        #                         account['image'] = image_path
+                    
+        #         meta_payment['direct_payment'] = payment
+        #     else:
+        #         meta_payment[name] = payment
+
+        # campaing_json['meta_payment'] = meta_payment
+        # campaing_json['meta_logistic'] = meta_logistic
+
+        # serializer = models.campaign.campaign.CampaignSerializerUpdate(
+        #     campaign, data=campaing_json, partial=True)
+        # if not serializer.is_valid():
+        #     print(serializer.errors)
+        #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # campaign = serializer.save()
+
+        # return Response(campaign.id, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['GET'], url_path=r'retrieve', permission_classes=(IsAuthenticated, ))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
