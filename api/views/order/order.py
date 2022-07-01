@@ -205,71 +205,64 @@ class OrderViewSet(viewsets.ModelViewSet):
         column = 0
 
         total_count, num_col_total = 0, 0
-
         campaign_orders = db.api_order.find({'campaign_id': int(campaign_id)})
         campaign_pre_orders = db.api_pre_order.find({'campaign_id': int(campaign_id), 'products': {'$ne': {}}})
 
         for campaign_order in campaign_orders:
             for column_title in column_list:
-                if column_title in ['pick_up_date', 'pick_up_store', 'last_five_digit']:
-                    col_data = ''
+                if column_title in ['pick_up_date', 'last_five_digit']:
                     try:
                         col_data = campaign_order['meta'][column_title]
                     except:
                         col_data = ''
-                    worksheet.write(row, column, col_data)
+                elif column_title == 'pick_up_store' and campaign_order['shipping_method'] == 'pickup':
+                    col_data = campaign_order['shipping_option'] + ' - ' + campaign_order['pickup_address']
                 elif column_title == 'created_at':
                     col_data = campaign_order[column_title].strftime("%Y-%m-%d")
-                    worksheet.write(row, column, col_data)
                 elif column_title in ['payment_card_type', 'payment_card_number']:
-                    worksheet.write(row, column, '')
+                    col_data = ''
+                elif column_title in ['shipping_address_1', 'shipping_location', 'shipping_region', 'shipping_postcode'] and campaign_order['shipping_method'] == 'pickup':
+                    col_data = ''
+                elif column_title in ['pick_up_store'] and campaign_order['shipping_method'] == 'delivery':
+                    col_data = ''
                 else:
                     col_data = campaign_order[column_title]
                     if column_title == 'total':
                         total_count += col_data
                         num_col_total = column
-                    if type(col_data) == int or type(col_data) == float:
-                        worksheet.write(row, column, col_data, int_center)
-                    else:
-                        worksheet.write(row, column, col_data)
+                worksheet.write(row, column, col_data)
                 column += 1
 
             products = campaign_order['products']
             for campaing_product_id_str, product in products.items():
                 worksheet.write(row, product_column_dict[campaing_product_id_str], product['qty'])
-
             row += 1
             column = 0
 
         for campaign_pre_order in campaign_pre_orders:
             for column_title in column_list:
-                if column_title in ['pick_up_date', 'pick_up_store', 'last_five_digit']:
-                    col_data = ''
+                if column_title in ['pick_up_date', 'last_five_digit']:
                     try:
                         col_data = campaign_pre_order['meta'][column_title]
                     except:
                         col_data = ''
-                    worksheet.write(row, column, col_data)
+                elif column_title == 'pick_up_store':
+                    col_data = campaign_order['shipping_option'] + ' - ' + campaign_order['pickup_address']
                 elif column_title == 'created_at':
                     col_data = campaign_pre_order[column_title].strftime("%Y-%m-%d")
-                    worksheet.write(row, column, col_data)
                 elif column_title in ['payment_card_type', 'payment_card_number']:
-                    worksheet.write(row, column, '')
+                    col_data = ''
                 else:
                     col_data = campaign_pre_order[column_title]
                     if column_title == 'total':
                         total_count += col_data
                         num_col_total = column
-                    if type(col_data) == int or type(col_data) == float:
-                        worksheet.write(row, column, col_data, int_center)
-                    else:
-                        worksheet.write(row, column, col_data)
+                worksheet.write(row, column, col_data)
                 column += 1
 
             products = campaign_pre_order['products']
             for campaing_product_id_str, product in products.items():
                 worksheet.write(row, product_column_dict[campaing_product_id_str], product['qty'])
-
             row += 1
             column = 0
 

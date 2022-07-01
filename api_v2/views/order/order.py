@@ -66,7 +66,7 @@ class OrderViewSet(viewsets.ModelViewSet):
     def guest_upload_receipt(self, request, order_oid):
 
         order = lib.util.verify.Verify.get_order_with_oid(order_oid)
-        last_five_digit, image, account_name =lib.util.getter.getdata(request,('last_five_digit', 'image', 'account_name'), required=False)
+        last_five_digit, image, account_name, account_mode = lib.util.getter.getdata(request,('last_five_digit', 'image', 'account_name', 'account_mode'), required=False)
 
         if image not in [None, '', "undefined", 'null']:
             image_path = default_storage.save(
@@ -78,6 +78,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         order.meta["last_five_digit"] = last_five_digit
         order.meta['account_name'] = account_name
+        order.meta['account_mode'] = account_mode
         order.payment_method = "Direct Payment"
         order.status = "complete"
         order.save()
@@ -127,7 +128,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         # api_user = lib.util.verify.Verify.get_customer_user(request)
         order = lib.util.verify.Verify.get_order_with_oid(order_oid)
-        last_five_digit, image, account_name =lib.util.getter.getdata(request,('last_five_digit', 'image', 'account_name'), required=False)
+        last_five_digit, image, account_name, account_mode = lib.util.getter.getdata(request,('last_five_digit', 'image', 'account_name', 'account_mode'), required=False)
 
         if image not in [None, '', "undefined", 'null']:
             image_path = default_storage.save(
@@ -136,9 +137,9 @@ class OrderViewSet(viewsets.ModelViewSet):
             )
             order.meta["receipt_image"] = settings.GS_URL + image_path
 
-
         order.meta["last_five_digit"] = last_five_digit
         order.meta['account_name'] = account_name
+        order.meta['account_mode'] = account_mode
         order.payment_method = "Direct Payment"
         order.status = "complete"
         order.save()

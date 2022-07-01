@@ -77,9 +77,11 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
         campaign_products_data = request.data
         errors = []
 
+        new_products = []
         for campaign_product_data in campaign_products_data:
             try:
                 product = lib.util.verify.Verify.get_product_from_user_subscription(user_subscription, campaign_product_data.get('product_id'))
+                print(product)
                 serializer = models.campaign.campaign_product.CampaignProductSerializerAssign(data=campaign_product_data)
                 if not serializer.is_valid():
                     errors.append({"product_id": campaign_product_data.get('product_id')})
@@ -90,11 +92,12 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
                 campaign_product.product = product
                 campaign_product.created_by = api_user
                 campaign_product.save()
+                new_products.append(campaign_product)
             except lib.error_handle.error.api_error.ApiVerifyError as e:
                 errors.append({"product_id": campaign_product_data.get('product_id')})
                 continue
-
-        return Response('success', status=status.HTTP_200_OK)
+        serializer = self.get_serializer(new_products, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     
 
     @action(detail=False, methods=['GET'], url_path=r'seller/retrieve', permission_classes=(IsAuthenticated,))
