@@ -79,8 +79,9 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
 
         if accounts:=campaign.meta_payment.get('direct_payment',{}).get('v2_accounts'):
-            for account in accounts:
-                image=request.data.get('_'+account.get('name'))
+            for index, account in enumerate(accounts):
+                key = account.get('name','')+f'_{index}'
+                image=request.data.get(key)
                 if image in ['null', None, '', 'undefined']:
                     continue
                 account_name = account.get('name','')
@@ -151,8 +152,9 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         save = False
         if accounts:=campaign.meta_payment.get('direct_payment',{}).get('v2_accounts'):
-            for account in accounts:
-                image=request.data.get('_'+account.get('name'))
+            for index, account in enumerate(accounts):
+                key = account.get('name','')+f'_{index}'
+                image=request.data.get(key)
                 if image in ['null', None, '', 'undefined']:
                     continue
                 account_name = account.get('name','')
