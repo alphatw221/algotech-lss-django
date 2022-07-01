@@ -7,6 +7,12 @@ from djongo import models
 from rest_framework import serializers
 from api.models.user.user import User
 
+
+STATUS_PROCEED = 'proceed'
+STATUS_COMPLETE = 'complete'
+STATUS_SHIPPING_OUT = 'shipping out'
+
+
 class Order(models.Model):
     campaign = models.ForeignKey(
         Campaign, null=True, on_delete=models.SET_NULL, related_name='orders')

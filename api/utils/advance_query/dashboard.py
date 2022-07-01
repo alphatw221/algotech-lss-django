@@ -651,10 +651,13 @@ def get_campaign_merge_order_list_v2(campaign_id, search,status, f_payment,f_del
     else:
         match_pipeline = {"$match":{"id":{"$ne":None} }}
         
-    if status != 'All':
-        status_match_pipeline = {"$match":{"id":{"$ne":None},"status":{"$regex":str(status),"$options": 'i'} }}
-    else:
+    if status == 'All':
         status_match_pipeline = {"$match":{"id":{"$ne":None} }}
+    elif status == 'complete':
+        status_match_pipeline = {"$match":{"id":{"$ne":None},"status":{"$in":['complete','shipping out']} }}
+    else:
+        status_match_pipeline = {"$match":{"id":{"$ne":None},"status":{"$regex":str(status),"$options": 'i'} }}
+        
         
     if f_payment not in [[],None]:
         filter_payment = {"$match":{"id":{"$ne":None},"payment_method":{"$in": f_payment} }}
@@ -665,6 +668,11 @@ def get_campaign_merge_order_list_v2(campaign_id, search,status, f_payment,f_del
         filter_platform = {"$match":{"id":{"$ne":None},"platform":{"$in": f_platform} }}
     else:
         filter_platform = {"$match":{"id":{"$ne":None} }}
+        
+    if f_delivery not in [[],None]:
+        filter_delivery = {"$match":{"id":{"$ne":None},"status":{"$in": f_delivery} }}
+    else:
+        filter_delivery = {"$match":{"id":{"$ne":None} }}
 
     # if not page.isnumeric() or not page_size.isnumeric():
     #     return []
@@ -725,6 +733,7 @@ def get_campaign_merge_order_list_v2(campaign_id, search,status, f_payment,f_del
         match_pipeline,
         filter_payment,
         filter_platform,
+        filter_delivery,
         # { "$skip": (page-1)*page_size },    # search and paginate by frontend by now
         # { "$limit": page_size }
 

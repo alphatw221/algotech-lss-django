@@ -19,6 +19,23 @@ import lib
 from api.utils.advance_query.dashboard import get_campaign_merge_order_list_v2
 
 from automation import jobs
+from backend import pymongo,i18n
+from api.utils.error_handle.error_handler.email_error_handler import email_error_handler
+
+@email_error_handler
+def send_shipping_email(order_id):
+
+    order_data = pymongo.mongodb.db.api_order.find_one({'id': int(order_id)})
+    campaign_id = order_data['campaign_id']
+    campaign_data = pymongo.mongodb.db.api_campaign.find_one({'id': int(campaign_id)})
+    facebook_page_id = campaign_data['facebook_page_id']
+    shop_name = pymongo.mongodb.db.api_facebook_page.find_one({'id': int(facebook_page_id)})['name']
+    customer_email = order_data['shipping_email']
+
+    mail_subject = i18n.delivery_comfirm_mail.i18n_get_mail_subject(shop_name)
+    mail_content = i18n.delivery_comfirm_mail.i18n_get_mail_content(order_id, campaign_data, order_data, shop_name)
+
+    i18n.delivery_comfirm_mail.send_smtp_mail(customer_email, mail_subject, mail_content)
 
 class OrderPagination(PageNumberPagination):
     page_query_param = 'page'
@@ -210,3 +227,15 @@ class OrderViewSet(viewsets.ModelViewSet):
         merge_list_json = loads(merge_list_str)
 
         return Response({'count':count,'data':merge_list_json}, status=status.HTTP_200_OK)
+    
+    @action(detail=True, methods=['GET'], url_path=r'seller/delivery_status', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def seller_order_delivery_status(self, request, pk=None):
+
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        order = lib.util.verify.Verify.get_order(pk)
+        lib.util.verify.Verify.get_campaign_from_user_subscription(api_user.user_subscription, order.campaign.id)
+        
+        # send_email(order.id)
+
+        return Response(order.id, status=status.HTTP_200_OK)
