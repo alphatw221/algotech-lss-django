@@ -229,6 +229,7 @@ class OrderViewSet(viewsets.ModelViewSet):
                     col_data = campaign_order[column_title]
                     if column_title == 'total':
                         total_count += col_data
+                        num_col_total = column
                 worksheet.write(row, column, col_data)
                 column += 1
 
@@ -255,6 +256,7 @@ class OrderViewSet(viewsets.ModelViewSet):
                     col_data = campaign_pre_order[column_title]
                     if column_title == 'total':
                         total_count += col_data
+                        num_col_total = column
                 worksheet.write(row, column, col_data)
                 column += 1
 
