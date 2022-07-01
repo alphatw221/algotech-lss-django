@@ -143,10 +143,10 @@ class CampaignSerializerEdit(serializers.ModelSerializer):
 
 
 class CampaignSerializerUpdate(serializers.ModelSerializer):
+
     class Meta:
         model = Campaign
-        fields = '__all__'
-        read_only_fields = ['created_at', 'modified_at']
+        fields = ['title', 'start_at', 'end_at', 'meta', 'meta_payment', 'meta_logistic']
 
     meta = serializers.JSONField(default={"allow_checkout": 1})
     meta_payment = serializers.JSONField(default=dict)

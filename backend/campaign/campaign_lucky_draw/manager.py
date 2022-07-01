@@ -61,7 +61,7 @@ class CampaignLuckyDrawManager:
                     'customer_name': winner[2],
                     'customer_img': winner[3],
                     'campaign_id': campaign.id,
-                    'currency': campaign.currency,
+                    # 'currency': campaign.currency,
                     'platform': winner[0],
                     'platform_id': platform_map[winner[0]],
                     'created_at': datetime.utcnow()

@@ -44,3 +44,11 @@ def get_page_business_profile(page_token: str, page_id: str):
     ret = FacebookApiCaller(f'v13.0/{page_id}', bearer_token=page_token,
                             params=params).get()
     return ret
+
+def get_comments_on_comment(page_token: str, comment_id: str):
+    params = {
+        'fields': 'created_time,from{picture,name,id},message,id',
+    }
+    ret = FacebookApiCaller(f'{comment_id}/comments', bearer_token=page_token,
+                            params=params).get()
+    return ret
