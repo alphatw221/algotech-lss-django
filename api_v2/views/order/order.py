@@ -19,6 +19,23 @@ import lib
 from api.utils.advance_query.dashboard import get_campaign_merge_order_list_v2
 
 from automation import jobs
+from backend import pymongo,i18n
+from api.utils.error_handle.error_handler.email_error_handler import email_error_handler
+
+@email_error_handler
+def send_shipping_email(order_id):
+
+    order_data = pymongo.mongodb.db.api_order.find_one({'id': int(order_id)})
+    campaign_id = order_data['campaign_id']
+    campaign_data = pymongo.mongodb.db.api_campaign.find_one({'id': int(campaign_id)})
+    facebook_page_id = campaign_data['facebook_page_id']
+    shop_name = pymongo.mongodb.db.api_facebook_page.find_one({'id': int(facebook_page_id)})['name']
+    customer_email = order_data['shipping_email']
+
+    mail_subject = i18n.delivery_comfirm_mail.i18n_get_mail_subject(shop_name)
+    mail_content = i18n.delivery_comfirm_mail.i18n_get_mail_content(order_id, campaign_data, order_data, shop_name)
+
+    i18n.delivery_comfirm_mail.send_smtp_mail(customer_email, mail_subject, mail_content)
 
 class OrderPagination(PageNumberPagination):
     page_query_param = 'page'
@@ -49,7 +66,7 @@ class OrderViewSet(viewsets.ModelViewSet):
     def guest_upload_receipt(self, request, order_oid):
 
         order = lib.util.verify.Verify.get_order_with_oid(order_oid)
-        last_five_digit, image, account_name =lib.util.getter.getdata(request,('last_five_digit', 'image', 'account_name'), required=False)
+        last_five_digit, image, account_name, account_mode = lib.util.getter.getdata(request,('last_five_digit', 'image', 'account_name', 'account_mode'), required=False)
 
         if image not in [None, '', "undefined", 'null']:
             image_path = default_storage.save(
@@ -61,6 +78,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         order.meta["last_five_digit"] = last_five_digit
         order.meta['account_name'] = account_name
+        order.meta['account_mode'] = account_mode
         order.payment_method = "Direct Payment"
         order.status = "complete"
         order.save()
@@ -110,7 +128,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         # api_user = lib.util.verify.Verify.get_customer_user(request)
         order = lib.util.verify.Verify.get_order_with_oid(order_oid)
-        last_five_digit, image, account_name =lib.util.getter.getdata(request,('last_five_digit', 'image', 'account_name'), required=False)
+        last_five_digit, image, account_name, account_mode = lib.util.getter.getdata(request,('last_five_digit', 'image', 'account_name', 'account_mode'), required=False)
 
         if image not in [None, '', "undefined", 'null']:
             image_path = default_storage.save(
@@ -119,9 +137,9 @@ class OrderViewSet(viewsets.ModelViewSet):
             )
             order.meta["receipt_image"] = settings.GS_URL + image_path
 
-
         order.meta["last_five_digit"] = last_five_digit
         order.meta['account_name'] = account_name
+        order.meta['account_mode'] = account_mode
         order.payment_method = "Direct Payment"
         order.status = "complete"
         order.save()
@@ -210,3 +228,15 @@ class OrderViewSet(viewsets.ModelViewSet):
         merge_list_json = loads(merge_list_str)
 
         return Response({'count':count,'data':merge_list_json}, status=status.HTTP_200_OK)
+    
+    @action(detail=True, methods=['GET'], url_path=r'seller/delivery_status', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def seller_order_delivery_status(self, request, pk=None):
+
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        order = lib.util.verify.Verify.get_order(pk)
+        lib.util.verify.Verify.get_campaign_from_user_subscription(api_user.user_subscription, order.campaign.id)
+        
+        # send_email(order.id)
+
+        return Response(order.id, status=status.HTTP_200_OK)

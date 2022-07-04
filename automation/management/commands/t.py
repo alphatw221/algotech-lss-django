@@ -50,7 +50,8 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.test_order_helper()
+        # self.test_lucky_draw()
+        self.test_campaign_job()
 
     def modify_database(self):
         from api.models.user.user_subscription import UserSubscription
@@ -399,3 +400,24 @@ class Command(BaseCommand):
         #     print('unsuccess')
 
         # print(order.data)
+        # lib.helper.order_helper.PreOrderHelper.add_product(None, pre_order_id=975, campaign_product_id=7817,qty=1)
+        # lib.helper.order_helper.PreOrderHelper.update_product(None, 975, 253601, 2)
+        # lib.helper.order_helper.PreOrderHelper.delete_product(None, 975, 253601)
+        # lib.helper.order_helper.PreOrderHelper.checkout(None, campaign_id=510, pre_order_id=975)
+    
+    def test_campaign_job(self):
+        from automation import jobs
+        jobs.campaign_job.campaign_job(648)
+
+        from datetime import datetime
+        from dateutil import parser
+        yourdate = parser.parse('2022-07-04T05:21:15+0000')
+        timestamp = datetime.timestamp(parser.parse('2022-07-04T05:21:15+0000'))
+        print (timestamp)
+        print (type(timestamp))
+
+        # print ('-----------------------')
+        # print ('comment timestamp')
+        # print (datetime.fromisoformat('2022-07-04T05:21:15+0000'))
+
+        

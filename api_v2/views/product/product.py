@@ -31,12 +31,12 @@ class ProductViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'], url_path=r'search', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def list_product(self, request):
-        api_user, search_column, keyword, product_status, category = \
-            lib.util.getter.getparams(request, ("search_column", "keyword", "product_status", "category"), with_user=True, seller=True)
-
+        api_user, search_column, keyword, product_status, category, exclude_products = \
+            lib.util.getter.getparams(request, ("search_column", "keyword", "product_status", "category", "exclude"), with_user=True, seller=True)
+        
         user_subscription = \
             lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
-
+        
         kwargs = {'status': product_status if product_status else 'enabled'}
         if (search_column in ["", None]) and (keyword not in [None, ""]):
             raise lib.error_handle.error.api_error.ApiVerifyError("search_column field can not be empty when keyword has value")
@@ -46,6 +46,11 @@ class ProductViewSet(viewsets.ModelViewSet):
             kwargs['tag__icontains'] = category 
 
         queryset = user_subscription.products.filter(**kwargs).order_by("-created_at")
+        
+        if exclude_products:
+            exclude_products = exclude_products.split(",")
+            queryset = queryset.exclude(id__in=exclude_products)
+            
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
@@ -54,7 +59,6 @@ class ProductViewSet(viewsets.ModelViewSet):
         else:
             serializer = self.get_serializer(queryset, many=True)
             data = serializer.data
-
         return Response(data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['GET'], url_path=r'retrieve', permission_classes=(IsAuthenticated,))

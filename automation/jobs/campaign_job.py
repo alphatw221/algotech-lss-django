@@ -16,6 +16,7 @@ import service
 import requests
 import traceback
 from dateutil import parser
+from datetime import datetime
 class OrderCodesMappingSingleton:
 
     order_codes_mapping = None
@@ -350,7 +351,7 @@ def capture_instagram(campaign, logs):
                 'id': comment['id'],
                 "campaign_id": campaign['id'],
                 'message': comment['text'],
-                "created_time": comment['timestamp'],  #parse to timestamp
+                "created_time": datetime.timestamp(parser.parse(comment['timestamp'])),  #parse to timestamp
                 "customer_id": comment['from']['id'],   #
                 "customer_name": comment['from']['username'],  #
                 "image": img_url,
