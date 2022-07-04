@@ -80,13 +80,13 @@ class PreOrderViewSet(viewsets.ModelViewSet):
             pre_order = lib.util.verify.Verify.get_pre_order(pre_order.id)
             return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_205_RESET_CONTENT)
 
-        order = lib.util.verify.Verify.get_order(api_order['id'])
+        order = lib.util.verify.Verify.get_order(api_order.id)
 
-        content = lib.helper.order_helper.OrderHelper.get_checkout_email_content(order,api_order['_id'])
+        content = lib.helper.order_helper.OrderHelper.get_checkout_email_content(order,api_order._id)
         jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)     #queue this to redis if needed
         
         data = models.order.order.OrderSerializer(order).data
-        data['oid']=str(api_order['_id'])
+        data['oid']=str(api_order._id)
 
         #send email to customer over here order detail link
         return Response(data, status=status.HTTP_200_OK)
@@ -124,12 +124,19 @@ class PreOrderViewSet(viewsets.ModelViewSet):
                 platform = None,
                 platform_id = None)
 
-            for campaign_product in campaign.products.filter(status=True):
-                try:
-                    lib.helper.order_helper.PreOrderHelper.add_product(None, pre_order.id, campaign_product.id)
-                except Exception:
-                     print(traceback.format_exc())
+            for campaign_product in campaign.products.filter(type='product'):   #status=True cause databaseError here
 
+                if not campaign_product.status or not campaign_product.qty_for_sale - campaign_product.qty_sold:
+                    continue
+
+                print(campaign_product.name)
+                try:
+                    lib.helper.order_helper.PreOrderHelper.add_product(None, pre_order.id, campaign_product.id, 1)
+                except Exception:
+                    print('add_proudct fail')
+                    print(traceback.format_exc())
+                    continue
+            
         pre_order_oid = database.lss.pre_order.get_oid_by_id(pre_order.id)
         
         response = JsonResponse({'client_uuid':client_uuid, 'pre_order_oid':pre_order_oid})
@@ -218,11 +225,12 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
         if not success:
             pre_order = lib.util.verify.Verify.get_pre_order(pre_order.id)
-            return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_205_RESET_CONTENT)
+            print(models.order.pre_order.PreOrderSerializer(pre_order).data)
+            return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_400_BAD_REQUEST)
 
-        order = lib.util.verify.Verify.get_order(api_order['id'])
+        order = lib.util.verify.Verify.get_order(api_order.id)
         data = models.order.order.OrderSerializer(order).data
-        data['oid']=str(api_order['_id'])
+        data['oid']=str(api_order._id)
 
         return Response(data, status=status.HTTP_200_OK)
 
