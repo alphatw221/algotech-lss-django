@@ -725,6 +725,7 @@ def get_campaign_merge_order_list_v2(campaign_id, search,status, f_payment,f_del
             "subtotal":{"$first":"$data.subtotal"},
             "total":{"$first":"$data.total"},
             "payment_method":{"$first":"$data.payment_method"},
+            "meta":{"$first":"$data.meta"},
             "status":{"$first":"$data.status"},
             "type":{"$first":"$data.type"}
         }},
