@@ -8,8 +8,6 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 
 from api import models
-from api.utils.common.order_helper import PreOrderHelper
-from api.utils.common.verify import ApiVerifyError
 
 from automation import jobs
 
@@ -18,6 +16,8 @@ import datetime
 import uuid
 import service
 import database
+import traceback
+
 class PreOrderPagination(PageNumberPagination):
     page_query_param = 'page'
     page_size_query_param = 'page_size'
@@ -51,7 +51,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         pre_order = lib.util.verify.Verify.get_pre_order_with_oid(pre_order_oid)
         campaign_product = lib.util.verify.Verify.get_campaign_product_from_pre_order(pre_order, campaign_product_id)
 
-        PreOrderHelper.add_product(None, pre_order, campaign_product, qty)
+        lib.helper.order_helper.PreOrderHelper.add_product(None,pre_order.id, campaign_product.id, qty)
         pre_order = lib.util.verify.Verify.get_pre_order(pre_order.id)
         return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
 
@@ -74,7 +74,12 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
         #checkout
 
-        api_order = PreOrderHelper.checkout(None, pre_order)
+        success, api_order = lib.helper.order_helper.PreOrderHelper.checkout(None, campaign.id, pre_order.id)
+
+        if not success:
+            pre_order = lib.util.verify.Verify.get_pre_order(pre_order.id)
+            return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_205_RESET_CONTENT)
+
         order = lib.util.verify.Verify.get_order(api_order['id'])
 
         content = lib.helper.order_helper.OrderHelper.get_checkout_email_content(order,api_order['_id'])
@@ -85,6 +90,9 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
         #send email to customer over here order detail link
         return Response(data, status=status.HTTP_200_OK)
+
+
+
 
     @action(detail=False, methods=['GET'], url_path=r'(?P<campaign_id>[^/.]+)/guest/create', permission_classes=(), authentication_classes=[])
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
@@ -108,12 +116,19 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         if models.order.pre_order.PreOrder.objects.filter(customer_id = customer_id, campaign = campaign, platform = None,).exists():
             pre_order = models.order.pre_order.PreOrder.objects.get(customer_id = customer_id, campaign = campaign, platform = None,)
         else:
+            
             pre_order = models.order.pre_order.PreOrder.objects.create(
-            customer_id = customer_id,
-            customer_name = customer_name,
-            campaign = campaign,
-            platform = None,
-            platform_id = None)
+                customer_id = customer_id,
+                customer_name = customer_name,
+                campaign = campaign,
+                platform = None,
+                platform_id = None)
+
+            for campaign_product in campaign.products.filter(status=True):
+                try:
+                    lib.helper.order_helper.PreOrderHelper.add_product(None, pre_order.id, campaign_product.id)
+                except Exception:
+                     print(traceback.format_exc())
 
         pre_order_oid = database.lss.pre_order.get_oid_by_id(pre_order.id)
         
@@ -143,13 +158,19 @@ class PreOrderViewSet(viewsets.ModelViewSet):
             pre_order = models.order.pre_order.PreOrder.objects.get(customer_id = customer_id, campaign = campaign, platform = None,)
         else:
             pre_order = models.order.pre_order.PreOrder.objects.create(
-            customer_id = customer_id,
-            customer_name = customer_name,
-            customer_img = customer_img,
-            campaign = campaign,
-            buyer = api_user,
-            platform = None,
-            platform_id = None)
+                customer_id = customer_id,
+                customer_name = customer_name,
+                customer_img = customer_img,
+                campaign = campaign,
+                buyer = api_user,
+                platform = None,
+                platform_id = None)
+
+            for campaign_product in campaign.products.filter(status=True):
+                try:
+                    lib.helper.order_helper.PreOrderHelper.add_product(None, pre_order.id, campaign_product.id)
+                except Exception:
+                     print(traceback.format_exc())
 
         pre_order_oid = database.lss.pre_order.get_oid_by_id(pre_order.id)
         return Response({ 'pre_order_oid':pre_order_oid}, status=status.HTTP_200_OK)
@@ -193,12 +214,13 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
         #checkout
 
-        api_order = PreOrderHelper.checkout(api_user, pre_order)
+        success, api_order = lib.helper.order_helper.PreOrderHelper.checkout(api_user, campaign.id, pre_order.id)
+
+        if not success:
+            pre_order = lib.util.verify.Verify.get_pre_order(pre_order.id)
+            return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_205_RESET_CONTENT)
+
         order = lib.util.verify.Verify.get_order(api_order['id'])
-
-
-        
-
         data = models.order.order.OrderSerializer(order).data
         data['oid']=str(api_order['_id'])
 
@@ -213,7 +235,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         pre_order = lib.util.verify.Verify.get_pre_order_with_oid(pre_order_oid)
         campaign_product = lib.util.verify.Verify.get_campaign_product_from_pre_order(pre_order, campaign_product_id)
 
-        PreOrderHelper.add_product(api_user, pre_order, campaign_product, qty)
+        lib.helper.order_helper.PreOrderHelper.add_product(api_user, pre_order.id, campaign_product.id, qty)
         pre_order = lib.util.verify.Verify.get_pre_order(pre_order.id)
         return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
 
@@ -284,7 +306,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, pre_order.campaign.id)
         if type(free_delivery) != bool:
-            raise ApiVerifyError("request data error")
+            raise lib.error_handle.error.api_error.ApiVerifyError("request data error")
 
         original_total = pre_order.total
         original_free_delivery = pre_order.free_delivery

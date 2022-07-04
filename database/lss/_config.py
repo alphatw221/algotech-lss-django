@@ -12,8 +12,9 @@ class Collection():
 
     _collection=None
     collection_name=''
+    template = {}
 
-    def __init__(self, id, _id, data):
+    def __init__(self, id, _id=None, data=None):
         self.id = id
         self._id = _id
         self.data = data
@@ -36,10 +37,11 @@ class Collection():
 
     @classmethod
     def create(cls, session=None, **kwargs):
-
-        kwargs['id'] = cls.__get_incremented_filed(session=session)
-        kwargs['created_at'] = datetime.utcnow()
-        _id = cls._collection.insert_one(kwargs, session=session).inserted_id
+        template = cls.template.copy()
+        template.update(kwargs)
+        template['id'] = cls.__get_incremented_filed(session=session)
+        template['created_at'] = datetime.utcnow()
+        _id = cls._collection.insert_one(template, session=session).inserted_id
         data = cls._collection.find_one(_id, session=session)
         return cls(data.get('id'), data.get('_id'), data)
 

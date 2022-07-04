@@ -5,7 +5,7 @@ from api import rule,models
 
 import lib
 import database
-
+import traceback
 from datetime import datetime
 class PreOrderHelper():
 
@@ -28,27 +28,22 @@ class PreOrderHelper():
                 qty = ret.get('qty')
                 qty_difference = ret.get('qty_difference')
                 
-                template = models.order.order_product.api_order_product_template.copy()
-                template.update({
-                    "campaign_id": campaign_product.data.get('campaign_id'),
-                    "campaign_product_id": campaign_product.id,
-                    "pre_order_id": pre_order.id,
-                    "qty": qty,
-                    "customer_id": pre_order.data.get('customer_id'),
-                    "customer_name": pre_order.data.get('customer_name'),
-                    "platform": pre_order.data.get('platform'),
-                    "type": campaign_product.data.get("type"),
-                    "name": campaign_product.data.get("name"),
-                    "price": campaign_product.data.get("price"),
-                    "image": campaign_product.data.get("image"),
-                    "subtotal": float(qty*campaign_product.data.get("price"))
-                })
+                order_product = database.lss.order_product.OrderProduct.create(
+                    campaign_id= campaign_product.data.get('campaign_id'),
+                    campaign_product_id= campaign_product.id,
+                    pre_order_id=pre_order.id,
+                    qty= qty,
+                    customer_id=pre_order.data.get('customer_id'),
+                    customer_name= pre_order.data.get('customer_name'),
+                    platform=pre_order.data.get('platform'),
+                    type=campaign_product.data.get("type"),
+                    name=campaign_product.data.get("name"),
+                    price=campaign_product.data.get("price"),
+                    image=campaign_product.data.get("image"),
+                    subtotal=float(qty*campaign_product.data.get("price")),
+                    session=session)
 
-                print(template)
-                order_product = database.lss.order_product.OrderProduct.create(session=session,**template)
-                campaign_product.sold(qty_difference, session=session)
-
-                order_product = {
+                order_product_data = {
                     "order_product_id": order_product.id,
                     "name": campaign_product.data.get("name"),
                     "image": campaign_product.data.get("image"),
@@ -67,7 +62,7 @@ class PreOrderHelper():
 
                 data ={
                     "lock_at": datetime.now() if api_user and api_user.type == 'customer' else None,
-                    f"products.{str(campaign_product.id)}": order_product,
+                    f"products.{str(campaign_product.id)}": order_product_data,
                     "subtotal":subtotal,
                     "total":total
                 }
@@ -97,29 +92,31 @@ class PreOrderHelper():
                 qty = ret.get('qty')
                 qty_difference = ret.get('qty_difference')
                 
-                campaign_product.sold(qty_difference, sync=False, session=session)
-                order_product.update(qty=qty, subtotal=float(qty*campaign_product.data.get("price")), session=session)
-    
-                subtotal = pre_order.data.get('subtotal')+qty_difference*campaign_product.data.get('price')
-                free_delivery = pre_order.data.get("free_delivery",False)
-                shipping_cost = 0 if free_delivery else pre_order.data.get('shipping_cost',0)
-                adjust_price = pre_order.data.get("adjust_price",0)
-                total = subtotal+ float(shipping_cost)+float(adjust_price)
-                total = 0 if total<0 else total
-                
-
-                data ={
-                    "lock_at": datetime.now() if api_user and api_user.type == 'customer' else None,
-                    f"products.{str(campaign_product.id)}.{'qty'}": qty,
-                    f"products.{str(campaign_product.id)}.{'subtotal'}": float(qty*order_product.data.get('price')),
-                    "subtotal":subtotal,
-                    "total":total
-                }
-
-                pre_order.update(**data, session=session)
+                cls._update_product(pre_order, order_product, campaign_product, qty, qty_difference, api_user, session)
         return pre_order
 
-    
+    @classmethod
+    def _update_product(cls, pre_order, order_product, campaign_product, qty, qty_difference, api_user, session):
+        
+        order_product.update(qty=qty, subtotal=float(qty*campaign_product.data.get("price")), session=session)
+
+        subtotal = pre_order.data.get('subtotal')+qty_difference*campaign_product.data.get('price')
+        free_delivery = pre_order.data.get("free_delivery",False)
+        shipping_cost = 0 if free_delivery else pre_order.data.get('shipping_cost',0)
+        adjust_price = pre_order.data.get("adjust_price",0)
+        total = subtotal+ float(shipping_cost)+float(adjust_price)
+        total = 0 if total<0 else total
+        
+
+        data ={
+            "lock_at": datetime.now() if api_user and api_user.type == 'customer' else None,
+            f"products.{str(campaign_product.id)}.{'qty'}": qty,
+            f"products.{str(campaign_product.id)}.{'subtotal'}": float(qty*order_product.data.get('price')),
+            "subtotal":subtotal,
+            "total":total
+        }
+
+        pre_order.update(**data, session=session)
 
     @classmethod
     @lib.error_handle.error_handler.pymongo_error_handler.pymongo_error_handler
@@ -138,32 +135,34 @@ class PreOrderHelper():
                     'api_order_product':order_product.data,
                     'api_campaign_product':campaign_product.data,
                     })
-
-                campaign_product.customer_return(order_product.data.get('qty'), session=session)
-                order_product.delete(session=session)
-                
-
-                subtotal = pre_order.data.get('subtotal')-order_product.data.get('qty')*order_product.data.get('price')
-                free_delivery = pre_order.data.get("free_delivery",False)
-                shipping_cost = 0 if free_delivery else pre_order.data.get('shipping_cost',0)
-                adjust_price = pre_order.data.get("adjust_price",0)
-                total = subtotal+ float(shipping_cost)+float(adjust_price)
-                total = 0 if total<0 else total
-
-                data = {
-                            "lock_at": datetime.now() if api_user and api_user.type == 'customer' else None,
-                            "subtotal":subtotal,
-                            "total":total
-                        }
-
-                pre_order.delete_product(campaign_product, session=session, sync=False, **data)
+                cls._delete_product(pre_order, campaign_product, order_product, api_user, session)
         return True
+
+    @classmethod
+    def _delete_product(cls, pre_order, campaign_product, order_product, api_user, session):
+        
+        subtotal = pre_order.data.get('subtotal')-order_product.data.get('qty')*order_product.data.get('price')
+        free_delivery = pre_order.data.get("free_delivery",False)
+        shipping_cost = 0 if free_delivery else pre_order.data.get('shipping_cost',0)
+        adjust_price = pre_order.data.get("adjust_price",0)
+        total = subtotal+ float(shipping_cost)+float(adjust_price)
+        total = 0 if total<0 else total
+
+        data = {
+                    "lock_at": datetime.now() if api_user and api_user.type == 'customer' else None,
+                    "subtotal":subtotal,
+                    "total":total
+                }
+
+        pre_order.delete_product(campaign_product, session=session, sync=False, **data)
+        order_product.delete(session=session)
 
     @classmethod
     @lib.error_handle.error_handler.pymongo_error_handler.pymongo_error_handler
     def checkout(cls, api_user, campaign_id, pre_order_id):
         with database.lss.util.start_session() as session:
             with session.start_transaction():
+                success = True
                 campaign = database.lss.campaign.Campaign.get_object(id=campaign_id,session=session)
                 pre_order = database.lss.pre_order.PreOrder.get_object(id=pre_order_id,session=session)
 
@@ -172,18 +171,44 @@ class PreOrderHelper():
                     'api_pre_order':pre_order.data,
                     'campaign':campaign
                     })
+
+                for campaign_product_id_str in pre_order.data.get('products',{}).keys():
+                    order_product_data = pre_order.data.get('products',{}).get(campaign_product_id_str)
+                    order_product = database.lss.order_product.OrderProduct.get_object(id=order_product_data.get('order_product_id'), session=session)
+                    campaign_product = database.lss.campaign_product.CampaignProduct.get_object(id=int(campaign_product_id_str), session=session)
+
+                    try:
+                        ret = rule.rule_checker.pre_order_rule_checker.OrderProductCheckoutRuleChecker.check(**{
+                            'campaign_product':campaign_product,
+                            'order_product':order_product,
+                        })
+                    except Exception:
+                        cls._delete_product(pre_order, campaign_product, order_product, api_user, session)
+                        print(traceback.format_exc())
+                        success = False
+                        continue
+
+                    if qty_difference := ret.get('qty_difference'):
+                        qty = ret.get('qty')
+                        cls._update_product(pre_order, order_product, campaign_product, qty, qty_difference, api_user, session)
+                        success = False
+
+                if not success:
+                    return False, pre_order
+
+                for campaign_product_id_str in pre_order.data.get('products',{}).keys():
+                    database.lss.campaign_product.CampaignProduct(id=int(campaign_product_id_str)).sold(order_product_data.get('qty'), sync=False, session=session)
+
                 order_data = pre_order.data.copy()
 
                 del order_data['_id']
                 order_data['buyer_id'] = api_user.id if api_user else None
-                template = models.order.order.api_order_template.copy()
-                template.update(order_data)
 
-                order = database.lss.order.Order.create(session=session, **template)
+                order = database.lss.order.Order.create(session=session, **order_data)
                 database.lss.order_product.OrderProduct.transfer_to_order(pre_order=pre_order, order=order, session=session)
                 pre_order.update(session=session, sync=False, products={},total=0,subtotal=0, adjust_price=0, adjust_title="", free_delivery=False, history={}, meta={})
                 
-        return order
+        return True, order
 
     
     

@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action, permission_classes
 
 from api import models
-from api.utils.common.order_helper import PreOrderHelper
+# from api.utils.common.order_helper import PreOrderHelper
 import lib
 
 class OrderProductViewSet(viewsets.ModelViewSet):
@@ -23,8 +23,8 @@ class OrderProductViewSet(viewsets.ModelViewSet):
 
         order_product = lib.util.verify.Verify.get_order_product(pk)
 
-        PreOrderHelper.delete_product(
-            None, pre_order, order_product)
+        lib.helper.order_helper.PreOrderHelper.delete_product(
+            None, pre_order.id, order_product.id)
 
         pre_order = lib.util.verify.Verify.get_pre_order(pre_order.id)
         return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
@@ -40,8 +40,8 @@ class OrderProductViewSet(viewsets.ModelViewSet):
 
         order_product = lib.util.verify.Verify.get_order_product(pk)
 
-        PreOrderHelper.update_product(
-            None, order_product.pre_order, order_product, qty)
+        lib.helper.order_helper.PreOrderHelper.update_product(
+            None, pre_order.id, order_product.id, qty)
 
         pre_order = lib.util.verify.Verify.get_pre_order(pre_order.id)
         return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
@@ -59,8 +59,8 @@ class OrderProductViewSet(viewsets.ModelViewSet):
         api_user = lib.util.verify.Verify.get_customer_user(request)
         order_product = lib.util.verify.Verify.get_order_product(pk)
 
-        PreOrderHelper.delete_product(
-            api_user, pre_order, order_product)
+        lib.helper.order_helper.PreOrderHelper.delete_product(
+            api_user, pre_order.id, order_product.id)
 
         pre_order = lib.util.verify.Verify.get_pre_order(pre_order.id)
         return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
@@ -76,8 +76,8 @@ class OrderProductViewSet(viewsets.ModelViewSet):
         pre_order = lib.util.verify.Verify.get_pre_order_with_oid(pre_order_oid)
         order_product = lib.util.verify.Verify.get_order_product(pk)
 
-        PreOrderHelper.update_product(
-            api_user, pre_order, order_product, qty)
+        lib.helper.order_helper.PreOrderHelper.update_product(
+            api_user, pre_order.id, order_product.id, qty)
 
         pre_order = lib.util.verify.Verify.get_pre_order(pre_order.id)
         return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
@@ -88,28 +88,33 @@ class OrderProductViewSet(viewsets.ModelViewSet):
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def seller_delete_order_product(self, request, pk=None):
 
-        api_user, order_product_id = lib.util.getter.getparams(request, ('order_product_id',), seller=True)
+        api_user, pre_order_id = lib.util.getter.getparams(request, ('pre_order_id',), with_user=True, seller=True)
 
-        pre_order = lib.util.verify.Verify.get_pre_order(pk)
+        pre_order = lib.util.verify.Verify.get_pre_order(pre_order_id)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, pre_order.campaign.id)
+        order_product = lib.util.verify.Verify.get_order_product_from_pre_order(pre_order, pk)
 
-        order_product = lib.util.verify.Verify.get_order_product_from_pre_order(pre_order, order_product_id)
-        PreOrderHelper.delete_product(
-            api_user, pre_order, order_product)
-        return Response({'message': "delete success"}, status=status.HTTP_200_OK)
-    
+        lib.helper.order_helper.PreOrderHelper.delete_product(
+            api_user, pre_order.id, order_product.id)
+
+        pre_order = lib.util.verify.Verify.get_pre_order(pre_order.id)
+        return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
+
+
     @action(detail=True, methods=['GET'], url_path=r'seller/update', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def seller_update_order_product(self, request, pk=None):
-        api_user, order_product_id, qty = lib.util.getter.getparams(request, ('order_product_id', 'qty'), with_user=True, seller=True)
+        api_user, pre_order_id,qty = lib.util.getter.getparams(request, ('pre_order_id', 'qty'), with_user=True, seller=True)
 
-        pre_order = lib.util.verify.Verify.get_pre_order(pk)
+        pre_order = lib.util.verify.Verify.get_pre_order(pre_order_id)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, pre_order.campaign.id)
+        order_product = lib.util.verify.Verify.get_order_product_from_pre_order(pre_order, pk)
 
-        order_product = lib.util.verify.Verify.get_order_product_from_pre_order(pre_order, order_product_id)
-        api_order_product = PreOrderHelper.update_product(
-            api_user, pre_order, order_product, qty)
-        return Response(api_order_product, status=status.HTTP_200_OK)
-    
+        lib.helper.order_helper.PreOrderHelper.update_product(
+            api_user, pre_order.id, order_product.id, qty)
+
+        pre_order = lib.util.verify.Verify.get_pre_order(pre_order.id)
+        return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
+

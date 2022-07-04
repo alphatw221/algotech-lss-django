@@ -1,5 +1,6 @@
 from api.utils.rule.rule_checker._rule_checker import RuleChecker
 from api.utils.rule.check_rule.pre_order_check_rule import PreOrderCheckRule
+from api.utils.rule.check_rule.order_product_check_rule import OrderProductCheckRule
 
 class PreOrderUpdateProductRuleChecker(RuleChecker):
 
@@ -39,3 +40,9 @@ class PreOrderCheckoutRuleChecker(RuleChecker):
         PreOrderCheckRule.is_order_lock,
         PreOrderCheckRule.is_order_empty
     ]
+
+class OrderProductCheckoutRuleChecker(RuleChecker):
+
+    check_list=[
+        OrderProductCheckRule.is_stock_avaliable
+    ]    

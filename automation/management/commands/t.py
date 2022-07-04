@@ -50,7 +50,7 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.test_lucky_draw()
+        self.test_order_helper()
 
     def modify_database(self):
         from api.models.user.user_subscription import UserSubscription
@@ -387,8 +387,15 @@ class Command(BaseCommand):
         from api import models
 
 
-        # lib.helper.order_helper.PreOrderHelper.add_product(None, pre_order_id=975, campaign_product_id=7817,qty=1)
-        # lib.helper.order_helper.PreOrderHelper.update_product(None, 975, 253601, 2)
-        # lib.helper.order_helper.PreOrderHelper.delete_product(None, 975, 253601)
-        # lib.helper.order_helper.PreOrderHelper.checkout(None, campaign_id=510, pre_order_id=975)
+        lib.helper.order_helper.PreOrderHelper.add_product(None, pre_order_id=821, campaign_product_id=7648,qty=2)
+        # pre_order = lib.helper.order_helper.PreOrderHelper.update_product(None, 821, 253873, 2)
+
+        # lib.helper.order_helper.PreOrderHelper.delete_product(None, 821, 253873)
+        # success, order = lib.helper.order_helper.PreOrderHelper.checkout(None, campaign_id=449, pre_order_id=821)
         
+        # if success:
+        #     print('success')
+        # else:
+        #     print('unsuccess')
+
+        # print(order.data)

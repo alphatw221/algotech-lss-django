@@ -319,16 +319,16 @@ class CampaignViewSet(viewsets.ModelViewSet):
             campaign.facebook_campaign['post_id']=post_id
             campaign.facebook_page = facebook_page
         elif platform =='youtube':
-            youtube_channel = lib.util.verify.Verify.get_youtube_channel_from_user_subscription()(user_subscription, platform_id)
+            youtube_channel = lib.util.verify.Verify.get_youtube_channel_from_user_subscription(user_subscription, platform_id)
             campaign.youtube_campaign['live_video_id']=post_id
             campaign.youtube_channel = youtube_channel
         elif platform =='instagram':
-            instagram_profile = lib.util.verify.Verify.get_instagram_profile_from_user_subscription((user_subscription, platform_id))
+            instagram_profile = lib.util.verify.Verify.get_instagram_profile_from_user_subscription(user_subscription, platform_id)
             campaign.instagram_campaign['live_media_id']=post_id
             campaign.instagram_profile = instagram_profile
         campaign.save()
-        return Response(models.campaign.campaign.CampaignSerializerRetreive(campaign).data, status=status.HTTP_200_OK)
-    
+        # return Response(models.campaign.campaign.CampaignSerializerRetreive(campaign).data, status=status.HTTP_200_OK)
+        return Response(models.campaign.campaign.CampaignSerializer(campaign).data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['PUT'], url_path=r'delivery/setting/update', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
