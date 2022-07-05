@@ -22,6 +22,6 @@ class CampaignProduct(Collection):
 
     def customer_return(self, qty, sync=True, session=None):
 
-        self._collection.update_one({'id':self.id}, {"$inc": {'qty_add_to_cart': -qty,"$set":{'updated_at':datetime.utcnow()}}}, session=session)
+        self._collection.update_one({'id':self.id}, {"$inc": {'qty_add_to_cart': -qty},"$set":{'updated_at':datetime.utcnow()}}, session=session)
         if sync:
             self._sync(session=session)
