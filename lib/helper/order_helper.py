@@ -1,8 +1,9 @@
+from os import sync
 from django.conf import settings
 
 from api import rule,models
 
-
+import service
 import lib
 import database
 import traceback
@@ -68,7 +69,109 @@ class PreOrderHelper():
                 }
 
                 pre_order.update(**data, session=session)
+                campaign_product.add_to_cart(qty_difference, sync=False, session=session)
         return pre_order
+
+    # @classmethod
+    # def add_product_by_comment(cls, pre_order_id, campaign_product_id, qty):
+    #     with database.lss.util.start_session() as session:
+    #         with session.start_transaction():
+
+    #             pre_order = database.lss.pre_order.PreOrder.get_object(id=pre_order_id,session=session)
+    #             campaign_product = database.lss.campaign_product.CampaignProduct.get_object(id=campaign_product_id,session=session)
+
+    #             ret = rule.check_rule.pre_order_check_rule.PreOrderCheckRule.is_stock_avaliable(**{'api_campaign_product':api_campaign_product,'qty':qty})
+    #             qty_difference = ret.get('qty_difference')
+
+    #             increment_id = get_incremented_filed(
+    #                 collection_name="api_order_product", field_name="id", session=session)
+    #             template = api_order_product_template.copy()
+    #             template.update({
+    #                 "id": increment_id,
+    #                 "campaign_id": api_campaign_product["campaign_id"],
+    #                 "campaign_product_id": api_campaign_product["id"],
+    #                 "pre_order_id": api_pre_order["id"],
+    #                 "qty": qty,
+    #                 "customer_id": api_pre_order['customer_id'],
+    #                 "customer_name": api_pre_order['customer_name'],
+    #                 "platform": api_pre_order['platform'],
+    #                 "type": api_campaign_product["type"],
+    #                 "name": api_campaign_product["name"],
+    #                 "price": api_campaign_product["price"],
+    #                 "currency": api_campaign_product["currency"],
+    #                 "currency_sign": api_campaign_product["currency_sign"],
+    #                 "image": api_campaign_product["image"],
+    #                 "subtotal": float(qty*api_campaign_product["price"])
+    #             })
+    #             db.api_order_product.insert_one(template, session=session)
+
+
+    #             order_product = database.lss.order_product.OrderProduct.create(
+    #                 campaign_id= campaign_product.data.get('campaign_id'),
+    #                 campaign_product_id= campaign_product.id,
+    #                 pre_order_id=pre_order.id,
+    #                 qty= qty,
+    #                 customer_id=pre_order.data.get('customer_id'),
+    #                 customer_name= pre_order.data.get('customer_name'),
+    #                 platform=pre_order.data.get('platform'),
+    #                 type=campaign_product.data.get("type"),
+    #                 name=campaign_product.data.get("name"),
+    #                 price=campaign_product.data.get("price"),
+    #                 image=campaign_product.data.get("image"),
+    #                 subtotal=float(qty*campaign_product.data.get("price")),
+    #                 session=session)
+
+    #             db.api_campaign_product.update_one({"id": api_campaign_product['id']}, {
+    #                 "$inc": {'qty_sold': qty_difference}}, session=session)
+
+    #             order_product = {
+    #                 "order_product_id": increment_id,
+    #                 "name": api_campaign_product["name"],
+    #                 "image": api_campaign_product["image"],
+    #                 "price": api_campaign_product["price"],
+    #                 "type": api_campaign_product["type"],
+
+    #                 "currency": api_campaign_product["currency"],
+    #                 "currency_sign": api_campaign_product["currency_sign"],
+
+    #                 "qty": qty,
+    #                 "subtotal": float(qty*api_campaign_product["price"])
+    #             }
+
+    #             subtotal = api_pre_order['subtotal']+(qty_difference*api_campaign_product['price'])
+    #             free_delivery = api_pre_order.get("free_delivery",False)
+    #             shipping_cost = 0 if free_delivery else api_pre_order.get('shipping_cost',0)
+    #             adjust_price = api_pre_order.get("adjust_price",0)
+    #             total = subtotal+ float(shipping_cost)+float(adjust_price)
+
+    #             db.api_pre_order.update_one(
+    #                 {'id': api_pre_order['id']},
+    #                 {
+    #                     "$set": {
+    #                         f"products.{str(api_campaign_product['id'])}": order_product,
+    #                         "subtotal":subtotal,
+    #                         "total":total
+    #                     },
+    #                 },session=session)
+    #             websocket_send_data = {
+    #                 'pre_order': {
+    #                     "id": api_pre_order['id'],
+    #                     'customer_id': api_pre_order['customer_id'],
+    #                     'customer_name': api_pre_order['customer_name'],
+    #                     'customer_img': api_pre_order['customer_img'],
+    #                     'campaign_id': api_pre_order['campaign_id'],
+    #                     'platform': api_pre_order['platform'],
+    #                     'currency_sign': api_pre_order['currency_sign'],
+    #                     'subtotal': subtotal
+    #                 },
+    #                 "product": {
+    #                     "id": api_campaign_product['id'],
+    #                     'qty_sold': api_campaign_product['qty_sold'] + qty_difference
+    #                 }
+    #             }
+    #             service.channels.campaign.send_order_data(api_campaign_product["campaign_id"], websocket_send_data['pre_order'])
+    #             service.channels.campaign.send_product_data(api_campaign_product["campaign_id"], websocket_send_data['product'])
+
 
     @classmethod
     @lib.error_handle.error_handler.pymongo_error_handler.pymongo_error_handler
@@ -95,6 +198,50 @@ class PreOrderHelper():
                 cls._update_product(pre_order, order_product, campaign_product, qty, qty_difference, api_user, session)
         return pre_order
 
+    # @classmethod
+    # def update_product_by_comment(cls, api_pre_order, api_campaign_product, qty):
+
+    #     with client.start_session() as session:
+    #         with session.start_transaction():
+
+    #             api_pre_order = db.api_pre_order.find_one({"id":api_pre_order['id']}, session=session)
+    #             api_campaign_product = db.api_campaign_product.find_one({"id":api_campaign_product['id']}, session=session)
+
+    #             api_order_product = db.api_order_product.find_one(
+    #                 {"pre_order_id": api_pre_order['id'], "campaign_product_id": api_campaign_product['id']}, session=session)
+
+    #             ret = PreOrderCheckRule.is_stock_avaliable(**{'api_campaign_product':api_campaign_product,'qty':qty,'api_order_product':api_order_product})
+    #             qty_difference = ret.get('qty_difference')
+
+    #             db.api_campaign_product.update_one(
+    #                 {'id': api_campaign_product['id']}, {"$inc": {'qty_sold': qty_difference}}, session=session)
+
+    #             db.api_order_product.update_one(
+    #                 {'id': api_order_product['id']}, {"$set": {'qty': qty, 'subtotal': float(qty*api_campaign_product["price"])}}, session=session)
+
+    #             subtotal = api_pre_order['subtotal']+qty_difference*api_campaign_product['price']
+    #             free_delivery = api_pre_order.get("free_delivery",False)
+    #             shipping_cost = 0 if free_delivery else api_pre_order.get('shipping_cost',0)
+    #             adjust_price = api_pre_order.get("adjust_price",0)
+    #             total = subtotal+ float(shipping_cost)+float(adjust_price)
+
+    #             db.api_pre_order.update_one(
+    #                 {'id': api_pre_order['id']},
+    #                 {
+    #                     "$set": {
+    #                         f"products.{str(api_campaign_product['id'])}.{'qty'}": qty,
+    #                         f"products.{str(api_campaign_product['id'])}.{'subtotal'}": float(qty*api_order_product['price']),
+    #                         "subtotal":subtotal,
+    #                         "total":total
+    #                     },
+    #                 },session=session)
+                
+    #             websocket_send_data = {
+    #                 "id": api_campaign_product['id'],
+    #                 'qty_sold': api_campaign_product['qty_sold'] + qty_difference
+    #             }
+    #             service.channels.campaign.send_product_data(api_campaign_product["campaign_id"], websocket_send_data)
+
     @classmethod
     def _update_product(cls, pre_order, order_product, campaign_product, qty, qty_difference, api_user, session):
         
@@ -115,7 +262,7 @@ class PreOrderHelper():
             "subtotal":subtotal,
             "total":total
         }
-
+        campaign_product.add_to_cart(qty_difference, sync=False, session=session)
         pre_order.update(**data, session=session)
 
     @classmethod
@@ -138,6 +285,47 @@ class PreOrderHelper():
                 cls._delete_product(pre_order, campaign_product, order_product, api_user, session)
         return True
 
+    # @classmethod
+    # def delete_product_by_comment(cls, api_pre_order, api_campaign_product):
+    #     with client.start_session() as session:
+    #         with session.start_transaction():
+
+    #             api_pre_order = db.api_pre_order.find_one({"id":api_pre_order['id']}, session=session)
+    #             api_campaign_product = db.api_campaign_product.find_one({"id":api_campaign_product['id']}, session=session)
+
+    #             api_order_product = db.api_order_product.find_one(
+    #                 {"pre_order_id": api_pre_order['id'], "campaign_product_id": api_campaign_product['id']}, session=session)
+
+    #             db.api_campaign_product.update_one(
+    #                 {'id': api_campaign_product['id']}, {"$inc": {'qty_sold': -api_order_product['qty']}}, session=session)
+
+    #             db.api_order_product.delete_one(
+    #                 {'id': api_order_product['id']}, session=session)
+
+    #             subtotal = api_pre_order['subtotal']-api_order_product['qty']*api_order_product['price']
+    #             free_delivery = api_pre_order.get("free_delivery",False)
+    #             shipping_cost = 0 if free_delivery else api_pre_order.get('shipping_cost',0)
+    #             adjust_price = api_pre_order.get("adjust_price",0)
+    #             total = subtotal+ float(shipping_cost)+float(adjust_price)
+
+    #             db.api_pre_order.update_one(
+    #                 {'id': api_pre_order['id']},
+    #                 {
+    #                     "$unset":{
+    #                         f"products.{str(api_campaign_product['id'])}":""
+    #                     },
+    #                     "$set": {
+    #                         "subtotal": subtotal,
+    #                         "total": total
+    #                     }
+    #                 },session=session)
+                
+    #             websocket_send_data = {
+    #                 "id": api_campaign_product['id'],
+    #                 'qty_sold': api_campaign_product['qty_sold'] - api_order_product['qty']
+    #             }
+    #             service.channels.campaign.send_product_data(api_campaign_product["campaign_id"], websocket_send_data)
+
     @classmethod
     def _delete_product(cls, pre_order, campaign_product, order_product, api_user, session):
         
@@ -153,10 +341,9 @@ class PreOrderHelper():
                     "subtotal":subtotal,
                     "total":total
                 }
-
+        campaign_product.customer_return(order_product.data.get('qty'), sync=False, session=session)
         pre_order.delete_product(campaign_product, session=session, sync=False, **data)
         order_product.delete(session=session)
-
     @classmethod
     @lib.error_handle.error_handler.pymongo_error_handler.pymongo_error_handler
     def checkout(cls, api_user, campaign_id, pre_order_id):
@@ -210,7 +397,52 @@ class PreOrderHelper():
                 
         return True, order
 
+    #  @classmethod
+    # @add_or_update_by_comment_error_handler
+    # def add_or_update_by_comment(cls, api_pre_order, api_campaign_product, qty):
+    #     if not api_campaign_product['status']:
+    #         return RequestState.INVALID_PRODUCT_NOT_ACTIVATED
+    #     if api_campaign_product['max_order_amount'] and \
+    #             qty > api_campaign_product['max_order_amount']:
+    #         return RequestState.INVALID_EXCEED_MAX_ORDER_AMOUNT
+
+    #     if str(api_campaign_product['id']) not in api_pre_order['products']:
+    #         if qty > 0:
+    #             cls.add_product_by_comment(
+    #                     api_pre_order, api_campaign_product, qty)
+    #             return RequestState.ADDED
+    #         elif qty == 0:
+    #             return RequestState.INVALID_ADD_ZERO_QTY
+    #         else:
+    #             return RequestState.INVALID_NEGATIVE_QTY
+
+    #     else:
+    #         if qty > 0:
+    #             if not api_campaign_product['customer_editable']:
+    #                 return RequestState.INVALID_EDIT_NOT_ALLOWED
+
+    #             cls.update_product_by_comment(api_pre_order, api_campaign_product, qty)
+    #             return RequestState.UPDATED
+    #         elif qty == 0:
+    #             if not api_campaign_product['customer_removable']:
+    #                 return RequestState.INVALID_REMOVE_NOT_ALLOWED
+    #             cls.delete_product_by_comment(
+    #                     api_pre_order, api_campaign_product)
+    #             return RequestState.DELETED
+    #         else:
+    #             return RequestState.INVALID_NEGATIVE_QTY
+
+
     
+                
+
+    
+
+    
+
+
+
+
     
     @classmethod
     def summarize_pre_order(cls, pre_order, campaign, shipping_option=None, save=False):
