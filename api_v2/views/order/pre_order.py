@@ -124,12 +124,11 @@ class PreOrderViewSet(viewsets.ModelViewSet):
                 platform = None,
                 platform_id = None)
 
-            for campaign_product in campaign.products.filter(type='product'):   #status=True cause databaseError here
+            for campaign_product in campaign.products.filter(Q(type=models.campaign.campaign_product.TYPE_PRODUCT)|Q(type=models.campaign.campaign_product.TYPE_PRODUCT_FAST)):   #status=True cause databaseError here
 
                 if not campaign_product.status or not campaign_product.qty_for_sale - campaign_product.qty_sold:
                     continue
 
-                print(campaign_product.name)
                 try:
                     lib.helper.order_helper.PreOrderHelper.add_product(None, pre_order.id, campaign_product.id, 1)
                 except Exception:
@@ -173,12 +172,11 @@ class PreOrderViewSet(viewsets.ModelViewSet):
                 platform = None,
                 platform_id = None)
 
-            for campaign_product in campaign.products.filter(type='product'):   #status=True cause databaseError here
+            for campaign_product in campaign.products.filter(Q(type=models.campaign.campaign_product.TYPE_PRODUCT)|Q(type=models.campaign.campaign_product.TYPE_PRODUCT_FAST)):   #status=True cause databaseError here
 
                 if not campaign_product.status or not campaign_product.qty_for_sale - campaign_product.qty_sold:
                     continue
 
-                print(campaign_product.name)
                 try:
                     lib.helper.order_helper.PreOrderHelper.add_product(None, pre_order.id, campaign_product.id, 1)
                 except Exception:
@@ -315,13 +313,14 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     def seller_adjust(self, request, pk=None):
 
         adjust_price, adjust_title, free_delivery = lib.util.getter.getdata(request, ('adjust_price', 'adjust_title', 'free_delivery'))
+        if type(free_delivery) != bool or type(adjust_price) not in [int, float]:
+            raise lib.error_handle.error.api_error.ApiVerifyError("request data error")
         adjust_price = float(adjust_price)
         api_user = lib.util.verify.Verify.get_seller_user(request)
         pre_order = lib.util.verify.Verify.get_pre_order(pk)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, pre_order.campaign.id)
-        if type(free_delivery) != bool:
-            raise lib.error_handle.error.api_error.ApiVerifyError("request data error")
+        
 
         original_total = pre_order.total
         original_free_delivery = pre_order.free_delivery

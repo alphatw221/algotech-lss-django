@@ -6,6 +6,10 @@ from djongo import models
 from rest_framework import serializers
 
 
+TYPE_PRODUCT='product'
+TYPE_PRODUCT_FAST='product-fast'
+TYPE_LUCKY_DRAW='lucky_draw'
+TYPE_LUCKY_DRAW_FAST='lucky_draw-fast'
 class CampaignProduct(models.Model):
     class Meta:
         db_table = 'api_campaign_product'
@@ -30,7 +34,7 @@ class CampaignProduct(models.Model):
     qty_for_sale = models.IntegerField(blank=False, null=True, default=0)
     qty_sold = models.IntegerField(blank=False, null=True, default=0)
     qty_add_to_cart = models.IntegerField(blank=False, null=False, default=0)
-    
+
     name = models.CharField(max_length=255, null=True,
                             blank=True, default=None)
     excerpt = models.TextField(null=True, blank=True, default=None)
