@@ -1,3 +1,4 @@
+from os import sync
 from django.conf import settings
 
 from api import rule,models
@@ -68,6 +69,7 @@ class PreOrderHelper():
                 }
 
                 pre_order.update(**data, session=session)
+                campaign_product.add_to_cart(qty_difference, sync=False, session=session)
         return pre_order
 
     @classmethod
@@ -115,7 +117,7 @@ class PreOrderHelper():
             "subtotal":subtotal,
             "total":total
         }
-
+        campaign_product.add_to_cart(qty_difference, sync=False, session=session)
         pre_order.update(**data, session=session)
 
     @classmethod
@@ -153,10 +155,9 @@ class PreOrderHelper():
                     "subtotal":subtotal,
                     "total":total
                 }
-
+        campaign_product.customer_return(order_product.data.get('qty'), sync=False, session=session)
         pre_order.delete_product(campaign_product, session=session, sync=False, **data)
         order_product.delete(session=session)
-
     @classmethod
     @lib.error_handle.error_handler.pymongo_error_handler.pymongo_error_handler
     def checkout(cls, api_user, campaign_id, pre_order_id):
