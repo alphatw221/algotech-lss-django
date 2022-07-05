@@ -1,4 +1,4 @@
-from os import sync
+
 from django.conf import settings
 
 from api import rule,models
