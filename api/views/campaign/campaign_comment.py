@@ -23,26 +23,16 @@ class CampaignCommentViewSet(viewsets.ModelViewSet):
     serializer_class = CampaignCommentSerializer
     filterset_fields = []
 
-    @action(detail=False, methods=['GET'], url_path=r'summerize/<campaign_id>[^/.]+', permission_classes=(IsAuthenticated,))
+    @action(detail=True, methods=['GET'], url_path=r'summarize', permission_classes=(IsAuthenticated,))
     @api_error_handler
-    def get_summerize_comment_main_categories(self, request, campaign_id):
+    def get_summerize_comment_main_categories(self, request, pk):
 
-        since, count = lib.util.getter.getparams(
-            request, ('since', 'count',), with_user=False)
+        tag, = lib.util.getter.getparams(request, ('tag',), with_user=False)
+        print(tag)
         
-        if not since:
-            since =1 
-
-        if not count:
-            count = 20
-
-        comments = models.campaign.campaign_comment.CampaignComment.objects.filter(campaign=campaign_id).all()
+        comments = models.campaign.campaign_comment.CampaignComment.objects.filter(campaign=pk, categories__contains=tag.lower())
         
-        main_categories = serializers.serialize("json", comments.all(), fields=("id","categories", "message", "main_categories"))
-        res = loads(main_categories)
-
-        main_categories = CampaignCommentSerializerTest(comments.all(),many=True)
-        print(main_categories)
+        main_categories = CampaignCommentSerializer(comments, many=True)
         res = main_categories.data
 
         return Response(res, status=status.HTTP_200_OK)
