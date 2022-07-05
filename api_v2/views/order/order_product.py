@@ -86,6 +86,7 @@ class OrderProductViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['GET'], url_path=r'seller/delete', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    @lib.error_handle.error_handler.order_operation_error_handler.order_operation_error_handler
     def seller_delete_order_product(self, request, pk=None):
 
         api_user, pre_order_id = lib.util.getter.getparams(request, ('pre_order_id',), with_user=True, seller=True)
@@ -104,6 +105,7 @@ class OrderProductViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['GET'], url_path=r'seller/update', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    @lib.error_handle.error_handler.order_operation_error_handler.order_operation_error_handler
     def seller_update_order_product(self, request, pk=None):
         api_user, pre_order_id,qty = lib.util.getter.getparams(request, ('pre_order_id', 'qty'), with_user=True, seller=True)
 

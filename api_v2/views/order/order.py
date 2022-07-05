@@ -237,6 +237,10 @@ class OrderViewSet(viewsets.ModelViewSet):
         order = lib.util.verify.Verify.get_order(pk)
         lib.util.verify.Verify.get_campaign_from_user_subscription(api_user.user_subscription, order.campaign.id)
         
+        
+        content = i18n.delivery_comfirm_mail.i18n_get_mail_content(order)
+        jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)
+        
         # send_email(order.id)
 
-        return Response(order.id, status=status.HTTP_200_OK)
+        return Response(order.campaign.title, status=status.HTTP_200_OK)
