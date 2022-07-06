@@ -229,7 +229,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         return Response({'count':count,'data':merge_list_json}, status=status.HTTP_200_OK)
     
-    @action(detail=True, methods=['GET'], url_path=r'seller/delivery_status', permission_classes=(IsAuthenticated,))
+    @action(detail=True, methods=['POST'], url_path=r'seller/delivery_status', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def seller_order_delivery_status(self, request, pk=None):
 
@@ -238,9 +238,9 @@ class OrderViewSet(viewsets.ModelViewSet):
         lib.util.verify.Verify.get_campaign_from_user_subscription(api_user.user_subscription, order.campaign.id)
         
         
-        content = i18n.delivery_comfirm_mail.i18n_get_mail_content(order)
-        jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)
+        # content = i18n.delivery_comfirm_mail.i18n_get_mail_content(order)
+        # jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)
         
         # send_email(order.id)
 
-        return Response(order.campaign.title, status=status.HTTP_200_OK)
+        return Response(order, status=status.HTTP_200_OK)

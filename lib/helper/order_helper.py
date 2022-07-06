@@ -1,4 +1,4 @@
-from os import sync
+
 from django.conf import settings
 
 from api import rule,models
@@ -152,7 +152,7 @@ class PreOrderHelper():
     #                         "subtotal":subtotal,
     #                         "total":total
     #                     },
-    #                 },session=session)
+    #                 },session=session)！
     #             websocket_send_data = {
     #                 'pre_order': {
     #                     "id": api_pre_order['id'],
