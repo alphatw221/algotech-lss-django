@@ -407,17 +407,5 @@ class Command(BaseCommand):
     
     def test_campaign_job(self):
         from automation import jobs
-        jobs.campaign_job.campaign_job(648)
+        jobs.campaign_job.campaign_job(661)
 
-        from datetime import datetime
-        from dateutil import parser
-        yourdate = parser.parse('2022-07-04T05:21:15+0000')
-        timestamp = datetime.timestamp(parser.parse('2022-07-04T05:21:15+0000'))
-        print (timestamp)
-        print (type(timestamp))
-
-        # print ('-----------------------')
-        # print ('comment timestamp')
-        # print (datetime.fromisoformat('2022-07-04T05:21:15+0000'))
-
-        
