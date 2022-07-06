@@ -109,7 +109,7 @@ def capture_facebook(campaign, user_subscription_data, logs):
                 "image": comment['from']['picture']['data']['url'],
                 # "categories":service.nlp.classification.classify_comment_v1(texts=[[comment['message']]],threshold=0.9)
                 }
-            database.lss.campaign_comment.CampaignComment.create(**uni_format_comment)
+            database.lss.campaign_comment.CampaignComment.create(**uni_format_comment, auto_inc=False)
             
             service.channels.campaign.send_comment_data(campaign.id, uni_format_comment)
             service.rq.job.enqueue_comment_queue(jobs.comment_job.comment_job, campaign.data, user_subscription_data, 'facebook', facebook_page.data, uni_format_comment, order_codes_mapping)
@@ -247,7 +247,7 @@ def capture_youtube(campaign, user_subscription_data, logs):
                 "live_chat_id": live_chat_id,
                 # "categories":service.nlp.classification.classify_comment_v1(texts=[[comment['snippet']['displayMessage']]],threshold=0.9)
             }
-            database.lss.campaign_comment.CampaignComment.create(**uni_format_comment)
+            database.lss.campaign_comment.CampaignComment.create(**uni_format_comment, auto_inc=False)
             service.channels.campaign.send_comment_data(campaign.id, uni_format_comment)
             service.rq.job.enqueue_comment_queue(jobs.comment_job.comment_job, campaign.data, user_subscription_data, 'youtube', youtube_channel.data, uni_format_comment, order_codes_mapping)
         youtube_campaign['next_page_token'] = data.get('nextPageToken', "")
@@ -348,7 +348,7 @@ def capture_instagram(campaign, user_subscription_data, logs):
                 # "categories":service.nlp.classification.classify_comment_v1(texts=[[comment['text']]],threshold=0.9)
                 }   #
 
-            database.lss.campaign_comment.CampaignComment.create(**uni_format_comment)
+            database.lss.campaign_comment.CampaignComment.create(**uni_format_comment, auto_inc=False)
             service.channels.campaign.send_comment_data(campaign.id, uni_format_comment)
             service.rq.job.enqueue_comment_queue(jobs.comment_job.comment_job, campaign.data, user_subscription_data, 'instagram', instagram_profile.data, uni_format_comment, order_codes_mapping)
             
@@ -429,7 +429,7 @@ def capture_youtube_video(campaign, user_subscription_data, youtube_channel, log
                 # "categories":service.nlp.classification.classify_comment_v1(texts=[[comment['snippet']['topLevelComment']['snippet']['textDisplay']]],threshold=0.9)
             }
 
-            database.lss.campaign_comment.CampaignComment.create(**uni_format_comment)
+            database.lss.campaign_comment.CampaignComment.create(**uni_format_comment, auto_inc=False)
             service.rq.job.enqueue_comment_queue(jobs.comment_job.comment_job, 
                 campaign.data, user_subscription_data, 'youtube', youtube_channel.data, uni_format_comment, order_codes_mapping)
         if keep_capturing:
