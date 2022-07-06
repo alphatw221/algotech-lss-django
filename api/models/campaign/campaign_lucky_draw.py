@@ -21,9 +21,12 @@ class CampaignLuckyDraw(models.Model):
 
     campaign = models.ForeignKey(
         Campaign, blank=True, null=True, on_delete=models.CASCADE, related_name='campaign_lucky_draws')
+    
+    prize = models.ForeignKey(
+        CampaignProduct, blank=True, null=True, on_delete=models.SET_NULL, related_name='campaign_lucky_draws_prize')
+    
     campaign_product = models.ForeignKey(
         CampaignProduct, blank=True, null=True, on_delete=models.SET_NULL, related_name='campaign_lucky_draws')
-
 
     num_of_winner = models.IntegerField(null=True, blank=True, default=1)
     winner_list = models.JSONField(default=list, null=True, blank=True)
