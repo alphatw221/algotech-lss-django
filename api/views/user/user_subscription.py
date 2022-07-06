@@ -58,6 +58,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
     filterset_fields = []
     pagination_class = UserSubscriptionPagination
 
+    
     @action(detail=False, methods=['POST'], url_path=r'admin_create_user_subscription', permission_classes=(IsAdminUser,))
     @api_error_handler
     def create_user_subscription(self, request):
@@ -383,7 +384,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
         
         return Response(FacebookPageSerializer(user_subscription.facebook_pages.all(),many=True).data, status=status.HTTP_200_OK)
-
+                    
     @action(detail=False, methods=['POST'], url_path=r'v2/bind_facebook_pages', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def bind_user_facebook_pages(self, request):
@@ -422,9 +423,11 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
             if facebook_page not in api_user_user_subscription.facebook_pages.all():
                 api_user_user_subscription.facebook_pages.add(facebook_page)
-
+        page_id_of_binded_pages = [item['id'] for item in response['data']]
+        lib.helper.subscription_helper.remove_pages("facebook", api_user_user_subscription, page_id_of_binded_pages)
         return Response(FacebookPageSerializer(api_user_user_subscription.facebook_pages.all(),many=True).data, status=status.HTTP_200_OK)
-
+    
+    
     @action(detail=False, methods=['GET'], url_path=r'youtube_channels', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def list_user_subscription_youtube_channel(self, request):
@@ -497,7 +500,8 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
             if youtube_channel not in api_user_user_subscription.youtube_channels.all():
                 api_user_user_subscription.youtube_channels.add(youtube_channel)
-
+        channel_id_of_binded_pages = [item['id'] for item in response['items']]
+        lib.helper.subscription_helper.remove_pages("youtube", api_user_user_subscription, channel_id_of_binded_pages)
         return Response(YoutubeChannelSerializer(api_user_user_subscription.youtube_channels.all(), many=True).data, status=status.HTTP_200_OK)
     
     
@@ -585,6 +589,8 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         if status_code != 200:
             raise ApiVerifyError("api_fb_get_accounts_from_user error")
 
+        business_id_of_binded_pages = []
+        
         for item in response['data']:
             page_token = item['access_token']
             page_id = item['id']
@@ -621,7 +627,9 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
             if instagram_profile not in api_user_user_subscription.instagram_profiles.all():
                 api_user_user_subscription.instagram_profiles.add(instagram_profile)
-
+                
+            business_id_of_binded_pages.append(business_id)
+        lib.helper.subscription_helper.remove_pages("instagram", api_user_user_subscription, business_id_of_binded_pages)
         return Response(InstagramProfileSerializer(api_user_user_subscription.instagram_profiles.all(),many=True).data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET'], url_path=r'dealer_search_list', permission_classes=(IsAuthenticated,))
