@@ -19,7 +19,7 @@ from backend.api.instagram.profile import api_ig_get_profile_live_media
 from backend.api.youtube.channel import api_youtube_get_list_channel_by_token
 from business_policy.subscription_plan import SubscriptionPlan
 import hashlib
-
+from api import models
 from bson.objectid import ObjectId
 import database
 def getparams(request, params: tuple, with_user=True, seller=True):
@@ -147,15 +147,13 @@ class Verify():
 
     @classmethod
     def get_platform_from_user_subscription(cls, user_subscription, platform_name, platform_id):
-        attr_dict = {'facebook': 'facebook_pages', 'youtube': 'youtube_channels', 'instagram': 'instagram_profiles'}
-
-        if platform_name not in attr_dict:
+        if platform_name not in models.user.user_subscription.PLATFORM_ATTR:
             raise ApiVerifyError('not support platform')
 
-        if not getattr(user_subscription, attr_dict[platform_name]).filter(id=platform_id).exists():
+        if not getattr(user_subscription, models.user.user_subscription.PLATFORM_ATTR[platform_name]['attr']).filter(id=platform_id).exists():
             raise ApiVerifyError('platform not found')
 
-        return getattr(user_subscription, attr_dict[platform_name]).get(id=platform_id)
+        return getattr(user_subscription, models.user.user_subscription.PLATFORM_ATTR[platform_name]['attr']).get(id=platform_id)
 
     @classmethod
     def get_platform_verify_with_token(cls, token, platform_name, platform_id):
@@ -426,6 +424,17 @@ class Verify():
         except Exception as e:
             return False
         return False
+
+
+
+    @staticmethod
+    def get_lucky_draw(lucky_draw_id):
+        if not models.campaign.campaign_lucky_draw.CampaignLuckyDraw.objects.filter(id=lucky_draw_id).exists():
+            raise ApiVerifyError('lucky draw not found')
+        return models.campaign.campaign_lucky_draw.CampaignLuckyDraw.objects.get(id=lucky_draw_id)
+
+
+
     class PreOrderApi():
 
         class FromBuyer(VerifyRequestFromWhome):

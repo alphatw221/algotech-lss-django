@@ -4,6 +4,16 @@ from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
 
+from business_policy.subscription import TYPE_CHOICES
+
+STATUS_INIT='initiate'
+STATUS_FINISH='finish'
+
+TYPE_LIKE='like'
+TYPE_PURCHASE='purchase'
+TYPE_PRODUCT='product'
+TYPE_KEYWORD='keyword'
+TYPE_CHOICES=[TYPE_LIKE, TYPE_PURCHASE, TYPE_PRODUCT, TYPE_KEYWORD]
 
 class CampaignLuckyDraw(models.Model):
     class Meta:
@@ -18,8 +28,8 @@ class CampaignLuckyDraw(models.Model):
     num_of_winner = models.IntegerField(null=True, blank=True, default=1)
     winner_list = models.JSONField(default=list, null=True, blank=True)
 
-    type = models.CharField(max_length=255, null=True, blank=True)    #'like, perchase, product, keyword'
-    status = models.CharField(max_length=255, null=True, blank=True)    #'initiate, finish'
+    type = models.CharField(max_length=255, null=True, blank=True)    
+    status = models.CharField(max_length=255, null=True, blank=True)    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -35,7 +45,24 @@ class CampaignLuckyDrawSerializer(serializers.ModelSerializer):
     class Meta:
         model = CampaignLuckyDraw
         fields = '__all__'
-        read_only_fields = ['created_at', 'modified_at']
+        read_only_fields = ['created_at', 'updated_at']
+
+    meta = serializers.JSONField(default=dict)
+
+class CampaignLuckyDrawSerializerCreate(serializers.ModelSerializer):
+    class Meta:
+        model = CampaignLuckyDraw
+        fields = ["title", "comment", "num_of_winner", "repeatable", "spin_time", "animation", "meta"]
+        read_only_fields = ['created_at', 'updated_at']
+
+    meta = serializers.JSONField(default=dict)
+
+
+class CampaignLuckyDrawSerializerUpdate(serializers.ModelSerializer):
+    class Meta:
+        model = CampaignLuckyDraw
+        fields = ["title", "comment", "num_of_winner", "repeatable", "spin_time", "animation", "meta"]
+        read_only_fields = ['created_at', 'updated_at']
 
     meta = serializers.JSONField(default=dict)
 
