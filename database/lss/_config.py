@@ -36,14 +36,24 @@ class Collection():
         return cls(data.get('id'), data.get('_id'), data)
 
     @classmethod
-    def create(cls, session=None, **kwargs):
+    def create_object(cls, session=None, auto_inc=True, **kwargs):
         template = cls.template.copy()
         template.update(kwargs)
-        template['id'] = cls.__get_incremented_filed(session=session)
+        if auto_inc:
+            template['id'] = cls.__get_incremented_filed(session=session) 
         template['created_at'] = datetime.utcnow()
         _id = cls._collection.insert_one(template, session=session).inserted_id
         data = cls._collection.find_one(_id, session=session)
         return cls(data.get('id'), data.get('_id'), data)
+
+    @classmethod
+    def create(cls, session=None, auto_inc=True, **kwargs):
+        template = cls.template.copy()
+        template.update(kwargs)
+        if auto_inc:
+            template['id'] = cls.__get_incremented_filed(session=session) 
+        template['created_at'] = datetime.utcnow()
+        cls._collection.insert_one(template, session=session)
 
     
     @classmethod

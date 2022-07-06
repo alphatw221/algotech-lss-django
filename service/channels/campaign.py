@@ -4,7 +4,7 @@ from channels.layers import get_channel_layer
 
 
 def send_comment_data(campaign_id, data):
-    del data['_id']
+    # del data['_id']
     async_to_sync(get_channel_layer().group_send)(f"campaign_{campaign_id}", {"type": "comment_data","data":data})
     
 def send_order_data(campaign_id, data):

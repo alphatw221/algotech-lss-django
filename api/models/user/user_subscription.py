@@ -3,16 +3,21 @@ from pyexpat import model
 
 
 from api.models.facebook.facebook_page import (FacebookPage,
-                                               FacebookPageInfoSerializer)
+                                               FacebookPageInfoSerializer, FacebookPageSerializer)
 from api.models.instagram.instagram_profile import (
-    InstagramProfile, InstagramProfileInfoSerializer)
+    InstagramProfile, InstagramProfileInfoSerializer, InstagramProfileSerializer)
 from api.models.youtube.youtube_channel import (YoutubeChannel,
-                                                YoutubeChannelInfoSerializer)
+                                                YoutubeChannelInfoSerializer, YoutubeChannelSerializer)
 from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
 import business_policy
 
+PLATFORM_ATTR={
+    'facebook':{'attr':'facebook_pages','serializer':FacebookPageSerializer}, 
+    'instagram':{'attr':'instagram_profiles','serializer':InstagramProfileSerializer}, 
+    'youtube':{'attr':'instagram_profiles','serializer':YoutubeChannelSerializer}
+    }
 class UserSubscription(models.Model):
 
     class Meta:

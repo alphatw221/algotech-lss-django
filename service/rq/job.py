@@ -8,8 +8,8 @@ def enqueue_campaign_queue(job, campaign_id):
     campaign_queue.enqueue(job, job_id=str(campaign_id), args=(
                     campaign_id,), result_ttl=10, failure_ttl=10)
 
-def enqueue_comment_queue(job,campaign, platform_name, platform, uni_format_comment, order_codes_mapping):
-    comment_queue.enqueue(job, args=(campaign, platform_name, platform,
+def enqueue_comment_queue(job,campaign_data, user_subscription_data,  platform_name, platform_instance_data, uni_format_comment, order_codes_mapping):
+    comment_queue.enqueue(job, args=(campaign_data, user_subscription_data, platform_name, platform_instance_data,
                                   uni_format_comment, order_codes_mapping), result_ttl=10, failure_ttl=10)
     pass
 

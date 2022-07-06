@@ -1,1 +1,1 @@
-from . import email, campaign_announcement
+from . import email, campaign_announcement, cart_product_request, comment_command

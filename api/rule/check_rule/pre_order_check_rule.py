@@ -1,8 +1,7 @@
 from django.conf import settings
 from datetime import datetime
-from api.utils.error_handle.error.pre_order_error import PreOrderErrors
-from api.utils.common.verify import Verify
-
+from lib.error_handle.error.pre_order_error import PreOrderErrors
+import lib
 
 class PreOrderCheckRule():
 
@@ -131,4 +130,4 @@ class PreOrderCheckRule():
     @staticmethod
     def orders_limit(**kwargs):
         api_user = kwargs.get('api_user')
-        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)

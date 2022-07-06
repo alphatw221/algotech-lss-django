@@ -133,7 +133,7 @@ class ProductCandidateSetGenerator(CandidateSetGenerator):
         return candidate_set
 
 
-class PerchaseCandidateSetGenerator(CandidateSetGenerator):
+class PurchaseCandidateSetGenerator(CandidateSetGenerator):
 
     def get_candidate_set(cls, campaign, repeatable=False):
 
@@ -190,10 +190,11 @@ class LuckyDraw():
             cls.__add_product(campaign, winner, campaign_product)
             cls.__announce(campaign, winner, campaign_product)
             
+            winner_dict = winner.to_dict()
             if winner not in campaign_winner_list:
-                campaign_winner_list.append(winner.to_dict())
+                campaign_winner_list.append(winner_dict)
 
-            winner_list.append(winner.to_dict())
+            winner_list.append(winner_dict)
 
         campaign.meta['winner_list']=campaign_winner_list
         campaign.save()
@@ -258,18 +259,20 @@ class LuckyDraw():
 
 
 
-def draw_keyword(campaign, keyword, campaign_product, num_of_winner, limit=100, repeatable=False):
-    candidate_set = lib.helper.lucky_draw.KeywordCandidateSetGenerator.get_candidate_set(campaign, keyword, limit=limit, repeatable=repeatable)
-    return lib.helper.lucky_draw.LuckyDraw.draw_from_candidate(campaign, campaign_product,  candidate_set=candidate_set, num_of_winner=num_of_winner)
+def draw(campaign, lucky_draw):
+    
+    if lucky_draw.type ==models.campaign.campaign_lucky_draw.TYPE_KEYWORD:
+        candidate_set = lib.helper.lucky_draw.KeywordCandidateSetGenerator.get_candidate_set(campaign, lucky_draw.keyword, limit=100, repeatable=lucky_draw.repeatable)
+        return lib.helper.lucky_draw.LuckyDraw.draw_from_candidate(campaign, lucky_draw.campaign_product,  candidate_set=candidate_set, num_of_winner=lucky_draw.num_of_winner)
+    elif lucky_draw.type ==models.campaign.campaign_lucky_draw.TYPE_LIKE:
+        candidate_set = lib.helper.lucky_draw.LikesCandidateSetGenerator.get_candidate_set(campaign, limit=100, repeatable=lucky_draw.repeatable)
+        return lib.helper.lucky_draw.LuckyDraw.draw_from_candidate(campaign, lucky_draw.campaign_product,  candidate_set=candidate_set, num_of_winner=lucky_draw.num_of_winner)
+    elif lucky_draw.type ==models.campaign.campaign_lucky_draw.TYPE_PRODUCT:
+        candidate_set = lib.helper.lucky_draw.ProductCandidateSetGenerator.get_candidate_set(campaign, repeatable=lucky_draw.repeatable)
+        return lib.helper.lucky_draw.LuckyDraw.draw_from_candidate(campaign, lucky_draw.campaign_product,  candidate_set=candidate_set, num_of_winner=lucky_draw.num_of_winner)
+    elif lucky_draw.type ==models.campaign.campaign_lucky_draw.TYPE_PURCHASE:
+        candidate_set = lib.helper.lucky_draw.PurchaseCandidateSetGenerator.get_candidate_set(campaign, repeatable=lucky_draw.repeatable)
+        return lib.helper.lucky_draw.LuckyDraw.draw_from_candidate(campaign, lucky_draw.campaign_product,  candidate_set=candidate_set, num_of_winner=lucky_draw.num_of_winner)
+    else:
+        return []
 
-def draw_likes(campaign, campaign_product, num_of_winner, limit=100, repeatable=False):
-    candidate_set = lib.helper.lucky_draw.LikesCandidateSetGenerator.get_candidate_set(campaign, limit=limit, repeatable=repeatable)
-    return lib.helper.lucky_draw.LuckyDraw.draw_from_candidate(campaign, campaign_product,  candidate_set=candidate_set, num_of_winner=num_of_winner)
-
-def draw_perchase(campaign, campaign_product, num_of_winner, repeatable=False):
-    candidate_set = lib.helper.lucky_draw.PerchaseCandidateSetGenerator.get_candidate_set(campaign, repeatable=repeatable)
-    return lib.helper.lucky_draw.LuckyDraw.draw_from_candidate(campaign, campaign_product,  candidate_set=candidate_set, num_of_winner=num_of_winner)
-
-def draw_product(campaign, campaign_product, num_of_winner, repeatable=False):
-    candidate_set = lib.helper.lucky_draw.ProductCandidateSetGenerator.get_candidate_set(campaign, repeatable=repeatable)
-    return lib.helper.lucky_draw.LuckyDraw.draw_from_candidate(campaign, campaign_product,  candidate_set=candidate_set, num_of_winner=num_of_winner)

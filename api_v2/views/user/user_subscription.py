@@ -2,6 +2,7 @@ from django.conf import settings
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.http import HttpResponseRedirect
+from itsdangerous import Serializer
 from numpy import require
 
 from rest_framework import serializers, status, viewsets
@@ -268,6 +269,24 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
         return Response(models.user.user.UserSerializerAccountInfo(api_user).data, status=status.HTTP_200_OK)
 
+    @action(detail=False, methods=['PUT'], url_path=r'platform/(?P<platform_name>[^/.]+)/unbind', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def unbind_platform_instance(self, request, platform_name):
+
+        platform_instance_id, = lib.util.getter.getdata(request, ('id',), required=True)
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        platform_instance = lib.util.verify.Verify.get_platform_from_user_subscription(user_subscription,platform_name,platform_instance_id)
+
+        getattr(user_subscription, models.user.user_subscription.PLATFORM_ATTR[platform_name]['attr']).remove(platform_instance)
+        
+        if not platform_instance.user_subscriptions.all().exists():
+            platform_instance.delete()
+
+        queryset = getattr(user_subscription, models.user.user_subscription.PLATFORM_ATTR[platform_name]['attr']).all()
+        serializer = models.user.user_subscription.PLATFORM_ATTR[platform_name]['serializer']
+        return Response(serializer(queryset,many=True).data, status=status.HTTP_200_OK)
+        
     # @action(detail=False, methods=['POST'], url_path=r'update_logistic', permission_classes=(IsAuthenticated,))
     # @api_error_handler
     # def update_logistic(self, request):
