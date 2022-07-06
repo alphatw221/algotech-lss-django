@@ -34,9 +34,9 @@ class CampaignCommentSerializerTest(serializers.ModelSerializer):
 class CampaignCommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = CampaignComment
-        exclude=['id']
+        fields = '__all__'
         read_only_fields = ['created_at', 'modified_at']
-
+    id = serializers.CharField()
     meta = serializers.JSONField(default=dict)
     categories = serializers.JSONField(default=list, required=False)
     main_categories = serializers.JSONField(default=list, required=False)
