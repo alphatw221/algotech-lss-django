@@ -52,8 +52,8 @@ class CampaignCommentViewSet(viewsets.ModelViewSet):
             status_code, response = get_post_media_url(campaign.instagram_profile.token, campaign.instagram_campaign.get("live_media_id", ""))
             if status_code == 200:
                 ig_media_url = response["media_url"]
-        except Exception as e:
-            print(e)
+        except Exception:
+            print(response)
         res = {
             "all": {
                 "fully_setup": True
@@ -61,7 +61,7 @@ class CampaignCommentViewSet(viewsets.ModelViewSet):
             "facebook": {
                 # "comments":CampaignCommentSerializer(fb_comments, many=True).data,
                 "fully_setup": True if (campaign.facebook_campaign.get("post_id", None) and campaign.facebook_page) else False,
-                "page_id": campaign.facebook_page.page_id,
+                "page_id": campaign.facebook_page.page_id if campaign.facebook_page else None,
                 "post_id": campaign.facebook_campaign.get("post_id", None),
             },
             "instagram": {
@@ -72,7 +72,7 @@ class CampaignCommentViewSet(viewsets.ModelViewSet):
             "youtube": {
                 # "comments":CampaignCommentSerializer(yt_comments, many=True).data,
                 "fully_setup": True if (campaign.youtube_campaign.get("live_video_id", None) and campaign.youtube_channel) else False,
-                "live_video_id": campaign.youtube_campaign.get("live_video_id", None)
+                "live_video_id": campaign.youtube_campaign.get("live_video_id", None) 
             },
             
         }
