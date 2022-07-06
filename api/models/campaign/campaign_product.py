@@ -10,6 +10,8 @@ TYPE_PRODUCT='product'
 TYPE_PRODUCT_FAST='product-fast'
 TYPE_LUCKY_DRAW='lucky_draw'
 TYPE_LUCKY_DRAW_FAST='lucky_draw-fast'
+
+IMAGE_NULL = 'no_image.jpeg'
 class CampaignProduct(models.Model):
     class Meta:
         db_table = 'api_campaign_product'

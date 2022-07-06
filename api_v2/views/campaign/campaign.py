@@ -156,6 +156,8 @@ class CampaignViewSet(viewsets.ModelViewSet):
                 key = account.get('name','')+f'_{index}'
                 image=request.data.get(key)
                 if image in ['null', None, '', 'undefined']:
+                    account['image'] = models.campaign.campaign.IMAGE_NULL
+                    save=True
                     continue
                 account_name = account.get('name','')
                 image_path = default_storage.save(f'/campaign/{campaign.id}/payment/direct_payment/accounts/{account_name}/{image.name}', ContentFile(image.read()))
@@ -400,11 +402,11 @@ class CampaignViewSet(viewsets.ModelViewSet):
                          }, status=status.HTTP_200_OK)
 
 
-    @action(detail=True, methods=['POST'], url_path=r'fast_add_product', permission_classes=(IsAuthenticated,) )
+    @action(detail=True, methods=['POST'], url_path=r'product/add/fast', permission_classes=(IsAuthenticated,) )
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def fast_add_product(self, request, pk):
 
-        save_to_stock, name, category, code, price, qty = lib.util.getter.getdata(request,("save_to_stock", "name", "category", "code", "price", "qty"), required=True)
+        save_to_stock, name, category, order_code, price, qty = lib.util.getter.getdata(request,("save_to_stock", "name", "category", "order_code", "price", "qty"), required=True)
         
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
@@ -412,8 +414,8 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         product=None
         if save_to_stock:
-            product = models.product.product.Product.objects.create(user_subscription=user_subscription, created_by=api_user, name=name, category=category, code=code, price=price, qty=0, type=models.product.product.TYPE_PRODUCT)
+            product = models.product.product.Product.objects.create(user_subscription=user_subscription, created_by=api_user, name=name, category=category, order_code=order_code, price=price, qty=0, type=models.product.product.TYPE_PRODUCT)
 
-        campaign_product = models.campaign.campaign_product.CampaignProduct.objects.create(campaign=campaign, created_by=api_user, product=product,  status=True, type=models.product.product.TYPE_PRODUCT, name=name, order_code=code, price=float(price), qty_for_sale=int(qty))
+        campaign_product = models.campaign.campaign_product.CampaignProduct.objects.create(campaign=campaign, created_by=api_user, product=product,  status=True, type=models.product.product.TYPE_PRODUCT, name=name, order_code=order_code, price=float(price), qty_for_sale=int(qty), image=models.campaign.campaign_product.IMAGE_NULL)
 
         return Response(models.campaign.campaign_product.CampaignProductSerializer(campaign_product).data, status=status.HTTP_200_OK)

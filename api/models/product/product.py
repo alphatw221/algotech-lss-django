@@ -9,6 +9,7 @@ from rest_framework import serializers
 TYPE_PRODUCT='product'
 TYPE_LUCY_DRAW='lucky_draw'
 
+IMAGE_NULL = 'no_image.jpeg'
 class Product(models.Model):
     STATUS_CHOICES = [
         ('enabled', 'Enabled'),

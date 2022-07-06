@@ -47,7 +47,7 @@ class PreOrderHelper():
                 qty = ret.get('qty')
                 qty_difference = ret.get('qty_difference')
                 
-                cls._add_product(api_user, pre_order, campaign_product, qty, qty_difference)
+                cls._add_product(api_user, pre_order, campaign_product, qty, qty_difference, session=session)
         return pre_order
 
     @classmethod

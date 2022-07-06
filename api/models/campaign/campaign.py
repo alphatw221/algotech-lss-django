@@ -13,6 +13,7 @@ from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
 
+IMAGE_NULL='/no_image.jpeg'
 
 class Campaign(models.Model):
     class Meta:

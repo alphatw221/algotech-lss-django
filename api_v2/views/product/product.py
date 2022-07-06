@@ -94,7 +94,9 @@ class ProductViewSet(viewsets.ModelViewSet):
             image_path = default_storage.save(
                 f'{user_subscription.id}/product/{product.id}/{image.name}', ContentFile(image.read()))
             product.image = image_path
-        
+        else:
+            product.image = models.product.product.IMAGE_NULL
+            
         product.user_subscription = user_subscription
         product.category = categories if categories else None
         product.save()
