@@ -282,7 +282,7 @@ def capture_instagram(campaign, user_subscription_data, logs):
         return
 
     page_token = instagram_profile.data.get('token')
-    instagram_campaign = campaign['instagram_campaign']
+    instagram_campaign = campaign.data.get('instagram_campaign')
     live_media_id = instagram_campaign.get('live_media_id')
 
     if not page_token or not live_media_id:
@@ -366,7 +366,7 @@ def capture_instagram(campaign, user_subscription_data, logs):
 
 
 def capture_youtube_video(campaign, user_subscription_data, youtube_channel, logs):
-    youtube_campaign = campaign['youtube_campaign']
+    youtube_campaign = campaign.data.get('youtube_campaign')
     # refresh_token = youtube_campaign.get('refresh_token')
     next_page_token = youtube_campaign.get('next_page_token', '')
     live_video_id = youtube_campaign.get('live_video_id')
