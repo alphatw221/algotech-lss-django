@@ -162,7 +162,7 @@ class PreOrderHelper():
                 campaign_product = database.lss.campaign_product.CampaignProduct.get_object(id=campaign_product_id,session=session)
                 order_product = database.lss.order_product.OrderProduct.get_object(pre_order_id=pre_order_id,campaign_product_id=campaign_product_id,session=session)
                 
-                ret = rule.check_rule.pre_order_check_rule.PreOrderCheckRule.is_stock_avaliable(**{'api_campaign_product':campaign_product.data,'qty':qty,'order_product':order_product.data})
+                ret = rule.check_rule.pre_order_check_rule.PreOrderCheckRule.is_stock_avaliable(**{'api_campaign_product':campaign_product.data,'qty':qty,'api_order_product':order_product.data})
                 qty_difference = ret.get('qty_difference')
 
                 cls._update_product(pre_order, order_product, campaign_product, qty, qty_difference, None, session=session)
