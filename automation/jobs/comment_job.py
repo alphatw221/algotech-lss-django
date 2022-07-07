@@ -92,9 +92,9 @@ def comment_responding(platform_name, platform_instance_data, campaign_data, use
         text = lib.i18n.cart_product_request.get_request_response(
             state, campaign_product, qty, lang=user_subscription_data.get('buyer_lang'))
 
-        if state in [ lib.helper.order_helper.PreOrderHelper.RequestState.ADDED, 
-            lib.helper.order_helper.PreOrderHelper.RequestState.UPDATED, 
-            lib.helper.order_helper.PreOrderHelper.RequestState.DELETED]:
+        if state in [ lib.helper.order_helper.RequestState.ADDED, 
+            lib.helper.order_helper.RequestState.UPDATED, 
+            lib.helper.order_helper.RequestState.DELETED]:
             
             shopping_cart_info, info_in_pm_notice = lib.i18n.cart_product_request.get_additional_text(pre_order, lang=user_subscription_data.get('buyer_lang'))
         else:

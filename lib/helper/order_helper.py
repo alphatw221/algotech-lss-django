@@ -9,24 +9,28 @@ import database
 import traceback
 from datetime import datetime
 from enum import Enum, auto
+
+
+class RequestState():
+    INIT = 'init'
+    ADDING = 'adding'
+    ADDED = 'added'
+    UPDATING = 'updating'
+    UPDATED = 'updated'
+    DELETING = 'deleting'
+    DELETED = 'deleted'
+    INSUFFICIENT_INV = 'insufficient_inv'
+    INVALID_PRODUCT_NOT_ACTIVATED = 'invalid_product_not_activated'
+    INVALID_EXCEED_MAX_ORDER_AMOUNT = 'invalid_exceed_max_order_amount'
+    INVALID_REMOVE_NOT_ALLOWED = 'invalid_remove_not_allowed'
+    INVALID_EDIT_NOT_ALLOWED = 'invalid_edit_not_allowed'
+    INVALID_NEGATIVE_QTY = 'invalid_negative_qty'
+    INVALID_ADD_ZERO_QTY = 'invalid_add_zero_qty'
+    INVALID_UNKNOWN_REQUEST = 'invalid_unknown_request'
+
+
 class PreOrderHelper():
 
-    class RequestState(Enum):
-        INIT = auto()
-        ADDING = auto()
-        ADDED = auto()
-        UPDATING = auto()
-        UPDATED = auto()
-        DELETING = auto()
-        DELETED = auto()
-        INSUFFICIENT_INV = auto()
-        INVALID_PRODUCT_NOT_ACTIVATED = auto()
-        INVALID_EXCEED_MAX_ORDER_AMOUNT = auto()
-        INVALID_REMOVE_NOT_ALLOWED = auto()
-        INVALID_EDIT_NOT_ALLOWED = auto()
-        INVALID_NEGATIVE_QTY = auto()
-        INVALID_ADD_ZERO_QTY = auto()
-        INVALID_UNKNOWN_REQUEST = auto()
 
     @classmethod
     @lib.error_handle.error_handler.pymongo_error_handler.pymongo_error_handler
@@ -218,7 +222,7 @@ class PreOrderHelper():
             with session.start_transaction():
 
                 pre_order = database.lss.pre_order.PreOrder.get_object(id=pre_order_id, session=session)
-                campaign_product = database.lss.campaign_product.CampaignProduct.get_object(id=order_product.data.get('campaign_product_id'), session=session)
+                campaign_product = database.lss.campaign_product.CampaignProduct.get_object(id=campaign_product_id, session=session)
                 order_product = database.lss.order_product.OrderProduct.get_object(pre_order_id=pre_order_id, campaign_product_id=campaign_product_id, session=session)
 
                 cls._delete_product(pre_order, campaign_product, order_product, None, session)
@@ -304,36 +308,36 @@ class PreOrderHelper():
     @lib.error_handle.error_handler.add_or_update_by_comment_error_handler.add_or_update_by_comment_error_handler
     def add_or_update_by_comment(cls, pre_order, campaign_product_data, qty):
         if not campaign_product_data.get('status'):
-            return cls.RequestState.INVALID_PRODUCT_NOT_ACTIVATED
+            return RequestState.INVALID_PRODUCT_NOT_ACTIVATED
         if campaign_product_data.get('max_order_amount') and \
                 qty > campaign_product_data.get('max_order_amount'):
-            return cls.RequestState.INVALID_EXCEED_MAX_ORDER_AMOUNT
+            return RequestState.INVALID_EXCEED_MAX_ORDER_AMOUNT
 
         if str(campaign_product_data.get('id')) not in pre_order.data.get('products',{}):
             if qty > 0:
                 cls.add_product_by_comment(
                         pre_order.id, campaign_product_data.get('id'), qty)
-                return cls.RequestState.ADDED
+                return RequestState.ADDED
             elif qty == 0:
-                return cls.RequestState.INVALID_ADD_ZERO_QTY
+                return RequestState.INVALID_ADD_ZERO_QTY
             else:
-                return cls.RequestState.INVALID_NEGATIVE_QTY
+                return RequestState.INVALID_NEGATIVE_QTY
 
         else:
             if qty > 0:
                 if not campaign_product_data.get('customer_editable'):
-                    return cls.RequestState.INVALID_EDIT_NOT_ALLOWED
+                    return RequestState.INVALID_EDIT_NOT_ALLOWED
 
                 cls.update_product_by_comment(pre_order.id, campaign_product_data.get('id'), qty)
-                return cls.RequestState.UPDATED
+                return RequestState.UPDATED
             elif qty == 0:
                 if not campaign_product_data.get('customer_removable'):
-                    return cls.RequestState.INVALID_REMOVE_NOT_ALLOWED
+                    return RequestState.INVALID_REMOVE_NOT_ALLOWED
                 cls.delete_product_by_comment(
                         pre_order.id, campaign_product_data.get('id'))
-                return cls.RequestState.DELETED
+                return RequestState.DELETED
             else:
-                return cls.RequestState.INVALID_NEGATIVE_QTY
+                return RequestState.INVALID_NEGATIVE_QTY
 
 
     

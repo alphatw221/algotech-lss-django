@@ -51,9 +51,10 @@ class CampaignCommentViewSet(viewsets.ModelViewSet):
         try:
             status_code, response = get_post_media_url(campaign.instagram_profile.token, campaign.instagram_campaign.get("live_media_id", ""))
             if status_code == 200:
+                print(response)
                 ig_media_url = response["media_url"]
         except Exception:
-            print(response)
+            pass
         res = {
             "all": {
                 "fully_setup": True
