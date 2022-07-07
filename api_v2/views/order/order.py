@@ -19,24 +19,8 @@ import lib
 from api.utils.advance_query.dashboard import get_campaign_merge_order_list_v2
 
 from automation import jobs
-from backend import pymongo,i18n
-from backend.i18n.delivery_comfirm_mail import i18n_get_mail_content
 from api.utils.error_handle.error_handler.email_error_handler import email_error_handler
 
-@email_error_handler
-def send_shipping_email(order_id):
-
-    order_data = pymongo.mongodb.db.api_order.find_one({'id': int(order_id)})
-    campaign_id = order_data['campaign_id']
-    campaign_data = pymongo.mongodb.db.api_campaign.find_one({'id': int(campaign_id)})
-    facebook_page_id = campaign_data['facebook_page_id']
-    shop_name = pymongo.mongodb.db.api_facebook_page.find_one({'id': int(facebook_page_id)})['name']
-    customer_email = order_data['shipping_email']
-
-    mail_subject = i18n.delivery_comfirm_mail.i18n_get_mail_subject(shop_name)
-    mail_content = i18n.delivery_comfirm_mail.i18n_get_mail_content(order_id, campaign_data, order_data, shop_name)
-
-    i18n.delivery_comfirm_mail.send_smtp_mail(customer_email, mail_subject, mail_content)
 
 class OrderPagination(PageNumberPagination):
     page_query_param = 'page'
@@ -239,8 +223,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         lib.util.verify.Verify.get_campaign_from_user_subscription(api_user.user_subscription, order.campaign.id)
         
         #to do :email layout need update
-        # content = i18n_get_mail_content(order,api_user) 
+        # content = lib.i18n.email.delivery_comfirm_mail.i18n_get_mail_content(order,api_user) 
         # jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)
-        serializer = models.order.order.OrderSerializer(order)
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response('done', status=status.HTTP_200_OK)
