@@ -151,34 +151,34 @@ class SubscriptionPlan:
         'campaign_limit':5,
         'campaign_live_limit': 2,
         'channel_limit': 1,
-        'products_limit': 10,
-        'orders_limit': 100
+        'product_limit': 10,
+        'order_limit': 100
     }
     lite = {
         'campaign_limit':0,
         'campaign_live_limit': 2,
         'channel_limit': 1,
-        'products_limit': 30,
-        'orders_limit': 300
+        'product_limit': 30,
+        'order_limit': 300
     }
     standard = {
         'campaign_limit':0,
         'campaign_live_limit': 4,
         'channel_limit': 2,
-        'products_limit': 100,
-        'orders_limit': 1000
+        'product_limit': 100,
+        'order_limit': 1000
     }
     premium = {
         'campaign_limit':0,
         'campaign_live_limit': 6,
         'channel_limit': 3,
-        'products_limit': 300,
-        'orders_limit': 5000
+        'product_limit': 300,
+        'order_limit': 5000
     }
     dealer = {
         'campaign_limit':0,
         'campaign_live_limit': 100,
         'channel_limit': 30,
-        'products_limit': 3000,
-        'orders_limit': 500000
+        'product_limit': 3000,
+        'order_limit': 500000
     } 
