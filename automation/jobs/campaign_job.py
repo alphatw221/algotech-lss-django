@@ -285,9 +285,14 @@ def capture_instagram(campaign, user_subscription_data, logs):
     instagram_campaign = campaign.data.get('instagram_campaign')
     live_media_id = instagram_campaign.get('live_media_id')
 
-    if not page_token or not live_media_id:
-        logs.append(["error", "no page_token or live_media_id"])
+    if not live_media_id:
+        logs.append(["error", "no live_media_id"])
         return
+
+    if not page_token :
+        logs.append(["error", "no page_token"])
+        return
+
 
     last_crelast_create_message_id = instagram_campaign.get("last_create_message_id")
     
