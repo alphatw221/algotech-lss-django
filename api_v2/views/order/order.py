@@ -20,6 +20,7 @@ from api.utils.advance_query.dashboard import get_campaign_merge_order_list_v2
 
 from automation import jobs
 from backend import pymongo,i18n
+from backend.i18n.delivery_comfirm_mail import i18n_get_mail_content
 from api.utils.error_handle.error_handler.email_error_handler import email_error_handler
 
 @email_error_handler
@@ -229,7 +230,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         return Response({'count':count,'data':merge_list_json}, status=status.HTTP_200_OK)
     
-    @action(detail=True, methods=['GET'], url_path=r'seller/delivery_status', permission_classes=(IsAuthenticated,))
+    @action(detail=True, methods=['POST'], url_path=r'seller/delivery_status', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def seller_order_delivery_status(self, request, pk=None):
 
@@ -237,6 +238,9 @@ class OrderViewSet(viewsets.ModelViewSet):
         order = lib.util.verify.Verify.get_order(pk)
         lib.util.verify.Verify.get_campaign_from_user_subscription(api_user.user_subscription, order.campaign.id)
         
-        # send_email(order.id)
+        #to do :email layout need update
+        # content = i18n_get_mail_content(order,api_user) 
+        # jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)
+        serializer = models.order.order.OrderSerializer(order)
 
-        return Response(order.id, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK)
