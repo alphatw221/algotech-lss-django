@@ -222,7 +222,7 @@ class PreOrderHelper():
             with session.start_transaction():
 
                 pre_order = database.lss.pre_order.PreOrder.get_object(id=pre_order_id, session=session)
-                campaign_product = database.lss.campaign_product.CampaignProduct.get_object(id=order_product.data.get('campaign_product_id'), session=session)
+                campaign_product = database.lss.campaign_product.CampaignProduct.get_object(id=campaign_product_id, session=session)
                 order_product = database.lss.order_product.OrderProduct.get_object(pre_order_id=pre_order_id, campaign_product_id=campaign_product_id, session=session)
 
                 cls._delete_product(pre_order, campaign_product, order_product, None, session)
