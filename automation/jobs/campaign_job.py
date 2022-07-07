@@ -274,7 +274,7 @@ def capture_instagram(campaign, user_subscription_data, logs):
     
     if not campaign.data.get('instagram_profile_id'):
         return
-    instagram_profile = database.lss.instagram_profile.InstagramProfile.create_object(id=campaign.data.get('instagram_profile_id'))
+    instagram_profile = database.lss.instagram_profile.InstagramProfile.get_object(id=campaign.data.get('instagram_profile_id'))
 
 
     if not instagram_profile:
