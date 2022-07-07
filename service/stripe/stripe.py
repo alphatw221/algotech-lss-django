@@ -78,3 +78,19 @@ def create_checkout_session(secret, currency, order, success_url, cancel_url):
         return checkout_session
     except Exception:
         return False
+
+
+def is_payment_successful(secret, session_id):
+    try:
+        stripe.api_key = secret
+                
+        session = stripe.checkout.Session.retrieve(session_id)
+        payment_intent = stripe.PaymentIntent.retrieve(
+            session.payment_intent,
+        )
+        if payment_intent.status == "succeeded":
+            return True, payment_intent
+
+        return False, None
+    except Exception:
+        return False, None

@@ -12,6 +12,9 @@ STATUS_PROCEED = 'proceed'
 STATUS_COMPLETE = 'complete'
 STATUS_SHIPPING_OUT = 'shipping out'
 
+PAYMENT_METHOD_STRIPE = 'stripe'
+PAYMENT_METHOD_DIRECT = 'direct_payment'
+
 
 class Order(models.Model):
     campaign = models.ForeignKey(

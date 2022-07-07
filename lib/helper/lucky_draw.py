@@ -69,6 +69,7 @@ class KeywordCandidateSetGenerator(CandidateSetGenerator):
 
 class LikesCandidateSetGenerator(CandidateSetGenerator):
 
+    @classmethod
     def get_candidate_set(cls, campaign, limit=1000, repeatable=False):
 
         winner_list = campaign.meta.get('winner_list',[])
@@ -261,18 +262,18 @@ class LuckyDraw():
 
 def draw(campaign, lucky_draw):
     
-    if lucky_draw.type ==models.campaign.campaign_lucky_draw.TYPE_KEYWORD:
+    if lucky_draw.type == models.campaign.campaign_lucky_draw.TYPE_KEYWORD:
         candidate_set = lib.helper.lucky_draw.KeywordCandidateSetGenerator.get_candidate_set(campaign, lucky_draw.keyword, limit=100, repeatable=lucky_draw.repeatable)
-        return lib.helper.lucky_draw.LuckyDraw.draw_from_candidate(campaign, lucky_draw.campaign_product,  candidate_set=candidate_set, num_of_winner=lucky_draw.num_of_winner)
-    elif lucky_draw.type ==models.campaign.campaign_lucky_draw.TYPE_LIKE:
+        return lib.helper.lucky_draw.LuckyDraw.draw_from_candidate(campaign, lucky_draw.prize,  candidate_set=candidate_set, num_of_winner=lucky_draw.num_of_winner)
+    elif lucky_draw.type == models.campaign.campaign_lucky_draw.TYPE_LIKE:
         candidate_set = lib.helper.lucky_draw.LikesCandidateSetGenerator.get_candidate_set(campaign, limit=100, repeatable=lucky_draw.repeatable)
-        return lib.helper.lucky_draw.LuckyDraw.draw_from_candidate(campaign, lucky_draw.campaign_product,  candidate_set=candidate_set, num_of_winner=lucky_draw.num_of_winner)
-    elif lucky_draw.type ==models.campaign.campaign_lucky_draw.TYPE_PRODUCT:
-        candidate_set = lib.helper.lucky_draw.ProductCandidateSetGenerator.get_candidate_set(campaign, repeatable=lucky_draw.repeatable)
-        return lib.helper.lucky_draw.LuckyDraw.draw_from_candidate(campaign, lucky_draw.campaign_product,  candidate_set=candidate_set, num_of_winner=lucky_draw.num_of_winner)
-    elif lucky_draw.type ==models.campaign.campaign_lucky_draw.TYPE_PURCHASE:
+        return lib.helper.lucky_draw.LuckyDraw.draw_from_candidate(campaign, lucky_draw.prize,  candidate_set=candidate_set, num_of_winner=lucky_draw.num_of_winner)
+    elif lucky_draw.type == models.campaign.campaign_lucky_draw.TYPE_PRODUCT:
+        candidate_set = lib.helper.lucky_draw.ProductCandidateSetGenerator.get_candidate_set(campaign, campaign_product=lucky_draw.campaign_product, repeatable=lucky_draw.repeatable)
+        return lib.helper.lucky_draw.LuckyDraw.draw_from_candidate(campaign, lucky_draw.prize,  candidate_set=candidate_set, num_of_winner=lucky_draw.num_of_winner)
+    elif lucky_draw.type == models.campaign.campaign_lucky_draw.TYPE_PURCHASE:
         candidate_set = lib.helper.lucky_draw.PurchaseCandidateSetGenerator.get_candidate_set(campaign, repeatable=lucky_draw.repeatable)
-        return lib.helper.lucky_draw.LuckyDraw.draw_from_candidate(campaign, lucky_draw.campaign_product,  candidate_set=candidate_set, num_of_winner=lucky_draw.num_of_winner)
+        return lib.helper.lucky_draw.LuckyDraw.draw_from_candidate(campaign, lucky_draw.prize,  candidate_set=candidate_set, num_of_winner=lucky_draw.num_of_winner)
     else:
         return []
 
