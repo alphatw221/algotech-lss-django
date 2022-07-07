@@ -282,7 +282,6 @@ def capture_instagram(campaign, user_subscription_data, logs):
         return
 
     page_token = instagram_profile.data.get('token')
-    print(instagram_profile.data)
     instagram_campaign = campaign.data.get('instagram_campaign')
     live_media_id = instagram_campaign.get('live_media_id')
 
