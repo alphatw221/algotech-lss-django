@@ -67,7 +67,7 @@ class CampaignCommentViewSet(viewsets.ModelViewSet):
             },
             "instagram": {
                 # "comments":CampaignCommentSerializer(ig_comments, many=True).data,
-                "fully_setup": True if (campaign.instagram_campaign.get("live_media_id", None) and campaign.instagram_profile) else False,
+                "fully_setup": True if (campaign.instagram_campaign.get("live_media_id", None) and campaign.instagram_profile and ig_media_url) else False,
                 "media_url": ig_media_url
             },
             "youtube": {

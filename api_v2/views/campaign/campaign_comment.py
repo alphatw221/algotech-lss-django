@@ -10,7 +10,7 @@ import lib
 class CampaignCommentPagination(CursorPagination):
     page_size_query_param = 'page_size'
     ordering = '-created_time'
-
+    page_size=10
 class CampaignCommentViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     queryset = models.campaign.campaign_comment.CampaignComment.objects.all().order_by('id')
@@ -23,9 +23,14 @@ class CampaignCommentViewSet(viewsets.ModelViewSet):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription =  lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         campaign =  lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
+        category, = lib.util.getter.getparams(request, ('category',), with_user=False)
+
         queryset = campaign.comments.all().order_by('-created_time')
         if platform_name in ['facebook','youtube','instagram']:
             queryset = queryset.filter(platform=platform_name).order_by('-created_time')
+
+        if category not in [None, '', 'null', 'undefined']:
+            queryset = queryset.filter(categories__contains=category.lower()).order_by('-created_time')
 
         page = self.paginate_queryset(queryset)
         serializer = models.campaign.campaign_comment.CampaignCommentSerializer(page, many=True)

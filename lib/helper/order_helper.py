@@ -66,6 +66,8 @@ class PreOrderHelper():
                 qty_difference = ret.get('qty_difference')
 
                 cls._add_product(None, pre_order, campaign_product, qty, qty_difference ,session=session)
+
+                campaign_product._sync(session=session)
                 
                 pre_order_data = {
                     "id": pre_order.id,
@@ -78,7 +80,9 @@ class PreOrderHelper():
                 }
                 product_data = {
                     "id": campaign_product.id,
-                    'qty_sold': campaign_product.data.get('qty_sold') + qty_difference
+                    'qty_sold': campaign_product.data.get('qty_sold'),
+                    "qty_add_to_cart":campaign_product.data.get('qty_add_to_cart'),
+
                 }
                 service.channels.campaign.send_order_data(campaign_product.data.get("campaign_id"), pre_order_data)
                 service.channels.campaign.send_product_data(campaign_product.data.get("campaign_id"), product_data)
@@ -167,11 +171,17 @@ class PreOrderHelper():
 
                 cls._update_product(pre_order, order_product, campaign_product, qty, qty_difference, None, session=session)
                 
-                websocket_send_data = {
+                campaign_product._sync(session=session)
+                
+
+                product_data = {
                     "id": campaign_product.id,
-                    'qty_sold': campaign_product.data.get('qty_sold') + qty_difference
+                    'qty_sold': campaign_product.data.get('qty_sold'),
+                    "qty_add_to_cart":campaign_product.data.get('qty_add_to_cart'),
+
                 }
-                service.channels.campaign.send_product_data(campaign_product.data.get("campaign_id"), websocket_send_data)
+
+                service.channels.campaign.send_product_data(campaign_product.data.get("campaign_id"), product_data)
 
     @staticmethod
     def _update_product(pre_order, order_product, campaign_product, qty, qty_difference, api_user, session):
@@ -227,11 +237,14 @@ class PreOrderHelper():
 
                 cls._delete_product(pre_order, campaign_product, order_product, None, session)
                 
-                websocket_send_data = {
+                campaign_product._sync(session=session)
+
+                product_data = {
                     "id": campaign_product.id,
-                    'qty_sold': campaign_product.data.get('qty_sold') - order_product.data.get('qty')
+                    'qty_sold': campaign_product.data.get('qty_sold'),
+                    "qty_add_to_cart":campaign_product.data.get('qty_add_to_cart'),
                 }
-                service.channels.campaign.send_product_data(campaign_product.data.get("campaign_id"), websocket_send_data)
+                service.channels.campaign.send_product_data(campaign_product.data.get("campaign_id"), product_data)
 
     @staticmethod
     def _delete_product(pre_order, campaign_product, order_product, api_user, session):
