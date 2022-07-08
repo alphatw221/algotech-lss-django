@@ -67,25 +67,6 @@ class PreOrderHelper():
 
                 cls._add_product(None, pre_order, campaign_product, qty, qty_difference ,session=session)
 
-                campaign_product._sync(session=session)
-                
-                pre_order_data = {
-                    "id": pre_order.id,
-                    'customer_id': pre_order.data.get('customer_id'),
-                    'customer_name': pre_order.data.get('customer_name'),
-                    'customer_img': pre_order.data.get('customer_img'),
-                    'campaign_id': pre_order.data.get('campaign_id'),
-                    'platform': pre_order.data.get('platform'),
-                    'subtotal': pre_order.data.get('subtotal')
-                }
-                product_data = {
-                    "id": campaign_product.id,
-                    'qty_sold': campaign_product.data.get('qty_sold'),
-                    "qty_add_to_cart":campaign_product.data.get('qty_add_to_cart'),
-
-                }
-                service.channels.campaign.send_order_data(campaign_product.data.get("campaign_id"), pre_order_data)
-                service.channels.campaign.send_product_data(campaign_product.data.get("campaign_id"), product_data)
 
     @staticmethod
     def _add_product(api_user, pre_order, campaign_product, qty, qty_difference, session):
@@ -129,7 +110,27 @@ class PreOrderHelper():
         }
 
         pre_order.update(**data, session=session)
-        campaign_product.add_to_cart(qty_difference, sync=False, session=session)
+        campaign_product.add_to_cart(qty_difference, session=session)
+
+        pre_order_data = {
+            "id": pre_order.id,
+            'customer_id': pre_order.data.get('customer_id'),
+            'customer_name': pre_order.data.get('customer_name'),
+            'customer_img': pre_order.data.get('customer_img'),
+            'campaign_id': pre_order.data.get('campaign_id'),
+            'platform': pre_order.data.get('platform'),
+            'subtotal': pre_order.data.get('subtotal')
+        }
+        product_data = {
+            "id": campaign_product.id,
+            'qty_sold': campaign_product.data.get('qty_sold'),
+            "qty_add_to_cart":campaign_product.data.get('qty_add_to_cart'),
+
+        }
+        service.channels.campaign.send_order_data(campaign_product.data.get("campaign_id"), pre_order_data)
+        service.channels.campaign.send_product_data(campaign_product.data.get("campaign_id"), product_data)
+
+
 
     @classmethod
     @lib.error_handle.error_handler.pymongo_error_handler.pymongo_error_handler
@@ -174,15 +175,6 @@ class PreOrderHelper():
                 campaign_product._sync(session=session)
                 
 
-                product_data = {
-                    "id": campaign_product.id,
-                    'qty_sold': campaign_product.data.get('qty_sold'),
-                    "qty_add_to_cart":campaign_product.data.get('qty_add_to_cart'),
-
-                }
-
-                service.channels.campaign.send_product_data(campaign_product.data.get("campaign_id"), product_data)
-
     @staticmethod
     def _update_product(pre_order, order_product, campaign_product, qty, qty_difference, api_user, session):
         
@@ -203,8 +195,18 @@ class PreOrderHelper():
             "subtotal":subtotal,
             "total":total
         }
-        campaign_product.add_to_cart(qty_difference, sync=False, session=session)
+        campaign_product.add_to_cart(qty_difference, session=session)
         pre_order.update(**data, session=session)
+
+        product_data = {
+            "id": campaign_product.id,
+            'qty_sold': campaign_product.data.get('qty_sold'),
+            "qty_add_to_cart":campaign_product.data.get('qty_add_to_cart'),
+
+        }
+
+        service.channels.campaign.send_product_data(campaign_product.data.get("campaign_id"), product_data)
+
 
     @classmethod
     @lib.error_handle.error_handler.pymongo_error_handler.pymongo_error_handler
@@ -237,14 +239,7 @@ class PreOrderHelper():
 
                 cls._delete_product(pre_order, campaign_product, order_product, None, session)
                 
-                campaign_product._sync(session=session)
-
-                product_data = {
-                    "id": campaign_product.id,
-                    'qty_sold': campaign_product.data.get('qty_sold'),
-                    "qty_add_to_cart":campaign_product.data.get('qty_add_to_cart'),
-                }
-                service.channels.campaign.send_product_data(campaign_product.data.get("campaign_id"), product_data)
+              
 
     @staticmethod
     def _delete_product(pre_order, campaign_product, order_product, api_user, session):
@@ -261,9 +256,18 @@ class PreOrderHelper():
                     "subtotal":subtotal,
                     "total":total
                 }
-        campaign_product.customer_return(order_product.data.get('qty'), sync=False, session=session)
+        campaign_product.customer_return(order_product.data.get('qty'), session=session)
         pre_order.delete_product(campaign_product, session=session, sync=False, **data)
         order_product.delete(session=session)
+
+        product_data = {
+            "id": campaign_product.id,
+            'qty_sold': campaign_product.data.get('qty_sold'),
+            "qty_add_to_cart":campaign_product.data.get('qty_add_to_cart'),
+        }
+        service.channels.campaign.send_product_data(campaign_product.data.get("campaign_id"), product_data)
+
+
     @classmethod
     @lib.error_handle.error_handler.pymongo_error_handler.pymongo_error_handler
     def checkout(cls, api_user, campaign_id, pre_order_id):
