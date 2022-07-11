@@ -9,6 +9,7 @@ from api.models.facebook.facebook_page import FacebookPage
 from api.models.youtube.youtube_channel import YoutubeChannel
 from api.models.instagram.instagram_profile import InstagramProfile
 from api.models.user.user_subscription import UserSubscription
+from api.models.user.static_assets import StaticAssets
 
 from api.models.order.order import Order
 from api.models.order.pre_order import PreOrder
@@ -238,6 +239,12 @@ class Verify():
         if not user_subscription:
             raise ApiVerifyError("no user_subscription")
         return user_subscription
+    
+    @staticmethod
+    def get_assets_from_user_subscription(user_subscription, id):
+        if not user_subscription.assets.filter(id=id).exists():
+            raise ApiVerifyError("static assets not found")
+        return user_subscription.assets.get(id=id)
 
     @staticmethod
     def get_dealer_user_subscription_from_api_user(api_user):

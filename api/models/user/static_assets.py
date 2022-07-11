@@ -1,5 +1,6 @@
 from djongo import models
 from api.models.user.user_subscription import UserSubscription
+from rest_framework import serializers
 
 
 TYPE_ANIMATION='animation'
@@ -22,3 +23,10 @@ class StaticAssets(models.Model):
 
     def __str__(self):
         return str(self.name)
+
+
+class StaticAssetsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StaticAssets
+        fields = '__all__'
+        read_only_fields = ['created_at', 'updated_at']
