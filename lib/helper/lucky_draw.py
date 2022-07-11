@@ -47,17 +47,17 @@ class KeywordCandidateSetGenerator(CandidateSetGenerator):
         candidate_set = set()
         campaign_comments = models.campaign.campaign_comment.CampaignComment.objects.filter(
             campaign=campaign,
-            message=keyword,
-            # message__contains=keyword,
+            # message=keyword,
+            message__contains=keyword,
         )[:limit]
 
         for campaign_comment in campaign_comments:
-            
+            print (campaign_comment.customer_id)
             candidate = LuckyDrawCandidate(
                 platform=campaign_comment.platform, 
                 customer_id=campaign_comment.customer_id, 
                 customer_name=campaign_comment.customer_name,
-                customer_image='')
+                customer_image=campaign_comment.image)
 
             if not repeatable and candidate in winner_list:
                 continue
@@ -87,6 +87,8 @@ class LikesCandidateSetGenerator(CandidateSetGenerator):
                 raise lib.error_handle.error.api_error.ApiVerifyError('Get Facebook Service Fail, Please Retry Again')
             likes_user_list += [user.get('name') for user in response.get('data',[])]
 
+        print (likes_user_list)
+        print ('likes_user_list')
         campaign_comments = models.campaign.campaign_comment.CampaignComment.objects.filter(
             campaign=campaign,
             customer_name__in=likes_user_list
@@ -98,7 +100,7 @@ class LikesCandidateSetGenerator(CandidateSetGenerator):
                 platform=campaign_comment.platform, 
                 customer_id=campaign_comment.customer_id, 
                 customer_name=campaign_comment.customer_name,
-                customer_image='')
+                customer_image=campaign_comment.image)
 
             if not repeatable and candidate in winner_list:
                 continue
@@ -110,7 +112,8 @@ class LikesCandidateSetGenerator(CandidateSetGenerator):
 
 
 class ProductCandidateSetGenerator(CandidateSetGenerator):
-
+    
+    @classmethod
     def get_candidate_set(cls, campaign, campaign_product, repeatable=False):
 
         winner_list = campaign.meta.get('winner_list',[])
@@ -119,12 +122,12 @@ class ProductCandidateSetGenerator(CandidateSetGenerator):
         order_products = models.order.order_product.OrderProduct.objects.filter(campaign=campaign, campaign_product=campaign_product)
 
         for order_product in order_products:
-
+            img_url = models.order.pre_order.PreOrder.objects.get(customer_id=order_product.customer_id, campaign=campaign.id).customer_img
             candidate = LuckyDrawCandidate(
                 platform=order_product.platform, 
                 customer_id=order_product.customer_id, 
                 customer_name=order_product.customer_name,
-                customer_image='')
+                customer_image=img_url)
 
             if not repeatable and candidate in winner_list:
                 continue
@@ -136,6 +139,7 @@ class ProductCandidateSetGenerator(CandidateSetGenerator):
 
 class PurchaseCandidateSetGenerator(CandidateSetGenerator):
 
+    @classmethod
     def get_candidate_set(cls, campaign, repeatable=False):
 
         winner_list = campaign.meta.get('winner_list',[])
@@ -263,13 +267,13 @@ class LuckyDraw():
 def draw(campaign, lucky_draw):
     
     if lucky_draw.type == models.campaign.campaign_lucky_draw.TYPE_KEYWORD:
-        candidate_set = lib.helper.lucky_draw.KeywordCandidateSetGenerator.get_candidate_set(campaign, lucky_draw.keyword, limit=100, repeatable=lucky_draw.repeatable)
+        candidate_set = lib.helper.lucky_draw.KeywordCandidateSetGenerator.get_candidate_set(campaign, lucky_draw.comment, limit=100, repeatable=lucky_draw.repeatable)
         return lib.helper.lucky_draw.LuckyDraw.draw_from_candidate(campaign, lucky_draw.prize,  candidate_set=candidate_set, num_of_winner=lucky_draw.num_of_winner)
     elif lucky_draw.type == models.campaign.campaign_lucky_draw.TYPE_LIKE:
         candidate_set = lib.helper.lucky_draw.LikesCandidateSetGenerator.get_candidate_set(campaign, limit=100, repeatable=lucky_draw.repeatable)
         return lib.helper.lucky_draw.LuckyDraw.draw_from_candidate(campaign, lucky_draw.prize,  candidate_set=candidate_set, num_of_winner=lucky_draw.num_of_winner)
     elif lucky_draw.type == models.campaign.campaign_lucky_draw.TYPE_PRODUCT:
-        candidate_set = lib.helper.lucky_draw.ProductCandidateSetGenerator.get_candidate_set(campaign, campaign_product=lucky_draw.campaign_product, repeatable=lucky_draw.repeatable)
+        candidate_set = lib.helper.lucky_draw.ProductCandidateSetGenerator.get_candidate_set(campaign=campaign, campaign_product=lucky_draw.campaign_product, repeatable=lucky_draw.repeatable)
         return lib.helper.lucky_draw.LuckyDraw.draw_from_candidate(campaign, lucky_draw.prize,  candidate_set=candidate_set, num_of_winner=lucky_draw.num_of_winner)
     elif lucky_draw.type == models.campaign.campaign_lucky_draw.TYPE_PURCHASE:
         candidate_set = lib.helper.lucky_draw.PurchaseCandidateSetGenerator.get_candidate_set(campaign, repeatable=lucky_draw.repeatable)

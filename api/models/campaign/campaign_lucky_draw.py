@@ -1,5 +1,6 @@
+from email.policy import default
 from api.models.campaign.campaign import Campaign
-from api.models.campaign.campaign_product import CampaignProduct
+from api.models.campaign.campaign_product import CampaignProduct, CampaignProductSerializer
 from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
@@ -40,7 +41,7 @@ class CampaignLuckyDraw(models.Model):
 
     repeatable = models.BooleanField(default=True ,null=False, blank=False)
     animation = models.CharField(max_length=255, null=True, blank=True)
-    spin_time = models.IntegerField(null=False, blank=False, default=2)
+    spin_time = models.IntegerField(null=False, blank=False, default=5)
     comment = models.CharField(max_length=255, null=True, blank=True)
     title = models.CharField(max_length=255, null=True, blank=True, default='')
     
@@ -50,6 +51,8 @@ class CampaignLuckyDrawSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['created_at', 'updated_at']
 
+    campaign_product = CampaignProductSerializer(read_only=True, default=dict)
+    prize = CampaignProductSerializer(read_only=True, default=dict)
     meta = serializers.JSONField(default=dict)
 
 class CampaignLuckyDrawSerializerCreate(serializers.ModelSerializer):
