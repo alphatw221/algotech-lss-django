@@ -10,7 +10,7 @@ import lib
 class CampaignCommentPagination(CursorPagination):
     page_size_query_param = 'page_size'
     ordering = '-created_time'
-    page_size=10
+    page_size=25
 class CampaignCommentViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     queryset = models.campaign.campaign_comment.CampaignComment.objects.all().order_by('id')
