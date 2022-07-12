@@ -10,11 +10,13 @@ from collections import OrderedDict
 
 class LuckyDrawCandidate():
 
-    def __init__(self, platform, customer_id, customer_name="", customer_image=""):
+    def __init__(self, platform, customer_id, customer_name="", customer_image="", draw_type=None, prize=None):
         self.platform = platform
         self.customer_id = customer_id
         self.customer_name = customer_name
         self.customer_image = customer_image
+        self.draw_type = draw_type
+        self.prize = prize
 
     def __hash__(self) -> int:
         return (self.platform, self.customer_id).__hash__()
@@ -29,7 +31,7 @@ class LuckyDrawCandidate():
             return False
 
     def to_dict(self):
-        return {'platform':self.platform,'customer_id':self.customer_id,'customer_name':self.customer_name,'customer_image':self.customer_image}
+        return {'platform':self.platform,'customer_id':self.customer_id,'customer_name':self.customer_name,'customer_image':self.customer_image,'draw_type':self.draw_type,'prize':self.prize}
 
 class CandidateSetGenerator():
 
@@ -41,14 +43,14 @@ class CandidateSetGenerator():
 class KeywordCandidateSetGenerator(CandidateSetGenerator):
 
     @classmethod
-    def get_candidate_set(cls, campaign, keyword, limit=1000, repeatable=False):
+    def get_candidate_set(cls, campaign, lucky_draw, limit=1000):
         
         winner_list = campaign.meta.get('winner_list',[])
         candidate_set = set()
         campaign_comments = models.campaign.campaign_comment.CampaignComment.objects.filter(
             campaign=campaign,
             # message=keyword,
-            message__contains=keyword,
+            message__contains=lucky_draw.keyword,
         )[:limit]
 
         for campaign_comment in campaign_comments:
@@ -57,9 +59,11 @@ class KeywordCandidateSetGenerator(CandidateSetGenerator):
                 platform=campaign_comment.platform, 
                 customer_id=campaign_comment.customer_id, 
                 customer_name=campaign_comment.customer_name,
-                customer_image=campaign_comment.image)
+                customer_image=campaign_comment.image,
+                draw_type=lucky_draw.type,
+                prize=lucky_draw.prize.name)
 
-            if not repeatable and candidate in winner_list:
+            if not lucky_draw.repeatable and candidate in winner_list:
                 continue
 
             candidate_set.add(candidate)
@@ -70,7 +74,7 @@ class KeywordCandidateSetGenerator(CandidateSetGenerator):
 class LikesCandidateSetGenerator(CandidateSetGenerator):
 
     @classmethod
-    def get_candidate_set(cls, campaign, limit=1000, repeatable=False):
+    def get_candidate_set(cls, lucky_draw, campaign, limit=1000):
 
         winner_list = campaign.meta.get('winner_list',[])
         candidate_set = set()
@@ -100,9 +104,11 @@ class LikesCandidateSetGenerator(CandidateSetGenerator):
                 platform=campaign_comment.platform, 
                 customer_id=campaign_comment.customer_id, 
                 customer_name=campaign_comment.customer_name,
-                customer_image=campaign_comment.image)
+                customer_image=campaign_comment.image,
+                draw_type=lucky_draw.type,
+                prize=lucky_draw.prize.name)
 
-            if not repeatable and candidate in winner_list:
+            if not lucky_draw.repeatable and candidate in winner_list:
                 continue
 
             candidate_set.add(candidate)
@@ -114,12 +120,12 @@ class LikesCandidateSetGenerator(CandidateSetGenerator):
 class ProductCandidateSetGenerator(CandidateSetGenerator):
     
     @classmethod
-    def get_candidate_set(cls, campaign, campaign_product, repeatable=False):
+    def get_candidate_set(cls, campaign, lucky_draw):
 
         winner_list = campaign.meta.get('winner_list',[])
         candidate_set = set()
 
-        order_products = models.order.order_product.OrderProduct.objects.filter(campaign=campaign, campaign_product=campaign_product)
+        order_products = models.order.order_product.OrderProduct.objects.filter(campaign=campaign, campaign_product=lucky_draw.campaign_product)
 
         for order_product in order_products:
             img_url = models.order.pre_order.PreOrder.objects.get(customer_id=order_product.customer_id, campaign=campaign.id).customer_img
@@ -127,9 +133,11 @@ class ProductCandidateSetGenerator(CandidateSetGenerator):
                 platform=order_product.platform, 
                 customer_id=order_product.customer_id, 
                 customer_name=order_product.customer_name,
-                customer_image=img_url)
+                customer_image=img_url,
+                draw_type=lucky_draw.type,
+                prize=lucky_draw.prize.name)
 
-            if not repeatable and candidate in winner_list:
+            if not lucky_draw.repeatable and candidate in winner_list:
                 continue
 
             candidate_set.add(candidate)
@@ -140,7 +148,7 @@ class ProductCandidateSetGenerator(CandidateSetGenerator):
 class PurchaseCandidateSetGenerator(CandidateSetGenerator):
 
     @classmethod
-    def get_candidate_set(cls, campaign, repeatable=False):
+    def get_candidate_set(cls, campaign, lucky_draw):
 
         winner_list = campaign.meta.get('winner_list',[])
         candidate_set = set()
@@ -153,9 +161,11 @@ class PurchaseCandidateSetGenerator(CandidateSetGenerator):
                 platform=order.platform, 
                 customer_id=order.customer_id, 
                 customer_name=order.customer_name,
-                customer_image=order.customer_img)
+                customer_image=order.customer_img,
+                draw_type=lucky_draw.type,
+                prize=lucky_draw.prize.name)
 
-            if not repeatable and candidate in winner_list:
+            if not lucky_draw.repeatable and candidate in winner_list:
                 continue
 
             candidate_set.add(candidate)
@@ -165,9 +175,11 @@ class PurchaseCandidateSetGenerator(CandidateSetGenerator):
                 platform=pre_order.platform, 
                 customer_id=pre_order.customer_id, 
                 customer_name=pre_order.customer_name,
-                customer_image=pre_order.customer_img)
+                customer_image=pre_order.customer_img,
+                draw_type=lucky_draw.type,
+                prize=lucky_draw.prize.name)
 
-            if not repeatable and candidate in winner_list:
+            if not lucky_draw.repeatable and candidate in winner_list:
                 continue
 
             candidate_set.add(candidate)
@@ -196,8 +208,8 @@ class LuckyDraw():
             cls.__announce(campaign, winner, campaign_product)
             
             winner_dict = winner.to_dict()
-            if winner not in campaign_winner_list:
-                campaign_winner_list.append(winner_dict)
+            # if winner not in campaign_winner_list:
+            campaign_winner_list.append(winner_dict)
 
             winner_list.append(winner_dict)
 
@@ -267,16 +279,16 @@ class LuckyDraw():
 def draw(campaign, lucky_draw):
     
     if lucky_draw.type == models.campaign.campaign_lucky_draw.TYPE_KEYWORD:
-        candidate_set = lib.helper.lucky_draw.KeywordCandidateSetGenerator.get_candidate_set(campaign, lucky_draw.comment, limit=100, repeatable=lucky_draw.repeatable)
+        candidate_set = lib.helper.lucky_draw.KeywordCandidateSetGenerator.get_candidate_set(campaign, lucky_draw, limit=100)
         return lib.helper.lucky_draw.LuckyDraw.draw_from_candidate(campaign, lucky_draw.prize,  candidate_set=candidate_set, num_of_winner=lucky_draw.num_of_winner)
     elif lucky_draw.type == models.campaign.campaign_lucky_draw.TYPE_LIKE:
-        candidate_set = lib.helper.lucky_draw.LikesCandidateSetGenerator.get_candidate_set(campaign, limit=100, repeatable=lucky_draw.repeatable)
+        candidate_set = lib.helper.lucky_draw.LikesCandidateSetGenerator.get_candidate_set(campaign, lucky_draw, limit=100)
         return lib.helper.lucky_draw.LuckyDraw.draw_from_candidate(campaign, lucky_draw.prize,  candidate_set=candidate_set, num_of_winner=lucky_draw.num_of_winner)
     elif lucky_draw.type == models.campaign.campaign_lucky_draw.TYPE_PRODUCT:
-        candidate_set = lib.helper.lucky_draw.ProductCandidateSetGenerator.get_candidate_set(campaign=campaign, campaign_product=lucky_draw.campaign_product, repeatable=lucky_draw.repeatable)
+        candidate_set = lib.helper.lucky_draw.ProductCandidateSetGenerator.get_candidate_set(campaign, lucky_draw)
         return lib.helper.lucky_draw.LuckyDraw.draw_from_candidate(campaign, lucky_draw.prize,  candidate_set=candidate_set, num_of_winner=lucky_draw.num_of_winner)
     elif lucky_draw.type == models.campaign.campaign_lucky_draw.TYPE_PURCHASE:
-        candidate_set = lib.helper.lucky_draw.PurchaseCandidateSetGenerator.get_candidate_set(campaign, repeatable=lucky_draw.repeatable)
+        candidate_set = lib.helper.lucky_draw.PurchaseCandidateSetGenerator.get_candidate_set(campaign, lucky_draw)
         return lib.helper.lucky_draw.LuckyDraw.draw_from_candidate(campaign, lucky_draw.prize,  candidate_set=candidate_set, num_of_winner=lucky_draw.num_of_winner)
     else:
         return []
