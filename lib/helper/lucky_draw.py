@@ -128,12 +128,12 @@ class ProductCandidateSetGenerator(CandidateSetGenerator):
         order_products = models.order.order_product.OrderProduct.objects.filter(campaign=campaign, campaign_product=lucky_draw.campaign_product)
 
         for order_product in order_products:
-            img_url = models.order.pre_order.PreOrder.objects.get(customer_id=order_product.customer_id, campaign=campaign.id).customer_img
+            # img_url = models.order.pre_order.PreOrder.objects.get(customer_id=order_product.customer_id, campaign=campaign.id).customer_img
             candidate = LuckyDrawCandidate(
                 platform=order_product.platform, 
                 customer_id=order_product.customer_id, 
                 customer_name=order_product.customer_name,
-                customer_image=img_url,
+                customer_image=order_product.pre_order.customer_img,
                 draw_type=lucky_draw.type,
                 prize=lucky_draw.prize.name)
 
