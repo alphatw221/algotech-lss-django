@@ -354,7 +354,7 @@ def get_campaign_comment_rank(user_subscription_id):
 def get_campaign_complete_sales(campaign_id):
 
     cursor=db.api_order.aggregate([
-        {"$match":{"campaign_id":campaign_id,'status': 'complete'}},
+        {"$match":{"campaign_id":campaign_id,'status':{"$in":['complete', 'shipping out']} }},
         {
             "$group":
                 {

@@ -22,16 +22,13 @@ def i18n_get_mail_content(order, user, lang=None):
     mail_content += f'<table cellspacing="0" cellpadding="0" border="0" width="100%" style="min-width: 100%;" role="presentation">\
                         <tbody>\
                           <tr>\
-                            <td style="color: #4b4b4b; font-weight: 600; width: 35%; text-align:left;" valign="top">Order Date</td>\
-                            <td style="color: black; width: 65%; font-weight: 400; text-align: right;" valign="middle">{ date_time }</td>\
+                            <td style="color: #4b4b4b; font-weight: 600; width: 35%; text-align:left;" valign="top">Order Date : { date_time }</td>\
                           </tr>\
                           <tr>\
-                            <td style="color: #4b4b4b; font-weight: 600; width: 35%; text-align:left;" valign="top">Seller</td>\
-                            <td style="color: black; width: 65%; font-weight: 400; text-align: right;" valign="middle">{ user.name }</td>\
+                            <td style="color: #4b4b4b; font-weight: 600; width: 35%; text-align:left;" valign="top">Seller : { user.name }</td>\
                           </tr>\
                           <tr>\
-                            <td style="color: #4b4b4b; font-weight: 600; width: 35%; text-align:left;" valign="top">Seller\'s Email</td>\
-                            <td style="color: black; width: 65%; font-weight: 400; text-align: right;" valign="middle">{ user.email }</td>\
+                            <td style="color: #4b4b4b; font-weight: 600; width: 35%; text-align:left;" valign="top">Seller\'s Email : { user.email }</td>\
                           </tr>\
                         </tbody>\
                       </table>'
@@ -70,16 +67,13 @@ def i18n_get_mail_content(order, user, lang=None):
     mail_content += f'<table cellspacing="0" cellpadding="0" border="0" width="100%" style="min-width: 100%;" role="presentation">\
                         <tbody>\
                           <tr>\
-                            <td data-key="1468271_subtotal" style="padding-top:13px; color: #4b4b4b; font-weight: 600; width: 35%; text-align:left;" align="right" bgcolor="#ffffff" valign="top">Subtotal</td>\
-                            <td style="padding-top:13px; color: black; width: 65%; font-weight: 400; text-align: right;" align="right" bgcolor="#ffffff"  valign="middle">${order.subtotal}</td>\
+                            <td data-key="1468271_subtotal" style="padding-top:13px; color: #4b4b4b; font-weight: 600; width: 35%; text-align:left;" align="right" bgcolor="#ffffff" valign="top">Subtotal ${order.subtotal}</td>\
                           </tr>\
                           <tr>\
-                            <td style="color: #4b4b4b; font-weight: 600; width: 35%; text-align:left;" align="right" bgcolor="#ffffff" valign="top">Delivery Charge</td>\
-                            <td style="color: black; width: 65%; font-weight: 400; text-align: right;" align="right" bgcolor="#ffffff" valign="middle">${order.shipping_cost}</td>\
+                            <td style="color: #4b4b4b; font-weight: 600; width: 35%; text-align:left;" align="right" bgcolor="#ffffff" valign="top">Delivery Charge ${order.shipping_cost}</td>\
                           </tr>\
                           <tr>\
-                            <td data-key="1468271_total" style="font-size: 15px; line-height: 26px; font-weight: bold; color: #666363; width: 65%; padding: 4px 0;" align="left" bgcolor="#ffffff"  valign="top">Total</td>\
-                            <td style="color: black; width: 65%; font-weight: 400; text-align: right;" align="right" bgcolor="#ffffff" valign="middle">${order.total}</td>\
+                            <td data-key="1468271_total" style="font-size: 15px; line-height: 26px; font-weight: bold; color: #666363; width: 65%; padding: 4px 0;" align="left" bgcolor="#ffffff"  valign="top">Total ${order.total}</td>\
                           </tr>\
                         </tbody>\
                       </table>'
@@ -90,16 +84,13 @@ def i18n_get_mail_content(order, user, lang=None):
                     <table cellspacing="0" cellpadding="0" border="0" width="100%" style="min-width: 100%;" role="presentation">\
                       <tbody>\
                         <tr>\
-                          <td style="color: #4b4b4b; font-weight: 600; width: 35%; text-align:left;" valign="top">Shipping Date</td>\
-                          <td style="color: black; width: 65%; font-weight: 400; text-align: right;" valign="middle">{shipping_date}</td>\
+                          <td style="color: #4b4b4b; font-weight: 600; width: 35%; text-align:left;" valign="top">Shipping Date : {shipping_date}</td>\
                         </tr>\
                         <tr>\
-                          <td style="color: #4b4b4b; font-weight: 600; width: 35%; text-align:left;" valign="top">Delivery Address</td>\
-                          <td style="color: black; width: 65%; font-weight: 400; text-align: right;" valign="middle">{order.shipping_location},{order.shipping_region},{order.shipping_postcode},{order.shipping_address_1}</td>\
+                          <td style="color: #4b4b4b; font-weight: 600; width: 35%; text-align:left;" valign="top">Delivery Address : {order.shipping_location},{order.shipping_region},{order.shipping_postcode},{order.shipping_address_1}</td>\
                         </tr>\
                         <tr>\
-                          <td style="color: #4b4b4b; font-weight: 600; width: 35%; text-align:left;" valign="top">Remark</td>\
-                          <td style="color: black; width: 65%; font-weight: 400; text-align: right;" valign="middle">{order.shipping_remark}</td>\
+                          <td style="color: #4b4b4b; font-weight: 600; width: 35%; text-align:left;" valign="top">Remark : {order.shipping_remark}</td>\
                         </tr>\
                       </tbody>\
                     </table>\
