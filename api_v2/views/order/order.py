@@ -225,7 +225,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         #to do :email layout need update
         content = lib.i18n.email.delivery_comfirm_mail.i18n_get_mail_content(order,api_user) 
         jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)
-        # order.status = models.order.order.STATUS_SHIPPING_OUT
-        # order.save()
+        order.status = models.order.order.STATUS_SHIPPING_OUT
+        order.save()
 
         return Response(order.status, status=status.HTTP_200_OK)
