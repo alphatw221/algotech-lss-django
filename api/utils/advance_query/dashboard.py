@@ -651,12 +651,12 @@ def get_campaign_merge_order_list_v2(campaign_id, search,status, f_payment,f_del
     else:
         match_pipeline = {"$match":{"id":{"$ne":None} }}
         
-    if status == 'All':
-        status_match_pipeline = {"$match":{"id":{"$ne":None} }}
-    elif status == 'complete':
+    if status == 'Review':
+        status_match_pipeline = {"$match":{"id":{"$ne":None},"status":{"$eq":"review"} }}
+    elif status == 'Complete':
         status_match_pipeline = {"$match":{"id":{"$ne":None},"status":{"$in":['complete','shipping out']} }}
     else:
-        status_match_pipeline = {"$match":{"id":{"$ne":None},"status":{"$regex":str(status),"$options": 'i'} }}
+        status_match_pipeline = {"$match":{"id":{"$ne":None} }}
         
         
     if f_payment not in [[],None]:
