@@ -38,6 +38,7 @@ from django.conf import settings
 from api import rule
 
 from business_policy.plan_limitation.live_show_seller import *
+import service
 
 
 
@@ -423,6 +424,10 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
             if facebook_page not in api_user_user_subscription.facebook_pages.all():
                 api_user_user_subscription.facebook_pages.add(facebook_page)
+                
+            status_code2, response2 = service.facebook.page.post_setup_webhook(page_token, page_id)
+            if status_code2 == 200:
+                print(response2)
         page_id_of_binded_pages = [item['id'] for item in response['data']]
         lib.helper.subscription_helper.remove_pages("facebook", api_user_user_subscription, page_id_of_binded_pages)
         return Response(FacebookPageSerializer(api_user_user_subscription.facebook_pages.all(),many=True).data, status=status.HTTP_200_OK)
@@ -669,16 +674,20 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
     def unbind_facebook_page(self, request):
         facebook_page_id,= getdata(request,("id",))
         api_user = Verify.get_seller_user(request)
-        platform = Verify.get_platform(api_user, "facebook", facebook_page_id)
+        page = Verify.get_platform(api_user, "facebook", facebook_page_id)
         api_user_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
         
         try:
-            api_user_user_subscription.facebook_pages.remove(platform)
+            api_user_user_subscription.facebook_pages.remove(page)
         except:
             raise ApiCallerError("no facebook page found")
         
-        if not platform.user_subscriptions.all().exists():
-            platform.delete()
+        if not page.user_subscriptions.all().exists():
+            page.delete()
+            status_code, response = service.facebook.page.delete_page_webhook(page.token, page.page_id)
+            print(response)
+            if status_code == 200:
+                print(page, "delete webhook setting")
         
         return Response(FacebookPageSerializer(api_user_user_subscription.facebook_pages.all(),many=True).data, status=status.HTTP_200_OK)
     

@@ -52,3 +52,15 @@ def get_comments_on_comment(page_token: str, comment_id: str):
     ret = FacebookApiCaller(f'{comment_id}/comments', bearer_token=page_token,
                             params=params).get()
     return ret
+
+def post_setup_webhook(page_token: str, page_id: str, subscribed_fields="messages, messaging_postbacks"):
+    params = {
+        'subscribed_fields': subscribed_fields,
+    }
+    ret = FacebookApiCaller(f'{page_id}/subscribed_apps', bearer_token=page_token,
+                            params=params).post()
+    return ret
+
+def delete_page_webhook(page_token: str, page_id: str):
+    ret = FacebookApiCaller(f'{page_id}/subscribed_apps', bearer_token=page_token).delete()
+    return ret

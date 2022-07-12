@@ -1,3 +1,6 @@
+import service
+
+
 def remove_pages(platform, user_subscription, id_of_binded_pages):
     if platform == "facebook":
         remove_pages = user_subscription.facebook_pages.exclude(page_id__in=id_of_binded_pages)
@@ -9,6 +12,9 @@ def remove_pages(platform, user_subscription, id_of_binded_pages):
                 pass
             if not page.user_subscriptions.all().exists():
                 page.delete()
+                status_code, response = service.facebook.page.delete_page_webhook(page.token, page.page_id)
+                if status_code == 200:
+                    print(page, "delete webhook setting")
     if platform == "instagram":
         remove_pages = user_subscription.instagram_profiles.exclude(business_id__in=id_of_binded_pages)
         for page in remove_pages:

@@ -40,6 +40,14 @@ class RestApiJsonCaller:
                                        timeout=5
                                        )
 
+    def delete(self):
+        return self.__request_template(requests.delete,
+                                       headers=self.headers,
+                                       params=self.params,
+                                       json=self.data,
+                                       timeout=5
+                                       )
+        
     def _process_response(self, response):
         if response.status_code // 100 == 2:
             ...  # handels status code 2XX
