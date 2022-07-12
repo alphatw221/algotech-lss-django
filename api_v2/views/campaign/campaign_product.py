@@ -1,3 +1,4 @@
+import traceback
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import status, viewsets
@@ -11,7 +12,7 @@ from api import utils
 
 import lib
 from datetime import datetime
-
+import database
 
 class CampaignProductPagination(PageNumberPagination):
 
@@ -99,6 +100,92 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(new_products, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
+    @action(detail=False, methods=['POST'], url_path=r'seller/create/bulk', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def seller_bulk_create_campaign_product(self, request):
+        api_user, campaign_id = lib.util.getter.getparams(request, ("campaign_id", ), with_user=True, seller=True)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
+
+        try:
+            with database.lss.util.start_session() as session:
+                with session.start_transaction():
+                    data = {'message':'Invalid','errors':[]}
+                    got_error=False
+                    order_code_set = set()
+                    id_set = set()
+                    api_campaign_products = database.lss.campaign_product.CampaignProduct.filter(campaign_id=campaign.id, session=session)
+                    for api_campaign_product in api_campaign_products:
+                        order_code_set.add(api_campaign_product.get('order_code'))
+                        id_set.add(api_campaign_product.get('product_id'))
+
+                    if not request.data:
+                        got_error = True
+                        data['message']='Invalid'
+                    for request_data in request.data :
+                        e = {}
+
+                        api_product = database.lss.product.Product.get_object(id=request_data.get('id'), user_subscription_id=user_subscription.id, session=session)
+                        if not api_product:
+                            e['name']='no product found'
+                            data.get('errors').append(e)
+                            got_error = True
+                            continue
+
+                        if request_data.get('order_code') in order_code_set:
+                            e['order_code']='deuplicate order code'
+                            got_error = True
+                        else:
+                            order_code_set.add(request_data.get('order_code'))
+
+                        if request_data.get('id') in id_set:
+                            e['name']='deuplicate item'
+                            got_error = True
+                        else:
+                            id_set.add(request_data.get('id') )
+
+                        if not request_data.get('qty'):
+                            e['qty']='qty invalid'
+                            got_error = True
+
+                        elif api_product.data.get('qty') < request_data.get('qty'):
+                            e['qty']=f"only {api_product.data.get('qty')} left"
+                            got_error = True
+                        max_order_amount = request_data.get('max_order_amount') if request_data.get('max_order_amount') else 0
+                        if max_order_amount and max_order_amount > request_data.get('qty'):
+                            e['max_order_amount']='max amount grater then qty'
+                            got_error = True
+
+                        if e:
+                            data.get('errors').append(e)
+                        else:
+                            data.get('errors').append(None)
+                            database.lss.campaign_product.CampaignProduct.create(
+                                image = request_data.get('image'),
+                                name=request_data.get('name', ''), 
+                                order_code=request_data.get('order_code', ''), 
+                                qty=request_data.get('qty', 0), 
+                                max_order_amount=request_data.get('max_order_amount', 0), 
+                                price=request_data.get('price', 999999), 
+                                customer_editable=request_data.get('customer_editable', True), 
+                                customer_removable=request_data.get('customer_removable', True), 
+                                category=request_data.get('category',''), 
+                                type=request_data.get('type',models.product.product.TYPE_PRODUCT),
+                                product_id = request_data.get('id'),
+                                campaign_id=campaign.id,
+                                session=session)
+
+                    if got_error:
+                        print(data)
+                        raise Exception()
+
+            
+
+        except Exception :
+            print(traceback.format_exc())
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(models.campaign.campaign_product.CampaignProductSerializer(campaign.products, many=True).data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET'], url_path=r'seller/retrieve', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
