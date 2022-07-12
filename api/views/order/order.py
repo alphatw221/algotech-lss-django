@@ -36,7 +36,7 @@ def get_title_map():
             'shipping_location': 'Location',
             'shipping_address_1': 'Shipping Address 1',
             'shipping_method': 'Shipping Method',
-            'pick_up_date': 'Pick Up Date',
+            'pickup_address': 'Pick Up Addrwess',
             'pick_up_store': 'Pick Up Store',
             'shipping_remark': 'Remark',
             'status': 'Payment Status',
@@ -216,15 +216,21 @@ class OrderViewSet(viewsets.ModelViewSet):
                     except:
                         col_data = ''
                 elif column_title == 'pick_up_store' and campaign_order['shipping_method'] == 'pickup':
-                    col_data = campaign_order['shipping_option'] + ' - ' + campaign_order['pickup_address']
+                    col_data = campaign_order['shipping_option']
+                elif column_title == 'pick_up_store' and campaign_order['shipping_method'] == 'delivery':
+                    col_data = ''
                 elif column_title == 'created_at':
                     col_data = campaign_order[column_title].strftime("%Y-%m-%d")
                 elif column_title in ['payment_card_type', 'payment_card_number']:
                     col_data = ''
-                elif column_title in ['shipping_address_1', 'shipping_location', 'shipping_region', 'shipping_postcode'] and campaign_order['shipping_method'] == 'pickup':
+                elif column_title in ['shipping_address_1', 'shipping_location', 'shipping_region', 'shipping_postcode'] and campaign_order['shipping_method'] in ['pickup', '']:
                     col_data = ''
-                elif column_title in ['pick_up_store'] and campaign_order['shipping_method'] == 'delivery':
-                    col_data = ''
+                elif column_title == 'payment_method':
+                    col_data = campaign_order[column_title] + '-' + campaign_order['meta']['account_mode']
+                elif column_title == 'shipping_method' and campaign_order['shipping_method'] == 'delivery':
+                    col_data = 'delivery' + '-' + campaign_order['shipping_option']
+                elif column_title == 'customer_name':
+                    col_data = campaign_order['shipping_first_name'] + campaign_order['shipping_last_name']
                 else:
                     col_data = campaign_order[column_title]
                     if column_title == 'total':
@@ -247,7 +253,7 @@ class OrderViewSet(viewsets.ModelViewSet):
                     except:
                         col_data = ''
                 elif column_title == 'pick_up_store':
-                    col_data = campaign_order['shipping_option'] + ' - ' + campaign_order['pickup_address']
+                    col_data = campaign_order['shipping_option']
                 elif column_title == 'created_at':
                     col_data = campaign_pre_order[column_title].strftime("%Y-%m-%d")
                 elif column_title in ['payment_card_type', 'payment_card_number']:
