@@ -125,3 +125,7 @@ class CampaignProductAdmin(admin.ModelAdmin):
     model = CampaignProduct
     list_display = [field.name for field in CampaignProduct._meta.fields]
     search_fields = [field.name for field in CampaignProduct._meta.fields]
+
+
+
+api_campaign_product_template={f.get_attname():f.get_default() if f.has_default() else None for f in CampaignProduct._meta.fields}

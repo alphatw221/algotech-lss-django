@@ -40,17 +40,11 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
 
-        auto_responses = user_subscription.auto_responses.all()
+        auto_responses = user_subscription.auto_responses.all().order_by("-created_at")
         page = self.paginate_queryset(auto_responses)
-        if page is not None:
-            serializer = models.auto_response.auto_response.AutoResponseSerializerWithFacebookInfo(page, many=True)
-            result = self.get_paginated_response(serializer.data)
-            data = result.data
-        else:
-            serializer = models.auto_response.auto_response.AutoResponseSerializerWithFacebookInfo(auto_responses, many=True)
-            data = serializer.data
+        serializer = models.auto_response.auto_response.AutoResponseSerializerWithFacebookInfo(page, many=True)
 
-        return Response(data, status=status.HTTP_200_OK)
+        return Response(self.get_paginated_response(serializer.data).data, status=status.HTTP_200_OK)
 
 
     @action(detail=False, methods=['POST'], url_path=r'create/(?P<platform_name>[^/.]+)/(?P<platform_id>[^/.]+)', permission_classes=(IsAuthenticated,))

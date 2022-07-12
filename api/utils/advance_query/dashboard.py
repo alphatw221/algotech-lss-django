@@ -354,7 +354,7 @@ def get_campaign_comment_rank(user_subscription_id):
 def get_campaign_complete_sales(campaign_id):
 
     cursor=db.api_order.aggregate([
-        {"$match":{"campaign_id":campaign_id,'status': 'complete'}},
+        {"$match":{"campaign_id":campaign_id,"status":{"$in":["complete", "shipping out"]} }},
         {
             "$group":
                 {
@@ -392,7 +392,7 @@ def get_total_order_complete_proceed(user_subscription_id):
                                     "id":{"$ne":None}}
                                  },
                                 {"$project":{"_id":0,
-                                "complete": {  "$cond": [ { "$eq": ["$status", "complete" ] }, 1, 0]},
+                                "complete": {  "$cond": [ { "$in":["$status", ["complete", "shipping out"] ] }, 1, 0]},
                                 "review": { "$cond": [ { "$eq": [ "$status", "review" ] }, 1, 0]}
                                 }},
                             ]
@@ -426,7 +426,7 @@ def get_campaign_order_complete_proceed(campaign_id):
                         "id":{"$ne":None}}
                      },
                     {"$project":{"_id":0,
-                    "complete": {  "$cond": [ { "$eq": ["$status", "complete" ] }, 1, 0]},
+                    "complete": {  "$cond": [ { "$in":["$status", ["complete", "shipping out"] ] }, 1, 0]},
                     "review": { "$cond": [ { "$eq": [ "$status", "review" ] }, 1, 0]}
                     }},
                 ]
@@ -651,12 +651,12 @@ def get_campaign_merge_order_list_v2(campaign_id, search,status, f_payment,f_del
     else:
         match_pipeline = {"$match":{"id":{"$ne":None} }}
         
-    if status == 'All':
-        status_match_pipeline = {"$match":{"id":{"$ne":None} }}
-    elif status == 'complete':
+    if status == 'Review':
+        status_match_pipeline = {"$match":{"id":{"$ne":None},"status":{"$eq":"review"} }}
+    elif status == 'Complete':
         status_match_pipeline = {"$match":{"id":{"$ne":None},"status":{"$in":['complete','shipping out']} }}
     else:
-        status_match_pipeline = {"$match":{"id":{"$ne":None},"status":{"$regex":str(status),"$options": 'i'} }}
+        status_match_pipeline = {"$match":{"id":{"$ne":None} }}
         
         
     if f_payment not in [[],None]:

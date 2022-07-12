@@ -1,4 +1,4 @@
-from email.policy import default
+
 from api.models.campaign.campaign import Campaign
 from api.models.campaign.campaign_product import CampaignProduct, CampaignProductSerializer
 from django.contrib import admin
