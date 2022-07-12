@@ -736,6 +736,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         api_user_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
         
         api_user_user_subscription.currency = currency
+        api_user_user_subscription.currency_sign = business_policy.subscription.CURRENCY_SIGN[currency]
         api_user_user_subscription.save()
         return Response(api_user_user_subscription.currency, status=status.HTTP_200_OK)
 
