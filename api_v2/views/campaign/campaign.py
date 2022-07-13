@@ -82,7 +82,8 @@ class CampaignViewSet(viewsets.ModelViewSet):
             for index, account in enumerate(accounts):
                 key = account.get('name','')+f'_{index}'
                 image=request.data.get(key)
-                if image in ['null', None, '', 'undefined']:
+                if image in ['null', None, '', 'undefined', '._no_image']:
+                    account['image'] = models.campaign.campaign.IMAGE_NULL
                     continue
                 account_name = account.get('name','')
                 image_path = default_storage.save(f'/campaign/{campaign.id}/payment/direct_payment/accounts/{account_name}/{image.name}', ContentFile(image.read()))
@@ -156,6 +157,8 @@ class CampaignViewSet(viewsets.ModelViewSet):
                 key = account.get('name','')+f'_{index}'
                 image=request.data.get(key)
                 if image in ['null', None, '', 'undefined']:
+                    continue
+                elif image == '._no_image':
                     account['image'] = models.campaign.campaign.IMAGE_NULL
                     save=True
                     continue

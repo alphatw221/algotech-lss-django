@@ -13,6 +13,7 @@ from djongo import models
 from rest_framework import serializers
 import business_policy
 
+IMAGE_NULL = 'no_image.jpeg'
 PLATFORM_ATTR={
     'facebook':{'attr':'facebook_pages','serializer':FacebookPageSerializer}, 
     'instagram':{'attr':'instagram_profiles','serializer':InstagramProfileSerializer}, 
