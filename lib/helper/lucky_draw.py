@@ -74,7 +74,7 @@ class KeywordCandidateSetGenerator(CandidateSetGenerator):
 class LikesCandidateSetGenerator(CandidateSetGenerator):
 
     @classmethod
-    def get_candidate_set(cls, lucky_draw, campaign, limit=1000):
+    def get_candidate_set(cls, campaign, lucky_draw, limit=1000):
 
         winner_list = campaign.meta.get('winner_list',[])
         candidate_set = set()
