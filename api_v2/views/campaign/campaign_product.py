@@ -164,7 +164,6 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
                                 image = request_data.get('image'),
                                 name=request_data.get('name', ''), 
                                 order_code=request_data.get('order_code', ''), 
-                                qty=request_data.get('qty', 0), 
                                 qty_for_sale=request_data.get('qty', 0), 
                                 max_order_amount=request_data.get('max_order_amount', 0), 
                                 price=request_data.get('price', 999999), 
