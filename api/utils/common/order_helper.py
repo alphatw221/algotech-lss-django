@@ -445,7 +445,8 @@ class PreOrderHelper():
     @classmethod
     def count_buyer_pre_order_detail(cls, pre_order, campaign, pre_order_data=None):
         delivery_charge = float(campaign.meta_logistic.get('delivery_charge',0))
-
+        is_subtotal_over_free_delivery_threshold = False
+        is_items_over_free_delivery_threshold = False
         if pre_order_data and pre_order_data.get('shipping_method') == 'in_store':
             delivery_charge=0
         else:
@@ -465,9 +466,10 @@ class PreOrderHelper():
 
             free_delivery_for_order_above_price = campaign.meta_logistic.get('free_delivery_for_order_above_price') if campaign.meta_logistic.get('is_free_delivery_for_order_above_price') == 1 else 0
             free_delivery_for_how_many_order_minimum = campaign.meta_logistic.get('free_delivery_for_how_many_order_minimum') if campaign.meta_logistic.get('is_free_delivery_for_how_many_order_minimum') == 1 else 0
-            
-            is_subtotal_over_free_delivery_threshold = pre_order.subtotal >= float(free_delivery_for_order_above_price)
-            is_items_over_free_delivery_threshold = len(pre_order.products) >= float(free_delivery_for_how_many_order_minimum)
+            if (campaign.meta_logistic.get('is_free_delivery_for_order_above_price') == 1) or (free_delivery_for_order_above_price != 0):
+                is_subtotal_over_free_delivery_threshold = pre_order.subtotal >= float(free_delivery_for_order_above_price)
+            if campaign.meta_logistic.get('is_free_delivery_for_how_many_order_minimum') == 1 or (free_delivery_for_how_many_order_minimum != 0):
+                is_items_over_free_delivery_threshold = len(pre_order.products) >= float(free_delivery_for_how_many_order_minimum)
 
             if pre_order.free_delivery :
                 delivery_charge = 0
