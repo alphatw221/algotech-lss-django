@@ -107,7 +107,7 @@ def capture_facebook(campaign, user_subscription_data, logs):
                 "customer_id": comment['from']['id'],
                 "customer_name": comment['from']['name'],
                 "image": comment['from']['picture']['data']['url'],
-                # "categories":service.nlp.classification.classify_comment_v1(texts=[[comment['message']]],threshold=0.9)
+                "categories":service.nlp.classification.classify_comment_v1(texts=[[comment['message']]],threshold=0.9)
                 }
             database.lss.campaign_comment.CampaignComment.create(**uni_format_comment, auto_inc=False)
             
@@ -245,7 +245,7 @@ def capture_youtube(campaign, user_subscription_data, logs):
                 "customer_name": comment['authorDetails']['displayName'],
                 "image": comment['authorDetails']['profileImageUrl'],
                 "live_chat_id": live_chat_id,
-                # "categories":service.nlp.classification.classify_comment_v1(texts=[[comment['snippet']['displayMessage']]],threshold=0.9)
+                "categories":service.nlp.classification.classify_comment_v1(texts=[[comment['snippet']['displayMessage']]],threshold=0.9)
             }
             database.lss.campaign_comment.CampaignComment.create(**uni_format_comment, auto_inc=False)
             service.channels.campaign.send_comment_data(campaign.id, uni_format_comment)
@@ -350,7 +350,7 @@ def capture_instagram(campaign, user_subscription_data, logs):
                 "customer_id": comment['from']['id'],   
                 "customer_name": comment['from']['username'],  
                 "image": img_url,
-                # "categories":service.nlp.classification.classify_comment_v1(texts=[[comment['text']]],threshold=0.9)
+                "categories":service.nlp.classification.classify_comment_v1(texts=[[comment['text']]],threshold=0.9)
                 }   #
 
             database.lss.campaign_comment.CampaignComment.create(**uni_format_comment, auto_inc=False)
@@ -431,7 +431,7 @@ def capture_youtube_video(campaign, user_subscription_data, youtube_channel, log
                 "customer_id": comment['snippet']['topLevelComment']['snippet']['authorChannelId']['value'],
                 "customer_name": comment['snippet']['topLevelComment']['snippet']['authorDisplayName'],
                 "image": comment['snippet']['topLevelComment']['snippet']['authorProfileImageUrl'],
-                # "categories":service.nlp.classification.classify_comment_v1(texts=[[comment['snippet']['topLevelComment']['snippet']['textDisplay']]],threshold=0.9)
+                "categories":service.nlp.classification.classify_comment_v1(texts=[[comment['snippet']['topLevelComment']['snippet']['textDisplay']]],threshold=0.9)
             }
 
             database.lss.campaign_comment.CampaignComment.create(**uni_format_comment, auto_inc=False)

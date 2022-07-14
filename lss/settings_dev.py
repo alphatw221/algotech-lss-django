@@ -33,7 +33,7 @@ WEB_SERVER_URL = "https://liveshowseller.pagekite.me/algotech_lss/public"
 SHOPPING_CART_URL = f"{WEB_SERVER_URL}/buyer/login_to_cart"
 
 #NLP
-NLP_COMPUTING_MACHINE_URL = "http://192.168.74.127:8501"
+NLP_COMPUTING_MACHINE_URL = "http://192.168.74.105:8501"
 
 
 GS_URL = "https://storage.googleapis.com/lss_dev_bucket/"

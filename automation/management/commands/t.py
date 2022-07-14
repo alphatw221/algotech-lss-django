@@ -51,7 +51,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # self.test_lucky_draw()
-        self.test_campaign_job()
+        self.test_nlp()
 
     def modify_database(self):
         from api.models.user.user_subscription import UserSubscription

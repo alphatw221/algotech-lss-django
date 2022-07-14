@@ -312,7 +312,7 @@ PAYMONGO_SECRET_KEY = 'sk_test_kXkD4NBMYZixy8dJ8GV6br4u'
 PAYMONGO_URL = 'https://api.paymongo.com/v1/links'
 
 #NLP
-NLP_COMPUTING_MACHINE_URL = "http://192.168.74.127:8501"
+NLP_COMPUTING_MACHINE_URL = "http://192.168.74.105:8501"
 
 # Facebook
 FACEBOOK_API_URL = "https://graph.facebook.com"
