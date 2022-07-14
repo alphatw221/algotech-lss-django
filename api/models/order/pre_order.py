@@ -57,7 +57,8 @@ class PreOrder(models.Model):
         blank=True, null=True, default=None)
     shipping_option = models.CharField(
         max_length=32, blank=True, default='')
-
+    shipping_option_index = models.IntegerField(blank=True, null=True, default=None)
+    
     platform = models.CharField(max_length=255, blank=True,
                                 choices=settings.SUPPORTED_PLATFORMS, default='n/a')
     platform_id = models.IntegerField(blank=True, null=True, default=None)
@@ -138,6 +139,7 @@ class PreOrderSerializerUpdateDelivery(serializers.ModelSerializer):
                   "shipping_remark",
                   "shipping_date",
                   "shipping_option",
+                  "shipping_option_index",
                   "pickup_address",
                   "remark",
                 ]

@@ -68,6 +68,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         order.status = "complete"
         order.save()
 
+        lib.helper.order_helper.OrderHelper.sold_campaign_product(order.id)
         content = lib.helper.order_helper.OrderHelper.get_confirmation_email_content(order)
         jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)     #queue this to redis if needed
 
@@ -129,6 +130,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         order.status = "complete"
         order.save()
 
+        lib.helper.order_helper.OrderHelper.sold_campaign_product(order.id)
         content = lib.helper.order_helper.OrderHelper.get_confirmation_email_content(order)
         jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)     #queue this to redis if needed
 

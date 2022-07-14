@@ -307,9 +307,6 @@ class PreOrderHelper():
                 if not success:
                     return False, pre_order
 
-                for campaign_product_id_str in pre_order.data.get('products',{}).keys():
-                    database.lss.campaign_product.CampaignProduct(id=int(campaign_product_id_str)).sold(order_product_data.get('qty'), sync=False, session=session)
-
                 order_data = pre_order.data.copy()
 
                 del order_data['_id']
@@ -381,24 +378,32 @@ class PreOrderHelper():
 
 
         delivery_charge = float(campaign.meta_logistic.get('delivery_charge',0))
-        delivery_titles = campaign.meta_logistic.get('additional_delivery_charge_title')
-        delivery_types = campaign.meta_logistic.get('additional_delivery_charge_type')
-        delivery_prices = campaign.meta_logistic.get('additional_delivery_charge_price')
+        meta_logistic = campaign.meta_logistic
+        delivery_options = meta_logistic.get('additional_delivery_options')
+        # delivery_titles = campaign.meta_logistic.get('additional_delivery_charge_title')
+        # delivery_types = campaign.meta_logistic.get('additional_delivery_charge_type')
+        # delivery_prices = campaign.meta_logistic.get('additional_delivery_charge_price')
 
-        free_delivery_for_order_above_price = campaign.meta_logistic.get('free_delivery_for_order_above_price') if campaign.meta_logistic.get('is_free_delivery_for_order_above_price') == 1 else 0
-        free_delivery_for_how_many_order_minimum = campaign.meta_logistic.get('free_delivery_for_how_many_order_minimum') if campaign.meta_logistic.get('is_free_delivery_for_how_many_order_minimum') == 1 else 0
+        # free_delivery_for_order_above_price = campaign.meta_logistic.get('free_delivery_for_order_above_price') if campaign.meta_logistic.get('is_free_delivery_for_order_above_price') == 1 else 0
+        # free_delivery_for_how_many_order_minimum = campaign.meta_logistic.get('free_delivery_for_how_many_order_minimum') if campaign.meta_logistic.get('is_free_delivery_for_how_many_order_minimum') == 1 else 0
         
-        is_subtotal_over_free_delivery_threshold = pre_order.subtotal >= float(free_delivery_for_order_above_price) if free_delivery_for_order_above_price else False
-        is_items_over_free_delivery_threshold = len(pre_order.products) >= float(free_delivery_for_how_many_order_minimum) if free_delivery_for_how_many_order_minimum else False
+        is_subtotal_over_free_delivery_threshold = pre_order.subtotal >= float(meta_logistic.get('free_delivery_for_order_above_price')) if meta_logistic.get('is_free_delivery_for_order_above_price') else False
+        is_items_over_free_delivery_threshold = len(pre_order.products) >= float(meta_logistic.get('free_delivery_for_how_many_order_minimum')) if meta_logistic.get('is_free_delivery_for_how_many_order_minimum') else False
+        # index=None
+        # for i, option in enumerate(delivery_options):
+        #     if option.get('title')==pre_order.shipping_option:
+        #         index = i
+        #         break
 
-        if (pre_order.shipping_option and delivery_titles and delivery_types and delivery_prices ):
-            addition_delivery_index = delivery_titles.index(pre_order.shipping_option)
+        if (pre_order.shipping_option_index and delivery_options[pre_order.shipping_option_index] ):
+            option = delivery_options[pre_order.shipping_option_index]
+            # addition_delivery_index = delivery_titles.index(pre_order.shipping_option)
 
-            if delivery_types[addition_delivery_index] == '+':
-                delivery_charge += float(delivery_prices[addition_delivery_index]) 
+            if option.get('type') == '+':
+                delivery_charge += float(option.get('price')) 
 
-            elif delivery_types[addition_delivery_index] == '=':
-                delivery_charge =  float(delivery_prices[addition_delivery_index])
+            elif option.get('type') == '=':
+                delivery_charge =  float(option.get('price'))
 
         if pre_order.free_delivery :
             delivery_charge = 0
@@ -487,4 +492,52 @@ class OrderHelper():
         return mail_content
 
 
+    @classmethod
+    @lib.error_handle.error_handler.pymongo_error_handler.pymongo_error_handler
+    def check_expired(cls, order_id):
+        with database.lss.util.start_session() as session:
+            with session.start_transaction():
+
+                order = database.lss.order.Order.get_object(id=order_id,session=session)
+
+
+                for campaign_product_id_str, order_product_data in order.data.get('products',{}).items():
+                    order_product = database.lss.order_product.OrderProduct.get_object(id=order_product_data.get('order_product_id'), session=session)
+                    campaign_product = database.lss.campaign_product.CampaignProduct.get_object(id=int(campaign_product_id_str), session=session)
+
+                    try:
+                        ret = rule.rule_checker.pre_order_rule_checker.OrderProductCheckoutRuleChecker.check(**{
+                            'campaign_product':campaign_product,
+                            'order_product':order_product,
+                        })
+                    except Exception:
+                        order.update(status=models.order.order.STATUS_EXPIRED,session=session)
+                        return False, order
+
+        return True, order
+
     
+    @classmethod
+    @lib.error_handle.error_handler.pymongo_error_handler.pymongo_error_handler
+    def sold_campaign_product(cls, order_id):
+
+        sold_campaign_products=[]
+
+        with database.lss.util.start_session() as session:
+            with session.start_transaction():
+
+                order = database.lss.order.Order.get_object(id=order_id,session=session)
+
+                for campaign_product_id_str, order_product_data in order.data.get('products',{}).items():
+                    campaign_product = database.lss.campaign_product.CampaignProduct(id=int(campaign_product_id_str))
+                    campaign_product.sold(order_product_data.get('qty'), session=session)
+                    sold_campaign_products.append(campaign_product)
+                    
+
+        for campaign_product in sold_campaign_products:
+            product_data = {
+                        "id": campaign_product.id,
+                        'qty_sold': campaign_product.data.get('qty_sold'),
+                        "qty_add_to_cart":campaign_product.data.get('qty_add_to_cart'),
+                    }
+            service.channels.campaign.send_product_data(campaign_product.data.get("campaign_id"), product_data)

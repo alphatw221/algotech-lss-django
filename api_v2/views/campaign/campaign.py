@@ -83,6 +83,8 @@ class CampaignViewSet(viewsets.ModelViewSet):
                 key = account.get('name','')+f'_{index}'
                 image=request.data.get(key)
                 if image in ['null', None, '', 'undefined', '._no_image']:
+                    continue
+                elif image =='._no_image':
                     account['image'] = models.campaign.campaign.IMAGE_NULL
                     continue
                 account_name = account.get('name','')

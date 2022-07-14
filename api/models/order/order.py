@@ -11,7 +11,8 @@ from api.models.user.user import User
 STATUS_PROCEED = 'proceed'
 STATUS_COMPLETE = 'complete'
 STATUS_SHIPPING_OUT = 'shipping out'
-
+STATUS_EXPIRED = 'expired'
+STATUS_PENDING_REFUND = 'pending_refund'
 PAYMENT_METHOD_STRIPE = 'stripe'
 PAYMENT_METHOD_DIRECT = 'direct_payment'
 
@@ -62,6 +63,7 @@ class Order(models.Model):
         blank=True, null=True, default=None)
     shipping_option = models.CharField(
         max_length=32, blank=True, default='')
+    shipping_option_index = models.IntegerField(blank=True, null=True, default=None)
 
     platform = models.CharField(max_length=255, blank=True,
                                 choices=settings.SUPPORTED_PLATFORMS, default='n/a')
@@ -129,6 +131,7 @@ class OrderSerializerUpdateShipping(serializers.ModelSerializer):
                   "shipping_remark",
                   "shipping_date", 
                   "shipping_option",
+                  "shipping_option_index",
                   "pickup_address"]
 
 

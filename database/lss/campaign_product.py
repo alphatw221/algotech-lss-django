@@ -12,7 +12,7 @@ class CampaignProduct(Collection):
     template = models.campaign.campaign_product.api_campaign_product_template
     
     def sold(self, qty, sync=True, session=None):
-        self._collection.update_one({'id':self.id},{"$inc": {'qty_sold': qty},"$set":{'updated_at':datetime.utcnow()}}, session=session)
+        self._collection.update_one({'id':self.id},{"$inc": {'qty_sold': qty, 'qty_add_to_cart': -qty},"$set":{'updated_at':datetime.utcnow()}}, session=session)
         if sync:
             self._sync(session=session)
 

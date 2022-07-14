@@ -138,11 +138,11 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
                         else:
                             order_code_set.add(request_data.get('order_code'))
 
-                        if request_data.get('id') in id_set:
-                            e['name']='deuplicate item'
-                            got_error = True
-                        else:
-                            id_set.add(request_data.get('id') )
+                        # if request_data.get('id') in id_set:
+                        #     e['name']='deuplicate item'
+                        #     got_error = True
+                        # else:
+                        #     id_set.add(request_data.get('id') )
 
                         if not request_data.get('qty'):
                             e['qty']='qty invalid'
@@ -161,17 +161,17 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
                         else:
                             data.get('errors').append(None)
                             database.lss.campaign_product.CampaignProduct.create(
-                                image = request_data.get('image'),
-                                name=request_data.get('name', ''), 
-                                order_code=request_data.get('order_code', ''), 
-                                qty_for_sale=request_data.get('qty', 0), 
-                                max_order_amount=request_data.get('max_order_amount', 0), 
-                                price=request_data.get('price', 999999), 
-                                customer_editable=request_data.get('customer_editable', True), 
-                                customer_removable=request_data.get('customer_removable', True), 
-                                category=request_data.get('category',''), 
-                                type=request_data.get('type',models.product.product.TYPE_PRODUCT),
-                                product_id = request_data.get('id'),
+                                image = str(request_data.get('image')),
+                                name=str(request_data.get('name', '')), 
+                                order_code=str(request_data.get('order_code', '')), 
+                                qty_for_sale=int(request_data.get('qty', 0)) if request_data.get('qty') else 0, 
+                                max_order_amount=int(request_data.get('max_order_amount')) if request_data.get('max_order_amount') else 0, 
+                                price=float(request_data.get('price', 999999)), 
+                                customer_editable=bool(request_data.get('customer_editable', True)), 
+                                customer_removable=bool(request_data.get('customer_removable', True)),
+                                # category=request_data.get('category',[]), 
+                                type=str(request_data.get('type',models.product.product.TYPE_PRODUCT)),
+                                product_id = int(request_data.get('id')) if request_data.get('id') else None,
                                 campaign_id=campaign.id,
                                 session=session)
 
@@ -184,7 +184,7 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
         except Exception :
             print(traceback.format_exc())
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
-
+            
         return Response(models.campaign.campaign_product.CampaignProductSerializer(campaign.products, many=True).data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET'], url_path=r'seller/retrieve', permission_classes=(IsAuthenticated,))

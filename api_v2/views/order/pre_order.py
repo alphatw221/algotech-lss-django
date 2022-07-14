@@ -230,7 +230,6 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
         if not success:
             pre_order = lib.util.verify.Verify.get_pre_order(pre_order.id)
-            print(models.order.pre_order.PreOrderSerializer(pre_order).data)
             return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_400_BAD_REQUEST)
 
         order = lib.util.verify.Verify.get_order(api_order.id)
@@ -261,7 +260,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         api_user, campaign_id, search = lib.util.getter.getparams(request, ('campaign_id', 'search'), with_user=True, seller=True)
 
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
-        print (user_subscription.campaigns.filter(id='452'))
+
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
 
         queryset = campaign.pre_orders.exclude(subtotal=0).order_by('id')
