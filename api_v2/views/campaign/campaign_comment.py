@@ -24,7 +24,7 @@ class CampaignCommentViewSet(viewsets.ModelViewSet):
         user_subscription =  lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         campaign =  lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
         category, = lib.util.getter.getparams(request, ('category',), with_user=False)
-
+        print(category)
         queryset = campaign.comments.all().order_by('-created_time')
         if platform_name in ['facebook','youtube','instagram']:
             queryset = queryset.filter(platform=platform_name).order_by('-created_time')

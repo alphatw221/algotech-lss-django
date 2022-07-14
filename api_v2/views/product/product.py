@@ -31,8 +31,8 @@ class ProductViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'], url_path=r'search', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def list_product(self, request):
-        api_user, search_column, keyword, product_status, category, exclude_products = \
-            lib.util.getter.getparams(request, ("search_column", "keyword", "product_status", "category", "exclude"), with_user=True, seller=True)
+        api_user, search_column, keyword, product_status, product_type, category, exclude_products = \
+            lib.util.getter.getparams(request, ("search_column", "keyword", "product_status", "product_type", "category", "exclude"), with_user=True, seller=True)
         
         user_subscription = \
             lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
@@ -42,6 +42,8 @@ class ProductViewSet(viewsets.ModelViewSet):
             raise lib.error_handle.error.api_error.ApiVerifyError("search_column field can not be empty when keyword has value")
         if (search_column not in ['undefined', '']) and (keyword not in ['undefined', '', None]):
             kwargs[search_column + '__icontains'] = keyword
+        if ( product_type in [models.product.product.TYPE_PRODUCT, models.product.product.TYPE_LUCY_DRAW]):
+            kwargs['type'] = product_type
         if category not in ['undefined', '', None]:
             kwargs['tag__icontains'] = category 
 
