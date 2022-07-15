@@ -50,7 +50,7 @@ class KeywordCandidateSetGenerator(CandidateSetGenerator):
         campaign_comments = models.campaign.campaign_comment.CampaignComment.objects.filter(
             campaign=campaign,
             # message=keyword,
-            message__contains=lucky_draw.keyword,
+            message__contains=lucky_draw.comment,
         )[:limit]
 
         for campaign_comment in campaign_comments:
@@ -128,12 +128,12 @@ class ProductCandidateSetGenerator(CandidateSetGenerator):
         order_products = models.order.order_product.OrderProduct.objects.filter(campaign=campaign, campaign_product=lucky_draw.campaign_product)
 
         for order_product in order_products:
-            # img_url = models.order.pre_order.PreOrder.objects.get(customer_id=order_product.customer_id, campaign=campaign.id).customer_img
+            img_url = models.order.pre_order.PreOrder.objects.get(customer_id=order_product.customer_id, campaign=campaign.id).customer_img
             candidate = LuckyDrawCandidate(
                 platform=order_product.platform, 
                 customer_id=order_product.customer_id, 
                 customer_name=order_product.customer_name,
-                customer_image=order_product.pre_order.customer_img,
+                customer_image=img_url,
                 draw_type=lucky_draw.type,
                 prize=lucky_draw.prize.name)
 
@@ -236,9 +236,9 @@ class LuckyDraw():
                     'instagram': campaign.instagram_profile.id if campaign.instagram_profile else None
                 }
                 pre_order = models.order.pre_order.PreOrder.objects.create(
-                    customer_id=winner.customer.id, 
+                    customer_id=winner.customer_id, 
                     customer_name=winner.customer_name, 
-                    customer_img=winner.customer_img, 
+                    customer_img=winner.customer_image, 
                     campaign = campaign, 
                     platform=winner.platform, 
                     platform_id=platform_id_dict.get(winner.platform))
