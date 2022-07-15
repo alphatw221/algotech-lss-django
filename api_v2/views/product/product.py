@@ -47,7 +47,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         if category not in ['undefined', '', None]:
             kwargs['tag__icontains'] = category 
 
-        queryset = user_subscription.products.filter(**kwargs).order_by("-created_at")
+        queryset = user_subscription.products.filter(**kwargs).order_by("-updated_at")
         
         if exclude_products:
             exclude_products = exclude_products.split(",")
