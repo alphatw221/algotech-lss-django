@@ -100,7 +100,7 @@ class ProductViewSet(viewsets.ModelViewSet):
             product.image = models.product.product.IMAGE_NULL
             
         product.user_subscription = user_subscription
-        product.category = categories if categories else None
+        # product.category = categories if categories else None
         product.save()
 
         product_categories = user_subscription.meta.get('product_categories', [])
