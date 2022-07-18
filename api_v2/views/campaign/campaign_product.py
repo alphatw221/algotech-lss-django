@@ -136,7 +136,7 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
                             continue
 
                         if request_data.get('type')==models.campaign.campaign_product.TYPE_PRODUCT and request_data.get('order_code') in order_code_set:
-                            e['order_code']='deuplicate order code'
+                            e['order_code']='duplicate order code'
                             got_error = True
                         else:
                             order_code_set.add(request_data.get('order_code'))
