@@ -113,11 +113,11 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
                     data = {'message':'Invalid','errors':[]}
                     got_error=False
                     order_code_set = set()
-                    id_set = set()
+                    # id_set = set()
                     api_campaign_products = database.lss.campaign_product.CampaignProduct.filter(campaign_id=campaign.id, session=session)
                     for api_campaign_product in api_campaign_products:
                         order_code_set.add(api_campaign_product.get('order_code'))
-                        id_set.add(api_campaign_product.get('product_id'))
+                        # id_set.add(api_campaign_product.get('product_id'))
 
                     if not request.data:
                         got_error = True
@@ -160,11 +160,13 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
                             data.get('errors').append(e)
                         else:
                             data.get('errors').append(None)
+                            qty_for_sale = int(request_data.get('qty', 0)) if request_data.get('qty') else 0
+                            api_product.distribute(qty_for_sale, sync=False, session=session)
                             database.lss.campaign_product.CampaignProduct.create(
                                 image = str(request_data.get('image')),
                                 name=str(request_data.get('name', '')), 
                                 order_code=str(request_data.get('order_code', '')), 
-                                qty_for_sale=int(request_data.get('qty', 0)) if request_data.get('qty') else 0, 
+                                qty_for_sale=qty_for_sale, 
                                 max_order_amount=int(request_data.get('max_order_amount')) if request_data.get('max_order_amount') else 0, 
                                 price=float(request_data.get('price', 999999)), 
                                 customer_editable=bool(request_data.get('customer_editable', True)), 
