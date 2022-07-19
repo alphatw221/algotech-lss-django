@@ -132,8 +132,9 @@ class ProductViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         product = serializer.save()
 
-
-        if image =='._no_image':
+        if image in ['null', None, '', 'undefined']:
+            pass
+        elif image =='._no_image':
             product.image = models.product.product.IMAGE_NULL
         elif image:
             image_path = default_storage.save(
