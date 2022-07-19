@@ -253,7 +253,7 @@ class OrderViewSet(viewsets.ModelViewSet):
                     except:
                         col_data = ''
                 elif column_title == 'pick_up_store':
-                    col_data = campaign_order['shipping_option']
+                    col_data = campaign_pre_order['shipping_option']
                 elif column_title == 'created_at':
                     col_data = campaign_pre_order[column_title].strftime("%Y-%m-%d")
                 elif column_title in ['payment_card_type', 'payment_card_number']:
