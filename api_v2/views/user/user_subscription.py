@@ -41,7 +41,8 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
-
+        
+        request.data['decimal_places'] = int(request.data['decimal_places'])
         serializer = models.user.user_subscription.UserSubscriptionSerializerUpdate(user_subscription,data=request.data, partial=True)
 
         if not serializer.is_valid():

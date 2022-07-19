@@ -1,3 +1,4 @@
+from configparser import MAX_INTERPOLATION_DEPTH
 import traceback
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
@@ -148,8 +149,8 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
                         elif api_product.data.get('qty') < request_data.get('qty'):
                             e['qty']=f"only {api_product.data.get('qty')} left"
                             got_error = True
-
-                        if request_data.get('type')==models.campaign.campaign_product.TYPE_PRODUCT and request_data.get('max_order_amount') > request_data.get('qty'):
+                        max_order_amount = request_data.get('max_order_amount') if request_data.get('max_order_amount') else 0
+                        if request_data.get('type')==models.campaign.campaign_product.TYPE_PRODUCT and max_order_amount > request_data.get('qty'):
                             e['max_order_amount']='max amount greater than qty'
                             got_error = True
 
