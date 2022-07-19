@@ -113,11 +113,9 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
                     data = {'message':'Invalid','errors':[]}
                     got_error=False
                     order_code_set = set()
-                    # id_set = set()
                     api_campaign_products = database.lss.campaign_product.CampaignProduct.filter(campaign_id=campaign.id, session=session)
                     for api_campaign_product in api_campaign_products:
                         order_code_set.add(api_campaign_product.get('order_code'))
-                        # id_set.add(api_campaign_product.get('product_id'))
 
                     if not request.data:
                         got_error = True
@@ -131,18 +129,17 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
                             data.get('errors').append(e)
                             got_error = True
                             continue
+                        if request_data.get('type') not in [models.campaign.campaign_product.TYPE_PRODUCT,models.campaign.campaign_product.TYPE_LUCKY_DRAW]:
+                            e['type'] = 'invalid product type'
+                            data.get('errors').append(e)
+                            got_error = True
+                            continue
 
-                        if request_data.get('order_code') in order_code_set:
-                            e['order_code']='deuplicate order code'
+                        if request_data.get('type')==models.campaign.campaign_product.TYPE_PRODUCT and request_data.get('order_code') in order_code_set:
+                            e['order_code']='duplicate order code'
                             got_error = True
                         else:
                             order_code_set.add(request_data.get('order_code'))
-
-                        # if request_data.get('id') in id_set:
-                        #     e['name']='deuplicate item'
-                        #     got_error = True
-                        # else:
-                        #     id_set.add(request_data.get('id') )
 
                         if not request_data.get('qty'):
                             e['qty']='qty invalid'
@@ -151,14 +148,14 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
                         elif api_product.data.get('qty') < request_data.get('qty'):
                             e['qty']=f"only {api_product.data.get('qty')} left"
                             got_error = True
-                        max_order_amount = request_data.get('max_order_amount') if request_data.get('max_order_amount') else 0
-                        if max_order_amount and max_order_amount > request_data.get('qty'):
+
+                        if request_data.get('type')==models.campaign.campaign_product.TYPE_PRODUCT and request_data.get('max_order_amount') > request_data.get('qty'):
                             e['max_order_amount']='max amount greater than qty'
                             got_error = True
 
-                        if e:
-                            data.get('errors').append(e)
-                        else:
+                        data.get('errors').append(e)
+
+                        if not e:
                             data.get('errors').append(None)
                             qty_for_sale = int(request_data.get('qty', 0)) if request_data.get('qty') else 0
                             api_product.distribute(qty_for_sale, sync=False, session=session)
@@ -171,7 +168,7 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
                                 price=float(request_data.get('price', 999999)), 
                                 customer_editable=bool(request_data.get('customer_editable', True)), 
                                 customer_removable=bool(request_data.get('customer_removable', True)),
-                                # category=request_data.get('category',[]), 
+                                tag=list(request_data.get('tag',[])),
                                 type=str(request_data.get('type',models.product.product.TYPE_PRODUCT)),
                                 product_id = int(request_data.get('id')) if request_data.get('id') else None,
                                 campaign_id=campaign.id,
