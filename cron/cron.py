@@ -28,7 +28,7 @@ class TestCronJob(CronJobBase):
     
     
 class CampaignReminderCronJob(CronJobBase):
-    RUN_EVERY_MINS = 1
+    RUN_EVERY_MINS = 0.1
     # RUN_AT_TIMES = ['10:00', ]
     # RETRY_AFTER_FAILURE_MINS = 60
 
@@ -37,12 +37,14 @@ class CampaignReminderCronJob(CronJobBase):
                         # retry_after_failure_mins=RETRY_AFTER_FAILURE_MINS
                         )
     code = 'campaign_reminder'
+    # ALLOW_PARALLEL_RUNS = True
 
-    async def do(self):
+    def do(self):
+        a = arrow.now()
         after_15min = arrow.utcnow().replace(second=0, microsecond=0).shift(minutes=+15)
         after_16min = after_15min.shift(minutes=+1)
-        after_1hour = arrow.utcnow().replace(second=0, microsecond=0).shift(minutes=+60)
-        after_61mins = after_1hour.shift(minutes=+1)
+        after_1hour = arrow.utcnow().replace(second=0, microsecond=0).shift(minutes=+30)
+        after_61mins = after_1hour.shift(minutes=+100)
         campaings_start_after_15mins = list(db.api_campaign.aggregate([
             {
                 "$match":{
@@ -80,9 +82,12 @@ class CampaignReminderCronJob(CronJobBase):
             }
         ]))
         campaigns = campaings_start_after_15mins + campaings_start_after_1hour
+        print(campaigns)
         channel_layer = get_channel_layer()
+        b = arrow.now()
+        # print(b-a)
         for campaign in campaigns:
             user_subscription_id = campaign['user_subscription_id']
             title = campaign['title']
             remind_time = campaign['remind_time']
-            await channel_layer.group_send(f"user_subscription_{user_subscription_id}", {"type": "notification_message","data":{"message":{"title": title, "remind_time": remind_time}}})
+            async_to_sync(channel_layer.group_send)(f"user_subscription_{user_subscription_id}", {"type": "notification_message","data":{"message":{"title": title, "remind_time": remind_time}}})
