@@ -210,11 +210,8 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         for campaign_order in campaign_orders:
             for column_title in column_list:
-                if column_title in ['pick_up_date', 'last_five_digit']:
-                    try:
-                        col_data = campaign_order['meta'][column_title]
-                    except:
-                        col_data = ''
+                if column_title == 'last_five_digit':
+                    col_data = campaign_order['meta'].get(column_title, '')
                 elif column_title == 'pick_up_store' and campaign_order['shipping_method'] == 'pickup':
                     col_data = campaign_order['shipping_option']
                 elif column_title == 'pick_up_store' and campaign_order['shipping_method'] == 'delivery':
@@ -226,7 +223,7 @@ class OrderViewSet(viewsets.ModelViewSet):
                 elif column_title in ['shipping_address_1', 'shipping_location', 'shipping_region', 'shipping_postcode'] and campaign_order['shipping_method'] in ['pickup', '']:
                     col_data = ''
                 elif column_title == 'payment_method':
-                    col_data = campaign_order[column_title] + '-' + campaign_order['meta']['account_mode']
+                    col_data = campaign_order[column_title] + '-' + campaign_order['meta'].get('account_mode', '')
                 elif column_title == 'shipping_method' and campaign_order['shipping_method'] == 'delivery':
                     col_data = 'delivery' + '-' + campaign_order['shipping_option']
                 elif column_title == 'customer_name':
@@ -247,13 +244,10 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         for campaign_pre_order in campaign_pre_orders:
             for column_title in column_list:
-                if column_title in ['pick_up_date', 'last_five_digit']:
-                    try:
-                        col_data = campaign_pre_order['meta'][column_title]
-                    except:
-                        col_data = ''
+                if column_title == 'last_five_digit':
+                    col_data = campaign_pre_order['meta'].get(column_title, '')
                 elif column_title == 'pick_up_store':
-                    col_data = campaign_order['shipping_option']
+                    col_data = campaign_pre_order['shipping_option']
                 elif column_title == 'created_at':
                     col_data = campaign_pre_order[column_title].strftime("%Y-%m-%d")
                 elif column_title in ['payment_card_type', 'payment_card_number']:
