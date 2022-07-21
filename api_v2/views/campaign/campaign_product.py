@@ -187,7 +187,7 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
             
         return Response(models.campaign.campaign_product.CampaignProductSerializer(campaign.products, many=True).data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['GET'], url_path=r'seller/retrieve', permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['GET'], url_path=r'seller/list', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def seller_retrieve_campaign_products(self, request):
         api_user, campaign_id, category = lib.util.getter.getparams(request, ("campaign_id", "category"), with_user=True, seller=True)
@@ -211,10 +211,11 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['DELETE'], url_path=r'seller/delete', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def delete_campaign_product(self, request, pk=None):
-        api_user, campaign_id = lib.util.getter.getparams(request,("campaign_id",),with_user=True, seller=True)
+        api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
-        campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
-        campaign_product = lib.util.verify.Verify.get_campaign_product_from_campaign(campaign, pk)
+        campaign_product = lib.util.verify.Verify.get_campaign_product(pk)
+        campaign = campaign_product.campaign
+        lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign.id)
 
         if campaign.start_at and datetime.timestamp(datetime.now()) > datetime.timestamp(campaign.start_at):
             raise lib.error_handle.error.api_error.ApiVerifyError("This campaign product can't be deleted because the campaign has already started.")
@@ -222,8 +223,6 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
         ## soft delete:
         campaign_product.campaign = None
         campaign_product.save()
-        ## hard delete:
-        # campaign_product.delete()
 
         return Response({"message": "delete success"}, status=status.HTTP_200_OK)
     
@@ -231,18 +230,17 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['PUT'], url_path=r'seller/update', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def update_campaign_product(self, request, pk=None):
-        api_user, campaign_id = lib.util.getter.getparams(request,("campaign_id",),with_user=True, seller=True)
+
+        api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
-        campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
-        campaign_product = lib.util.verify.Verify.get_campaign_product_from_campaign(campaign, pk)
-       
-        # if "price" in request.data and campaign.start_at and datetime.timestamp(datetime.now())>datetime.timestamp(campaign.start_at):
-        #     raise lib.error_handle.error.api_error.ApiVerifyError('price not editable after starting campaign')
+        campaign_product = lib.util.verify.Verify.get_campaign_product(pk)
+        campaign = campaign_product.campaign
+        lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign.id)
 
         serializer = models.campaign.campaign_product.CampaignProductSerializerUpdate(
             campaign_product, data=request.data, partial=True)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         serializer.save()
-
+        serializer = models.campaign.campaign_product.CampaignProductSerializer(campaign_product)
         return Response(serializer.data, status=status.HTTP_200_OK)

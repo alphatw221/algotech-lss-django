@@ -297,6 +297,12 @@ class Verify():
             raise ApiVerifyError("no campaign found")
         return pre_order.campaign
 
+    @staticmethod
+    def get_campaign_product(campaign_product_id):
+        if not models.campaign.campaign_product.CampaignProduct.objects.filter(id=campaign_product_id).exists():
+            raise ApiVerifyError("no campaign product found")
+        return models.campaign.campaign_product.CampaignProduct.objects.get(id=campaign_product_id)
+
 
     @staticmethod
     def get_campaign_from_platform(platform, campaign_id):

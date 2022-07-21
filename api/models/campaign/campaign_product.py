@@ -116,9 +116,7 @@ class CampaignProductSerializerAssign(serializers.ModelSerializer):
 class CampaignProductSerializerUpdate(CampaignProductSerializer):
     class Meta:
         model = CampaignProduct
-        exclude = ['campaign', 'created_by']
-        read_only_fields = ['created_at', 'modified_at',
-                            'qty_sold']
+        fields = ['name', 'description', 'remark', 'order_code', 'qty_for_sale', 'customer_removable', 'customer_editable', 'type']
 
 
 class CampaignProductAdmin(admin.ModelAdmin):
