@@ -389,8 +389,9 @@ EMAIL_HOST_PASSWORD = 'bq5^82DrrpQ4'  # jyhudyfbvpmewjsc
 
 # cron app
 CRON_CLASSES = [
-    # "cron.cron.TestCronJob",
+    "cron.cron.CampaignReminderCronJob",
 ]
+DJANGO_CRON_DELETE_LOGS_OLDER_THAN = 10
 
 # cart lock after shopper access
 CART_LOCK_INTERVAL = 180
