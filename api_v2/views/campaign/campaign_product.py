@@ -131,27 +131,27 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
                             got_error = True
                             continue
                         if request_data.get('type') not in [models.campaign.campaign_product.TYPE_PRODUCT,models.campaign.campaign_product.TYPE_LUCKY_DRAW]:
-                            e['type'] = 'invalid product type'
+                            e['type'] = 'type_invalid'
                             data.get('errors').append(e)
                             got_error = True
                             continue
 
                         if request_data.get('type')==models.campaign.campaign_product.TYPE_PRODUCT and request_data.get('order_code') in order_code_set:
-                            e['order_code']='duplicate order code'
+                            e['order_code']='order_code_duplicate'
                             got_error = True
                         else:
                             order_code_set.add(request_data.get('order_code'))
 
                         if not request_data.get('qty'):
-                            e['qty']='qty invalid'
+                            e['qty']='invalid_qty'
                             got_error = True
 
-                        elif api_product.data.get('qty') < request_data.get('qty'):
-                            e['qty']=f"only {api_product.data.get('qty')} left"
-                            got_error = True
+                        # elif api_product.data.get('qty') < request_data.get('qty'):
+                        #     e['qty']=f"only {api_product.data.get('qty')} left"
+                        #     got_error = True
                         max_order_amount = request_data.get('max_order_amount') if request_data.get('max_order_amount') else 0
                         if request_data.get('type')==models.campaign.campaign_product.TYPE_PRODUCT and max_order_amount > request_data.get('qty'):
-                            e['max_order_amount']='max amount greater than qty'
+                            e['max_order_amount']='max_order_amount_grater_than_qty'
                             got_error = True
 
                         data.get('errors').append(e)
