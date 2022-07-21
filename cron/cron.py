@@ -28,7 +28,7 @@ class TestCronJob(CronJobBase):
     
     
 class CampaignReminderCronJob(CronJobBase):
-    RUN_EVERY_MINS = 1
+    RUN_EVERY_MINS = 0.5
     # RUN_AT_TIMES = ['10:00', ]
     # RETRY_AFTER_FAILURE_MINS = 60
 
@@ -37,7 +37,7 @@ class CampaignReminderCronJob(CronJobBase):
                         # retry_after_failure_mins=RETRY_AFTER_FAILURE_MINS
                         )
     code = 'campaign_reminder'
-    # ALLOW_PARALLEL_RUNS = True
+    ALLOW_PARALLEL_RUNS = True
 
     def do(self):
         a = arrow.now()
