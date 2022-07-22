@@ -64,3 +64,38 @@ def post_setup_webhook(page_token: str, page_id: str, subscribed_fields="message
 def delete_page_webhook(page_token: str, page_id: str):
     ret = FacebookApiCaller(f'{page_id}/subscribed_apps', bearer_token=page_token).delete()
     return ret
+
+def post_send_quick_replies(page_token:str, recipient_id: str, replies_options: list):
+    """_summary_
+
+    Args:
+        recipient_id (str): IGSID
+        replies_options (list): 
+        ex. 
+            [
+                {
+                    "content_type":"text",
+                    "title":"<TITLE_1>",
+                    "payload":"<POSTBACK_PAYLOAD_1>"
+                },
+                {
+                    "content_type":"text",
+                    "title":"<TITLE_2>",
+                    "payload":"<POSTBACK_PAYLOAD_2>"
+                }
+            ]
+    """
+    params = {
+        "recipient":{
+            "id": recipient_id
+        },
+        "messaging_type": "RESPONSE",
+        "message":{
+            "text": "",
+            "quick_replies": replies_options
+        }
+    }
+    ret = FacebookApiCaller("me/messages", bearer_token=page_token, params=params).post()
+    return ret
+        
+    

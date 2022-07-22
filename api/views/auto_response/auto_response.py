@@ -1,6 +1,6 @@
 from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated
-from api.models.auto_response.auto_response import AutoResponse, AutoResponseSerializer, AutoResponseSerializerUpdate, AutoResponseSerializerWithFacebookInfo
+from api.models.auto_response.auto_response import AutoResponse, AutoResponseSerializer, AutoResponseSerializerUpdate, AutoResponseSerializerWithPagesInfo
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from api.models.facebook.facebook_page import FacebookPage
@@ -44,15 +44,15 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
         auto_responses = user_subscription.auto_responses.all()
         # page = self.paginate_queryset(auto_responses)
         # if page is not None:
-        #     serializer = AutoResponseSerializerWithFacebookInfo(page, many=True)
+        #     serializer = AutoResponseSerializerWithPagesInfo(page, many=True)
         #     result = self.get_paginated_response(serializer.data)
         #     data = result.data
         # else:
-        #     serializer = AutoResponseSerializerWithFacebookInfo(auto_responses, many=True)
+        #     serializer = AutoResponseSerializerWithPagesInfo(auto_responses, many=True)
         #     data = serializer.data
 
         # return Response(data, status=status.HTTP_200_OK)
-        return Response(AutoResponseSerializerWithFacebookInfo(auto_responses, many=True).data, status=status.HTTP_200_OK)
+        return Response(AutoResponseSerializerWithPagesInfo(auto_responses, many=True).data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['POST'], url_path=r'create/(?P<platform_name>[^/.]+)/(?P<platform_id>[^/.]+)', permission_classes=(IsAuthenticated,))
     @api_error_handler
@@ -61,7 +61,6 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
         api_user = Verify.get_seller_user(request)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
         platform = Verify.get_platform_from_user_subscription(user_subscription, platform_name, platform_id)
-
         data = request.data
         data['input_msg'] = data['input_msg'].lower()
         data['user_subscription'] = user_subscription.id
@@ -78,7 +77,7 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         obj = serializer.save()
         
-        return Response(AutoResponseSerializerWithFacebookInfo(obj).data, status=status.HTTP_200_OK)
+        return Response(AutoResponseSerializerWithPagesInfo(obj).data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['PUT'], url_path=r'update', permission_classes=(IsAuthenticated,))
     @api_error_handler
