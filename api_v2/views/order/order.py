@@ -9,18 +9,49 @@ from rest_framework.parsers import MultiPartParser
 from django.core.files.storage import default_storage
 from django.conf import settings
 from django.core.files.base import ContentFile
+from django.http import HttpResponse
 
 
 from api import models
 from bson.json_util import loads, dumps
 import database
 import lib
+import xlsxwriter
 
 from api.utils.advance_query.dashboard import get_campaign_merge_order_list_v2
 
 from automation import jobs
 from api.utils.error_handle.error_handler.email_error_handler import email_error_handler
 
+
+def get_title_map():
+    title_map = {
+            'id': 'Id',
+            'created_at': 'Order Date',
+            'customer_name': 'Customer Name',
+            'platform': 'Platform',
+            'shipping_email': 'E-mail',
+            'shipping_phone': 'Phone',
+            'first_name': 'First Name',
+            'last_name': 'Last Name',
+            'total': 'Total',
+            'payment_method': 'Payment Method',
+            'shipping_first_name': 'Shipping First Name',
+            'shipping_last_name': 'Shipping Last Name',
+            'shipping_phone': 'Shipping Phone',
+            'shipping_postcode': 'Postcode',
+            'shipping_region': 'Region',
+            'shipping_location': 'Location',
+            'shipping_address_1': 'Shipping Address 1',
+            'shipping_method': 'Shipping Method',
+            'shipping_option': 'Shipping Option',
+            'pickup_address': 'Pick Up Addrwess',
+            'pick_up_store': 'Pick Up Store',
+            'shipping_remark': 'Remark',
+            'status': 'Payment Status',
+            'last_five_digit': 'Payment Record',
+        }
+    return title_map
 
 class OrderPagination(PageNumberPagination):
     page_query_param = 'page'
@@ -231,3 +262,135 @@ class OrderViewSet(viewsets.ModelViewSet):
         order.save()
 
         return Response(order.status, status=status.HTTP_200_OK)
+    
+    @action(detail=True, methods=['GET'], url_path=r'report', permission_classes=(IsAuthenticated, ))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def seller_order_report_v2(self, request, pk=None):
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, pk)
+
+        column_list = ['id', 'created_at', 'platform', 'customer_name', 'shipping_phone', 'shipping_email', 'shipping_method', 'shipping_option', 'shipping_address_1', 'shipping_location', 'shipping_region', 'shipping_postcode', 'pick_up_store', 'pickup_address', 'shipping_remark', 'payment_method', 'status', 'last_five_digit', 'total']
+        title_map = get_title_map()
+        campaign_title = campaign.title.replace(' ', '')
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = f'attachment; filename={campaign_title}.xlsx'
+
+        workbook = xlsxwriter.Workbook(response, {'in_memory': True})
+        worksheet = workbook.add_worksheet()
+        header = workbook.add_format({
+            'bold': True,
+            'bg_color': '#F7F7F7',
+            'color': 'black',
+            'align': 'center',
+            'valign': 'top',
+            'border': 1
+        })
+        int_center = workbook.add_format({
+            'align': 'center'
+        })
+        title_form = workbook.add_format({
+            'align': 'center',
+            'bold': True,
+            'font_size': 18,
+            'border': 1
+        })
+        info_form = workbook.add_format({
+            'align': 'center',
+            'bold': True,
+            'font_size': 13,
+            'border': 1
+        })
+
+        campaign_products_count = models.campaign.campaign_product.CampaignProduct.objects.filter(campaign_id=pk).count()
+        worksheet.merge_range(0, 0, 0, len(column_list) + campaign_products_count - 1, campaign.title + ' Order Report', title_form)
+        worksheet.merge_range(1, 0, 1, 5, 'Contact Info', info_form)
+        worksheet.merge_range(1, 6, 1, 14, 'Delivery Info', info_form)
+        worksheet.merge_range(1, 15, 1, 18, 'Payment Info', info_form)
+        worksheet.merge_range(1, 19, 1, 19 + campaign_products_count - 1, 'Order Info', info_form)
+
+        row, column = 2, 0
+        for title in column_list:
+            worksheet.write(row, column, title_map[title], header)
+            if len(title) >= 8:
+                worksheet.set_column(column, column, len(title_map[title]) + 2)
+            column += 1
+        
+        product_column_dict = {}
+        campaign_products = models.campaign.campaign_product.CampaignProduct.objects.filter(campaign_id=pk)
+        for campaign_product in campaign_products:
+            worksheet.write(row, column, campaign_product.name, header)
+            product_column_dict[str(campaign_product.id)] = column
+            column += 1
+        
+        row += 1
+        column = 0
+
+        orders = models.order.order.Order.objects.filter(campaign_id=pk).order_by('status')
+        pre_orders = models.order.pre_order.PreOrder.objects.filter(campaign_id=pk).exclude(products__in={})
+        
+        for order in orders:
+            for field_name in column_list:
+                shipping_method = getattr(order, 'shipping_method')
+                if field_name == 'created_at':
+                    column_data = getattr(order, field_name).strftime("%Y-%m-%d")
+                elif field_name == 'customer_name':
+                    column_data = f'{order.shipping_last_name} {order.shipping_first_name}'
+                elif field_name == 'shipping_method':
+                    if shipping_method == 'delivery':
+                        column_data = 'Delivery'
+                    else:
+                        column_data = 'Pick up'
+                elif field_name == 'shipping_option':
+                    if shipping_method == 'delivery':
+                        if order.shipping_option == '':
+                            column_data = 'Default'
+                        else: 
+                            column_data = order.shipping_option
+                    else:
+                        column_data = ''
+                elif field_name in ['shipping_address_1', 'shipping_location', 'shipping_region', 'shipping_postcode'] and shipping_method in ['pickup', '']:
+                    column_data = ''
+                elif field_name == 'pick_up_store':
+                    if shipping_method == 'delivery':
+                        column_data = ''
+                    else:
+                        column_data = order.shipping_option
+                elif field_name == 'pickup_address' and order.shipping_method == 'delivery':
+                    column_data = ''
+                elif field_name == 'payment_method':
+                    if order.payment_method == 'Direct Payment':
+                        column_data = f'{order.payment_method} - {order.meta.get("account_mode", "")}'
+                    else:
+                        column_data = order.payment_method
+                elif field_name == 'last_five_digit':
+                    column_data = order.meta.get(field_name, '')
+                else:
+                    column_data = getattr(order, field_name)
+                worksheet.write(row, column, column_data)
+                column += 1
+
+            for campaing_product_id_str, order.products in order.products.items():
+                worksheet.write(row, product_column_dict[campaing_product_id_str], order.products.get('qty', 0))
+            row += 1
+            column = 0
+        
+        for pre_order in pre_orders:
+            for field_name in column_list:
+                
+                if field_name == 'created_at':
+                    column_data = getattr(pre_order, field_name).strftime("%Y-%m-%d")
+                elif field_name in ['shipping_address_1', 'shipping_method', 'shipping_location', 'shipping_region', 'shipping_postcode', 'last_five_digit', 'pick_up_store']:
+                    column_data = ''
+                else:
+                    column_data = getattr(pre_order, field_name)
+                worksheet.write(row, column, column_data)
+                column += 1
+            for campaing_product_id_str, pre_order.products in pre_order.products.items():
+                worksheet.write(row, product_column_dict[campaing_product_id_str], pre_order.products.get('qty', 0))
+            row += 1
+            column = 0
+
+        workbook.close()
+
+        return response
