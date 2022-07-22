@@ -13,7 +13,7 @@ from service.instagram.chat_bot import api_ig_post_page_message_chat_bot
 
 
 def get_fb_auto_response(fb_id, message):
-    message_list = list(message.lower())
+    message_list = message.lower().split(' ')
     output_msg_list = []
     output_datas = db.api_auto_response.find({'facebook_page_id': fb_id, 'input_msg': {'$in': message_list}})
     for output_data in output_datas:
