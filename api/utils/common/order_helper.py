@@ -232,7 +232,7 @@ class PreOrderHelper():
                 db.api_pre_order.update_one({"id": api_pre_order["id"]}, {
                                             "$set": {"products": {}, "total": 0, "subtotal": 0, "adjust_price":0, "adjust_title":"", "free_delivery":False, "history":{}, "meta":{}}}, session=session)
       
-        return db.api_order.find_one({"id": increment_id})
+        return db.api_order.find_one({"id": increment_id}, {"_id": False})
 
     
 
@@ -491,7 +491,6 @@ class PreOrderHelper():
             'delivery_charge': delivery_charge,
             'total': pre_order.subtotal + pre_order.adjust_price + delivery_charge
         }
-
         return pre_order_price_information
 
 

@@ -2,6 +2,7 @@ from api.models.facebook.facebook_page import FacebookPage, FacebookPageInfoSeri
 from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
+from api.models.instagram.instagram_profile import InstagramProfile, InstagramProfileInfoSerializer
 from api.models.user.user_subscription import UserSubscription
 
 
@@ -14,6 +15,8 @@ class AutoResponse(models.Model):
 
     facebook_page = models.ForeignKey(
         FacebookPage, null=True, on_delete=models.SET_NULL, related_name='auto_responses')
+    instagram_profile = models.ForeignKey(
+        InstagramProfile, null=True, on_delete=models.SET_NULL, related_name='auto_responses')
 
     description = models.TextField(null=True, blank=True, default=None)
     input_msg = models.TextField(null=True, blank=True, default=None)
@@ -44,13 +47,14 @@ class AutoResponseSerializerUpdate(serializers.ModelSerializer):
     meta = serializers.JSONField(default=dict)
 
 
-class AutoResponseSerializerWithFacebookInfo(serializers.ModelSerializer):
+class AutoResponseSerializerWithPagesInfo(serializers.ModelSerializer):
     class Meta:
         model = AutoResponse
         fields = '__all__'
         read_only_fields = ['created_at', 'modified_at', 'facebook_page']
 
     facebook_page = FacebookPageInfoSerializer(read_only=True)
+    instagram_profile = InstagramProfileInfoSerializer(read_only=True)
     meta = serializers.JSONField(default=dict)
 
 

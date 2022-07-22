@@ -10,6 +10,7 @@ class InstagramProfile(models.Model):
 
     profile_id = models.CharField(max_length=255, null=True, blank=True)
     business_id = models.CharField(max_length=255, null=True, blank=True)
+    connected_facebook_page_id = models.CharField(max_length=255, null=True, blank=True)
     name = models.CharField(max_length=255, null=True, blank=True)
     remark = models.TextField(null=True, blank=True, default=None)
     image = models.CharField(max_length=512, null=True, blank=True)

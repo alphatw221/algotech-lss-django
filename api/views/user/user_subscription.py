@@ -619,6 +619,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
             if InstagramProfile.objects.filter(business_id=business_id).exists():
                 instagram_profile = InstagramProfile.objects.get(business_id=business_id)
+                instagram_profile.connected_facebook_page_id = page_id
                 instagram_profile.name = profile_name
                 instagram_profile.token = page_token
                 instagram_profile.token_update_at = datetime.now()
@@ -627,7 +628,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
                 instagram_profile.save()
             else:
                 instagram_profile = InstagramProfile.objects.create(
-                    business_id=business_id, name=profile_name, token=page_token, token_update_at=datetime.now(), image=profile_pricure)
+                    business_id=business_id, connected_facebook_page_id=page_id, name=profile_name, token=page_token, token_update_at=datetime.now(), image=profile_pricure)
                 instagram_profile.save()
 
             if instagram_profile not in api_user_user_subscription.instagram_profiles.all():
