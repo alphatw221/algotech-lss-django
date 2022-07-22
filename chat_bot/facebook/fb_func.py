@@ -34,23 +34,28 @@ def handleTextMessage(object, page_id, sender_id, message):
     try:
         if object == "page":
             fb_id = FacebookPage.objects.get(page_id = page_id).id
-            campaign_id_list = []
-            try:
-                campaign_datas = db.api_campaign.find({'facebook_page_id': fb_id, 'start_at': {'$lt': datetime.utcnow()}, 'end_at': {'$gt': datetime.utcnow()}})
-                for campaign_data in campaign_datas:
-                    campaign_id_list.append(campaign_data['id'])
-            except Exception:
-                campaign_id_list.append(-1)
-            comment_count = db.api_campaign_comment.find({'campaign_id':{'$in': campaign_id_list}, 'customer_id': sender_id, 'platform': 'facebook'}).count()
+            # campaign_id_list = []
+            # try:
+            #     campaign_datas = db.api_campaign.find({'facebook_page_id': fb_id, 'start_at': {'$lt': datetime.utcnow()}, 'end_at': {'$gt': datetime.utcnow()}})
+            #     for campaign_data in campaign_datas:
+            #         campaign_id_list.append(campaign_data['id'])
+            # except Exception:
+            #     campaign_id_list.append(-1)
+            # comment_count = db.api_campaign_comment.find({'campaign_id':{'$in': campaign_id_list}, 'customer_id': sender_id, 'platform': 'facebook'}).count()
 
-            if comment_count > 0:
-                output_msg_list = get_fb_auto_response(fb_id, message['text'])
-                page_token = FacebookPage.objects.get(page_id = page_id).token
-                for output_msg in output_msg_list:
-                    response = {'text': output_msg}
-                    api_fb_post_page_message_chat_bot(page_token, sender_id, response)
-            else:
-                print ('user not commented before')
+            # if comment_count > 0:
+            #     output_msg_list = get_fb_auto_response(fb_id, message['text'])
+            #     page_token = FacebookPage.objects.get(page_id = page_id).token
+            #     for output_msg in output_msg_list:
+            #         response = {'text': output_msg}
+            #         api_fb_post_page_message_chat_bot(page_token, sender_id, response)
+            # else:
+            #     print ('user not commented before')
+            output_msg_list = get_fb_auto_response(fb_id, message['text'])
+            page_token = FacebookPage.objects.get(page_id = page_id).token
+            for output_msg in output_msg_list:
+                response = {'text': output_msg}
+                api_fb_post_page_message_chat_bot(page_token, sender_id, response)
         elif object == "instagram":
             ig_profile = InstagramProfile.objects.get(business_id = page_id).id
             ig_id = ig_profile.id
