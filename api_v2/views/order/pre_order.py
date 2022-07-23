@@ -151,10 +151,17 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
         api_user = lib.util.verify.Verify.get_customer_user(request)
 
-        customer_id= getattr(api_user,f'{login_with}_info',{}).get('id')    #Facebook App Scope ID Here
-        customer_name= getattr(api_user,f'{login_with}_info',{}).get('name')
-        customer_img= getattr(api_user,f'{login_with}_info',{}).get('picture')
-
+        if login_with not in ['facebook','youtube','instagram']:
+            customer_id = api_user.id
+            customer_name= api_user.name
+            customer_img= api_user.image
+            platform = 'lss'
+        else:
+            customer_id= getattr(api_user,f'{login_with}_info',{}).get('id')    #Facebook App Scope ID Here
+            customer_name= getattr(api_user,f'{login_with}_info',{}).get('name')
+            customer_img= getattr(api_user,f'{login_with}_info',{}).get('picture')
+            platform = login_with
+            
         if not customer_id or not customer_name :
             raise lib.error_handle.error.api_error.ApiVerifyError('Invalid User')
 
