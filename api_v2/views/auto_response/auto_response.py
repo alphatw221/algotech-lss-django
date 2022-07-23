@@ -42,7 +42,7 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
 
         auto_responses = user_subscription.auto_responses.all().order_by("-created_at")
         page = self.paginate_queryset(auto_responses)
-        serializer = models.auto_response.auto_response.AutoResponseSerializerWithFacebookInfo(page, many=True)
+        serializer = models.auto_response.auto_response.AutoResponseSerializerWithPagesInfo(page, many=True)
 
         return Response(self.get_paginated_response(serializer.data).data, status=status.HTTP_200_OK)
 
@@ -71,7 +71,7 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         obj = serializer.save()
         
-        return Response(models.auto_response.auto_response.AutoResponseSerializerWithFacebookInfo(obj).data, status=status.HTTP_200_OK)
+        return Response(models.auto_response.auto_response.AutoResponseSerializerWithPagesInfo(obj).data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['PUT'], url_path=r'update', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler

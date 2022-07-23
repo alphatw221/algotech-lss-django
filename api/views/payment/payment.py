@@ -52,10 +52,19 @@ import lib
 def send_email(order_id):
 
     order_data = db.api_order.find_one({'id': int(order_id)})
+    platform_name = order_data['platform']
     campaign_id = order_data['campaign_id']
     campaign_data = db.api_campaign.find_one({'id': int(campaign_id)})
-    facebook_page_id = campaign_data['facebook_page_id']
-    shop_name = db.api_facebook_page.find_one({'id': int(facebook_page_id)})['name']
+    if platform_name == "facebook":
+        facebook_page_id = campaign_data['facebook_page_id']
+        shop_name = db.api_facebook_page.find_one({'id': int(facebook_page_id)})['name']
+    elif platform_name == "instagram":
+        instagram_profile_id = campaign_data['instagram_profile_id']
+        shop_name = db.api_instagram_profile.find_one({'id': int(instagram_profile_id)})['name']
+    elif platform_name == "youtube":
+        youtube_channel_id = campaign_data['youtube_channel_id']
+        shop_name = db.api_youtube_channel.find_one({'id': int(youtube_channel_id)})['name']
+    
     customer_email = order_data['shipping_email']
 
     mail_subject = i18n_get_mail_subject(shop_name)
@@ -244,7 +253,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         campaign_obj = order_object.campaign
         currency = campaign_obj.meta_payment["paypal"]["paypal_currency"]
         if not currency:
-            currency = 'SGD' if not order_object.currency else order_object.currency
+            currency = 'SGD' if not campaign_obj.currency else campaign_obj.currency
 
         # data is json, example:
         data = [{
@@ -472,7 +481,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
 
     @action(detail=False, methods=['PUT'], url_path=r'buyser_receipt_upload', parser_classes=(MultiPartParser,))
     @api_error_handler
-    def buyser_receipt_upload(self, request):
+    def buyer_receipt_upload(self, request):
         image = request.data["image"]
         print(f"image: {image}")
         # if not image:
@@ -692,7 +701,8 @@ class PaymentViewSet(viewsets.GenericViewSet):
             'platform_id': pre_order.platform_id,
             'meta_logistic': campaign['meta_logistic'],
             'allow_checkout': campaign['meta'].get('allow_checkout', 1),
-            'currency': campaign['currency']
+            'currency': campaign['currency'],
+            'currency_sign': campaign['currency_sign']
         }
 
         return Response(data_dict, status=status.HTTP_200_OK)
@@ -852,8 +862,13 @@ class PaymentViewSet(viewsets.GenericViewSet):
     @api_error_handler
     def get_payment_meta(self, request):
         payment_method = {}
-        api_user = Verify.get_seller_user(request)
-        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+        order_id = request.query_params.get('order_id')
+        if order_id:
+            order_object = Verify.get_order(order_id)
+            user_subscription = order_object.campaign.user_subscription
+        else:
+            api_user = Verify.get_seller_user(request)
+            user_subscription = Verify.get_user_subscription_from_api_user(api_user)
         lang = user_subscription.lang
         print("lang", lang)
 

@@ -27,7 +27,7 @@ def facebook_receive(request):
         print(traceback.format_exc())
         return HttpResponse(status=400)
 
-    if body.get('object') == 'page':
+    if body.get('object') in ['page', 'instagram']:
         for entry in body.get('entry', []):
             try:
                 webhook_event = entry['messaging'][0]
@@ -37,7 +37,7 @@ def facebook_receive(request):
 
                 if message := webhook_event.get('message'):
                     if message.get('text'):
-                        handleTextMessage(page_id, sender_psid, message)
+                        handleTextMessage(body.get('object'), page_id, sender_psid, message)
                         print (message['text'], time_of_event)
                         
                     elif message.get('attachments'):
