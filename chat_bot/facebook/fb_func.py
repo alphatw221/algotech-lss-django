@@ -9,8 +9,8 @@ from api.models.instagram.instagram_profile import InstagramProfile
 from backend.pymongo.mongodb import db
 from datetime import datetime
 from backend.api.facebook.chat_bot import api_fb_post_page_message_chat_bot
-from service.instagram.chat_bot import api_ig_post_page_message_chat_bot
 
+import service
 
 def get_fb_auto_response(fb_id, message):
     message_list = message.lower().split(' ')
@@ -59,7 +59,8 @@ def handleTextMessage(object, page_id, sender_id, message):
             output_msg_list = get_ig_auto_response(ig_id, message['text'])
             for output_msg in output_msg_list:
                 response = {'text': output_msg}
-                api_ig_post_page_message_chat_bot(connected_facebook_page_id, page_token, sender_id, response)
+                service.instagram.chat_bot.post_page_message_chat_bot(connected_facebook_page_id, page_token, sender_id, response)
+
 
     except Exception:
         return -1

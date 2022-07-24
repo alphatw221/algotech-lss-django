@@ -1,6 +1,7 @@
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
-from itsdangerous import Serializer
+from django.http import HttpResponse
+
 
 from rest_framework import status, viewsets
 from rest_framework.parsers import MultiPartParser
@@ -18,6 +19,7 @@ class CampaignPagination(PageNumberPagination):
     page_query_param = 'page'
     page_size_query_param = 'page_size'
     
+
 class CampaignViewSet(viewsets.ModelViewSet):
     queryset = models.campaign.campaign.Campaign.objects.all().order_by('id')
     serializer_class = models.campaign.campaign.CampaignSerializer
@@ -424,3 +426,19 @@ class CampaignViewSet(viewsets.ModelViewSet):
         campaign_product = models.campaign.campaign_product.CampaignProduct.objects.create(campaign=campaign, created_by=api_user, product=product,  status=True, type=models.product.product.TYPE_PRODUCT, name=name, order_code=order_code, price=float(price), qty_for_sale=int(qty), image=models.campaign.campaign_product.IMAGE_NULL)
 
         return Response(models.campaign.campaign_product.CampaignProductSerializer(campaign_product).data, status=status.HTTP_200_OK)
+
+    
+    @action(detail=True, methods=['GET'], url_path=r'report', permission_classes=(IsAuthenticated, ))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def generate_campaign_order_report(self, request, pk):
+
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, pk)
+        campaign_title = campaign.title.replace(' ','')
+        buffer = lib.helper.xlsx_helper.OrderReport.create(campaign, user_subscription.lang)
+
+        response = HttpResponse(buffer, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = f'attachment; filename={campaign_title}.xlsx'
+        return response
+        
