@@ -5,6 +5,8 @@ import io
 class FieldMapper():
     field_name=''
     title=''
+    _width=None
+    
     def __init__(self, field_name=None, title=None, width=None):
         if field_name!=None:
             self.field_name = field_name
