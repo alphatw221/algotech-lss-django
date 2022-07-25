@@ -1,1 +1,1 @@
-from . import post,profile,user
+from . import post,profile,user,chat_bot

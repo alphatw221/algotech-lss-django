@@ -15,7 +15,8 @@ STATUS_EXPIRED = 'expired'
 STATUS_PENDING_REFUND = 'pending_refund'
 PAYMENT_METHOD_STRIPE = 'stripe'
 PAYMENT_METHOD_DIRECT = 'direct_payment'
-
+SHIPPING_METHOD_DELIVERY='delivery'
+SHIPPING_METHOD_PICKUP='pickup'
 
 class Order(models.Model):
     campaign = models.ForeignKey(
