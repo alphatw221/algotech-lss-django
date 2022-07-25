@@ -23,7 +23,7 @@ def get_fb_auto_response(fb_id, message):
 
 def get_ig_auto_response(ig_id, message):
     message_list = [message.lower()]
-    print(message_list)
+    print("message_list", message_list)
     output_msg_list = []
     output_datas = db.api_auto_response.find({'instagram_profile_id': ig_id, 'input_msg': {'$in': message_list}})
     for output_data in output_datas:
@@ -63,6 +63,7 @@ def handleTextMessage(object, page_id, sender_id, message):
             page_token = ig_profile.token
             connected_facebook_page_id = ig_profile.connected_facebook_page_id
             output_msg_list = get_ig_auto_response(ig_id, message['text'])
+            print("output_msg_list", output_msg_list)
             for output_msg in output_msg_list:
                 response = {'text': output_msg}
                 service.instagram.chat_bot.post_page_message_chat_bot(connected_facebook_page_id, page_token, sender_id, response)
