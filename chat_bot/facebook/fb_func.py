@@ -23,6 +23,7 @@ def get_fb_auto_response(fb_id, message):
 
 def get_ig_auto_response(ig_id, message):
     message_list = list(message.lower())
+    print(message_list)
     output_msg_list = []
     output_datas = db.api_auto_response.find({'instagram_profile_id': ig_id, 'input_msg': {'$in': message_list}})
     for output_data in output_datas:
