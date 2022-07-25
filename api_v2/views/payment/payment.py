@@ -85,10 +85,10 @@ class PaymentViewSet(viewsets.GenericViewSet):
         order.status = models.order.order.STATUS_COMPLETE
         order.payment_method = models.order.order.PAYMENT_METHOD_STRIPE
         order.checkout_details[models.order.order.PAYMENT_METHOD_STRIPE] = after_pay_details
-        order.history.append({
+        order.history[models.order.order.PAYMENT_METHOD_STRIPE]={
             "action": "pay",
             "time": pendulum.now("UTC").to_iso8601_string()
-        })
+        }
         order.save()
 
         content = lib.helper.order_helper.OrderHelper.get_confirmation_email_content(order)
