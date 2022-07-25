@@ -58,7 +58,7 @@ def handleTextMessage(object, page_id, sender_id, message):
                 response = {'text': output_msg}
                 api_fb_post_page_message_chat_bot(page_token, sender_id, response)
         elif object == "instagram":
-            ig_profile = InstagramProfile.objects.get(business_id = page_id).id
+            ig_profile = InstagramProfile.objects.get(business_id = page_id)
             ig_id = ig_profile.id
             page_token = ig_profile.token
             connected_facebook_page_id = ig_profile.connected_facebook_page_id
