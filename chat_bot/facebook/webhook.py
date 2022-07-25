@@ -26,7 +26,7 @@ def facebook_receive(request):
         import traceback
         print(traceback.format_exc())
         return HttpResponse(status=400)
-
+    print(body)
     if body.get('object') in ['page', 'instagram']:
         for entry in body.get('entry', []):
             try:
