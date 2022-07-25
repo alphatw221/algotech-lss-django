@@ -635,6 +635,9 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
                 api_user_user_subscription.instagram_profiles.add(instagram_profile)
                 
             business_id_of_binded_pages.append(business_id)
+            status_code2, response2 = service.facebook.page.post_setup_webhook(page_token, page_id)
+            if status_code2 == 200:
+                print(response2)
         lib.helper.subscription_helper.remove_pages("instagram", api_user_user_subscription, business_id_of_binded_pages)
         return Response(InstagramProfileSerializer(api_user_user_subscription.instagram_profiles.all(),many=True).data, status=status.HTTP_200_OK)
 
