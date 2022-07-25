@@ -13,7 +13,7 @@ from backend.api.facebook.chat_bot import api_fb_post_page_message_chat_bot
 import service
 
 def get_fb_auto_response(fb_id, message):
-    message_list = message.lower().split(' ')
+    message_list = [message.lower()]
     output_msg_list = []
     output_datas = db.api_auto_response.find({'facebook_page_id': fb_id, 'input_msg': {'$in': message_list}})
     for output_data in output_datas:
