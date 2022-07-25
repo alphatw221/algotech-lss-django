@@ -68,5 +68,6 @@ def handleTextMessage(object, page_id, sender_id, message):
                 service.instagram.chat_bot.post_page_message_chat_bot(connected_facebook_page_id, page_token, sender_id, response)
 
 
-    except Exception:
+    except Exception as e:
+        print(e)
         return -1
