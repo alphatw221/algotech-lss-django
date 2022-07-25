@@ -142,15 +142,15 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
                         else:
                             order_code_set.add(request_data.get('order_code'))
 
-                        if not request_data.get('qty'):
-                            e['qty']='invalid_qty'
+                        if not request_data.get('assign_qty'):
+                            e['assign_qty']='invalid_qty'
                             got_error = True
 
                         # elif api_product.data.get('qty') < request_data.get('qty'):
                         #     e['qty']=f"only {api_product.data.get('qty')} left"
                         #     got_error = True
                         max_order_amount = request_data.get('max_order_amount') if request_data.get('max_order_amount') else 0
-                        if request_data.get('type')==models.campaign.campaign_product.TYPE_PRODUCT and max_order_amount > request_data.get('qty'):
+                        if request_data.get('type')==models.campaign.campaign_product.TYPE_PRODUCT and max_order_amount > request_data.get('assign_qty'):
                             e['max_order_amount']='max_order_amount_grater_than_qty'
                             got_error = True
 
@@ -158,7 +158,7 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
 
                         if not e:
                             data.get('errors').append(None)
-                            qty_for_sale = int(request_data.get('qty', 0)) if request_data.get('qty') else 0
+                            qty_for_sale = int(request_data.get('assign_qty', 0)) if request_data.get('assign_qty') else 0
                             api_product.distribute(qty_for_sale, sync=False, session=session)
                             database.lss.campaign_product.CampaignProduct.create(
                                 image = str(request_data.get('image')),
