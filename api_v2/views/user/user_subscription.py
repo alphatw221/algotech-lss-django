@@ -255,7 +255,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         else:
             data = request.data
 
-        if type(user_subscription.meta_payment[payment_key])==dict:
+        if type(user_subscription.meta_payment.get(payment_key))==dict:
             user_subscription.meta_payment[payment_key].update(data)
         else:
             user_subscription.meta_payment[payment_key]=data
