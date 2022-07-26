@@ -277,7 +277,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 
 # gcp load balancer
-GCP_API_LOADBALANCER_URL = "https://gipassl.algotech.app"
+GCP_API_LOADBALANCER_URL = "http://v2login.liveshowseller.com/"
 # for social lab
 # GCP_API_LOADBALANCER_URL = "https://sb.liveshowseller.ph"
 
