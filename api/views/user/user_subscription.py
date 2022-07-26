@@ -824,7 +824,8 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             "user_plan":plan,
             "adjust_amount":adjust_amount,
             "currency": country_plan.currency,
-            "marketing_plans": marketing_plans
+            "marketing_plans": marketing_plans,
+            "period":period,
         }, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['POST'], url_path=r'upgrade')
