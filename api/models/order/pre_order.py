@@ -91,6 +91,19 @@ class PreOrderSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['created_at', 'modified_at']
 
+    campaign = CampaignSerializer()
+    meta = serializers.JSONField(default=dict)
+    products = serializers.JSONField(default=dict)
+    checkout_details = serializers.JSONField(default=dict)
+    history = serializers.JSONField(default=dict)
+
+class PreOrderSerializerWithSubscription(serializers.ModelSerializer):
+
+    class Meta:
+        model = PreOrder
+        fields = '__all__'
+        read_only_fields = ['created_at', 'modified_at']
+
     campaign = CampaignSerializerWithUserSubscription()
     meta = serializers.JSONField(default=dict)
     products = serializers.JSONField(default=dict)

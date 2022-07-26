@@ -39,7 +39,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         campaign = lib.util.verify.Verify.get_campaign_from_pre_order(pre_order)
         pre_order = lib.helper.order_helper.PreOrderHelper.summarize_pre_order(pre_order, campaign, save=True)
 
-        return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
+        return Response(models.order.pre_order.PreOrderSerializerWithSubscription(pre_order).data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['PUT'], url_path=r'(?P<pre_order_oid>[^/.]+)/guest/add', permission_classes=(), authentication_classes=[])
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
@@ -209,7 +209,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         campaign = lib.util.verify.Verify.get_campaign_from_pre_order(pre_order)
         pre_order = lib.helper.order_helper.PreOrderHelper.summarize_pre_order(pre_order, campaign, save=True)
 
-        return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
+        return Response(models.order.pre_order.PreOrderSerializerWithSubscription(pre_order).data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['PUT'], url_path=r'(?P<pre_order_oid>[^/.]+)/buyer/delivery', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
