@@ -158,7 +158,7 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
 
-        return Response(models.campaign.campaign_lucky_draw.CampaignLuckyDrawSerializer(campaign.campaign_lucky_draws.all(), many=True).data, status=status.HTTP_200_OK)
+        return Response(models.campaign.campaign_lucky_draw.CampaignLuckyDrawSerializer(campaign.lucky_draws.all(), many=True).data, status=status.HTTP_200_OK)
 
 
     @action(detail=True, methods=['POST'], url_path=r'draw', permission_classes=(IsAuthenticated,))
