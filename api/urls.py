@@ -11,6 +11,7 @@ from api.views.auto_response import auto_response
 from api.views.campaign import campaign, campaign_comment, campaign_lucky_draw, campaign_product
 
 from api.views.facebook import facebook_page
+from api.views.instagram import instagram_profile
 
 from api.views.product import product
 
@@ -52,6 +53,8 @@ def url_setup(urlpatterns):
     router.register(r'campaign', campaign.CampaignViewSet)
 
     router.register(r'facebook_page', facebook_page.FacebookPageViewSet)
+    
+    router.register(r'instagram_profile', instagram_profile.InstagramViewSet)
 
     router.register(r'product', product.ProductViewSet)
 
