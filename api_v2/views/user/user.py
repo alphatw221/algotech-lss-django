@@ -9,7 +9,7 @@ from api import models
 from api import rule
 import service
 import lib
-
+import business_policy
 
 
 
@@ -76,6 +76,23 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(models.user.user.UserSerializerAccountInfo(api_user).data, status=status.HTTP_200_OK) 
 
     
+    @action(detail=False, methods=['PUT'], url_path=r'seller/language/(?P<language>[^/.]+)', permission_classes=(IsAuthenticated, ))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def seller_change_language(self, request, language):
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+
+        if language not in [business_policy.subscription.LANGUAGE_ENGLICH,
+                            business_policy.subscription.LANGUAGE_INDONESIAN,
+                            business_policy.subscription.LANGUAGE_SIMPLIFY_CHINESE,
+                            business_policy.subscription.LANGUAGE_TRANDITIONAL_CHINESE]:
+            raise lib.error_handle.error.api_error.ApiCallerError('language not supported')
+
+        api_user.lang = language
+        api_user.save()
+
+        return Response( models.user.user.UserSerializerAccountInfo(api_user).data, status=status.HTTP_200_OK)
+
+
     @action(detail=False, methods=['POST'], url_path=r'seller/password/change', permission_classes=(IsAuthenticated, ))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def seller_change_password(self, request):
@@ -90,5 +107,3 @@ class UserViewSet(viewsets.ModelViewSet):
         auth_user.save()
 
         return Response({"message":"complete"}, status=status.HTTP_200_OK)
-
-

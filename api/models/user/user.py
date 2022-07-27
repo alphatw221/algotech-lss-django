@@ -11,7 +11,7 @@ from rest_framework import serializers
 from api.models.user.user_subscription import UserSubscription, UserSubscriptionSerializerAccountInfo
 from api.models.youtube.youtube_channel import YoutubeChannelInfoSerializer
 
-
+import business_policy
 class User(models.Model):
     class Meta:
         db_table = 'api_user'
@@ -60,6 +60,8 @@ class User(models.Model):
     auth_user = models.ForeignKey(
         AuthUser, on_delete=models.CASCADE, related_name="api_users", null=True, blank=True, default=None)
 
+    lang = models.CharField(max_length=255, blank=False, null=False,
+                            choices=business_policy.subscription.LANGUAGE_CHOICES, default=business_policy.subscription.LANGUAGE_ENGLICH)
     def __str__(self):
         return str(self.name)
 
