@@ -45,7 +45,7 @@ class HubspotViewSet(viewsets.GenericViewSet):
         if AuthUser.objects.filter(email=email).exists():
             auth_user = AuthUser.objects.get(email=email)
             # set new password
-            auth_user.set_password("12345678")
+            auth_user.set_password(password)
             auth_user.save()
 
         else:
