@@ -57,6 +57,7 @@ class CampaignReminderCronJob(CronJobBase):
             {
                 "$project":{
                     "_id":0,
+                    "id":1,
                     "user_subscription_id":1,
                     "title":1,
                     "remind_time": "15 mins"
@@ -75,6 +76,7 @@ class CampaignReminderCronJob(CronJobBase):
             {
                 "$project":{
                     "_id":0,
+                    "id":1,
                     "user_subscription_id":1,
                     "title":1,
                     "remind_time": "an hour"
@@ -87,7 +89,8 @@ class CampaignReminderCronJob(CronJobBase):
         b = arrow.now()
         # print(b-a)
         for campaign in campaigns:
+            id = campaign['id']
             user_subscription_id = campaign['user_subscription_id']
             title = campaign['title']
             remind_time = campaign['remind_time']
-            async_to_sync(channel_layer.group_send)(f"user_subscription_{user_subscription_id}", {"type": "notification_message","data":{"message":{"title": title, "remind_time": remind_time}}})
+            async_to_sync(channel_layer.group_send)(f"user_subscription_{user_subscription_id}", {"type": "notification_message","data":{"message":{"id": id, "title": title, "remind_time": remind_time}}})
