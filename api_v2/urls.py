@@ -2,7 +2,7 @@ from django.conf.urls import url, include
 from rest_framework import routers
 
 from api_v2.views.product import product
-from api_v2.views.campaign import campaign, campaign_product, campaign_comment, campaign_lucky_draw
+from api_v2.views.campaign import campaign, campaign_product, campaign_comment, campaign_lucky_draw, campaign_quiz_game
 from api_v2.views.user import user, user_subscription
 from api_v2.views.order import pre_order, order_product, order
 from api_v2.views.facebook import facebook_page
@@ -28,6 +28,7 @@ router.register(r'payment', payment.PaymentViewSet)
 router.register(r'auto-response', auto_response.AutoResponseViewSet)
 router.register(r'campaign-comment', campaign_comment.CampaignCommentViewSet)
 router.register(r'campaign-luckydraw', campaign_lucky_draw.CampaignLuckyDrawViewSet)
+router.register(r'campaign-quizgame', campaign_quiz_game.CampaignQuizGameViewSet)
 
 urlpatterns = [
     url(r'^', include(router.urls)),
