@@ -355,7 +355,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
             user_subscription.save()
 
-            return Response(models.user.user_subscription.UserSubscriptionSerializerMeta(user_subscription).data, status=status.HTTP_200_OK)
+            return Response(models.user.user.UserSerializerAccountInfo(api_user).data, status=status.HTTP_200_OK)
 
     # @action(detail=False, methods=['GET'], url_path=r'admin_search_list', permission_classes=(IsAdminUser,))
     # @api_error_handler
