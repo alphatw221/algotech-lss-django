@@ -40,7 +40,7 @@ class FacebookPage(models.Model):
 class FacebookPageInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = FacebookPage
-        fields = ['page_id', 'name', 'remark', 'image', 'lang']
+        fields = ['id', 'page_id', 'name', 'remark', 'image', 'lang']
         read_only_fields = ['created_at', 'modified_at']
 
 
