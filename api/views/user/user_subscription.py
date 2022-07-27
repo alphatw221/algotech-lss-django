@@ -931,7 +931,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         social_meida_connect_limit = globals()[type]['social_meida_connect']
         current_connected_social_media = get_current_connected_socail_media(user_subscription)
         if social_meida_connect_limit == len(current_connected_social_media):
-            return Response({"activated_platform": current_connected_social_media}, status=status.HTTP_200_OK)
-        return Response({"activated_platform": activated_platform}, status=status.HTTP_200_OK)
+            return Response({"can_bind": False, "activated_platform_amount": len(current_connected_social_media)}, status=status.HTTP_200_OK)
+        return Response({"can_bind": True, "activated_platform_amount": 3}, status=status.HTTP_200_OK)
     
     
