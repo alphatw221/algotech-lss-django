@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from api import models
+from api import rule
 import service
 import lib
 
@@ -73,5 +74,21 @@ class UserViewSet(viewsets.ModelViewSet):
     def seller_get_account_info(self, request):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         return Response(models.user.user.UserSerializerAccountInfo(api_user).data, status=status.HTTP_200_OK) 
+
+    
+    @action(detail=False, methods=['POST'], url_path=r'seller/password/change', permission_classes=(IsAuthenticated, ))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def seller_change_password(self, request):
+        password, new_password = lib.util.getter.getdata(request, ("password", "new_password"), required=True)
+        auth_user = request.user
+        
+        if not auth_user.check_password(password):
+            return Response({"message": "password incorrect"}, status=status.HTTP_401_UNAUTHORIZED)
+        rule.rule_checker.user_rule_checker.SellerChangePasswordRuleChecker.check(**{"password":password,"new_password":new_password})
+
+        auth_user.set_password(new_password)
+        auth_user.save()
+
+        return Response({"message":"complete"}, status=status.HTTP_200_OK)
 
 

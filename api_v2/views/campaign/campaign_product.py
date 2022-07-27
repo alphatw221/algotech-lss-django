@@ -150,10 +150,11 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
                         #     e['qty']=f"only {api_product.data.get('qty')} left"
                         #     got_error = True
                         max_order_amount = request_data.get('max_order_amount') if request_data.get('max_order_amount') else 0
+                        max_order_amount = int(max_order_amount)
                         if request_data.get('type')==models.campaign.campaign_product.TYPE_PRODUCT and max_order_amount > request_data.get('assign_qty'):
                             e['max_order_amount']='max_order_amount_grater_than_qty'
                             got_error = True
-
+                        
                         data.get('errors').append(e)
 
                         if not e:
