@@ -43,7 +43,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         
         #temp
-        language = lib.util.getter.getdata(request,('lang',))
+        language, = lib.util.getter.getdata(request,('lang',))
         api_user.lang = language
         api_user.save()
 
