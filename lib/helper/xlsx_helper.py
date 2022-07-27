@@ -145,7 +145,8 @@ class OrderReport(XlsxHelper):
         worksheet.merge_range(cls.row, 15, cls.row, 18, 'Payment Info', info_format)
         worksheet.merge_range(cls.row, 19, cls.row, 19 + campaign_products_count - 1, 'Order Info', info_format)
         cls._next_row()
-
+        cls._next_column()
+        
         for column in cls.columns:
             worksheet.write(cls.row, cls.col, column.title, header_format)
             worksheet.set_column(cls.col, cls.col, column.width)
