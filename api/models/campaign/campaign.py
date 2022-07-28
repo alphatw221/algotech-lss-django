@@ -1,5 +1,7 @@
-from email.policy import default
-from re import T
+from django.contrib import admin
+from djongo import models
+from rest_framework import serializers
+
 from api.models.facebook.facebook_page import (FacebookPage,
                                                FacebookPageInfoSerializer, FacebookPageSerializer)
 
@@ -9,9 +11,8 @@ from api.models.user.user import User
 from api.models.user.user_subscription import UserSubscription, UserSubscriptionSerializer
 from api.models.youtube.youtube_channel import (YoutubeChannel,
                                                 YoutubeChannelInfoSerializer, YoutubeChannelSerializer)
-from django.contrib import admin
-from djongo import models
-from rest_framework import serializers
+
+import business_policy
 
 IMAGE_NULL='/no_image.jpeg'
 
@@ -63,6 +64,9 @@ class Campaign(models.Model):
     meta = models.JSONField(null=True, blank=True, default=dict)
     meta_payment = models.JSONField(null=True, blank=True, default=dict)
     meta_logistic = models.JSONField(default=dict, null=True, blank=dict)
+
+    lang = models.CharField(max_length=255, blank=False, null=False,
+                            choices=business_policy.subscription.LANGUAGE_CHOICES, default=business_policy.subscription.LANGUAGE_ENGLICH)
 
     def __str__(self):
         return str(self.title)
@@ -147,7 +151,7 @@ class CampaignSerializerUpdate(serializers.ModelSerializer):
 
     class Meta:
         model = Campaign
-        fields = ['title', 'start_at', 'end_at', 'meta', 'meta_payment', 'meta_logistic']
+        fields = ['title', 'start_at', 'end_at', 'meta', 'meta_payment', 'meta_logistic', 'lang']
 
     meta = serializers.JSONField(default={"allow_checkout": 1})
     meta_payment = serializers.JSONField(default=dict)
