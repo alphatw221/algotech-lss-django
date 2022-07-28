@@ -441,4 +441,13 @@ class CampaignViewSet(viewsets.ModelViewSet):
         response = HttpResponse(buffer, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         response['Content-Disposition'] = f'attachment; filename={campaign_title}.xlsx'
         return response
-        
+    
+    @action(detail=True, methods=['GET'], url_path=r'product/order_code/dict', permission_classes=(IsAuthenticated, ))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def get_campaign_product_dict(self, request, pk):
+
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, pk)
+
+        return Response({str(product.order_code).lower():True for product in campaign.products.all()}, status=status.HTTP_200_OK)
