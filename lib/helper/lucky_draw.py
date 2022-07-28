@@ -204,15 +204,18 @@ class LuckyDraw():
 
         
         for winner in winners:                                              #multithread needed
-            cls.__add_product(campaign, winner, campaign_product)
-            cls.__announce(campaign, winner, campaign_product)
+            try:
+                cls.__add_product(campaign, winner, campaign_product)
+                cls.__announce(campaign, winner, campaign_product)
+                cls.__send_private_message(campaign, winner, campaign_product)
+                winner_dict = winner.to_dict()
+                # if winner not in campaign_winner_list:
+                campaign_winner_list.append(winner_dict)
+
+                winner_list.append(winner_dict)
+            except Exception:
+                pass
             
-            winner_dict = winner.to_dict()
-            # if winner not in campaign_winner_list:
-            campaign_winner_list.append(winner_dict)
-
-            winner_list.append(winner_dict)
-
         campaign.meta['winner_list']=campaign_winner_list
         campaign.save()
 
@@ -264,10 +267,21 @@ class LuckyDraw():
 
         if (facebook_page := campaign.facebook_page):
             service.facebook.post.post_page_comment_on_post(facebook_page.token, campaign.facebook_campaign.get('post_id'), text)
-            
+        
 
         if (youtube_channel := campaign.youtube_channel):
             service.youtube.live_chat.post_live_chat_comment(youtube_channel.token, campaign.youtube_campaign.get('live_chat_id'), text)
+
+    @classmethod
+    def __send_private_message(cls, 
+    campaign: models.campaign.campaign.Campaign, 
+    winner: LuckyDrawCandidate, 
+    campaign_product:models.campaign.campaign_product.CampaignProduct):
+
+        text = lib.i18n.campaign_announcement.get_campaign_announcement_lucky_draw_winner(campaign_product.name, winner.customer_name)  #temp
+
+        if (campaign.instagram_profile and winner.platform=='instagram' ):
+            service.instagram.post.private_message( campaign.instagram_profile.token, winner.customer_id, text)
 
     
     @classmethod
