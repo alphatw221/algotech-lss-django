@@ -259,16 +259,6 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
                 image_path = default_storage.save(
                         f'/{user_subscription.id}/payment/direct_payment/{image.name}', ContentFile(image.read()))
                 account['image'] = image_path
-            # for account in data.get('v2_accounts'):
-            #     image = request.data.get('_'+account.get('name'))
-            #     if image in ['null','undefined','',None]:
-            #         continue
-            #     elif image in ['._no_image']:
-            #         account['image'] = models.user.user_subscription.IMAGE_NULL
-            #     else:
-            #         image_path = default_storage.save(
-            #             f'/{user_subscription.id}/payment/direct_payment/{image.name}', ContentFile(image.read()))
-            #         account['image'] = image_path
         else:
             data = request.data
 
