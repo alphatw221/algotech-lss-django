@@ -4,7 +4,9 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from api import models
-import lib, json
+import lib
+import json
+import datetime
 
 class CampaignQuizGameViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
@@ -17,12 +19,9 @@ class CampaignQuizGameViewSet(viewsets.ModelViewSet):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
+        prize = lib.util.verify.Verify.get_campaign_product_from_campaign(campaign, int(request.data.get('prize', {}).get('id', 0)))
 
-        data, = lib.util.getter.getdata(request, ('data', ), required=True)
-        data = json.load(data)
-        prize = lib.util.verify.Verify.get_campaign_product_from_campaign(campaign, int(data.get('prize', {}).get('id', 0)))
-
-        serializer = models.campaign.campaign_quiz_game.CampaignQuizGameSerializerCreate(data = data)
+        serializer = models.campaign.campaign_quiz_game.CampaignQuizGameSerializerCreate(data = request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         quiz_game = serializer.save()
@@ -32,4 +31,30 @@ class CampaignQuizGameViewSet(viewsets.ModelViewSet):
         quiz_game.status = models.campaign.campaign_quiz_game.STATUS_INIT
         quiz_game.save()
 
-        return Response('poop', status=status.HTTP_200_OK)
+        return Response(models.campaign.campaign_quiz_game.CampaignQuizGameSerializer(quiz_game).data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['GET'], url_path=r'(?P<campaign_id>[^/.]+)/list', permission_classes=(IsAuthenticated, ))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def list_quiz_game(self, request, campaign_id):
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
+
+        return Response(models.campaign.campaign_quiz_game.CampaignQuizGameSerializer(campaign.quiz_games.all(), many=True).data, status=status.HTTP_200_OK)
+    
+    @action(detail=True, methods=['GET'], url_path=r'start', permission_classes=(IsAuthenticated, ))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def start_quiz_game(self, request, pk):
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        quiz_game = lib.util.verify.Verify.get_quiz_game(pk)
+
+        meta = quiz_game.meta
+        meta['start_at'] = datetime.datetime.now()
+        quiz_game.meta = meta
+        quiz_game.save()
+
+        campaign = quiz_game.campaign
+        lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign.id)
+
+        return Response(models.campaign.campaign_quiz_game.CampaignQuizGameSerializer(quiz_game).data, status=status.HTTP_200_OK)
