@@ -57,7 +57,7 @@ class HubspotViewSet(viewsets.GenericViewSet):
             status='new', 
             started_at=now,
             expired_at=expired_at, 
-            user_plan= {"activated_platform" : ["facebook", "instagram"]}, 
+            user_plan= {"activated_platform" : ["facebook", "instagram", "youtube"]}, 
             meta_country={ 'activated_country': [country] },
             type='trial',
             lang=country_plan.language ,
