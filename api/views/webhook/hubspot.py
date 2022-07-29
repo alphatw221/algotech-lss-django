@@ -52,14 +52,16 @@ class HubspotViewSet(viewsets.GenericViewSet):
             auth_user = AuthUser.objects.create_user(
                 username=f'{first_name} {last_name}', email=email, password=password)
         
+
         user_subscription = models.user.user_subscription.UserSubscription.objects.create(
             name=f'{first_name} {last_name}', 
             status='new', 
             started_at=now,
             expired_at=expired_at, 
-            user_plan= {"activated_platform" : ["facebook", "instagram"]}, 
+            user_plan= {"activated_platform" : ["facebook", "instagram", "youtube"]}, 
             meta_country={ 'activated_country': [country] },
-            type='trial',
+            type=business_policy.subscription.TYPE_TRIAL,
+
             lang=country_plan.language ,
             country = country
             )
