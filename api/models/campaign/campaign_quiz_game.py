@@ -29,6 +29,9 @@ class CampaignQuizGame(models.Model):
     winner_list = models.JSONField(default=list, null=True, blank=True)
     meta = models.JSONField(default=dict, null=True, blank=True)
     status = models.CharField(max_length=255, null=True, blank=True) 
+
+    start_at = models.DateTimeField(null=True, blank=True, default=None)
+    end_at = models.DateTimeField(null=True, blank=True, default=None)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
