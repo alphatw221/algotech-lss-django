@@ -186,21 +186,6 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
         return Response(models.user.static_assets.StaticAssetsSerializer(static_assets, many=True).data, status=status.HTTP_200_OK)
 
 
-    @action(detail=False, methods=['POST'], url_path=r'(?P<campaign_id>[^/.]+)/upload/animation', parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated,))
-    @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def upload_animation(self, request, campaign_id):
-        api_user = lib.util.verify.Verify.get_seller_user(request)
-        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
-
-        animation, = lib.util.getter.getdata(request, ("animation", ), required=True)
-        if animation:
-            animation_path = default_storage.save(
-                f'{user_subscription.id}/luckydraw/{animation.name}', ContentFile(animation.read()))
-            models.user.static_assets.StaticAssets.objects.create(user_subscription=user_subscription, name=animation.name, path=animation_path, type=models.user.static_assets.TYPE_ANIMATION)
-        
-        return Response({'message': 'success'}, status=status.HTTP_200_OK)
-
-
     # @action(detail=False, methods=['POST'], url_path=r'(?P<campaign_id>[^/.]+)/likes', permission_classes=(IsAuthenticated,))
     # @lib.error_handle.error_handler.api_error_handler.api_error_handler
     # def lucky_draw_likes(self, request, campaign_id):

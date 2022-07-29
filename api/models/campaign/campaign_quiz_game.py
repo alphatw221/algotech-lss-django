@@ -52,3 +52,11 @@ class CampaignQuizGameSerializerCreate(serializers.ModelSerializer):
         read_only_fields = ['created_at', 'updated_at']
     
     meta = serializers.JSONField(default=dict)
+
+class CampaignQuizGameSerializerUpdate(serializers.ModelSerializer):
+    class Meta:
+        model = CampaignQuizGame
+        fields = ['title', 'question', 'answer', 'remark', 'num_of_winner', 'repeatable', 'is_follower', 'meta']
+        read_only_fields = ['created_at', 'updated_at']
+    
+    meta = serializers.JSONField(default=dict)
