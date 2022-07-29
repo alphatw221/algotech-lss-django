@@ -1,6 +1,6 @@
 from email.policy import default
 from api.models.campaign.campaign import Campaign
-from api.models.campaign.campaign_product import CampaignProduct
+from api.models.campaign.campaign_product import CampaignProduct, CampaignProductSerializer
 
 from djongo import models
 from rest_framework import serializers
@@ -29,11 +29,31 @@ class CampaignQuizGame(models.Model):
     winner_list = models.JSONField(default=list, null=True, blank=True)
     meta = models.JSONField(default=dict, null=True, blank=True)
     status = models.CharField(max_length=255, null=True, blank=True) 
+
+    start_at = models.DateTimeField(null=True, blank=True, default=None)
+    end_at = models.DateTimeField(null=True, blank=True, default=None)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
 
+class CampaignQuizGameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CampaignQuizGame
+        fields = '__all__'
+        read_only_fields = ['created_at', 'updated_at']
+
+    prize = CampaignProductSerializer(read_only=True, default=dict)
+    meta = serializers.JSONField(default=dict)
+
 class CampaignQuizGameSerializerCreate(serializers.ModelSerializer):
+    class Meta:
+        model = CampaignQuizGame
+        fields = ['title', 'question', 'answer', 'remark', 'num_of_winner', 'repeatable', 'is_follower', 'meta']
+        read_only_fields = ['created_at', 'updated_at']
+    
+    meta = serializers.JSONField(default=dict)
+
+class CampaignQuizGameSerializerUpdate(serializers.ModelSerializer):
     class Meta:
         model = CampaignQuizGame
         fields = ['title', 'question', 'answer', 'remark', 'num_of_winner', 'repeatable', 'is_follower', 'meta']
