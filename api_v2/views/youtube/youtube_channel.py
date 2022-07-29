@@ -13,7 +13,7 @@ class YoutubeChannelViewSet(viewsets.GenericViewSet):
 
     @action(detail=True, methods=['GET'], url_path=r'token/check', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def check_instagram_page_token(self, request, pk):
+    def check_youtube_channel_token(self, request, pk):
 
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
@@ -28,3 +28,18 @@ class YoutubeChannelViewSet(viewsets.GenericViewSet):
             raise lib.error_handle.error.api_error.ApiVerifyError(f"YouTube channel <{youtube_channel.name}>: token expired or invalid. Please re-bind your channel on Platform page.")
         return Response(models.youtube.youtube_channel.YoutubeChannelSerializer(youtube_channel).data, status=status.HTTP_200_OK)
 
+    @action(detail=True, methods=['GET'], url_path=r'post/check', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def check_youtube_channel_post(self, request, pk):
+        live_video_id = request.query_params.get('post_id')
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        
+        if 'youtube' not in user_subscription.user_plan.get('activated_platform'):
+            raise lib.error_handle.error.api_error.ApiVerifyError('youtube not activated')
+        
+        youtube_channel = lib.util.verify.Verify.get_youtube_channel_from_user_subscription(user_subscription, pk)
+        code, response = service.youtube.viedo.get_video_info_with_access_token(youtube_channel.token, live_video_id)
+        if not response.get('items'):
+            return Response({"error_response": response}, status=status.HTTP_200_OK)
+        return Response({"success_response": response}, status=status.HTTP_200_OK)
