@@ -1,5 +1,10 @@
 from ..facebook._fb_api_caller import FacebookApiCaller, FacebookApiV12Caller
 
+def get_post(page_token: str, post_id: str):
+    params = {}
+    ret = FacebookApiCaller(f'{post_id}', bearer_token=page_token,
+                            params=params).get()
+    return ret
 
 def post_id_list(token: str, bussiness_id: str):
     ret = FacebookApiCaller(f'{bussiness_id}/media', bearer_token=token).get()

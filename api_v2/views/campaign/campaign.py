@@ -339,7 +339,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, pk)
 
         if platform not in user_subscription.user_plan.get('activated_platform'):
-            raise lib.error_handle.error.api_error.ApiCallerError('facebook not activated')
+            raise lib.error_handle.error.api_error.ApiCallerError(f'{platform} not activated')
 
         if platform=='facebook':
             facebook_page = lib.util.verify.Verify.get_facebook_page_from_user_subscription(user_subscription, platform_id)
