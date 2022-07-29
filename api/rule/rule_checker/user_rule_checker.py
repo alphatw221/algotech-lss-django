@@ -26,7 +26,6 @@ class DealerCreateAccountRuleChecker(RuleChecker):
 class SellerChangePasswordRuleChecker(RuleChecker):
 
     check_list=[
-        check_rule.user_check_rule.UserCheckRule.is_password_valid,
         check_rule.user_check_rule.UserCheckRule.is_new_password_valid,
     ]
 
