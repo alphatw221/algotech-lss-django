@@ -2,7 +2,7 @@ import pytz
 from api.utils.error_handle.error.api_error import ApiVerifyError
 from django.contrib.auth.models import User as AuthUser
 from api.models.user.user import User
-
+import lib
 class AdminCheckRule():
 
     @staticmethod
@@ -76,12 +76,10 @@ class UserCheckRule():
         #TODO check is_dealer_license_sufficient
         # raise ApiVerifyError()
 
-    @staticmethod
-    def is_password_valid(**kwargs):
-        password = kwargs.get('password')
-        pass
 
-    @staticmethod
-    def is_new_password_valid(**kwargs):
+
+    @classmethod
+    def is_new_password_valid(cls, **kwargs):
         new_password = kwargs.get('new_password')
-        pass
+        if not (type(new_password)==str and len(new_password)>=8 and len(new_password)<=20):
+            raise lib.error_handle.error.api_error.ApiVerifyError('invalid password')

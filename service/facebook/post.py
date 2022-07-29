@@ -1,5 +1,11 @@
 from ._fb_api_caller import FacebookApiCaller
 
+def get_post(page_token: str, post_id: str):
+    params = {}
+    ret = FacebookApiCaller(f'{post_id}', bearer_token=page_token,
+                            params=params).get()
+    return ret
+
 def get_post_likes(page_token: str, post_id: str, after: str = None, limit=100):
     params = {
         'limit': limit,

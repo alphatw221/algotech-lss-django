@@ -230,6 +230,24 @@ class CampaignViewSet(viewsets.ModelViewSet):
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
 
         return Response(models.campaign.campaign.CampaignSerializer(campaign).data, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['DELETE'], url_path=r'delete', permission_classes = (IsAuthenticated, ))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def delete_campaign(self, request):
+
+        api_user, campaign_id = lib.util.getter.getparams(request,("campaign_id", ), with_user=True, seller=True)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription,campaign_id)
+
+        print(campaign.user_subscription)
+        campaign.user_subscription = None
+        print(campaign.user_subscription)
+        # campaign.facebook_page = None
+        # campaign.youtube_page = None
+        # campaign.instagram_profile = None
+        campaign.save()
+
+        return Response({"message": "delete success"}, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET'], url_path=r'check_facebook_page_token', permission_classes=(IsAuthenticated, ))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
@@ -321,7 +339,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, pk)
 
         if platform not in user_subscription.user_plan.get('activated_platform'):
-            raise lib.error_handle.error.api_error.ApiCallerError('facebook not activated')
+            raise lib.error_handle.error.api_error.ApiCallerError(f'{platform} not activated')
 
         if platform=='facebook':
             facebook_page = lib.util.verify.Verify.get_facebook_page_from_user_subscription(user_subscription, platform_id)
