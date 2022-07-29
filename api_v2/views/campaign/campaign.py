@@ -231,15 +231,17 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         return Response(models.campaign.campaign.CampaignSerializer(campaign).data, status=status.HTTP_200_OK)
     
-    @action(detail=True, methods=['DELETE'], url_path=r'delete', permission_classes = (IsAuthenticated, ))
+    @action(detail=False, methods=['DELETE'], url_path=r'delete', permission_classes = (IsAuthenticated, ))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def delete_campaign(self, request, pk=None):
+    def delete_campaign(self, request):
 
-        api_user = lib.util.verify.Verify.Verify.get_seller_user(request)
-        user_subscription = lib.util.verify.Verify.Verify.get_user_subscription_from_api_user(api_user)
-        campaign = lib.util.verify.Verify.Verify.get_campaign_from_user_subscription(user_subscription)
+        api_user, campaign_id = lib.util.getter.getparams(request,("campaign_id", ), with_user=True, seller=True)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription,campaign_id)
 
+        print(campaign.user_subscription)
         campaign.user_subscription = None
+        print(campaign.user_subscription)
         # campaign.facebook_page = None
         # campaign.youtube_page = None
         # campaign.instagram_profile = None
