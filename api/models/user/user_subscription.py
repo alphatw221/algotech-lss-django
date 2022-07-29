@@ -55,7 +55,10 @@ class UserSubscription(models.Model):
         choices=business_policy.subscription.DECIMAL_CHOICES, default=business_policy.subscription.DECIMAL_001)
     currency =   models.CharField(max_length=255, null=True, blank=True,
         choices=business_policy.subscription.CURRENCY_CHOICES, default=business_policy.subscription.CURRENCY_SGD)
-
+    
+    price_unit =   models.CharField(max_length=255, null=False, blank=True,
+        choices=business_policy.subscription.PRICE_UNIT_CHOICES, default=business_policy.subscription.PRICE_UNIT_UNIT)
+        
     user_plan = models.JSONField(null=True, blank=True, default=dict)
     purchase_price = models.FloatField(null=True, blank=True, default=0)
 
