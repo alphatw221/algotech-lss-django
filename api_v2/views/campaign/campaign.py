@@ -240,9 +240,9 @@ class CampaignViewSet(viewsets.ModelViewSet):
         campaign = lib.util.verify.Verify.Verify.get_campaign_from_user_subscription(user_subscription)
 
         campaign.user_subscription = None
-        campaign.facebook_page = None
-        campaign.youtube_page = None
-        campaign.instagram_profile = None
+        # campaign.facebook_page = None
+        # campaign.youtube_page = None
+        # campaign.instagram_profile = None
         campaign.save()
 
         return Response({"message": "delete success"}, status=status.HTTP_200_OK)
