@@ -67,7 +67,8 @@ class Campaign(models.Model):
 
     lang = models.CharField(max_length=255, blank=False, null=False,
                             choices=business_policy.subscription.LANGUAGE_CHOICES, default=business_policy.subscription.LANGUAGE_ENGLICH)
-
+    price_unit =   models.CharField(max_length=255, null=False, blank=True,
+        choices=business_policy.subscription.PRICE_UNIT_CHOICES, default=business_policy.subscription.PRICE_UNIT_UNIT)
     def __str__(self):
         return str(self.title)
 
