@@ -21,17 +21,22 @@ class CampaignQuizGameViewSet(viewsets.ModelViewSet):
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
         prize = lib.util.verify.Verify.get_campaign_product_from_campaign(campaign, int(request.data.get('prize', {}).get('id', 0)))
 
-        serializer = models.campaign.campaign_quiz_game.CampaignQuizGameSerializerCreate(data = request.data)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        quiz_game = serializer.save()
+        print (request.data)
 
-        quiz_game.campaign = campaign
-        quiz_game.prize = prize
-        quiz_game.status = models.campaign.campaign_quiz_game.STATUS_INIT
-        quiz_game.save()
 
-        return Response(models.campaign.campaign_quiz_game.CampaignQuizGameSerializer(quiz_game).data, status=status.HTTP_200_OK)
+
+
+        # serializer = models.campaign.campaign_quiz_game.CampaignQuizGameSerializerCreate(data = request.data)
+        # if not serializer.is_valid():
+        #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # quiz_game = serializer.save()
+
+        # quiz_game.campaign = campaign
+        # quiz_game.prize = prize
+        # quiz_game.status = models.campaign.campaign_quiz_game.STATUS_INIT
+        # quiz_game.save()
+
+        return Response('', status=status.HTTP_200_OK)
     
 
     @action(detail=True, methods=['PUT'], url_path=r'update', permission_classes=(IsAuthenticated,))
