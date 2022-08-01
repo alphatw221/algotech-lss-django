@@ -106,7 +106,7 @@ class CampaignSerializer(serializers.ModelSerializer):
     class Meta:
         model = Campaign
         fields = '__all__'
-        read_only_fields = ['created_at', 'modified_at']
+        read_only_fields = ['created_at', 'updated_at']
 
     facebook_page = FacebookPageInfoSerializer(default=dict)
     facebook_campaign = FacebookCampaignSerializer(default=dict)
@@ -124,8 +124,8 @@ class CampaignSerializerCreate(serializers.ModelSerializer):
     class Meta:
         model = Campaign
         # fields = '__all__'
-        exclude = ['facebook_page', 'youtube_channel', 'instagram_profile']
-        read_only_fields = ['created_at', 'modified_at']
+        exclude = ['facebook_page', 'youtube_channel', 'instagram_profile', 'dealer']
+        read_only_fields = ['created_at', 'updated_at']
 
     facebook_campaign = FacebookCampaignSerializer(default=dict)
     youtube_campaign = YoutubeCampaignSerializer(default=dict)
@@ -140,8 +140,8 @@ class CampaignSerializerEdit(serializers.ModelSerializer):
     class Meta:
         model = Campaign
         # fields = '__all__'
-        exclude = ['facebook_page', 'youtube_channel', 'instagram_profile']
-        read_only_fields = ['created_at', 'modified_at']
+        exclude = ['facebook_page', 'youtube_channel', 'instagram_profile', 'dealer']
+        read_only_fields = ['created_at', 'updated_at']
 
     facebook_campaign = FacebookCampaignSerializer(default=dict)
     youtube_campaign = YoutubeCampaignSerializer(default=dict)
@@ -156,7 +156,7 @@ class CampaignSerializerUpdate(serializers.ModelSerializer):
 
     class Meta:
         model = Campaign
-        fields = ['title', 'start_at', 'end_at', 'meta', 'meta_payment', 'meta_logistic', 'lang']
+        fields = ['title', 'start_at', 'end_at', 'meta', 'meta_payment', 'meta_logistic', 'lang', 'currency', 'price_unit', 'decimal_places']
 
     meta = serializers.JSONField(default={"allow_checkout": 1})
     meta_payment = serializers.JSONField(default=dict)
