@@ -121,8 +121,8 @@ class PaymentViewSet(viewsets.GenericViewSet):
             order.total, 
             currency,
             order.id,
-            f'{settings.GCP_API_LOADBALANCER_URL}/api/v2/payment/hit_pay_return_redirect/?order_id={order.id}',
-            f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}/')
+            f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}',
+            f'{settings.GCP_API_LOADBALANCER_URL}/api/v2/payment/hitpay/webhook/')
 
         if code != 201:
             raise lib.error_handle.error.api_error.ApiCallerError('Payment Error, Please Choose Another Payment Method')
@@ -157,74 +157,3 @@ class PaymentViewSet(viewsets.GenericViewSet):
             content = lib.helper.order_helper.OrderHelper.get_confirmation_email_content(order)
             jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)
         return Response('ok')
-    
-    # @action(detail=False, methods=['GET'], url_path=r'hitpay_return_redirect')
-    # @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    # def hit_pay_redirect(self, request):
-    #     order_id, status = request.query_params.get('order_id'), request.query_params.get('status') 
-    #     if status == 'canceled':
-    #         return redirect(settings.WEB_SERVER_URL + '/buyer/order/' + order_id + '/payment')
-    #     time.sleep(2)
-    #     order_object = Verify.get_order(order_id)
-    #     campaign = order_object.campaign
-    #     api_key = campaign.meta_payment.get("hitpay").get("hitpay_api_key")
-
-    #     payment_request_id = db.api_order.find_one({'id': int(order_id)})['checkout_details']['hitpay']['payment_request_id']
-
-    #     headers = {
-    #         'X-BUSINESS-API-KEY': api_key,
-    #         'Content-Type': 'application/x-www-form-urlencoded',
-    #         'X-Requested-With': 'XMLHttpRequest'
-    #     }
-    #     params = {
-    #         'ID': payment_request_id
-    #     }
-    #     code, ret = HitPay_Helper.HitPayApiCaller(headers=headers, params=params).get()
-    #     #TODO return redirect to order history page
-    #     if code != 200:
-    #         raise Exception('hitpay get payment request api failed')
-        
-    #     for _ret in ret:
-    #         if _ret['id'] == payment_request_id:
-    #             status = _ret['status']
-    #     if status == 'completed':
-    #         return redirect(settings.WEB_SERVER_URL + '/buyer/order/' + order_id + '/confirmation')
-        #TODO else return redirect to order history page
-
-    #     send_email(order_id)
-    #     # shop, order, campaign = confirmation_email_info(order_id)
-    #     # sib_service.transaction_email.OrderConfirmationEmail(shop=shop, order=order, campaign=campaign, to=[order.get('shipping_email')], cc=[]).send()
-
-    #     return Response('hitpay succed')
-    
-    # @action(detail=False, methods=['GET'], url_path=r'hit_pay_return_redirect')
-    # @api_error_handler
-    # def hit_pay_redirect(self, request):
-    #     order_id, status = request.query_params.get('order_id'), request.query_params.get('status') 
-    #     if status == 'canceled':
-    #         return redirect(settings.WEB_SERVER_URL + '/buyer/order/' + order_id + '/payment')
-    #     time.sleep(2)
-    #     order_object = Verify.get_order(order_id)
-    #     campaign = order_object.campaign
-    #     api_key = campaign.meta_payment.get("hitpay").get("hitpay_api_key")
-
-    #     payment_request_id = db.api_order.find_one({'id': int(order_id)})['checkout_details']['hitpay']['payment_request_id']
-
-    #     headers = {
-    #         'X-BUSINESS-API-KEY': api_key,
-    #         'Content-Type': 'application/x-www-form-urlencoded',
-    #         'X-Requested-With': 'XMLHttpRequest'
-    #     }
-    #     params = {
-    #         'ID': payment_request_id
-    #     }
-    #     code, ret = HitPay_Helper.HitPayApiCaller(headers=headers, params=params).get()
-    #     #TODO return redirect to order history page
-    #     if code != 200:
-    #         raise Exception('hitpay get payment request api failed')
-        
-    #     for _ret in ret:
-    #         if _ret['id'] == payment_request_id:
-    #             status = _ret['status']
-    #     if status == 'completed':
-    #         return redirect(settings.WEB_SERVER_URL + '/buyer/order/' + order_id + '/confirmation')

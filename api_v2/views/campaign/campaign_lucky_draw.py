@@ -10,7 +10,7 @@ from django.core.files.storage import default_storage
 
 from api import models
 import lib, json
-from lib.helper import lucky_draw
+
 
 class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
