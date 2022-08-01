@@ -171,7 +171,7 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
         campaign = lucky_draw.campaign
         lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign.id)
 
-        winner_list = lib.helper.lucky_draw.draw(campaign, lucky_draw)
+        winner_list = lib.helper.lucky_draw_helper.draw(campaign, lucky_draw)
         return Response(winner_list, status=status.HTTP_200_OK)
 
 
@@ -195,7 +195,7 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
     #     user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
     #     campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
     #     campaign_product = lib.util.verify.Verify.get_campaign_product_from_campaign(campaign, campaign_product_id)
-    #     winner_list = lib.helper.lucky_draw.draw_likes(campaign, campaign_product, num_of_winner, limit=100, repeatable=repeatable)
+    #     winner_list = lib.helper.lucky_draw_helper.draw_likes(campaign, campaign_product, num_of_winner, limit=100, repeatable=repeatable)
     
     #     return Response(winner_list, status=status.HTTP_200_OK)
 
@@ -209,7 +209,7 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
     #     user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
     #     campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
     #     campaign_product = lib.util.verify.Verify.get_campaign_product_from_campaign(campaign, campaign_product_id)
-    #     winner_list = lib.helper.lucky_draw.draw_keyword(campaign, keyword, campaign_product, num_of_winner, limit=100, repeatable=repeatable)
+    #     winner_list = lib.helper.lucky_draw_helper.draw_keyword(campaign, keyword, campaign_product, num_of_winner, limit=100, repeatable=repeatable)
     
     #     return Response(winner_list, status=status.HTTP_200_OK)
 
@@ -223,7 +223,7 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
     #     user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
     #     campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
     #     campaign_product = lib.util.verify.Verify.get_campaign_product_from_campaign(campaign, campaign_product_id)
-    #     winner_list = lib.helper.lucky_draw.draw_perchase(campaign, campaign_product, num_of_winner, limit=100, repeatable=repeatable)
+    #     winner_list = lib.helper.lucky_draw_helper.draw_perchase(campaign, campaign_product, num_of_winner, limit=100, repeatable=repeatable)
     
     #     return Response(winner_list, status=status.HTTP_200_OK)
 
@@ -236,6 +236,6 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
     #     user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
     #     campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
     #     campaign_product = lib.util.verify.Verify.get_campaign_product_from_campaign(campaign, campaign_product_id)
-    #     winner_list = lib.helper.lucky_draw.draw_product(campaign, campaign_product, num_of_winner, limit=100, repeatable=repeatable)
+    #     winner_list = lib.helper.lucky_draw_helper.draw_product(campaign, campaign_product, num_of_winner, limit=100, repeatable=repeatable)
     
     #     return Response(winner_list, status=status.HTTP_200_OK)
