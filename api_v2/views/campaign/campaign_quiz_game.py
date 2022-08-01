@@ -125,6 +125,6 @@ class CampaignQuizGameViewSet(viewsets.ModelViewSet):
         campaign = quiz_game.campaign
         lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign.id)
 
-        winner_list = lib.helper.quiz_game.quiz(campaign, quiz_game)
+        winner_list = lib.helper.quiz_game_helper.quiz(campaign, quiz_game)
 
         return Response(models.campaign.campaign_quiz_game.CampaignQuizGameSerializer(quiz_game).data, status=status.HTTP_200_OK)

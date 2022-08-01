@@ -112,6 +112,6 @@ class QuizGame():
 
 
 def quiz(campaign, quiz_game):
-    candidate_set = lib.helper.quiz_game.QuizGameCandidateSetGenerator.get_candidate_set(campaign, quiz_game, limit=100)
+    candidate_set = lib.helper.quiz_game_helper.QuizGameCandidateSetGenerator.get_candidate_set(campaign, quiz_game, limit=100)
     
-    return lib.helper.quiz_game.QuizGame.get_winner_from_candidate(campaign, quiz_game.prize,  candidate_set=candidate_set, num_of_winner=quiz_game.num_of_winner)
+    return lib.helper.quiz_game_helper.QuizGame.get_winner_from_candidate(campaign, quiz_game.prize,  candidate_set=candidate_set, num_of_winner=quiz_game.num_of_winner)

@@ -11,7 +11,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from django.core.files.storage import default_storage
 from django.conf import settings
-from rest_framework.parsers import MultiPartParser
+from rest_framework.parsers import MultiPartParser, FormParser
 
 
 import  base64
@@ -119,71 +119,41 @@ class PaymentViewSet(viewsets.GenericViewSet):
             api_key,
             order.shipping_email, 
             order.total, 
-            currency,order.id,
-            f'{settings.GCP_API_LOADBALANCER_URL}/api/v2/payment/hit_pay_return_redirect/?order_id={order.id}',
-            f'{settings.GCP_API_LOADBALANCER_URL}/api/v2/payment/hit_pay_webhook/')
+            currency,
+            order.id,
+            f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}',
+            f'{settings.GCP_API_LOADBALANCER_URL}/api/v2/payment/hitpay/webhook/')
 
         if code != 201:
             raise lib.error_handle.error.api_error.ApiCallerError('Payment Error, Please Choose Another Payment Method')
 
         return Response(payment.get('url'))
 
-    # @action(detail=False, methods=['POST'], url_path=r'hit_pay_webhook', parser_classes=(MultiPartParser, FormParser))
-    # def hit_pay_webhook(self, request):
-    #     data_dict = request.data.dict()
-    #     payment_id, payment_request_id, phone = data_dict['payment_id'], data_dict['payment_request_id'], data_dict['phone']
-    #     amount, currency, status = data_dict['amount'], data_dict['currency'], data_dict['status']
-    #     order_id = data_dict['reference_number']
-    #     _hmac, secret_salt = data_dict['hmac'], settings.HITPAY_SECRET_SALT
-    #     sort_key_list = ['amount', 'currency', 'hmac', 'payment_id', 'payment_request_id', 'phone', 'reference_number', 'status']
+    @action(detail=False, methods=['POST'], url_path=r'hitpay/webhook', parser_classes=(MultiPartParser, FormParser))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def hit_pay_webhook(self, request):
 
-    #     hitpay_dict, info_dict = {}, {}
-    #     info_dict['payment_id'] = payment_id
-    #     info_dict['payment_request_id'] = payment_request_id
-    #     hitpay_dict['hitpay'] = info_dict
-    #     total = int(db.api_order.find_one({'id': int(order_id)})['total'])
+        payment_id, payment_request_id, phone, amount, currency, status, reference_number, hmac,  = \
+            lib.util.getter.getdata(request, ("payment_id", "payment_request_id", "phone", "amount", "currency", "status", "reference_number", "hmac"), required=True)
 
-    #     #TODO change to real checking way
-    #     if status == 'completed' and int(total) == int(float(amount)):
-    #         db.api_order.update_one(
-    #             { 'id': int(order_id) },
-    #             { '$set': {'status': 'complete', 'checkout_details': hitpay_dict, 'payment_method': 'hitpay'} }
-    #         )
-
-    #     send_email(order_id)
-    #     # shop, order, campaign = confirmation_email_info(order_id)
-    #     # sib_service.transaction_email.OrderConfirmationEmail(shop=shop, order=order, campaign=campaign, to=[order.get('shipping_email')], cc=[]).send()
-
-    #     return Response('hitpay succed')
-    
-    # @action(detail=False, methods=['GET'], url_path=r'hit_pay_return_redirect')
-    # @api_error_handler
-    # def hit_pay_redirect(self, request):
-    #     order_id, status = request.query_params.get('order_id'), request.query_params.get('status') 
-    #     if status == 'canceled':
-    #         return redirect(settings.WEB_SERVER_URL + '/buyer/order/' + order_id + '/payment')
-    #     time.sleep(2)
-    #     order_object = Verify.get_order(order_id)
-    #     campaign = order_object.campaign
-    #     api_key = campaign.meta_payment.get("hitpay").get("hitpay_api_key")
-
-    #     payment_request_id = db.api_order.find_one({'id': int(order_id)})['checkout_details']['hitpay']['payment_request_id']
-
-    #     headers = {
-    #         'X-BUSINESS-API-KEY': api_key,
-    #         'Content-Type': 'application/x-www-form-urlencoded',
-    #         'X-Requested-With': 'XMLHttpRequest'
-    #     }
-    #     params = {
-    #         'ID': payment_request_id
-    #     }
-    #     code, ret = HitPay_Helper.HitPayApiCaller(headers=headers, params=params).get()
-    #     #TODO return redirect to order history page
-    #     if code != 200:
-    #         raise Exception('hitpay get payment request api failed')
+        order = lib.util.verify.Verify.get_order(reference_number)
+        campaign = order.campaign
+        salt = campaign.meta_payment.get(models.order.order.PAYMENT_METHOD_HITPAY,{}).get('salt')
         
-    #     for _ret in ret:
-    #         if _ret['id'] == payment_request_id:
-    #             status = _ret['status']
-    #     if status == 'completed':
-    #         return redirect(settings.WEB_SERVER_URL + '/buyer/order/' + order_id + '/confirmation')
+        if not lib.helper.hitpay_helper.is_request_valid(request, salt, hmac):
+            raise lib.error_handle.error.api_error.ApiCallerError('invalid')
+
+        if status == 'completed' and order.tatal== amount:
+
+            order.status = models.order.order.STATUS_COMPLETE
+            order.payment_method = models.order.order.PAYMENT_METHOD_HITPAY
+            order.checkout_details[models.order.order.PAYMENT_METHOD_HITPAY] = request.data.dict()
+            order.history[models.order.order.PAYMENT_METHOD_HITPAY]={
+                "action": "pay",
+                "time": pendulum.now("UTC").to_iso8601_string()
+            }
+            order.save()
+
+            content = lib.helper.order_helper.OrderHelper.get_confirmation_email_content(order)
+            jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)
+        return Response('ok')

@@ -9,7 +9,4 @@ def webhook_facebook(request):
     if request.method == 'GET':
         return facebook_verify(request)
     elif request.method == 'POST':
-        if settings.GCP_API_LOADBALANCER_URL != "https://sb.liveshowseller.ph":
-            r = requests.post('https://sb.liveshowseller.ph/chat_bot/facebook/', json=json.loads(request.body))
-
         return facebook_receive(request)
