@@ -147,10 +147,10 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         page = self.paginate_queryset(api_user.orders.all().order_by('-created_at'))
         if page is not None:
-            serializer = models.order.order.OrderSerializerWithUserSubscription(page, many=True)
+            serializer = models.order.order.OrderSerializer(page, many=True)
             data = self.get_paginated_response(serializer.data).data
         else:
-            data = models.order.order.OrderSerializerWithUserSubscription(api_user.orders, many=True).data
+            data = models.order.order.OrderSerializer(api_user.orders, many=True).data
 
         return Response(data, status=status.HTTP_200_OK)
        
