@@ -20,7 +20,7 @@ def getdata(request, data: tuple, required=False):
     ret = []
     if required:
         for d in data:
-            if type(request.data.get(d)) != bool and not request.data.get(d):
+            if type(request.data.get(d)) not in [ bool, int, float] and not request.data.get(d):
                 raise lib.error_handle.error.api_error.ApiVerifyError(f"{d} is required")
             ret.append(request.data.get(d))
         return ret

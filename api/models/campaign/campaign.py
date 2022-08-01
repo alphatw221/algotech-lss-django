@@ -69,6 +69,10 @@ class Campaign(models.Model):
                             choices=business_policy.subscription.LANGUAGE_CHOICES, default=business_policy.subscription.LANGUAGE_ENGLICH)
     price_unit =   models.CharField(max_length=255, null=False, blank=True,
         choices=business_policy.subscription.PRICE_UNIT_CHOICES, default=business_policy.subscription.PRICE_UNIT_UNIT)
+
+    decimal_places = models.IntegerField( blank=False, null=False, 
+        choices=business_policy.subscription.DECIMAL_CHOICES, default=business_policy.subscription.DECIMAL_001)
+    
     def __str__(self):
         return str(self.title)
 

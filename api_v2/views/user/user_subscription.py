@@ -353,31 +353,46 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
     #     print(user_subscription.lang)
     #     return Response(UserSubscriptionSerializerSimplify(user_subscription).data, status=status.HTTP_200_OK)
 
-    
-    @action(detail=False, methods=['GET', 'PUT'], url_path=r'notes', permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['GET'], url_path=r'info/general', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def update_note(self, request):
+    def get_general_info(self, request):
 
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
 
-        if request.method == "GET":
-            noteJson = {
-                'delivery_note': user_subscription.meta_logistic.get('delivery_note', ''),
-                'special_note' : user_subscription.meta_payment.get('special_note', ''),
-                'confirmation_note': user_subscription.meta_payment.get('confirmation_note', '')
-            }
-            return Response(noteJson, status=status.HTTP_200_OK)
-        else:
-            api_user, delivery_note, special_note, confirmation_note = lib.util.getter.getparams(request,('delivery_note','special_note', 'confirmation_note'),with_user=True, seller=True)
+        _json = {
 
-            user_subscription.meta_logistic['delivery_note'] = delivery_note
-            user_subscription.meta_payment['special_note'] = special_note
-            user_subscription.meta_payment['confirmation_note'] = confirmation_note
+            'currency':user_subscription.currency,
+            'buyer_lang':user_subscription.buyer_lang,
+            'decimal_places':user_subscription.decimal_places,
+            'price_unit':user_subscription.price_unit,
+            'delivery_note': user_subscription.meta_logistic.get('delivery_note', ''),
+            'special_note' : user_subscription.meta_payment.get('special_note', ''),
+            'confirmation_note': user_subscription.meta_payment.get('confirmation_note', '')
+        }
+        return Response(_json, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['PUT'], url_path=r'update/info/general', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def update_general_info(self, request):
 
-            user_subscription.save()
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
 
-            return Response(models.user.user.UserSerializerAccountInfo(api_user).data, status=status.HTTP_200_OK)
+        currency, buyer_lang, decimal_places, price_unit, delivery_note, special_note, confirmation_note  =\
+                lib.util.getter.getdata(request,('currency', 'buyer_lang', 'decimal_places', 'price_unit', 'delivery_note', 'special_note', 'confirmation_note'), required=True)
+        
+        user_subscription.currency=currency
+        user_subscription.buyer_lang=buyer_lang
+        user_subscription.decimal_places=decimal_places
+        user_subscription.price_unit=price_unit
+        user_subscription.meta_logistic['delivery_note'] = delivery_note
+        user_subscription.meta_payment['special_note'] = special_note
+        user_subscription.meta_payment['confirmation_note'] = confirmation_note
+
+        user_subscription.save()
+
+        return Response(models.user.user.UserSerializerAccountInfo(api_user).data, status=status.HTTP_200_OK)
 
     # @action(detail=False, methods=['GET'], url_path=r'admin_search_list', permission_classes=(IsAdminUser,))
     # @api_error_handler
