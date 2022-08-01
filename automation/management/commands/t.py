@@ -373,12 +373,12 @@ class Command(BaseCommand):
         from api import models
 
         campaign = models.campaign.campaign.Campaign.objects.get(id=510)
-        candidate_set = lib.helper.lucky_draw.KeywordCandidateSetGenerator.get_candidate_set(campaign,'cart',repeatable=True)
+        candidate_set = lib.helper.lucky_draw_helper.KeywordCandidateSetGenerator.get_candidate_set(campaign,'cart',repeatable=True)
         campaign_product = models.campaign.campaign_product.CampaignProduct.objects.get(id=7819)
 
         print(candidate_set)
 
-        winner_list = lib.helper.lucky_draw.LuckyDraw.draw_from_candidate(campaign, campaign_product,  candidate_set=candidate_set)
+        winner_list = lib.helper.lucky_draw_helper.LuckyDraw.draw_from_candidate(campaign, campaign_product,  candidate_set=candidate_set)
 
         print(winner_list)
 

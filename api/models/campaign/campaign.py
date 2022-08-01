@@ -69,6 +69,10 @@ class Campaign(models.Model):
                             choices=business_policy.subscription.LANGUAGE_CHOICES, default=business_policy.subscription.LANGUAGE_ENGLICH)
     price_unit =   models.CharField(max_length=255, null=False, blank=True,
         choices=business_policy.subscription.PRICE_UNIT_CHOICES, default=business_policy.subscription.PRICE_UNIT_UNIT)
+
+    decimal_places = models.IntegerField( blank=False, null=False, 
+        choices=business_policy.subscription.DECIMAL_CHOICES, default=business_policy.subscription.DECIMAL_001)
+    
     def __str__(self):
         return str(self.title)
 
@@ -102,7 +106,7 @@ class CampaignSerializer(serializers.ModelSerializer):
     class Meta:
         model = Campaign
         fields = '__all__'
-        read_only_fields = ['created_at', 'modified_at']
+        read_only_fields = ['created_at', 'updated_at']
 
     facebook_page = FacebookPageInfoSerializer(default=dict)
     facebook_campaign = FacebookCampaignSerializer(default=dict)
@@ -120,8 +124,8 @@ class CampaignSerializerCreate(serializers.ModelSerializer):
     class Meta:
         model = Campaign
         # fields = '__all__'
-        exclude = ['facebook_page', 'youtube_channel', 'instagram_profile']
-        read_only_fields = ['created_at', 'modified_at']
+        exclude = ['facebook_page', 'youtube_channel', 'instagram_profile', 'dealer']
+        read_only_fields = ['created_at', 'updated_at']
 
     facebook_campaign = FacebookCampaignSerializer(default=dict)
     youtube_campaign = YoutubeCampaignSerializer(default=dict)
@@ -136,8 +140,8 @@ class CampaignSerializerEdit(serializers.ModelSerializer):
     class Meta:
         model = Campaign
         # fields = '__all__'
-        exclude = ['facebook_page', 'youtube_channel', 'instagram_profile']
-        read_only_fields = ['created_at', 'modified_at']
+        exclude = ['facebook_page', 'youtube_channel', 'instagram_profile', 'dealer']
+        read_only_fields = ['created_at', 'updated_at']
 
     facebook_campaign = FacebookCampaignSerializer(default=dict)
     youtube_campaign = YoutubeCampaignSerializer(default=dict)
@@ -152,7 +156,7 @@ class CampaignSerializerUpdate(serializers.ModelSerializer):
 
     class Meta:
         model = Campaign
-        fields = ['title', 'start_at', 'end_at', 'meta', 'meta_payment', 'meta_logistic', 'lang']
+        fields = ['title', 'start_at', 'end_at', 'meta', 'meta_payment', 'meta_logistic', 'lang', 'currency', 'price_unit', 'decimal_places']
 
     meta = serializers.JSONField(default={"allow_checkout": 1})
     meta_payment = serializers.JSONField(default=dict)

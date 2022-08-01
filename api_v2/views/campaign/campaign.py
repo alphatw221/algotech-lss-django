@@ -77,8 +77,8 @@ class CampaignViewSet(viewsets.ModelViewSet):
         campaign = serializer.save()
         campaign.created_by = api_user
         campaign.user_subscription = user_subscription
-        campaign.currency = user_subscription.currency
-        campaign.lang = user_subscription.lang
+
+
 
         if accounts:=campaign.meta_payment.get('direct_payment',{}).get('v2_accounts'):
             for index, account in enumerate(accounts):

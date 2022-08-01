@@ -42,6 +42,12 @@ class QuizGameCandidateSetGenerator(CandidateSetGenerator):
     def get_candidate_set(cls, campaign, quiz_game, limit=1000):
         #TODO combine quiz_game winner list
         winner_list = campaign.meta.get('winner_list', [])
+
+        print (winner_list)
+        print ('--------------')
+        [winner_dict.pop('draw_type', None) for winner_dict in winner_list]
+
+
         candidate_set = set()
         campaign_comments = models.campaign.campaign_comment.CampaignComment.objects.filter(
             campaign=campaign,
@@ -97,8 +103,8 @@ class QuizGame():
             except Exception:
                 pass
         
-        print ('---------------------------------------------')
-        print (winner_list)
+        # print ('---------------------------------------------')
+        # print (winner_list)
         # campaign.meta['winner_list']=campaign_winner_list
         # campaign.save()
 
@@ -106,6 +112,6 @@ class QuizGame():
 
 
 def quiz(campaign, quiz_game):
-    candidate_set = lib.helper.quiz_game.QuizGameCandidateSetGenerator.get_candidate_set(campaign, quiz_game, limit=100)
+    candidate_set = lib.helper.quiz_game_helper.QuizGameCandidateSetGenerator.get_candidate_set(campaign, quiz_game, limit=100)
     
-    return lib.helper.quiz_game.QuizGame.get_winner_from_candidate(campaign, quiz_game.prize,  candidate_set=candidate_set, num_of_winner=quiz_game.num_of_winner)
+    return lib.helper.quiz_game_helper.QuizGame.get_winner_from_candidate(campaign, quiz_game.prize,  candidate_set=candidate_set, num_of_winner=quiz_game.num_of_winner)
