@@ -133,8 +133,9 @@ class PaymentViewSet(viewsets.GenericViewSet):
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def hit_pay_webhook(self, request):
 
-        payment_id, payment_request_id, phone, amount, currency, status, reference_number, hmac,  = \
-            lib.util.getter.getdata(request, ("payment_id", "payment_request_id", "phone", "amount", "currency", "status", "reference_number", "hmac"), required=True)
+        print(request.data)
+        amount, status, reference_number, hmac,  = \
+            lib.util.getter.getdata(request, ("amount", "status", "reference_number", "hmac"), required=True)
 
         order = lib.util.verify.Verify.get_order(reference_number)
         campaign = order.campaign
