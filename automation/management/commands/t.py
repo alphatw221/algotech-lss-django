@@ -51,7 +51,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # self.test_lucky_draw()
-        self.test_nlp()
+        self.test_hitpay_verification()
 
     def modify_database(self):
         from api.models.user.user_subscription import UserSubscription
@@ -409,3 +409,45 @@ class Command(BaseCommand):
         from automation import jobs
         jobs.campaign_job.campaign_job(661)
 
+
+    def test_hitpay_verification(self):
+
+
+        import hmac
+        import hashlib
+        import base64
+
+        KEY_LIST = ['amount', 'currency', 'payment_id', 'payment_request_id', 'phone', 'reference_number', 'status']
+
+        salt = '2MUizyJj429NIoOMmTXedyICmbwS1rt6Wph7cGqzG99IkmCV6nUCQ22lRVCB0Rgu'
+
+        request_data = {'payment_id': '96ec6ec3-fea0-4a9d-bd38-0b9bb05b1f24', 
+        'payment_request_id': '96ec6ec3-2dcb-4aca-ad54-d29fde47a3c3', 
+        'phone': '', 
+        'amount': '1.00', 
+        'currency': 'SGD', 
+        'status': 'completed', 
+        'reference_number': '32846',
+         'hmac': 'bcf1e64ffd1214f3af65202dc2072b221c25fdc221b540559b7d563f5a454b8d'}
+
+        # bcf1e64ffd1214f3af65202dc2072b221c25fdc221b540559b7d563f5a454b8d
+
+        data=''
+        for key in KEY_LIST:
+            data = data+request_data.get(key,'')
+
+        print('data:')
+        print(data)
+        dig = hmac.new(salt.encode(), msg=data.encode(), digestmod=hashlib.sha256).digest()
+        hexdig = hmac.new(salt.encode(), msg=data.encode(), digestmod=hashlib.sha256).hexdigest()
+
+        print('dig:')
+        print(dig)
+
+        print('hexdig:')
+        print(hexdig)
+
+
+        print("base64")
+        print( base64.b64encode(dig).decode())
+        
