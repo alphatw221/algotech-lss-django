@@ -10,7 +10,8 @@ from collections import OrderedDict
 
 class LuckyDrawCandidate():
 
-    def __init__(self, platform, customer_id, customer_name="", customer_image="", draw_type=None, prize=None):
+    def __init__(self,platform, customer_id, comment_id=None, customer_name="", customer_image="", draw_type=None, prize=None):
+        self.comment_id = comment_id
         self.platform = platform
         self.customer_id = customer_id
         self.customer_name = customer_name
@@ -54,10 +55,11 @@ class KeywordCandidateSetGenerator(CandidateSetGenerator):
         )[:limit]
 
         for campaign_comment in campaign_comments:
-            print (campaign_comment.customer_id)
+
             candidate = LuckyDrawCandidate(
                 platform=campaign_comment.platform, 
                 customer_id=campaign_comment.customer_id, 
+                comment_id = campaign_comment.id,
                 customer_name=campaign_comment.customer_name,
                 customer_image=campaign_comment.image,
                 draw_type=lucky_draw.type,
@@ -91,8 +93,6 @@ class LikesCandidateSetGenerator(CandidateSetGenerator):
                 raise lib.error_handle.error.api_error.ApiVerifyError('Get Facebook Service Fail, Please Retry Again')
             likes_user_list += [user.get('name') for user in response.get('data',[])]
 
-        print (likes_user_list)
-        print ('likes_user_list')
         campaign_comments = models.campaign.campaign_comment.CampaignComment.objects.filter(
             campaign=campaign,
             customer_name__in=likes_user_list
@@ -130,6 +130,7 @@ class ProductCandidateSetGenerator(CandidateSetGenerator):
         for order_product in order_products:
             img_url = models.order.pre_order.PreOrder.objects.get(customer_id=order_product.customer_id, campaign=campaign.id).customer_img
             candidate = LuckyDrawCandidate(
+
                 platform=order_product.platform, 
                 customer_id=order_product.customer_id, 
                 customer_name=order_product.customer_name,
@@ -280,8 +281,9 @@ class LuckyDraw():
 
         text = lib.i18n.campaign_announcement.get_campaign_announcement_lucky_draw_winner(campaign_product.name, winner.customer_name)  #temp
 
-        if (campaign.instagram_profile and winner.platform=='instagram' ):
-            service.instagram.post.private_message( campaign.instagram_profile.token, winner.customer_id, text)
+        if (campaign.instagram_profile and winner.platform=='instagram'):
+            service.instagram.chat_bot.post_page_message_chat_bot(campaign.instagram_profile.connected_facebook_page_id, campaign.instagram_profile.token, winner.customer_id, text)
+
 
     
     @classmethod
