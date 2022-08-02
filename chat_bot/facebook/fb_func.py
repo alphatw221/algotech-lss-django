@@ -76,8 +76,8 @@ def handleTextMessage(object, page_id, sender_id, message):
                 output_msg_list = get_ig_auto_response(ig_id, message['text'])
                 print("output_msg_list", output_msg_list)
                 for output_msg in output_msg_list:
-                    response = {'text': output_msg}
-                    service.instagram.chat_bot.post_page_message_chat_bot(connected_facebook_page_id, page_token, sender_id, response)
+
+                    service.instagram.chat_bot.post_page_message_chat_bot(connected_facebook_page_id, page_token, sender_id, output_msg)
             else:
                 print ('user not commented before')
                 
