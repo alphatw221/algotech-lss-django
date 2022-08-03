@@ -94,3 +94,21 @@ def is_payment_successful(secret, session_id):
         return False, None
     except Exception:
         return False, None
+
+
+def create_payment_intent(api_key:str,  amount:int, currency:str, receipt_email:str):
+    try:
+        stripe.api_key = api_key
+        return stripe.PaymentIntent.create( amount=amount, currency=currency, receipt_email=receipt_email)        
+    except Exception:
+        return False
+
+def retrieve_payment_intent(api_key:str, payment_intent_id:str):
+
+    try:
+        stripe.api_key = settings.STRIPE_API_KEY
+        return stripe.PaymentIntent.retrieve(payment_intent_id)     
+    except Exception:
+        return False
+
+    

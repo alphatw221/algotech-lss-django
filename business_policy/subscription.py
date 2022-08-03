@@ -89,3 +89,7 @@ TYPE_CHOICES = [
     (TYPE_PREMIUM, 'Premium'),
     (TYPE_DEALER,'Dealer'),
 ]
+
+PERIOD_MONTH = 'month'
+PERIOD_QUARTER = 'quarter'
+PERIOD_YEAR = 'year'
