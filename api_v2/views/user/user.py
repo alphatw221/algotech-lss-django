@@ -244,7 +244,7 @@ class UserViewSet(viewsets.ModelViewSet):
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def user_register_with_bank_transfer(self, request, country_code):
 
-        last_five_digit, image, account_name, account_mode, email, password, plan, period = lib.util.getter.getdata(request,("last_five_digit", "image", "account_name", "account_mode", "email", "password", "plan", "period"), required=True)
+        last_five_digit, image, account_name, email, password, plan, period = lib.util.getter.getdata(request,("last_five_digit", "image", "account_name", "email", "password", "plan", "period"), required=True)
         firstName, lastName, contactNumber, country, promoCode, timezone = lib.util.getter.getdata(request, ("firstName", "lastName", "contactNumber", "country", "promoCode", "timezone"), required=False)
 
         try:
