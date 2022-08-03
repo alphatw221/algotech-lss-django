@@ -251,7 +251,8 @@ class UserViewSet(viewsets.ModelViewSet):
             country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(country_code)
             subscription_plan = country_plan.get_plan(plan)
 
-            kwargs.update({'email':email,'plan':plan,'period':period, 'promoCode':promoCode, 'country_plan':country_plan, 'subscription_plan':subscription_plan})
+            kwargs={'email':email,'plan':plan,'period':period, 'promoCode':promoCode, 'country_plan':country_plan, 'subscription_plan':subscription_plan}
+
             kwargs=rule.rule_checker.user_rule_checker.RegistrationRequireRefundChecker.check(**kwargs)
         except Exception:
             raise lib.error_handle.error.api_error.ApiVerifyError('data invalid, please contact support for refunding')
