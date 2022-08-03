@@ -51,7 +51,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # self.test_lucky_draw()
-        self.test_hitpay_verification()
+        self.test_mongo_aggr()
 
     def modify_database(self):
         from api.models.user.user_subscription import UserSubscription
@@ -264,94 +264,8 @@ class Command(BaseCommand):
     
     def test_mongo_aggr(self):
         from pprint import pprint 
-        # cursor = db.api_user_subscription.aggregate([
-        #     {'$match': {'id': 1}},
-        #     {'$lookup': {
-        #         'from': 'api_campaign',
-        #         'as': 'campaigns',
-        #         'let': { 'id': '$id' },
-        #         'pipeline': [
-        #             {'$match': {
-        #                 '$expr': { '$eq': [ '$$id', '$user_subscription_id' ] },
-        #                 'id': {'$ne': None}
-        #             }},
-        #             {'$project': { '_id': 0, 'id': 1 }}
-        #         ]
-        #     }}
-        # ])
-        # l = list(cursor)
-        # pprint (l)
-
-        # cursor = db.api_campaign.aggregate([
-        #     {'$match': {'id': 118}},
-        #     {'$lookup': {
-        #         'from': 'api_order',
-        #         'as': 'orders',
-        #         'let': { 'id': '$id' },
-        #         'pipeline': [
-        #             {'$match': {
-        #                 '$expr': { '$eq': [ '$$id', '$campaign_id'] }
-        #             }},
-        #             # {'$unwind': '$orders'},
-        #             {'$group': {
-        #                 '_id': '$customer_id',
-        #                 'customer_id': { '$first': '$customer_id'},
-        #                 'customer_name': { '$first': '$customer_name'},
-        #                 'customer_img': { '$first': '$customer_img'},
-        #                 'shipping_email': { '$first': '$shipping_email'},
-        #                 'shipping_phone': { '$first': '$shipping_phone'},
-        #                 'platform': { '$first': '$platform'},
-        #             }}
-        #         ],
-        #     }},
-        #     {'$unwind': '$orders'},
-        #     {'$project': {'_id': 0, 'orders': 1, }},
-        #     # {'$unwind': '$orders'}
-        # ])
-        # l = list(cursor)
-        # pprint (l)
-
-
-        cursor = db.api_user_subscription.aggregate([
-            {'$match': {'id': 1}},
-            {'$lookup': {
-                'from': 'api_campaign',
-                'as': 'campaigns',
-                'let': { 'id': '$id' },
-                'pipeline': [
-                    {'$match': {
-                        '$expr': { '$eq': [ '$$id', '$user_subscription_id' ] },
-                        'id': {'$ne': None}
-                    }},
-                    {'$project': { '_id': 0, 'id': 1 }},
-                    {'$lookup': {
-                        'from': 'api_order',
-                        'as': 'orders',
-                        'let': { 'id': '$id' },
-                        'pipeline': [
-                            {'$match': {
-                                '$expr': { '$eq': [ '$$id', '$campaign_id'] }
-                            }}
-                        ],
-                    }},
-                    {'$unwind': '$orders'},  
-                    {'$match': {'orders': {'$ne': []}}},
-                    {'$project': {'_id': 0, 'orders': 1}},
-                ]
-            }},
-            {'$unwind': '$campaigns'},  
-            {'$project': { '_id': 0, 'campaigns': 1 }},
-            {'$group': {
-                '_id': '$campaigns.orders.customer_id',
-                'customer_id': { '$first': '$campaigns.orders.customer_id'},
-                'customer_name': { '$first': '$campaigns.orders.customer_name'},
-                'customer_img': { '$first': '$campaigns.orders.customer_img'},
-                'shipping_email': { '$first': '$campaigns.orders.shipping_email'},
-                'shipping_phone': { '$first': '$campaigns.orders.shipping_phone'},
-                'platform': { '$first': '$campaigns.orders.platform'},
-            }},
-        ])
-        l = list(cursor)
+        import database
+        l = database.lss.campaign.get_merge_order_list_pagination(campaign_id=958, status='', search='', filter_payment=[], filter_delivery=[], filter_platform=[])
         pprint(l)
 
     def test_websocket(self):
