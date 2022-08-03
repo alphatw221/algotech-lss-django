@@ -261,7 +261,7 @@ class UserViewSet(viewsets.ModelViewSet):
         if image:
             image_path = default_storage.save(f'register/receipt/{datetime.now().strftime("%Y/%m/%d, %H:%M:%S")}/{image.name}', ContentFile(image.read()))
 
-        subscription_meta = {"last_five_digit":last_five_digit, "account_mode":account_mode, "account_name": account_name, "receipt":image_path}
+        subscription_meta = {"last_five_digit":last_five_digit, "account_name": account_name, "receipt":image_path}
 
         ret = lib.helper.register_helper.create_new_register_account(plan, country_plan, subscription_plan, timezone, period, firstName, lastName, email, password, country, country_code,  contactNumber,  amount, subscription_meta=subscription_meta)
 
