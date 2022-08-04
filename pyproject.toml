@@ -44,6 +44,7 @@ channels-redis = "^3.4.0"
 django-channels-jwt-auth-middleware = "^1.0.0"
 daphne = "^3.0.2"
 django-vite = "^2.0.2"
+pandas = "^1.4.3"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
