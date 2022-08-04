@@ -44,94 +44,50 @@ class QuizGameCandidateSetGenerator(CandidateSetGenerator):
 
     @classmethod
     def get_candidate_set(cls, campaign, quiz_game_bundle, limit=1000):
-        ## TODO combine quiz_game winner list to lucky draw
         winner_list = campaign.meta.get('winner_list', [])
-        campaign_quiz_game_bundles = models.campaign.campaign_quiz_game_bundle.CampaignQuizGameBundle.objects.filter(campaign=campaign)
-        for campaign_quiz_game_bundle in campaign_quiz_game_bundles:
-            winner_list += list(campaign_quiz_game_bundle.winner_list)
-
         candidate_set = set()
-        candidate_list = []
-        quizgameid_list = []
-        go_comparing = False
+        is_first_quiz = True
 
         quiz_games = models.campaign.campaign_quiz_game.CampaignQuizGameBundleSerializerWithEachQuiz(quiz_game_bundle).data.get('quiz_games')
         for quiz_game in quiz_games:
-            quiz_id, quiz_game_start_at, quiz_game_end_at = 0, '', ''
-            for key, val in quiz_game.items():
-                if key == 'id': quiz_id = val
-                if key == 'start_at': quiz_game_start_at = val 
-                if key == 'end_at': quiz_game_end_at = val 
-          
-            if quiz_id != 0 and quiz_game_start_at not in [None, ''] and quiz_game_end_at not in [None, '']:
-                quizgame = models.campaign.campaign_quiz_game.CampaignQuizGame.objects.get(id=quiz_id)
-                quizgameid_list.append(quizgame.id)
-                campaign_comments = models.campaign.campaign_comment.CampaignComment.objects.filter(
-                    campaign=campaign,
-                    message__icontains=quizgame.answer,
-                    created_time__gte=datetime.datetime.timestamp(quizgame.start_at),
-                    created_time__lte=datetime.datetime.timestamp(quizgame.end_at)
-                ).order_by('created_time')[:limit]
+            if not (dict(quiz_game).get('id', 0) != 0 and dict(quiz_game).get('start_at', '') not in [None, ''] and dict(quiz_game).get('end_at', '') not in [None, '']):
+                continue
+            quizgame = models.campaign.campaign_quiz_game.CampaignQuizGame.objects.get(id=dict(quiz_game).get('id', 0))
+            campaign_comments = models.campaign.campaign_comment.CampaignComment.objects.filter(
+                campaign=campaign,
+                message__icontains=quizgame.answer,
+                created_time__gte=datetime.datetime.timestamp(quizgame.start_at),
+                created_time__lte=datetime.datetime.timestamp(quizgame.end_at)
+            ).order_by('created_time')[:limit]
 
-                for campaign_comment in campaign_comments:
-                    if go_comparing == False:
-                        candidate_dict = {
-                            'platform': campaign_comment.platform,
-                            'customer_id': campaign_comment.customer_id,
-                            'customer_name': campaign_comment.customer_name,
-                            'customer_image': campaign_comment.image,
-                            'prize': quiz_game_bundle.prize.name,
-                            'created_time': [{ quizgame.id : campaign_comment.created_time }]
-                        }
-                        candidate_list.append(candidate_dict)
-                    else:
-                        for candidate_dict in candidate_list:
-                            ## find exists quiz_game_id to compare created_time later
-                            created_time_list = candidate_dict.get('created_time', [])
-                            exist_quizgame_id_list = []
-                            for created_time in created_time_list:
-                                exist_quizgame_id_list.append(list(created_time.keys())[0])
-
-                            if candidate_dict.get('platform', '') == campaign_comment.platform and candidate_dict.get('customer_id', '') == campaign_comment.customer_id:
-                                if quizgame.id in exist_quizgame_id_list:
-                                    for created_time in created_time_list:
-                                        if quizgame.id == list(created_time.keys())[0] and campaign_comment.created_time < created_time[quizgame.id]:
-                                            created_time[quizgame.id] = campaign_comment.created_time
-                                else:
-                                    created_time_list.append({ quizgame.id : campaign_comment.created_time })
-            go_comparing = True
-
-        ## filter out not answer all question candidate
-        for i in range(len(candidate_list)):
-            candidate_quizgame_id_list = []
-            for created_time in candidate_list[i].get('created_time', []):
-                [candidate_quizgame_id_list.append(key) for key in created_time.keys()]
-            if quizgameid_list != candidate_quizgame_id_list:
-                del candidate_list[i]
+            alive_candidate_set = set()
+            for campaign_comment in campaign_comments:
+                if is_first_quiz == True:
+                    candidate = QuizGameCandidate(
+                        platform=campaign_comment.platform,
+                        customer_id=campaign_comment.customer_id,
+                        customer_name=campaign_comment.customer_name,
+                        customer_image=campaign_comment.image,
+                        prize=quiz_game_bundle.prize.name,
+                        timestamp=campaign_comment.created_time
+                    )
+                    candidate_set.add(candidate)
+                else:
+                    for candidate in list(candidate_set):
+                        if candidate.to_dict().get('platform', '') == campaign_comment.platform and candidate.to_dict().get('customer_id', '') == campaign_comment.customer_id and candidate not in list(alive_candidate_set):
+                            candidate = QuizGameCandidate(
+                                platform=campaign_comment.platform,
+                                customer_id=campaign_comment.customer_id,
+                                customer_name=campaign_comment.customer_name,
+                                customer_image=campaign_comment.image,
+                                prize=quiz_game_bundle.prize.name,
+                                timestamp= campaign_comment.created_time + candidate.to_dict().get('timestamp', 9999999999)
+                            )
+                            alive_candidate_set.add(candidate)
+            if not is_first_quiz: candidate_set = alive_candidate_set
+            is_first_quiz = False
         
-        for candidate_dict in candidate_list:
-            total_timestamp = 0
-            created_time_list = candidate_dict.get('created_time')
-            for created_time in created_time_list:
-                for quizgame_id, created_at in created_time.items():
-                    total_timestamp += created_at
-
-            candidate = QuizGameCandidate(
-                platform=candidate_dict.get('platform', ''),
-                customer_id=candidate_dict.get('customer_id', ''),
-                customer_name=candidate_dict.get('customer_name', ''),
-                customer_image=candidate_dict.get('image', ''),
-                prize=quiz_game_bundle.prize.name,
-                timestamp=total_timestamp
-            )
-
-            ## TODO repeatable winner checker
-            # if not quiz_game.repeatable and candidate in winner_list:
-            #     continue
-            candidate_set.add(candidate)
-
         return candidate_set
-    
     
 
 class QuizGame():
@@ -166,16 +122,21 @@ class QuizGame():
             print('no winners')
             return []
         
+        campaign_winner_list = campaign.meta.get('winner_list',[])
         winner_list = []
         for winner in winners:                                              #multithread needed
             cls.__add_product(campaign, winner, quiz_game_bundle.prize)
             cls.__announce(campaign, winner, quiz_game_bundle.prize)
             cls.__send_private_message(campaign, winner, quiz_game_bundle.prize)
             winner_dict = winner.to_dict()
+
+            campaign_winner_list.append(winner_dict)
             winner_list.append(winner_dict)
 
         quiz_game_bundle.winner_list = winner_list
         quiz_game_bundle.save()
+        campaign.meta['winner_list']=campaign_winner_list
+        campaign.save()
 
         return winner_list
     

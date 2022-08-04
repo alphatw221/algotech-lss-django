@@ -21,13 +21,14 @@ class CampaignQuizGameViewSet(viewsets.ModelViewSet):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
-        prize = lib.util.verify.Verify.get_campaign_product_from_campaign(campaign, int(request.data.get('prize', {}).get('id', 0)))
-        question_list = request.data.get('quiz_games', [])
+        prize, quiz_games = lib.util.getter.getdata(request, ('prize', 'quiz_games'), required=True)
+        prize_id = prize.get('id', 0)
+        prize = lib.util.verify.Verify.get_campaign_product_from_campaign(campaign, prize_id)
 
-        for question in question_list:
-            if question['question'] in ['', None]:
+        for quiz_game in quiz_games:
+            if quiz_game.get('question') in ['', None] and type(quiz_game.get('question')) != str:
                 return Response({'message': 'question null'}, status=status.HTTP_400_BAD_REQUEST)
-            elif question['answer'] in ['', None]:
+            elif quiz_game.get('answer') in ['', None] and type(quiz_game.get('answer')) != str:
                 return Response({'message': 'answer null'}, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = models.campaign.campaign_quiz_game_bundle.CampaignQuizGameBundleSerializerCreate(data = request.data)
@@ -38,10 +39,10 @@ class CampaignQuizGameViewSet(viewsets.ModelViewSet):
         quiz_game_bundle.prize = prize
         quiz_game_bundle.save()
 
-        for question in question_list:
-            serializer = models.campaign.campaign_quiz_game.CampaignQuizGameSerializerCreate(data = {'question': question['question'], 'answer': question['answer']})
+        for _quiz_game in quiz_games:
+            serializer = models.campaign.campaign_quiz_game.CampaignQuizGameSerializerCreate(data = _quiz_game)
             if not serializer.is_valid():
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                continue
             quiz_game = serializer.save()
             quiz_game.quiz_game_bundle = quiz_game_bundle
             quiz_game.save()
@@ -49,6 +50,7 @@ class CampaignQuizGameViewSet(viewsets.ModelViewSet):
         return Response(models.campaign.campaign_quiz_game_bundle.CampaignQuizGameBundleSerializer(quiz_game_bundle).data, status=status.HTTP_200_OK)
     
 
+    ## 單筆刪除
     @action(detail=True, methods=['PUT'], url_path=r'update', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def update_quiz_game(self, request, pk):
@@ -57,13 +59,14 @@ class CampaignQuizGameViewSet(viewsets.ModelViewSet):
         quiz_game_bundle = lib.util.verify.Verify.get_quiz_game_bundle(pk)
         campaign = quiz_game_bundle.campaign
         lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign.id)
-        prize = lib.util.verify.Verify.get_campaign_product_from_campaign(campaign, int(request.data.get('prize', {}).get('id', 0)))
-        question_list = request.data.get('quiz_games', [])
+        prize, quiz_games = lib.util.getter.getdata(request, ('prize', 'quiz_games'), required=True)
+        prize_id = prize.get('id', 0)
+        prize = lib.util.verify.Verify.get_campaign_product_from_campaign(campaign, prize_id)
 
-        for question in question_list:
-            if question['question'] in ['', None]:
+        for quiz_game in quiz_games:
+            if quiz_game.get('question') in ['', None] and type(quiz_game.get('question')) != str:
                 return Response({'message': 'question null'}, status=status.HTTP_400_BAD_REQUEST)
-            elif question['answer'] in ['', None]:
+            elif quiz_game.get('answer') in ['', None] and type(quiz_game.get('answer')) != str:
                 return Response({'message': 'answer null'}, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = models.campaign.campaign_quiz_game_bundle.CampaignQuizGameBundleSerializerUpdate(quiz_game_bundle, data = request.data, partial=True)
@@ -73,17 +76,14 @@ class CampaignQuizGameViewSet(viewsets.ModelViewSet):
         quiz_game_bundle.prize = prize
         quiz_game_bundle.save()
 
-        ## remove old quiz game then add new one
-        quiz_games = models.campaign.campaign_quiz_game.CampaignQuizGameBundleSerializerWithEachQuiz(quiz_game_bundle).data.get('quiz_games')
         for quiz_game in quiz_games:
-            for key, val in quiz_game.items():
-                if (key == 'id'):
-                    models.campaign.campaign_quiz_game.CampaignQuizGame.objects.get(id=val).delete()
-
-        for question in question_list:
-            serializer = models.campaign.campaign_quiz_game.CampaignQuizGameSerializerCreate(data = {'question': question['question'], 'answer': question['answer']})
+            if models.campaign.campaign_quiz_game.CampaignQuizGame.objects.filter(id=quiz_game.get('id', 0)).exists():
+                quizgame = models.campaign.campaign_quiz_game.CampaignQuizGame.objects.get(id=quiz_game.get('id', 0))
+                serializer = models.campaign.campaign_quiz_game.CampaignQuizGameSerializerUpdate(quizgame, data = quiz_game, partial=True)
+            else:
+                serializer = models.campaign.campaign_quiz_game.CampaignQuizGameSerializerCreate(data = quiz_game)
             if not serializer.is_valid():
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                continue
             quiz_game = serializer.save()
             quiz_game.quiz_game_bundle = quiz_game_bundle
             quiz_game.save()
@@ -91,9 +91,9 @@ class CampaignQuizGameViewSet(viewsets.ModelViewSet):
         return Response(models.campaign.campaign_quiz_game_bundle.CampaignQuizGameBundleSerializer(quiz_game_bundle).data, status=status.HTTP_200_OK)
     
 
-    @action(detail=True, methods=['DELETE'], url_path=r'delete', permission_classes=(IsAuthenticated, ))
+    @action(detail=True, methods=['DELETE'], url_path=r'delete/bundle', permission_classes=(IsAuthenticated, ))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def delete_quiz_game(self, request, pk):
+    def delete_quiz_game_bundle(self, request, pk):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         quiz_game_bundle = lib.util.verify.Verify.get_quiz_game_bundle(pk)
@@ -101,6 +101,20 @@ class CampaignQuizGameViewSet(viewsets.ModelViewSet):
         lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign.id)
         
         quiz_game_bundle.delete()
+
+        return Response({'message': 'delete success'}, status=status.HTTP_200_OK)
+    
+
+    @action(detail=True, methods=['DELETE'], url_path=r'delete/quiz-game', permission_classes=(IsAuthenticated, ))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def delete_quiz_game(self, request, pk):   
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        quiz_game = lib.util.verify.Verify.get_quiz_game(pk)
+        campaign = quiz_game.quiz_game_bundle.campaign
+        lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign.id)
+        
+        quiz_game.delete()
 
         return Response({'message': 'delete success'}, status=status.HTTP_200_OK)
 

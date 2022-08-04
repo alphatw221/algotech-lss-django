@@ -38,6 +38,7 @@ class CampaignQuizGameBundleSerializer(serializers.ModelSerializer):
         read_only_fields = ['created_at', 'updated_at']
 
     prize = CampaignProductSerializer(read_only=True, default=dict)
+    winner_list = serializers.JSONField(read_only=True, default=dict)
     meta = serializers.JSONField(default=dict)
 
 
