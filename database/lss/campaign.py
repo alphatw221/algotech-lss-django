@@ -23,7 +23,9 @@ def get_merge_order_list_pagination(campaign_id, search:str, status:str, filter_
 
     if search not in ["",None,'undefined'] and search.isnumeric():
         filter_query["$or"]=[{"id":{"$eq":int(search)}}, {"customer_name":{"$regex":str(search),"$options": 'i'}}]
-
+    elif search not in ["",None,'undefined']:
+        filter_query["customer_name"]={"$regex":str(search),"$options": 'i'}
+        
     if status == models.order.order.STATUS_REVIEW:
         filter_query['status']={"$in":[models.order.order.STATUS_REVIEW]} 
     elif status == models.order.order.STATUS_COMPLETE:

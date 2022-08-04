@@ -9,6 +9,8 @@ from api.models.order.pre_order import PreOrderSerializer
 from api.models.user import user_subscription
 from api.utils.common.verify import Verify
 from api.utils.common.common import *
+from api.utils.error_handle.error.api_error import ApiCallerError
+from api.utils.report import SalesReport
 
 from backend.pymongo.mongodb import db
 from dateutil.relativedelta import relativedelta
@@ -515,4 +517,22 @@ class DashboardViewSet(viewsets.ModelViewSet):
         }
 
         return Response(dealer_dashboard_json, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['GET'], url_path=r'report_of_campaigns_in_period', permission_classes=(IsAuthenticated,))
+    @api_error_handler
+    def report_of_campaigns_in_period(self, request):
+        api_user, start_time, end_time = getparams(request, ('start_time', 'end_time'), seller=True)
+        api_user = Verify.get_seller_user(request)
+        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
         
+        start_time = SalesReport.normalize_start_time(start_time)
+        end_time = SalesReport.normalize_end_time(end_time)
+        basic_info = SalesReport.get_basic_info(start_time, end_time)
+        if len(basic_info.index) == 0:
+            raise ApiCallerError("No any campaigns in period.")
+        top_10_itmes = SalesReport.get_top_10_itmes(start_time, end_time)
+        order_analysis = SalesReport.get_order_analysis(start_time, end_time)
+        data = SalesReport.merge_data(basic_info, top_10_itmes, order_analysis)
+        report = SalesReport.reformat_data(data)
+
+        return Response(report, status=status.HTTP_200_OK)
