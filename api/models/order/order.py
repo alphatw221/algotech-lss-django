@@ -10,6 +10,7 @@ from api.models.user.user import User
 
 STATUS_PROCEED = 'proceed'
 STATUS_COMPLETE = 'complete'
+STATUS_REVIEW = 'review'
 STATUS_SHIPPING_OUT = 'shipping out'
 STATUS_EXPIRED = 'expired'
 STATUS_PENDING_REFUND = 'pending_refund'

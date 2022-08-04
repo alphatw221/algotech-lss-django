@@ -30,10 +30,10 @@ def facebook_receive(request):
     if body.get('object') in ['page', 'instagram']:
         for entry in body.get('entry', []):
             try:
-                webhook_event = entry['messaging'][0]
-                page_id = entry['id']
-                sender_psid = webhook_event['sender']['id']
-                time_of_event = entry['time']
+                webhook_event = entry.get('messaging',{})[0]
+                page_id = entry.get('id', None)
+                sender_psid = webhook_event.get('sender',{}).get('id')
+                time_of_event = entry.get('time')
 
                 if message := webhook_event.get('message'):
                     if message.get('is_echo'):

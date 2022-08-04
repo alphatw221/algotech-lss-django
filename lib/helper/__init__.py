@@ -1,1 +1,1 @@
-from . import login_helper, lucky_draw_helper, order_helper, first_data_helper, quiz_game_helper, subscription_helper,xlsx_helper, hitpay_helper
+from . import login_helper, lucky_draw_helper, order_helper, first_data_helper, quiz_game_helper, subscription_helper,xlsx_helper, hitpay_helper, register_helper

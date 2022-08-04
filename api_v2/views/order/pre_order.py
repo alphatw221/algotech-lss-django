@@ -30,6 +30,11 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     pagination_class = PreOrderPagination
 
 # ---------------------------------------------- guest ------------------------------------------------------
+    @action(detail=False, methods=['GET'], url_path=r'guest/retrieve/(?P<pre_order_oid>[^/.]+)/platform', permission_classes=(), authentication_classes=[])
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def guest_retrieve_pre_order_platform(self, request, pre_order_oid):
+        pre_order = lib.util.verify.Verify.get_pre_order_with_oid(pre_order_oid)
+        return Response(pre_order.platform, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET'], url_path=r'guest/retrieve/(?P<pre_order_oid>[^/.]+)', permission_classes=(), authentication_classes=[])
     @lib.error_handle.error_handler.api_error_handler.api_error_handler

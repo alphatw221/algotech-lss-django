@@ -13,12 +13,10 @@ from django.core.files.base import ContentFile
 
 
 from api import models
-from bson.json_util import loads, dumps
 import database
 import lib
 # import xlsxwriter
 
-from api.utils.advance_query.dashboard import get_campaign_merge_order_list_v2
 
 from automation import jobs
 from api.utils.error_handle.error_handler.email_error_handler import email_error_handler
@@ -35,6 +33,11 @@ class OrderViewSet(viewsets.ModelViewSet):
     pagination_class = OrderPagination
 
     # ----------------------------------------------- guest ----------------------------------------------------
+    @action(detail=False, methods=['GET'], url_path=r'guest/retrieve/(?P<order_oid>[^/.]+)/platform', permission_classes=(), authentication_classes=[])
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def guest_retrieve_order_platform(self, request, order_oid):
+        order = lib.util.verify.Verify.get_order_with_oid(order_oid)
+        return Response(order.platform, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET'], url_path=r'guest/retrieve/(?P<order_oid>[^/.]+)/subscription', permission_classes=(), authentication_classes=[])
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
@@ -202,21 +205,15 @@ class OrderViewSet(viewsets.ModelViewSet):
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def get_merge_order_list(self, request):
 
-        api_user, campaign_id, search, page, page_size,order_status= lib.util.getter.getparams(request, ( 'campaign_id', 'search', 'page', 'page_size','status'),with_user=True, seller=True)
-        f_payment,f_delivery,f_platform = lib.util.getter.getdata(request,('payment','delivery','platform'))
+        api_user, campaign_id, search, page, page_size, order_status= lib.util.getter.getparams(request, ( 'campaign_id', 'search', 'page', 'page_size','status'),with_user=True, seller=True)
+        payment_list, delivery_list, platform_list = lib.util.getter.getdata(request,('payment','delivery','platform'))
         
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription,campaign_id)
-        merge_list = get_campaign_merge_order_list_v2(campaign.id, search, order_status, f_payment, f_delivery, f_platform)
-        count = len(merge_list)
-        page,page_size = int(page),int(page_size)
-        skip = (page-1)*page_size
-        if len(merge_list) >= page_size:
-            merge_list = merge_list[skip:skip+page_size]
-        merge_list_str = dumps(merge_list)
-        merge_list_json = loads(merge_list_str)
 
-        return Response({'count':count,'data':merge_list_json}, status=status.HTTP_200_OK)
+        json_data, total_count = database.lss.campaign.get_merge_order_list_pagination(campaign.id, search, order_status, payment_list, delivery_list, platform_list , int(page), int(page_size))
+
+        return Response({'count':total_count,'data':json_data}, status=status.HTTP_200_OK)
     
     @action(detail=True, methods=['POST'], url_path=r'seller/delivery_status', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
