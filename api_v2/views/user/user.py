@@ -185,6 +185,7 @@ class UserViewSet(viewsets.ModelViewSet):
         email, plan, period = lib.util.getter.getdata(request, ("email", "plan", "period"), required=True)
         promoCode, = lib.util.getter.getdata(request, ("promoCode",), required=False)
 
+        country_code = business_policy.subscription.COUNTRY_SG if country_code in ['', 'undefined', 'null', None] else country_code
         country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(country_code)
         subscription_plan = country_plan.get_plan(plan)
 
@@ -203,6 +204,7 @@ class UserViewSet(viewsets.ModelViewSet):
             "client_secret":intent.client_secret,
             "payment_amount":amount,
             "user_plan":plan,
+            "period":period,
             "currency":country_plan.currency,
             "marketing_plans":marketing_plans
         }, status=status.HTTP_200_OK)
@@ -211,6 +213,7 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['POST'], url_path=r'register/(?P<country_code>[^/.]+)/stripe', permission_classes=())
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def user_register_with_stripe(self, request, country_code):
+        country_code = business_policy.subscription.COUNTRY_SG if country_code in ['', 'undefined', 'null', None] else country_code
         email, password, plan, period, intentSecret = lib.util.getter.getdata(request,("email", "password", "plan", "period", "intentSecret"),required=True)
         firstName, lastName, contactNumber, country, promoCode, timezone = lib.util.getter.getdata(request, ("firstName", "lastName", "contactNumber", "country", "promoCode", "timezone"), required=False)
 
@@ -243,7 +246,7 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['POST'], url_path=r'register/(?P<country_code>[^/.]+)/transfer', permission_classes=(), parser_classes=(MultiPartParser,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def user_register_with_bank_transfer(self, request, country_code):
-
+        country_code = business_policy.subscription.COUNTRY_SG if country_code in ['', 'undefined', 'null', None] else country_code
         last_five_digit, image, account_name, email, password, plan, period = lib.util.getter.getdata(request,("last_five_digit", "image", "account_name", "email", "password", "plan", "period"), required=True)
         firstName, lastName, contactNumber, country, promoCode, timezone = lib.util.getter.getdata(request, ("firstName", "lastName", "contactNumber", "country", "promoCode", "timezone"), required=False)
 
