@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-06-17 10:20+0000\n"
+"POT-Creation-Date: 2022-08-03 15:27+0000\n"
 "PO-Revision-Date: 2021-12-13 15:50+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -18,112 +18,128 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: Poedit 3.0\n"
 
-#: backend/i18n/campaign_announcement.py:8
+#: backend/i18n/campaign_announcement.py:8 lib/i18n/campaign_announcement.py:7
 #, python-brace-format
 msgid "PRODUCT_CLOSED{order_code}"
 msgstr "商品 {order_code} 已停止接单。"
 
 #: backend/i18n/campaign_announcement.py:15
+#: lib/i18n/campaign_announcement.py:14
 #, python-brace-format
 msgid "PRODUCT_SOLD_OUT{order_code}"
 msgstr "商品 {order_code} 已售完。"
 
 #: backend/i18n/campaign_announcement.py:22
+#: lib/i18n/campaign_announcement.py:21
 #, python-brace-format
 msgid "LUCKY_DRAW_WINNER{customer_name}{product_name}"
 msgstr ""
 "恭喜 {customer_name} 中奖，获得 {product_name}！请至购物车确认您的奖品。"
 
-#: backend/i18n/cart_product_request.py:9
+#: backend/i18n/cart_product_request.py:9 lib/i18n/cart_product_request.py:10
 msgid "MESSAGE_PREFIX"
 msgstr "Live Show Seller："
 
-#: backend/i18n/cart_product_request.py:21
+#: backend/i18n/cart_product_request.py:21 lib/i18n/cart_product_request.py:20
 #, python-brace-format
 msgid "SHOPPING_CART_INFO{link}"
 msgstr "长按以下连结并使用Chrome/Safari开启购物车：{link}"
 
-#: backend/i18n/cart_product_request.py:23
+#: backend/i18n/cart_product_request.py:23 lib/i18n/cart_product_request.py:22
 msgid "MORE_INFO_IN_PM_NOTICE"
 msgstr ""
 "购物车连结已传送到您的 FB Messenger，若没有收到讯息，请联络粉丝专页管理员/小"
 "编。"
 
 #: backend/i18n/cart_product_request.py:30
-#: backend/i18n/cart_product_request.py:66
+#: backend/i18n/cart_product_request.py:66 lib/i18n/cart_product_request.py:29
+#: lib/i18n/cart_product_request.py:65
 #, python-brace-format
 msgid "INVALID_EXCEED_MAX_ORDER_AMOUNT{order_code}{max_order_amount}"
 msgstr "{order_code} 无法新增，此商品单次限购数量为 {max_order_amount} 件。"
 
 #: backend/i18n/cart_product_request.py:36
-#: backend/i18n/cart_product_request.py:73
+#: backend/i18n/cart_product_request.py:73 lib/i18n/cart_product_request.py:35
+#: lib/i18n/cart_product_request.py:72
 msgid "ADDED"
 msgstr "下单成功！"
 
 #: backend/i18n/cart_product_request.py:38
-#: backend/i18n/cart_product_request.py:75
+#: backend/i18n/cart_product_request.py:75 lib/i18n/cart_product_request.py:37
+#: lib/i18n/cart_product_request.py:74
 msgid "UPDATED"
 msgstr "更新成功！"
 
 #: backend/i18n/cart_product_request.py:40
-#: backend/i18n/cart_product_request.py:77
+#: backend/i18n/cart_product_request.py:77 lib/i18n/cart_product_request.py:39
+#: lib/i18n/cart_product_request.py:76
 msgid "DELETED"
 msgstr "商品已从购物车删除，"
 
 #: backend/i18n/cart_product_request.py:42
-#: backend/i18n/cart_product_request.py:79
+#: backend/i18n/cart_product_request.py:79 lib/i18n/cart_product_request.py:41
+#: lib/i18n/cart_product_request.py:78
 msgid "INSUFFICIENT_INV"
 msgstr "商品已售完，"
 
 #: backend/i18n/cart_product_request.py:44
-#: backend/i18n/cart_product_request.py:81
+#: backend/i18n/cart_product_request.py:81 lib/i18n/cart_product_request.py:43
+#: lib/i18n/cart_product_request.py:80
 msgid "INVALID_PRODUCT_NOT_ACTIVATED"
 msgstr "商品目前无法下单，"
 
 #: backend/i18n/cart_product_request.py:46
-#: backend/i18n/cart_product_request.py:83
+#: backend/i18n/cart_product_request.py:83 lib/i18n/cart_product_request.py:45
+#: lib/i18n/cart_product_request.py:82
 msgid "INVALID_REMOVE_NOT_ALLOWED"
 msgstr "无法删除，"
 
 #: backend/i18n/cart_product_request.py:48
-#: backend/i18n/cart_product_request.py:85
+#: backend/i18n/cart_product_request.py:85 lib/i18n/cart_product_request.py:47
+#: lib/i18n/cart_product_request.py:84
 msgid "INVALID_EDIT_NOT_ALLOWED"
 msgstr "无法修改，"
 
 #: backend/i18n/cart_product_request.py:50
-#: backend/i18n/cart_product_request.py:87
+#: backend/i18n/cart_product_request.py:87 lib/i18n/cart_product_request.py:49
+#: lib/i18n/cart_product_request.py:86
 msgid "INVALID_ADD_ZERO_QTY"
 msgstr "无法删除，"
 
 #: backend/i18n/cart_product_request.py:52
-#: backend/i18n/cart_product_request.py:89
+#: backend/i18n/cart_product_request.py:89 lib/i18n/cart_product_request.py:51
+#: lib/i18n/cart_product_request.py:88
 msgid "N/A"
 msgstr "操作错误，"
 
 #: backend/i18n/cart_product_request.py:54
-#: backend/i18n/cart_product_request.py:92
+#: backend/i18n/cart_product_request.py:92 lib/i18n/cart_product_request.py:53
+#: lib/i18n/cart_product_request.py:91
 #, python-brace-format
 msgid "ITEM_INFO{order_code}{qty}{result}"
 msgstr "{result}商品 {order_code} <{qty} 件>。"
 
 #: backend/i18n/comment_command.py:24 backend/i18n/comment_command.py:27
-#: backend/i18n/comment_command.py:29
+#: backend/i18n/comment_command.py:29 lib/i18n/comment_command.py:25
+#: lib/i18n/comment_command.py:28 lib/i18n/comment_command.py:30
 msgid "COMMENT_COMMAND_CART_NO_CART_PRODUCT"
 msgstr "您的购物车内没有商品。"
 
-#: backend/i18n/comment_command.py:36 templates/register_confirmation.html:11
+#: backend/i18n/comment_command.py:36 lib/i18n/comment_command.py:35
+#: templates/register_confirmation.html:11
 #: templates/register_confirmation.html:16
 msgid "COMMENT_COMMAND_CART_MESSAGE_HEADER"
 msgstr "您的购物车："
 
 #: backend/i18n/comment_command.py:39 backend/i18n/comment_command.py:96
+#: lib/i18n/comment_command.py:38
 #, python-brace-format
 msgid "TOTAL{dollar_sign}{total}\n"
 msgstr ""
 "订单金额：{dollar_sign}{total}\n"
 "\n"
 
-#: backend/i18n/comment_command.py:41
+#: backend/i18n/comment_command.py:41 lib/i18n/comment_command.py:40
 #, python-brace-format
 msgid "DETAIL{link}\n"
 msgstr "查看购物车：{link}\n"
@@ -153,7 +169,7 @@ msgstr "额外运费：{dollar_sign}{option}\n"
 msgid "DETAIL{link}"
 msgstr "查看购物车：{link}\n"
 
-#: backend/i18n/comment_command.py:117
+#: backend/i18n/comment_command.py:117 lib/i18n/comment_command.py:117
 #, python-brace-format
 msgid "ITEM_INFO{name}{qty}{dollar_sign}{total}\n"
 msgstr "{name} 数量：{qty} {dollar_sign}{total}\n"
@@ -237,6 +253,12 @@ msgstr ""
 #: business_policy/payment.py:107
 msgid "PAYMENT/FIRST_DATA/TIME_ZONE"
 msgstr "地址: 8 Burn Road #15-13, Singapore 369977"
+
+#: lib/i18n/campaign_announcement.py:29
+#, python-brace-format
+msgid "QUIZ_GAME_WINNER{customer_name}{product_name}"
+msgstr ""
+"恭喜 {customer_name} 得奖，获得 {product_name}！请至购物车确认您的奖品。"
 
 #: templates/email_reset_password_link.html:12
 #: templates/reset_password_success_email.html:12

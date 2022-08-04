@@ -21,3 +21,10 @@ def get_campaign_announcement_lucky_draw_winner(product_name: str, customer_name
         'LUCKY_DRAW_WINNER{customer_name}{product_name}'
     ).format(product_name=product_name,
              customer_name=customer_name)
+
+
+@lang_translate_default_en
+def get_campaign_announcement_quiz_game_winner(product_name: str, customer_name: str, lang=None):
+    return _(
+        'QUIZ_GAME_WINNER{customer_name}{product_name}'
+    ).format(product_name=product_name, customer_name=customer_name)

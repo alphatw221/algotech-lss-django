@@ -29,3 +29,32 @@ class CampaignQuizGameBundle(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+
+class CampaignQuizGameBundleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CampaignQuizGameBundle
+        fields = '__all__'
+        read_only_fields = ['created_at', 'updated_at']
+
+    prize = CampaignProductSerializer(read_only=True, default=dict)
+    winner_list = serializers.JSONField(read_only=True, default=dict)
+    meta = serializers.JSONField(default=dict)
+
+
+class CampaignQuizGameBundleSerializerCreate(serializers.ModelSerializer):
+    class Meta:
+        model = CampaignQuizGameBundle
+        fields = ['remark', 'num_of_winner', 'repeatable', 'is_follower', 'meta']
+        read_only_fields = ['created_at', 'updated_at']
+    
+    meta = serializers.JSONField(default=dict)
+
+
+class CampaignQuizGameBundleSerializerUpdate(serializers.ModelSerializer):
+    class Meta:
+        model = CampaignQuizGameBundle
+        fields = ['remark', 'num_of_winner', 'repeatable', 'is_follower', 'meta']
+        read_only_fields = ['created_at', 'updated_at']
+    
+    meta = serializers.JSONField(default=dict)
