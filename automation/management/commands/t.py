@@ -51,7 +51,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # self.test_lucky_draw()
-        self.test_mongo_aggr()
+        self.test_hitpay_verification()
 
     def modify_database(self):
         from api.models.user.user_subscription import UserSubscription
@@ -329,11 +329,10 @@ class Command(BaseCommand):
 
         import hmac
         import hashlib
-        import base64
 
         KEY_LIST = ['amount', 'currency', 'payment_id', 'payment_request_id', 'phone', 'reference_number', 'status']
 
-        salt = '2MUizyJj429NIoOMmTXedyICmbwS1rt6Wph7cGqzG99IkmCV6nUCQ22lRVCB0Rgu'
+        salt = '9ntt8RQoPtP9NXlO36aZTpP5wK10vFWbsw45KjaBGNzfYiU75cUJ3LLCEqMLGUO9'
 
         request_data = {'payment_id': '96ec6ec3-fea0-4a9d-bd38-0b9bb05b1f24', 
         'payment_request_id': '96ec6ec3-2dcb-4aca-ad54-d29fde47a3c3', 
@@ -348,20 +347,12 @@ class Command(BaseCommand):
 
         data=''
         for key in KEY_LIST:
-            data = data+request_data.get(key,'')
-
+            data = data+(key+request_data.get(key,''))
         print('data:')
         print(data)
-        dig = hmac.new(salt.encode(), msg=data.encode(), digestmod=hashlib.sha256).digest()
-        hexdig = hmac.new(salt.encode(), msg=data.encode(), digestmod=hashlib.sha256).hexdigest()
 
-        print('dig:')
-        print(dig)
+        hexdig = hmac.new(salt.encode(), msg=data.encode(), digestmod=hashlib.sha256).hexdigest()
 
         print('hexdig:')
         print(hexdig)
 
-
-        print("base64")
-        print( base64.b64encode(dig).decode())
-        

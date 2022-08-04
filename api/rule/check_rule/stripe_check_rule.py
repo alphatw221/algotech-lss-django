@@ -41,7 +41,8 @@ class StripeCheckRule():
 
         amount = kwargs.get('amount')
         paymentIntent = kwargs.get('paymentIntent')
-
+        if not paymentIntent:
+            return
         if int(amount*100) != paymentIntent.amount:
             raise ApiVerifyError('payment amount error')
 

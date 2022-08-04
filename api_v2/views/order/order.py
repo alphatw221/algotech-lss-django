@@ -33,6 +33,11 @@ class OrderViewSet(viewsets.ModelViewSet):
     pagination_class = OrderPagination
 
     # ----------------------------------------------- guest ----------------------------------------------------
+    @action(detail=False, methods=['GET'], url_path=r'guest/retrieve/(?P<order_oid>[^/.]+)/platform', permission_classes=(), authentication_classes=[])
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def guest_retrieve_order_platform(self, request, order_oid):
+        order = lib.util.verify.Verify.get_order_with_oid(order_oid)
+        return Response(order.platform, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET'], url_path=r'guest/retrieve/(?P<order_oid>[^/.]+)/subscription', permission_classes=(), authentication_classes=[])
     @lib.error_handle.error_handler.api_error_handler.api_error_handler

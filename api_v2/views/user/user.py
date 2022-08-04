@@ -1,12 +1,15 @@
 
 from django.contrib.auth.models import User as AuthUser
 from django.conf import settings
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
 
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.parsers import MultiPartParser
 
 from api import models
 from api import rule
@@ -18,6 +21,8 @@ import lib
 import business_policy
 from backend.i18n.email.subject import i18n_get_reset_password_success_mail_subject, i18n_get_reset_password_mail_subject #temp
 
+from datetime import datetime, timedelta
+import pytz
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -169,3 +174,96 @@ class UserViewSet(viewsets.ModelViewSet):
             lang=user_subscription.lang)
 
         return Response({"message":"The email has been sent. If you haven't received the email after a few minutes, please check your spam folder. "}, status=status.HTTP_200_OK)
+
+
+
+
+
+    @action(detail=False, methods=['POST'], url_path=r'register/validate/(?P<country_code>[^/.]+)', permission_classes=())
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def validate_register_data(self, request, country_code):
+        email, plan, period = lib.util.getter.getdata(request, ("email", "plan", "period"), required=True)
+        promoCode, = lib.util.getter.getdata(request, ("promoCode",), required=False)
+
+        country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(country_code)
+        subscription_plan = country_plan.get_plan(plan)
+
+        kwargs = {'email':email, 'plan':plan, 'period':period, 'promoCode':promoCode, 'country_plan':country_plan, 'subscription_plan':subscription_plan}
+        kwargs = rule.rule_checker.user_rule_checker.RegistrationDataRuleChecker.check(**kwargs)
+
+        email = kwargs.get('email')
+        amount = kwargs.get('amount')
+        marketing_plans = kwargs.get('marketing_plans')
+
+        intent = service.stripe.stripe.create_payment_intent(settings.STRIPE_API_KEY, amount, country_plan.currency, email)
+        if not intent:
+            raise lib.error_handle.error.api_error.ApiCallerError("invalid email")
+
+        return Response({
+            "client_secret":intent.client_secret,
+            "payment_amount":amount,
+            "user_plan":plan,
+            "currency":country_plan.currency,
+            "marketing_plans":marketing_plans
+        }, status=status.HTTP_200_OK)
+
+
+    @action(detail=False, methods=['POST'], url_path=r'register/(?P<country_code>[^/.]+)/stripe', permission_classes=())
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def user_register_with_stripe(self, request, country_code):
+        email, password, plan, period, intentSecret = lib.util.getter.getdata(request,("email", "password", "plan", "period", "intentSecret"),required=True)
+        firstName, lastName, contactNumber, country, promoCode, timezone = lib.util.getter.getdata(request, ("firstName", "lastName", "contactNumber", "country", "promoCode", "timezone"), required=False)
+
+        payment_intent_id = intentSecret[:27]
+
+        paymentIntent = service.stripe.stripe.retrieve_payment_intent(settings.STRIPE_API_KEY, payment_intent_id)
+        if not paymentIntent:
+            raise lib.error_handle.error.api_error.ApiCallerError("payment error, please contact support team")
+        kwargs = {'paymentIntent':paymentIntent,'email':email,'plan':plan,'period':period, 'promoCode':promoCode}
+        kwargs=rule.rule_checker.user_rule_checker.RegistrationPaymentCompleteChecker.check(**kwargs)
+
+        try:
+            country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(country_code)
+            subscription_plan = country_plan.get_plan(plan)
+
+            kwargs.update({'country_plan':country_plan, 'subscription_plan':subscription_plan})
+            kwargs=rule.rule_checker.user_rule_checker.RegistrationRequireRefundChecker.check(**kwargs)
+        except Exception:
+            #TODO refund
+            raise lib.error_handle.error.api_error.ApiVerifyError('data invalid, please contact support for refunding')
+
+        email = kwargs.get('email')
+        amount = kwargs.get('amount')
+
+        subscription_meta={"stripe payment intent":intentSecret}
+        ret = lib.helper.register_helper.create_new_register_account(plan, country_plan, subscription_plan, timezone, period, firstName, lastName, email, password, country, country_code,  contactNumber,  amount, paymentIntent, subscription_meta=subscription_meta)
+
+        return Response(ret, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['POST'], url_path=r'register/(?P<country_code>[^/.]+)/transfer', permission_classes=(), parser_classes=(MultiPartParser,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def user_register_with_bank_transfer(self, request, country_code):
+
+        last_five_digit, image, account_name, email, password, plan, period = lib.util.getter.getdata(request,("last_five_digit", "image", "account_name", "email", "password", "plan", "period"), required=True)
+        firstName, lastName, contactNumber, country, promoCode, timezone = lib.util.getter.getdata(request, ("firstName", "lastName", "contactNumber", "country", "promoCode", "timezone"), required=False)
+
+        try:
+            country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(country_code)
+            subscription_plan = country_plan.get_plan(plan)
+
+            kwargs={'email':email,'plan':plan,'period':period, 'promoCode':promoCode, 'country_plan':country_plan, 'subscription_plan':subscription_plan}
+
+            kwargs=rule.rule_checker.user_rule_checker.RegistrationRequireRefundChecker.check(**kwargs)
+        except Exception:
+            raise lib.error_handle.error.api_error.ApiVerifyError('data invalid, please contact support for refunding')
+        email = kwargs.get('email')
+        amount = kwargs.get('amount')
+
+        if image:
+            image_path = default_storage.save(f'register/receipt/{datetime.now().strftime("%Y/%m/%d, %H:%M:%S")}/{image.name}', ContentFile(image.read()))
+
+        subscription_meta = {"last_five_digit":last_five_digit, "account_name": account_name, "receipt":image_path}
+
+        ret = lib.helper.register_helper.create_new_register_account(plan, country_plan, subscription_plan, timezone, period, firstName, lastName, email, password, country, country_code,  contactNumber,  amount, subscription_meta=subscription_meta)
+
+        return Response(ret, status=status.HTTP_200_OK)
