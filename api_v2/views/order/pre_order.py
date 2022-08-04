@@ -242,6 +242,10 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         order = lib.util.verify.Verify.get_order(api_order.id)
         data = models.order.order.OrderSerializer(order).data
         data['oid']=str(api_order._id)
+        
+        # change buyer language
+        api_user.lang = campaign.lang
+        api_user.save()
 
         return Response(data, status=status.HTTP_200_OK)
 
