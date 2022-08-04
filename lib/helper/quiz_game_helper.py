@@ -73,8 +73,8 @@ class QuizGameCandidateSetGenerator(CandidateSetGenerator):
                     )
                     candidate_set.add(candidate)
                 else:
-                    for candidate in list(candidate_set):
-                        if candidate.to_dict().get('platform', '') == campaign_comment.platform and candidate.to_dict().get('customer_id', '') == campaign_comment.customer_id and candidate not in list(alive_candidate_set):
+                    for candidate in candidate_set:
+                        if candidate.platform == campaign_comment.platform and candidate.customer_id == campaign_comment.customer_id and candidate not in alive_candidate_set:
                             candidate = QuizGameCandidate(
                                 platform=campaign_comment.platform,
                                 customer_id=campaign_comment.customer_id,
@@ -84,7 +84,9 @@ class QuizGameCandidateSetGenerator(CandidateSetGenerator):
                                 timestamp= campaign_comment.created_time + candidate.to_dict().get('timestamp', 9999999999)
                             )
                             alive_candidate_set.add(candidate)
-            if not is_first_quiz: candidate_set = alive_candidate_set
+            if not is_first_quiz: 
+                _alive_candidate_set = alive_candidate_set.copy()
+                candidate_set = _alive_candidate_set
             is_first_quiz = False
         
         return candidate_set

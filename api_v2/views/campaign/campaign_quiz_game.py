@@ -1,9 +1,7 @@
-from functools import partial
 from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.renderers import JSONRenderer
 
 from api import models
 import lib
@@ -77,8 +75,8 @@ class CampaignQuizGameViewSet(viewsets.ModelViewSet):
         quiz_game_bundle.save()
 
         for quiz_game in quiz_games:
-            if models.campaign.campaign_quiz_game.CampaignQuizGame.objects.filter(id=quiz_game.get('id', 0)).exists():
-                quizgame = models.campaign.campaign_quiz_game.CampaignQuizGame.objects.get(id=quiz_game.get('id', 0))
+            if quiz_game_bundle.quiz_games.filter(id=quiz_game.get('id', 0)).exists():
+                quizgame = quiz_game_bundle.quiz_games.get(id=quiz_game.get('id', 0))
                 serializer = models.campaign.campaign_quiz_game.CampaignQuizGameSerializerUpdate(quizgame, data = quiz_game, partial=True)
             else:
                 serializer = models.campaign.campaign_quiz_game.CampaignQuizGameSerializerCreate(data = quiz_game)
@@ -105,7 +103,7 @@ class CampaignQuizGameViewSet(viewsets.ModelViewSet):
         return Response({'message': 'delete success'}, status=status.HTTP_200_OK)
     
 
-    @action(detail=True, methods=['DELETE'], url_path=r'delete/quiz-game', permission_classes=(IsAuthenticated, ))
+    @action(detail=True, methods=['DELETE'], url_path=r'delete', permission_classes=(IsAuthenticated, ))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def delete_quiz_game(self, request, pk):   
         api_user = lib.util.verify.Verify.get_seller_user(request)
