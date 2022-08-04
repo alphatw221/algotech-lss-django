@@ -1,5 +1,5 @@
 import pytz
-from api.utils.error_handle.error.api_error import ApiVerifyError
+from lib.error_handle.error.api_error import ApiVerifyError
 from django.contrib.auth.models import User as AuthUser
 from api.models.user.user import User
 import lib

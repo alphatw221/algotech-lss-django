@@ -1,7 +1,7 @@
 
 from api.models.user.promotion_code import PromotionCode
-from api.utils.error_handle.error.api_error import ApiVerifyError
 
+from lib.error_handle.error.api_error import ApiVerifyError
 from datetime import datetime
 
 from business_policy.marketing_plan import MarketingPlan
