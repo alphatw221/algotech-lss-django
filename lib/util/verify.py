@@ -446,13 +446,18 @@ class Verify():
             raise ApiVerifyError('lucky draw not found')
         return models.campaign.campaign_lucky_draw.CampaignLuckyDraw.objects.get(id=lucky_draw_id)
 
-
     @staticmethod
     def get_quiz_game(quiz_game_id):
         if not models.campaign.campaign_quiz_game.CampaignQuizGame.objects.filter(id=quiz_game_id).exists():
             raise ApiVerifyError('quiz game not found')
         return models.campaign.campaign_quiz_game.CampaignQuizGame.objects.get(id=quiz_game_id)
 
+    @staticmethod
+    def get_quiz_game_bundle(quiz_game_bundle_id):
+        if not models.campaign.campaign_quiz_game_bundle.CampaignQuizGameBundle.objects.filter(id=quiz_game_bundle_id).exists():
+            raise ApiVerifyError('quiz game not found')
+        return models.campaign.campaign_quiz_game_bundle.CampaignQuizGameBundle.objects.get(id=quiz_game_bundle_id)
+        
 
     class PreOrderApi():
 
