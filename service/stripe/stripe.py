@@ -2,6 +2,7 @@ from django.conf import settings
 import stripe
 import urllib
 
+import traceback
 def create_checkout_session(secret, currency, order, success_url, cancel_url):
     try:
         stripe.api_key = secret
@@ -96,11 +97,12 @@ def is_payment_successful(secret, session_id):
         return False, None
 
 
-def create_payment_intent(api_key:str,  amount:int, currency:str, receipt_email:str):
+def create_payment_intent(api_key:str,  amount:float, currency:str, receipt_email:str):
     try:
         stripe.api_key = api_key
-        return stripe.PaymentIntent.create( amount=amount, currency=currency, receipt_email=receipt_email)        
+        return stripe.PaymentIntent.create( amount=int(amount*100), currency=currency, receipt_email=receipt_email)        
     except Exception:
+        print(traceback.format_exc())
         return False
 
 def retrieve_payment_intent(api_key:str, payment_intent_id:str):

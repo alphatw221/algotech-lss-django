@@ -275,8 +275,8 @@ class DashboardViewSet(viewsets.ModelViewSet):
             if (total_order_complete_count + total_order_proceed_count + total_pre_order_count) else 0
 
         manage_order = {
-            "order_qty":campaign_order_complete_count,
-            "cart_qty":(campaign_pre_order_count + campaign_order_proceed_count),
+            "order_qty":(campaign_order_complete_count + campaign_order_proceed_count),
+            "cart_qty":campaign_pre_order_count,
 
             "comment_count":campaign_comment_count,
             "complete_sales":campaign_complete_sales,

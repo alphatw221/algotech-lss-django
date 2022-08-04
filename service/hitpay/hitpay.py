@@ -20,7 +20,10 @@ def create_payment(api_key, email, amount, currency, reference_number, redirect_
             'currency': currency,
             'reference_number': reference_number,
         }
-            
+        a, b = HitPayApiCaller('v1/payment-requests',headers=headers,params=params).post()
+        print(a)
+        print(b)
+        return a, b
         return HitPayApiCaller('v1/payment-requests',headers=headers,params=params).post()
     except Exception:
         return False,None
