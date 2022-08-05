@@ -100,7 +100,6 @@ class ProductViewSet(viewsets.ModelViewSet):
             product.image = models.product.product.IMAGE_NULL
             
         product.user_subscription = user_subscription
-        # product.category = categories if categories else None
         product.save()
 
         product_categories = user_subscription.meta.get('product_categories', [])
@@ -141,7 +140,6 @@ class ProductViewSet(viewsets.ModelViewSet):
                 f'{user_subscription.id}/product/{product.id}/{image.name}', ContentFile(image.read()))
             product.image = image_path
 
-        product.category = categories if categories else None
         product.save()
 
         product_categories = user_subscription.meta.get('product_categories', [])
@@ -212,7 +210,10 @@ class ProductViewSet(viewsets.ModelViewSet):
         user_subscription.meta['product_categories'] = categories_list
         user_subscription.save()
 
-        models.product.product.Product.objects.filter(user_subscription=user_subscription, category=category_name ).update(category=update_name)
+        query = models.product.product.Product.objects.filter(user_subscription=user_subscription, tag__contains=category_name)
+        for obj in query:
+            obj.tag = list(map(lambda x: x.replace(category_name, update_name), obj.tag))
+            obj.save()
 
         return Response(categories_list, status=status.HTTP_200_OK)
     
@@ -235,6 +236,9 @@ class ProductViewSet(viewsets.ModelViewSet):
         user_subscription.meta['product_categories'] = categories_list
         user_subscription.save()
 
-        models.product.product.Product.objects.filter(user_subscription=user_subscription, category=category_name ).delete()
+        query = models.product.product.Product.objects.filter(user_subscription=user_subscription, tag__contains=category_name)
+        for obj in query:
+            obj.tag = [x for x in obj.tag if x != category_name]
+            obj.save()
 
         return Response(categories_list, status=status.HTTP_200_OK)

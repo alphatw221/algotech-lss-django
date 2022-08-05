@@ -46,22 +46,21 @@ class ShippingOptionMapper(FieldMapper):
 class DeliveryInfonMapper(FieldMapper):
     def mapping(self, object):
         shipping_method=getattr(object, 'shipping_method')
-        info_data = '' if shipping_method == models.order.order.SHIPPING_METHOD_PICKUP else super().mapping(object)
+        info_data = '' if shipping_method == models.order.order.SHIPPING_METHOD_PICKUP or object.status not in ['complete', 'shipping out'] else super().mapping(object)
         return info_data
 
 class PickupStoreMapper(FieldMapper):
     def mapping(self, object):
         shipping_method=getattr(object, 'shipping_method')
-        if shipping_method == models.order.order.SHIPPING_METHOD_DELIVERY:
+        if shipping_method == models.order.order.SHIPPING_METHOD_DELIVERY or object.status not in ['complete', 'shipping out']:
             info_data = ''
         else:
             info_data = object.campaign.meta_logistic['pickup_options'][object.shipping_option_index]['name']
-            
         return info_data
 class PickupAddressMapper(FieldMapper):
     def mapping(self, object):
         shipping_method=getattr(object, 'shipping_method')
-        info_data = '' if shipping_method == models.order.order.SHIPPING_METHOD_DELIVERY else super().mapping(object)
+        info_data = '' if shipping_method == models.order.order.SHIPPING_METHOD_DELIVERY or object.status not in ['complete', 'shipping out'] else super().mapping(object)
         return info_data
 
 class PaymentMethodMapper(FieldMapper):
@@ -183,6 +182,7 @@ class OrderReport(XlsxHelper):
                 worksheet.write(cls.row, product_column_dict[campaing_product_id_str], order_product.get('qty', 0))
             cls._next_row()
             cls._reset_column()
+        cls._reset_row()
 
         workbook.close()
         buffer.seek(0)
