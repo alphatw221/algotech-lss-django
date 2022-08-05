@@ -1,6 +1,6 @@
 from django.conf import settings
 from backend.api.google._google_api_caller import GoogleApiCaller, GoogleAccountApiCaller, GoogleOauth2ApiCaller
-
+import requests
 
 def api_google_get_me(token: str):
     code, ret = GoogleApiCaller('userinfo/v2/me', bearer_token=token).get()
@@ -33,3 +33,20 @@ def api_google_post_refresh_token(refresh_token):
         "refresh_token": refresh_token
     }
     return GoogleOauth2ApiCaller("token", data=data).post()
+
+
+def get_token(code, redirect_uri, client_id, client_secret):
+
+    response = requests.post(
+                    url="https://accounts.google.com/o/oauth2/token",
+                    data={
+                        "code": code,
+                        "client_id": client_id,
+                        "client_secret": client_secret,
+                        "redirect_uri": redirect_uri,
+                        # "redirect_uri": settings.WEB_SERVER_URL + "/bind_youtube_channels_callback",
+                        "grant_type": "authorization_code"
+                    }
+                )
+    return response.status_code, response.json()
+
