@@ -4,6 +4,7 @@ import paypalrestsdk
 
 def create_payment(client_id, client_secret, amount, currency, return_url, cancel_url):
 
+
     try:
         paypalrestsdk.configure({
             "mode": "live",  # live mode
@@ -37,9 +38,9 @@ def create_payment(client_id, client_secret, amount, currency, return_url, cance
             }]
         })
 
-        payment.create()
-
-        return payment.create()
+        if not payment.create():
+            return False
+        return payment
     except Exception:
         print(traceback.format_exc())
         return False

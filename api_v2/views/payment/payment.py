@@ -183,7 +183,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         if not payment:
             raise lib.error_handle.error.api_error.ApiCallerError('Payment Error, Please Choose Another Payment Method')
 
-
+    
         for link in payment.links:
             if link.rel == "approval_url":
                 return Response(str(link.href))
