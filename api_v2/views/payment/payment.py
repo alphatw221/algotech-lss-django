@@ -1,4 +1,5 @@
 
+from http import client
 from django.core.files.base import ContentFile
 from django.contrib.auth.models import User as AuthUser
 from django.http import HttpResponseRedirect
@@ -52,7 +53,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             currency,
             order,
             success_url=settings.GCP_API_LOADBALANCER_URL + '/api/v2/payment/strip/callback/success?session_id={CHECKOUT_SESSION_ID}&order_oid=' + str(order_oid), 
-            cancel_url=f"{settings.GCP_API_LOADBALANCER_URL}/api/v2/payment/strip/callback/cancel?order_oid={str(order_oid)}")
+            cancel_url=f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{str(order_oid)}/payment')
 
         if not checkout_session:
             raise lib.error_handle.error.api_error.ApiCallerError('Payment Error, Please Choose Another Payment Method')
@@ -95,12 +96,12 @@ class PaymentViewSet(viewsets.GenericViewSet):
         jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)
         return HttpResponseRedirect(redirect_to=f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}/confirmation')
 
-    @action(detail=False, methods=['GET'], url_path=r'strip/callback/cancel', )
-    @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def strip_cancel_callback(self, request):
-        order_oid, = lib.util.getter.getparams(request, ('order_oid',), with_user=False)
-        return HttpResponseRedirect(
-                redirect_to=f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}/payment')
+    # @action(detail=False, methods=['GET'], url_path=r'strip/callback/cancel', )
+    # @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    # def strip_cancel_callback(self, request):
+    #     order_oid, = lib.util.getter.getparams(request, ('order_oid',), with_user=False)
+    #     return HttpResponseRedirect(
+    #             redirect_to=f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}/payment')
 
     
 
@@ -157,3 +158,83 @@ class PaymentViewSet(viewsets.GenericViewSet):
             content = lib.helper.order_helper.OrderHelper.get_confirmation_email_content(order)
             jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)
         return Response('ok')
+
+
+
+
+
+
+    @action(detail=False, methods=['GET'], url_path=r"paypal/gateway")
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def get_paypal_gateway(self, request):
+
+        order_oid, = lib.util.getter.getparams(request,('order_oid',),with_user=False) 
+        order = lib.util.verify.Verify.get_order_with_oid(order_oid)
+        campaign = lib.util.verify.Verify.get_campaign_from_order(order)
+
+        client_id = campaign.meta_payment.get("paypal",{}).get("client_id")
+        secret = campaign.meta_payment.get("paypal",{}).get("secret")
+        currency = campaign.meta_payment.get("paypal",{}).get("currency")
+
+        payment = service.paypal.paypal.create_payment(client_id, secret, order.total, currency , 
+            f"{settings.GCP_API_LOADBALANCER_URL}/api/v2/payment/paypal/callback/success?order_oid={order_oid}", 
+            f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}',
+            )
+        if not payment:
+            raise lib.error_handle.error.api_error.ApiCallerError('Payment Error, Please Choose Another Payment Method')
+
+
+        for link in payment.links:
+            if link.rel == "approval_url":
+                return Response(str(link.href))
+        
+        raise lib.error_handle.error.api_error.ApiCallerError('Payment Error, Please Choose Another Payment Method')
+
+    @action(detail=False, methods=['GET'], url_path=r"paypal/callback/success")
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def paypal_success_callback(self, request):
+
+        paymentId, PayerID, order_oid = lib.util.getter.getparams(request, ('paymentId', 'PayerID', 'order_oid'), with_user=False)
+        order = lib.util.verify.Verify.get_order_with_oid(order_oid)
+        campaign = order.campaign
+        client_id = campaign.meta_payment.get("paypal",{}).get("client_id")
+        secret = campaign.meta_payment.get("paypal",{}).get("secret")
+
+        payment = service.paypal.paypal.find_payment(client_id, secret, paymentId)
+
+        if not payment or not payment.execute({"payer_id": PayerID}):
+            return Response(payment.error)
+
+        order.status = models.order.order.STATUS_COMPLETE
+        order.payment_method = models.order.order.PAYMENT_METHOD_PAYPAL
+        order.checkout_details[models.order.order.PAYMENT_METHOD_PAYPAL] = request.data.dict()
+        order.history[models.order.order.PAYMENT_METHOD_PAYPAL]={
+            "action": "pay",
+            "time": pendulum.now("UTC").to_iso8601_string()
+        }
+        order.save()
+
+        content = lib.helper.order_helper.OrderHelper.get_confirmation_email_content(order)
+        jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)
+        return HttpResponseRedirect(redirect_to=f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}/confirmation')
+
+
+
+    # @action(detail=False, methods=['GET'], url_path=r"paypal_cancel")
+    # @api_error_handler
+    # def paypal_cancel(self, request, *args, **kwargs):
+    #     try:
+    #         order_id = request.GET["order_id"]
+    #         order_object = Verify.get_order(order_id)
+    #         pre_order = PreOrder.objects.filter(customer_id=order_object.customer_id, campaign_id=order_object.campaign_id)
+    #         if len(pre_order) > 1:
+    #             return Response({"message": "Buyer has more than one shopping cart."}, status=status.HTTP_400_BAD_REQUEST)
+    #         order_object.checkout_details[len(order_object.checkout_details) + 1] = {
+    #             "action": "cancel payment",
+    #             "time": datetime.datetime.now()
+    #         }
+    #         order_object.save()
+    #         return HttpResponseRedirect(redirect_to=f'{settings.WEB_SERVER_URL}/buyer/cart/{pre_order.id}')
+    #     except Exception as e:
+    #         print(e)
+    #         return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
