@@ -89,22 +89,24 @@ class LikesCandidateSetGenerator(CandidateSetGenerator):
             token=facebook_page.token   
 
             code, response = service.facebook.post.get_post_likes(token, post_id, after=None, limit=limit)
+            # print(code)
+            # print(response)
             if code!=200 :
                 raise lib.error_handle.error.api_error.ApiVerifyError('Get Facebook Service Fail, Please Retry Again')
-            likes_user_list += [user.get('name') for user in response.get('data',[])]
+            # likes_user_list += [user.get('name') for user in response.get('data',[])]
+            # print(likes_user_list)
+        # campaign_comments = models.campaign.campaign_comment.CampaignComment.objects.filter(
+        #     campaign=campaign,
+        #     customer_name__in=likes_user_list
+        # )[:limit]
 
-        campaign_comments = models.campaign.campaign_comment.CampaignComment.objects.filter(
-            campaign=campaign,
-            customer_name__in=likes_user_list
-        )[:limit]
-
-        for campaign_comment in campaign_comments:
+        for user in response.get('data',[]):
         
             candidate = LuckyDrawCandidate(
-                platform=campaign_comment.platform, 
-                customer_id=campaign_comment.customer_id, 
-                customer_name=campaign_comment.customer_name,
-                customer_image=campaign_comment.image,
+                platform='facebook', 
+                customer_id=user.get('id'),     #ASID over here!! might have some issues 
+                customer_name=user.get('name'),
+                customer_image=user.get('pic_large'),
                 draw_type=lucky_draw.type,
                 prize=lucky_draw.prize.name)
 
