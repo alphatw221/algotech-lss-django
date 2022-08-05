@@ -147,11 +147,10 @@ class CampaignQuizGameViewSet(viewsets.ModelViewSet):
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         quiz_game = lib.util.verify.Verify.get_quiz_game(pk)
 
-        quiz_game.start_at = datetime.datetime.now()
-        quiz_game.save()
-
         campaign = quiz_game.quiz_game_bundle.campaign
         lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign.id)
+        quiz_game.start_at = datetime.datetime.now()
+        quiz_game.save()
 
         return Response(models.campaign.campaign_quiz_game.CampaignQuizGameSerializer(quiz_game).data, status=status.HTTP_200_OK)
     
@@ -163,13 +162,10 @@ class CampaignQuizGameViewSet(viewsets.ModelViewSet):
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         quiz_game = lib.util.verify.Verify.get_quiz_game(pk)
 
-        quiz_game.end_at = datetime.datetime.now()
-        quiz_game.save()
-
         campaign = quiz_game.quiz_game_bundle.campaign
         lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign.id)
-
-        # winner_list = lib.helper.quiz_game_helper.quiz(campaign, quiz_game)
+        quiz_game.end_at = datetime.datetime.now()
+        quiz_game.save()
 
         return Response(models.campaign.campaign_quiz_game.CampaignQuizGameSerializer(quiz_game).data, status=status.HTTP_200_OK)
     
@@ -185,5 +181,8 @@ class CampaignQuizGameViewSet(viewsets.ModelViewSet):
         lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign.id)
 
         winner_list = lib.helper.quiz_game_helper.quiz(campaign, quiz_game_bundle)
+        if not winner_list:
+            quiz_game_bundle.winner_list = ['no winners']
+            quiz_game_bundle.save()
 
         return Response(winner_list, status=status.HTTP_200_OK)
