@@ -71,7 +71,7 @@ class UserViewSet(viewsets.ModelViewSet):
         email, password = lib.util.getter.getdata(request, ("email","password",), required=True)
         token = lib.helper.login_helper.GeneralLogin.get_token(email, password)
         if not token:
-            Response({"message": "email or password incorrect"}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({"message": "email or password incorrect"}, status=status.HTTP_401_UNAUTHORIZED)
         return Response(token, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['POST'], url_path=r'seller/login/google', permission_classes=())
