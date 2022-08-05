@@ -48,7 +48,17 @@ class DeliveryInfonMapper(FieldMapper):
         shipping_method=getattr(object, 'shipping_method')
         info_data = '' if shipping_method == models.order.order.SHIPPING_METHOD_PICKUP else super().mapping(object)
         return info_data
-class PickupInfoMapper(FieldMapper):
+
+class PickupStoreMapper(FieldMapper):
+    def mapping(self, object):
+        shipping_method=getattr(object, 'shipping_method')
+        if shipping_method == models.order.order.SHIPPING_METHOD_DELIVERY:
+            info_data = ''
+        else:
+            info_data = object.campaign.meta_logistic['pickup_options'][object.shipping_option_index]['name']
+            
+        return info_data
+class PickupAddressMapper(FieldMapper):
     def mapping(self, object):
         shipping_method=getattr(object, 'shipping_method')
         info_data = '' if shipping_method == models.order.order.SHIPPING_METHOD_DELIVERY else super().mapping(object)
@@ -100,8 +110,8 @@ class OrderReport(XlsxHelper):
             DeliveryInfonMapper('shipping_location','Location'),
             DeliveryInfonMapper('shipping_region','Region'),
             DeliveryInfonMapper('shipping_postcode','Postcode'),
-            # PickupInfoMapper('pick_up_store','Pick Up Store'),
-            PickupInfoMapper('pickup_address','Pick Up Addrwess'),
+            PickupStoreMapper('pick_up_store','Pick Up Store'),
+            PickupAddressMapper('pickup_address','Pick Up Addrwess'),
             FieldMapper('shipping_remark','Remark'),
             PaymentMethodMapper('payment_method','Payment Method'),
             FieldMapper('status','Payment Status'),
@@ -141,9 +151,9 @@ class OrderReport(XlsxHelper):
         worksheet.merge_range(cls.row, 0, cls.row, len(cls.columns) + campaign_products_count - 1, campaign.title + ' Order Report', title_format)
         cls._next_row()
         worksheet.merge_range(cls.row, 0, cls.row, 5, 'Contact Info', info_format)
-        worksheet.merge_range(cls.row, 6, cls.row, 14, 'Delivery Info', info_format)
-        worksheet.merge_range(cls.row, 15, cls.row, 18, 'Payment Info', info_format)
-        worksheet.merge_range(cls.row, 19, cls.row, 19 + campaign_products_count - 1, 'Order Info', info_format)
+        worksheet.merge_range(cls.row, 6, cls.row, 15, 'Delivery Info', info_format)
+        worksheet.merge_range(cls.row, 16, cls.row, 19, 'Payment Info', info_format)
+        worksheet.merge_range(cls.row, 20, cls.row, 20 + campaign_products_count - 1, 'Order Info', info_format)
         cls._next_row()
         cls._reset_column()
         

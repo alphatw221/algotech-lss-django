@@ -48,19 +48,19 @@ class QuizGameCandidateSetGenerator(CandidateSetGenerator):
         candidate_set = set()
         is_first_quiz = True
 
-        quiz_games = models.campaign.campaign_quiz_game.CampaignQuizGameBundleSerializerWithEachQuiz(quiz_game_bundle).data.get('quiz_games')
-        for quiz_game in quiz_games:
-            if not (dict(quiz_game).get('id', 0) != 0 and dict(quiz_game).get('start_at', '') not in [None, ''] and dict(quiz_game).get('end_at', '') not in [None, '']):
+        cache = {}
+        for quiz_game in quiz_game_bundle.quiz_games.all() :
+            if not quiz_game.id or not quiz_game.start_at or not quiz_game.end_at:
                 continue
-            quizgame = models.campaign.campaign_quiz_game.CampaignQuizGame.objects.get(id=dict(quiz_game).get('id', 0))
-            campaign_comments = models.campaign.campaign_comment.CampaignComment.objects.filter(
-                campaign=campaign,
-                message__icontains=quizgame.answer,
-                created_time__gte=datetime.datetime.timestamp(quizgame.start_at),
-                created_time__lte=datetime.datetime.timestamp(quizgame.end_at)
+
+            campaign_comments = campaign.comments.filter(
+                message__icontains=quiz_game.answer,
+                created_time__gte=datetime.datetime.timestamp(quiz_game.start_at),
+                created_time__lte=datetime.datetime.timestamp(quiz_game.end_at)
             ).order_by('created_time')[:limit]
 
             alive_candidate_set = set()
+            
             for campaign_comment in campaign_comments:
                 if is_first_quiz == True:
                     candidate = QuizGameCandidate(
@@ -71,22 +71,27 @@ class QuizGameCandidateSetGenerator(CandidateSetGenerator):
                         prize=quiz_game_bundle.prize.name,
                         timestamp=campaign_comment.created_time
                     )
-                    candidate_set.add(candidate)
+                    if not quiz_game_bundle.repeatable and candidate in winner_list:
+                        continue
+                    if candidate not in candidate_set:
+                        cache[f'{campaign_comment.platform}{campaign_comment.customer_id}'] = campaign_comment.created_time
+                        candidate_set.add(candidate)
                 else:
-                    for candidate in candidate_set:
-                        if candidate.platform == campaign_comment.platform and candidate.customer_id == campaign_comment.customer_id and candidate not in alive_candidate_set:
-                            candidate = QuizGameCandidate(
-                                platform=campaign_comment.platform,
-                                customer_id=campaign_comment.customer_id,
-                                customer_name=campaign_comment.customer_name,
-                                customer_image=campaign_comment.image,
-                                prize=quiz_game_bundle.prize.name,
-                                timestamp= campaign_comment.created_time + candidate.to_dict().get('timestamp', 9999999999)
-                            )
-                            alive_candidate_set.add(candidate)
+                    candidate = QuizGameCandidate(
+                        platform=campaign_comment.platform,
+                        customer_id=campaign_comment.customer_id,
+                        customer_name=campaign_comment.customer_name,
+                        customer_image=campaign_comment.image,
+                        prize=quiz_game_bundle.prize.name,
+                        timestamp= campaign_comment.created_time
+                    )
+                    if candidate in candidate_set and candidate not in alive_candidate_set:
+                        cache[f'{campaign_comment.platform}{campaign_comment.customer_id}'] += campaign_comment.created_time
+                        candidate.timestamp = cache[f'{campaign_comment.platform}{campaign_comment.customer_id}']
+                        alive_candidate_set.add(candidate)
+
             if not is_first_quiz: 
-                _alive_candidate_set = alive_candidate_set.copy()
-                candidate_set = _alive_candidate_set
+                candidate_set = alive_candidate_set.copy()
             is_first_quiz = False
         
         return candidate_set
