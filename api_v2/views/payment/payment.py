@@ -183,7 +183,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         if not payment:
             raise lib.error_handle.error.api_error.ApiCallerError('Payment Error, Please Choose Another Payment Method')
 
-    
+
         for link in payment.links:
             if link.rel == "approval_url":
                 return Response(str(link.href))
@@ -207,7 +207,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
 
         order.status = models.order.order.STATUS_COMPLETE
         order.payment_method = models.order.order.PAYMENT_METHOD_PAYPAL
-        order.checkout_details[models.order.order.PAYMENT_METHOD_PAYPAL] = request.data.dict()
+        order.checkout_details[models.order.order.PAYMENT_METHOD_PAYPAL] = request.data
         order.history[models.order.order.PAYMENT_METHOD_PAYPAL]={
             "action": "pay",
             "time": pendulum.now("UTC").to_iso8601_string()
