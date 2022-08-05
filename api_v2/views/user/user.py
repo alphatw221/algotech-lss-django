@@ -247,7 +247,7 @@ class UserViewSet(viewsets.ModelViewSet):
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def user_register_with_bank_transfer(self, request, country_code):
         country_code = business_policy.subscription.COUNTRY_SG if country_code in ['', 'undefined', 'null', None] else country_code
-        last_five_digit, image, account_name, email, password, plan, period = lib.util.getter.getdata(request,("last_five_digit", "image", "account_name", "email", "password", "plan", "period"), required=True)
+        last_five_digit, image, bank_name, account_name, email, password, plan, period = lib.util.getter.getdata(request,("last_five_digit", "image", "bank_name", "account_name", "email", "password", "plan", "period"), required=True)
         firstName, lastName, contactNumber, country, promoCode, timezone = lib.util.getter.getdata(request, ("firstName", "lastName", "contactNumber", "country", "promoCode", "timezone"), required=False)
 
         try:
@@ -265,7 +265,7 @@ class UserViewSet(viewsets.ModelViewSet):
         if image:
             image_path = default_storage.save(f'register/receipt/{datetime.now().strftime("%Y/%m/%d, %H:%M:%S")}/{image.name}', ContentFile(image.read()))
 
-        subscription_meta = {"last_five_digit":last_five_digit, "account_name": account_name, "receipt":image_path}
+        subscription_meta = {"last_five_digit":last_five_digit, 'bank_name':bank_name, "account_name": account_name, "receipt":image_path}
 
         ret = lib.helper.register_helper.create_new_register_account(plan, country_plan, subscription_plan, timezone, period, firstName, lastName, email, password, country, country_code,  contactNumber,  amount, subscription_meta=subscription_meta)
 
