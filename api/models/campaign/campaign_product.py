@@ -116,7 +116,7 @@ class CampaignProductSerializerAssign(serializers.ModelSerializer):
 class CampaignProductSerializerUpdate(CampaignProductSerializer):
     class Meta:
         model = CampaignProduct
-        fields = ['name', 'description', 'remark', 'qty_for_sale', 'customer_removable', 'customer_editable', 'max_order_amount']
+        fields = ['name', 'description', 'remark', 'qty_for_sale', 'customer_removable', 'customer_editable', 'max_order_amount', 'type', 'order_code']
 
 
 class CampaignProductAdmin(admin.ModelAdmin):

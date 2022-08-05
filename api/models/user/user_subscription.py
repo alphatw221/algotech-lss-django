@@ -14,10 +14,14 @@ from rest_framework import serializers
 import business_policy
 
 IMAGE_NULL = 'no_image.jpeg'
+PLATFORM_FACEBOOK = 'facebook'
+PLATFORM_INSTAGRAM = 'instagram'
+PLATFORM_YOUTUBE = 'youtube'
+
 PLATFORM_ATTR={
-    'facebook':{'attr':'facebook_pages','serializer':FacebookPageSerializer}, 
-    'instagram':{'attr':'instagram_profiles','serializer':InstagramProfileSerializer}, 
-    'youtube':{'attr':'instagram_profiles','serializer':YoutubeChannelSerializer}
+    PLATFORM_FACEBOOK:{'attr':'facebook_pages','serializer':FacebookPageSerializer}, 
+    PLATFORM_INSTAGRAM:{'attr':'instagram_profiles','serializer':InstagramProfileSerializer}, 
+    PLATFORM_YOUTUBE:{'attr':'youtube_channels','serializer':YoutubeChannelSerializer}
     }
 class UserSubscription(models.Model):
 

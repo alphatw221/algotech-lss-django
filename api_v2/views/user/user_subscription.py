@@ -1,3 +1,4 @@
+from pyexpat import model
 from django.conf import settings
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
@@ -16,11 +17,12 @@ from rest_framework.parsers import MultiPartParser, JSONParser, FormParser
 
 from api import rule
 from api import models
-from api.models.user import user_subscription
+
 import lib
 import service
 
 import json
+from datetime import datetime
 class UserSubscriptionPagination(PageNumberPagination):
 
     page_query_param = 'page'
@@ -297,11 +299,26 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
         return Response(models.user.user.UserSerializerAccountInfo(api_user).data, status=status.HTTP_200_OK)
 
+
+    @action(detail=False, methods=['GET'], url_path=r'platform/(?P<platform_name>[^/.]+)', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def get_platform_instances(self, request, platform_name):
+
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+
+        queryset = getattr(user_subscription, models.user.user_subscription.PLATFORM_ATTR[platform_name]['attr']).all()
+        serializer = models.user.user_subscription.PLATFORM_ATTR[platform_name]['serializer']
+        return Response(serializer(queryset,many=True).data, status=status.HTTP_200_OK)
+
+
+
     @action(detail=False, methods=['PUT'], url_path=r'platform/(?P<platform_name>[^/.]+)/unbind', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def unbind_platform_instance(self, request, platform_name):
 
-        platform_instance_id, = lib.util.getter.getdata(request, ('id',), required=True)
+
+        platform_instance_id, = lib.util.getter.getparams(request, ('instance_id',), with_user=False)
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         platform_instance = lib.util.verify.Verify.get_platform_from_user_subscription(user_subscription,platform_name,platform_instance_id)
@@ -314,7 +331,29 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         queryset = getattr(user_subscription, models.user.user_subscription.PLATFORM_ATTR[platform_name]['attr']).all()
         serializer = models.user.user_subscription.PLATFORM_ATTR[platform_name]['serializer']
         return Response(serializer(queryset,many=True).data, status=status.HTTP_200_OK)
+
+
+    @action(detail=False, methods=['PUT'], url_path=r'platform/(?P<platform_name>[^/.]+)/bind', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def bind_platform_instances(self, request, platform_name):
         
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+
+        if platform_name == models.user.user_subscription.PLATFORM_FACEBOOK:
+            lib.helper.subscription_helper.bind_facebook_pages(request, user_subscription)
+        
+        elif platform_name == models.user.user_subscription.PLATFORM_INSTAGRAM:
+            lib.helper.subscription_helper.bind_instagram_profiles(request, user_subscription)
+       
+        elif platform_name == models.user.user_subscription.PLATFORM_YOUTUBE:
+            lib.helper.subscription_helper.bind_youtube_channels(request, user_subscription) 
+
+                   
+        queryset = getattr(user_subscription, models.user.user_subscription.PLATFORM_ATTR[platform_name]['attr']).all()
+        serializer = models.user.user_subscription.PLATFORM_ATTR[platform_name]['serializer']
+        return Response(serializer(queryset,many=True).data, status=status.HTTP_200_OK)
+    
     # @action(detail=False, methods=['POST'], url_path=r'update_logistic', permission_classes=(IsAuthenticated,))
     # @api_error_handler
     # def update_logistic(self, request):
