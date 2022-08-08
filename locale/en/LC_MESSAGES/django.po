@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-03 15:27+0000\n"
+"POT-Creation-Date: 2022-08-08 06:45+0000\n"
 "PO-Revision-Date: 2021-12-13 15:51+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -256,12 +256,116 @@ msgstr "Share Secret"
 msgid "PAYMENT/FIRST_DATA/TIME_ZONE"
 msgstr "Time Zone"
 
+#: lib/helper/xlsx_helper.py:103
+msgid "REPORT/COLUMN_TITLE/ID"
+msgstr "ID"
+
+#: lib/helper/xlsx_helper.py:104
+msgid "REPORT/COLUMN_TITLE/ORDER_DATE"
+msgstr "Order Date"
+
+#: lib/helper/xlsx_helper.py:105
+msgid "REPORT/COLUMN_TITLE/PLATFORM"
+msgstr "Platform"
+
+#: lib/helper/xlsx_helper.py:106
+msgid "REPORT/COLUMN_TITLE/CUSTOMER_NAME"
+msgstr "Customer_Name"
+
+#: lib/helper/xlsx_helper.py:107
+msgid "REPORT/COLUMN_TITLE/SHIPPING_PHONE"
+msgstr "Shipping_Phone"
+
+#: lib/helper/xlsx_helper.py:108
+msgid "REPORT/COLUMN_TITLE/EMAIL"
+msgstr "E-mail"
+
+#: lib/helper/xlsx_helper.py:109
+msgid "REPORT/COLUMN_TITLE/SHIPPING_METHOD"
+msgstr "Shipping_Method"
+
+#: lib/helper/xlsx_helper.py:110
+msgid "REPORT/COLUMN_TITLE/SHIPPING_OPTION"
+msgstr "Shipping_Option"
+
+#: lib/helper/xlsx_helper.py:111
+msgid "REPORT/COLUMN_TITLE/SHIPPING_ADDRESS_1"
+msgstr "Shipping_Address_1"
+
+#: lib/helper/xlsx_helper.py:112
+msgid "REPORT/COLUMN_TITLE/LOCATION"
+msgstr "Location"
+
+#: lib/helper/xlsx_helper.py:113
+msgid "REPORT/COLUMN_TITLE/REGION"
+msgstr "Region"
+
+#: lib/helper/xlsx_helper.py:114
+msgid "REPORT/COLUMN_TITLE/POSTCODE"
+msgstr "Postcode"
+
+#: lib/helper/xlsx_helper.py:115
+msgid "REPORT/COLUMN_TITLE/PICK_UP_STORE"
+msgstr "Pick_Up_Store"
+
+#: lib/helper/xlsx_helper.py:116
+msgid "REPORT/COLUMN_TITLE/PICK_UP_ADDRESS"
+msgstr "Pick_Up_Addrwess"
+
+#: lib/helper/xlsx_helper.py:117
+msgid "REPORT/COLUMN_TITLE/REMARK"
+msgstr "Remark"
+
+#: lib/helper/xlsx_helper.py:118
+msgid "REPORT/COLUMN_TITLE/PAYMENT_METHOD"
+msgstr "Payment_Method"
+
+#: lib/helper/xlsx_helper.py:119
+msgid "REPORT/COLUMN_TITLE/PAYMENT_STATUS"
+msgstr "Payment_Status"
+
+#: lib/helper/xlsx_helper.py:120
+msgid "REPORT/COLUMN_TITLE/PAYMENT_RECORD"
+msgstr "Payment_Record"
+
+#: lib/helper/xlsx_helper.py:121
+msgid "REPORT/COLUMN_TITLE/TOTAL"
+msgstr "Total"
+
+#: lib/helper/xlsx_helper.py:155
+msgid "REPORT/SECTION_TITLE/CONTACT_INFO"
+msgstr "Contact Information"
+
+#: lib/helper/xlsx_helper.py:156
+msgid "REPORT/SECTION_TITLE/DELIVERY_INFO"
+msgstr "Delivery Information"
+
+#: lib/helper/xlsx_helper.py:157
+msgid "REPORT/SECTION_TITLE/PAYMENT_INFO"
+msgstr "Payment Information"
+
+#: lib/helper/xlsx_helper.py:158
+msgid "REPORT/SECTION_TITLE/ORDER_INFO"
+msgstr "Order Information"
+
 #: lib/i18n/campaign_announcement.py:29
 #, python-brace-format
 msgid "QUIZ_GAME_WINNER{customer_name}{product_name}"
 msgstr ""
 "Congratulations to {customer_name} on winning quiz "
 "game! Prize: {product_name}. Please check your shopping cart."
+
+#: lib/i18n/campaign_announcement.py:35
+#, fuzzy, python-brace-format
+#| msgid "REPORT/SECTION_TITLE/TITLE"
+msgid "REPORT/SECTION_TITLE/{section_title}"
+msgstr "Order Report"
+
+#: lib/i18n/campaign_announcement.py:40
+#, fuzzy, python-brace-format
+#| msgid "REPORT/COLUMN_TITLE/ID"
+msgid "REPORT/COLUMN_TITLE/{column_title}"
+msgstr "ID"
 
 #: templates/email_reset_password_link.html:12
 #: templates/reset_password_success_email.html:12

@@ -1,19 +1,25 @@
+from django.utils import translation
+from django.utils.translation import ugettext as _
 from api import models
+
 import xlsxwriter
 import io
 
 class FieldMapper():
     field_name=''
     title=''
+    i18n_key=None
     _width=None
     
-    def __init__(self, field_name=None, title=None, width=None):
+    def __init__(self, field_name=None, title=None, i18n_key=None, width=None):
         if field_name!=None:
             self.field_name = field_name
         if title!=None:
             self.title = title
         if width!=None:
             self._width = width
+        if i18n_key!=None:
+            self.i18n_key = i18n_key
             
     def mapping(self,object):
         return getattr(object,self.field_name)
@@ -70,7 +76,10 @@ class PaymentMethodMapper(FieldMapper):
 class LastFiveDigitMapper(FieldMapper):
     def mapping(self, object):
         return object.meta.get(self.field_name, '')
-
+class TotalMapper(FieldMapper):
+    def mapping(self, object, decimal_places):
+        info_data = int(super().mapping(object)) if decimal_places == 0 else super().mapping(object)
+        return info_data
 class XlsxHelper():
     row=0
     col=0
@@ -97,30 +106,29 @@ class XlsxHelper():
 class OrderReport(XlsxHelper):
 
     columns=[
-            FieldMapper('id','ID'),
-            DateTimeMapper('created_at','Order Date'),
-            FieldMapper('platform','Platform'),
-            CustomerNameMapper('customer_name','Customer Name'),
-            FieldMapper('shipping_phone','Shipping Phone'),
-            FieldMapper('shipping_email','E-mail'),
-            ShippingMethodMapper('shipping_method','Shipping Method'),
-            ShippingOptionMapper('shipping_option','Shipping Option'),
-            DeliveryInfonMapper('shipping_address_1','Shipping Address 1'),
-            DeliveryInfonMapper('shipping_location','Location'),
-            DeliveryInfonMapper('shipping_region','Region'),
-            DeliveryInfonMapper('shipping_postcode','Postcode'),
-            PickupStoreMapper('pick_up_store','Pick Up Store'),
-            PickupAddressMapper('pickup_address','Pick Up Addrwess'),
-            FieldMapper('shipping_remark','Remark'),
-            PaymentMethodMapper('payment_method','Payment Method'),
-            FieldMapper('status','Payment Status'),
-            LastFiveDigitMapper('last_five_digit','Payment Record'),
-            FieldMapper('total','Total'),
+            FieldMapper('id','ID', i18n_key='REPORT/COLUMN_TITLE/ID'),
+            DateTimeMapper('created_at', 'Order Date', i18n_key='REPORT/COLUMN_TITLE/ORDER_DATE'),
+            FieldMapper('platform', 'Platform', i18n_key='REPORT/COLUMN_TITLE/PLATFORM'),
+            CustomerNameMapper('customer_name', 'Customer Name', i18n_key='REPORT/COLUMN_TITLE/CUSTOMER_NAME'),
+            FieldMapper('shipping_phone', 'Shipping Phone', i18n_key='REPORT/COLUMN_TITLE/SHIPPING_PHONE'),
+            FieldMapper('shipping_email', 'E-mail', i18n_key='REPORT/COLUMN_TITLE/EMAIL'),
+            ShippingMethodMapper('shipping_method', 'Shipping Method', i18n_key='REPORT/COLUMN_TITLE/SHIPPING_METHOD'),
+            ShippingOptionMapper('shipping_option', 'Shipping Option', i18n_key='REPORT/COLUMN_TITLE/SHIPPING_OPTION'),
+            DeliveryInfonMapper('shipping_address_1', 'Shipping Address 1', i18n_key='REPORT/COLUMN_TITLE/SHIPPING_ADDRESS_1'),
+            DeliveryInfonMapper('shipping_location', 'Location', i18n_key='REPORT/COLUMN_TITLE/LOCATION'),
+            DeliveryInfonMapper('shipping_region', 'Region', i18n_key='REPORT/COLUMN_TITLE/REGION'),
+            DeliveryInfonMapper('shipping_postcode', 'Postcode', i18n_key='REPORT/COLUMN_TITLE/POSTCODE'),
+            PickupStoreMapper('pick_up_store', 'Pick up Store', i18n_key='REPORT/COLUMN_TITLE/PICK_UP_STORE'),
+            PickupAddressMapper('pickup_address', 'Pick up Address', i18n_key='REPORT/COLUMN_TITLE/PICK_UP_ADDRESS'),
+            FieldMapper('shipping_remark', 'Remark', i18n_key='REPORT/COLUMN_TITLE/REMARK'),
+            PaymentMethodMapper('payment_method', 'Payment Method', i18n_key='REPORT/COLUMN_TITLE/PAYMENT_METHOD'),
+            FieldMapper('status', 'Payment Status', i18n_key='REPORT/COLUMN_TITLE/PAYMENT_STATUS'),
+            LastFiveDigitMapper('last_five_digit', 'Payment Record', i18n_key='REPORT/COLUMN_TITLE/PAYMENT_RECORD'),
+            TotalMapper('total', 'Total', i18n_key='REPORT/COLUMN_TITLE/TOTAL'),
         ]
 
     @classmethod
     def create(cls, campaign, lang='en'):
-
         buffer = io.BytesIO()
         
         workbook = xlsxwriter.Workbook(buffer,{'in_memory': True} )
@@ -145,19 +153,21 @@ class OrderReport(XlsxHelper):
             'font_size': 13,
             'border': 1
         })
-
+        
         campaign_products_count = campaign.products.count()
-        worksheet.merge_range(cls.row, 0, cls.row, len(cls.columns) + campaign_products_count - 1, campaign.title + ' Order Report', title_format)
-        cls._next_row()
-        worksheet.merge_range(cls.row, 0, cls.row, 5, 'Contact Info', info_format)
-        worksheet.merge_range(cls.row, 6, cls.row, 15, 'Delivery Info', info_format)
-        worksheet.merge_range(cls.row, 16, cls.row, 19, 'Payment Info', info_format)
-        worksheet.merge_range(cls.row, 20, cls.row, 20 + campaign_products_count - 1, 'Order Info', info_format)
+        with translation.override(campaign.lang):
+            worksheet.merge_range(cls.row, 0, cls.row, len(cls.columns) + campaign_products_count - 1, f'{campaign.title} {_("REPORT/SECTION_TITLE/TITLE")}', title_format)
+            cls._next_row()
+            worksheet.merge_range(cls.row, 0, cls.row, 5, _('REPORT/SECTION_TITLE/CONTACT_INFO'), info_format)
+            worksheet.merge_range(cls.row, 6, cls.row, 15, _('REPORT/SECTION_TITLE/DELIVERY_INFO'), info_format)
+            worksheet.merge_range(cls.row, 16, cls.row, 19, _('REPORT/SECTION_TITLE/PAYMENT_INFO'), info_format)
+            worksheet.merge_range(cls.row, 20, cls.row, 20 + campaign_products_count - 1, _('REPORT/SECTION_TITLE/ORDER_INFO'), info_format)
         cls._next_row()
         cls._reset_column()
         
         for column in cls.columns:
-            worksheet.write(cls.row, cls.col, column.title, header_format)
+            with translation.override(campaign.lang):
+                worksheet.write(cls.row, cls.col, _(column.i18n_key), header_format)
             worksheet.set_column(cls.col, cls.col, column.width)
             cls._next_column()
 
@@ -175,7 +185,10 @@ class OrderReport(XlsxHelper):
         all_orders = list(orders)+list(pre_orders)
         for order in all_orders:
             for column in cls.columns:
-                worksheet.write(cls.row, cls.col, column.mapping(order))
+                if column.field_name == 'total':
+                    worksheet.write(cls.row, cls.col, column.mapping(order, campaign.decimal_places))    
+                else:
+                    worksheet.write(cls.row, cls.col, column.mapping(order))
                 cls._next_column()
 
             for campaing_product_id_str, order_product in order.products.items():

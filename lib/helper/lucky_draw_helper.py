@@ -265,7 +265,7 @@ class LuckyDraw():
     winner: LuckyDrawCandidate, 
     campaign_product:models.campaign.campaign_product.CampaignProduct):
         
-        text = lib.i18n.campaign_announcement.get_campaign_announcement_lucky_draw_winner(campaign_product.name, winner.customer_name)
+        text = lib.i18n.campaign_announcement.get_campaign_announcement_lucky_draw_winner(campaign_product.name, winner.customer_name, lang=campaign.lang)
 
 
         if (facebook_page := campaign.facebook_page):
@@ -281,7 +281,7 @@ class LuckyDraw():
     winner: LuckyDrawCandidate, 
     campaign_product:models.campaign.campaign_product.CampaignProduct):
 
-        text = lib.i18n.campaign_announcement.get_campaign_announcement_lucky_draw_winner(campaign_product.name, winner.customer_name)  #temp
+        text = lib.i18n.campaign_announcement.get_campaign_announcement_lucky_draw_winner(campaign_product.name, winner.customer_name, lang=campaign.lang)  #temp
 
         if (campaign.instagram_profile and winner.platform=='instagram'):
             service.instagram.chat_bot.post_page_message_chat_bot(campaign.instagram_profile.connected_facebook_page_id, campaign.instagram_profile.token, winner.customer_id, text)
