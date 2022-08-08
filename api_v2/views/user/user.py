@@ -170,7 +170,7 @@ class UserViewSet(viewsets.ModelViewSet):
             i18n_get_reset_password_mail_subject(lang=user_subscription.lang),
             email,
             "email_reset_password_link.html",
-            {"url":settings.GCP_API_LOADBALANCER_URL +"/seller/password/reset","code":code,"username":auth_user.username},
+            {"url":settings.GCP_API_LOADBALANCER_URL +"/seller/web/password/reset","code":code,"username":auth_user.username},
             lang=user_subscription.lang)
 
         return Response({"message":"The email has been sent. If you haven't received the email after a few minutes, please check your spam folder. "}, status=status.HTTP_200_OK)
