@@ -418,9 +418,10 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
 
-        currency, buyer_lang, decimal_places, price_unit, delivery_note, special_note, confirmation_note  =\
-                lib.util.getter.getdata(request,('currency', 'buyer_lang', 'decimal_places', 'price_unit', 'delivery_note', 'special_note', 'confirmation_note'), required=True)
-        
+        currency, buyer_lang, decimal_places, price_unit  =\
+                lib.util.getter.getdata(request,('currency', 'buyer_lang', 'decimal_places', 'price_unit'), required=True)
+        delivery_note, special_note, confirmation_note  =\
+                lib.util.getter.getdata(request,('delivery_note', 'special_note', 'confirmation_note'), required=False)
         user_subscription.currency=currency
         user_subscription.buyer_lang=buyer_lang
         user_subscription.decimal_places=decimal_places

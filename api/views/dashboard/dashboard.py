@@ -10,7 +10,7 @@ from api.models.user import user_subscription
 from api.utils.common.verify import Verify
 from api.utils.common.common import *
 from api.utils.error_handle.error.api_error import ApiCallerError
-from api.utils.report import SalesReport
+from api.utils.report import SalesReport2
 
 from backend.pymongo.mongodb import db
 from dateutil.relativedelta import relativedelta
@@ -524,15 +524,13 @@ class DashboardViewSet(viewsets.ModelViewSet):
         api_user, start_time, end_time = getparams(request, ('start_time', 'end_time'), seller=True)
         api_user = Verify.get_seller_user(request)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
-        
-        start_time = SalesReport.normalize_start_time(start_time)
-        end_time = SalesReport.normalize_end_time(end_time)
-        basic_info = SalesReport.get_basic_info(start_time, end_time)
-        if len(basic_info.index) == 0:
+        user_subscription_id = user_subscription.id
+        start_time = SalesReport2.normalize_start_time(start_time)
+        end_time = SalesReport2.normalize_end_time(end_time)
+        basic_info = SalesReport2.get_basic_info(start_time, end_time, user_subscription_id)
+        if len(basic_info) == 0:
             raise ApiCallerError("No any campaigns in period.")
-        top_10_itmes = SalesReport.get_top_10_itmes(start_time, end_time)
-        order_analysis = SalesReport.get_order_analysis(start_time, end_time)
-        data = SalesReport.merge_data(basic_info, top_10_itmes, order_analysis)
-        report = SalesReport.reformat_data(data)
-
+        top_10_itmes = SalesReport2.get_top_10_itmes(start_time, end_time, user_subscription_id)
+        order_analysis = SalesReport2.get_order_analysis(start_time, end_time, user_subscription_id)
+        report = SalesReport2.merge_data(basic_info, top_10_itmes, order_analysis)
         return Response(report, status=status.HTTP_200_OK)
