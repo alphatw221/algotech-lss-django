@@ -75,7 +75,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         lib.helper.order_helper.OrderHelper.sold_campaign_product(order.id)
         content = lib.helper.order_helper.OrderHelper.get_confirmation_email_content(order)
-        jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)     #queue this to redis if needed
+        jobs.send_email_job.send_email_job(f'Thanks for your order! Your order #{order.id} from {order.campaign.title} is confirmed!', order.shipping_email, content=content)     #queue this to redis if needed
 
         return Response(models.order.order.OrderSerializer(order).data, status=status.HTTP_200_OK)
 
@@ -137,7 +137,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         lib.helper.order_helper.OrderHelper.sold_campaign_product(order.id)
         content = lib.helper.order_helper.OrderHelper.get_confirmation_email_content(order)
-        jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)     #queue this to redis if needed
+        jobs.send_email_job.send_email_job(f'Thanks for your order! Your order #{order.id} from {order.campaign.title} is confirmed!', order.shipping_email, content=content)     #queue this to redis if needed
 
         return Response(models.order.order.OrderSerializer(order).data, status=status.HTTP_200_OK)
 
@@ -225,7 +225,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         
         
         content = lib.i18n.email.delivery_comfirm_mail.i18n_get_mail_content(order,api_user) 
-        jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)
+        jobs.send_email_job.send_email_job(f'Your order #{order.id} from {order.campaign.title} has shipped!', order.shipping_email, content=content)
         order.status = models.order.order.STATUS_SHIPPING_OUT
         order.save()
 
