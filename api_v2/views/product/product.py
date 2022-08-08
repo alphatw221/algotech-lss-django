@@ -1,3 +1,4 @@
+from math import prod
 from unicodedata import category
 from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated
@@ -161,6 +162,25 @@ class ProductViewSet(viewsets.ModelViewSet):
         product.delete()
         return Response({"message": "delete success"}, status=status.HTTP_200_OK)
 
+    @action(detail=True, methods=['POST'], url_path=r'copy', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def copy_product(self, request, pk=None):
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        product = lib.util.verify.Verify.get_product_from_user_subscription(user_subscription, pk)
+
+        models.product.product.Product.objects.create(
+            user_subscription=user_subscription,
+            qty=product.qty,
+            name=product.name,
+            description=product.description,
+            price=product.price,
+            image=product.image,
+            status=product.status,
+            tag=product.tag            
+        )
+
+        return Response({"message": "copy success"}, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET'], url_path=r'categories', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler

@@ -43,6 +43,7 @@ from backend.api.twitch.post import api_twitch_get_access_token
 from backend.i18n.register_confirm_mail import i18n_get_register_confirm_mail_content, i18n_get_register_confirm_mail_subject, i18n_get_register_activate_mail_subject
 import service
 from api import models
+import lib
 class Command(BaseCommand):
     help = ''
 
@@ -51,7 +52,9 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # self.test_lucky_draw()
-        self.test_hitpay_verification()
+        # self.test_hitpay_verification()
+        text = lib.i18n.campaign_announcement.get_campaign_report_section_title('CONTACT_INFO')
+        print (text)
 
     def modify_database(self):
         from api.models.user.user_subscription import UserSubscription
