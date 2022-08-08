@@ -525,7 +525,6 @@ class DashboardViewSet(viewsets.ModelViewSet):
         api_user = Verify.get_seller_user(request)
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)
         user_subscription_id = user_subscription.id
-        user_subscription_id = 218
         start_time = SalesReport2.normalize_start_time(start_time)
         end_time = SalesReport2.normalize_end_time(end_time)
         basic_info = SalesReport2.get_basic_info(start_time, end_time, user_subscription_id)
