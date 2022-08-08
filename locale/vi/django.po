@@ -7,35 +7,35 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-08 06:45+0000\n"
+"POT-Creation-Date: 2022-08-03 15:27+0000\n"
 "PO-Revision-Date: 2021-12-13 15:51+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"Language: en\n"
+"Language: vi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: Poedit 3.0\n"
 
 #: backend/i18n/campaign_announcement.py:8 lib/i18n/campaign_announcement.py:7
 #, python-brace-format
 msgid "PRODUCT_CLOSED{order_code}"
-msgstr "Order code: {order_code} has closed."
+msgstr "Mã đơn hàng: {order_code} đã đóng cửa."
 
 #: backend/i18n/campaign_announcement.py:15
 #: lib/i18n/campaign_announcement.py:14
 #, python-brace-format
 msgid "PRODUCT_SOLD_OUT{order_code}"
-msgstr "Order code: {order_code} is sold out."
+msgstr "Mã đơn hàng: {order_code} đã bán hết."
 
 #: backend/i18n/campaign_announcement.py:22
 #: lib/i18n/campaign_announcement.py:21
 #, python-brace-format
 msgid "LUCKY_DRAW_WINNER{customer_name}{product_name}"
 msgstr ""
-"Congratulations to {customer_name} on winning lucky "
-"draw! Prize: {product_name}. Please check your shopping cart."
+"Chúc mừng {customer_name} đã giành được "
+"Quà tặng minigame! Giải thưởng: {product_name}. Vui lòng kiểm tra giỏ hàng của bạn."
 
 #: backend/i18n/cart_product_request.py:9 lib/i18n/cart_product_request.py:10
 msgid "MESSAGE_PREFIX"
@@ -45,7 +45,7 @@ msgstr "Live Show Seller: "
 #, python-brace-format
 msgid "SHOPPING_CART_INFO{link}"
 msgstr ""
-"please press/hold the Shopping Cart Link below and open on Safari or Chrome: "
+"Vui lòng nhấn / giữ giỏ hàng liên kết below and open on Safari or Chrome: "
 "{link}"
 
 #: backend/i18n/cart_product_request.py:23 lib/i18n/cart_product_request.py:22
@@ -121,7 +121,7 @@ msgstr "has an operation error"
 #: lib/i18n/cart_product_request.py:91
 #, python-brace-format
 msgid "ITEM_INFO{order_code}{qty}{result}"
-msgstr "\"{order_code}\" Qty: {qty} {result}. "
+msgstr "\"{order_code}\" Số lượng: {qty} {result}. "
 
 #: backend/i18n/comment_command.py:24 backend/i18n/comment_command.py:27
 #: backend/i18n/comment_command.py:29 lib/i18n/comment_command.py:25
@@ -140,7 +140,7 @@ msgstr "Your shopping cart:"
 #, python-brace-format
 msgid "TOTAL{dollar_sign}{total}\n"
 msgstr ""
-"Total: {dollar_sign}{total}\n"
+"Tổng thanh toán: {dollar_sign}{total}\n"
 "\n"
 
 #: backend/i18n/comment_command.py:41 lib/i18n/comment_command.py:40
@@ -160,7 +160,7 @@ msgstr "Your latest order:"
 #: backend/i18n/comment_command.py:90
 #, python-brace-format
 msgid "DELIVERY{dollar_sign}{delivery}\n"
-msgstr "Delivery: {dollar_sign}{delivery}\n"
+msgstr "Vận chuyển: {dollar_sign}{delivery}\n"
 
 #: backend/i18n/comment_command.py:93
 #, python-brace-format
@@ -176,12 +176,12 @@ msgstr "Find out details: {link}\n"
 #: backend/i18n/comment_command.py:117 lib/i18n/comment_command.py:117
 #, python-brace-format
 msgid "ITEM_INFO{name}{qty}{dollar_sign}{total}\n"
-msgstr "{name} Qty:{qty} {dollar_sign}{total}\n"
+msgstr "{name} Số lượng:{qty} {dollar_sign}{total}\n"
 
 #: backend/i18n/email/subject.py:8 templates/email_reset_password_link.html:7
 #: templates/reset_password_success_email.html:7
 msgid "EMAIL/PASSWORD_RESET_LINK/SUBJECT"
-msgstr "Live Show Seller Password Reset"
+msgstr "Live Show Seller Xin chào"
 
 #: backend/i18n/email/subject.py:12
 msgid "EMAIL/PASSWORD_RESET_SUCCESS/SUBJECT"
@@ -201,11 +201,11 @@ msgstr "Name of Bank/Payment Mode"
 
 #: business_policy/payment.py:22
 msgid "PAYMENT/DIRECT_PAYMENT/ACCOUNT_NAME"
-msgstr "Account Name"
+msgstr "Tên tài khoản"
 
 #: business_policy/payment.py:23
 msgid "PAYMENT/DIRECT_PAYMENT/ACCOUNT_NUMBER"
-msgstr "Account Number"
+msgstr "Số tài khoản"
 
 #: business_policy/payment.py:24
 msgid "PAYMENT/DIRECT_PAYMENT/OTHER_NOTE"
@@ -213,7 +213,7 @@ msgstr "Other Note (Press enter to add new line)"
 
 #: business_policy/payment.py:25
 msgid "PAYMENT/DIRECT_PAYMENT/REQUIRE_CUSTOMER_PAYMENT_RECORD"
-msgstr "Require Customer's Payment Record"
+msgstr "Yêu cầu người mua đính kèm hóa đơn thanh toán"
 
 #: business_policy/payment.py:38
 msgid "PAYMENT/HIT_PAY/PAYMENT_BUTTON_TITLE"
@@ -222,7 +222,7 @@ msgstr "Payment Button Title"
 #: business_policy/payment.py:39 business_policy/payment.py:54
 #: business_policy/payment.py:68 business_policy/payment.py:106
 msgid "PAYMENT/CURRENCY_CODE"
-msgstr "Currency Code"
+msgstr "Mã tiền tệ"
 
 #: business_policy/payment.py:40
 msgid "PAYMENT/HIT_PAY/API_KEY"
@@ -238,115 +238,23 @@ msgstr "Client ID"
 
 #: business_policy/payment.py:55
 msgid "PAYMENT/PAYPAL/SECRET"
-msgstr "Secret"
+msgstr "Mã bảo mật"
 
 #: business_policy/payment.py:67 business_policy/payment.py:92
 msgid "PAYMENT/SECRET_KEY"
-msgstr "Secret Key"
+msgstr "Mã bảo mật"
 
 #: business_policy/payment.py:104
 msgid "PAYMENT/FIRST_DATA/STORE_ID"
-msgstr "Store ID"
+msgstr "Mã cửa hàng"
 
 #: business_policy/payment.py:105
 msgid "PAYMENT/FIRST_DATA/SHARE_SECRET"
-msgstr "Share Secret"
+msgstr "Chìa khóa bí mật"
 
 #: business_policy/payment.py:107
 msgid "PAYMENT/FIRST_DATA/TIME_ZONE"
-msgstr "Time Zone"
-
-#: lib/helper/xlsx_helper.py:103
-msgid "REPORT/COLUMN_TITLE/ID"
-msgstr "ID"
-
-#: lib/helper/xlsx_helper.py:104
-msgid "REPORT/COLUMN_TITLE/ORDER_DATE"
-msgstr "Order Date"
-
-#: lib/helper/xlsx_helper.py:105
-msgid "REPORT/COLUMN_TITLE/PLATFORM"
-msgstr "Platform"
-
-#: lib/helper/xlsx_helper.py:106
-msgid "REPORT/COLUMN_TITLE/CUSTOMER_NAME"
-msgstr "Customer_Name"
-
-#: lib/helper/xlsx_helper.py:107
-msgid "REPORT/COLUMN_TITLE/SHIPPING_PHONE"
-msgstr "Shipping_Phone"
-
-#: lib/helper/xlsx_helper.py:108
-msgid "REPORT/COLUMN_TITLE/EMAIL"
-msgstr "E-mail"
-
-#: lib/helper/xlsx_helper.py:109
-msgid "REPORT/COLUMN_TITLE/SHIPPING_METHOD"
-msgstr "Shipping_Method"
-
-#: lib/helper/xlsx_helper.py:110
-msgid "REPORT/COLUMN_TITLE/SHIPPING_OPTION"
-msgstr "Shipping_Option"
-
-#: lib/helper/xlsx_helper.py:111
-msgid "REPORT/COLUMN_TITLE/SHIPPING_ADDRESS_1"
-msgstr "Shipping_Address_1"
-
-#: lib/helper/xlsx_helper.py:112
-msgid "REPORT/COLUMN_TITLE/LOCATION"
-msgstr "Location"
-
-#: lib/helper/xlsx_helper.py:113
-msgid "REPORT/COLUMN_TITLE/REGION"
-msgstr "Region"
-
-#: lib/helper/xlsx_helper.py:114
-msgid "REPORT/COLUMN_TITLE/POSTCODE"
-msgstr "Postcode"
-
-#: lib/helper/xlsx_helper.py:115
-msgid "REPORT/COLUMN_TITLE/PICK_UP_STORE"
-msgstr "Pick_Up_Store"
-
-#: lib/helper/xlsx_helper.py:116
-msgid "REPORT/COLUMN_TITLE/PICK_UP_ADDRESS"
-msgstr "Pick_Up_Addrwess"
-
-#: lib/helper/xlsx_helper.py:117
-msgid "REPORT/COLUMN_TITLE/REMARK"
-msgstr "Remark"
-
-#: lib/helper/xlsx_helper.py:118
-msgid "REPORT/COLUMN_TITLE/PAYMENT_METHOD"
-msgstr "Payment_Method"
-
-#: lib/helper/xlsx_helper.py:119
-msgid "REPORT/COLUMN_TITLE/PAYMENT_STATUS"
-msgstr "Payment_Status"
-
-#: lib/helper/xlsx_helper.py:120
-msgid "REPORT/COLUMN_TITLE/PAYMENT_RECORD"
-msgstr "Payment_Record"
-
-#: lib/helper/xlsx_helper.py:121
-msgid "REPORT/COLUMN_TITLE/TOTAL"
-msgstr "Total"
-
-#: lib/helper/xlsx_helper.py:155
-msgid "REPORT/SECTION_TITLE/CONTACT_INFO"
-msgstr "Contact Information"
-
-#: lib/helper/xlsx_helper.py:156
-msgid "REPORT/SECTION_TITLE/DELIVERY_INFO"
-msgstr "Delivery Information"
-
-#: lib/helper/xlsx_helper.py:157
-msgid "REPORT/SECTION_TITLE/PAYMENT_INFO"
-msgstr "Payment Information"
-
-#: lib/helper/xlsx_helper.py:158
-msgid "REPORT/SECTION_TITLE/ORDER_INFO"
-msgstr "Order Information"
+msgstr "Múi giờ"
 
 #: lib/i18n/campaign_announcement.py:29
 #, python-brace-format
@@ -355,22 +263,10 @@ msgstr ""
 "Congratulations to {customer_name} on winning quiz "
 "game! Prize: {product_name}. Please check your shopping cart."
 
-#: lib/i18n/campaign_announcement.py:35
-#, fuzzy, python-brace-format
-#| msgid "REPORT/SECTION_TITLE/TITLE"
-msgid "REPORT/SECTION_TITLE/{section_title}"
-msgstr "Order Report"
-
-#: lib/i18n/campaign_announcement.py:40
-#, fuzzy, python-brace-format
-#| msgid "REPORT/COLUMN_TITLE/ID"
-msgid "REPORT/COLUMN_TITLE/{column_title}"
-msgstr "ID"
-
 #: templates/email_reset_password_link.html:12
 #: templates/reset_password_success_email.html:12
 msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT1"
-msgstr "Hello "
+msgstr "Xin chào"
 
 #: templates/email_reset_password_link.html:15
 msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT2"
@@ -380,7 +276,7 @@ msgstr ""
 
 #: templates/email_reset_password_link.html:18
 msgid "EMAIL/PASSWORD_RESET_LINK/BUTTON"
-msgstr "Reset Password"
+msgstr "Thay đổi mật khẩu"
 
 #: templates/email_reset_password_link.html:21
 msgid "EMAIL/IF_YOU_CAN_NOT_CLICK"
@@ -467,7 +363,7 @@ msgstr ""
 
 #: templates/register_confirmation.html:31
 msgid "LOGIN_1_WELCOME"
-msgstr "Please log in"
+msgstr "Vui lòng hãy đăng nhập"
 
 #: templates/register_confirmation.html:31
 msgid "LOGIN_3_WELCOME"

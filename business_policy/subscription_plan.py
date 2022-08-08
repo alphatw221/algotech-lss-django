@@ -29,9 +29,9 @@ class SubscriptionPlan:
         cc = ['lss@algotech.app']
         plans = {
             "trial" :{"text": "Free Trial", "price":{"month":0}},
-            "lite" : {"text": "Lite", "price":{"quarter":30,"year":108}},
-            "standard" : {"text": "Standard", "price":{"quarter":90,"year":324}},
-            "premium" : {"text": "Premium", "price":{"quarter":180,"year":648}},
+            "lite" : {"value":"lite", "text": "Lite", "price":{"month":10,"quarter":30,"year":108}},
+            "standard" : {"value":"standard","text": "Standard", "price":{"month":30,"quarter":90,"year":324}},
+            "premium" : {"value":"premium","text": "Premium", "price":{"month":15,"quarter":45,"year":162}},
         }
         
     class PH(CountryPlan):
@@ -42,9 +42,9 @@ class SubscriptionPlan:
         cc = ['lss@algotech.app', 'hello@liveshowseller.ph']
         plans = {
             "trial" :{"text": "Free Trial", "price":{"month":0}},
-             "lite" : {"text": "Lite", "price":{"quarter":30,"year":108}},
-            "standard" : {"text": "Standard", "price":{"quarter":54,"year":194}},
-            "premium" : {"text": "Premium", "price":{"quarter":120,"year":432}},
+            "lite" : {"value":"lite","text": "Lite", "price":{"month":10,"quarter":30,"year":108}},
+            "standard" : {"value":"standard","text": "Standard", "price":{"month":18,"quarter":54,"year":194}},
+            "premium" : {"value":"premium","text": "Premium", "price":{"month":10,"quarter":30,"year":108}},
         }
     
     class TH(CountryPlan):
@@ -55,9 +55,9 @@ class SubscriptionPlan:
         cc = ['lss@algotech.app']
         plans = {
             "trial" :{"text": "Free Trial", "price":{"month":0}},
-            "lite" : {"text": "Lite", "price":{"quarter":30,"year":108}},
-            "standard" : {"text": "Standard", "price":{"quarter":75,"year":270}},
-            "premium" : {"text": "Premium", "price":{"quarter":126,"year":454}},
+            "lite" : {"value":"lite","text": "Lite", "price":{"month":10,"quarter":30,"year":108}},
+            "standard" : {"value":"standard","text": "Standard", "price":{"month":30,"quarter":90,"year":324}},
+            "premium" : {"value":"premium","text": "Premium", "price":{"month":15,"quarter":45,"year":162}},
         }
 
     class IN(CountryPlan):
@@ -68,9 +68,9 @@ class SubscriptionPlan:
         cc = ['lss@algotech.app']
         plans = {
             "trial" :{"text": "Free Trial", "price":{"month":0}},
-            "lite" : {"text": "Lite", "price":{"quarter":30,"year":108}},
-            "standard" : {"text": "Standard", "price":{"quarter":75,"year":270}},
-            "premium" : {"text": "Premium", "price":{"quarter":126,"year":454}},
+            "lite" : {"value":"lite","text": "Lite", "price":{"month":10,"quarter":30,"year":108}},
+            "standard" : {"value":"standard","text": "Standard", "price":{"month":30,"quarter":90,"year":324}},
+            "premium" : {"value":"premium","text": "Premium", "price":{"month":15,"quarter":45,"year":162}},
         }
 
         
@@ -83,9 +83,9 @@ class SubscriptionPlan:
         cc = ['lss@algotech.app', 'contact@liveshowseller.id']
         plans = {
             "trial" :{"text": "Free Trial", "price":{"month":0}},
-            "lite" : {"text": "Lite", "price":{"quarter":30,"year":108}},
-            "standard" : {"text": "Standard", "price":{"quarter":90,"year":324}},
-            "premium" : {"text": "Premium", "price":{"quarter":180,"year":648}},
+            "lite" : {"value":"lite","text": "Lite", "price":{"month":10,"quarter":30,"year":108}},
+            "standard" : {"value":"standard","text": "Standard", "price":{"month":25,"quarter":75,"year":270}},
+            "premium" : {"value":"premium","text": "Premium", "price":{"month":10,"quarter":30,"year":108}},
         }
     
     class MY(CountryPlan):
@@ -96,22 +96,22 @@ class SubscriptionPlan:
         cc = ['lss@algotech.app']
         plans = {
             "trial" :{"text": "Free Trial", "price":{"month":0}},
-            "lite" : {"text": "Lite", "price":{"quarter":30,"year":108}},
-            "standard" : {"text": "Standard", "price":{"quarter":90,"year":324}},
-            "premium" : {"text": "Premium", "price":{"quarter":180,"year":648}},
+            "lite" : {"value":"lite","text": "Lite", "price":{"month":10,"quarter":30,"year":108}},
+            "standard" : {"value":"standard","text": "Standard", "price":{"month":30,"quarter":90,"year":324}},
+            "premium" : {"value":"premium","text": "Premium", "price":{"month":15,"quarter":45,"year":162}},
         }
 
     class VN(CountryPlan):
         promo_code="ALGOTECH"
         promo_discount_rate=0.9
-        currency = "USD"
+        currency = "VND"
         language = "en"
         cc = ['lss@algotech.app']
         plans = {
             "trial" :{"text": "Free Trial", "price":{"month":0}},
-            "lite" : {"text": "Lite", "price":{"quarter":30,"year":108}},
-            "standard" : {"text": "Standard", "price":{"quarter":54,"year":194}},
-            "premium" : {"text": "Premium", "price":{"quarter":120,"year":432}},
+            "lite" : {"value":"lite","text": "Lite", "price":{"month":70000,"quarter":210000,"year":765000}},
+            "standard" : {"value":"standard","text": "Standard", "price":{"month":160000,"quarter":480000,"year":1728000}},
+            "premium" : {"value":"premium","text": "Premium", "price":{"month":100000,"quarter":300000,"year":1080000}},
         }
 
     class TW(CountryPlan):
@@ -122,9 +122,9 @@ class SubscriptionPlan:
         cc = ['lss@algotech.app']
         plans = {
             "trial" :{"text": "Free Trial", "price":{"month":0}},
-            "lite" : {"text": "Lite", "price":{"quarter":900,"year":3240}},
-            "standard" : {"text": "Standard", "price":{"quarter":2700,"year":9720}},
-            "premium" : {"text": "Premium", "price":{"quarter":5400,"year":19440}},
+            "lite" : {"value":"lite","text": "Lite", "price":{"month":300,"quarter":900,"year":3240}},
+            "standard" : {"value":"standard","text": "Standard", "price":{"month":900,"quarter":2700,"year":9720}},
+            "premium" : {"value":"premium","text": "Premium", "price":{"month":450,"quarter":1350,"year":4860}},
         }
    
 
@@ -136,9 +136,9 @@ class SubscriptionPlan:
         cc = ['lss@algotech.app']
         plans = {
             "trial" :{"text": "Free Trial", "price":{"month":0}},
-            "lite" : {"text": "Lite", "price":{"quarter":30,"year":108}},
-            "standard" : {"text": "Standard", "price":{"quarter":54,"year":194}},
-            "premium" : {"text": "Premium", "price":{"quarter":120,"year":432}},
+            "lite" : {"value":"lite","text": "Lite", "price":{"month":10,"quarter":30,"year":108}},
+            "standard" : {"value":"standard","text": "Standard", "price":{"month":30,"quarter":90,"year":324}},
+            "premium" : {"value":"premium","text": "Premium", "price":{"month":15,"quarter":45,"year":162}},
         }
 
     @classmethod
