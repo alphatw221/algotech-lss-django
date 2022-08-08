@@ -1,5 +1,5 @@
 from itertools import product
-from math import prod
+from math import prod,floor
 from backend.i18n._helper import lang_translate_default_en
 from django.conf import settings
 from django.utils.translation import ugettext as _
@@ -7,15 +7,20 @@ from django.utils.translation import ugettext as _
 
 @lang_translate_default_en
 def i18n_get_mail_content(order, user, lang=None):
+    price_unit={
+      "1":"",
+      "1000":"K",
+      "1000000":"M"
+    }
     date_time = order.created_at.strftime("%b %d %Y")
     shipping_date = order.updated_at.strftime("%b %d %Y")
     
-    mail_content = f'<body style="background: #eaeaea; font-family: \'Open Sans\', sans-serif;"><main style="margin: 5% 30% 1% 30%;">'
-    mail_content += f'<div style="background: #ffffff;"><div><div style=" padding: 13px 40px;"><div>\
+    mail_content = f'<body style="background: #eaeaea; font-family: \'Open Sans\', sans-serif;"><main style="margin: 5% 5% 1% 5%;">'
+    mail_content += f'<div style="background: #ffffff;"><div><div style=" sm:padding: 13px 15px; lg:padding: 13px 60px;"><div>\
                     <h1 data-key="1468266_heading" style="text-align:center; font-family: Georgia,serif,\'Playfair Display\'; font-size: 28px; line-height: 46px; font-weight: 700; color: #4b4b4b; text-transform: none; background-color: #ffffff; margin: 0;">Your Order Has Shipped</h1>'
     mail_content += f'<p data-key="1468270_order_number" style="text-align:center; color:#666363; font-weight: 500;">Order NO. #{order.id}</p></div>'
     
-    mail_content += f'<div style="margin-top: 1%; font-size: 0.9rem; line-height: 2; sm:padding: 13px 40px;">\
+    mail_content += f'<div style="margin-top: 1%; font-size: 0.9rem; line-height: 2; sm:padding: 13px 30px;">\
                     <p style="text-align: left; font-weight: 700; font-size: 1rem; line-height: 2;">Order Information</p>\
                         <div style="border-bottom: 3px solid #ffd000; width: 20%; margin-bottom: 3%;"></div>'
     
@@ -58,7 +63,9 @@ def i18n_get_mail_content(order, user, lang=None):
                           </td>'
         mail_content += f'<td width="1" style="white-space: nowrap; padding: 13px 0 13px 26px;" align="right" bgcolor="#ffffff" valign="top">\
                                 <p style="font-size: 16px; line-height: 26px; font-weight: 400; color: #666363; margin: 0;" align="right">\
-                                ${product["subtotal"]}\
+                                {order.campaign.currency}\
+                                {round(product["subtotal"],order.campaign.decimal_places) if order.campaign.decimal_places!="1" else floor(product["subtotal"])}\
+                                {price_unit[order.campaign.price_unit]}\
                                 </p></td></tr></tbody></table></tr>'
         mail_content += f'</tr>'
         
@@ -67,13 +74,22 @@ def i18n_get_mail_content(order, user, lang=None):
     mail_content += f'<table cellspacing="0" cellpadding="0" border="0" width="100%" style="min-width: 100%;" role="presentation">\
                         <tbody>\
                           <tr>\
-                            <td data-key="1468271_subtotal" style="padding-top:13px; color: #4b4b4b; font-weight: 600; width: 35%; text-align:left;" align="right" bgcolor="#ffffff" valign="top">Subtotal ${order.subtotal}</td>\
+                            <td data-key="1468271_subtotal" style="font-size: 15px; padding-top:13px; color: #4b4b4b; font-weight: 600; width: 35%; text-align:right;" align="right" bgcolor="#ffffff" valign="top">Subtotal\
+                              <span style="width:120px; display:inline-block;">{order.campaign.currency}\
+                              {round(order.subtotal,order.campaign.decimal_places) if order.campaign.decimal_places!="1" else floor(order.subtotal)}\
+                              {price_unit[order.campaign.price_unit]}</span></td>\
                           </tr>\
                           <tr>\
-                            <td style="color: #4b4b4b; font-weight: 600; width: 35%; text-align:left;" align="right" bgcolor="#ffffff" valign="top">Delivery Charge ${order.shipping_cost}</td>\
+                            <td style="font-size: 15px; color: #4b4b4b; font-weight: 600; width: 35%; text-align:right; padding-bottom: 13px;" align="right" bgcolor="#ffffff" valign="top">Delivery Charge\
+                              <span style="width:120px; display:inline-block;">{order.campaign.currency}\
+                              {round(order.shipping_cost,order.campaign.decimal_places) if order.campaign.decimal_places!="1" else floor(order.shipping_cost)}\
+                              {price_unit[order.campaign.price_unit]}</span></td>\
                           </tr>\
                           <tr>\
-                            <td data-key="1468271_total" style="font-size: 15px; line-height: 26px; font-weight: bold; color: #666363; width: 65%; padding: 4px 0;" align="left" bgcolor="#ffffff"  valign="top">Total ${order.total}</td>\
+                            <td data-key="1468271_total" style="font-size: 15px; line-height: 26px; font-weight: bold; text-align:right; color: #666363; width: 65%; padding: 4px 0; border-top: 1px solid #666363;" align="left" bgcolor="#ffffff"  valign="top">Total\
+                              <span style="width:120px; display:inline-block;">{order.campaign.currency}\
+                              {round(order.total,order.campaign.decimal_places) if order.campaign.decimal_places!="1" else floor(order.total)}\
+                              {price_unit[order.campaign.price_unit]}</span></td>\
                           </tr>\
                         </tbody>\
                       </table>'
