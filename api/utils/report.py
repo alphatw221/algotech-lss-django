@@ -582,6 +582,8 @@ class SalesReport2:
     @classmethod
     def get_basic_info(cls, start_time, end_time, user_subscription_id):
         json_data = SalesReport2.query_basic_info(start_time, end_time, user_subscription_id)
+        if len(basic_info) == 0:
+            return {}
         basic_info = SalesReport2.modify_basic_info(json_data)
         return basic_info
     

@@ -130,6 +130,7 @@ def create_payment_intent(api_key:str,  amount:float, currency:str, receipt_emai
         # Something else happened, completely unrelated to Stripe
         raise lib.error_handle.error.api_error.ApiCallerError('No related with this payment')
 
+
 def retrieve_payment_intent(api_key:str, payment_intent_id:str):
 
     try:
