@@ -7,11 +7,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-08 06:45+0000\n"
-"PO-Revision-Date: 2021-12-13 15:50+0800\n"
+"POT-Creation-Date: 2022-08-03 15:27+0000\n"
+"PO-Revision-Date: 2021-12-13 15:51+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"Language: zh_TW\n"
+"Language: vi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -21,477 +21,385 @@ msgstr ""
 #: backend/i18n/campaign_announcement.py:8 lib/i18n/campaign_announcement.py:7
 #, python-brace-format
 msgid "PRODUCT_CLOSED{order_code}"
-msgstr "商品 {order_code} 已停止接單。"
+msgstr "Mã đơn hàng: {order_code} đã đóng cửa."
 
 #: backend/i18n/campaign_announcement.py:15
 #: lib/i18n/campaign_announcement.py:14
 #, python-brace-format
 msgid "PRODUCT_SOLD_OUT{order_code}"
-msgstr "商品 {order_code} 已售完。"
+msgstr "Mã đơn hàng: {order_code} đã bán hết."
 
 #: backend/i18n/campaign_announcement.py:22
 #: lib/i18n/campaign_announcement.py:21
 #, python-brace-format
 msgid "LUCKY_DRAW_WINNER{customer_name}{product_name}"
 msgstr ""
-"恭喜 {customer_name} 中獎，獲得 {product_name}！請至購物車確認您的獎品。"
+"Chúc mừng {customer_name} đã giành được "
+"Quà tặng minigame! Giải thưởng: {product_name}. Vui lòng kiểm tra giỏ hàng của bạn."
 
 #: backend/i18n/cart_product_request.py:9 lib/i18n/cart_product_request.py:10
 msgid "MESSAGE_PREFIX"
-msgstr "Live Show Seller："
+msgstr "Live Show Seller: "
 
 #: backend/i18n/cart_product_request.py:21 lib/i18n/cart_product_request.py:20
 #, python-brace-format
 msgid "SHOPPING_CART_INFO{link}"
-msgstr "長按以下連結並使用Chrome/Safari開啟購物車：{link}"
+msgstr ""
+"Vui lòng nhấn / giữ giỏ hàng liên kết below and open on Safari or Chrome: "
+"{link}"
 
 #: backend/i18n/cart_product_request.py:23 lib/i18n/cart_product_request.py:22
 msgid "MORE_INFO_IN_PM_NOTICE"
 msgstr ""
-"購物車連結已傳送到您的 FB Messenger，若沒有收到訊息，請聯絡粉絲專頁管理員/小"
-"編。"
+"Shopping cart link is sent via FB Messenger, please contact page admin if "
+"not received any notification."
 
 #: backend/i18n/cart_product_request.py:30
 #: backend/i18n/cart_product_request.py:66 lib/i18n/cart_product_request.py:29
 #: lib/i18n/cart_product_request.py:65
 #, python-brace-format
 msgid "INVALID_EXCEED_MAX_ORDER_AMOUNT{order_code}{max_order_amount}"
-msgstr "{order_code} 無法新增，此商品單次限購數量為 {max_order_amount} 件。"
+msgstr ""
+"\"{order_code}\" has a maximum ordering quantity of {max_order_amount}. "
 
 #: backend/i18n/cart_product_request.py:36
 #: backend/i18n/cart_product_request.py:73 lib/i18n/cart_product_request.py:35
 #: lib/i18n/cart_product_request.py:72
 msgid "ADDED"
-msgstr "下單成功！"
+msgstr "is added"
 
 #: backend/i18n/cart_product_request.py:38
 #: backend/i18n/cart_product_request.py:75 lib/i18n/cart_product_request.py:37
 #: lib/i18n/cart_product_request.py:74
 msgid "UPDATED"
-msgstr "更新成功！"
+msgstr "is updated"
 
 #: backend/i18n/cart_product_request.py:40
 #: backend/i18n/cart_product_request.py:77 lib/i18n/cart_product_request.py:39
 #: lib/i18n/cart_product_request.py:76
 msgid "DELETED"
-msgstr "商品已從購物車刪除，"
+msgstr "is removed"
 
 #: backend/i18n/cart_product_request.py:42
 #: backend/i18n/cart_product_request.py:79 lib/i18n/cart_product_request.py:41
 #: lib/i18n/cart_product_request.py:78
 msgid "INSUFFICIENT_INV"
-msgstr "商品已售完，"
+msgstr "is sold out"
 
 #: backend/i18n/cart_product_request.py:44
 #: backend/i18n/cart_product_request.py:81 lib/i18n/cart_product_request.py:43
 #: lib/i18n/cart_product_request.py:80
 msgid "INVALID_PRODUCT_NOT_ACTIVATED"
-msgstr "商品目前無法下單，"
+msgstr "is unavailable"
 
 #: backend/i18n/cart_product_request.py:46
 #: backend/i18n/cart_product_request.py:83 lib/i18n/cart_product_request.py:45
 #: lib/i18n/cart_product_request.py:82
 msgid "INVALID_REMOVE_NOT_ALLOWED"
-msgstr "無法刪除，"
+msgstr "is not allowed to remove"
 
 #: backend/i18n/cart_product_request.py:48
 #: backend/i18n/cart_product_request.py:85 lib/i18n/cart_product_request.py:47
 #: lib/i18n/cart_product_request.py:84
 msgid "INVALID_EDIT_NOT_ALLOWED"
-msgstr "無法修改，"
+msgstr "is not allowed to edit"
 
 #: backend/i18n/cart_product_request.py:50
 #: backend/i18n/cart_product_request.py:87 lib/i18n/cart_product_request.py:49
 #: lib/i18n/cart_product_request.py:86
 msgid "INVALID_ADD_ZERO_QTY"
-msgstr "無法刪除，"
+msgstr "can not be added with 0 qty"
 
 #: backend/i18n/cart_product_request.py:52
 #: backend/i18n/cart_product_request.py:89 lib/i18n/cart_product_request.py:51
 #: lib/i18n/cart_product_request.py:88
 msgid "N/A"
-msgstr "操作錯誤，"
+msgstr "has an operation error"
 
 #: backend/i18n/cart_product_request.py:54
 #: backend/i18n/cart_product_request.py:92 lib/i18n/cart_product_request.py:53
 #: lib/i18n/cart_product_request.py:91
 #, python-brace-format
 msgid "ITEM_INFO{order_code}{qty}{result}"
-msgstr "{result}商品 {order_code} <{qty} 件>。"
+msgstr "\"{order_code}\" Số lượng: {qty} {result}. "
 
 #: backend/i18n/comment_command.py:24 backend/i18n/comment_command.py:27
 #: backend/i18n/comment_command.py:29 lib/i18n/comment_command.py:25
 #: lib/i18n/comment_command.py:28 lib/i18n/comment_command.py:30
 msgid "COMMENT_COMMAND_CART_NO_CART_PRODUCT"
-msgstr "您的購物車內沒有商品。"
+msgstr "There's no products in cart."
 
 #: backend/i18n/comment_command.py:36 lib/i18n/comment_command.py:35
 #: templates/register_confirmation.html:11
 #: templates/register_confirmation.html:16
 msgid "COMMENT_COMMAND_CART_MESSAGE_HEADER"
-msgstr "您的購物車："
+msgstr "Your shopping cart:"
 
 #: backend/i18n/comment_command.py:39 backend/i18n/comment_command.py:96
 #: lib/i18n/comment_command.py:38
 #, python-brace-format
 msgid "TOTAL{dollar_sign}{total}\n"
 msgstr ""
-"訂單金額：{dollar_sign}{total}\n"
+"Tổng thanh toán: {dollar_sign}{total}\n"
 "\n"
 
 #: backend/i18n/comment_command.py:41 lib/i18n/comment_command.py:40
 #, python-brace-format
 msgid "DETAIL{link}\n"
-msgstr "查看購物車：{link}\n"
+msgstr "Find out details: {link}\n"
 
 #: backend/i18n/comment_command.py:76 backend/i18n/comment_command.py:79
 #: backend/i18n/comment_command.py:84
 msgid "COMMENT_COMMAND_ORDER_NO_ORDER"
-msgstr "您最近沒有訂單。"
+msgstr "You have no recent orders."
 
 #: backend/i18n/comment_command.py:86
 msgid "COMMENT_COMMAND_ORDER_MESSAGE_HEADER"
-msgstr "您的最新訂單："
+msgstr "Your latest order:"
 
 #: backend/i18n/comment_command.py:90
 #, python-brace-format
 msgid "DELIVERY{dollar_sign}{delivery}\n"
-msgstr "運費：{dollar_sign}{delivery}\n"
+msgstr "Vận chuyển: {dollar_sign}{delivery}\n"
 
 #: backend/i18n/comment_command.py:93
 #, python-brace-format
 msgid "OPTION{dollar_sign}{option}\n"
-msgstr "額外運費：{dollar_sign}{option}\n"
+msgstr "Option: {dollar_sign}{option}\n"
 
 #: backend/i18n/comment_command.py:99
 #, fuzzy, python-brace-format
 #| msgid "DETAIL{link}\n"
 msgid "DETAIL{link}"
-msgstr "查看購物車：{link}\n"
+msgstr "Find out details: {link}\n"
 
 #: backend/i18n/comment_command.py:117 lib/i18n/comment_command.py:117
 #, python-brace-format
 msgid "ITEM_INFO{name}{qty}{dollar_sign}{total}\n"
-msgstr "{name} 數量：{qty} {dollar_sign}{total}\n"
+msgstr "{name} Số lượng:{qty} {dollar_sign}{total}\n"
 
 #: backend/i18n/email/subject.py:8 templates/email_reset_password_link.html:7
 #: templates/reset_password_success_email.html:7
 msgid "EMAIL/PASSWORD_RESET_LINK/SUBJECT"
-msgstr "Live Show Seller 重設密碼通知"
+msgstr "Live Show Seller Xin chào"
 
 #: backend/i18n/email/subject.py:12
 msgid "EMAIL/PASSWORD_RESET_SUCCESS/SUBJECT"
-msgstr "Live Show Seller 修改密碼成功通知"
+msgstr "Your Live Show Seller password has been successfully changed"
 
 #: backend/i18n/register_confirm_mail.py:17 lib/i18n/email/password_reset.py:5
 msgid "MAIL_SUBJECT_WELCOME"
-msgstr ""
+msgstr "Welcome to Live Show Seller"
 
 #: backend/i18n/register_confirm_mail.py:22
 msgid "MAIL_SUBJECT_ACTIVATION"
-msgstr ""
+msgstr "Activated account details at Live Show Seller."
 
 #: business_policy/payment.py:21
 msgid "PAYMENT/DIRECT_PAYMENT/NAME_OF_BANK_OR_PAYMENT_MODE"
-msgstr "銀行名稱 / 付款方式"
+msgstr "Name of Bank/Payment Mode"
 
 #: business_policy/payment.py:22
 msgid "PAYMENT/DIRECT_PAYMENT/ACCOUNT_NAME"
-msgstr "帳戶名稱"
+msgstr "Tên tài khoản"
 
 #: business_policy/payment.py:23
 msgid "PAYMENT/DIRECT_PAYMENT/ACCOUNT_NUMBER"
-msgstr "帳號"
+msgstr "Số tài khoản"
 
 #: business_policy/payment.py:24
 msgid "PAYMENT/DIRECT_PAYMENT/OTHER_NOTE"
-msgstr "其他備註 (按enter增加新的欄位)"
+msgstr "Other Note (Press enter to add new line)"
 
 #: business_policy/payment.py:25
 msgid "PAYMENT/DIRECT_PAYMENT/REQUIRE_CUSTOMER_PAYMENT_RECORD"
-msgstr "要求客戶附上付款記錄"
+msgstr "Yêu cầu người mua đính kèm hóa đơn thanh toán"
 
 #: business_policy/payment.py:38
 msgid "PAYMENT/HIT_PAY/PAYMENT_BUTTON_TITLE"
-msgstr "付款按鈕名稱"
+msgstr "Payment Button Title"
 
 #: business_policy/payment.py:39 business_policy/payment.py:54
 #: business_policy/payment.py:68 business_policy/payment.py:106
 msgid "PAYMENT/CURRENCY_CODE"
-msgstr "貨幣代碼"
+msgstr "Mã tiền tệ"
 
 #: business_policy/payment.py:40
 msgid "PAYMENT/HIT_PAY/API_KEY"
-msgstr "API 金鑰"
+msgstr "API Key"
 
 #: business_policy/payment.py:41
 msgid "PAYMENT/HIT_PAY/SALT"
-msgstr "密碼"
+msgstr "Salt"
 
 #: business_policy/payment.py:53
 msgid "PAYMENT/PAYPAL/CLIENT_ID"
-msgstr "客戶識別碼"
+msgstr "Client ID"
 
 #: business_policy/payment.py:55
 msgid "PAYMENT/PAYPAL/SECRET"
-msgstr "密碼"
+msgstr "Mã bảo mật"
 
 #: business_policy/payment.py:67 business_policy/payment.py:92
 msgid "PAYMENT/SECRET_KEY"
-msgstr "密鑰"
+msgstr "Mã bảo mật"
 
 #: business_policy/payment.py:104
 msgid "PAYMENT/FIRST_DATA/STORE_ID"
-msgstr "商店識別碼"
+msgstr "Mã cửa hàng"
 
 #: business_policy/payment.py:105
 msgid "PAYMENT/FIRST_DATA/SHARE_SECRET"
-msgstr "共享密鑰"
+msgstr "Chìa khóa bí mật"
 
 #: business_policy/payment.py:107
 msgid "PAYMENT/FIRST_DATA/TIME_ZONE"
-msgstr "時區"
-
-#: lib/helper/xlsx_helper.py:103
-msgid "REPORT/COLUMN_TITLE/ID"
-msgstr "編號"
-
-#: lib/helper/xlsx_helper.py:104
-msgid "REPORT/COLUMN_TITLE/ORDER_DATE"
-msgstr "訂單日期"
-
-#: lib/helper/xlsx_helper.py:105
-msgid "REPORT/COLUMN_TITLE/PLATFORM"
-msgstr "使用平台"
-
-#: lib/helper/xlsx_helper.py:106
-msgid "REPORT/COLUMN_TITLE/CUSTOMER_NAME"
-msgstr "客戶名稱"
-
-#: lib/helper/xlsx_helper.py:107
-msgid "REPORT/COLUMN_TITLE/SHIPPING_PHONE"
-msgstr "客戶電話"
-
-#: lib/helper/xlsx_helper.py:108
-msgid "REPORT/COLUMN_TITLE/EMAIL"
-msgstr "E-mail"
-
-#: lib/helper/xlsx_helper.py:109
-msgid "REPORT/COLUMN_TITLE/SHIPPING_METHOD"
-msgstr "運送方式"
-
-#: lib/helper/xlsx_helper.py:110
-msgid "REPORT/COLUMN_TITLE/SHIPPING_OPTION"
-msgstr "運送選項"
-
-#: lib/helper/xlsx_helper.py:111
-msgid "REPORT/COLUMN_TITLE/SHIPPING_ADDRESS_1"
-msgstr "收件住址"
-
-#: lib/helper/xlsx_helper.py:112
-msgid "REPORT/COLUMN_TITLE/LOCATION"
-msgstr "地點"
-
-#: lib/helper/xlsx_helper.py:113
-msgid "REPORT/COLUMN_TITLE/REGION"
-msgstr "區域"
-
-#: lib/helper/xlsx_helper.py:114
-msgid "REPORT/COLUMN_TITLE/POSTCODE"
-msgstr "郵遞區號"
-
-#: lib/helper/xlsx_helper.py:115
-msgid "REPORT/COLUMN_TITLE/PICK_UP_STORE"
-msgstr "自取店家"
-
-#: lib/helper/xlsx_helper.py:116
-msgid "REPORT/COLUMN_TITLE/PICK_UP_ADDRESS"
-msgstr "自取地址"
-
-#: lib/helper/xlsx_helper.py:117
-msgid "REPORT/COLUMN_TITLE/REMARK"
-msgstr "註記"
-
-#: lib/helper/xlsx_helper.py:118
-msgid "REPORT/COLUMN_TITLE/PAYMENT_METHOD"
-msgstr "付款方式"
-
-#: lib/helper/xlsx_helper.py:119
-msgid "REPORT/COLUMN_TITLE/PAYMENT_STATUS"
-msgstr "付款狀態"
-
-#: lib/helper/xlsx_helper.py:120
-msgid "REPORT/COLUMN_TITLE/PAYMENT_RECORD"
-msgstr "付款證明"
-
-#: lib/helper/xlsx_helper.py:121
-msgid "REPORT/COLUMN_TITLE/TOTAL"
-msgstr "總金額"
-
-#: lib/helper/xlsx_helper.py:155
-msgid "REPORT/SECTION_TITLE/CONTACT_INFO"
-msgstr "聯絡資訊"
-
-#: lib/helper/xlsx_helper.py:156
-msgid "REPORT/SECTION_TITLE/DELIVERY_INFO"
-msgstr "出貨資訊"
-
-#: lib/helper/xlsx_helper.py:157
-msgid "REPORT/SECTION_TITLE/PAYMENT_INFO"
-msgstr "付款資訊"
-
-#: lib/helper/xlsx_helper.py:158
-msgid "REPORT/SECTION_TITLE/ORDER_INFO"
-msgstr "訂單資訊"
+msgstr "Múi giờ"
 
 #: lib/i18n/campaign_announcement.py:29
 #, python-brace-format
 msgid "QUIZ_GAME_WINNER{customer_name}{product_name}"
 msgstr ""
-"恭喜 {customer_name} 得獎，獲得 {product_name}！請至購物車確認您的獎品。"
-
-#: lib/i18n/campaign_announcement.py:35
-#, fuzzy, python-brace-format
-#| msgid "REPORT/SECTION_TITLE/TITLE"
-msgid "REPORT/SECTION_TITLE/{section_title}"
-msgstr "訂單報表"
-
-#: lib/i18n/campaign_announcement.py:40
-#, fuzzy, python-brace-format
-#| msgid "REPORT/COLUMN_TITLE/ID"
-msgid "REPORT/COLUMN_TITLE/{column_title}"
-msgstr "編號"
+"Congratulations to {customer_name} on winning quiz "
+"game! Prize: {product_name}. Please check your shopping cart."
 
 #: templates/email_reset_password_link.html:12
 #: templates/reset_password_success_email.html:12
 msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT1"
-msgstr "您好 "
+msgstr "Xin chào"
 
 #: templates/email_reset_password_link.html:15
 msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT2"
 msgstr ""
-"我們收到重設Live Show Seller 密碼的要求。請點擊下方連結, 即可重新設定。"
+"We received a request to reset your Live Show Seller password. Click the "
+"link below to reset your password:"
 
 #: templates/email_reset_password_link.html:18
 msgid "EMAIL/PASSWORD_RESET_LINK/BUTTON"
-msgstr "重設密碼"
+msgstr "Thay đổi mật khẩu"
 
 #: templates/email_reset_password_link.html:21
 msgid "EMAIL/IF_YOU_CAN_NOT_CLICK"
-msgstr "若您無法重設密碼，請在您的瀏覽器輸入此網址:"
+msgstr ""
+"If you are having trouble resetting your password, please enter the URL in "
+"your browser."
 
 #: templates/email_reset_password_link.html:23
 msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT3"
 msgstr ""
-"若您忽略此封信件, 原本的密碼不會有所變更。若您並沒有要求重設密碼, 請與我們聯"
-"繫。"
+"If you ignore this message, your password will not be changed. If you didn’t "
+"request a password reset, let us know. "
 
 #: templates/email_reset_password_link.html:25
 #: templates/reset_password_success_email.html:17
 msgid "CONTACT_INFO/EMAIL"
-msgstr "電子信箱: app@algotech.app"
+msgstr "Email: app@algotech.app"
 
 #: templates/email_reset_password_link.html:26
 msgid "CONTACT_INFO/PHONE"
-msgstr "聯絡電話: +65 9489 2086"
+msgstr "Contact Number: +65 9489 2086"
 
 #: templates/email_reset_password_link.html:27
 msgid "CONTACT_INFO/ADDRESS"
-msgstr ""
+msgstr "Address: 8 Burn Road #15-13, Singapore 369977"
 
 #: templates/register_activation.html:10
 msgid "TITLE_ACTIVATION"
-msgstr ""
+msgstr "Activated account details at Live Show Seller."
 
 #: templates/register_activation.html:18
 msgid "YOUR_ACTIVATION"
-msgstr ""
+msgstr "Your"
 
 #: templates/register_activation.html:18
 msgid "PLAN_ACCOUNT_ACTIVATION"
-msgstr ""
+msgstr "account at Live Show Seller has been activated."
 
 #: templates/register_activation.html:19
 msgid "LOGIN_ACTIVATION"
-msgstr ""
+msgstr "You may now log in to the system"
 
 #: templates/register_activation.html:19
 #: templates/register_confirmation.html:31
 msgid "LOGIN_2_WELCOME"
-msgstr ""
+msgstr "here"
 
 #: templates/register_activation.html:27
 msgid "STEP1_ACTIVATION"
-msgstr ""
+msgstr "What happens next?"
 
 #: templates/register_activation.html:28
 msgid "STEP2_ACTIVATION"
 msgstr ""
+"Please refer to the user guide below, it will walk you through every step of "
+"the process."
 
 #: templates/register_activation.html:29
 msgid "STEP3_ACTIVATION"
-msgstr ""
+msgstr "If any further assistance is needed, feel free to contact us at"
 
 #: templates/register_activation.html:29
 msgid "STEP4_ACTIVATION"
-msgstr ""
+msgstr "during office hours."
 
 #: templates/register_activation.html:33
 msgid "REGARDS_ACTIVATION"
-msgstr ""
+msgstr "Best regards,"
 
 #: templates/register_activation.html:34
 #: templates/register_confirmation.html:47
 msgid "CONGRATS_3_WELCOME"
-msgstr ""
+msgstr "The Live Show Seller Team"
 
 #: templates/register_confirmation.html:22
 msgid "TITLE_WELCOME"
-msgstr ""
+msgstr "Welcome to Live Show Seller"
 
 #: templates/register_confirmation.html:30
 msgid "THANKS_PHRASE_WELCOME"
 msgstr ""
+"Thank you for signing up with Live Show Seller, we’re thrilled to have you "
+"here!"
 
 #: templates/register_confirmation.html:31
 msgid "LOGIN_1_WELCOME"
-msgstr ""
+msgstr "Vui lòng hãy đăng nhập"
 
 #: templates/register_confirmation.html:31
 msgid "LOGIN_3_WELCOME"
-msgstr ""
+msgstr "to start the journey."
 
 #: templates/register_confirmation.html:39
 msgid "PLAN_CHOOSE_1_WELCOME"
 msgstr ""
+"Choose an upgrade plan to boost your business with new member discount!"
 
 #: templates/register_confirmation.html:40
 msgid "PLAN_CHOOSE_2_WELCOME"
-msgstr ""
+msgstr "Not sure which one suits your business the best?"
 
 #: templates/register_confirmation.html:41
 msgid "PLAN_CHOOSE_3_WELCOME"
-msgstr ""
+msgstr "Feel free to contact us at"
 
 #: templates/register_confirmation.html:41
 msgid "PLAN_CHOOSE_4_WELCOME"
-msgstr ""
+msgstr "at any time."
 
 #: templates/register_confirmation.html:45
 msgid "CONGRATS_1_WELCOME"
-msgstr ""
+msgstr "Let’s start selling live now!"
 
 #: templates/register_confirmation.html:46
 msgid "CONGRATS_2_WELCOME"
-msgstr ""
+msgstr "Cheers,"
 
 #: templates/reset_password_success_email.html:15
 msgid "EMAIL/PASSWORD_RESET_SUCCESS/CONTENT1"
-msgstr "您在Live Show Seller 所使用的帳號"
+msgstr "The password for your Live Show Seller account"
 
 #: templates/reset_password_success_email.html:15
 msgid "EMAIL/PASSWORD_RESET_SUCCESS/CONTENT2"
-msgstr "已成功修改密碼. 若您沒有要求修改密碼, 請立即聯絡我們的客服專員。"
-
-#~ msgid "MESSAGE_HEADER"
-#~ msgstr "訂單明細："
+msgstr ""
+"has been successfully changed.\n"
+"If you did not request this change, please contact support immediately."

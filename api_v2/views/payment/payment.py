@@ -60,7 +60,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         
         return Response(checkout_session.url, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['GET'], url_path=r'strip/callback/success',)
+    @action(detail=False, methods=['GET'], url_path=r'stripe/callback/success',)
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def strip_success_callback(self, request):
         print("session_id", request.GET["session_id"])

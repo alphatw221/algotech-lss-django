@@ -21,9 +21,8 @@ class StripeCheckRule():
 
         subscription_plan = kwargs.get('subscription_plan')
         period = kwargs.get('period')
-
+        
         amount = subscription_plan.get('price',{}).get(period)
-
         if not amount :
             raise ApiVerifyError('invalid period')
         return {'amount':amount}
