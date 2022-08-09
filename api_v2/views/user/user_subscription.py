@@ -17,9 +17,11 @@ from rest_framework.parsers import MultiPartParser, JSONParser, FormParser
 
 from api import rule
 from api import models
+from api import utils
 
 import lib
 import service
+import business_policy
 
 import json
 from datetime import datetime
@@ -837,37 +839,37 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
     #     }
     #     return Response(plan_information, status=status.HTTP_200_OK)
         
-    # @action(detail=False, methods=['POST'], url_path=r'upgrade/intent')
-    # @api_error_handler
-    # def upgrade_intent(self, request):
-    #     email, plan, period = lib.util.getter.getdata(request, ("email", "plan", "period"), required=True)
-    #     promoCode, = lib.util.getter.getdata(request, ("promoCode",), required=False)
-    #     api_user = Verify.get_seller_user(request)    
-    #     api_user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+    @action(detail=False, methods=['POST'], url_path=r'upgrade/intent')
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def upgrade_intent(self, request):
+        email, plan, period = lib.util.getter.getdata(request, ("email", "plan", "period"), required=True)
+        promoCode, = lib.util.getter.getdata(request, ("promoCode",), required=False)
+        api_user = lib.util.verify.Verify.get_seller_user(request)    
+        api_user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
 
-    #     country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(api_user_subscription.country)
-    #     subscription_plan = country_plan.get_plan(plan)
+        country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(api_user_subscription.country)
+        subscription_plan = country_plan.get_plan(plan)
 
-    #     kwargs = {'email':email, 'plan':plan, 'period':period, 'country_plan':country_plan, 'subscription_plan':subscription_plan, 'api_user_subscription':api_user_subscription, 'promoCode': promoCode}
-    #     kwargs = rule.rule_checker.user_subscription_rule_checker.UpgradeIntentDataRuleChecker.check(**kwargs)
+        kwargs = {'email':email, 'plan':plan, 'period':period, 'country_plan':country_plan, 'subscription_plan':subscription_plan, 'api_user': api_user, 'api_user_subscription':api_user_subscription, 'promoCode': promoCode}
+        kwargs = rule.rule_checker.user_subscription_rule_checker.UpgradeIntentDataRuleChecker.check(**kwargs)
 
-    #     email = kwargs.get('email')
-    #     amount = kwargs.get('amount')
-    #     adjust_amount = kwargs.get('adjust_amount')
+        email = kwargs.get('email')
+        amount = kwargs.get('amount')
+        adjust_amount = kwargs.get('adjust_amount')
+        marketing_plans = kwargs.get('marketing_plans')
 
-    #     stripe.api_key = settings.STRIPE_API_KEY  
-    #     try:
-    #         intent = stripe.PaymentIntent.create( amount=int(amount*100), currency=country_plan.currency, receipt_email = email)
-    #     except Exception:
-    #         raise ApiCallerError("invalid email")
+        stripe_api_key = settings.STRIPE_API_KEY
+        intent = service.stripe.stripe.create_payment_intent(stripe_api_key, amount=int(amount*100), currency=country_plan.currency, receipt_email = email)
 
-    #     return Response({
-    #         "client_secret":intent.client_secret,
-    #         "payment_amount":amount,
-    #         "user_plan":plan,
-    #         "adjust_amount":adjust_amount,
-    #         "currency": country_plan.currency
-    #     }, status=status.HTTP_200_OK)
+        return Response({
+            "client_secret":intent.client_secret,
+            "payment_amount":amount,
+            "user_plan":plan,
+            "adjust_amount":adjust_amount,
+            "currency": country_plan.currency,
+            "marketing_plans": marketing_plans,
+            "period":period,
+        }, status=status.HTTP_200_OK)
     
     # @action(detail=False, methods=['POST'], url_path=r'upgrade')
     # @api_error_handler
