@@ -100,7 +100,10 @@ def is_payment_successful(secret, session_id):
 def create_payment_intent(api_key:str,  amount:float, currency:str, receipt_email:str):
     try:
         stripe.api_key = api_key
-        return stripe.PaymentIntent.create( amount=int(amount*100), currency=currency, receipt_email=receipt_email)        
+        return stripe.PaymentIntent.create( amount=int(amount*100), currency=currency, receipt_email=receipt_email)    
+            # 
+    # except stripe.error.Ammount_Error:
+    #     return ''
     except Exception:
         print(traceback.format_exc())
         return False
