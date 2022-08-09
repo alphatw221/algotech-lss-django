@@ -812,7 +812,6 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         amount = kwargs.get('amount')
         adjust_amount = kwargs.get('adjust_amount')
         marketing_plans = kwargs.get('marketing_plans')
-
         stripe.api_key = settings.STRIPE_API_KEY
         try:
             intent = stripe.PaymentIntent.create( amount=int(amount*100), currency=country_plan.currency, receipt_email = email)
@@ -821,6 +820,8 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             print(traceback.format_exc())
             raise ApiCallerError("invalid email")
 
+        # if intent =='':
+        #     raise ...
         return Response({
             "client_secret":intent.client_secret,
             "payment_amount":amount,
