@@ -14,6 +14,12 @@ from rest_framework import serializers
 import business_policy
 
 IMAGE_NULL = 'no_image.jpeg'
+IMAGE_GIF = 'image/gif'
+IMAGE_JPEG = 'image/jpeg'
+IMAGE_JPG = 'image/jpg'
+IMAGE_PNG = 'image/png'
+IMAGE_SUPPORTED_TYPE = [IMAGE_JPEG, IMAGE_JPG, IMAGE_PNG]
+IMAGE_MAXIMUM_SIZE = 10*1024*1024
 PLATFORM_FACEBOOK = 'facebook'
 PLATFORM_INSTAGRAM = 'instagram'
 PLATFORM_YOUTUBE = 'youtube'

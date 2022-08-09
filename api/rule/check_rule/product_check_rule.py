@@ -1,5 +1,5 @@
 import lib
-
+from api import models
 class ProductCheckRule():
 
     @staticmethod
@@ -11,4 +11,23 @@ class ProductCheckRule():
         if max_order_amount > product_data.get('qty',0):
             raise lib.error_handle.error.api_error.ApiVerifyError('max order amount should be less than stock amount')
 
+    @staticmethod
+    def is_images_type_supported(**kwargs):
+        image = kwargs.get('image')
+        
+        if image in ['null', None, '', 'undefined', '._no_image']:
+            return 
+        elif image.content_type not in models.product.product.IMAGE_SUPPORTED_TYPE:
+            print(image.content_type)
+            raise lib.error_handle.error.api_error.ApiVerifyError(f'not support this image type')
+    
+    @staticmethod 
+    def is_images_exceed_max_size(**kwargs):
+        image = kwargs.get('image')
+        
+        if image in ['null', None, '', 'undefined', '._no_image']:
+            return 
+        if image.size > models.product.product.IMAGE_MAXIMUM_SIZE:
+            print(image.size)
+            raise lib.error_handle.error.api_error.ApiVerifyError(f'image size exceed maximum size')
   
