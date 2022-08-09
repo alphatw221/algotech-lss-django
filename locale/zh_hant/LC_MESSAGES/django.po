@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-08 06:45+0000\n"
+"POT-Creation-Date: 2022-08-09 08:43+0000\n"
 "PO-Revision-Date: 2021-12-13 15:50+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -252,95 +252,99 @@ msgstr "共享密鑰"
 msgid "PAYMENT/FIRST_DATA/TIME_ZONE"
 msgstr "時區"
 
-#: lib/helper/xlsx_helper.py:103
+#: lib/helper/xlsx_helper.py:109
 msgid "REPORT/COLUMN_TITLE/ID"
 msgstr "編號"
 
-#: lib/helper/xlsx_helper.py:104
+#: lib/helper/xlsx_helper.py:110
 msgid "REPORT/COLUMN_TITLE/ORDER_DATE"
 msgstr "訂單日期"
 
-#: lib/helper/xlsx_helper.py:105
+#: lib/helper/xlsx_helper.py:111
 msgid "REPORT/COLUMN_TITLE/PLATFORM"
 msgstr "使用平台"
 
-#: lib/helper/xlsx_helper.py:106
+#: lib/helper/xlsx_helper.py:112
 msgid "REPORT/COLUMN_TITLE/CUSTOMER_NAME"
 msgstr "客戶名稱"
 
-#: lib/helper/xlsx_helper.py:107
+#: lib/helper/xlsx_helper.py:113
 msgid "REPORT/COLUMN_TITLE/SHIPPING_PHONE"
 msgstr "客戶電話"
 
-#: lib/helper/xlsx_helper.py:108
+#: lib/helper/xlsx_helper.py:114
 msgid "REPORT/COLUMN_TITLE/EMAIL"
 msgstr "E-mail"
 
-#: lib/helper/xlsx_helper.py:109
+#: lib/helper/xlsx_helper.py:115
 msgid "REPORT/COLUMN_TITLE/SHIPPING_METHOD"
 msgstr "運送方式"
 
-#: lib/helper/xlsx_helper.py:110
+#: lib/helper/xlsx_helper.py:116
 msgid "REPORT/COLUMN_TITLE/SHIPPING_OPTION"
 msgstr "運送選項"
 
-#: lib/helper/xlsx_helper.py:111
+#: lib/helper/xlsx_helper.py:117
 msgid "REPORT/COLUMN_TITLE/SHIPPING_ADDRESS_1"
 msgstr "收件住址"
 
-#: lib/helper/xlsx_helper.py:112
+#: lib/helper/xlsx_helper.py:118
 msgid "REPORT/COLUMN_TITLE/LOCATION"
 msgstr "地點"
 
-#: lib/helper/xlsx_helper.py:113
+#: lib/helper/xlsx_helper.py:119
 msgid "REPORT/COLUMN_TITLE/REGION"
 msgstr "區域"
 
-#: lib/helper/xlsx_helper.py:114
+#: lib/helper/xlsx_helper.py:120
 msgid "REPORT/COLUMN_TITLE/POSTCODE"
 msgstr "郵遞區號"
 
-#: lib/helper/xlsx_helper.py:115
+#: lib/helper/xlsx_helper.py:121
 msgid "REPORT/COLUMN_TITLE/PICK_UP_STORE"
 msgstr "自取店家"
 
-#: lib/helper/xlsx_helper.py:116
+#: lib/helper/xlsx_helper.py:122
 msgid "REPORT/COLUMN_TITLE/PICK_UP_ADDRESS"
 msgstr "自取地址"
 
-#: lib/helper/xlsx_helper.py:117
+#: lib/helper/xlsx_helper.py:123
 msgid "REPORT/COLUMN_TITLE/REMARK"
 msgstr "註記"
 
-#: lib/helper/xlsx_helper.py:118
+#: lib/helper/xlsx_helper.py:124
 msgid "REPORT/COLUMN_TITLE/PAYMENT_METHOD"
 msgstr "付款方式"
 
-#: lib/helper/xlsx_helper.py:119
+#: lib/helper/xlsx_helper.py:125
 msgid "REPORT/COLUMN_TITLE/PAYMENT_STATUS"
 msgstr "付款狀態"
 
-#: lib/helper/xlsx_helper.py:120
+#: lib/helper/xlsx_helper.py:126
 msgid "REPORT/COLUMN_TITLE/PAYMENT_RECORD"
 msgstr "付款證明"
 
-#: lib/helper/xlsx_helper.py:121
+#: lib/helper/xlsx_helper.py:127
 msgid "REPORT/COLUMN_TITLE/TOTAL"
 msgstr "總金額"
 
-#: lib/helper/xlsx_helper.py:155
+#: lib/helper/xlsx_helper.py:159
+msgid "REPORT/SECTION_TITLE/TITLE"
+msgstr "訂單報表"
+
+#: lib/helper/xlsx_helper.py:162
 msgid "REPORT/SECTION_TITLE/CONTACT_INFO"
 msgstr "聯絡資訊"
 
-#: lib/helper/xlsx_helper.py:156
+#: lib/helper/xlsx_helper.py:163
 msgid "REPORT/SECTION_TITLE/DELIVERY_INFO"
 msgstr "出貨資訊"
 
-#: lib/helper/xlsx_helper.py:157
+#: lib/helper/xlsx_helper.py:164
 msgid "REPORT/SECTION_TITLE/PAYMENT_INFO"
 msgstr "付款資訊"
 
-#: lib/helper/xlsx_helper.py:158
+#: lib/helper/xlsx_helper.py:165
 msgid "REPORT/SECTION_TITLE/ORDER_INFO"
 msgstr "訂單資訊"
 
@@ -349,18 +353,6 @@ msgstr "訂單資訊"
 msgid "QUIZ_GAME_WINNER{customer_name}{product_name}"
 msgstr ""
 "恭喜 {customer_name} 得獎，獲得 {product_name}！請至購物車確認您的獎品。"
-
-#: lib/i18n/campaign_announcement.py:35
-#, fuzzy, python-brace-format
-#| msgid "REPORT/SECTION_TITLE/TITLE"
-msgid "REPORT/SECTION_TITLE/{section_title}"
-msgstr "訂單報表"
-
-#: lib/i18n/campaign_announcement.py:40
-#, fuzzy, python-brace-format
-#| msgid "REPORT/COLUMN_TITLE/ID"
-msgid "REPORT/COLUMN_TITLE/{column_title}"
-msgstr "編號"
 
 #: templates/email_reset_password_link.html:12
 #: templates/reset_password_success_email.html:12
@@ -492,6 +484,3 @@ msgstr "您在Live Show Seller 所使用的帳號"
 #: templates/reset_password_success_email.html:15
 msgid "EMAIL/PASSWORD_RESET_SUCCESS/CONTENT2"
 msgstr "已成功修改密碼. 若您沒有要求修改密碼, 請立即聯絡我們的客服專員。"
-
-#~ msgid "MESSAGE_HEADER"
-#~ msgstr "訂單明細："

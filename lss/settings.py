@@ -241,6 +241,7 @@ LANGUAGES = [
     ('zh-hans', 'Simplified Chinese'),
     ('zh-hant', 'Traditional Chinese'),
     ('id', 'Indonesian'),
+    ('vi', 'Vietnam')
 ]
 
 LANGUAGES_CHOICES = [
@@ -248,13 +249,15 @@ LANGUAGES_CHOICES = [
     ('zh_hans', 'Simplified Chinese'),
     ('zh_hant', 'Traditional Chinese'),
     ('id', 'Indonesian'),
+    ('vi', 'Vietnam')
 ]
 
 SUPPORTED_LANGUAGES = {
     'en',
     'zh_hans',
     'zh_hant',
-    'id'
+    'id',
+    'vi'
 }
 
 # Static files (CSS, JavaScript, Images)

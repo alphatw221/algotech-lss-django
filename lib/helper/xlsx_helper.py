@@ -156,7 +156,8 @@ class OrderReport(XlsxHelper):
         
         campaign_products_count = campaign.products.count()
         with translation.override(campaign.lang):
-            worksheet.merge_range(cls.row, 0, cls.row, len(cls.columns) + campaign_products_count - 1, campaign.title, title_format)
+            report_title = campaign.title + ' ' + _('REPORT/SECTION_TITLE/TITLE')
+            worksheet.merge_range(cls.row, 0, cls.row, len(cls.columns) + campaign_products_count - 1, report_title, title_format)
             cls._next_row()
             worksheet.merge_range(cls.row, 0, cls.row, 5, _('REPORT/SECTION_TITLE/CONTACT_INFO'), info_format)
             worksheet.merge_range(cls.row, 6, cls.row, 15, _('REPORT/SECTION_TITLE/DELIVERY_INFO'), info_format)
