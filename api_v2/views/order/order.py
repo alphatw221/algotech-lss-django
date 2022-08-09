@@ -225,7 +225,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         
         
         content = lib.i18n.email.delivery_comfirm_mail.i18n_get_mail_content(order,api_user) 
-        jobs.send_email_job.send_email_job(f'Your order #{order.id} from {order.campaign.title} has shipped!', order.shipping_email, content=content)
+        jobs.send_email_job.send_email_job(f'Your order #{order.id} from {order.campaign.title} has shipped!', "jeremychou@accoladeglobal.net", content=content)
         order.status = models.order.order.STATUS_SHIPPING_OUT
         order.save()
 

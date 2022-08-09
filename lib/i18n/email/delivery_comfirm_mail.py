@@ -64,7 +64,7 @@ def i18n_get_mail_content(order, user, lang=None):
         mail_content += f'<td width="1" style="white-space: nowrap; padding: 13px 0 13px 26px;" align="right" bgcolor="#ffffff" valign="top">\
                                 <p style="font-size: 16px; line-height: 26px; font-weight: 400; color: #666363; margin: 0;" align="right">\
                                 {order.campaign.currency}\
-                                {round(product["subtotal"],order.campaign.decimal_places) if order.campaign.decimal_places!="1" else floor(product["subtotal"])}\
+                                {floor((product["subtotal"] * (10 ** order.campaign.decimal_places))) / (10 ** order.campaign.decimal_places)}\
                                 {price_unit[order.campaign.price_unit]}\
                                 </p></td></tr></tbody></table></tr>'
         mail_content += f'</tr>'
@@ -76,19 +76,19 @@ def i18n_get_mail_content(order, user, lang=None):
                           <tr>\
                             <td data-key="1468271_subtotal" style="font-size: 15px; padding-top:13px; color: #4b4b4b; font-weight: 600; width: 35%; text-align:right;" align="right" bgcolor="#ffffff" valign="top">Subtotal\
                               <span style="width:120px; display:inline-block;">{order.campaign.currency}\
-                              {round(order.subtotal,order.campaign.decimal_places) if order.campaign.decimal_places!="1" else floor(order.subtotal)}\
+                              {floor((order.subtotal * (10 ** order.campaign.decimal_places))) / (10 ** order.campaign.decimal_places)}\
                               {price_unit[order.campaign.price_unit]}</span></td>\
                           </tr>\
                           <tr>\
                             <td style="font-size: 15px; color: #4b4b4b; font-weight: 600; width: 35%; text-align:right; padding-bottom: 13px;" align="right" bgcolor="#ffffff" valign="top">Delivery Charge\
                               <span style="width:120px; display:inline-block;">{order.campaign.currency}\
-                              {round(order.shipping_cost,order.campaign.decimal_places) if order.campaign.decimal_places!="1" else floor(order.shipping_cost)}\
+                              {floor((order.shipping_cost * (10 ** order.campaign.decimal_places))) / (10 ** order.campaign.decimal_places)}\
                               {price_unit[order.campaign.price_unit]}</span></td>\
                           </tr>\
                           <tr>\
                             <td data-key="1468271_total" style="font-size: 15px; line-height: 26px; font-weight: bold; text-align:right; color: #666363; width: 65%; padding: 4px 0; border-top: 1px solid #666363;" align="left" bgcolor="#ffffff"  valign="top">Total\
                               <span style="width:120px; display:inline-block;">{order.campaign.currency}\
-                              {round(order.total,order.campaign.decimal_places) if order.campaign.decimal_places!="1" else floor(order.total)}\
+                              {floor((order.total * (10 ** order.campaign.decimal_places))) / (10 ** order.campaign.decimal_places)}\
                               {price_unit[order.campaign.price_unit]}</span></td>\
                           </tr>\
                         </tbody>\
