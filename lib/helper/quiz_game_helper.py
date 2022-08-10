@@ -101,32 +101,24 @@ class QuizGame():
 
     @classmethod
     def get_winner_from_candidate(cls, campaign, quiz_game_bundle, candidate_set=set()):
+
         if not candidate_set:
-            print('no candidate')
             return []
+
         num_of_winner = len(candidate_set) if quiz_game_bundle.num_of_winner > len(candidate_set) else quiz_game_bundle.num_of_winner
 
         timestamp_list = []
-        for candidate in list(candidate_set):
-            timestamp_list.append(candidate.to_dict().get('timestamp', 9999999999))
+        candidate_list = []
+        for candidate in candidate_set:
+            timestamp_list.append(candidate.timestamp)
+            candidate_list.append(candidate)
 
-        ranking_dict = {}
-        array = numpy.array(timestamp_list)
-        temp = array.argsort()
-        ranks = numpy.empty_like(temp)
-        ranks[temp] = numpy.arange(len(array))
-        ranking_list = [i + 1 for i in list(ranks)]
-        ranking_dict = dict(zip(timestamp_list, ranking_list))
+        rank_indexs = numpy.array(timestamp_list).argsort()
 
-        for timestamp, ranking in ranking_dict.items():
-            if ranking > num_of_winner:
-                for candidate in list(candidate_set):
-                    if timestamp == candidate.to_dict().get('timestamp', 9999999999):
-                        candidate_set.remove(candidate)
-        
-        winners = list(candidate_set)
+        np_candidate_list = numpy.array(candidate_list)
+
+        winners = list(np_candidate_list[rank_indexs[:num_of_winner]])
         if not winners:
-            print('no winners')
             return []
         
         campaign_winner_list = campaign.meta.get('winner_list',[])
