@@ -272,8 +272,12 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
                 image=request.data.get(key)
                 if image in ['null', None, '', 'undefined']:
                     continue
+                elif image.size > models.user.user_subscription.IMAGE_MAXIMUM_SIZE:
+                    continue
+                elif image.content_type not in models.user.user_subscription.IMAGE_SUPPORTED_TYPE:
+                    continue
                 elif image =='._no_image':
-                    account['image'] = models.campaign.campaign.IMAGE_NULL
+                    account['image'] = models.user.user_subscription.IMAGE_NULL
                     continue
                 image_path = default_storage.save(
                         f'/{user_subscription.id}/payment/direct_payment/{image.name}', ContentFile(image.read()))

@@ -12,6 +12,7 @@ from rest_framework.decorators import action
 
 from datetime import datetime
 from api import models
+import api
 import lib
 import json
 import service
@@ -85,6 +86,10 @@ class CampaignViewSet(viewsets.ModelViewSet):
                 key = account.get('name','')+f'_{index}'
                 image=request.data.get(key)
                 if image in ['null', None, '', 'undefined']:
+                    continue
+                elif image.size > api.models.campaign.campaign.IMAGE_MAXIMUM_SIZE:
+                    continue
+                elif image.content_type not in ['image/jpeg', 'image/png', 'image/jpg']:
                     continue
                 elif image =='._no_image':
                     account['image'] = models.campaign.campaign.IMAGE_NULL
@@ -161,6 +166,10 @@ class CampaignViewSet(viewsets.ModelViewSet):
                 key = account.get('name','')+f'_{index}'
                 image=request.data.get(key)
                 if image in ['null', None, '', 'undefined']:
+                    continue
+                elif image.size > models.campaign.campaign.IMAGE_MAXIMUM_SIZE:
+                    continue
+                elif image.content_type not in models.campaign.campaign.IMAGE_SUPPORTED_TYPE:
                     continue
                 elif image == '._no_image':
                     account['image'] = models.campaign.campaign.IMAGE_NULL
