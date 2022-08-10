@@ -13,6 +13,8 @@ from djongo import models
 from rest_framework import serializers
 import business_policy
 
+import plugins
+
 IMAGE_NULL = 'no_image.jpeg'
 IMAGE_GIF = 'image/gif'
 IMAGE_JPEG = 'image/jpeg'
@@ -83,12 +85,15 @@ class UserSubscription(models.Model):
     product_limit=models.IntegerField(blank=False, null=False, default=10)
     order_limit=models.IntegerField(blank=False, null=False, default=100)
 
+    meta_plugin = models.JSONField(null=False, blank=False, default=dict)
 
     def __str__(self) -> str:
         return str(self.name)
     
 
-
+    def excute_plugin(self, command, *args, **kwargs):
+        for plugin_key, credential in self.meta_plugin.items():
+            getattr(plugins,plugin_key).excute(command, credential, *args, **kwargs)
 
 
 
