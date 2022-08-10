@@ -124,7 +124,7 @@ class SubscriptionPlan:
             "trial" :{"text": "Free Trial", "price":{"month":0}},
             "lite" : {"value":"lite","text": "Lite", "price":{"month":300,"quarter":900,"year":3240}},
             "standard" : {"value":"standard","text": "Standard", "price":{"month":900,"quarter":2700,"year":9720}},
-            "premium" : {"value":"premium","text": "Premium", "price":{"month":450,"quarter":1350,"year":4860}},
+            "premium" : {"value":"premium","text": "Premium", "price":{"month":450,"quarter":1350,"year":4320}},
         }
    
 

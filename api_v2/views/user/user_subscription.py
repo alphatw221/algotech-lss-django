@@ -51,7 +51,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         api_user.lang = language
         api_user.save()
 
-        request.data['decimal_places'] = int(request.data['decimal_places'])
+        # request.data['decimal_places'] = int(request.data['decimal_places'])
         serializer = models.user.user_subscription.UserSubscriptionSerializerUpdate(user_subscription,data=request.data, partial=True)
 
         if not serializer.is_valid():
