@@ -85,14 +85,13 @@ class UserSubscription(models.Model):
     product_limit=models.IntegerField(blank=False, null=False, default=10)
     order_limit=models.IntegerField(blank=False, null=False, default=100)
 
-    meta_plugin = models.JSONField(null=False, blank=False, default=dict)
 
     def __str__(self) -> str:
         return str(self.name)
     
 
     def excute_plugin(self, command, *args, **kwargs):
-        for plugin_key, credential in self.meta_plugin.items():
+        for plugin_key, credential in self.user_plan.get('plugins',{}).items():
             getattr(plugins,plugin_key).excute(command, credential, *args, **kwargs)
 
 
