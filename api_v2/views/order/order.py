@@ -81,8 +81,10 @@ class OrderViewSet(viewsets.ModelViewSet):
         order.save()
 
         lib.helper.order_helper.OrderHelper.sold_campaign_product(order.id)
-        content = lib.helper.order_helper.OrderHelper.get_confirmation_email_content(order)
-        jobs.send_email_job.send_email_job(f'Thanks for your order! Your order #{order.id} from {order.campaign.title} is confirmed!', order.shipping_email, content=content)     #queue this to redis if needed
+        # content = lib.helper.order_helper.OrderHelper.get_confirmation_email_content(order)
+        subject = lib.i18n.email.order_comfirm_mail.i18n_get_mail_subject(order)
+        content = lib.i18n.email.order_comfirm_mail.i18n_get_mail_content(order)
+        jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)     #queue this to redis if needed
 
         return Response(models.order.order.OrderSerializer(order).data, status=status.HTTP_200_OK)
 

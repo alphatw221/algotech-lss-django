@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-09 08:43+0000\n"
+"POT-Creation-Date: 2022-08-10 03:27+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -184,6 +184,10 @@ msgstr "Live Show Seller Xin chào"
 msgid "EMAIL/PASSWORD_RESET_SUCCESS/SUBJECT"
 msgstr "Mật khẩu Live Show Seller của bạn đã được thay đổi thành công"
 
+#: backend/i18n/payment_comfirm_mail.py:52
+msgid "EMAIL/DELIVERY_CONFIRM/ORDER_CONFIRMATION"
+msgstr "xác nhận đơn hàng"
+
 #: backend/i18n/register_confirm_mail.py:17 lib/i18n/email/password_reset.py:5
 msgid "MAIL_SUBJECT_WELCOME"
 msgstr "Chào mừng đến với Live Show Seller"
@@ -355,6 +359,107 @@ msgid "QUIZ_GAME_WINNER{customer_name}{product_name}"
 msgstr ""
 "Xin chúc mừng {customer_name} đã rút thăm trúng thưởng!"
 "Giải: {product_name}. Vui lòng kiểm tra giỏ hàng của bạn."
+
+#: lib/i18n/email/delivery_comfirm_mail.py:21
+msgid "EMAIL/DELIVERY_CONFIRM/ORDER_NO"
+msgstr "Số đơn hàng."
+
+#: lib/i18n/email/delivery_comfirm_mail.py:24
+msgid "EMAIL/DELIVERY_CONFIRM/ORDER_INFO"
+msgstr "Thông tin đặt hàng"
+
+#: lib/i18n/email/delivery_comfirm_mail.py:30
+msgid "EMAIL/DELIVERY_CONFIRM/ORDER_DATE"
+msgstr "Ngày đặt hàng"
+
+#: lib/i18n/email/delivery_comfirm_mail.py:33
+#: lib/i18n/email/delivery_comfirm_mail.py:36
+msgid "EMAIL/DELIVERY_CONFIRM/SELLER"
+msgstr "Người bán"
+
+#: lib/i18n/email/delivery_comfirm_mail.py:77
+msgid "EMAIL/DELIVERY_CONFIRM/SUBTOTAL"
+msgstr "Tổng phụ"
+
+#: lib/i18n/email/delivery_comfirm_mail.py:83
+msgid "EMAIL/DELIVERY_CONFIRM/DELIVERY_CHARGE"
+msgstr "Phí giao hàng"
+
+#: lib/i18n/email/delivery_comfirm_mail.py:89
+msgid "EMAIL/DELIVERY_CONFIRM/TOTAL"
+msgstr "Tổng số"
+
+#: lib/i18n/email/delivery_comfirm_mail.py:98
+msgid "EMAIL/DELIVERY_CONFIRM/SHIPPING_INFO"
+msgstr "Thông tin vận chuyển"
+
+#: lib/i18n/email/delivery_comfirm_mail.py:103
+msgid "EMAIL/DELIVERY_CONFIRM/SHIPPING_DATE"
+msgstr "Ngày giao hàng"
+
+#: lib/i18n/email/delivery_comfirm_mail.py:106
+msgid "EMAIL/DELIVERY_CONFIRM/DELIVERY_ADDRESS"
+msgstr "Địa chỉ giao hàng"
+
+#: lib/i18n/email/delivery_comfirm_mail.py:109
+msgid "EMAIL/DELIVERY_CONFIRM/REMARK"
+msgstr "Nhận xét"
+
+#: lib/i18n/email/delivery_comfirm_mail.py:116
+msgid "EMAIL/DELIVERY_CONFIRM/DO_NOT_REPLY_1"
+msgstr ""
+"Vui lòng không trả lời e-mail này. Hộp thư này không được theo dõi và bạn sẽ "
+"không nhận được phản hồi."
+
+#: lib/i18n/email/delivery_comfirm_mail.py:117
+msgid "EMAIL/DELIVERY_CONFIRM/DO_NOT_REPLY_2"
+msgstr ""
+"Đối với các câu hỏi về đơn đặt hàng, các câu hỏi hoặc nhận xét khác, vui "
+"lòng liên hệ với email hoặc số điện thoại của Nhà bán hàng. Bạn sẽ được hỗ "
+"trợ và phục vụ nhanh hơn so với yêu cầu qua thư."
+
+#: lib/i18n/email/order_comfirm_mail.py:9
+#, python-brace-format
+msgid "EMAIL/ORDER_CONFIRM/SUBJECT{order_id}{campaign_title}"
+msgstr ""
+"Cảm ơn đơn đặt hàng của bạn! Đơn đặt hàng # {order_id} của bạn từ "
+"{campaign_title} đã được xác nhận!"
+
+#: lib/i18n/email/order_comfirm_mail.py:15
+msgid "EMAIL/ORDER_CONFIRM/ORDER"
+msgstr "Đặt hàng"
+
+#: lib/i18n/email/order_comfirm_mail.py:17
+msgid "EMAIL/ORDER_CONFIRM/CUSTOMER_NAME"
+msgstr "Tên khách hàng"
+
+#: lib/i18n/email/order_comfirm_mail.py:18
+msgid "EMAIL/ORDER_CONFIRM/DELIVERY_TO"
+msgstr "Giao hàng tới"
+
+#: lib/i18n/email/order_comfirm_mail.py:21
+msgid "EMAIL/ORDER_CONFIRM/DELIVERY_WAY"
+msgstr "Cách giao hàng"
+
+#: lib/i18n/email/order_comfirm_mail.py:24
+msgid "EMAIL/ORDER_CONFIRM/PICK_UP_STORE"
+msgstr "Nhận hàng tại cửa hàng"
+
+#: lib/i18n/email/order_comfirm_mail.py:27
+msgid "EMAIL/ORDER_CONFIRM/DELIVERY_ADDRESS"
+msgstr "Địa chỉ giao hàng"
+
+#: lib/i18n/email/order_comfirm_mail.py:32
+msgid "EMAIL/ORDER_CONFIRM/PAYMENT_METHOD"
+msgstr "Phương thức thanh toán"
+
+#: lib/i18n/email/order_comfirm_mail.py:38
+msgid "EMAIL/ORDER_CONFIRM/DELIVERY_CHARGE"
+msgstr "Phí giao hàng"
+
+#: lib/i18n/email/order_comfirm_mail.py:40
+msgid "EMAIL/ORDER_CONFIRM/TOTAL"
+msgstr "Tổng số"
 
 #: templates/email_reset_password_link.html:12
 #: templates/reset_password_success_email.html:12
