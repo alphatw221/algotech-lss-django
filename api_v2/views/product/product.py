@@ -175,7 +175,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         models.product.product.Product.objects.create(
             user_subscription=user_subscription,
             qty=product.qty,
-            name=product.name,
+            name=f'copy - {product.name}',
             description=product.description,
             price=product.price,
             image=product.image,
