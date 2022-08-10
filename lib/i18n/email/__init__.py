@@ -1,1 +1,1 @@
-from . import password_reset,registration_confirm,delivery_comfirm_mail
+from . import order_comfirm_mail, password_reset,registration_confirm,delivery_comfirm_mail

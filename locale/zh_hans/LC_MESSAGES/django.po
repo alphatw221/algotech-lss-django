@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-09 08:43+0000\n"
+"POT-Creation-Date: 2022-08-10 03:27+0000\n"
 "PO-Revision-Date: 2021-12-13 15:50+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -185,6 +185,10 @@ msgstr "Live Show Seller 重設密碼通知"
 msgid "EMAIL/PASSWORD_RESET_SUCCESS/SUBJECT"
 msgstr "Live Show Seller 重設密碼通知"
 
+#: backend/i18n/payment_comfirm_mail.py:52
+msgid "EMAIL/DELIVERY_CONFIRM/ORDER_CONFIRMATION"
+msgstr "订单确认"
+
 #: backend/i18n/register_confirm_mail.py:17 lib/i18n/email/password_reset.py:5
 msgid "MAIL_SUBJECT_WELCOME"
 msgstr ""
@@ -355,6 +359,100 @@ msgstr "订单资讯"
 msgid "QUIZ_GAME_WINNER{customer_name}{product_name}"
 msgstr ""
 "恭喜 {customer_name} 得奖，获得 {product_name}！请至购物车确认您的奖品。"
+
+#: lib/i18n/email/delivery_comfirm_mail.py:21
+msgid "EMAIL/DELIVERY_CONFIRM/ORDER_NO"
+msgstr "订单号。"
+
+#: lib/i18n/email/delivery_comfirm_mail.py:24
+msgid "EMAIL/DELIVERY_CONFIRM/ORDER_INFO"
+msgstr "订单信息"
+
+#: lib/i18n/email/delivery_comfirm_mail.py:30
+msgid "EMAIL/DELIVERY_CONFIRM/ORDER_DATE"
+msgstr "订单日期"
+
+#: lib/i18n/email/delivery_comfirm_mail.py:33
+#: lib/i18n/email/delivery_comfirm_mail.py:36
+msgid "EMAIL/DELIVERY_CONFIRM/SELLER"
+msgstr "卖家"
+
+#: lib/i18n/email/delivery_comfirm_mail.py:77
+msgid "EMAIL/DELIVERY_CONFIRM/SUBTOTAL"
+msgstr "小计"
+
+#: lib/i18n/email/delivery_comfirm_mail.py:83
+msgid "EMAIL/DELIVERY_CONFIRM/DELIVERY_CHARGE"
+msgstr "运费"
+
+#: lib/i18n/email/delivery_comfirm_mail.py:89
+msgid "EMAIL/DELIVERY_CONFIRM/TOTAL"
+msgstr "总计"
+
+#: lib/i18n/email/delivery_comfirm_mail.py:98
+msgid "EMAIL/DELIVERY_CONFIRM/SHIPPING_INFO"
+msgstr "发货信息"
+
+#: lib/i18n/email/delivery_comfirm_mail.py:103
+msgid "EMAIL/DELIVERY_CONFIRM/SHIPPING_DATE"
+msgstr "发货日期"
+
+#: lib/i18n/email/delivery_comfirm_mail.py:106
+msgid "EMAIL/DELIVERY_CONFIRM/DELIVERY_ADDRESS"
+msgstr "收货地址"
+
+#: lib/i18n/email/delivery_comfirm_mail.py:109
+msgid "EMAIL/DELIVERY_CONFIRM/REMARK"
+msgstr "备注"
+
+#: lib/i18n/email/delivery_comfirm_mail.py:116
+msgid "EMAIL/DELIVERY_CONFIRM/DO_NOT_REPLY_1"
+msgstr "此邮件为系统自动发送。请勿回覆。"
+
+#: lib/i18n/email/delivery_comfirm_mail.py:117
+msgid "EMAIL/DELIVERY_CONFIRM/DO_NOT_REPLY_2"
+msgstr "如有订单相关问题或意见，请联系卖家的电子邮件，谢谢!"
+
+#: lib/i18n/email/order_comfirm_mail.py:9
+#, python-brace-format
+msgid "EMAIL/ORDER_CONFIRM/SUBJECT{order_id}{campaign_title}"
+msgstr "感谢您的订单！您来自 {campaign_title} 的订单 #{order_id} 已确认！"
+
+#: lib/i18n/email/order_comfirm_mail.py:15
+msgid "EMAIL/ORDER_CONFIRM/ORDER"
+msgstr "订单"
+
+#: lib/i18n/email/order_comfirm_mail.py:17
+msgid "EMAIL/ORDER_CONFIRM/CUSTOMER_NAME"
+msgstr "客户名称"
+
+#: lib/i18n/email/order_comfirm_mail.py:18
+msgid "EMAIL/ORDER_CONFIRM/DELIVERY_TO"
+msgstr "送货到"
+
+#: lib/i18n/email/order_comfirm_mail.py:21
+msgid "EMAIL/ORDER_CONFIRM/DELIVERY_WAY"
+msgstr "发货方式"
+
+#: lib/i18n/email/order_comfirm_mail.py:24
+msgid "EMAIL/ORDER_CONFIRM/PICK_UP_STORE"
+msgstr "取货店"
+
+#: lib/i18n/email/order_comfirm_mail.py:27
+msgid "EMAIL/ORDER_CONFIRM/DELIVERY_ADDRESS"
+msgstr "收货地址"
+
+#: lib/i18n/email/order_comfirm_mail.py:32
+msgid "EMAIL/ORDER_CONFIRM/PAYMENT_METHOD"
+msgstr "付款方式"
+
+#: lib/i18n/email/order_comfirm_mail.py:38
+msgid "EMAIL/ORDER_CONFIRM/DELIVERY_CHARGE"
+msgstr "运费"
+
+#: lib/i18n/email/order_comfirm_mail.py:40
+msgid "EMAIL/ORDER_CONFIRM/TOTAL"
+msgstr "总计"
 
 #: templates/email_reset_password_link.html:12
 #: templates/reset_password_success_email.html:12
