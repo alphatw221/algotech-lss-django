@@ -320,9 +320,25 @@ class Command(BaseCommand):
         # lib.helper.order_helper.PreOrderHelper.checkout(None, campaign_id=510, pre_order_id=975)
     
     def test_campaign_job(self):
+
         from automation import jobs
         jobs.campaign_job.campaign_job(661)
 
+        from datetime import datetime
+        from dateutil import parser
+
+        ig_datas = db.api_campaign_comment.find({'platform': 'instagram'})
+        for ig_data in ig_datas:
+            _id = ig_data['_id']
+            created_time = ig_data['created_time']
+            if type(created_time) == str:
+                timestamp = datetime.timestamp(parser.parse(created_time))
+                
+                print (_id)
+                db.api_campaign_comment.update_one(
+                    {'_id': _id},
+                    {'$set': {'created_time': timestamp}}
+                )
 
     def test_hitpay_verification(self):
 
