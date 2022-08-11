@@ -13,7 +13,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.core.files.storage import default_storage
 from django.conf import settings
 from rest_framework.parsers import MultiPartParser, FormParser,FileUploadParser, BaseParser
-
+from rest_framework.renderers import HTMLFormRenderer
 
 import  base64
 
@@ -271,7 +271,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         
         raise lib.error_handle.error.api_error.ApiCallerError('Payment Error, Please Choose Another Payment Method')
     
-    @action(detail=False, methods=['POST'], url_path=r"ecpay/callback/success",parser_classes=(MyParser,))
+    @action(detail=False, methods=['POST'], url_path=r"ecpay/callback/success",parser_classes=(MultiPartParser,), renderer_classes = (HTMLFormRenderer,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def ecpay_success_callback(self, request):
 
@@ -301,4 +301,6 @@ class PaymentViewSet(viewsets.GenericViewSet):
         # content = lib.helper.order_helper.OrderHelper.get_confirmation_email_content(order)
         # jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)
         # return HttpResponseRedirect(redirect_to=f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}/confirmation')
-        return '1|OK'
+
+        return Response('1|OK')
+        
