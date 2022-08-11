@@ -10,10 +10,10 @@ class CartCheckRule():
     def is_campaign_product_exist(**kwargs):
         cart = kwargs.get('cart')
         campaign_product = kwargs.get('campaign_product')
-
+        campaign_product_id = kwargs.get('campaign_product_id')
         if not campaign_product:
-            if campaign_product.id in cart.products:
-                del cart.products[campaign_product.id]
+            if campaign_product_id in cart.products:
+                del cart.products[campaign_product_id]
                 cart.save()
             raise CartErrors.CartException('campaign product has already been deleted')
     

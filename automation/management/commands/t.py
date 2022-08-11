@@ -51,10 +51,7 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        # self.test_lucky_draw()
-        # self.test_hitpay_verification()
-        text = lib.i18n.campaign_announcement.get_campaign_report_section_title('CONTACT_INFO')
-        print (text)
+        self.test_cart_helper()
 
     def modify_database(self):
         from api.models.user.user_subscription import UserSubscription
@@ -359,3 +356,17 @@ class Command(BaseCommand):
         print('hexdig:')
         print(hexdig)
 
+
+    def test_cart_helper(self):
+
+        import lib
+        from api import models
+
+        campaign = models.campaign.campaign.Campaign.objects.get(id=1024)
+        models.cart.cart.Cart.objects.create(
+            customer_id='testing',
+            customer_name = 'test',
+            customer_img = '',
+            platform = 'facebook',
+            campaign=campaign
+        )

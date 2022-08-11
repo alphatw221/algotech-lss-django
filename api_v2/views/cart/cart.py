@@ -44,7 +44,7 @@ class CartViewSet(viewsets.ModelViewSet):
 
         return Response(models.cart.cart.CartSerializer(cart).data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['PUT'], url_path=r'(?P<cart_oid>[^/.]+)/guest/edit', permission_classes=(), authentication_classes=[])
+    @action(detail=False, methods=['PUT'], url_path=r'(?P<cart_oid>[^/.]+)/guest/product/edit', permission_classes=(), authentication_classes=[])
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     @lib.error_handle.error_handler.cart_operation_error_handler.order_operation_error_handler
     def guest_edit_cart_product(self, request, cart_oid):
@@ -66,7 +66,7 @@ class CartViewSet(viewsets.ModelViewSet):
 
         return Response(models.cart.cart.CartSerializer(cart).data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['DELETE'], url_path=r'(?P<cart_oid>[^/.]+)/guest/delete', permission_classes=(), authentication_classes=[])
+    @action(detail=False, methods=['DELETE'], url_path=r'(?P<cart_oid>[^/.]+)/guest/product/delete', permission_classes=(), authentication_classes=[])
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     @lib.error_handle.error_handler.cart_operation_error_handler.order_operation_error_handler
     def guest_delete_cart_product(self, request, cart_oid):
@@ -274,7 +274,7 @@ class CartViewSet(viewsets.ModelViewSet):
 
         return Response(data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['PUT'], url_path=r'(?P<cart_oid>[^/.]+)/buyer/edit', permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['PUT'], url_path=r'(?P<cart_oid>[^/.]+)/buyer/product/edit', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     @lib.error_handle.error_handler.cart_operation_error_handler.order_operation_error_handler
     def buyer_add_order_product(self, request, cart_oid):
@@ -301,7 +301,7 @@ class CartViewSet(viewsets.ModelViewSet):
 
         return Response(models.cart.cart.CartSerializer(cart).data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['DELETE'], url_path=r'(?P<cart_oid>[^/.]+)/buyer/delete',  permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['DELETE'], url_path=r'(?P<cart_oid>[^/.]+)/buyer/product/delete',  permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     @lib.error_handle.error_handler.cart_operation_error_handler.order_operation_error_handler
     def buyer_delete_cart_product(self, request, cart_oid):
