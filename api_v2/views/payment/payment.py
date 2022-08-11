@@ -271,12 +271,12 @@ class PaymentViewSet(viewsets.GenericViewSet):
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def ecpay_success_callback(self, request):
 
-        order_oid = lib.util.getter.getparams(request, ('order_oid'), with_user=False)
-        order = lib.util.verify.Verify.get_order_with_oid(order_oid)
-        campaign = order.campaign
-        merchant_id = campaign.meta_payment.get("ecpay",{}).get("merchant_id")
-        hash_key = campaign.meta_payment.get("ecpay",{}).get("hash_key")
-        hash_iv = campaign.meta_payment.get("ecpay",{}).get("hash_iv")
+        # order_oid = lib.util.getter.getparams(request, ('order_oid'), with_user=False)
+        # order = lib.util.verify.Verify.get_order_with_oid(order_oid)
+        # campaign = order.campaign
+        # merchant_id = campaign.meta_payment.get("ecpay",{}).get("merchant_id")
+        # hash_key = campaign.meta_payment.get("ecpay",{}).get("hash_key")
+        # hash_iv = campaign.meta_payment.get("ecpay",{}).get("hash_iv")
         print("~~~~45df45df4g5s4524sgh254s25gf4~~~~~~")
         print(request)
 
