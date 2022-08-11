@@ -3,20 +3,20 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
+#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: \n"
+"Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-03 15:27+0000\n"
-"PO-Revision-Date: 2021-12-13 15:51+0800\n"
-"Last-Translator: \n"
-"Language-Team: \n"
-"Language: vi\n"
+"POT-Creation-Date: 2022-08-10 03:27+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Poedit 3.0\n"
 
 #: backend/i18n/campaign_announcement.py:8 lib/i18n/campaign_announcement.py:7
 #, python-brace-format
@@ -34,8 +34,8 @@ msgstr "Mã đơn hàng: {order_code} đã bán hết."
 #, python-brace-format
 msgid "LUCKY_DRAW_WINNER{customer_name}{product_name}"
 msgstr ""
-"Xin chúc mừng {customer_name} đã giành được "
-"Quà tặng! Giải thưởng: {product_name}. Vui lòng kiểm tra giỏ hàng của bạn."
+"Xin chúc mừng {customer_name} đã giành được Quà tặng! Giải "
+"thưởng: {product_name}. Vui lòng kiểm tra giỏ hàng của bạn."
 
 #: backend/i18n/cart_product_request.py:9 lib/i18n/cart_product_request.py:10
 msgid "MESSAGE_PREFIX"
@@ -51,16 +51,15 @@ msgstr ""
 #: backend/i18n/cart_product_request.py:23 lib/i18n/cart_product_request.py:22
 msgid "MORE_INFO_IN_PM_NOTICE"
 msgstr ""
-"Link giỏ hàng được gửi qua FB Messenger, vui lòng liên hệ quản trị viên trang (page admin) "
-"nếu không nhận được thông báo."
+"Link giỏ hàng được gửi qua FB Messenger, vui lòng liên hệ quản trị viên "
+"trang (page admin) nếu không nhận được thông báo."
 
 #: backend/i18n/cart_product_request.py:30
 #: backend/i18n/cart_product_request.py:66 lib/i18n/cart_product_request.py:29
 #: lib/i18n/cart_product_request.py:65
 #, python-brace-format
 msgid "INVALID_EXCEED_MAX_ORDER_AMOUNT{order_code}{max_order_amount}"
-msgstr ""
-"\"{order_code}\" có số lượng đặt hàng tối đa là {max_order_amount}. "
+msgstr "\"{order_code}\" có số lượng đặt hàng tối đa là {max_order_amount}. "
 
 #: backend/i18n/cart_product_request.py:36
 #: backend/i18n/cart_product_request.py:73 lib/i18n/cart_product_request.py:35
@@ -139,9 +138,7 @@ msgstr "Giỏ hàng của bạn:"
 #: lib/i18n/comment_command.py:38
 #, python-brace-format
 msgid "TOTAL{dollar_sign}{total}\n"
-msgstr ""
-"Tổng thanh toán: {dollar_sign}{total}\n"
-"\n"
+msgstr "Tổng thanh toán: {dollar_sign}{total}\n"
 
 #: backend/i18n/comment_command.py:41 lib/i18n/comment_command.py:40
 #, python-brace-format
@@ -171,7 +168,7 @@ msgstr "Tùy chọn: {dollar_sign}{option}\n"
 #, fuzzy, python-brace-format
 #| msgid "DETAIL{link}\n"
 msgid "DETAIL{link}"
-msgstr Tìm hiểu chi tiết: {link}\n"
+msgstr "Tìm hiểu chi tiết: {link}\n"
 
 #: backend/i18n/comment_command.py:117 lib/i18n/comment_command.py:117
 #, python-brace-format
@@ -186,6 +183,10 @@ msgstr "Live Show Seller Xin chào"
 #: backend/i18n/email/subject.py:12
 msgid "EMAIL/PASSWORD_RESET_SUCCESS/SUBJECT"
 msgstr "Mật khẩu Live Show Seller của bạn đã được thay đổi thành công"
+
+#: backend/i18n/payment_comfirm_mail.py:52
+msgid "EMAIL/DELIVERY_CONFIRM/ORDER_CONFIRMATION"
+msgstr "xác nhận đơn hàng"
 
 #: backend/i18n/register_confirm_mail.py:17 lib/i18n/email/password_reset.py:5
 msgid "MAIL_SUBJECT_WELCOME"
@@ -256,12 +257,209 @@ msgstr "Chìa khóa bí mật"
 msgid "PAYMENT/FIRST_DATA/TIME_ZONE"
 msgstr "Múi giờ"
 
+#: lib/helper/xlsx_helper.py:109
+msgid "REPORT/COLUMN_TITLE/ID"
+msgstr "ID"
+
+#: lib/helper/xlsx_helper.py:110
+msgid "REPORT/COLUMN_TITLE/ORDER_DATE"
+msgstr "Ngày đặt hàng"
+
+#: lib/helper/xlsx_helper.py:111
+msgid "REPORT/COLUMN_TITLE/PLATFORM"
+msgstr "Nền tảng"
+
+#: lib/helper/xlsx_helper.py:112
+msgid "REPORT/COLUMN_TITLE/CUSTOMER_NAME"
+msgstr "Tên khách hàng"
+
+#: lib/helper/xlsx_helper.py:113
+msgid "REPORT/COLUMN_TITLE/SHIPPING_PHONE"
+msgstr "Số điện thoại"
+
+#: lib/helper/xlsx_helper.py:114
+msgid "REPORT/COLUMN_TITLE/EMAIL"
+msgstr "E-mail"
+
+#: lib/helper/xlsx_helper.py:115
+msgid "REPORT/COLUMN_TITLE/SHIPPING_METHOD"
+msgstr "Phương thức giao hàng"
+
+#: lib/helper/xlsx_helper.py:116
+msgid "REPORT/COLUMN_TITLE/SHIPPING_OPTION"
+msgstr "Tùy chọn giao hàng"
+
+#: lib/helper/xlsx_helper.py:117
+msgid "REPORT/COLUMN_TITLE/SHIPPING_ADDRESS_1"
+msgstr "Địa chỉ giao hàng"
+
+#: lib/helper/xlsx_helper.py:118
+msgid "REPORT/COLUMN_TITLE/LOCATION"
+msgstr "Địa điểm "
+
+#: lib/helper/xlsx_helper.py:119
+msgid "REPORT/COLUMN_TITLE/REGION"
+msgstr "Khu vực"
+
+#: lib/helper/xlsx_helper.py:120
+msgid "REPORT/COLUMN_TITLE/POSTCODE"
+msgstr "Mã bưu điện"
+
+#: lib/helper/xlsx_helper.py:121
+msgid "REPORT/COLUMN_TITLE/PICK_UP_STORE"
+msgstr "Tên cửa hàng"
+
+#: lib/helper/xlsx_helper.py:122
+msgid "REPORT/COLUMN_TITLE/PICK_UP_ADDRESS"
+msgstr "Địa chỉ cửa hàng"
+
+#: lib/helper/xlsx_helper.py:123
+msgid "REPORT/COLUMN_TITLE/REMARK"
+msgstr "Nhận xét"
+
+#: lib/helper/xlsx_helper.py:124
+msgid "REPORT/COLUMN_TITLE/PAYMENT_METHOD"
+msgstr "Phương thức thanh toán"
+
+#: lib/helper/xlsx_helper.py:125
+msgid "REPORT/COLUMN_TITLE/PAYMENT_STATUS"
+msgstr "Tình trạng thanh toán"
+
+#: lib/helper/xlsx_helper.py:126
+msgid "REPORT/COLUMN_TITLE/PAYMENT_RECORD"
+msgstr "Hóa đơn thanh toán"
+
+#: lib/helper/xlsx_helper.py:127
+msgid "REPORT/COLUMN_TITLE/TOTAL"
+msgstr "Tổng thanh toán"
+
+#: lib/helper/xlsx_helper.py:159
+msgid "REPORT/SECTION_TITLE/TITLE"
+msgstr "Báo cáo đơn hàng"
+
+#: lib/helper/xlsx_helper.py:162
+msgid "REPORT/SECTION_TITLE/CONTACT_INFO"
+msgstr "Thông tin liên lạc"
+
+#: lib/helper/xlsx_helper.py:163
+msgid "REPORT/SECTION_TITLE/DELIVERY_INFO"
+msgstr "Thông tin giao hàng"
+
+#: lib/helper/xlsx_helper.py:164
+msgid "REPORT/SECTION_TITLE/PAYMENT_INFO"
+msgstr "Thông tin thanh toán"
+
+#: lib/helper/xlsx_helper.py:165
+msgid "REPORT/SECTION_TITLE/ORDER_INFO"
+msgstr "Thông tin đặt hàng"
+
 #: lib/i18n/campaign_announcement.py:29
 #, python-brace-format
 msgid "QUIZ_GAME_WINNER{customer_name}{product_name}"
 msgstr ""
 "Xin chúc mừng {customer_name} đã rút thăm trúng thưởng!"
 "Giải: {product_name}. Vui lòng kiểm tra giỏ hàng của bạn."
+
+#: lib/i18n/email/delivery_comfirm_mail.py:21
+msgid "EMAIL/DELIVERY_CONFIRM/ORDER_NO"
+msgstr "Số đơn hàng."
+
+#: lib/i18n/email/delivery_comfirm_mail.py:24
+msgid "EMAIL/DELIVERY_CONFIRM/ORDER_INFO"
+msgstr "Thông tin đặt hàng"
+
+#: lib/i18n/email/delivery_comfirm_mail.py:30
+msgid "EMAIL/DELIVERY_CONFIRM/ORDER_DATE"
+msgstr "Ngày đặt hàng"
+
+#: lib/i18n/email/delivery_comfirm_mail.py:33
+#: lib/i18n/email/delivery_comfirm_mail.py:36
+msgid "EMAIL/DELIVERY_CONFIRM/SELLER"
+msgstr "Người bán"
+
+#: lib/i18n/email/delivery_comfirm_mail.py:77
+msgid "EMAIL/DELIVERY_CONFIRM/SUBTOTAL"
+msgstr "Tổng phụ"
+
+#: lib/i18n/email/delivery_comfirm_mail.py:83
+msgid "EMAIL/DELIVERY_CONFIRM/DELIVERY_CHARGE"
+msgstr "Phí giao hàng"
+
+#: lib/i18n/email/delivery_comfirm_mail.py:89
+msgid "EMAIL/DELIVERY_CONFIRM/TOTAL"
+msgstr "Tổng số"
+
+#: lib/i18n/email/delivery_comfirm_mail.py:98
+msgid "EMAIL/DELIVERY_CONFIRM/SHIPPING_INFO"
+msgstr "Thông tin vận chuyển"
+
+#: lib/i18n/email/delivery_comfirm_mail.py:103
+msgid "EMAIL/DELIVERY_CONFIRM/SHIPPING_DATE"
+msgstr "Ngày giao hàng"
+
+#: lib/i18n/email/delivery_comfirm_mail.py:106
+msgid "EMAIL/DELIVERY_CONFIRM/DELIVERY_ADDRESS"
+msgstr "Địa chỉ giao hàng"
+
+#: lib/i18n/email/delivery_comfirm_mail.py:109
+msgid "EMAIL/DELIVERY_CONFIRM/REMARK"
+msgstr "Nhận xét"
+
+#: lib/i18n/email/delivery_comfirm_mail.py:116
+msgid "EMAIL/DELIVERY_CONFIRM/DO_NOT_REPLY_1"
+msgstr ""
+"Vui lòng không trả lời e-mail này. Hộp thư này không được theo dõi và bạn sẽ "
+"không nhận được phản hồi."
+
+#: lib/i18n/email/delivery_comfirm_mail.py:117
+msgid "EMAIL/DELIVERY_CONFIRM/DO_NOT_REPLY_2"
+msgstr ""
+"Đối với các câu hỏi về đơn đặt hàng, các câu hỏi hoặc nhận xét khác, vui "
+"lòng liên hệ với email hoặc số điện thoại của Nhà bán hàng. Bạn sẽ được hỗ "
+"trợ và phục vụ nhanh hơn so với yêu cầu qua thư."
+
+#: lib/i18n/email/order_comfirm_mail.py:9
+#, python-brace-format
+msgid "EMAIL/ORDER_CONFIRM/SUBJECT{order_id}{campaign_title}"
+msgstr ""
+"Cảm ơn đơn đặt hàng của bạn! Đơn đặt hàng # {order_id} của bạn từ "
+"{campaign_title} đã được xác nhận!"
+
+#: lib/i18n/email/order_comfirm_mail.py:15
+msgid "EMAIL/ORDER_CONFIRM/ORDER"
+msgstr "Đặt hàng"
+
+#: lib/i18n/email/order_comfirm_mail.py:17
+msgid "EMAIL/ORDER_CONFIRM/CUSTOMER_NAME"
+msgstr "Tên khách hàng"
+
+#: lib/i18n/email/order_comfirm_mail.py:18
+msgid "EMAIL/ORDER_CONFIRM/DELIVERY_TO"
+msgstr "Giao hàng tới"
+
+#: lib/i18n/email/order_comfirm_mail.py:21
+msgid "EMAIL/ORDER_CONFIRM/DELIVERY_WAY"
+msgstr "Cách giao hàng"
+
+#: lib/i18n/email/order_comfirm_mail.py:24
+msgid "EMAIL/ORDER_CONFIRM/PICK_UP_STORE"
+msgstr "Nhận hàng tại cửa hàng"
+
+#: lib/i18n/email/order_comfirm_mail.py:27
+msgid "EMAIL/ORDER_CONFIRM/DELIVERY_ADDRESS"
+msgstr "Địa chỉ giao hàng"
+
+#: lib/i18n/email/order_comfirm_mail.py:32
+msgid "EMAIL/ORDER_CONFIRM/PAYMENT_METHOD"
+msgstr "Phương thức thanh toán"
+
+#: lib/i18n/email/order_comfirm_mail.py:38
+msgid "EMAIL/ORDER_CONFIRM/DELIVERY_CHARGE"
+msgstr "Phí giao hàng"
+
+#: lib/i18n/email/order_comfirm_mail.py:40
+msgid "EMAIL/ORDER_CONFIRM/TOTAL"
+msgstr "Tổng số"
 
 #: templates/email_reset_password_link.html:12
 #: templates/reset_password_success_email.html:12
@@ -271,8 +469,8 @@ msgstr "Xin chào bạn"
 #: templates/email_reset_password_link.html:15
 msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT2"
 msgstr ""
-"Chúng tôi đã nhận được yêu cầu đặt lại mật khẩu tài khoản Live Show Seller của bạn."
-"Nhấp vào liên kết bên dưới để đặt lại mật khẩu của bạn:"
+"Chúng tôi đã nhận được yêu cầu đặt lại mật khẩu tài khoản Live Show Seller "
+"của bạn.Nhấp vào liên kết bên dưới để đặt lại mật khẩu của bạn:"
 
 #: templates/email_reset_password_link.html:18
 msgid "EMAIL/PASSWORD_RESET_LINK/BUTTON"
@@ -281,14 +479,14 @@ msgstr "Thay đổi mật khẩu"
 #: templates/email_reset_password_link.html:21
 msgid "EMAIL/IF_YOU_CAN_NOT_CLICK"
 msgstr ""
-"Nếu bạn gặp sự cố khi đặt lại mật khẩu, vui lòng nhập URL"
-"vào trình duyệt của bạn."
+"Nếu bạn gặp sự cố khi đặt lại mật khẩu, vui lòng nhập URLvào trình duyệt của "
+"bạn."
 
 #: templates/email_reset_password_link.html:23
 msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT3"
 msgstr ""
-"Nếu bạn bỏ qua thông báo này, mật khẩu của bạn sẽ không được thay đổi. "
-"Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng cho chúng tôi biết "
+"Nếu bạn bỏ qua thông báo này, mật khẩu của bạn sẽ không được thay đổi. Nếu "
+"bạn không yêu cầu đặt lại mật khẩu, vui lòng cho chúng tôi biết "
 
 #: templates/email_reset_password_link.html:25
 #: templates/reset_password_success_email.html:17
@@ -331,8 +529,8 @@ msgstr "Điều gì tiếp theo sẽ diễn ra?"
 #: templates/register_activation.html:28
 msgid "STEP2_ACTIVATION"
 msgstr ""
-"Vui lòng tham khảo hướng dẫn sử dụng bên dưới, bạn sẽ được hướng dẫn bạn kĩ càng và chi tiết theo từng bước"
-"quá trình."
+"Vui lòng tham khảo hướng dẫn sử dụng bên dưới, bạn sẽ được hướng dẫn bạn kĩ "
+"càng và chi tiết theo từng bướcquá trình."
 
 #: templates/register_activation.html:29
 msgid "STEP3_ACTIVATION"
@@ -358,8 +556,8 @@ msgstr "Chào mừng bạn đến với Live Show Seller"
 #: templates/register_confirmation.html:30
 msgid "THANKS_PHRASE_WELCOME"
 msgstr ""
-"Cảm ơn bạn đã đăng ký sử dụng Live Show Seller, chúng tôi rất vui khi được hỗ trợ bạn tăng trưởng doanh số"
-"tại đây!"
+"Cảm ơn bạn đã đăng ký sử dụng Live Show Seller, chúng tôi rất vui khi được "
+"hỗ trợ bạn tăng trưởng doanh sốtại đây!"
 
 #: templates/register_confirmation.html:31
 msgid "LOGIN_1_WELCOME"
@@ -372,7 +570,8 @@ msgstr "bắt đầu hành trình bán hàng livestream."
 #: templates/register_confirmation.html:39
 msgid "PLAN_CHOOSE_1_WELCOME"
 msgstr ""
-"Chọn nâng cấp gói dịch vụ để thúc đẩy hoạt động kinh doanh của bạn với ưu đãi cực hấp dẫn dành cho thành viên mới!"
+"Chọn nâng cấp gói dịch vụ để thúc đẩy hoạt động kinh doanh của bạn với ưu "
+"đãi cực hấp dẫn dành cho thành viên mới!"
 
 #: templates/register_confirmation.html:40
 msgid "PLAN_CHOOSE_2_WELCOME"
@@ -402,4 +601,5 @@ msgstr "Mật khẩu cho tài khoản Live Show Seller"
 msgid "EMAIL/PASSWORD_RESET_SUCCESS/CONTENT2"
 msgstr ""
 "has been successfully changed.\n"
-"Nếu bạn không yêu cầu thay đổi này, vui lòng liên hệ với bộ phận hỗ trợ ngay lập tức."
+"Nếu bạn không yêu cầu thay đổi này, vui lòng liên hệ với bộ phận hỗ trợ ngay "
+"lập tức."

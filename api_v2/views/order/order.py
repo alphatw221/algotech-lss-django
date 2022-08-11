@@ -20,6 +20,7 @@ import lib
 
 from automation import jobs
 from api.utils.error_handle.error_handler.email_error_handler import email_error_handler
+from api.utils.error_handle.error.api_error import ApiCallerError
 
 
 class OrderPagination(PageNumberPagination):
@@ -58,7 +59,13 @@ class OrderViewSet(viewsets.ModelViewSet):
         order = lib.util.verify.Verify.get_order_with_oid(order_oid)
         last_five_digit, image, account_name, account_mode = lib.util.getter.getdata(request,('last_five_digit', 'image', 'account_name', 'account_mode'), required=False)
 
-        if image not in [None, '', "undefined", 'null']:
+        if image in [None, '', "undefined", 'null']:
+            pass
+        elif image.size > models.order.order.IMAGE_MAXIMUM_SIZE:
+            raise lib.error_handle.error.api_error.ApiVerifyError(f'image size exceed maximum size')
+        elif image.content_type not in models.order.order.IMAGE_SUPPORTED_TYPE:
+            raise lib.error_handle.error.api_error.ApiVerifyError(f'not support this image type')
+        else:
             image_path = default_storage.save(
                 f'campaign/{order.campaign.id}/order/{order.id}/receipt/{image.name}', 
                 ContentFile(image.read())
@@ -74,8 +81,10 @@ class OrderViewSet(viewsets.ModelViewSet):
         order.save()
 
         lib.helper.order_helper.OrderHelper.sold_campaign_product(order.id)
-        content = lib.helper.order_helper.OrderHelper.get_confirmation_email_content(order)
-        jobs.send_email_job.send_email_job(f'Thanks for your order! Your order #{order.id} from {order.campaign.title} is confirmed!', order.shipping_email, content=content)     #queue this to redis if needed
+        # content = lib.helper.order_helper.OrderHelper.get_confirmation_email_content(order)
+        subject = lib.i18n.email.order_comfirm_mail.i18n_get_mail_subject(order)
+        content = lib.i18n.email.order_comfirm_mail.i18n_get_mail_content(order)
+        jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)     #queue this to redis if needed
 
         return Response(models.order.order.OrderSerializer(order).data, status=status.HTTP_200_OK)
 

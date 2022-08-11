@@ -49,5 +49,5 @@ def i18n_get_mail_content(order_id, campaign_data, order_data, shop_name, lang=N
 
 @lang_translate_default_en
 def i18n_get_mail_subject(shop_name, lang=None):
-    mail_subject = '[LSS] '+ shop_name + ' order confirmation'
+    mail_subject = '[LSS] '+ shop_name + ' ' + _('EMAIL/DELIVERY_CONFIRM/ORDER_CONFIRMATION')
     return mail_subject
