@@ -4,14 +4,14 @@ from django.utils.translation import ugettext as _
 
 
 @lang_translate_default_en
-def i18n_get_mail_subject(order):
+def i18n_get_mail_subject(order, lang=None):
     return _(
         'EMAIL/ORDER_CONFIRM/SUBJECT{order_id}{campaign_title}'
     ).format(order_id=order.id, campaign_title=order.campaign.title)
 
 
 @lang_translate_default_en
-def i18n_get_mail_content(order):
+def i18n_get_mail_content(order, lang=None):
     mail_content = '<h3>' +_('EMAIL/ORDER_CONFIRM/ORDER') + f' # {str(order.id)}</h3>'
     mail_content+= f'<h3>{order.campaign.title}</h3>----------------------------------------<br>'
     mail_content+= '<b>' + _('EMAIL/ORDER_CONFIRM/CUSTOMER_NAME') + f' : </b>{order.customer_name}<br>'
