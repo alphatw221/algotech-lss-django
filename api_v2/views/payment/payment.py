@@ -238,3 +238,63 @@ class PaymentViewSet(viewsets.GenericViewSet):
     #     except Exception as e:
     #         print(e)
     #         return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    
+    @action(detail=False, methods=['GET'], url_path=r"ecpay/credential")
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def get_ecpay_credential(self, request):
+
+        order_oid, = lib.util.getter.getparams(request,('order_oid',),with_user=False) 
+        order = lib.util.verify.Verify.get_order_with_oid(order_oid)
+        campaign = lib.util.verify.Verify.get_campaign_from_order(order)
+
+        merchant_id = campaign.meta_payment.get("ecpay",{}).get("merchant_id")
+        hash_key = campaign.meta_payment.get("ecpay",{}).get("hash_key")
+        hash_iv = campaign.meta_payment.get("ecpay",{}).get("hash_iv")
+        
+        action,payment = service.ecpay.ecpay.create_order(merchant_id, hash_key, hash_iv, int(order.total) , order.id, 
+            f'https://staginglss.accoladeglobal.net/api/v2/payment/ecpay/callback/success/?order_oid={order_oid}', 
+            f'https://staginglss.accoladeglobal.net/buyer/order/{order_oid}',
+            )
+        
+        if not payment:
+            raise lib.error_handle.error.api_error.ApiCallerError('Payment Error, Please Choose Another Payment Method')
+
+
+        # for link in payment.links:
+        #     if link.rel == "approval_url":
+                # return Response(str(link.href))
+        return Response({'action':action,'data':payment})
+        
+        raise lib.error_handle.error.api_error.ApiCallerError('Payment Error, Please Choose Another Payment Method')
+    
+    @action(detail=False, methods=['POST'], url_path=r"ecpay/callback/success")
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def ecpay_success_callback(self, request):
+
+        # order_oid = lib.util.getter.getparams(request, ('order_oid'), with_user=False)
+        # order = lib.util.verify.Verify.get_order_with_oid(order_oid)
+        # campaign = order.campaign
+        # merchant_id = campaign.meta_payment.get("ecpay",{}).get("merchant_id")
+        # hash_key = campaign.meta_payment.get("ecpay",{}).get("hash_key")
+        # hash_iv = campaign.meta_payment.get("ecpay",{}).get("hash_iv")
+        print("~~~~45df45df4g5s4524sgh254s25gf4~~~~~~")
+        print(request)
+
+        # payment = service.paypal.paypal.find_payment(client_id, secret, paymentId)
+
+        # if not payment or not payment.execute({"payer_id": PayerID}):
+        #     return Response(payment.error)
+
+        # order.status = models.order.order.STATUS_COMPLETE
+        # order.payment_method = models.order.order.PAYMENT_METHOD_PAYPAL
+        # order.checkout_details[models.order.order.PAYMENT_METHOD_PAYPAL] = request.data
+        # order.history[models.order.order.PAYMENT_METHOD_PAYPAL]={
+        #     "action": "pay",
+        #     "time": pendulum.now("UTC").to_iso8601_string()
+        # }
+        # order.save()
+
+        # content = lib.helper.order_helper.OrderHelper.get_confirmation_email_content(order)
+        # jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)
+        # return HttpResponseRedirect(redirect_to=f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}/confirmation')
+        return '1|OK'
