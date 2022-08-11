@@ -267,7 +267,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         
         raise lib.error_handle.error.api_error.ApiCallerError('Payment Error, Please Choose Another Payment Method')
     
-    @action(detail=False, methods=['POST'], url_path=r"ecpay/callback/success")
+    @action(detail=False, methods=['POST'], url_path=r"ecpay/callback/success",parser_classes=(MultiPartParser, FormParser))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def ecpay_success_callback(self, request):
 
