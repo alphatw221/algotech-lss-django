@@ -24,17 +24,9 @@ import pendulum
 import database
 from automation import jobs
 
-class PlainTextParser(BaseParser):
-    """
-    Plain text parser.
-    """
+class MyParser(FormParser):
     media_type = 'text/html'
 
-    def parse(self, stream, media_type=None, parser_context=None):
-        """
-        Simply return a string representing the body of the request.
-        """
-        return stream.read()
 
 class PaymentViewSet(viewsets.GenericViewSet):
     queryset = AuthUser.objects.none()
@@ -279,7 +271,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         
         raise lib.error_handle.error.api_error.ApiCallerError('Payment Error, Please Choose Another Payment Method')
     
-    @action(detail=False, methods=['POST'], url_path=r"ecpay/callback/success",parser_classes=(PlainTextParser,))
+    @action(detail=False, methods=['POST'], url_path=r"ecpay/callback/success",parser_classes=(MyParser,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def ecpay_success_callback(self, request):
 
