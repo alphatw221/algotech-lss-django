@@ -12,7 +12,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from django.core.files.storage import default_storage
 from django.conf import settings
-from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.parsers import MultiPartParser, FormParser,FileUploadParser
 
 
 import  base64
@@ -267,7 +267,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         
         raise lib.error_handle.error.api_error.ApiCallerError('Payment Error, Please Choose Another Payment Method')
     
-    @action(detail=False, methods=['POST'], url_path=r"ecpay/callback/success",parser_classes=(FormParser, MultiPartParser))
+    @action(detail=False, methods=['POST'], url_path=r"ecpay/callback/success",parser_classes=(FormParser, MultiPartParser, FileUploadParser))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def ecpay_success_callback(self, request):
 
