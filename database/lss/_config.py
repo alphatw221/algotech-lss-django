@@ -37,6 +37,8 @@ class Collection():
 
     @classmethod
     def create_object(cls, session=None, auto_inc=True, **kwargs):
+        if '_id' in kwargs:
+            del kwargs['_id']
         template = cls.template.copy()
         template.update(kwargs)
         if auto_inc:

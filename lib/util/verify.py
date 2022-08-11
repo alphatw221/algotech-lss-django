@@ -14,6 +14,7 @@ from api.models.user.static_assets import StaticAssets
 from api.models.order.order import Order
 from api.models.order.pre_order import PreOrder
 from api.models.order.order_product import OrderProduct
+from api.models.cart.cart import Cart
 
 from lib.error_handle.error.api_error import ApiVerifyError
 from backend.api.instagram.profile import api_ig_get_profile_live_media
@@ -168,6 +169,26 @@ class Verify():
             raise ApiVerifyError("user is not platform admin")
         return platform
 
+    
+    @staticmethod
+    def get_cart(cart_id):
+        if not Cart.objects.filter(id=cart_id).exists():
+            raise ApiVerifyError('no cart found')
+        return Cart.objects.get(id=cart_id)
+
+    @staticmethod
+    def get_cart_with_oid(oid):
+        try:
+            _id=ObjectId(oid)
+        except Exception:
+            raise ApiVerifyError('no cart found')
+        
+        cart = database.lss.cart.Cart.get(_id=_id)
+        if not cart:
+            raise ApiVerifyError('no cart found')
+        return Cart.objects.get(id=cart['id'])
+
+
     @staticmethod
     def get_pre_order(pre_order_id):
         if not PreOrder.objects.filter(id=pre_order_id).exists():
@@ -296,6 +317,12 @@ class Verify():
         if not pre_order.campaign:
             raise ApiVerifyError("no campaign found")
         return pre_order.campaign
+
+    @staticmethod
+    def get_campaign_from_cart(cart):
+        if not cart.campaign:
+            raise ApiVerifyError("no campaign found")
+        return cart.campaign
 
     @staticmethod
     def get_campaign_product(campaign_product_id):

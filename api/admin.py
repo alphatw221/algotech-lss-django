@@ -3,7 +3,7 @@ from django.contrib import admin
 from api.models.auto_response import auto_response
 from api.models.campaign import (campaign, campaign_comment,
                                  campaign_lucky_draw, campaign_product)
-from api.models.cart import cart_product
+
 from api.models.order import order, pre_order, order_product
 from api.models.product import product
 from api.models.test import sample
@@ -33,8 +33,6 @@ admin.site.register(campaign_lucky_draw.CampaignLuckyDraw,
 
 admin.site.register(product.Product, product.ProductAdmin)
 
-admin.site.register(cart_product.CartProduct,
-                    cart_product.CartProductAdmin)
 
 # admin.site.register(order.Order, order.OrderAdmin)
 admin.site.register(pre_order.PreOrder,

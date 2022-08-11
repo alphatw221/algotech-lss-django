@@ -4,7 +4,7 @@ from enum import Enum, auto
 from api.models.campaign.campaign import Campaign
 from api.models.campaign.campaign_comment import CampaignComment
 from api.models.campaign.campaign_product import CampaignProduct
-from api.models.cart.cart_product import CartProduct
+
 
 
 class RequestState(Enum):
@@ -29,7 +29,7 @@ class RequestState(Enum):
 class CartProductRequestItem:
     campaign_product: CampaignProduct
     qty: int
-    orig_cart_product: CartProduct = None
+    # orig_cart_product: CartProduct = None
     state: RequestState = RequestState.INIT
 
     def __repr__(self) -> str:

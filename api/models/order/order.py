@@ -14,10 +14,12 @@ STATUS_REVIEW = 'review'
 STATUS_SHIPPING_OUT = 'shipping out'
 STATUS_EXPIRED = 'expired'
 STATUS_PENDING_REFUND = 'pending_refund'
+
 PAYMENT_METHOD_STRIPE = 'stripe'
 PAYMENT_METHOD_DIRECT = 'direct_payment'
 PAYMENT_METHOD_HITPAY = 'hitpay'
 PAYMENT_METHOD_PAYPAL = 'paypal'
+
 SHIPPING_METHOD_DELIVERY='delivery'
 SHIPPING_METHOD_PICKUP='pickup'
 
@@ -143,9 +145,12 @@ class OrderSerializerUpdateShipping(serializers.ModelSerializer):
                   "shipping_date", 
                   "shipping_option",
                   "shipping_option_index",
-                  "pickup_address"]
+                  "pickup_address",
+                  "remark"
+                  ]
 
 
+    
 class OrderSerializerUpdatePaymentShipping(serializers.ModelSerializer):
 
     class Meta:
