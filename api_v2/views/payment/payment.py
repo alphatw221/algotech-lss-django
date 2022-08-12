@@ -238,12 +238,13 @@ class PaymentViewSet(viewsets.GenericViewSet):
             raise ApiCallerError(f"error: {response.json()}")
         
         webhook_exists = False
+        webhook_url = 'https://staginglss.accoladeglobal.net/api/v2/payment/pay_mongo/webhook/'
         webhook_list = [ value for list_data in response.json()['data'] for key, value in list_data['attributes'].items() if key == 'url']
-        if f'{settings.GCP_API_LOADBALANCER_URL}/api/v2/payment/pay_mongo/webhook/' in webhook_list:
+        if webhook_url in webhook_list:
             webhook_exists = True
-            
+        print(webhook_list)
         if not webhook_exists:
-            response = service.pay_mongo.pay_mongo.register_webhook(secret_key)
+            response = service.pay_mongo.pay_mongo.register_webhook(secret_key, webhook_url)
             if response.status_code != 200:
                 raise ApiCallerError(f"error: {response.json()}")
         

@@ -29,14 +29,14 @@ def create_link(order, secret_key):
     response = requests.request("POST", f"{settings.PAYMONGO_API_URL}/v1/links", json=payload, headers=headers)
     return response
 
-def register_webhook(secret_key):
+def register_webhook(secret_key, webhook_url):
     message_bytes = secret_key.encode('ascii')
     base64_bytes = base64.b64encode(message_bytes)
     secret_key = base64_bytes.decode('ascii')
 
     payload = {"data": {"attributes": {
                 "events": ["payment.paid"],
-                "url": f'{settings.GCP_API_LOADBALANCER_URL}/api/v2/payment/pay_mongo/webhook/'
+                "url": webhook_url
             }}}
     headers = {
         "Accept": "application/json",
