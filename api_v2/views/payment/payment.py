@@ -252,13 +252,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             raise ApiCallerError(f"error: {response.json()}")
         payMongoResponse = json.loads(response.text)
         print(payMongoResponse)
-        response = {
-            'checkout_url': payMongoResponse['data']['attributes']['checkout_url'],
-            'reference_number': payMongoResponse['data']['attributes']['reference_number'],
-            'id': payMongoResponse['data']['id']
-        }
-        
-        return HttpResponseRedirect(redirect_to=payMongoResponse['data']['attributes']['checkout_url'])
+        return Response(payMongoResponse['data']['attributes']['checkout_url'], status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['GET'], url_path=r"pay_mongo/register/webhook")
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
