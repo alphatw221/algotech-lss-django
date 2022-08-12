@@ -429,11 +429,10 @@ class CampaignViewSet(viewsets.ModelViewSet):
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription,campaign_id)
 
-        campaign.meta['allow_checkout']=1 if int(_status) else 0
+        campaign.meta['allow_checkout']=False if campaign.meta.get('allow_checkout',True) else True
         campaign.save()
 
-        return Response({"allow_checkout":campaign.meta['allow_checkout']
-                         }, status=status.HTTP_200_OK)
+        return Response(models.campaign.campaign.CampaignSerializer(campaign).data, status=status.HTTP_200_OK)
 
 
     @action(detail=True, methods=['POST'], url_path=r'product/add/fast', permission_classes=(IsAuthenticated,) )
