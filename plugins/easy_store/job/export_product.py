@@ -5,9 +5,8 @@ try:
     os.environ['DJANGO_SETTINGS_MODULE'] = config.DJANGO_SETTINGS
     django.setup()
 except Exception:
-
     pass
-
+from django.conf import settings
 
 # from .. import service as easy_store_service
 
