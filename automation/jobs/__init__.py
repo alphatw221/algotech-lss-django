@@ -1,1 +1,1 @@
-from . import campaign_job, comment_job, send_email_job, export_product
+from . import campaign_job, comment_job, easy_store, send_email_job
