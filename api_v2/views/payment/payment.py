@@ -276,6 +276,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def pay_mongo_webhook_paid(self, request):
         from backend.pymongo.mongodb import db
+        print(request.data)
         order_id = int(request.data['data']['attributes']['data']['attributes']['description'].split('_')[1])
         if (request.data['data']['attributes']['data']['attributes']['status'] == 'paid'):
             db.api_order.update(
