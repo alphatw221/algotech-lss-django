@@ -1,5 +1,6 @@
 
 from http import client
+import json
 from django.core.files.base import ContentFile
 from django.contrib.auth.models import User as AuthUser
 from django.http import HttpResponseRedirect
@@ -18,6 +19,7 @@ from rest_framework.renderers import HTMLFormRenderer
 import  base64
 
 from api import models
+from api.utils.error_handle.error.api_error import ApiCallerError
 import service
 import lib
 import pendulum
@@ -223,7 +225,84 @@ class PaymentViewSet(viewsets.GenericViewSet):
         return HttpResponseRedirect(redirect_to=f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}/confirmation')
 
 
-
+    @action(detail=False, methods=['GET'], url_path=r"pay_mongo/gateway")
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def get_pay_mongo_gateway(self, request):
+        order_oid, = lib.util.getter.getparams(request,('order_oid',),with_user=False) 
+        order = lib.util.verify.Verify.get_order_with_oid(order_oid)
+        campaign = lib.util.verify.Verify.get_campaign_from_order(order)
+        secret_key = campaign.meta_payment.get("pay_mongo",{}).get("secret")
+        
+        response = service.pay_mongo.pay_mongo.retrieve_webhook(secret_key)
+        if response.status_code != 200:
+            raise ApiCallerError(f"error: {response.json()}")
+        
+        webhook_exists = False
+        webhook_list = [ value for list_data in response.json()['data'] for key, value in list_data['attributes'].items() if key == 'url']
+        if f'{settings.GCP_API_LOADBALANCER_URL}/api/v2/payment/pay_mongo/webhook/' in webhook_list:
+            webhook_exists = True
+            
+        if not webhook_exists:
+            response = service.pay_mongo.pay_mongo.register_webhook(secret_key)
+            if response.status_code != 200:
+                raise ApiCallerError(f"error: {response.json()}")
+        
+        response = service.pay_mongo.pay_mongo.create_link(order, secret_key)
+        if response.status_code != 200:
+            raise ApiCallerError(f"error: {response.json()}")
+        payMongoResponse = json.loads(response.text)
+        print(payMongoResponse)
+        response = {
+            'checkout_url': payMongoResponse['data']['attributes']['checkout_url'],
+            'reference_number': payMongoResponse['data']['attributes']['reference_number'],
+            'id': payMongoResponse['data']['id']
+        }
+        
+        return HttpResponseRedirect(redirect_to=payMongoResponse['data']['attributes']['checkout_url'])
+    
+    @action(detail=False, methods=['GET'], url_path=r"pay_mongo/register/webhook")
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def pay_mongo_register_webhook(self, request):
+        order_oid, = lib.util.getter.getparams(request,('order_oid',),with_user=False) 
+        order = lib.util.verify.Verify.get_order_with_oid(order_oid)
+        campaign = lib.util.verify.Verify.get_campaign_from_order(order)
+        secret_key = campaign.meta_payment.get("pay_mongo",{}).get("secret")
+        response = service.pay_mongo.pay_mongo.register_webhook(secret_key)
+        if response.status_code != 200:
+            raise ApiCallerError("error: {response.text}")
+        return Response(response, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['POST'], url_path=r"pay_mongo/webhook/")
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def pay_mongo_webhook_paid(self, request):
+        from backend.pymongo.mongodb import db
+        order_id = int(request.data['data']['attributes']['data']['attributes']['description'].split('_')[1])
+        if (request.data['data']['attributes']['data']['attributes']['status'] == 'paid'):
+            db.api_order.update(
+                {'id': order_id},
+                {'$set': {'status': 'complete'}}
+            )
+        return Response('response', status=status.HTTP_200_OK)
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     # @action(detail=False, methods=['GET'], url_path=r"paypal_cancel")
     # @api_error_handler
     # def paypal_cancel(self, request, *args, **kwargs):
