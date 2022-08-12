@@ -53,14 +53,14 @@ def export_product_job(user_subscription_id, credential):
                         lss_product = models.product.product.Product.objects.get(id=sku_dict[sku])
                         lss_product.price = price
                         lss_product.name = name
-                        lss_product.tags = tags
+                        lss_product.tag = tags
                         lss_product.qty = qty
                         lss_product.status = models.product.product.STATUS_ENABLED
                         lss_product.meta.update(meta_data)
                         lss_product.save()
                     else:
                         models.product.product.Product.objects.create(
-                            user_subscription = user_subscription, name = name, price=price, sku=sku, tags=tags, qty = qty, status = models.product.product.STATUS_ENABLED, meta=meta_data)
+                            user_subscription = user_subscription, name = name, price=price, sku=sku, tag=tags, qty = qty, status = models.product.product.STATUS_ENABLED, meta=meta_data)
 
             page+=1
 
