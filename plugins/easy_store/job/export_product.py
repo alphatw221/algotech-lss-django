@@ -5,9 +5,10 @@ try:
     os.environ['DJANGO_SETTINGS_MODULE'] = config.DJANGO_SETTINGS
     django.setup()
 except Exception:
+
     pass
-from api import models
-import lib
+
+
 from .. import service as easy_store_service
 
 def export_product_job(user_subscription_id, credential):
