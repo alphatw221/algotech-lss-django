@@ -765,7 +765,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             "Authorization": f"Basic {secret_key}"
         }
 
-        response = requests.request("POST", settings.PAYMONGO_URL, json=payload, headers=headers)
+        response = requests.request("POST", settings.PAYMONGO_API_URL, json=payload, headers=headers)
         payMongoResponse = json.loads(response.text)
         print(payMongoResponse)
         response = {
@@ -799,7 +799,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             "Authorization": f"Basic {secret_key}"
         }
 
-        response = requests.request("GET", settings.PAYMONGO_URL, params=params, headers=headers)
+        response = requests.request("GET", settings.PAYMONGO_API_URL, params=params, headers=headers)
         payMongoResponse = json.loads(response.text)
         response = {
             'order_id': payMongoResponse['data'][0]['attributes']['description'].split('_')[1],
@@ -837,7 +837,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             "Authorization": f"Basic {secret_key}"
         }
 
-        response = requests.request("POST", settings.PAYMONGO_URL, json=payload, headers=headers)
+        response = requests.request("POST", settings.PAYMONGO_API_URL, json=payload, headers=headers)
         return Response(response, status=status.HTTP_200_OK)
 
     
