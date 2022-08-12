@@ -4,7 +4,8 @@ import django
 try:
     os.environ['DJANGO_SETTINGS_MODULE'] = config.DJANGO_SETTINGS
     django.setup()
-except Exception:
+except Exception as e:
+    print(e)
     pass
 from django.conf import settings
 
