@@ -255,7 +255,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         print(payMongoResponse)
         return Response(payMongoResponse['data']['attributes']['checkout_url'], status=status.HTTP_200_OK)
     
-    @action(detail=False, methods=['GET'], url_path=r"pay_mongo/register/webhook")
+    @action(detail=False, methods=['GET'], url_path=r"pay_mongo/webhook/register")
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def pay_mongo_register_webhook(self, request):
         order_oid, = lib.util.getter.getparams(request,('order_oid',),with_user=False) 
@@ -267,7 +267,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             raise ApiCallerError("error: {response.text}")
         return Response(response, status=status.HTTP_200_OK)
     
-    @action(detail=False, methods=['POST'], url_path=r"pay_mongo/webhook/")
+    @action(detail=False, methods=['POST'], url_path=r"pay_mongo/webhook")
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def pay_mongo_webhook_paid(self, request):
         from backend.pymongo.mongodb import db
