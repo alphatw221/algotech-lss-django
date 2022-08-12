@@ -19,7 +19,6 @@ from rest_framework.renderers import HTMLFormRenderer
 import  base64
 
 from api import models
-from api.utils.error_handle.error.api_error import ApiCallerError
 import service
 import lib
 import pendulum
@@ -224,7 +223,25 @@ class PaymentViewSet(viewsets.GenericViewSet):
         jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)
         return HttpResponseRedirect(redirect_to=f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}/confirmation')
 
-
+    # @action(detail=False, methods=['GET'], url_path=r"paypal_cancel")
+    # @api_error_handler
+    # def paypal_cancel(self, request, *args, **kwargs):
+    #     try:
+    #         order_id = request.GET["order_id"]
+    #         order_object = Verify.get_order(order_id)
+    #         pre_order = PreOrder.objects.filter(customer_id=order_object.customer_id, campaign_id=order_object.campaign_id)
+    #         if len(pre_order) > 1:
+    #             return Response({"message": "Buyer has more than one shopping cart."}, status=status.HTTP_400_BAD_REQUEST)
+    #         order_object.checkout_details[len(order_object.checkout_details) + 1] = {
+    #             "action": "cancel payment",
+    #             "time": datetime.datetime.now()
+    #         }
+    #         order_object.save()
+    #         return HttpResponseRedirect(redirect_to=f'{settings.WEB_SERVER_URL}/buyer/cart/{pre_order.id}')
+    #     except Exception as e:
+    #         print(e)
+    #         return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    
     @action(detail=False, methods=['GET'], url_path=r"pay_mongo/gateway")
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def get_pay_mongo_gateway(self, request):
@@ -235,22 +252,22 @@ class PaymentViewSet(viewsets.GenericViewSet):
         
         response = service.pay_mongo.pay_mongo.retrieve_webhook(secret_key)
         if response.status_code != 200:
-            raise ApiCallerError(f"error: {response.json()}")
+            raise lib.error_handle.error.api_error.ApiCallerError(f"error: {response.json()}")
         
         webhook_exists = False
-        webhook_url = 'https://staginglss.accoladeglobal.net/api/v2/payment/pay_mongo/webhook/'
+        webhook_url = f'{settings.GCP_API_LOADBALANCER_URL}/api/v2/payment/pay_mongo/webhook/'
         webhook_list = [ value for list_data in response.json()['data'] for key, value in list_data['attributes'].items() if key == 'url']
         if webhook_url in webhook_list:
             webhook_exists = True
-        print(webhook_list)
+        # print(webhook_list)
         if not webhook_exists:
             response = service.pay_mongo.pay_mongo.register_webhook(secret_key, webhook_url)
             if response.status_code != 200:
-                raise ApiCallerError(f"error: {response.json()}")
+                raise lib.error_handle.error.api_error.ApiCallerError(f"error: {response.json()}")
         
         response = service.pay_mongo.pay_mongo.create_link(order, secret_key)
         if response.status_code != 200:
-            raise ApiCallerError(f"error: {response.json()}")
+            raise lib.error_handle.error.api_error.ApiCallerError(f"error: {response.json()}")
         payMongoResponse = json.loads(response.text)
         print(payMongoResponse)
         return Response(payMongoResponse['data']['attributes']['checkout_url'], status=status.HTTP_200_OK)
@@ -264,7 +281,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         secret_key = campaign.meta_payment.get("pay_mongo",{}).get("secret")
         response = service.pay_mongo.pay_mongo.register_webhook(secret_key)
         if response.status_code != 200:
-            raise ApiCallerError("error: {response.text}")
+            raise lib.error_handle.error.api_error.ApiCallerError("error: {response.text}")
         return Response(response, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['POST'], url_path=r"pay_mongo/webhook")
@@ -287,44 +304,6 @@ class PaymentViewSet(viewsets.GenericViewSet):
             content = lib.helper.order_helper.OrderHelper.get_confirmation_email_content(order)
             jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)
         return Response('response', status=status.HTTP_200_OK)
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-    # @action(detail=False, methods=['GET'], url_path=r"paypal_cancel")
-    # @api_error_handler
-    # def paypal_cancel(self, request, *args, **kwargs):
-    #     try:
-    #         order_id = request.GET["order_id"]
-    #         order_object = Verify.get_order(order_id)
-    #         pre_order = PreOrder.objects.filter(customer_id=order_object.customer_id, campaign_id=order_object.campaign_id)
-    #         if len(pre_order) > 1:
-    #             return Response({"message": "Buyer has more than one shopping cart."}, status=status.HTTP_400_BAD_REQUEST)
-    #         order_object.checkout_details[len(order_object.checkout_details) + 1] = {
-    #             "action": "cancel payment",
-    #             "time": datetime.datetime.now()
-    #         }
-    #         order_object.save()
-    #         return HttpResponseRedirect(redirect_to=f'{settings.WEB_SERVER_URL}/buyer/cart/{pre_order.id}')
-    #     except Exception as e:
-    #         print(e)
-    #         return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
     
     @action(detail=False, methods=['GET'], url_path=r"ecpay/credential")
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
