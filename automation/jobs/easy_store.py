@@ -49,7 +49,7 @@ def export_product_job(user_subscription_id, credential):
                         product_categories.append(collection_name)
                         tag_set.add(collection_name)
                     tags.append(collection_name)
-                # tags = [collection.get('name') for collection in  product.get('collections') if collection.get('name')]
+
                 for variant in product.get('variants'):
                     
                     sku = variant.get('sku')
