@@ -7,7 +7,7 @@ from api import models
 import lib
 import service
 
-# from .. import job as easy_store_job
+
 from automation import jobs
 
 PLUGIN_EASY_STORE = 'easy_store'
