@@ -273,11 +273,19 @@ class PaymentViewSet(viewsets.GenericViewSet):
         from backend.pymongo.mongodb import db
         print(request.data)
         order_id = int(request.data['data']['attributes']['data']['attributes']['description'].split('_')[1])
+        order = lib.util.verify.Verify.get_order(order_id)
         if (request.data['data']['attributes']['data']['attributes']['status'] == 'paid'):
-            db.api_order.update(
-                {'id': order_id},
-                {'$set': {'status': 'complete'}}
-            )
+            
+            order.status = models.order.order.STATUS_COMPLETE
+            order.payment_method = models.order.order.PAYMENT_METHOD_PAYMONGO
+            order.checkout_details[models.order.order.PAYMENT_METHOD_PAYMONGO] = request.data
+            order.history[models.order.order.PAYMENT_METHOD_PAYMONGO]={
+                "action": "pay",
+                "time": pendulum.now("UTC").to_iso8601_string()
+            }
+            order.save()
+            content = lib.helper.order_helper.OrderHelper.get_confirmation_email_content(order)
+            jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)
         return Response('response', status=status.HTTP_200_OK)
         
         
