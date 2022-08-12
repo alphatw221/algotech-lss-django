@@ -51,4 +51,8 @@ urlpatterns = [
 
     path('test',TemplateView.as_view(template_name="email_reset_password_link.html")),
     path('test2',TemplateView.as_view(template_name="reset_password_success_email.html")),
+
+
+    #-------------------------plugin---------------------------------------------------
+    path('api/plugin/easy_store/', include('plugins.easy_store.urls'))
 ]

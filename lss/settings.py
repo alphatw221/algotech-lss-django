@@ -15,6 +15,7 @@ from datetime import timedelta
 from pathlib import Path
 
 from google.oauth2 import service_account
+from corsheaders.defaults import default_headers
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -34,8 +35,11 @@ DEBUG = False
 ALLOWED_HOSTS = ['*']  # Auto Scale testing
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = False
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    "Access-Control-Allow-Origin",
+]
 
 # Application definition
 
@@ -312,7 +316,7 @@ HITPAY_API_KEY = 'a17041b2c841f88263faaed459e1579a592a431acf8b69e044645d28d4a1c3
 HITPAY_SECRET_SALT = '9ntt8RQoPtP9NXlO36aZTpP5wK10vFWbsw45KjaBGNzfYiU75cUJ3LLCEqMLGUO9'
 
 PAYMONGO_SECRET_KEY = 'sk_test_kXkD4NBMYZixy8dJ8GV6br4u'
-PAYMONGO_URL = 'https://api.paymongo.com/v1/links'
+PAYMONGO_API_URL = 'https://api.paymongo.com'
 
 #NLP
 NLP_COMPUTING_MACHINE_URL = "http://192.168.74.105:8501"

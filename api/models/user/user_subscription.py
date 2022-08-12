@@ -13,7 +13,7 @@ from djongo import models
 from rest_framework import serializers
 import business_policy
 
-import plugins
+# import plugins
 
 IMAGE_NULL = 'no_image.jpeg'
 IMAGE_GIF = 'image/gif'
@@ -90,7 +90,7 @@ class UserSubscription(models.Model):
         return str(self.name)
     
 
-    def excute_plugin(self, command, *args, **kwargs):
+    def excute_plugin(self, plugins, command, *args, **kwargs):
         for plugin_key, credential in self.user_plan.get('plugins',{}).items():
             getattr(plugins,plugin_key).excute(command, credential, *args, **kwargs)
 
