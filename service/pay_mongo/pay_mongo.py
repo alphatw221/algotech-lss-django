@@ -4,9 +4,7 @@ import hmac, hashlib, base64, binascii
 import requests
 def create_link(order, secret_key):
     amount = int(order.total * 100)
-    print(amount)
-    if amount < 10000:
-        amount = 10000
+    
     message_bytes = secret_key.encode('ascii')
     base64_bytes = base64.b64encode(message_bytes)
     secret_key = base64_bytes.decode('ascii')
