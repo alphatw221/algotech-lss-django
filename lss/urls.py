@@ -54,5 +54,5 @@ urlpatterns = [
 
 
     #-------------------------plugin---------------------------------------------------
-    path('api/plugin/easy_store', include('plugins.easy_store.urls'))
+    path('api/plugin/easy_store/', include('plugins.easy_store.urls'))
 ]
