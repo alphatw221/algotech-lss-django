@@ -7,7 +7,8 @@ from api import models
 import lib
 import service
 
-from .. import job as easy_store_job
+# from .. import job as easy_store_job
+from automation import jobs
 
 PLUGIN_EASY_STORE = 'easy_store'
 class ProductViewSet(viewsets.ModelViewSet):
@@ -24,5 +25,5 @@ class ProductViewSet(viewsets.ModelViewSet):
         if not credential:
             raise lib.error_handle.error.api_error.ApiVerifyError('no_plugin')
         
-        service.rq.queue.enqueue_general_queue(easy_store_job.export_product.export_product_job, user_subscription_id = user_subscription.id, credential=credential)
+        service.rq.queue.enqueue_general_queue(jobs.export_product.export_product_job, user_subscription_id = user_subscription.id, credential=credential)
         return Response('ok', status=status.HTTP_200_OK)
