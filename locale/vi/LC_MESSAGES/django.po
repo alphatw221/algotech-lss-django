@@ -50,9 +50,7 @@ msgstr ""
 
 #: backend/i18n/cart_product_request.py:23 lib/i18n/cart_product_request.py:22
 msgid "MORE_INFO_IN_PM_NOTICE"
-msgstr ""
-"Link giỏ hàng được gửi qua FB Messenger, vui lòng liên hệ quản trị viên "
-"trang (page admin) nếu không nhận được thông báo."
+msgstr "Link giỏ hàng được gửi qua FB Messenger, vui lòng liên hệ quản trị viên trang (page admin) nếu không nhận được thông báo."
 
 #: backend/i18n/cart_product_request.py:30
 #: backend/i18n/cart_product_request.py:66 lib/i18n/cart_product_request.py:29
