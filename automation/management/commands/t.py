@@ -1,6 +1,7 @@
 import email
 import imp
 from inspect import Parameter
+from os import access
 import pprint
 from grpc import server
 import requests
@@ -408,8 +409,25 @@ class Command(BaseCommand):
     def test_easy_store(self):
         from plugins.easy_store import service
         from pprint import pprint
-        success, data = service.products.get_published_product(shop='yihsuehlinlinyixue.easy.co', access_token='698f9a9a7c8bbe5f65d0207fb6cba139',page=1)
+        shop = 'fantastyfrog.easy.co'
+        access_token = '8cd8e2672d9031a9df5f5371b0c4ca41'
+        # success, data = service.products.get_published_product(shop=shop, access_token=access_token,page=1)
 
-        pprint(success)
-        pprint(data)
+        # pprint(success)
+        # pprint(data)
+
+        line_items = {
+            "checkout": {
+                "line_items": [
+                    {
+                        "variant_id": 8020926,
+                        "quantity": 1
+                    }
+                ]
+            }
+        }
+
+        service.checkouts.create_checkouts(shop=shop, access_token=access_token, line_items=line_items)
+
+
         
