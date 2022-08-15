@@ -7,6 +7,7 @@ from api import models
 import lib
 import service
 
+from .. import service as easy_store_service
 
 from automation import jobs
 
@@ -26,34 +27,45 @@ class CartViewSet(viewsets.ModelViewSet):
             raise lib.error_handle.error.api_error.ApiVerifyError('Please Refresh The Page And Retry Again')
 
         pre_order = lib.util.verify.Verify.get_pre_order_with_oid(cart_oid)    #temp
+        campaign = pre_order.campaign
+        user_subscription = campaign.user_subscription
+
+        credential = user_subscription.user_plan.get('plugins',{}).get('easy_store',{})
+
+        if not credential:
+            raise lib.error_handle.error.api_error.ApiVerifyError('no_plugin')
 
         campaign_product_dict = {str(campaign_product.id):campaign_product for campaign_product in pre_order.campaign.products.all()}
-        # pre_order.campaign.user_subscription...
 
-        # line_items = []
-        # for campaign_product_id_str,product in pre_order.products:
-        #   if campaign_product_id_str not in campaign_product_dict:
-        #       continue
-        #   campaign_product = campaign_product_dict[campaign_product_id_str]
-        #   line_items.append({'variant_id':campaign_product.meta.get('easy_store',{}).get('variant_id'), 'quantity':product.get('qty')})
-        # 
-        #     
-        #   TODO 
-        #   if easy_store checkout not exists:
-        #       create
-        #   else:
-        #       update
-        #
-        #
-        #
-
+        line_items = []
+        for campaign_product_id_str,product in pre_order.products:
+          if campaign_product_id_str not in campaign_product_dict:
+              continue
+          campaign_product = campaign_product_dict[campaign_product_id_str]
+          line_items.append({'variant_id':campaign_product.meta.get('easy_store',{}).get('variant_id'), 'quantity':product.get('qty')})
         
-        # meta_data = {'easy_store':{
-        #                     "checkout_id":'',
-        #                     "url":'',
-        #                 }}
-        
-        # pre_order.meta.update(meta_data)
-        # pre_order.save()
 
-        return Response('url_here', status=status.HTTP_200_OK)
+        if cart_token := pre_order.meta.get('easy_store',{}).get('cart_token'):
+            success, data = easy_store_service.checkouts.update_checkout(credential.get('shop'), credential.get('access_token'), line_items, cart_token)
+        else:
+            success, data = easy_store_service.checkouts.create_checkout(credential.get('shop'), credential.get('access_token'), line_items)
+
+        if not success:
+            raise lib.error_handle.error.api_error.ApiCallerError('please place your order again')
+        checkout = data.get('checkout')
+        id = checkout.get('id')
+        token = checkout.get('token')
+        cart_token = checkout.get('cart_token')
+        checkout_url = checkout.get('checkout_url')
+        
+        meta_data = {'easy_store':{
+                            "id":id,
+                            "token":token,
+                            "cart_token":cart_token,
+                            "checkout_url":checkout_url,
+                        }}
+        
+        pre_order.meta.update(meta_data)
+        pre_order.save()
+
+        return Response(checkout_url, status=status.HTTP_200_OK)

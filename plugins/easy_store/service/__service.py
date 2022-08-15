@@ -5,3 +5,9 @@ def load_response(response):
         print(response.text)
         return False, None
     return True, json.loads(response.text)
+
+def get_header(token):
+    return {
+        'Content-Type': 'application/json',
+        'Easystore-Access-Token': token
+    }
