@@ -79,6 +79,8 @@ class Campaign(models.Model):
     decimal_places = models.IntegerField( blank=False, null=False, 
         choices=business_policy.subscription.DECIMAL_CHOICES, default=business_policy.subscription.DECIMAL_001)
     
+    stop_checkout = models.BooleanField(
+        blank=False, null=False, default=False)
     def __str__(self):
         return str(self.title)
 

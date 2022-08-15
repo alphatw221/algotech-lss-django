@@ -115,7 +115,8 @@ class PreOrderCheckRule():
             campaign = kwargs.get('campaign')
             if api_user and api_user.type=="user":
                 return
-            if not campaign.data.get('meta',{}).get('allow_checkout', True):
+            if campaign.stop_checkout:
+
                 raise PreOrderErrors.PreOrderException('Sorry, you are unable to make that purchase right now.')
 
         else:
@@ -123,7 +124,8 @@ class PreOrderCheckRule():
 
             if api_user and api_user.type=="user":
                 return
-            if not campaign.meta.get('allow_checkout', 1):
+            if campaign.stop_checkout:
+
                 raise PreOrderErrors.PreOrderException('Sorry, you are unable to make that purchase right now.')
 
     @staticmethod

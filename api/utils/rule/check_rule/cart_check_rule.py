@@ -105,7 +105,8 @@ class CartCheckRule():
         campaign = kwargs.get('campaign')
         if api_user and api_user.type=="user":
             return
-        if not campaign.meta.get('allow_checkout', True):
+        if campaign.stop_checkout:
+        # if not campaign.meta.get('allow_checkout', True):
             raise CartErrors.CartException('Sorry, you are unable to make that purchase right now.')
 
 

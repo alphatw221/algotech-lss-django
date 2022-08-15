@@ -359,7 +359,7 @@ def get_campaign_complete_sales(campaign_id):
             "$group":
                 {
                 "_id":None,
-                "campaign_sales": { "$sum": "$subtotal" },
+                "campaign_sales": { "$sum": "$total" },
                 }
         },
         {"$project":{"_id":0,"campaign_sales":1}},

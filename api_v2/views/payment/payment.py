@@ -14,7 +14,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.core.files.storage import default_storage
 from django.conf import settings
 from rest_framework.parsers import MultiPartParser, FormParser,FileUploadParser, BaseParser
-from rest_framework.renderers import HTMLFormRenderer
+from rest_framework.renderers import HTMLFormRenderer,StaticHTMLRenderer
 
 import  base64
 
@@ -335,51 +335,90 @@ class PaymentViewSet(viewsets.GenericViewSet):
         hash_iv = campaign.meta_payment.get("ecpay",{}).get("hash_iv")
         
         action,payment = service.ecpay.ecpay.create_order(merchant_id, hash_key, hash_iv, int(order.total) , order.id, 
-            f'https://staginglss.accoladeglobal.net/api/v2/payment/ecpay/callback/success/?order_oid={order_oid}', 
-            f'https://staginglss.accoladeglobal.net/buyer/order/{order_oid}',
+            f'https://staginglss.accoladeglobal.net/api/v2/payment/ecpay/callback/success/{order_oid}/', 
+            f'https://staginglss.accoladeglobal.net/buyer/order/{order_oid}/confirmation',
             )
         
         if not payment:
             raise lib.error_handle.error.api_error.ApiCallerError('Payment Error, Please Choose Another Payment Method')
 
-
-        # for link in payment.links:
-        #     if link.rel == "approval_url":
-                # return Response(str(link.href))
+        
         return Response({'action':action,'data':payment})
         
         raise lib.error_handle.error.api_error.ApiCallerError('Payment Error, Please Choose Another Payment Method')
     
-    @action(detail=False, methods=['POST'], url_path=r"ecpay/callback/success",parser_classes=(MultiPartParser,), renderer_classes = (HTMLFormRenderer,))
+    @action(detail=False, methods=['POST'], url_path=r"ecpay/callback/success/(?P<order_oid>[^/.]+)",parser_classes=(FormParser,), renderer_classes = (StaticHTMLRenderer,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def ecpay_success_callback(self, request):
-
-        # order_oid = lib.util.getter.getparams(request, ('order_oid'), with_user=False)
-        # order = lib.util.verify.Verify.get_order_with_oid(order_oid)
-        # campaign = order.campaign
+    def ecpay_success_callback(self, request,order_oid):
+        
+        order = lib.util.verify.Verify.get_order_with_oid(order_oid)
+        campaign = order.campaign
         # merchant_id = campaign.meta_payment.get("ecpay",{}).get("merchant_id")
         # hash_key = campaign.meta_payment.get("ecpay",{}).get("hash_key")
         # hash_iv = campaign.meta_payment.get("ecpay",{}).get("hash_iv")
-        print("~~~~45df45df4g5s4524sgh254s25gf4~~~~~~")
-        print(request)
+        pay_res = request.data.dict()
+        if not pay_res or pay_res['MerchantTradeNo'] != str(order.id) :
+            return print('order is not match')
+        
+        # {'AlipayID': [''], 
+        # 'AlipayTradeNo': [''], 
+        # 'amount': ['620'], 
+        # 'ATMAccBank': [''], 
+        # 'ATMAccNo': [''], 
+        # 'auth_code': ['777777'], 
+        # 'card4no': ['2222'], 
+        # 'card6no': ['431195'], 
+        # 'CustomField1': [''], 
+        # 'CustomField2': [''], 
+        # 'CustomField3': [''], 
+        # 'CustomField4': [''], 
+        # 'eci': ['0'], 
+        # 'ExecTimes': [''], 
+        # 'Frequency': [''], 
+        # 'gwsr': ['12084016'], 
+        # 'MerchantID': ['2000132'], 
+        # 'MerchantTradeNo': ['32963'], 
+        # 'PayFrom': [''], 
+        # 'PaymentDate': ['2022/08/12 10:21:28'], 
+        # 'PaymentNo': [''], 
+        # 'PaymentType': ['Credit_CreditCard'], 
+        # 'PaymentTypeChargeFee': ['12'], 
+        # 'PeriodAmount': [''],
+        # 'PeriodType': [''], 
+        # 'process_date': ['2022/08/12 10:21:28'], 
+        # 'red_dan': ['0'], 'red_de_amt': ['0'], 
+        # 'red_ok_amt': ['0'], 'red_yet': ['0'], 
+        # 'RtnCode': ['1'], 'RtnMsg': ['交易成功'], 
+        # 'SimulatePaid': ['0'], 'staed': ['0'], 
+        # 'stage': ['0'], 'stast': ['0'], 
+        # 'StoreID': [''], 
+        # 'TenpayTradeNo': [''], 
+        # 'TotalSuccessAmount': [''], 
+        # 'TotalSuccessTimes': [''], 
+        # 'TradeAmt': ['620'], 
+        # 'TradeDate': ['2022/08/12 10:21:04'], 
+        # 'TradeNo': ['2208121021044275'], 
+        # 'WebATMAccBank': [''], 
+        # 'WebATMAccNo': [''], 
+        # 'WebATMBankName': [''], 
+        # 'CheckMacValue': ['9D8011AE1ADC9F13854745CA88F8DA4DF14B111580EF7AACD29631E034CDC9AA']}
 
-        # payment = service.paypal.paypal.find_payment(client_id, secret, paymentId)
+        if pay_res['RtnCode'] == '0':
+            raise lib.error_handle.error.api_error.ApiVerifyError('payment not successful',pay_res['RtnMsg'])
+        
+        order.status = models.order.order.STATUS_COMPLETE
+        order.payment_method = models.order.order.PAYMENT_METHOD_ECPAY
+        order.checkout_details[models.order.order.PAYMENT_METHOD_ECPAY] = pay_res
+        order.history[models.order.order.PAYMENT_METHOD_ECPAY]={
+            "action": "pay",
+            "time": pendulum.now("UTC").to_iso8601_string()
+        }
+        order.save()
 
-        # if not payment or not payment.execute({"payer_id": PayerID}):
-        #     return Response(payment.error)
-
-        # order.status = models.order.order.STATUS_COMPLETE
-        # order.payment_method = models.order.order.PAYMENT_METHOD_PAYPAL
-        # order.checkout_details[models.order.order.PAYMENT_METHOD_PAYPAL] = request.data
-        # order.history[models.order.order.PAYMENT_METHOD_PAYPAL]={
-        #     "action": "pay",
-        #     "time": pendulum.now("UTC").to_iso8601_string()
-        # }
-        # order.save()
-
-        # content = lib.helper.order_helper.OrderHelper.get_confirmation_email_content(order)
-        # jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)
+        content = lib.helper.order_helper.OrderHelper.get_confirmation_email_content(order)
+        jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)
         # return HttpResponseRedirect(redirect_to=f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}/confirmation')
-
-        return Response('1|OK')
+        res = '1|OK'
+        
+        return Response(res)
         
