@@ -155,7 +155,7 @@ class OrderReport(XlsxHelper):
         })
         
         campaign_products_count = campaign.products.count()
-        with translation.override(campaign.lang):
+        with translation.override(lang):
             report_title = campaign.title + ' ' + _('REPORT/SECTION_TITLE/TITLE')
             worksheet.merge_range(cls.row, 0, cls.row, len(cls.columns) + campaign_products_count - 1, report_title, title_format)
             cls._next_row()
@@ -167,7 +167,7 @@ class OrderReport(XlsxHelper):
         cls._reset_column()
         
         for column in cls.columns:
-            with translation.override(campaign.lang):
+            with translation.override(lang):
                 worksheet.write(cls.row, cls.col, _(column.i18n_key), header_format)
             worksheet.set_column(cls.col, cls.col, column.width)
             cls._next_column()

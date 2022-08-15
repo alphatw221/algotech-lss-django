@@ -25,7 +25,7 @@ def create_checkouts(shop, access_token, line_items):
 
 def update_checkouts(shop, access_token):
     response = request("PUT", 
-        f"https://{shop}/api/3.0/checkouts.json/{}", 
+        f"https://{shop}/api/3.0/checkouts.json/", 
         headers = {'EasyStore-Access-Token': access_token}, 
     )
 
