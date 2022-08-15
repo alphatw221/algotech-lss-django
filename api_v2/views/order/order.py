@@ -62,9 +62,9 @@ class OrderViewSet(viewsets.ModelViewSet):
         if image in [None, '', "undefined", 'null']:
             pass
         elif image.size > models.order.order.IMAGE_MAXIMUM_SIZE:
-            raise lib.error_handle.error.api_error.ApiVerifyError(f'image size exceed maximum size')
+            raise lib.error_handle.error.api_error.ApiVerifyError('image_size_exceed_maximum_size')
         elif image.content_type not in models.order.order.IMAGE_SUPPORTED_TYPE:
-            raise lib.error_handle.error.api_error.ApiVerifyError(f'not support this image type')
+            raise lib.error_handle.error.api_error.ApiVerifyError('not_support_this_image_type')
         else:
             image_path = default_storage.save(
                 f'campaign/{order.campaign.id}/order/{order.id}/receipt/{image.name}', 

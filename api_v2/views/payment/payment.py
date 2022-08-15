@@ -48,7 +48,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         campaign = lib.util.verify.Verify.get_campaign_from_order(order)
 
         if not campaign.meta_payment.get("stripe",{}).get("enabled"):
-            raise lib.error_handle.error.api_error.ApiVerifyError('payment not enable')
+            raise lib.error_handle.error.api_error.ApiVerifyError('payment_not_enable')
             
         secret = campaign.meta_payment.get("stripe",{}).get("secret")
         currency = campaign.meta_payment.get("stripe",{}).get("currency")
@@ -61,7 +61,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             cancel_url=f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{str(order_oid)}/payment')
 
         if not checkout_session:
-            raise lib.error_handle.error.api_error.ApiCallerError('Payment Error, Please Choose Another Payment Method')
+            raise lib.error_handle.error.api_error.ApiCallerError('choose_another_payment_method')
         
         return Response(checkout_session.url, status=status.HTTP_200_OK)
 
@@ -79,7 +79,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         is_successful, payment_intent = service.stripe.stripe.is_payment_successful(secret, session_id)
         
         if not is_successful:
-            raise lib.error_handle.error.api_error.ApiVerifyError('payment not successful')
+            raise lib.error_handle.error.api_error.ApiVerifyError('payment_failed')
 
         after_pay_details = {
             "client_secret": payment_intent.client_secret,
@@ -131,7 +131,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             f'{settings.GCP_API_LOADBALANCER_URL}/api/v2/payment/hitpay/webhook/')
 
         if code != 201:
-            raise lib.error_handle.error.api_error.ApiCallerError('Payment Error, Please Choose Another Payment Method')
+            raise lib.error_handle.error.api_error.ApiCallerError('choose_another_payment_method')
 
         return Response(payment.get('url'))
 
@@ -186,14 +186,14 @@ class PaymentViewSet(viewsets.GenericViewSet):
             f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}',
             )
         if not payment:
-            raise lib.error_handle.error.api_error.ApiCallerError('Payment Error, Please Choose Another Payment Method')
+            raise lib.error_handle.error.api_error.ApiCallerError('choose_another_payment_method')
 
 
         for link in payment.links:
             if link.rel == "approval_url":
                 return Response(str(link.href))
         
-        raise lib.error_handle.error.api_error.ApiCallerError('Payment Error, Please Choose Another Payment Method')
+        raise lib.error_handle.error.api_error.ApiCallerError('choose_another_payment_method')
 
     @action(detail=False, methods=['GET'], url_path=r"paypal/callback/success")
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
@@ -258,7 +258,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
                 "time": pendulum.now("UTC").to_iso8601_string()
             }
             order.save()
-            raise lib.error_handle.error.api_error.ApiCallerError("Payment Error, Please Choose Another Payment Method")
+            raise lib.error_handle.error.api_error.ApiCallerError("choose_another_payment_method")
         
         webhook_exists = False
         webhook_url = f'{settings.GCP_API_LOADBALANCER_URL}/api/v2/payment/pay_mongo/webhook/'
@@ -275,7 +275,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
                     "time": pendulum.now("UTC").to_iso8601_string()
                 }
                 order.save()
-                raise lib.error_handle.error.api_error.ApiCallerError("Payment Error, Please Choose Another Payment Method")
+                raise lib.error_handle.error.api_error.ApiCallerError("choose_another_payment_method")
         
         response = service.pay_mongo.pay_mongo.create_link(order, secret_key)
         if response.status_code != 200:
@@ -285,22 +285,10 @@ class PaymentViewSet(viewsets.GenericViewSet):
                 "time": pendulum.now("UTC").to_iso8601_string()
             }
             order.save()
-            raise lib.error_handle.error.api_error.ApiCallerError("Payment Error, Please Choose Another Payment Method")
+            raise lib.error_handle.error.api_error.ApiCallerError("choose_another_payment_method")
         payMongoResponse = json.loads(response.text)
         print(payMongoResponse)
         return Response(payMongoResponse['data']['attributes']['checkout_url'], status=status.HTTP_200_OK)
-    
-    @action(detail=False, methods=['GET'], url_path=r"pay_mongo/webhook/register")
-    @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def pay_mongo_register_webhook(self, request):
-        order_oid, = lib.util.getter.getparams(request,('order_oid',),with_user=False) 
-        order = lib.util.verify.Verify.get_order_with_oid(order_oid)
-        campaign = lib.util.verify.Verify.get_campaign_from_order(order)
-        secret_key = campaign.meta_payment.get("pay_mongo",{}).get("secret")
-        response = service.pay_mongo.pay_mongo.register_webhook(secret_key)
-        if response.status_code != 200:
-            raise lib.error_handle.error.api_error.ApiCallerError("error: {response.text}")
-        return Response(response, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['POST'], url_path=r"pay_mongo/webhook")
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
@@ -340,12 +328,12 @@ class PaymentViewSet(viewsets.GenericViewSet):
             )
         
         if not payment:
-            raise lib.error_handle.error.api_error.ApiCallerError('Payment Error, Please Choose Another Payment Method')
+            raise lib.error_handle.error.api_error.ApiCallerError('choose_another_payment_method')
 
         
         return Response({'action':action,'data':payment})
         
-        raise lib.error_handle.error.api_error.ApiCallerError('Payment Error, Please Choose Another Payment Method')
+        # raise lib.error_handle.error.api_error.ApiCallerError('Payment Error, Please Choose Another Payment Method')
     
     @action(detail=False, methods=['POST'], url_path=r"ecpay/callback/success/(?P<order_oid>[^/.]+)",parser_classes=(FormParser,), renderer_classes = (StaticHTMLRenderer,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
