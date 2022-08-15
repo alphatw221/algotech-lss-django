@@ -38,20 +38,21 @@ class CartViewSet(viewsets.ModelViewSet):
         campaign_product_dict = {str(campaign_product.id):campaign_product for campaign_product in pre_order.campaign.products.all()}
 
         line_items = []
-        for campaign_product_id_str,product in pre_order.products:
+        for campaign_product_id_str,product in pre_order.products.items():
           if campaign_product_id_str not in campaign_product_dict:
               continue
           campaign_product = campaign_product_dict[campaign_product_id_str]
           line_items.append({'variant_id':campaign_product.meta.get('easy_store',{}).get('variant_id'), 'quantity':product.get('qty')})
         
 
-        if cart_token := pre_order.meta.get('easy_store',{}).get('cart_token'):
-            success, data = easy_store_service.checkouts.update_checkout(credential.get('shop'), credential.get('access_token'), line_items, cart_token)
-        else:
-            success, data = easy_store_service.checkouts.create_checkout(credential.get('shop'), credential.get('access_token'), line_items)
-
+        # if cart_token := pre_order.meta.get('easy_store',{}).get('cart_token'):
+        #     success, data = easy_store_service.checkouts.update_checkout(credential.get('shop'), credential.get('access_token'), line_items, cart_token)
+        # else:
+        #     success, data = easy_store_service.checkouts.create_checkout(credential.get('shop'), credential.get('access_token'), line_items)
+        success, data = easy_store_service.checkouts.create_checkout(credential.get('shop'), credential.get('access_token'), line_items)
         if not success:
             raise lib.error_handle.error.api_error.ApiCallerError('please place your order again')
+
         checkout = data.get('checkout')
         id = checkout.get('id')
         token = checkout.get('token')

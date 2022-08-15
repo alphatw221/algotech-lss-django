@@ -1,10 +1,12 @@
 import json
 
 def load_response(response):
-    if not response.status_code / 100 == 2:
+    data = json.loads(response.text)
+    if not response.status_code / 100 == 2 or 'error' in data:
+        print(response.status_code)
         print(response.text)
         return False, None
-    return True, json.loads(response.text)
+    return True, data
 
 def get_header(token):
     return {

@@ -9,12 +9,12 @@ def __get_url(shop, cart_token=None):
     return f"https://{shop}/api/3.0/checkouts.json"
 
 def create_checkout(shop, access_token, line_items):
-
-    data = {
+    print(line_items)
+    data = json.dumps({
         "checkout": {
             "line_items":line_items
         }
-    }
+    })
     response = request("POST", __get_url(shop), 
         headers = get_header(access_token), 
         data = data,
@@ -34,14 +34,16 @@ def retrieve_checkout(shop, access_token, cart_token):
 
 def update_checkout(shop, access_token, line_items, cart_token):
 
-    data = {
+    data = json.dumps({
         "checkout": {
             "line_items":line_items
         }
-    }
+    })
     response = request("PUT", __get_url(shop, cart_token), 
         headers = get_header(access_token), 
         data = data,
         timeout=5
     )
+    print(response.status_code)
+    print(response.text)
     return load_response(response)

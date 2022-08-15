@@ -30,23 +30,23 @@ def create_webhook(shop, token, topic, url):
         # currency/delete
 
 
-    payload = {
+    payload = json.dumps({
         "webhook": {
             "topic": topic,
             "url": url
         }
-    }
+    })
     response = request("POST", __get_url(shop), headers=get_header(token), data=payload, timeout=5)
     return load_response(response)
 
 def update_webhook(shop, token, topic, url):
 
-    payload = {
+    payload = json.dumps({
         "webhook": {
             "topic": topic,
             "url": url
         }
-    }
+    })
     response = request("PUT", __get_url(shop), headers=get_header(token), data=payload)
     return load_response(response)
 
