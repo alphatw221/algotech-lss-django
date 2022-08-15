@@ -51,7 +51,7 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.test_cart_helper()
+        self.test_easy_store()
 
     def modify_database(self):
         from api.models.user.user_subscription import UserSubscription
@@ -386,3 +386,12 @@ class Command(BaseCommand):
             platform = 'facebook',
             campaign=campaign
         )
+
+    def test_easy_store(self):
+        from plugins.easy_store import service
+        from pprint import pprint
+        success, data = service.products.get_published_product(shop='yihsuehlinlinyixue.easy.co', access_token='698f9a9a7c8bbe5f65d0207fb6cba139',page=1)
+
+        pprint(success)
+        pprint(data)
+        

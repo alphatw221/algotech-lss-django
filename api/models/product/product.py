@@ -17,6 +17,8 @@ IMAGE_PNG = 'image/png'
 IMAGE_SUPPORTED_TYPE = [IMAGE_JPEG, IMAGE_JPG, IMAGE_PNG]
 IMAGE_MAXIMUM_SIZE = 10*1024*1024
 
+STATUS_ENABLED = 'enabled'
+STATUS_DISABLED = 'disabled'
 class Product(models.Model):
     STATUS_CHOICES = [
         ('enabled', 'Enabled'),

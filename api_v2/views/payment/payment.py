@@ -1,5 +1,6 @@
 
 from http import client
+import json
 from django.core.files.base import ContentFile
 from django.contrib.auth.models import User as AuthUser
 from django.http import HttpResponseRedirect
@@ -222,8 +223,6 @@ class PaymentViewSet(viewsets.GenericViewSet):
         jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)
         return HttpResponseRedirect(redirect_to=f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}/confirmation')
 
-
-
     # @action(detail=False, methods=['GET'], url_path=r"paypal_cancel")
     # @api_error_handler
     # def paypal_cancel(self, request, *args, **kwargs):
@@ -242,6 +241,86 @@ class PaymentViewSet(viewsets.GenericViewSet):
     #     except Exception as e:
     #         print(e)
     #         return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    
+    @action(detail=False, methods=['GET'], url_path=r"pay_mongo/gateway")
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def get_pay_mongo_gateway(self, request):
+        order_oid, = lib.util.getter.getparams(request,('order_oid',),with_user=False) 
+        order = lib.util.verify.Verify.get_order_with_oid(order_oid)
+        campaign = lib.util.verify.Verify.get_campaign_from_order(order)
+        secret_key = campaign.meta_payment.get("pay_mongo",{}).get("secret")
+        
+        response = service.pay_mongo.pay_mongo.retrieve_webhook(secret_key)
+        if response.status_code != 200:
+            order.history[models.order.order.PAYMENT_METHOD_PAYMONGO]={
+                "action": "retrieve_webhook",
+                "error": response.json()['errors'],
+                "time": pendulum.now("UTC").to_iso8601_string()
+            }
+            order.save()
+            raise lib.error_handle.error.api_error.ApiCallerError("Payment Error, Please Choose Another Payment Method")
+        
+        webhook_exists = False
+        webhook_url = f'{settings.GCP_API_LOADBALANCER_URL}/api/v2/payment/pay_mongo/webhook/'
+        webhook_list = [ value for list_data in response.json()['data'] for key, value in list_data['attributes'].items() if key == 'url']
+        if webhook_url in webhook_list:
+            webhook_exists = True
+        # print(webhook_list)
+        if not webhook_exists:
+            response = service.pay_mongo.pay_mongo.register_webhook(secret_key, webhook_url)
+            if response.status_code != 200:
+                order.history[models.order.order.PAYMENT_METHOD_PAYMONGO]={
+                    "action": "register_webhook",
+                    "error": response.json()['errors'],
+                    "time": pendulum.now("UTC").to_iso8601_string()
+                }
+                order.save()
+                raise lib.error_handle.error.api_error.ApiCallerError("Payment Error, Please Choose Another Payment Method")
+        
+        response = service.pay_mongo.pay_mongo.create_link(order, secret_key)
+        if response.status_code != 200:
+            order.history[models.order.order.PAYMENT_METHOD_PAYMONGO]={
+                "action": "create_link",
+                "error": response.json()['errors'],
+                "time": pendulum.now("UTC").to_iso8601_string()
+            }
+            order.save()
+            raise lib.error_handle.error.api_error.ApiCallerError("Payment Error, Please Choose Another Payment Method")
+        payMongoResponse = json.loads(response.text)
+        print(payMongoResponse)
+        return Response(payMongoResponse['data']['attributes']['checkout_url'], status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['GET'], url_path=r"pay_mongo/webhook/register")
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def pay_mongo_register_webhook(self, request):
+        order_oid, = lib.util.getter.getparams(request,('order_oid',),with_user=False) 
+        order = lib.util.verify.Verify.get_order_with_oid(order_oid)
+        campaign = lib.util.verify.Verify.get_campaign_from_order(order)
+        secret_key = campaign.meta_payment.get("pay_mongo",{}).get("secret")
+        response = service.pay_mongo.pay_mongo.register_webhook(secret_key)
+        if response.status_code != 200:
+            raise lib.error_handle.error.api_error.ApiCallerError("error: {response.text}")
+        return Response(response, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['POST'], url_path=r"pay_mongo/webhook")
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def pay_mongo_webhook_paid(self, request):
+        print(request.data)
+        order_id = int(request.data['data']['attributes']['data']['attributes']['description'].split('_')[1])
+        order = lib.util.verify.Verify.get_order(order_id)
+        if (request.data['data']['attributes']['data']['attributes']['status'] == 'paid'):
+            
+            order.status = models.order.order.STATUS_COMPLETE
+            order.payment_method = models.order.order.PAYMENT_METHOD_PAYMONGO
+            order.checkout_details[models.order.order.PAYMENT_METHOD_PAYMONGO] = request.data
+            order.history[models.order.order.PAYMENT_METHOD_PAYMONGO]={
+                "action": "pay",
+                "time": pendulum.now("UTC").to_iso8601_string()
+            }
+            order.save()
+            content = lib.helper.order_helper.OrderHelper.get_confirmation_email_content(order)
+            jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)
+        return Response('response', status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['GET'], url_path=r"ecpay/credential")
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
