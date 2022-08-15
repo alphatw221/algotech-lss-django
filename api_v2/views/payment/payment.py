@@ -335,7 +335,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         hash_iv = campaign.meta_payment.get("ecpay",{}).get("hash_iv")
         
         action,payment = service.ecpay.ecpay.create_order(merchant_id, hash_key, hash_iv, int(order.total) , order.id, 
-            f'https://staginglss.accoladeglobal.net/api/v2/payment/ecpay/callback/success/{order_oid}/', 
+            f'https://ca87-220-136-97-201.jp.ngrok.io/api/v2/payment/ecpay/callback/success/{order_oid}/', 
             f'https://staginglss.accoladeglobal.net/buyer/order/{order_oid}/confirmation',
             )
         
@@ -353,11 +353,16 @@ class PaymentViewSet(viewsets.GenericViewSet):
         
         order = lib.util.verify.Verify.get_order_with_oid(order_oid)
         campaign = order.campaign
-        # merchant_id = campaign.meta_payment.get("ecpay",{}).get("merchant_id")
-        # hash_key = campaign.meta_payment.get("ecpay",{}).get("hash_key")
-        # hash_iv = campaign.meta_payment.get("ecpay",{}).get("hash_iv")
-        pay_res = request.data.dict()
-        if not pay_res or pay_res['MerchantTradeNo'] != str(order.id) :
+        merchant_id = campaign.meta_payment.get("ecpay",{}).get("merchant_id")
+        hash_key = campaign.meta_payment.get("ecpay",{}).get("hash_key")
+        hash_iv = campaign.meta_payment.get("ecpay",{}).get("hash_iv")
+        
+        payment_res = request.data.dict()
+        
+        check_value = service.ecpay.ecpay.check_mac_value(merchant_id, hash_key, hash_iv, payment_res)
+        
+        
+        if not payment_res or payment_res['CheckMacValue'] != check_value :
             return print('order is not match')
         
         # {'AlipayID': [''], 
@@ -402,13 +407,15 @@ class PaymentViewSet(viewsets.GenericViewSet):
         # 'WebATMAccNo': [''], 
         # 'WebATMBankName': [''], 
         # 'CheckMacValue': ['9D8011AE1ADC9F13854745CA88F8DA4DF14B111580EF7AACD29631E034CDC9AA']}
+        
+        
 
-        if pay_res['RtnCode'] == '0':
-            raise lib.error_handle.error.api_error.ApiVerifyError('payment not successful',pay_res['RtnMsg'])
+        if payment_res['RtnCode'] == '0':
+            raise lib.error_handle.error.api_error.ApiVerifyError('payment not successful',payment_res['RtnMsg'])
         
         order.status = models.order.order.STATUS_COMPLETE
         order.payment_method = models.order.order.PAYMENT_METHOD_ECPAY
-        order.checkout_details[models.order.order.PAYMENT_METHOD_ECPAY] = pay_res
+        order.checkout_details[models.order.order.PAYMENT_METHOD_ECPAY] = payment_res
         order.history[models.order.order.PAYMENT_METHOD_ECPAY]={
             "action": "pay",
             "time": pendulum.now("UTC").to_iso8601_string()
