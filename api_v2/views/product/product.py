@@ -21,6 +21,7 @@ from api import rule
 class ProductPagination(PageNumberPagination):
     page_query_param = 'page'
     page_size_query_param = 'page_size'
+    sort_query_param = 'sort_by'
 
 
 class ProductViewSet(viewsets.ModelViewSet):
@@ -32,8 +33,8 @@ class ProductViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'], url_path=r'search', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def list_product(self, request):
-        api_user, search_column, keyword, product_status, product_type, category, exclude_products = \
-            lib.util.getter.getparams(request, ("search_column", "keyword", "product_status", "product_type", "category", "exclude"), with_user=True, seller=True)
+        api_user, search_column, keyword, product_status, product_type, category, exclude_products, sort_by = \
+            lib.util.getter.getparams(request, ("search_column", "keyword", "product_status", "product_type", "category", "exclude", "sort_by"), with_user=True, seller=True)
         
         user_subscription = \
             lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
@@ -48,7 +49,17 @@ class ProductViewSet(viewsets.ModelViewSet):
         if category not in ['undefined', '', None]:
             kwargs['tag__icontains'] = category 
 
-        queryset = user_subscription.products.filter(**kwargs).order_by("-updated_at")
+        if(sort_by in ['undefined', '', None]):
+            queryset = user_subscription.products.filter(**kwargs).order_by("-updated_at")
+        if(sort_by == 'name'):
+            queryset = user_subscription.products.filter(**kwargs).order_by("name")
+        if(sort_by == '-name'):
+            queryset = user_subscription.products.filter(**kwargs).order_by("-name")
+        if(sort_by == 'qty'):
+            queryset = user_subscription.products.filter(**kwargs).order_by("qty")
+        if(sort_by == '-qty'):
+            queryset = user_subscription.products.filter(**kwargs).order_by("-qty")
+        
         
         if exclude_products:
             exclude_products = exclude_products.split(",")
