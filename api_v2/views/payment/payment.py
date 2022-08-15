@@ -334,8 +334,8 @@ class PaymentViewSet(viewsets.GenericViewSet):
         hash_key = campaign.meta_payment.get("ecpay",{}).get("hash_key")
         hash_iv = campaign.meta_payment.get("ecpay",{}).get("hash_iv")
         
-        CheckMacValue,payment = service.ecpay.ecpay.create_order(merchant_id, hash_key, hash_iv, int(order.total) , order.id, 
-            f'https://cff4-220-136-101-122.jp.ngrok.io/api/v2/payment/ecpay/callback/success/{order_oid}/', 
+        action,payment = service.ecpay.ecpay.create_order(merchant_id, hash_key, hash_iv, int(order.total) , order.id, 
+            f'https://staginglss.accoladeglobal.net/api/v2/payment/ecpay/callback/success/{order_oid}/', 
             f'https://staginglss.accoladeglobal.net/buyer/order/{order_oid}/confirmation',
             )
         
@@ -343,7 +343,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             raise lib.error_handle.error.api_error.ApiCallerError('Payment Error, Please Choose Another Payment Method')
 
         
-        return Response({'data':payment})
+        return Response({'action':action,'data':payment})
         
         raise lib.error_handle.error.api_error.ApiCallerError('Payment Error, Please Choose Another Payment Method')
     

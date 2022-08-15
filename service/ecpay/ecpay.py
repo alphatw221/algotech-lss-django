@@ -51,6 +51,6 @@ def create_order(merchant_id, hash_key, hash_iv, amount:int, order_id, return_ur
         # action_url = 'https://payment.ecpay.com.tw/Cashier/AioCheckOut/V5' # 正式環境
         html = ecpay_payment_sdk.gen_html_post_form(action_url, final_order_params)
         # return action_url,final_order_params
-        return html
+        return action_url,final_order_params
     except Exception as error:
         print('An exception happened: ' + str(error))
