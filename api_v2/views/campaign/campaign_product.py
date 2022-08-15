@@ -174,6 +174,7 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
                                 type=str(request_data.get('type',models.product.product.TYPE_PRODUCT)),
                                 product_id = int(request_data.get('id')) if request_data.get('id') else None,
                                 campaign_id=campaign.id,
+                                meta = api_product.data.get('meta',{}),      
                                 session=session)
 
                     if got_error:

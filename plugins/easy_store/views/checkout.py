@@ -24,6 +24,9 @@ class CartViewSet(viewsets.ModelViewSet):
 
         if code!=200 or not response.get('success'):
             raise lib.error_handle.error.api_error.ApiVerifyError('Please Refresh The Page And Retry Again')
+        # pre_order = lib.util.verify.Verify.get_pre_order_with_oid(cart_oid)    #temp
+
+        #pre_order.campaign.user_subscription...
 
         #   TODO 
         #   if easy_store checkout not exists:
@@ -34,7 +37,7 @@ class CartViewSet(viewsets.ModelViewSet):
         #
         #
 
-        # pre_order = lib.util.verify.Verify.get_pre_order_with_oid(cart_oid)    #temp
+        
         # meta_data = {'easy_store':{
         #                     "checkout_id":'',
         #                     "url":'',
