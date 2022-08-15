@@ -416,18 +416,16 @@ class Command(BaseCommand):
         # pprint(success)
         # pprint(data)
 
-        line_items = {
-            "checkout": {
-                "line_items": [
+        line_items = [
                     {
                         "variant_id": 8020926,
                         "quantity": 1
                     }
                 ]
-            }
-        }
+     
 
         service.checkouts.create_checkouts(shop=shop, access_token=access_token, line_items=line_items)
 
+        # service.checkouts.list_checkouts(shop=shop, access_token=access_token)
 
         
