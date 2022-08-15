@@ -26,8 +26,17 @@ class CartViewSet(viewsets.ModelViewSet):
             raise lib.error_handle.error.api_error.ApiVerifyError('Please Refresh The Page And Retry Again')
         # pre_order = lib.util.verify.Verify.get_pre_order_with_oid(cart_oid)    #temp
 
-        #pre_order.campaign.user_subscription...
+        # campaign_product_dict = {str(campaign_product.id):campaign_product for campaign_product in pre_order.campaign.products.all()}
+        # pre_order.campaign.user_subscription...
 
+        # line_items = []
+        # for campaign_product_id_str,product in pre_order.products:
+        #   if campaign_product_id_str not in campaign_product_dict:
+        #       continue
+        #   campaign_product = campaign_product_dict[campaign_product_id_str]
+        #   line_items.append({'variant_id':campaign_product.meta.get('easy_store',{}).get('variant_id'), 'quantity':product.get('qty')})
+        # 
+        #     
         #   TODO 
         #   if easy_store checkout not exists:
         #       create

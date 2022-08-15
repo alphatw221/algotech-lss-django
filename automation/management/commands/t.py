@@ -409,25 +409,28 @@ class Command(BaseCommand):
     def test_easy_store(self):
         from plugins.easy_store import service
         from pprint import pprint
-        shop = 'fantastyfrog.easy.co'
-        access_token = '8cd8e2672d9031a9df5f5371b0c4ca41'
+        # shop = 'fantastyfrog.easy.co'
+        # access_token = '8cd8e2672d9031a9df5f5371b0c4ca41'
+
+        shop = 'yihsuehlinlinyixue.easy.co'
+        access_token = '698f9a9a7c8bbe5f65d0207fb6cba139'
+
         # success, data = service.products.get_published_product(shop=shop, access_token=access_token,page=1)
 
         # pprint(success)
         # pprint(data)
 
-        line_items = {
-            "checkout": {
-                "line_items": [
+        line_items =  [
                     {
-                        "variant_id": 8020926,
+                        "variant_id": 36344238,
                         "quantity": 1
                     }
                 ]
-            }
-        }
+            
+        
 
-        service.checkouts.create_checkouts(shop=shop, access_token=access_token, line_items=line_items)
-
+        success, data =  service.checkouts.create_checkouts(shop=shop, access_token=access_token, line_items=line_items)
+        pprint(success)
+        pprint(data)
 
         

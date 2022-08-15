@@ -12,7 +12,7 @@ def create_checkouts(shop, access_token, line_items):
         }
     })
     response = request("POST", 
-        f"https://{shop}/api/3.0/checkout.json", 
+        f"https://{shop}/api/3.0/checkouts.json", 
         headers = {'EasyStore-Access-Token': access_token}, 
         data = data
     )
