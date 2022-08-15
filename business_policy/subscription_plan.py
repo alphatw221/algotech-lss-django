@@ -105,7 +105,7 @@ class SubscriptionPlan:
         promo_code="ALGOTECH"
         promo_discount_rate=0.9
         currency = "VND"
-        language = "en"
+        language = "vi"
         cc = ['lss@algotech.app']
         plans = {
             "trial" :{"text": "Free Trial", "price":{"month":0}},
