@@ -16,7 +16,9 @@ def get_request_response(state, api_campaign_product, qty, lang=None):
 @lang_translate_default_en
 def get_additional_text(pre_order, lang=None):
 
+    #link = settings.SHOPPING_CART_RECAPTCHA_URL + '/' + type + '/' + object_id
     link = settings.SHOPPING_CART_URL + '/' + str(pre_order._id)
+    
     shopping_cart_info = _('SHOPPING_CART_INFO{link}'
                            ).format(link=link)
     more_info_in_pm_notice = _('MORE_INFO_IN_PM_NOTICE')
