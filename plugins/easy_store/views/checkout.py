@@ -18,6 +18,13 @@ class CartViewSet(viewsets.ModelViewSet):
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def get_easy_store_checkout_gateway(self, request, cart_oid):
 
+        recaptcha_token, = lib.util.getter.getparams(request, ('recaptcha_token',), with_user=False)
+        
+        code, response = service.recaptcha.recaptcha.verify_token(recaptcha_token)
+
+        if code!=200 or not response.get('success'):
+            raise lib.error_handle.error.api_error.ApiVerifyError('Please Refresh The Page And Retry Again')
+
         #   TODO 
         #   if easy_store checkout not exists:
         #       create
