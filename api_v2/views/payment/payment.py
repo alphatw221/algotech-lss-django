@@ -252,7 +252,13 @@ class PaymentViewSet(viewsets.GenericViewSet):
         
         response = service.pay_mongo.pay_mongo.retrieve_webhook(secret_key)
         if response.status_code != 200:
-            raise lib.error_handle.error.api_error.ApiCallerError(f"error: {response.json()}")
+            order.history[models.order.order.PAYMENT_METHOD_PAYMONGO]={
+                "action": "retrieve_webhook",
+                "error": response.json()['errors'],
+                "time": pendulum.now("UTC").to_iso8601_string()
+            }
+            order.save()
+            raise lib.error_handle.error.api_error.ApiCallerError("Payment Error, Please Choose Another Payment Method")
         
         webhook_exists = False
         webhook_url = f'{settings.GCP_API_LOADBALANCER_URL}/api/v2/payment/pay_mongo/webhook/'
@@ -263,11 +269,23 @@ class PaymentViewSet(viewsets.GenericViewSet):
         if not webhook_exists:
             response = service.pay_mongo.pay_mongo.register_webhook(secret_key, webhook_url)
             if response.status_code != 200:
-                raise lib.error_handle.error.api_error.ApiCallerError(f"error: {response.json()}")
+                order.history[models.order.order.PAYMENT_METHOD_PAYMONGO]={
+                    "action": "register_webhook",
+                    "error": response.json()['errors'],
+                    "time": pendulum.now("UTC").to_iso8601_string()
+                }
+                order.save()
+                raise lib.error_handle.error.api_error.ApiCallerError("Payment Error, Please Choose Another Payment Method")
         
         response = service.pay_mongo.pay_mongo.create_link(order, secret_key)
         if response.status_code != 200:
-            raise lib.error_handle.error.api_error.ApiCallerError(f"error: {response.json()}")
+            order.history[models.order.order.PAYMENT_METHOD_PAYMONGO]={
+                "action": "create_link",
+                "error": response.json()['errors'],
+                "time": pendulum.now("UTC").to_iso8601_string()
+            }
+            order.save()
+            raise lib.error_handle.error.api_error.ApiCallerError("Payment Error, Please Choose Another Payment Method")
         payMongoResponse = json.loads(response.text)
         print(payMongoResponse)
         return Response(payMongoResponse['data']['attributes']['checkout_url'], status=status.HTTP_200_OK)
@@ -287,7 +305,6 @@ class PaymentViewSet(viewsets.GenericViewSet):
     @action(detail=False, methods=['POST'], url_path=r"pay_mongo/webhook")
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def pay_mongo_webhook_paid(self, request):
-        from backend.pymongo.mongodb import db
         print(request.data)
         order_id = int(request.data['data']['attributes']['data']['attributes']['description'].split('_')[1])
         order = lib.util.verify.Verify.get_order(order_id)
