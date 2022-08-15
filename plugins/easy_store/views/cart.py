@@ -24,9 +24,10 @@ class CartViewSet(viewsets.ModelViewSet):
 
         if code!=200 or not response.get('success'):
             raise lib.error_handle.error.api_error.ApiVerifyError('Please Refresh The Page And Retry Again')
-        # pre_order = lib.util.verify.Verify.get_pre_order_with_oid(cart_oid)    #temp
 
-        # campaign_product_dict = {str(campaign_product.id):campaign_product for campaign_product in pre_order.campaign.products.all()}
+        pre_order = lib.util.verify.Verify.get_pre_order_with_oid(cart_oid)    #temp
+
+        campaign_product_dict = {str(campaign_product.id):campaign_product for campaign_product in pre_order.campaign.products.all()}
         # pre_order.campaign.user_subscription...
 
         # line_items = []
