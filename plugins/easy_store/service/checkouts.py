@@ -5,9 +5,7 @@ import json
 def create_checkouts(shop, access_token, line_items):
     data = json.dumps({
         "checkout": {
-            'presentment_currency': 'MYR',
-            "line_items": line_items,
-            'email': 'derekhwang33@gmail.com'
+            "line_items": line_items
         }
     })
 
@@ -25,9 +23,9 @@ def create_checkouts(shop, access_token, line_items):
     return True, json.loads(response.text)
 
 
-def list_checkouts(shop, access_token):
-    response = request("GET", 
-        f"https://{shop}/api/3.0/checkouts.json", 
+def update_checkouts(shop, access_token):
+    response = request("PUT", 
+        f"https://{shop}/api/3.0/checkouts.json/{}", 
         headers = {'EasyStore-Access-Token': access_token}, 
     )
 

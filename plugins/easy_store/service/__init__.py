@@ -1,1 +1,1 @@
-from . import checkouts, collections, images, orders, products, store, channels
+from . import checkouts, collections, images, orders, products, store, channels, webhooks

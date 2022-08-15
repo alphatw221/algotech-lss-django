@@ -298,6 +298,7 @@ WEB_SERVER_URL = "https://v1login.liveshowseller.com"
 
 # SHOPPING_CART_URL = f"{WEB_SERVER_URL}/buyer/login_to_cart"
 SHOPPING_CART_URL = f"{GCP_API_LOADBALANCER_URL}/buyer/cart"
+SHOPPING_CART_RECAPTCHA_URL = f"{GCP_API_LOADBALANCER_URL}/buyer/recaptcha"
 
 SUPPORTED_PLATFORMS = [
     ("n/a", "No specific platform"),
