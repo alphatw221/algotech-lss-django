@@ -86,19 +86,22 @@ def command_responding(platform_name, platform_instance_data, campaign_data, use
 
 
 def comment_responding(platform_name, platform_instance_data, campaign_data, user_subscription_data, pre_order, comment, campaign_product, qty, state):
-    # return
+
+    if plugins:=user_subscription_data.get('user_plan',{}).get('plugins'):
+        shopping_cart_info, info_in_pm_notice = lib.i18n.cart_product_request.get_plugins_additional_text(pre_order, plugins, lang=campaign_data.get('lang'))
+    else:
+        shopping_cart_info, info_in_pm_notice = lib.i18n.cart_product_request.get_additional_text(pre_order, lang=campaign_data.get('lang'))
+
     if platform_name == 'facebook':
 
         text = lib.i18n.cart_product_request.get_request_response(
             state, campaign_product, qty, lang=campaign_data.get('lang'))
 
-        if state in [ lib.helper.order_helper.RequestState.ADDED, 
+        if state not in [ lib.helper.order_helper.RequestState.ADDED, 
             lib.helper.order_helper.RequestState.UPDATED, 
             lib.helper.order_helper.RequestState.DELETED]:
-            
-            shopping_cart_info, info_in_pm_notice = lib.i18n.cart_product_request.get_additional_text(pre_order, lang=campaign_data.get('lang'))
-        else:
             shopping_cart_info, info_in_pm_notice = "", ""
+            
         code, ret = service.facebook.post.post_page_comment_on_comment( platform_instance_data['token'], comment['id'], text+info_in_pm_notice)
         if code!=200:
             print("response", ret)
@@ -110,8 +113,8 @@ def comment_responding(platform_name, platform_instance_data, campaign_data, use
         text = lib.i18n.cart_product_request.get_request_response(
         state, campaign_product, qty, lang=campaign_data.get('lang'))
 
-        shopping_cart_info, info_in_pm_notice = lib.i18n.cart_product_request.get_additional_text(pre_order,
-                                                                         lang=campaign_data.get('lang'))
+        # shopping_cart_info, info_in_pm_notice = lib.i18n.cart_product_request.get_additional_text(pre_order,
+        #                                                                  lang=campaign_data.get('lang'))
         
 
         customer_name =comment['customer_name']
@@ -134,8 +137,8 @@ def comment_responding(platform_name, platform_instance_data, campaign_data, use
         text = lib.i18n.cart_product_request.get_request_response(
             state, campaign_product, qty, lang=campaign_data.get('lang'))
 
-        shopping_cart_info, info_in_pm_notice = lib.i18n.cart_product_request.get_additional_text(pre_order,
-                                                                         lang=campaign_data.get('lang'))
+        # shopping_cart_info, info_in_pm_notice = lib.i18n.cart_product_request.get_additional_text(pre_order,
+        #                                                                  lang=campaign_data.get('lang'))
        
         code, ret =service.instagram.post.private_message( platform_instance_data['token'], comment['id'], text+shopping_cart_info)
         if code!=200:
