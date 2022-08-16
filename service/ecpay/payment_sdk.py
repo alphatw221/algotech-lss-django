@@ -607,7 +607,7 @@ class OrderSearch(BasePayment):
 
     __url = 'https://payment.ecpay.com.tw/Cashier/QueryTradeInfo/V5'
 
-    def order_search(self, action_url=__url, client_parameters={}):
+    def order_search(self, action_url, client_parameters):
         self.__check_pattern = []
         if action_url is None:
             action_url = self.__url
@@ -634,6 +634,7 @@ class OrderSearch(BasePayment):
             query.pop('CheckMacValue')
             return query
         else:
+            print(query)
             raise Exception("CheckMacValue is error!")
 
 

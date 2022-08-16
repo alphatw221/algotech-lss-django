@@ -37,14 +37,14 @@ class SubscriptionPlan:
     class PH(CountryPlan):
         promo_code="ALGOTECH"
         promo_discount_rate=0.9
-        currency = "USD"
+        currency = "PHP"
         language = "en"
         cc = ['lss@algotech.app', 'hello@liveshowseller.ph']
         plans = {
             "trial" :{"text": "Free Trial", "price":{"month":0}},
-            "lite" : {"value":"lite","text": "Lite", "price":{"month":10,"quarter":30,"year":108}},
-            "standard" : {"value":"standard","text": "Standard", "price":{"month":18,"quarter":54,"year":194}},
-            "premium" : {"value":"premium","text": "Premium", "price":{"month":10,"quarter":30,"year":108}},
+            "lite" : {"value":"lite","text": "Lite", "price":{"month":599,"quarter":30,"year":6469.2}},
+            "standard" : {"value":"standard","text": "Standard", "price":{"month":1199,"quarter":54,"year":12949.2}},
+            "premium" : {"value":"premium","text": "Premium", "price":{"month":600,"quarter":30,"year":6480}},
         }
     
     class TH(CountryPlan):
