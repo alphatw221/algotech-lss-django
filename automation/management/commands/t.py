@@ -432,6 +432,7 @@ class Command(BaseCommand):
         # pprint(success)
         # pprint(data)
 
+
         line_items =  [
                     {
                         "variant_id": 36344238,
