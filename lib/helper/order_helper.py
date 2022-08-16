@@ -109,25 +109,16 @@ class PreOrderHelper():
             "total":total
         }
 
-        pre_order.update(**data, session=session)
+        pre_order.update(**data, session=session, sync=True)
         campaign_product.add_to_cart(qty_difference, session=session)
-
-        pre_order_data = {
-            "id": pre_order.id,
-            'customer_id': pre_order.data.get('customer_id'),
-            'customer_name': pre_order.data.get('customer_name'),
-            'customer_img': pre_order.data.get('customer_img'),
-            'campaign_id': pre_order.data.get('campaign_id'),
-            'platform': pre_order.data.get('platform'),
-            'subtotal': pre_order.data.get('subtotal')
-        }
+        
         product_data = {
             "id": campaign_product.id,
             'qty_sold': campaign_product.data.get('qty_sold'),
             "qty_add_to_cart":campaign_product.data.get('qty_add_to_cart'),
 
         }
-        service.channels.campaign.send_order_data(campaign_product.data.get("campaign_id"), pre_order_data)
+        service.channels.campaign.send_order_data(campaign_product.data.get("campaign_id"), pre_order.data)
         service.channels.campaign.send_product_data(campaign_product.data.get("campaign_id"), product_data)
 
 
@@ -196,7 +187,7 @@ class PreOrderHelper():
             "total":total
         }
         campaign_product.add_to_cart(qty_difference, session=session)
-        pre_order.update(**data, session=session)
+        pre_order.update(**data, session=session, sync=True)
 
         product_data = {
             "id": campaign_product.id,
@@ -204,7 +195,7 @@ class PreOrderHelper():
             "qty_add_to_cart":campaign_product.data.get('qty_add_to_cart'),
 
         }
-
+        service.channels.campaign.send_order_data(campaign_product.data.get("campaign_id"), pre_order.data)
         service.channels.campaign.send_product_data(campaign_product.data.get("campaign_id"), product_data)
 
 
@@ -257,7 +248,7 @@ class PreOrderHelper():
                     "total":total
                 }
         campaign_product.customer_return(order_product.data.get('qty'), session=session)
-        pre_order.delete_product(campaign_product, session=session, sync=False, **data)
+        pre_order.delete_product(campaign_product, session=session, sync=True, **data)
         order_product.delete(session=session)
 
         product_data = {
@@ -265,6 +256,8 @@ class PreOrderHelper():
             'qty_sold': campaign_product.data.get('qty_sold'),
             "qty_add_to_cart":campaign_product.data.get('qty_add_to_cart'),
         }
+
+        service.channels.campaign.send_order_data(campaign_product.data.get("campaign_id"), pre_order.data)
         service.channels.campaign.send_product_data(campaign_product.data.get("campaign_id"), product_data)
 
 
