@@ -134,7 +134,7 @@ class UserViewSet(viewsets.ModelViewSet):
         rule.rule_checker.user_rule_checker.SellerResetPasswordRuleChecker.check(**{"new_password":new_password})
         ret = lib.code_manager.password_code_manager.PasswordResetCodeManager.execute(code, new_password)
         
-        email = ret["Email"]
+        email = ret["email"]
         auth_user = AuthUser.objects.get(email=email)
         
         api_user = models.user.user.User.objects.get(email=email,type='user')

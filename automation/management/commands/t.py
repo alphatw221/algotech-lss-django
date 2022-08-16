@@ -420,3 +420,25 @@ class Command(BaseCommand):
         # pprint(success)
         # pprint(data)
 
+<<<<<<< HEAD
+=======
+        line_items =  [
+                    {
+                        "variant_id": 36344238,
+                        "quantity": 2
+                    }
+                ]
+            
+        
+
+        success, data =  service.checkouts.create_checkout(shop=shop, access_token=access_token, line_items=line_items)
+        # pprint(success)
+        # pprint(data)
+
+        # a5318e0f-2317-445c-9c71-ab6c812666e9
+
+        # success, data =  service.checkouts.retrieve_checkout(shop=shop, access_token=access_token, cart_token='a5318e0f-2317-445c-9c71-ab6c812666e9')
+        # success, data =  service.checkouts.update_checkout(shop=shop, access_token=access_token, line_items=line_items, cart_token='a5318e0f-2317-445c-9c71-ab6c812666e9')
+        pprint(success)
+        pprint(data)
+>>>>>>> db5c496a6dc8291cd05ef2c40791f6c22d3c653e
