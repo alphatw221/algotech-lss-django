@@ -53,12 +53,12 @@ class PaymentViewSet(viewsets.GenericViewSet):
         secret = campaign.meta_payment.get("stripe",{}).get("secret")
         currency = campaign.meta_payment.get("stripe",{}).get("currency")
 
-        payment_amount = lib.helper.payment_helper.transform_payment_amount(order.total, campaign.decimal_places, campaign.price_unit)
-
         checkout_session = service.stripe.stripe.create_checkout_session(
             secret,
             currency,
             order,
+            campaign.decimal_places,
+            campaign.price_unit,
             success_url=settings.GCP_API_LOADBALANCER_URL + '/api/v2/payment/strip/callback/success?session_id={CHECKOUT_SESSION_ID}&order_oid=' + str(order_oid), 
             cancel_url=f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{str(order_oid)}/payment')
 

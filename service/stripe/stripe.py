@@ -10,9 +10,10 @@ import traceback
 
 from math import floor
 
-def transform_payment_amount(amount, decimal_places, price_unit):
-    amount = amount*int(price_unit)
+def __transform_payment_amount(amount, decimal_places, price_unit):
+    
     amount = __to_decimal_places(amount, decimal_places)
+    amount = amount*int(price_unit)
     return amount
 
 
@@ -20,7 +21,7 @@ def __to_decimal_places(amount , decimal_places):
     return floor((amount * (10 ** decimal_places))) / (10 ** decimal_places)
 
 
-def create_checkout_session(secret, currency, order, success_url, cancel_url):
+def create_checkout_session(secret, currency, order, decimal_places, price_unit, success_url, cancel_url):
     try:
         stripe.api_key = secret
         items = []
@@ -29,9 +30,10 @@ def create_checkout_session(secret, currency, order, success_url, cancel_url):
                 name=product.get('name',''),
                 images=[urllib.parse.quote(f"{settings.GS_URL}{product.get('image','')}").replace("%3A", ":")]
             )
+            
             price = stripe.Price.create(
                 product=stripe_product.id,
-                unit_amount=int(product.get('price',0)*100),
+                unit_amount=int(__transform_payment_amount(product.get('price'), decimal_places, price_unit)*100),
                 currency=currency,
             )
             items.append(
@@ -44,7 +46,7 @@ def create_checkout_session(secret, currency, order, success_url, cancel_url):
         discounts = []
         if order.adjust_price:
             discount = stripe.Coupon.create(
-                amount_off=int(-order.adjust_price * 100),
+                amount_off=int(-__transform_payment_amount(order.adjust_price, decimal_places, price_unit) * 100),
                 currency=currency
             )
             discounts.append(
@@ -74,7 +76,7 @@ def create_checkout_session(secret, currency, order, success_url, cancel_url):
                 display_name="General Shipping",
                 type="fixed_amount",
                 fixed_amount={
-                    'amount': int(order.shipping_cost * 100),
+                    'amount': int( __transform_payment_amount(order.shipping_cost, decimal_places, price_unit) * 100),
                     'currency': currency,
                 }
             )

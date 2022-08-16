@@ -1,8 +1,9 @@
 from math import floor
 
 def transform_payment_amount(amount, decimal_places, price_unit):
-    amount = amount*int(price_unit)
+    
     amount = __to_decimal_places(amount, decimal_places)
+    amount = amount*int(price_unit)
     # print(decimal_places)
     # print(price_unit)
     # print(amount)
