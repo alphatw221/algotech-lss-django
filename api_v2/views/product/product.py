@@ -48,18 +48,11 @@ class ProductViewSet(viewsets.ModelViewSet):
             kwargs['type'] = product_type
         if category not in ['undefined', '', None]:
             kwargs['tag__icontains'] = category 
-
+        
         if(sort_by in ['undefined', '', None]):
             queryset = user_subscription.products.filter(**kwargs).order_by("-updated_at")
-        if(sort_by == 'name'):
-            queryset = user_subscription.products.filter(**kwargs).order_by("name")
-        if(sort_by == '-name'):
-            queryset = user_subscription.products.filter(**kwargs).order_by("-name")
-        if(sort_by == 'qty'):
-            queryset = user_subscription.products.filter(**kwargs).order_by("qty")
-        if(sort_by == '-qty'):
-            queryset = user_subscription.products.filter(**kwargs).order_by("-qty")
-        
+        else: 
+            queryset = user_subscription.products.filter(**kwargs).order_by(sort_by)
         
         if exclude_products:
             exclude_products = exclude_products.split(",")
