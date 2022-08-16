@@ -53,6 +53,8 @@ class PaymentViewSet(viewsets.GenericViewSet):
         secret = campaign.meta_payment.get("stripe",{}).get("secret")
         currency = campaign.meta_payment.get("stripe",{}).get("currency")
 
+        payment_amount = lib.helper.payment_helper.transform_payment_amount(order.total, campaign.decimal_places, campaign.price_unit)
+
         checkout_session = service.stripe.stripe.create_checkout_session(
             secret,
             currency,
@@ -121,10 +123,12 @@ class PaymentViewSet(viewsets.GenericViewSet):
         api_key = campaign.meta_payment.get("hitpay",{}).get("api_key")
         currency = campaign.meta_payment.get("hitpay",{}).get("currency")
 
+        payment_amount = lib.helper.payment_helper.transform_payment_amount(order.total, campaign.decimal_places, campaign.price_unit)
+
         code, payment = service.hitpay.hitpay.create_payment(
             api_key,
             order.shipping_email, 
-            order.total, 
+            payment_amount, 
             currency,
             order.id,
             f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}',
@@ -181,7 +185,9 @@ class PaymentViewSet(viewsets.GenericViewSet):
         secret = campaign.meta_payment.get("paypal",{}).get("secret")
         currency = campaign.meta_payment.get("paypal",{}).get("currency")
 
-        payment = service.paypal.paypal.create_payment(client_id, secret, order.total, currency , 
+        payment_amount = lib.helper.payment_helper.transform_payment_amount(order.total, campaign.decimal_places, campaign.price_unit)
+
+        payment = service.paypal.paypal.create_payment(client_id, secret, payment_amount, currency , 
             f"{settings.GCP_API_LOADBALANCER_URL}/api/v2/payment/paypal/callback/success?order_oid={order_oid}", 
             f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}',
             )
@@ -276,8 +282,9 @@ class PaymentViewSet(viewsets.GenericViewSet):
                 }
                 order.save()
                 raise lib.error_handle.error.api_error.ApiCallerError("Payment Error, Please Choose Another Payment Method")
-        
-        response = service.pay_mongo.pay_mongo.create_link(order, secret_key)
+
+        payment_amount = lib.helper.payment_helper.transform_payment_amount(order.total, campaign.decimal_places, campaign.price_unit)
+        response = service.pay_mongo.pay_mongo.create_link(order.id, payment_amount, secret_key)
         if response.status_code != 200:
             order.history[models.order.order.PAYMENT_METHOD_PAYMONGO]={
                 "action": "create_link",
@@ -334,7 +341,10 @@ class PaymentViewSet(viewsets.GenericViewSet):
         hash_key = campaign.meta_payment.get("ecpay",{}).get("hash_key")
         hash_iv = campaign.meta_payment.get("ecpay",{}).get("hash_iv")
         
-        action,payment = service.ecpay.ecpay.create_order(merchant_id, hash_key, hash_iv, int(order.total) , order.id, 
+        payment_amount = lib.helper.payment_helper.transform_payment_amount(order.total, campaign.decimal_places, campaign.price_unit)
+
+
+        action,payment = service.ecpay.ecpay.create_order(merchant_id, hash_key, hash_iv, int(payment_amount) , order.id, 
             f'https://ca87-220-136-97-201.jp.ngrok.io/api/v2/payment/ecpay/callback/success/{order_oid}/', 
             f'https://staginglss.accoladeglobal.net/buyer/order/{order_oid}/confirmation',
             )
