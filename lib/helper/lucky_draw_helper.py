@@ -92,7 +92,7 @@ class LikesCandidateSetGenerator(CandidateSetGenerator):
             # print(code)
             # print(response)
             if code!=200 :
-                raise lib.error_handle.error.api_error.ApiVerifyError('Get Facebook Service Fail, Please Retry Again')
+                raise lib.error_handle.error.api_error.ApiVerifyError('helper.fb_api_fail')
             # likes_user_list += [user.get('name') for user in response.get('data',[])]
             # print(likes_user_list)
         # campaign_comments = models.campaign.campaign_comment.CampaignComment.objects.filter(

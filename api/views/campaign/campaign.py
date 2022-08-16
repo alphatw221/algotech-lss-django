@@ -11,6 +11,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from datetime import datetime
 from api.models.youtube.youtube_channel import YoutubeChannelSerializer
+from api.rule.rule_checker.user_subscription_rule_checker import CreateCampaignRuleChecker
 from backend.api.google.user import api_google_post_refresh_token
 
 from backend.pymongo.mongodb import db
@@ -19,7 +20,6 @@ from api.utils.common.verify import ApiVerifyError
 from api.utils.common.common import getdata,getparams
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 from bson.json_util import loads, dumps
-from api.utils.rule.rule_checker.user_subscription_rule_checker import CreateCampaignRuleChecker
 
 
 def verify_seller_request(api_user):
