@@ -49,7 +49,7 @@ class PasswordResetCodeManager(CodeManager):
         # EmailService.send_email_template("",auth_user.email,"",{})
 
         return {
-            "Customer Name":auth_user.username,
-            "Email":auth_user.email,
-            "New Password":new_password[:4]+"*"*(len(new_password)-4)
+            "user_name":auth_user.username,
+            "email":auth_user.email,
+            "new_password":new_password[:4]+"*"*(len(new_password)-4)
         }
