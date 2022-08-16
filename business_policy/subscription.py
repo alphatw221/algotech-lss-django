@@ -52,9 +52,9 @@ LANGUAGE_VIETNAMESE='vi'
 
 LANGUAGE_CHOICES=[
     (LANGUAGE_ENGLICH,'English'),
-    (LANGUAGE_INDONESIAN,'Chinese-Simplify'),
-    (LANGUAGE_SIMPLIFY_CHINESE,'Chinese-Tranditional'),
-    (LANGUAGE_TRANDITIONAL_CHINESE,'Indonesian'),
+    (LANGUAGE_INDONESIAN,'Indonesian'),
+    (LANGUAGE_SIMPLIFY_CHINESE,'Chinese-Simplify'),
+    (LANGUAGE_TRANDITIONAL_CHINESE,'Chinese-Tranditional'),
     (LANGUAGE_VIETNAMESE,'Vietnamese')
 ]
 
