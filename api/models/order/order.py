@@ -1,6 +1,7 @@
 
 # TODO: WIP
 from api.models.campaign.campaign import Campaign, CampaignSerializerRetreive, CampaignSerializerWithUserSubscription
+from api.models.campaign.discount import Discount
 from django.conf import settings
 from django.contrib import admin
 from djongo import models
@@ -103,6 +104,7 @@ class Order(models.Model):
     buyer = models.ForeignKey(
         User, null=True, default=None, blank=True, on_delete=models.SET_NULL, related_name='orders')
 
+    discounts = models.ArrayField(model_container=Discount, blank=False, null = False, default = [])
 class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:

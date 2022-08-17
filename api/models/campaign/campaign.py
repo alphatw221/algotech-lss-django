@@ -1,5 +1,7 @@
 from django.contrib import admin
 from djongo import models
+
+
 from rest_framework import serializers
 
 from api.models.facebook.facebook_page import (FacebookPage,
@@ -11,6 +13,7 @@ from api.models.user.user import User
 from api.models.user.user_subscription import UserSubscription, UserSubscriptionSerializer
 from api.models.youtube.youtube_channel import (YoutubeChannel,
                                                 YoutubeChannelInfoSerializer, YoutubeChannelSerializer)
+from api.models.campaign.discount import Discount
 
 import business_policy
 
@@ -21,6 +24,8 @@ IMAGE_JPG = 'image/jpg'
 IMAGE_PNG = 'image/png'
 IMAGE_SUPPORTED_TYPE = [IMAGE_JPEG, IMAGE_JPG, IMAGE_PNG]
 IMAGE_MAXIMUM_SIZE = 10*1024*1024
+
+
 
 class Campaign(models.Model):
     class Meta:
@@ -81,6 +86,9 @@ class Campaign(models.Model):
     
     stop_checkout = models.BooleanField(
         blank=False, null=False, default=False)
+    
+    discounts = models.ArrayField(model_container=Discount, blank=False, null = False, default = [])
+
     def __str__(self):
         return str(self.title)
 
@@ -187,3 +195,9 @@ class CampaignAdmin(admin.ModelAdmin):
     model = Campaign
     list_display = [field.name for field in Campaign._meta.fields]
     search_fields = [field.name for field in Campaign._meta.fields]
+
+
+
+
+
+
