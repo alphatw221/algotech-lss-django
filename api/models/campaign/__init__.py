@@ -1,1 +1,1 @@
-from . import campaign, campaign_comment, campaign_product, campaign_lucky_draw, campaign_quiz_game, campaign_quiz_game_bundle
+from . import campaign, campaign_comment, campaign_product, campaign_lucky_draw, campaign_quiz_game, campaign_quiz_game_bundle, discount

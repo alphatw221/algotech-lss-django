@@ -3,6 +3,7 @@ from djongo import models
 
 from rest_framework import serializers
 
+TYPE_PERCENT_OFF = 'percent_off'
 
 
 class Discount(models.Model):
@@ -23,11 +24,4 @@ class Discount(models.Model):
 
 
 
-class DiscountSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Discount
-        fields = '__all__'
-        read_only_fields = ['created_at', 'updated_at']
-
-    meta = serializers.JSONField(default=dict)
 

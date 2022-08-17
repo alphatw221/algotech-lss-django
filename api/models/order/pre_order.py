@@ -83,6 +83,7 @@ class PreOrder(models.Model):
     buyer = models.ForeignKey(
         User, null=True, default=None, blank=True, on_delete=models.SET_NULL, related_name='pre_orders')
 
+    discount = models.FloatField(null=True, blank=True, default=0)
     discounts = models.ArrayField(model_container=Discount, blank=False, null = False, default = [])
 
 class PreOrderSerializer(serializers.ModelSerializer):

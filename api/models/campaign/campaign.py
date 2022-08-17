@@ -150,7 +150,7 @@ class CampaignSerializerCreate(serializers.ModelSerializer):
     meta = serializers.JSONField(default={"allow_checkout": 1})
     meta_payment = serializers.JSONField(default=dict)
     meta_logistic = serializers.JSONField(default=dict)
-
+    discounts = serializers.JSONField(default=[])
 
 class CampaignSerializerEdit(serializers.ModelSerializer):
     class Meta:
@@ -166,7 +166,7 @@ class CampaignSerializerEdit(serializers.ModelSerializer):
     meta = serializers.JSONField(default={"allow_checkout": 1})
     meta_payment = serializers.JSONField(default=dict)
     meta_logistic = serializers.JSONField(default=dict)
-
+    discounts = serializers.JSONField(default=[])
 
 class CampaignSerializerUpdate(serializers.ModelSerializer):
 
@@ -177,13 +177,13 @@ class CampaignSerializerUpdate(serializers.ModelSerializer):
     meta = serializers.JSONField(default={"allow_checkout": 1})
     meta_payment = serializers.JSONField(default=dict)
     meta_logistic = serializers.JSONField(default=dict)
-
+    discounts = serializers.JSONField(default=[])
 
 class CampaignSerializerRetreive(CampaignSerializer):
     facebook_page = FacebookPageSerializer(read_only=True)
     youtube_channel = YoutubeChannelSerializer(read_only=True)
     instagram_profile = InstagramProfileSerializer(read_only=True)
-
+    
 class CampaignSerializerWithUserSubscription(CampaignSerializer):
 
     user_subscription = UserSubscriptionSerializer(read_only=True)
