@@ -181,7 +181,7 @@ DATABASES = {
             'password': 'algo83111T%%',
             'authSource': 'admin',
             'authMechanism': 'SCRAM-SHA-1',
-            'readPreference': 'primary',
+            'readPreference': 'secondaryPreferred',
             'ssl': False,
         }
     },
