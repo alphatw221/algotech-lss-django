@@ -1,3 +1,4 @@
+from email.policy import default
 from api.models.campaign.campaign import Campaign, CampaignSerializer, CampaignSerializerRetreive, CampaignSerializerWithUserSubscription
 from api.models.campaign.discount import Discount
 from django.conf import settings
@@ -98,7 +99,7 @@ class PreOrderSerializer(serializers.ModelSerializer):
     products = serializers.JSONField(default=dict)
     checkout_details = serializers.JSONField(default=dict)
     history = serializers.JSONField(default=dict)
-
+    discounts = serializers.JSONField(default=[])
 class PreOrderSerializerWithSubscription(serializers.ModelSerializer):
 
     class Meta:
@@ -111,7 +112,7 @@ class PreOrderSerializerWithSubscription(serializers.ModelSerializer):
     products = serializers.JSONField(default=dict)
     checkout_details = serializers.JSONField(default=dict)
     history = serializers.JSONField(default=dict)
-
+    discounts = serializers.JSONField(default=[])
 
 class PreOrderSerializerUpdatePaymentShipping(serializers.ModelSerializer):
 

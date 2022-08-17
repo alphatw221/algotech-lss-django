@@ -119,7 +119,7 @@ class OrderSerializer(serializers.ModelSerializer):
     products = serializers.JSONField(default=dict)
     checkout_details = serializers.JSONField(default=dict)
     history = serializers.JSONField(default=dict)
-
+    discounts = serializers.JSONField(default=[])
 
 class OrderSerializerWithUserSubscription(serializers.ModelSerializer):
 
@@ -133,7 +133,7 @@ class OrderSerializerWithUserSubscription(serializers.ModelSerializer):
     products = serializers.JSONField(default=dict)
     checkout_details = serializers.JSONField(default=dict)
     history = serializers.JSONField(default=dict)
-
+    discounts = serializers.JSONField(default=[])
 class OrderSerializerUpdateShipping(serializers.ModelSerializer):
 
     class Meta:
