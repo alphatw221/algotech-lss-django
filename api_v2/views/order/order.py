@@ -62,9 +62,9 @@ class OrderViewSet(viewsets.ModelViewSet):
         if image in [None, '', "undefined", 'null']:
             pass
         elif image.size > models.order.order.IMAGE_MAXIMUM_SIZE:
-            raise lib.error_handle.error.api_error.ApiVerifyError(f'image size exceed maximum size')
+            raise lib.error_handle.error.api_error.ApiVerifyError('image_size_exceed_maximum_size')
         elif image.content_type not in models.order.order.IMAGE_SUPPORTED_TYPE:
-            raise lib.error_handle.error.api_error.ApiVerifyError(f'not support this image type')
+            raise lib.error_handle.error.api_error.ApiVerifyError('not_support_this_image_type')
         else:
             image_path = default_storage.save(
                 f'campaign/{order.campaign.id}/order/{order.id}/receipt/{image.name}', 
@@ -76,7 +76,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         order.meta["last_five_digit"] = last_five_digit
         order.meta['account_name'] = account_name
         order.meta['account_mode'] = account_mode
-        order.payment_method = "Direct Payment"
+        order.payment_method = models.order.order.PAYMENT_METHOD_DIRECT
         order.status = "complete"
         order.save()
 
@@ -140,7 +140,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         order.meta["last_five_digit"] = last_five_digit
         order.meta['account_name'] = account_name
         order.meta['account_mode'] = account_mode
-        order.payment_method = "Direct Payment"
+        order.payment_method = models.order.order.PAYMENT_METHOD_DIRECT
         order.status = "complete"
         order.save()
 
@@ -218,7 +218,6 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         api_user, campaign_id, search, page, page_size, order_status= lib.util.getter.getparams(request, ( 'campaign_id', 'search', 'page', 'page_size','status'),with_user=True, seller=True)
         payment_list, delivery_list, platform_list = lib.util.getter.getdata(request,('payment','delivery','platform'))
-        
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription,campaign_id)
 

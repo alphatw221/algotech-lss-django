@@ -52,7 +52,7 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.test_nlp()
+        self.test_remove_campaign_comment_duplicate()
 
     def modify_database(self):
         from api.models.user.user_subscription import UserSubscription
@@ -452,3 +452,20 @@ class Command(BaseCommand):
         # success, data =  service.checkouts.update_checkout(shop=shop, access_token=access_token, line_items=line_items, cart_token='a5318e0f-2317-445c-9c71-ab6c812666e9')
         pprint(success)
         pprint(data)
+
+    def test_remove_campaign_comment_duplicate(self):
+
+        from database.lss._config import db
+
+        curser = db.api_campaign_comment.aggregate([{"$group" : { "_id": {"platform":"$platform","id":"$id","campaign_id":"$campaign_id"}, "count": { "$sum": 1 } } },
+            {"$match": {"_id" :{ "$ne" : None } , "count" : {"$gt": 1} } }, 
+            {"$project": {"index" : "$_id", "_id" : 0} }])
+
+        duplicate_list = list(curser)
+        print(len(duplicate_list))
+        # for item in duplicate_list:
+
+        #     index = item.get('index')
+        #     db.api_campaign_comment.delete_many(index)
+            # print(index)
+            # break

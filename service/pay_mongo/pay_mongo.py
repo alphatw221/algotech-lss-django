@@ -2,8 +2,8 @@ from django.conf import settings
 from backend.pymongo.mongodb import db
 import hmac, hashlib, base64, binascii
 import requests
-def create_link(order, secret_key):
-    amount = int(order.total * 100)
+def create_link(order_id, amount, secret_key):
+    amount = int(amount * 100)
     
     message_bytes = secret_key.encode('ascii')
     base64_bytes = base64.b64encode(message_bytes)
@@ -13,7 +13,7 @@ def create_link(order, secret_key):
         "data": {
             "attributes": {
                 "amount": amount,
-                "description": f"Order_{order.id}",
+                "description": f"Order_{order_id}",
                 "remarks": ""
             },
         }

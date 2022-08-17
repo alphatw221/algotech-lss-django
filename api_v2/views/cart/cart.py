@@ -81,7 +81,7 @@ class CartViewSet(viewsets.ModelViewSet):
         rule.rule_checker.cart_rule_checker.CartDeleteProductRuleChecker.check({'api_user':None,'cart':cart,'campaign_product':campaign_product})
 
         if campaign_product_id not in cart.products:
-            raise lib.error_handle.error.api_error.ApiVerifyError('campaign_product not found')
+            raise lib.error_handle.error.api_error.ApiVerifyError('campaign_product_not_found')
         
         qty = cart.products[campaign_product_id].get('qty',0)
         database.lss.campaign_product.CampaignProduct(id=campaign_product_id).customer_return(qty=qty, sync=False)
@@ -147,7 +147,7 @@ class CartViewSet(viewsets.ModelViewSet):
         code, response = service.recaptcha.recaptcha.verify_token(recaptcha_token)
 
         if code!=200 or not response.get('success'):
-            raise lib.error_handle.error.api_error.ApiVerifyError('Please Refresh The Page And Retry Again')
+            raise lib.error_handle.error.api_error.ApiVerifyError('refresh_try_again')
         
         if not client_uuid or client_uuid in ['null', 'undefined']:
             client_uuid = str(uuid.uuid4())
@@ -195,7 +195,7 @@ class CartViewSet(viewsets.ModelViewSet):
             # platform = login_with
             
         if not customer_id or not customer_name :
-            raise lib.error_handle.error.api_error.ApiVerifyError('Invalid User')
+            raise lib.error_handle.error.api_error.ApiVerifyError('invalid_user')
 
         campaign = lib.util.verify.Verify.get_campaign(campaign_id)
 
@@ -222,7 +222,7 @@ class CartViewSet(viewsets.ModelViewSet):
         # pre_order = lib.util.verify.Verify.get_pre_order_with_oid(pre_order_oid)
 
         if cart.buyer and cart.buyer != api_user:
-            raise lib.error_handle.error.api_error.ApiVerifyError('Invalid User')
+            raise lib.error_handle.error.api_error.ApiVerifyError('invalid_user')
 
         return Response(models.cart.cart.CartSerializer(cart).data, status=status.HTTP_200_OK)
 
@@ -318,7 +318,7 @@ class CartViewSet(viewsets.ModelViewSet):
         rule.rule_checker.cart_rule_checker.CartDeleteProductRuleChecker.check({'api_user':api_user,'cart':cart,'campaign_product':campaign_product})
 
         if campaign_product_id not in cart.products:
-            raise lib.error_handle.error.api_error.ApiVerifyError('campaign_product not found')
+            raise lib.error_handle.error.api_error.ApiVerifyError('campaign_product_not_found')
         
         qty = cart.products[campaign_product_id].get('qty',0)
         database.lss.campaign_product.CampaignProduct(id=campaign_product_id).customer_return(qty=qty, sync=False)
@@ -405,7 +405,7 @@ class CartViewSet(viewsets.ModelViewSet):
         free_delivery, = lib.util.getter.getdata(request, ('free_delivery',), required=True)
 
         if type(free_delivery) != bool :
-            raise lib.error_handle.error.api_error.ApiVerifyError("request data error")
+            raise lib.error_handle.error.api_error.ApiVerifyError("request_data_error")
 
         api_user = lib.util.verify.Verify.get_seller_user(request)
         cart = lib.util.verify.Verify.get_cart(pk)

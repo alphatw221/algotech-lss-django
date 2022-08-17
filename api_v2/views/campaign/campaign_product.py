@@ -220,7 +220,7 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
         lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign.id)
 
         if campaign.start_at and datetime.timestamp(datetime.now()) > datetime.timestamp(campaign.start_at):
-            raise lib.error_handle.error.api_error.ApiVerifyError("This campaign product can't be deleted because the campaign has already started.")
+            raise lib.error_handle.error.api_error.ApiVerifyError("campaign_product_can_not_delete")
         
         ## soft delete:
         campaign_product.campaign = None

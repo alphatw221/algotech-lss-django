@@ -1,3 +1,4 @@
+from calendar import c
 from django.http import JsonResponse
 from django.db.models import Q
 
@@ -67,8 +68,19 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         
         shipping_data, = \
             lib.util.getter.getdata(request, ("shipping_data",), required=True)
+        # discount_code = \
+        #     lib.util.getter.getdata(request, ("discount_code",), required=False)
+
         pre_order = lib.util.verify.Verify.get_pre_order_with_oid(pre_order_oid)
         campaign = lib.util.verify.Verify.get_campaign_from_pre_order(pre_order)
+
+        # discount = None
+        # for _discount in campaign.discounts:
+        #     if discount_code and discount_code == _discount.get('code'):
+        #         discount = _discount
+        #         break
+        # if discount_code and not discount:
+        #     raise lib.error_handle.error.api_error.ApiVerifyError('invalid_discount_code')
 
         serializer = models.order.pre_order.PreOrderSerializerUpdateDelivery(pre_order, data=shipping_data, partial=True) 
         if not serializer.is_valid():
@@ -108,7 +120,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         code, response = service.recaptcha.recaptcha.verify_token(recaptcha_token)
 
         if code!=200 or not response.get('success'):
-            raise lib.error_handle.error.api_error.ApiVerifyError('Please Refresh The Page And Retry Again')
+            raise lib.error_handle.error.api_error.ApiVerifyError('refresh_try_again')
         
         if not client_uuid or client_uuid in ['null', 'undefined']:
             client_uuid = str(uuid.uuid4())
@@ -168,7 +180,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
             platform = login_with
             
         if not customer_id or not customer_name :
-            raise lib.error_handle.error.api_error.ApiVerifyError('Invalid User')
+            raise lib.error_handle.error.api_error.ApiVerifyError('invalid_user')
 
         campaign = lib.util.verify.Verify.get_campaign(campaign_id)
 
@@ -209,7 +221,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         pre_order = lib.util.verify.Verify.get_pre_order_with_oid(pre_order_oid)
 
         if pre_order.buyer and pre_order.buyer != api_user:
-            raise lib.error_handle.error.api_error.ApiVerifyError('Invalid User')
+            raise lib.error_handle.error.api_error.ApiVerifyError('invalid_user')
 
         campaign = lib.util.verify.Verify.get_campaign_from_pre_order(pre_order)
         pre_order = lib.helper.order_helper.PreOrderHelper.summarize_pre_order(pre_order, campaign, save=True)
@@ -225,9 +237,20 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         
         shipping_data, = \
             lib.util.getter.getdata(request, ("shipping_data",), required=True)
+        # discount_code = \
+        #     lib.util.getter.getdata(request, ("discount_code",), required=False)
 
         pre_order = lib.util.verify.Verify.get_pre_order_with_oid(pre_order_oid)
         campaign = lib.util.verify.Verify.get_campaign_from_pre_order(pre_order)
+
+        # discount = None
+        # for _discount in campaign.discounts:
+        #     if discount_code and discount_code == _discount.get('code'):
+        #         discount = _discount
+        #         break
+        # if discount_code and not discount:
+        #     raise lib.error_handle.error.api_error.ApiVerifyError('invalid_discount_code')
+
 
         serializer = models.order.pre_order.PreOrderSerializerUpdateDelivery(pre_order, data=shipping_data, partial=True) 
         if not serializer.is_valid():
@@ -265,6 +288,36 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
         lib.helper.order_helper.PreOrderHelper.add_product(api_user, pre_order.id, campaign_product.id, qty)
         pre_order = lib.util.verify.Verify.get_pre_order(pre_order.id)
+        return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
+
+
+    @action(detail=False, methods=['PUT'], url_path=r'(?P<pre_order_oid>[^/.]+)/buyer/discount', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def buyer_apply_discount_code(self, request, pre_order_oid):
+
+        # api_user = lib.util.verify.Verify.get_customer_user(request)
+
+        discount_code = \
+            lib.util.getter.getdata(request, ("discount_code",), required=True)
+
+        pre_order = lib.util.verify.Verify.get_pre_order_with_oid(pre_order_oid)
+        campaign = lib.util.verify.Verify.get_campaign_from_pre_order(pre_order)
+
+        if discount_code in [discount.get('code') for doscount in pre_order.discounts]:
+            raise lib.error_handle.error.api_error.ApiVerifyError('discount_code_already_apply')
+
+        discount = None
+        for _discount in campaign.discounts:
+            if discount_code == _discount.get('code'):
+                discount = _discount
+                break
+        if not discount:
+            raise lib.error_handle.error.api_error.ApiVerifyError('invalid_discount_code')
+
+        pre_order.discounts.append(discount)
+
+        pre_order = lib.helper.order_helper.PreOrderHelper.summarize_pre_order(pre_order, campaign, save=True)
+
         return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
 
 # ---------------------------------------------- seller ------------------------------------------------------
@@ -329,7 +382,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
         adjust_price, adjust_title, free_delivery = lib.util.getter.getdata(request, ('adjust_price', 'adjust_title', 'free_delivery'))
         if type(free_delivery) != bool or type(adjust_price) not in [int, float]:
-            raise lib.error_handle.error.api_error.ApiVerifyError("request data error")
+            raise lib.error_handle.error.api_error.ApiVerifyError("request_data_error")
         adjust_price = float(adjust_price)
         api_user = lib.util.verify.Verify.get_seller_user(request)
         pre_order = lib.util.verify.Verify.get_pre_order(pk)
@@ -367,4 +420,4 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         pre_order.save()
         return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
     
-    
+        

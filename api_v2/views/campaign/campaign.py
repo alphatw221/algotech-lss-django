@@ -47,7 +47,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
         
         kwargs = {}
         if (search_column in ["", None]) and (keyword not in [None, ""]):
-            raise lib.error_handle.error.api_error.ApiVerifyError("search_column field can not be empty when keyword has value")
+            raise lib.error_handle.error.api_error.ApiVerifyError("search_can_not_empty")
         if (search_column not in ['undefined', '']) and (keyword not in ['undefined', '', None]):
             kwargs = { search_column + '__icontains': keyword }
 
@@ -267,8 +267,8 @@ class CampaignViewSet(viewsets.ModelViewSet):
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         
         if 'facebook' not in user_subscription.user_plan.get('activated_platform'):
-           raise lib.error_handle.error.api_error.ApiVerifyError('facebook not activated')
-       
+           raise lib.error_handle.error.api_error.ApiVerifyError('facebook_not_activated')
+        
         facebook_page = lib.util.verify.Verify.get_facebook_page_from_user_subscription(user_subscription, facebook_page_id)
         is_token_valid = lib.util.verify.Verify.check_is_page_token_valid('facebook', facebook_page.token, facebook_page.page_id)
         if not is_token_valid:
