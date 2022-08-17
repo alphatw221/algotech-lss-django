@@ -1,5 +1,5 @@
-from api.utils.rule.rule_checker._rule_checker import RuleChecker
-from api.utils.rule.check_rule.cart_check_rule import CartCheckRule
+from api.rule.check_rule.cart_check_rule import CartCheckRule
+from api.rule.rule_checker.rule_checker import RuleChecker
 
 class CartEditProductRuleChecker(RuleChecker):
 

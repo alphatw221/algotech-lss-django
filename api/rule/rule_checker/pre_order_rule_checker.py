@@ -1,6 +1,6 @@
-from api.utils.rule.rule_checker._rule_checker import RuleChecker
-from api.utils.rule.check_rule.pre_order_check_rule import PreOrderCheckRule
-from api.utils.rule.check_rule.order_product_check_rule import OrderProductCheckRule
+from api.rule.check_rule.order_product_check_rule import OrderProductCheckRule
+from api.rule.check_rule.pre_order_check_rule import PreOrderCheckRule
+from api.rule.rule_checker.rule_checker import RuleChecker
 
 class PreOrderUpdateProductRuleChecker(RuleChecker):
 
