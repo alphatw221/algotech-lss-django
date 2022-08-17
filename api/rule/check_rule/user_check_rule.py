@@ -3,6 +3,7 @@ from lib.error_handle.error.api_error import ApiVerifyError
 from django.contrib.auth.models import User as AuthUser
 from api.models.user.user import User
 import lib
+import re
 class AdminCheckRule():
 
     @staticmethod
@@ -48,10 +49,14 @@ class UserCheckRule():
 
     @staticmethod
     def is_email_format_valid(**kwargs):
+        regex = re.compile(r'([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,})+')
         email = kwargs.get('email')
         if type(email) != str:
             raise ApiVerifyError('helper.invalid_email')
-        return {"email":email.lower().replace(" ","")}
+        email = email.lower().replace(" ","")
+        if not re.fullmatch(regex, email):
+            raise ApiVerifyError('helper.invalid_email')
+        return {"email":email}
         
     @staticmethod
     def is_plan_valid(**kwargs):
