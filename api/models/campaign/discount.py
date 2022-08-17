@@ -14,8 +14,12 @@ class Discount(models.Model):
     description = models.TextField(null=True, blank=True, default=None)
     code = type = models.CharField(max_length=255, null=True, blank=True)
 
-    type = models.CharField(max_length=255, null=True, blank=True)
+    start_at = models.DateTimeField(null=True, blank=True, default=None)
+    end_at = models.DateTimeField(null=True, blank=True, default=None)
 
+    type = models.CharField(max_length=255, null=True, blank=True)
+    limitation = models.CharField(max_length=255, null=True, blank=True)
+    
     meta = models.JSONField(null=True, blank=True, default=dict)
   
     def __str__(self):
