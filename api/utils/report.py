@@ -563,9 +563,20 @@ class SalesReport2:
                     "total_inventories":{"$sum": "$campaign_product_total_item.qty_for_sale"},
                     "total_no_of_orders": {"$add":[{"$size": "$pre_orders.id"},{"$size": "$orders.id"}]},
                     "total_amount": {"$add":[{"$sum": "$pre_orders.total"},{"$sum": "$orders.total"}]},
-                    "average_order_value":{ "$divide": [{"$add":[{"$sum": "$pre_orders.total"},{"$sum": "$orders.total"}]}, 2 ] }
                 }
             },
+            {
+                "$project":{
+                    "post_comment":"$post_comment",
+                    "no_of_items_sold":"$no_of_items_sold",
+                    "no_of_items_unsold":"$no_of_items_unsold",
+                    "total_no_of_items":"$total_no_of_items",
+                    "total_inventories":"$total_inventories",
+                    "total_no_of_orders": "$total_no_of_orders",
+                    "total_amount": "$total_amount",
+                    "average_order_value":{ "$cond": [{ "$eq": [ "$total_no_of_orders", 0 ] }, 0, {"$round": [{"$divide":["$total_amount", "$total_no_of_orders"]}, 2]}] }
+                }
+            }
         ])
         return list(query)
     
@@ -582,7 +593,7 @@ class SalesReport2:
     @classmethod
     def get_basic_info(cls, start_time, end_time, user_subscription_id):
         json_data = SalesReport2.query_basic_info(start_time, end_time, user_subscription_id)
-        if len(basic_info) == 0:
+        if len(json_data) == 0:
             return {}
         basic_info = SalesReport2.modify_basic_info(json_data)
         return basic_info
