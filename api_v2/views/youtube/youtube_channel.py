@@ -36,7 +36,7 @@ class YoutubeChannelViewSet(viewsets.GenericViewSet):
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         
         if 'youtube' not in user_subscription.user_plan.get('activated_platform'):
-            raise lib.error_handle.error.api_error.ApiVerifyError('youtube not activated')
+            raise lib.error_handle.error.api_error.ApiVerifyError('youtube_not_activated')
         
         youtube_channel = lib.util.verify.Verify.get_youtube_channel_from_user_subscription(user_subscription, pk)
         code, response = service.youtube.viedo.get_video_info_with_access_token(youtube_channel.token, live_video_id)

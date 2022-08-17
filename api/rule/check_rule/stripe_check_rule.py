@@ -13,7 +13,7 @@ class StripeCheckRule():
         paymentIntent = kwargs.get('paymentIntent')
 
         if paymentIntent.status != "succeeded":
-            raise ApiVerifyError('payment not succeeded')
+            raise ApiVerifyError('helper.payment_not_succeeded')
 
 
     @staticmethod
@@ -24,7 +24,7 @@ class StripeCheckRule():
         
         amount = subscription_plan.get('price',{}).get(period)
         if not amount :
-            raise ApiVerifyError('invalid period')
+            raise ApiVerifyError('helper.invalid_period')
         return {'amount':amount}
 
     @staticmethod
@@ -43,7 +43,7 @@ class StripeCheckRule():
         if not paymentIntent:
             return
         if int(amount*100) != paymentIntent.amount:
-            raise ApiVerifyError('payment amount error')
+            raise ApiVerifyError('helper.payment_amount_error')
 
 
     def adjust_price_if_promo_code_valid(**kwargs):
@@ -89,7 +89,7 @@ class StripeCheckRule():
         upgrade_avaliable_list=upgrade_avaliable_dict.get(api_user_subscription.type)
 
         if plan not in upgrade_avaliable_list:
-            raise ApiVerifyError('not valid upgrade plan')
+            raise ApiVerifyError('helper.not_valid_upgrade_plan')
 
     def adjust_amount_if_subscription_undue(**kwargs):
 

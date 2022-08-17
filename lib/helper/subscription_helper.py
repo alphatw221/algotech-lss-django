@@ -45,7 +45,7 @@ def bind_facebook_pages(request, user_subscription):
     print(status_code)
     print(response)
     if status_code != 200:
-        raise lib.error_handle.error.api_error.ApiCallerError("api_fb_get_accounts_from_user error")
+        raise lib.error_handle.error.api_error.ApiCallerError("helper.api_fb_get_accounts_error")
 
 
     for item in response.get('data',[]):
@@ -79,7 +79,7 @@ def bind_instagram_profiles(request, user_subscription):
     status_code, response = service.facebook.user.get_me_accounts(token)
 
     if status_code != 200:
-        raise lib.error_handle.error.api_error.ApiCallerError("api_fb_get_accounts_from_user error")
+        raise lib.error_handle.error.api_error.ApiCallerError("helper.api_fb_get_accounts_error")
         
     business_id_of_binded_pages = []
     
@@ -140,10 +140,10 @@ def bind_youtube_channels(request, user_subscription):
     status_code, response = service.youtube.channel.get_list_channel_by_token(access_token)
 
     if status_code != 200:
-        raise lib.error_handle.error.api_error.ApiCallerError("get youtube channels error")
+        raise lib.error_handle.error.api_error.ApiCallerError("helper.api_yt_list_channel_error")
     
     if not response.get("items"):
-        raise lib.error_handle.error.api_error.ApiCallerError("not channel found in this account.")
+        raise lib.error_handle.error.api_error.ApiCallerError("helper.no_channel_found")
 
     #TODO handle next page token
     for item in response['items']:

@@ -47,7 +47,7 @@ class FacebookLogin():
     def get_token(cls, token, user_type):
         status_code, response = api_fb_get_me_login(token)
         if status_code / 100 != 2:
-            raise ApiVerifyError("facebook user token invalid")
+            raise ApiVerifyError("helper.fb_user_token_invalid")
             
         facebook_id = response.get('id')
         facebook_name = response.get('name')
@@ -55,7 +55,7 @@ class FacebookLogin():
         email = response.get('email')
 
         if not email:
-            raise ApiVerifyError("can't get email from facebook")
+            raise ApiVerifyError("helper.unable_get_fb_email")
 
         api_user_exists = models.user.user.User.objects.filter(
             email=email, type=user_type).exists()
@@ -87,7 +87,7 @@ class FacebookLogin():
                 name=facebook_name, email=email, type=user_type, status='new', auth_user=auth_user)
 
         if user_type == 'user' and api_user.status != 'valid':
-            raise ApiVerifyError('account not activated')
+            raise ApiVerifyError('helper.account_not_activated')
 
         api_user.facebook_info["token"] = token
         api_user.facebook_info["id"] = facebook_id
@@ -150,7 +150,7 @@ class GoogleLogin():
                 name=google_name, email=email, type=user_type, status='new', auth_user=auth_user)
 
         if user_type == 'user' and api_user.status != 'valid':
-            raise ApiVerifyError('account not activated')
+            raise ApiVerifyError('helper.account_not_activated')
 
         api_user.google_info["id"] = google_id
         api_user.google_info["name"] = google_name

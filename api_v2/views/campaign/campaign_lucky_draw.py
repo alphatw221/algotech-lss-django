@@ -56,9 +56,9 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
         type = data.get('type', '')
 
         if type not in models.campaign.campaign_lucky_draw.TYPE_CHOICES:
-            raise lib.error_handle.error.api_error.ApiVerifyError('invalid lucky_draw type')
+            raise lib.error_handle.error.api_error.ApiVerifyError('invalid_lucky_draw_type')
         elif type == models.campaign.campaign_lucky_draw.TYPE_PRODUCT and data.get('campaign_product', '') == '': 
-            raise lib.error_handle.error.api_error.ApiVerifyError('invalid lucky_draw product')
+            raise lib.error_handle.error.api_error.ApiVerifyError('invalid_lucky_draw_product')
         
         prize = lib.util.verify.Verify.get_campaign_product_from_campaign(campaign, int(data.get('prize', {}).get('id', 0)))
         if animation and data.get('path', '') == '':
@@ -102,9 +102,9 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
         type = data.get('type', '')
 
         if type not in models.campaign.campaign_lucky_draw.TYPE_CHOICES:
-            raise lib.error_handle.error.api_error.ApiVerifyError('invalid lucky_draw type')
+            raise lib.error_handle.error.api_error.ApiVerifyError('invalid_lucky_draw_type')
         elif type == models.campaign.campaign_lucky_draw.TYPE_PRODUCT and data.get('campaign_product', '') == '': 
-            raise lib.error_handle.error.api_error.ApiVerifyError('invalid lucky_draw product')
+            raise lib.error_handle.error.api_error.ApiVerifyError('invalid_lucky_draw_product')
 
         prize = lib.util.verify.Verify.get_campaign_product_from_campaign(campaign, int(data.get('prize', {}).get('id', 0)))
         if animation and data.get('path', '') == '':
@@ -143,7 +143,7 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
         lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign.id)
 
         if lucky_draw.status==models.campaign.campaign_lucky_draw.STATUS_FINISH:
-            raise lib.error_handle.error.api_error.ApiVerifyError('lucky draw has already finished')
+            raise lib.error_handle.error.api_error.ApiVerifyError('lucky_draw_has_already_finished')
 
         lucky_draw.delete()
         

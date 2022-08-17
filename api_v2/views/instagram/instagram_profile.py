@@ -39,7 +39,7 @@ class InstagramProfileViewSet(viewsets.ModelViewSet):
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         
         if 'instagram' not in user_subscription.user_plan.get('activated_platform'):
-            raise lib.error_handle.error.api_error.ApiVerifyError('instagram not activated')
+            raise lib.error_handle.error.api_error.ApiVerifyError('instagram_not_activated')
         
         instagram_profile = lib.util.verify.Verify.get_instagram_profile_from_user_subscription(user_subscription, pk)
         code, response = service.instagram.post.get_post(instagram_profile.token, media_id)
