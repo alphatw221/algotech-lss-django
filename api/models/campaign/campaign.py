@@ -177,7 +177,7 @@ class CampaignSerializerUpdate(serializers.ModelSerializer):
     meta = serializers.JSONField(default={"allow_checkout": 1})
     meta_payment = serializers.JSONField(default=dict)
     meta_logistic = serializers.JSONField(default=dict)
-    discounts = serializers.JSONField(default=[])
+    discounts = serializers.JSONField(default=[], allow_null=True)
 
 class CampaignSerializerRetreive(CampaignSerializer):
     facebook_page = FacebookPageSerializer(read_only=True)
