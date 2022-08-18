@@ -35,12 +35,8 @@ router.register(r'campaign-luckydraw', campaign_lucky_draw.CampaignLuckyDrawView
 router.register(r'campaign-quizgame', campaign_quiz_game.CampaignQuizGameViewSet)
 router.register(r'business-policy',business_policy.BusinessPolicyViewSet)
 router.register(r'cart',cart.CartViewSet)
-<<<<<<< HEAD
-# router.register(r'twitch',twitch.TwitchViewSet)
 router.register(r'discount-code',discount_code.DiscountCodeViewSet)
-=======
 router.register(r'twitch',twitch_channel.TwitchViewSet)
->>>>>>> d7d383993c249e11bdc5bd648ccf11d1a367e67d
 
 urlpatterns = [
     url(r'^', include(router.urls)),
