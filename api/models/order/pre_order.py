@@ -100,7 +100,7 @@ class PreOrderSerializer(serializers.ModelSerializer):
     products = serializers.JSONField(default=dict)
     checkout_details = serializers.JSONField(default=dict)
     history = serializers.JSONField(default=dict)
-    applied_discount = serializers.JSONField(default=[])
+    applied_discount = serializers.JSONField(default=dict)
     shipping_option_data = serializers.JSONField(default=dict)
 class PreOrderSerializerWithSubscription(serializers.ModelSerializer):
 
