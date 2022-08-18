@@ -26,6 +26,9 @@ def enqueue_email_queue(job, subject, email, template, parameters, file, lang):
             "lang":lang
         }, result_ttl=10, failure_ttl=10)
 
+def enqueue_twitch_chat_queue(job, campaign_id, comments):
+    comment_queue.enqueue(job, args=(campaign_id, comments), result_ttl=10, failure_ttl=10)
+
 def get_job_status(job_id):
     job = Job.fetch(str(job_id), connection=redis_connection)
     return job, job.get_status(refresh=True)

@@ -34,3 +34,14 @@ class TwitchChannel(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class TwitchChannelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TwitchChannel
+        fields = '__all__'
+        read_only_fields = ['created_at', 'modified_at']
+
+    meta = serializers.JSONField(default=dict)
+    meta_payment = serializers.JSONField(default=dict)
+    meta_logistic = serializers.JSONField(default=dict)

@@ -143,3 +143,11 @@ def comment_responding(platform_name, platform_instance_data, campaign_data, use
         code, ret =service.instagram.post.private_message( platform_instance_data['token'], comment['id'], text+shopping_cart_info)
         if code!=200:
             print("response", ret)
+    
+    elif platform_name == 'twitch':
+        text = lib.i18n.cart_product_request.get_request_response(
+            state, campaign_product, qty, lang=campaign_data.get('lang'))
+        
+        code, ret = service.twitch.post.whisper_to_user(platform_instance_data['token'], comment['customer_id'], text+shopping_cart_info)
+        if code!=200:
+            print("response", ret)
