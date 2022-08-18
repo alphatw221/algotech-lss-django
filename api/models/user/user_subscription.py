@@ -8,6 +8,8 @@ from api.models.instagram.instagram_profile import (
     InstagramProfile, InstagramProfileInfoSerializer, InstagramProfileSerializer)
 from api.models.youtube.youtube_channel import (YoutubeChannel,
                                                 YoutubeChannelInfoSerializer, YoutubeChannelSerializer)
+from api.models.twitch.twitch_channel import (TwitchChannel, TwitchChannelSerializer)
+
 from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
@@ -25,11 +27,13 @@ IMAGE_MAXIMUM_SIZE = 10*1024*1024
 PLATFORM_FACEBOOK = 'facebook'
 PLATFORM_INSTAGRAM = 'instagram'
 PLATFORM_YOUTUBE = 'youtube'
+PLATFORM_TWITCH = 'twitch'
 
 PLATFORM_ATTR={
     PLATFORM_FACEBOOK:{'attr':'facebook_pages','serializer':FacebookPageSerializer}, 
     PLATFORM_INSTAGRAM:{'attr':'instagram_profiles','serializer':InstagramProfileSerializer}, 
-    PLATFORM_YOUTUBE:{'attr':'youtube_channels','serializer':YoutubeChannelSerializer}
+    PLATFORM_YOUTUBE:{'attr':'youtube_channels','serializer':YoutubeChannelSerializer},
+    PLATFORM_TWITCH:{'attr':'twitch_channels','serializer':TwitchChannelSerializer}
     }
 class UserSubscription(models.Model):
 
@@ -42,6 +46,8 @@ class UserSubscription(models.Model):
         InstagramProfile, related_name='user_subscriptions')
     youtube_channels = models.ManyToManyField(
         YoutubeChannel, related_name='user_subscriptions')
+    twitch_channels = models.ManyToManyField(
+        TwitchChannel, related_name='user_subscriptions')
 
     name = models.CharField(max_length=255, null=True, blank=True)
     description = models.TextField(null=True, blank=True, default=None)
