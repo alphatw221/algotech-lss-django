@@ -362,13 +362,9 @@ class PreOrderHelper():
     @classmethod
     def summarize_pre_order(cls, pre_order, campaign, shipping_option=None, save=False):
         
-        total_discount = 0
-        # subtotal = pre_order.subtotal
-        # for _discount in pre_order.discounts:
-        #     after_discount_subtotal, discount = lib.helper.discount_helper.make_discount(subtotal, _discount)
-        #     subtotal = after_discount_subtotal
-        #     total_discount+=discount
-        # pre_order.discount = total_discount
+
+        after_discount_subtotal, discount = lib.helper.discount_helper.make_discount(pre_order.subtotal, pre_order.applied_discount)
+        pre_order.discount = discount
 
         if pre_order.shipping_method == 'pickup':
             pre_order.shipping_cost = 0

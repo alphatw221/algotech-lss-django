@@ -139,15 +139,15 @@ class UserViewSet(viewsets.ModelViewSet):
         auth_user = AuthUser.objects.get(email=email)
         
         api_user = models.user.user.User.objects.get(email=email,type='user')
-        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        # user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
 
         service.email.email_service.EmailService.send_email_template(
             jobs.send_email_job.send_email_job,
-            i18n_get_reset_password_success_mail_subject(lang=user_subscription.lang),
+            i18n_get_reset_password_success_mail_subject(lang=api_user.lang),
             email,
             "reset_password_success_email.html",
             {"email":email,"username":auth_user.username},
-            lang=user_subscription.lang
+            lang=api_user.lang
         )
         
         return Response(ret, status=status.HTTP_200_OK)
@@ -164,15 +164,15 @@ class UserViewSet(viewsets.ModelViewSet):
 
         auth_user = AuthUser.objects.get(email=email)
         api_user = models.user.user.User.objects.get(email=email,type='user')
-        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
-        code = lib.code_manager.password_code_manager.PasswordResetCodeManager.generate(auth_user.id,user_subscription.lang)
+        # user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        code = lib.code_manager.password_code_manager.PasswordResetCodeManager.generate(auth_user.id,api_user.lang)
         service.email.email_service.EmailService.send_email_template(
             jobs.send_email_job.send_email_job,
-            i18n_get_reset_password_mail_subject(lang=user_subscription.lang),
+            i18n_get_reset_password_mail_subject(lang=api_user.lang),
             email,
             "email_reset_password_link.html",
             {"url":settings.GCP_API_LOADBALANCER_URL +"/seller/web/password/reset","code":code,"username":auth_user.username},
-            lang=user_subscription.lang)
+            lang=api_user.lang)
 
         return Response({"message":"The email has been sent. If you haven't received the email after a few minutes, please check your spam folder. "}, status=status.HTTP_200_OK)
 

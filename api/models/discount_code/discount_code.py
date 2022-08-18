@@ -4,6 +4,9 @@ from rest_framework import serializers
 
 from api.models.user.user_subscription import UserSubscription
 
+TYPE_PERCENT_OFF = 'percent_off'
+
+LIMITATION_SPECIFIC_CAMPAIGN = 'specific_campaign'
 class DiscountCode(models.Model):
     class Meta:
         db_table = 'api_discount_code'
@@ -15,14 +18,15 @@ class DiscountCode(models.Model):
 
     name = models.CharField(max_length=255, null=True, blank=True)
     description = models.TextField(null=True, blank=True, default=None)
-    code = type = models.CharField(max_length=255, null=True, blank=True)
+    code = models.CharField(max_length=255, null=True, blank=True)
 
     start_at = models.DateTimeField(null=True, blank=True, default=None)
     end_at = models.DateTimeField(null=True, blank=True, default=None)
 
     type = models.CharField(max_length=255, null=True, blank=True)
-    limitation = models.CharField(max_length=255, null=True, blank=True)
-    
+    # limitation = models.CharField(max_length=255, null=True, blank=True)
+
+    limitations = models.JSONField(null=False, blank=False, default=[])
     meta = models.JSONField(null=True, blank=True, default=dict)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -39,4 +43,5 @@ class DiscountCodeSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['user_subscription', 'type', 'limitation', 'meta', 'created_at', 'updated_at']
 
+    limitations = serializers.JSONField(default=[])
     meta = serializers.JSONField(default=dict)

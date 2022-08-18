@@ -48,10 +48,10 @@ class DiscountCodeViewSet(viewsets.ModelViewSet):
 
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
-        type, limitation = lib.util.getter.getdata(request, ("type", "limitation"), required=True)
+        type, limitations = lib.util.getter.getdata(request, ("type", "limitations"), required=True)
         type_data, limitation_data = lib.util.getter.getdata(request, ("type_data", "limitation_data"), required=False)
 
-        #TODO validation type and limitation
+        #TODO validation type and limitations
 
         serializer = models.discount_code.discount_code.DiscountCodeSerializer(data=request.data)
         if not serializer.is_valid():
@@ -60,9 +60,9 @@ class DiscountCodeViewSet(viewsets.ModelViewSet):
         
         discount_code.user_subscription = user_subscription
         discount_code.type = type
-        discount_code.limitation = limitation
+        discount_code.limitations = limitations
         discount_code.meta[type] = type_data
-        discount_code.meta[limitation] = limitation_data
+        discount_code.meta.update(limitation_data)
         discount_code.save()
 
         return Response(models.discount_code.discount_code.DiscountCodeSerializer(discount_code).data, status=status.HTTP_200_OK)
@@ -71,9 +71,10 @@ class DiscountCodeViewSet(viewsets.ModelViewSet):
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def update_discount_code(self, request, pk=None):
 
-        type, limitation = lib.util.getter.getdata(request, ("type", "limitation"), required=True)
+        type, limitations = lib.util.getter.getdata(request, ("type", "limitations"), required=True)
         type_data, limitation_data = lib.util.getter.getdata(request, ("type_data", "limitation_data"), required=False)
 
+        #TODO validation type and limitations
 
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
@@ -85,9 +86,9 @@ class DiscountCodeViewSet(viewsets.ModelViewSet):
         discount_code = serializer.save()
 
         discount_code.type = type
-        discount_code.limitation = limitation
+        discount_code.limitations = limitations
         discount_code.meta[type] = type_data
-        discount_code.meta[limitation] = limitation_data
+        discount_code.meta.update(limitation_data)
         discount_code.save()
 
         return Response(serializer.data, status=status.HTTP_200_OK)
