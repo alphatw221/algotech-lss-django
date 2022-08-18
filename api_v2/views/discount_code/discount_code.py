@@ -35,8 +35,8 @@ class DiscountCodeViewSet(viewsets.ModelViewSet):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
 
-        auto_responses = user_subscription.auto_responses.all().order_by("-created_at")
-        page = self.paginate_queryset(auto_responses)
+        discount_codes = user_subscription.discount_codes.all().order_by("-created_at")
+        page = self.paginate_queryset(discount_codes)
         serializer = models.discount_code.discount_code.DiscountCodeSerializer(page, many=True)
 
         return Response(self.get_paginated_response(serializer.data).data, status=status.HTTP_200_OK)
