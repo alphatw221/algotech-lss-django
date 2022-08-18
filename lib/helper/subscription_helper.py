@@ -103,12 +103,14 @@ def bind_instagram_profiles(request, user_subscription):
         status_code, profile_info_response = service.instagram.profile.get_profile_info(page_token, business_id)
         # status_code, profile_info_response = api_ig_get_profile_info(page_token, business_id)
         profile_name = profile_info_response.get('name')
+        profile_username = profile_info_response.get('username')
         profile_pricure = profile_info_response.get('profile_picture_url')
         
         if models.instagram.instagram_profile.InstagramProfile.objects.filter(business_id=business_id).exists():
             instagram_profile = models.instagram.instagram_profile.InstagramProfile.objects.get(business_id=business_id)
             instagram_profile.connected_facebook_page_id = page_id
             instagram_profile.name = profile_name
+            instagram_profile.username = profile_username
             instagram_profile.token = page_token
             instagram_profile.token_update_at = datetime.now()
             # instagram_profile.token_update_by = api_user.facebook_info['id']
