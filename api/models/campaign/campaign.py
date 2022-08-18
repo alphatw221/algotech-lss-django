@@ -13,7 +13,6 @@ from api.models.user.user import User
 from api.models.user.user_subscription import UserSubscription, UserSubscriptionSerializer
 from api.models.youtube.youtube_channel import (YoutubeChannel,
                                                 YoutubeChannelInfoSerializer, YoutubeChannelSerializer)
-from api.models.campaign.discount import Discount
 
 import business_policy
 
@@ -87,7 +86,7 @@ class Campaign(models.Model):
     stop_checkout = models.BooleanField(
         blank=False, null=False, default=False)
     
-    discounts = models.ArrayField(model_container=Discount, blank=False, null = False, default = [])
+    # discounts = models.ArrayField(model_container=Discount, blank=False, null = False, default = [])
 
     def __str__(self):
         return str(self.title)
@@ -134,7 +133,7 @@ class CampaignSerializer(serializers.ModelSerializer):
     meta = serializers.JSONField(default=dict)
     meta_payment = serializers.JSONField(default=dict)
     meta_logistic = serializers.JSONField(default=dict)
-    discounts = serializers.JSONField(default=[])
+
 
 class CampaignSerializerCreate(serializers.ModelSerializer):
     class Meta:
@@ -150,7 +149,7 @@ class CampaignSerializerCreate(serializers.ModelSerializer):
     meta = serializers.JSONField(default={"allow_checkout": 1})
     meta_payment = serializers.JSONField(default=dict)
     meta_logistic = serializers.JSONField(default=dict)
-    discounts = serializers.JSONField(default=[])
+
 
 class CampaignSerializerEdit(serializers.ModelSerializer):
     class Meta:
@@ -166,18 +165,18 @@ class CampaignSerializerEdit(serializers.ModelSerializer):
     meta = serializers.JSONField(default={"allow_checkout": 1})
     meta_payment = serializers.JSONField(default=dict)
     meta_logistic = serializers.JSONField(default=dict)
-    discounts = serializers.JSONField(default=[])
+
 
 class CampaignSerializerUpdate(serializers.ModelSerializer):
 
     class Meta:
         model = Campaign
-        fields = ['title', 'start_at', 'end_at', 'meta', 'meta_payment', 'meta_logistic', 'lang', 'currency', 'price_unit', 'decimal_places', 'discounts']
+        fields = ['title', 'start_at', 'end_at', 'meta', 'meta_payment', 'meta_logistic', 'lang', 'currency', 'price_unit', 'decimal_places']
 
     meta = serializers.JSONField(default={"allow_checkout": 1})
     meta_payment = serializers.JSONField(default=dict)
     meta_logistic = serializers.JSONField(default=dict)
-    discounts = serializers.JSONField(default=[], allow_null=True)
+
 
 class CampaignSerializerRetreive(CampaignSerializer):
     facebook_page = FacebookPageSerializer(read_only=True)

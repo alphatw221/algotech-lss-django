@@ -14,6 +14,7 @@ from api_v2.views.auto_response import auto_response
 from api_v2.views.business_policy import business_policy
 from api_v2.views.cart import cart
 from api_v2.views.twitch import twitch
+from api_v2.views.discount_code import discount_code
 
 router = routers.DefaultRouter()
 router.register(r'product', product.ProductViewSet)
@@ -35,6 +36,7 @@ router.register(r'campaign-quizgame', campaign_quiz_game.CampaignQuizGameViewSet
 router.register(r'business-policy',business_policy.BusinessPolicyViewSet)
 router.register(r'cart',cart.CartViewSet)
 # router.register(r'twitch',twitch.TwitchViewSet)
+router.register(r'discount-code',discount_code.DiscountCodeViewSet)
 
 urlpatterns = [
     url(r'^', include(router.urls)),

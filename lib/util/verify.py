@@ -375,6 +375,12 @@ class Verify():
         if country_code not in ["SG", "PH", "IN", "ID", "MY", "TW", "CN"]:
             raise ApiVerifyError("util.country_code_not_valid")
 
+    @staticmethod
+    def get_discount_code_from_user_subscription(user_subscription, discount_code_id):
+
+        if not user_subscription.discount_codes.filter(id=discount_code_id).exists():
+            raise ApiVerifyError("util.no_discount_code_found")
+        return user_subscription.discount_codes.get(id=discount_code_id)
 
     @staticmethod
     def get_auto_response_from_user_subscription(user_subscription, auto_response_id):
