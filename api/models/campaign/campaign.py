@@ -172,12 +172,12 @@ class CampaignSerializerUpdate(serializers.ModelSerializer):
 
     class Meta:
         model = Campaign
-        fields = ['title', 'start_at', 'end_at', 'meta', 'meta_payment', 'meta_logistic', 'lang', 'currency', 'price_unit', 'decimal_places']
+        fields = ['title', 'start_at', 'end_at', 'meta', 'meta_payment', 'meta_logistic', 'lang', 'currency', 'price_unit', 'decimal_places', 'discounts']
 
     meta = serializers.JSONField(default={"allow_checkout": 1})
     meta_payment = serializers.JSONField(default=dict)
     meta_logistic = serializers.JSONField(default=dict)
-    discounts = serializers.JSONField(default=[])
+    discounts = serializers.JSONField(default=[], allow_null=True)
 
 class CampaignSerializerRetreive(CampaignSerializer):
     facebook_page = FacebookPageSerializer(read_only=True)
