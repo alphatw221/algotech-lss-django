@@ -23,12 +23,12 @@ class InstagramProfileViewSet(viewsets.ModelViewSet):
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         
         if 'instagram' not in user_subscription.user_plan.get('activated_platform'):
-            raise lib.error_handle.error.api_error.ApiVerifyError('instagram not activated')
+            raise lib.error_handle.error.api_error.ApiVerifyError('instagram_not_activated')
         
         instagram_profile = lib.util.verify.Verify.get_instagram_profile_from_user_subscription(user_subscription, pk)
         is_token_valid = lib.util.verify.Verify.check_is_page_token_valid('instagram', instagram_profile.token, instagram_profile.business_id)
         if not is_token_valid:
-            raise lib.error_handle.error.api_error.ApiVerifyError(f"Instagram profile <{instagram_profile.name}>: token expired or invalid. Please re-bind your profile on Platform page.")
+            raise lib.error_handle.error.api_error.ApiVerifyError("instagram_token_expired")
         return Response(models.instagram.instagram_profile.InstagramProfileSerializer(instagram_profile).data, status=status.HTTP_200_OK)
     
     @action(detail=True, methods=['GET'], url_path=r'post/check', permission_classes=(IsAuthenticated,))
