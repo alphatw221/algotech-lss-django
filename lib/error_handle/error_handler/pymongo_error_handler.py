@@ -9,5 +9,5 @@ def pymongo_error_handler(func):
             return func(*args, **kwargs)
         except pymongo_errors.PyMongoError as e:
             print(e)
-            raise pymongo_errors.PyMongoError("server busy, please try again")
+            raise pymongo_errors.PyMongoError("error_handler.pymongo_error.server_busy")
     return wrapper

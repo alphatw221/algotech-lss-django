@@ -12,6 +12,7 @@ class InstagramProfile(models.Model):
     business_id = models.CharField(max_length=255, null=True, blank=True)
     connected_facebook_page_id = models.CharField(max_length=255, null=True, blank=True)
     name = models.CharField(max_length=255, null=True, blank=True)
+    username = models.CharField(max_length=255, null=True, blank=True)
     remark = models.TextField(null=True, blank=True, default=None)
     image = models.CharField(max_length=512, null=True, blank=True)
     lang = models.CharField(max_length=255, blank=True,
@@ -42,7 +43,7 @@ class InstagramProfile(models.Model):
 class InstagramProfileInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = InstagramProfile
-        fields = ['id', 'profile_id', 'business_id', 'name', 'remark', 'image', 'lang', 'connected_facebook_page_id']
+        fields = ['profile_id', 'business_id', 'name', 'remark', 'image', 'lang']
         read_only_fields = ['created_at', 'modified_at']
 
 

@@ -34,11 +34,11 @@ class PasswordResetCodeManager(CodeManager):
         data = cls._decode(code)
 
         if float(data.get('expired_time', 1)) <datetime.now().timestamp():
-            raise  lib.error_handle.error.api_error.ApiVerifyError('code expired') 
+            raise  lib.error_handle.error.api_error.ApiVerifyError('reset_password_code_manager.code_expired') 
 
         
         if not AuthUser.objects.filter(id=data.get('auth_user_id',-1)).exists():
-            raise  lib.error_handle.error.api_error.ApiVerifyError('user not found')
+            raise  lib.error_handle.error.api_error.ApiVerifyError('user_not_found')
 
         auth_user = AuthUser.objects.get(id=data.get('auth_user_id'))
 

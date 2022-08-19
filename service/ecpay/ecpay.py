@@ -7,6 +7,11 @@
 # spec.loader.exec_module(module)
 from .payment_sdk import ECPayPaymentSdk
 from datetime import datetime
+import time
+
+
+action_url = 'https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5'  # 測試環境
+# action_url = 'https://payment.ecpay.com.tw/Cashier/AioCheckOut/V5' # 正式環境
 
 
 def create_order(merchant_id, hash_key, hash_iv, amount:int, order_id, return_url, order_result_url):
@@ -54,3 +59,15 @@ def create_order(merchant_id, hash_key, hash_iv, amount:int, order_id, return_ur
         return action_url,final_order_params
     except Exception as error:
         print('An exception happened: ' + str(error))
+        
+def check_mac_value(merchant_id,hash_key,hash_iv,payment_res):
+    
+    ecpay_payment_sdk = ECPayPaymentSdk(
+        MerchantID=merchant_id,
+        HashKey=hash_key,
+        HashIV=hash_iv
+    )
+    
+    check_value = ecpay_payment_sdk.generate_check_value(payment_res)
+    
+    return check_value

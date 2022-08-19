@@ -45,7 +45,7 @@ def bind_facebook_pages(request, user_subscription):
     print(status_code)
     print(response)
     if status_code != 200:
-        raise lib.error_handle.error.api_error.ApiCallerError("api_fb_get_accounts_from_user error")
+        raise lib.error_handle.error.api_error.ApiCallerError("helper.api_fb_get_accounts_error")
 
 
     for item in response.get('data',[]):
@@ -79,7 +79,7 @@ def bind_instagram_profiles(request, user_subscription):
     status_code, response = service.facebook.user.get_me_accounts(token)
 
     if status_code != 200:
-        raise lib.error_handle.error.api_error.ApiCallerError("api_fb_get_accounts_from_user error")
+        raise lib.error_handle.error.api_error.ApiCallerError("helper.api_fb_get_accounts_error")
         
     business_id_of_binded_pages = []
     
@@ -103,12 +103,14 @@ def bind_instagram_profiles(request, user_subscription):
         status_code, profile_info_response = service.instagram.profile.get_profile_info(page_token, business_id)
         # status_code, profile_info_response = api_ig_get_profile_info(page_token, business_id)
         profile_name = profile_info_response.get('name')
+        profile_username = profile_info_response.get('username')
         profile_pricure = profile_info_response.get('profile_picture_url')
         
         if models.instagram.instagram_profile.InstagramProfile.objects.filter(business_id=business_id).exists():
             instagram_profile = models.instagram.instagram_profile.InstagramProfile.objects.get(business_id=business_id)
             instagram_profile.connected_facebook_page_id = page_id
             instagram_profile.name = profile_name
+            instagram_profile.username = profile_username
             instagram_profile.token = page_token
             instagram_profile.token_update_at = datetime.now()
             # instagram_profile.token_update_by = api_user.facebook_info['id']
@@ -140,10 +142,10 @@ def bind_youtube_channels(request, user_subscription):
     status_code, response = service.youtube.channel.get_list_channel_by_token(access_token)
 
     if status_code != 200:
-        raise lib.error_handle.error.api_error.ApiCallerError("get youtube channels error")
+        raise lib.error_handle.error.api_error.ApiCallerError("helper.api_yt_list_channel_error")
     
     if not response.get("items"):
-        raise lib.error_handle.error.api_error.ApiCallerError("not channel found in this account.")
+        raise lib.error_handle.error.api_error.ApiCallerError("helper.no_channel_found")
 
     #TODO handle next page token
     for item in response['items']:

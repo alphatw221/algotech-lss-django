@@ -40,7 +40,6 @@ from api.models.order.order import Order
 from api.models.order.order_product import OrderProduct
 from datetime import datetime
 from backend.api.instagram.post import api_ig_private_message, api_ig_get_post_comments
-from backend.api.twitch.post import api_twitch_get_access_token
 from backend.i18n.register_confirm_mail import i18n_get_register_confirm_mail_content, i18n_get_register_confirm_mail_subject, i18n_get_register_activate_mail_subject
 import service
 from api import models
@@ -52,7 +51,8 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.test_easy_store()
+        self.test_twitch()
+        # self.test_remove_campaign_comment_duplicate()
 
     def modify_database(self):
         from api.models.user.user_subscription import UserSubscription
@@ -260,8 +260,20 @@ class Command(BaseCommand):
     def test_nlp(self):
 
         import service
+        categories = service.nlp.classification.classify_comment_v2([
+        '包裹在哪',
+        'I would like to have a refund',
+        '满多少可以包邮',
+        '我想要紅色的還有嗎',
+        'what time could be free',
+        '不滿意可以退費嗎',
+        '你們可以用什麼信用卡',
+        '台南滷肉飯',
+        '商品一件多少錢',
+        '請問這個還有貨嗎'
+        ])
+        print(categories)
 
-        print(service.nlp.classification.classify_comment_v1([['test test']]))
     
     def test_mongo_aggr(self):
         from pprint import pprint 
@@ -420,6 +432,7 @@ class Command(BaseCommand):
         # pprint(success)
         # pprint(data)
 
+
         line_items =  [
                     {
                         "variant_id": 36344238,
@@ -439,3 +452,26 @@ class Command(BaseCommand):
         # success, data =  service.checkouts.update_checkout(shop=shop, access_token=access_token, line_items=line_items, cart_token='a5318e0f-2317-445c-9c71-ab6c812666e9')
         pprint(success)
         pprint(data)
+
+    def test_remove_campaign_comment_duplicate(self):
+
+        from database.lss._config import db
+
+        curser = db.api_campaign_comment.aggregate([{"$group" : { "_id": {"platform":"$platform","id":"$id","campaign_id":"$campaign_id"}, "count": { "$sum": 1 } } },
+            {"$match": {"_id" :{ "$ne" : None } , "count" : {"$gt": 1} } }, 
+            {"$project": {"index" : "$_id", "_id" : 0} }])
+
+        duplicate_list = list(curser)
+        print(len(duplicate_list))
+        # for item in duplicate_list:
+
+        #     index = item.get('index')
+        #     db.api_campaign_comment.delete_many(index)
+            # print(index)
+            # break
+    
+    def test_twitch(self):
+        import service
+
+        ret = service.twitch.post.whisper_to_user('17uulrj9lsj7zqpwrvsneildfcs947', '818419850', 'eat poop poop')
+        print (ret)
