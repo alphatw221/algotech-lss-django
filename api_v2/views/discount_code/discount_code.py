@@ -48,21 +48,17 @@ class DiscountCodeViewSet(viewsets.ModelViewSet):
 
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
-        type, limitations = lib.util.getter.getdata(request, ("type", "limitations"), required=True)
-        type_data, limitation_data = lib.util.getter.getdata(request, ("type_data", "limitation_data"), required=False)
+        # type, limitations = lib.util.getter.getdata(request, ("type", "limitations"), required=True)
+
 
         #TODO validation type and limitations
-
+        print(request.data)
         serializer = models.discount_code.discount_code.DiscountCodeSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         discount_code = serializer.save()
         
         discount_code.user_subscription = user_subscription
-        discount_code.type = type
-        discount_code.limitations = limitations
-        discount_code.meta[type] = type_data
-        discount_code.meta.update(limitation_data)
         discount_code.save()
 
         return Response(models.discount_code.discount_code.DiscountCodeSerializer(discount_code).data, status=status.HTTP_200_OK)
@@ -71,8 +67,7 @@ class DiscountCodeViewSet(viewsets.ModelViewSet):
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def update_discount_code(self, request, pk=None):
 
-        type, limitations = lib.util.getter.getdata(request, ("type", "limitations"), required=True)
-        type_data, limitation_data = lib.util.getter.getdata(request, ("type_data", "limitation_data"), required=False)
+        # type, limitations = lib.util.getter.getdata(request, ("type", "limitations"), required=True)
 
         #TODO validation type and limitations
 
@@ -84,12 +79,6 @@ class DiscountCodeViewSet(viewsets.ModelViewSet):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         discount_code = serializer.save()
-
-        discount_code.type = type
-        discount_code.limitations = limitations
-        discount_code.meta[type] = type_data
-        discount_code.meta.update(limitation_data)
-        discount_code.save()
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
