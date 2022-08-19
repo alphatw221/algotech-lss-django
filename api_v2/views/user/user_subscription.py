@@ -355,7 +355,9 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
        
         elif platform_name == models.user.user_subscription.PLATFORM_YOUTUBE:
             lib.helper.subscription_helper.bind_youtube_channels(request, user_subscription) 
-
+        
+        elif platform_name == models.user.user_subscription.PLATFORM_TWITCH:
+            lib.helper.subscription_helper.bind_twitch_channels(request, user_subscription) 
                    
         queryset = getattr(user_subscription, models.user.user_subscription.PLATFORM_ATTR[platform_name]['attr']).all()
         serializer = models.user.user_subscription.PLATFORM_ATTR[platform_name]['serializer']
