@@ -162,6 +162,7 @@ def i18n_get_mail_content(order, campaign, lang=None):
                                 </p></td></tr></tbody></table></tr>'
         mail_content += f'</tr>'
     mail_content += f'</tbody></table>'
+    
     # for key, product in order.products.items():
     #     mail_content+= f'<tr><td style="border: 1px solid black;">{product["name"]}</td><td style="border: 1px solid black;">${product["price"]}</td><td style="border: 1px solid black;">{product["qty"]}</td><td style="border: 1px solid black;">{product["subtotal"]}</td></tr>'
     # mail_content+= '</table>'

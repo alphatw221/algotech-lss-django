@@ -88,9 +88,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
         order = lib.util.verify.Verify.get_order(api_order.id)
 
-        # subject = lib.i18n.email.order_comfirm_mail.i18n_get_mail_subject(order, order.campaign.created_by.lang)
-        # content = lib.i18n.email.order_comfirm_mail.i18n_get_mail_content(order, order.campaign.created_by.lang)
-        subject = lib.helper.order_helper.OrderHelper.i18n_get_checkout_mail_subject(order,lang=campaign.lang)
+        subject = lib.helper.order_helper.OrderHelper.i18n_get_mail_subject(order,lang=campaign.lang)
         content = lib.helper.order_helper.OrderHelper.get_checkout_email_content(order,api_order._id,lang=campaign.lang)
         jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)     
         #queue this to redis if needed 

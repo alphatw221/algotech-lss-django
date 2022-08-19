@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-17 15:56+0800\n"
+"POT-Creation-Date: 2022-08-19 11:40+0800\n"
 "PO-Revision-Date: 2021-12-13 15:50+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -143,7 +143,8 @@ msgstr ""
 "订单金额：{dollar_sign}{total}\n"
 "\n"
 
-#: .\backend\i18n\comment_command.py:41 .\lib\i18n\comment_command.py:40
+#: .\backend\i18n\comment_command.py:41 .\backend\i18n\comment_command.py:99
+#: .\lib\i18n\comment_command.py:40
 #, python-brace-format
 msgid "DETAIL{link}\n"
 msgstr "查看购物车：{link}\n"
@@ -167,12 +168,6 @@ msgstr "运费：{dollar_sign}{delivery}\n"
 msgid "OPTION{dollar_sign}{option}\n"
 msgstr "额外运费：{dollar_sign}{option}\n"
 
-#: .\backend\i18n\comment_command.py:99
-#, fuzzy, python-brace-format
-#| msgid "DETAIL{link}\n"
-msgid "DETAIL{link}"
-msgstr "查看购物车：{link}\n"
-
 #: .\backend\i18n\comment_command.py:117 .\lib\i18n\comment_command.py:117
 #, python-brace-format
 msgid "ITEM_INFO{name}{qty}{dollar_sign}{total}\n"
@@ -185,8 +180,6 @@ msgid "EMAIL/PASSWORD_RESET_LINK/SUBJECT"
 msgstr "Live Show Seller 重設密碼通知"
 
 #: .\backend\i18n\email\subject.py:12
-#, fuzzy
-#| msgid "EMAIL/PASSWORD_RESET_LINK/SUBJECT"
 msgid "EMAIL/PASSWORD_RESET_SUCCESS/SUBJECT"
 msgstr "Live Show Seller 重設密碼通知"
 
@@ -264,84 +257,104 @@ msgstr ""
 msgid "PAYMENT/FIRST_DATA/TIME_ZONE"
 msgstr "地址: 8 Burn Road #15-13, Singapore 369977"
 
-#: .\lib\helper\order_helper.py:443 .\lib\helper\order_helper.py:583
+#: .\lib\helper\order_helper.py:445 .\lib\helper\order_helper.py:586
 #: .\lib\i18n\email\delivery_comfirm_mail.py:21
+#: .\lib\i18n\email\order_comfirm_mail.py:24
 msgid "EMAIL/DELIVERY_CONFIRM/ORDER_NO"
 msgstr "订单号。"
 
-#: .\lib\helper\order_helper.py:447 .\lib\helper\order_helper.py:587
+#: .\lib\helper\order_helper.py:449 .\lib\helper\order_helper.py:590
 #: .\lib\i18n\email\delivery_comfirm_mail.py:24
+#: .\lib\i18n\email\order_comfirm_mail.py:28
 msgid "EMAIL/DELIVERY_CONFIRM/ORDER_INFO"
 msgstr "订单信息"
 
-#: .\lib\helper\order_helper.py:453 .\lib\helper\order_helper.py:598
+#: .\lib\helper\order_helper.py:455 .\lib\helper\order_helper.py:596
+#: .\lib\i18n\email\order_comfirm_mail.py:34
+msgid "EMAIL/DELIVERY_CONFIRM/CAMPAIGN_TITLE"
+msgstr "活动名称"
+
+#: .\lib\helper\order_helper.py:460 .\lib\helper\order_helper.py:601
 #: .\lib\i18n\email\delivery_comfirm_mail.py:30
+#: .\lib\i18n\email\order_comfirm_mail.py:37
 msgid "EMAIL/DELIVERY_CONFIRM/ORDER_DATE"
 msgstr "订单日期"
 
-#: .\lib\helper\order_helper.py:456 .\lib\helper\order_helper.py:459
-#: .\lib\i18n\email\delivery_comfirm_mail.py:33
-#: .\lib\i18n\email\delivery_comfirm_mail.py:36
-msgid "EMAIL/DELIVERY_CONFIRM/SELLER"
-msgstr "卖家"
-
-#: .\lib\helper\order_helper.py:464 .\lib\helper\order_helper.py:603
+#: .\lib\helper\order_helper.py:465 .\lib\i18n\email\order_comfirm_mail.py:42
 msgid "EMAIL/DELIVERY_CONFIRM/BUYER"
 msgstr "买家"
 
-#: .\lib\helper\order_helper.py:467 .\lib\helper\order_helper.py:473
-#: .\lib\helper\order_helper.py:608 .\lib\helper\order_helper.py:614
+#: .\lib\helper\order_helper.py:470 .\lib\helper\order_helper.py:604
+#: .\lib\i18n\email\order_comfirm_mail.py:47
 msgid "EMAIL/DELIVERY_CONFIRM/RECEIVER"
 msgstr "收货人"
 
-#: .\lib\helper\order_helper.py:470 .\lib\helper\order_helper.py:611
+#: .\lib\helper\order_helper.py:473 .\lib\helper\order_helper.py:607
+#: .\lib\i18n\email\order_comfirm_mail.py:50
 msgid "REPORT/COLUMN_TITLE/SHIPPING_PHONE"
 msgstr "客户电话"
 
-#: .\lib\helper\order_helper.py:478 .\lib\helper\order_helper.py:619
+#: .\lib\helper\order_helper.py:479 .\lib\helper\order_helper.py:623
+#: .\lib\i18n\email\order_comfirm_mail.py:55
 msgid "REPORT/COLUMN_TITLE/PICK_UP_STORE"
 msgstr "自取店家"
 
-#: .\lib\helper\order_helper.py:483 .\lib\helper\order_helper.py:624
+#: .\lib\helper\order_helper.py:484 .\lib\helper\order_helper.py:627
 #: .\lib\i18n\email\delivery_comfirm_mail.py:106
+#: .\lib\i18n\email\order_comfirm_mail.py:60
 msgid "EMAIL/DELIVERY_CONFIRM/DELIVERY_ADDRESS"
 msgstr "收货地址"
 
-msgid "EMAIL/ORDER_CONFIRM/PROCESS_PAYMENT{link}"
-msgstr "前往付款: {link}"
-
-#: .\lib\helper\order_helper.py:490 .\lib\helper\order_helper.py:637
+#: .\lib\helper\order_helper.py:491 .\lib\i18n\email\order_comfirm_mail.py:72
 msgid "REPORT/COLUMN_TITLE/PAYMENT_METHOD"
 msgstr "付款方式"
 
-#: .\lib\helper\order_helper.py:538 .\lib\helper\order_helper.py:685
+#: .\lib\helper\order_helper.py:539 .\lib\helper\order_helper.py:690
 #: .\lib\i18n\email\delivery_comfirm_mail.py:77
+#: .\lib\i18n\email\order_comfirm_mail.py:173
 msgid "EMAIL/DELIVERY_CONFIRM/SUBTOTAL"
 msgstr "小计"
 
-#: .\lib\helper\order_helper.py:544 .\lib\helper\order_helper.py:691
+#: .\lib\helper\order_helper.py:545 .\lib\helper\order_helper.py:696
 #: .\lib\i18n\email\delivery_comfirm_mail.py:83
+#: .\lib\i18n\email\order_comfirm_mail.py:179
 msgid "EMAIL/DELIVERY_CONFIRM/DELIVERY_CHARGE"
 msgstr "运费"
 
-#: .\lib\helper\order_helper.py:550 .\lib\helper\order_helper.py:697
+#: .\lib\helper\order_helper.py:551 .\lib\helper\order_helper.py:702
 #: .\lib\i18n\email\delivery_comfirm_mail.py:89
+#: .\lib\i18n\email\order_comfirm_mail.py:185
 msgid "EMAIL/DELIVERY_CONFIRM/TOTAL"
 msgstr "总计"
 
-#: .\lib\helper\order_helper.py:563 .\lib\helper\order_helper.py:710
+#: .\lib\helper\order_helper.py:564 .\lib\helper\order_helper.py:714
 #: .\lib\i18n\email\delivery_comfirm_mail.py:116
+#: .\lib\i18n\email\order_comfirm_mail.py:197
 msgid "EMAIL/DELIVERY_CONFIRM/DO_NOT_REPLY_1"
 msgstr "此邮件为系统自动发送。请勿回覆。"
 
-#: .\lib\helper\order_helper.py:564 .\lib\helper\order_helper.py:711
+#: .\lib\helper\order_helper.py:565 .\lib\helper\order_helper.py:715
 #: .\lib\i18n\email\delivery_comfirm_mail.py:117
+#: .\lib\i18n\email\order_comfirm_mail.py:198
 msgid "EMAIL/DELIVERY_CONFIRM/DO_NOT_REPLY_2"
 msgstr "如有订单相关问题或意见，请联系卖家的电子邮件，谢谢!"
 
-#: .\lib\helper\order_helper.py:593
-msgid "EMAIL/DELIVERY_CONFIRM/CAMPAIGN_TITLE"
-msgstr "活动名称"
+#: .\lib\helper\order_helper.py:571
+#, python-brace-format
+msgid "EMAIL/ORDER_PLACED/SUBJECT{order_id}{campaign_title}"
+msgstr "感谢您的订单！您来自 {campaign_title} 的订单 #{order_id} 已下單！"
+
+#: .\lib\helper\order_helper.py:585 .\lib\i18n\email\order_comfirm_mail.py:23
+msgid "EMAIL/ORDER_PLACED/TITLE"
+msgstr "您的订单已成功下单"
+
+#: .\lib\helper\order_helper.py:610
+msgid "EMAIL/ORDER_CONFIRM/SHIPPING_METHOD"
+msgstr "邮寄方式"
+
+#: .\lib\helper\order_helper.py:642
+msgid "EMAIL/ORDER_CONFIRM/PROCESS_PAYMENT"
+msgstr "前往支付"
 
 #: .\lib\helper\xlsx_helper.py:159
 msgid "REPORT/SECTION_TITLE/TITLE"
@@ -355,7 +368,7 @@ msgstr "联络资讯"
 msgid "REPORT/SECTION_TITLE/DELIVERY_INFO"
 msgstr "出货资讯"
 
-#: .\lib\helper\xlsx_helper.py:164
+#: .\lib\helper\xlsx_helper.py:164 .\lib\i18n\email\order_comfirm_mail.py:68
 msgid "REPORT/SECTION_TITLE/PAYMENT_INFO"
 msgstr "付款资讯"
 
@@ -368,6 +381,11 @@ msgstr "订单资讯"
 msgid "QUIZ_GAME_WINNER{customer_name}{product_name}"
 msgstr ""
 "恭喜 {customer_name} 得奖，获得 {product_name}！请至购物车确认您的奖品。"
+
+#: .\lib\i18n\email\delivery_comfirm_mail.py:33
+#: .\lib\i18n\email\delivery_comfirm_mail.py:36
+msgid "EMAIL/DELIVERY_CONFIRM/SELLER"
+msgstr "卖家"
 
 #: .\lib\i18n\email\delivery_comfirm_mail.py:98
 msgid "EMAIL/DELIVERY_CONFIRM/SHIPPING_INFO"
@@ -386,47 +404,21 @@ msgstr "备注"
 msgid "EMAIL/ORDER_CONFIRM/SUBJECT{order_id}{campaign_title}"
 msgstr "感谢您的订单！您来自 {campaign_title} 的订单 #{order_id} 已确认！"
 
-#: .\lib\i18n\email\order_comfirm_mail.py:15
-msgid "EMAIL/ORDER_CONFIRM/ORDER"
-msgstr "订单"
+#: .\lib\i18n\email\order_comfirm_mail.py:75
+msgid "EMAIL/ORDER_CONFIRM/ACCOUNT_MODE"
+msgstr "银行/金融服务"
 
-#: .\lib\i18n\email\order_comfirm_mail.py:17
-msgid "EMAIL/ORDER_CONFIRM/CUSTOMER_NAME"
-msgstr "客户名称"
+#: .\lib\i18n\email\order_comfirm_mail.py:78
+msgid "EMAIL/ORDER_CONFIRM/SELLER_ACCOUNT"
+msgstr "收款银行账户"
 
-#: .\lib\i18n\email\order_comfirm_mail.py:18
-msgid "EMAIL/ORDER_CONFIRM/DELIVERY_TO"
-msgstr "送货到"
+#: .\lib\i18n\email\order_comfirm_mail.py:83
+msgid "EMAIL/ORDER_CONFIRM/LAST_FIVE_DIGIT"
+msgstr "支付账戶末五码"
 
-#: .\lib\i18n\email\order_comfirm_mail.py:21
-msgid "EMAIL/ORDER_CONFIRM/DELIVERY_WAY"
-msgstr "发货方式"
-
-#: .\lib\i18n\email\order_comfirm_mail.py:24
-msgid "EMAIL/ORDER_CONFIRM/PICK_UP_STORE"
-msgstr "取货店"
-
-msgid "EMAIL/ORDER_CONFIRM/PICK_UP_DATE"
-msgstr "取货日期"
-
-#: .\lib\i18n\email\order_comfirm_mail.py:27
-msgid "EMAIL/ORDER_CONFIRM/DELIVERY_ADDRESS"
-msgstr "收货地址"
-
-msgid "EMAIL/ORDER_CONFIRM/DELIVERY_DATE"
-msgstr "收货日期"
-
-#: .\lib\i18n\email\order_comfirm_mail.py:32
-msgid "EMAIL/ORDER_CONFIRM/PAYMENT_METHOD"
-msgstr "付款方式"
-
-#: .\lib\i18n\email\order_comfirm_mail.py:38
-msgid "EMAIL/ORDER_CONFIRM/DELIVERY_CHARGE"
-msgstr "运费"
-
-#: .\lib\i18n\email\order_comfirm_mail.py:40
-msgid "EMAIL/ORDER_CONFIRM/TOTAL"
-msgstr "总计"
+#: .\lib\i18n\email\order_comfirm_mail.py:95
+msgid "EMAIL/ORDER_CONFIRM/SELLER_CONTACT"
+msgstr "联络卖家营销号"
 
 #: .\templates\email_reset_password_link.html:12
 #: .\templates\reset_password_success_email.html:12
@@ -563,6 +555,36 @@ msgstr "您好 "
 msgid "EMAIL/PASSWORD_RESET_SUCCESS/CONTENT2"
 msgstr ""
 "我們收到重設Live Show Seller 密碼的要求。請點擊下方連結, 即可重新設定。"
+
+#~ msgid "EMAIL/ORDER_CONFIRM/TOTAL"
+#~ msgstr "总计"
+
+#~ msgid "EMAIL/ORDER_CONFIRM/PAYMENT_METHOD"
+#~ msgstr "支付方式"
+
+#~ msgid "EMAIL/ORDER_CONFIRM/ORDER"
+#~ msgstr "订单"
+
+#~ msgid "EMAIL/ORDER_CONFIRM/CUSTOMER_NAME"
+#~ msgstr "客户名称"
+
+#~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_TO"
+#~ msgstr "送货到"
+
+#~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_WAY"
+#~ msgstr "发货方式"
+
+#~ msgid "EMAIL/ORDER_CONFIRM/PICK_UP_STORE"
+#~ msgstr "取货店"
+
+#~ msgid "EMAIL/ORDER_CONFIRM/PICK_UP_DATE"
+#~ msgstr "取货日期"
+
+#~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_ADDRESS"
+#~ msgstr "收货地址"
+
+#~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_CHARGE"
+#~ msgstr "运费"
 
 #~ msgid "REPORT/COLUMN_TITLE/ID"
 #~ msgstr "编号"
