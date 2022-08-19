@@ -304,8 +304,6 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         campaign = lib.util.verify.Verify.get_campaign_from_pre_order(pre_order)
         discount_codes = campaign.user_subscription.discount_codes.all()
 
-        if pre_order.applied_discount:
-            raise lib.error_handle.error.api_error.ApiVerifyError('discount_code_already_apply')
 
         valid_discount_code = None
         for _discount_code in discount_codes:
@@ -316,7 +314,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
             raise lib.error_handle.error.api_error.ApiVerifyError('invalid_discount_code')
         
         for limitation in valid_discount_code.limitations:
-            if not lib.helper.discount_helper.check_limitation(limitation, valid_discount_code.meta.get(limitation), pre_order):
+            if not lib.helper.discount_helper.check_limitation(limitation, pre_order):
                  raise lib.error_handle.error.api_error.ApiVerifyError('not_eligible')
  
 
