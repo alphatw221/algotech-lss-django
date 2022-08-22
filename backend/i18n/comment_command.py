@@ -96,7 +96,7 @@ def i18n_get_comment_command_order(campaign, comment):
     text.append(_('TOTAL{dollar_sign}{total}\n'
                   ).format(dollar_sign=campaign["currency_sign"],
                            total=order.get('total', 0)))
-    text.append(_('DETAIL{link}'
+    text.append(_('DETAIL{link}\n'
                   ).format(link=settings.SHOPPING_CART_URL))
 
     return ''.join(text)
