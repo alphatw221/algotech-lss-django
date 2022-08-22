@@ -201,9 +201,9 @@ def bind_twitch_channels(request, user_subscription):
     
     image = response.get("data")[0].get("profile_image_url")
 
-    if models.twitch.twitch_channel.TwitchChannel.objects.filter(channel_name=channel_name).exists():
-        twitch_channel = models.twitch.twitch_channel.TwitchChannel.objects.get(channel_name=channel_name)
-        twitch_channel.channel_name = channel_name
+    if models.twitch.twitch_channel.TwitchChannel.objects.filter(name=channel_name).exists():
+        twitch_channel = models.twitch.twitch_channel.TwitchChannel.objects.get(name=channel_name)
+        twitch_channel.name = channel_name
         twitch_channel.user_name = channel_name
         twitch_channel.token = access_token
         twitch_channel.refresh_token = refresh_token
@@ -212,7 +212,7 @@ def bind_twitch_channels(request, user_subscription):
         twitch_channel.save()
     else:
         twitch_channel = models.twitch.twitch_channel.TwitchChannel.objects.create(
-            channel_name=channel_name, 
+            name=channel_name, 
             user_name=channel_name, 
             token=access_token, 
             refresh_token=refresh_token,
