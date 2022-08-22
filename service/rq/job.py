@@ -1,4 +1,4 @@
-from ._rq import redis_connection,campaign_queue,comment_queue, email_queue
+from ._rq import redis_connection
 from rq.job import Job
 
 def exists(job_id):
