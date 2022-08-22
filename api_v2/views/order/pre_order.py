@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 
+
 from api import models
 
 from automation import jobs
@@ -99,9 +100,10 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
         order = lib.util.verify.Verify.get_order(api_order.id)
 
-        content = lib.helper.order_helper.OrderHelper.get_checkout_email_content(order,api_order._id)
-        jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)     #queue this to redis if needed
-        
+        subject = lib.helper.order_helper.OrderHelper.i18n_get_mail_subject(order,lang=campaign.lang)
+        content = lib.helper.order_helper.OrderHelper.get_checkout_email_content(order,api_order._id,lang=campaign.lang)
+        jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)     
+        #queue this to redis if needed 
         data = models.order.order.OrderSerializer(order).data
         data['oid']=str(api_order._id)
 
