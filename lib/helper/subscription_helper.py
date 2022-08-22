@@ -177,3 +177,49 @@ def bind_youtube_channels(request, user_subscription):
 
         if youtube_channel not in user_subscription.youtube_channels.all():
             user_subscription.youtube_channels.add(youtube_channel)
+
+def bind_twitch_channels(request, user_subscription):
+
+    code, = lib.util.getter.getdata(request,("code",), required=True)
+
+    response_code, response = service.twitch.twitch.get_token(code)
+    if not response_code / 100 == 2:
+        lib.error_handle.error.api_error.ApiCallerError('get twitch token fail')
+
+    access_token = response.get("access_token")
+    refresh_token = response.get("refresh_token")
+
+    response_code, response = service.twitch.twitch.get_user(access_token)
+    if not response_code / 100 == 2:
+        lib.error_handle.error.api_error.ApiCallerError('get twitch user detail fail')
+    
+    channel_name = response.get("preferred_username")
+
+    response_code, response = service.twitch.twitch.get_user_info(access_token, channel_name)
+    if not response_code / 100 == 2:
+        lib.error_handle.error.api_error.ApiCallerError('get twitch user info fail')
+    
+    image = response.get("data")[0].get("profile_image_url")
+
+    if models.twitch.twitch_channel.TwitchChannel.objects.filter(name=channel_name).exists():
+        twitch_channel = models.twitch.twitch_channel.TwitchChannel.objects.get(name=channel_name)
+        twitch_channel.name = channel_name
+        twitch_channel.user_name = channel_name
+        twitch_channel.token = access_token
+        twitch_channel.refresh_token = refresh_token
+        twitch_channel.token_update_at = datetime.now()
+        twitch_channel.image = image
+        twitch_channel.save()
+    else:
+        twitch_channel = models.twitch.twitch_channel.TwitchChannel.objects.create(
+            name=channel_name, 
+            user_name=channel_name, 
+            token=access_token, 
+            refresh_token=refresh_token,
+            token_update_at=datetime.now(), 
+            image=image
+        )
+        twitch_channel.save()
+
+    if twitch_channel not in user_subscription.twitch_channels.all():
+        user_subscription.twitch_channels.add(twitch_channel)

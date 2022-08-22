@@ -7,7 +7,7 @@ class TwitchChannel(models.Model):
     class Meta:
         db_table = 'api_twitch_channel'
 
-    channel_name = models.CharField(max_length=255, null=True, blank=True)
+    name = models.CharField(max_length=255, null=True, blank=True)
     token = models.CharField(max_length=255, null=True, blank=True)
     refresh_token = models.CharField(max_length=255, null=True, blank=True)
     user_name = models.CharField(max_length=255, null=True, blank=True)
@@ -45,3 +45,10 @@ class TwitchChannelSerializer(serializers.ModelSerializer):
     meta = serializers.JSONField(default=dict)
     meta_payment = serializers.JSONField(default=dict)
     meta_logistic = serializers.JSONField(default=dict)
+
+
+class TwitchChannelInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TwitchChannel
+        fields = ['id', 'user_name', 'name', 'remark', 'image', 'lang']
+        read_only_fields = ['created_at', 'modified_at']

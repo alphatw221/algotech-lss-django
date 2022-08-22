@@ -473,5 +473,5 @@ class Command(BaseCommand):
     def test_twitch(self):
         import service
 
-        ret = service.twitch.post.whisper_to_user('17uulrj9lsj7zqpwrvsneildfcs947', '818419850', 'eat poop poop')
+        ret = service.twitch.twitch.whisper_to_user('17uulrj9lsj7zqpwrvsneildfcs947', '818419850', 'eat poop poop')
         print (ret)
