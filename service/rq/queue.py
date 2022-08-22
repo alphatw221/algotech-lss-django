@@ -2,9 +2,8 @@ from ._rq import redis_connection,campaign_queue,comment_queue, email_queue, gen
 from rq.job import Job
 
 
-def enqueue_unique_job_to_campaign_queue(job, campaign_id):
-    campaign_queue.enqueue(job, job_id=str(campaign_id), args=(
-                    campaign_id,), result_ttl=10, failure_ttl=10)
+def enqueue_unique_job_to_campaign_queue(job, **kwargs):
+    campaign_queue.enqueue(job, job_id=str(kwargs.get('campaign_id')), kwargs=kwargs, result_ttl=10, failure_ttl=10)
 
 
 def enqueue_campaign_queue(job, **kwargs):
