@@ -114,7 +114,7 @@ def capture_facebook(campaign, user_subscription_data, logs):
             except Exception: #duplicate key error might happen here
                 continue
             service.channels.campaign.send_comment_data(campaign.id, uni_format_comment)
-            service.rq.job.enqueue_comment_queue(jobs.comment_job.comment_job, campaign.data, user_subscription_data, 'facebook', facebook_page.data, uni_format_comment, order_codes_mapping)
+            service.rq.queue.enqueue_comment_queue(jobs.comment_job.comment_job, campaign.data, user_subscription_data, 'facebook', facebook_page.data, uni_format_comment, order_codes_mapping)
             comment_capture_since = comment['created_time']
     except Exception as e:
         print(traceback.format_exc())
@@ -254,7 +254,7 @@ def capture_youtube(campaign, user_subscription_data, logs):
             except Exception:
                 continue
             service.channels.campaign.send_comment_data(campaign.id, uni_format_comment)
-            service.rq.job.enqueue_comment_queue(jobs.comment_job.comment_job, campaign.data, user_subscription_data, 'youtube', youtube_channel.data, uni_format_comment, order_codes_mapping)
+            service.rq.queue.enqueue_comment_queue(jobs.comment_job.comment_job, campaign.data, user_subscription_data, 'youtube', youtube_channel.data, uni_format_comment, order_codes_mapping)
         youtube_campaign['next_page_token'] = data.get('nextPageToken', "")
         youtube_campaign['latest_comment_time'] = parser.parse(
             comments[-1]['snippet']['publishedAt']).timestamp()
@@ -362,7 +362,7 @@ def capture_instagram(campaign, user_subscription_data, logs):
             except Exception:
                 continue
             service.channels.campaign.send_comment_data(campaign.id, uni_format_comment)
-            service.rq.job.enqueue_comment_queue(jobs.comment_job.comment_job, campaign.data, user_subscription_data, 'instagram', instagram_profile.data, uni_format_comment, order_codes_mapping)
+            service.rq.queue.enqueue_comment_queue(jobs.comment_job.comment_job, campaign.data, user_subscription_data, 'instagram', instagram_profile.data, uni_format_comment, order_codes_mapping)
             
 
         if keep_capturing:
@@ -445,7 +445,7 @@ def capture_youtube_video(campaign, user_subscription_data, youtube_channel, log
                 database.lss.campaign_comment.CampaignComment.create(**uni_format_comment, auto_inc=False)
             except Exception:
                 continue
-            service.rq.job.enqueue_comment_queue(jobs.comment_job.comment_job, 
+            service.rq.queue.enqueue_comment_queue(jobs.comment_job.comment_job, 
                 campaign.data, user_subscription_data, 'youtube', youtube_channel.data, uni_format_comment, order_codes_mapping)
         if keep_capturing:
             next_page_token = get_yt_video_data.get('nextPageToken', '')
