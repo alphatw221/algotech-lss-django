@@ -82,13 +82,14 @@ class LikesCandidateSetGenerator(CandidateSetGenerator):
         candidate_set = set()
         
         likes_user_list=[]
-
+        response = {}
+        
         if campaign.facebook_page_id and models.facebook.facebook_page.FacebookPage.objects.filter(id=campaign.facebook_page_id).exists():
             facebook_page = models.facebook.facebook_page.FacebookPage.objects.get(id=campaign.facebook_page_id)
             post_id=campaign.facebook_campaign.get('post_id')
             token=facebook_page.token   
 
-            code, response = service.facebook.post.get_post_likes(token, post_id, after=None, limit=limit)
+            code, response = service.facebook.post.get_post_likes(token, facebook_page.page_id, post_id, after=None, limit=limit)
             # print(code)
             # print(response)
             if code!=200 :
@@ -189,6 +190,47 @@ class PurchaseCandidateSetGenerator(CandidateSetGenerator):
 
         return candidate_set
 
+class SharedPostCandidateSetGenerator(CandidateSetGenerator):
+
+    @classmethod
+    def get_candidate_set(cls, campaign, lucky_draw, limit=1000):
+
+        winner_list = campaign.meta.get('winner_list',[])
+        candidate_set = set()
+        
+        likes_user_list=[]
+        response = {}
+        
+        if campaign.facebook_page_id and models.facebook.facebook_page.FacebookPage.objects.filter(id=campaign.facebook_page_id).exists():
+            facebook_page = models.facebook.facebook_page.FacebookPage.objects.get(id=campaign.facebook_page_id)
+            post_id=campaign.facebook_campaign.get('post_id')
+            token=facebook_page.token   
+
+            code, response = service.facebook.post.get_post_sharedpost(token, facebook_page.page_id, post_id, after=None, limit=limit)
+            if code!=200 :
+                raise lib.error_handle.error.api_error.ApiVerifyError('helper.fb_api_fail')
+
+        for user in response.get('data',[]):
+            customer_image = ""
+            user_asid = user.get('from').get("id")
+            code, resp = service.facebook.page.get_user_picture(user_asid, token)
+            if code == 200:
+                customer_image = resp.get("picture").get("data","").get("url", "")
+            candidate = LuckyDrawCandidate(
+                platform='facebook', 
+                customer_id=user_asid,     #ASID over here!! might have some issues 
+                customer_name=user.get('from').get('name'),
+                customer_image=customer_image,
+                draw_type=lucky_draw.type,
+                prize=lucky_draw.prize.name)
+
+            if not lucky_draw.repeatable and candidate in winner_list:
+                continue
+
+            candidate_set.add(candidate)
+
+        return candidate_set
+    
 class LuckyDraw():
 
     @classmethod
@@ -307,6 +349,9 @@ def draw(campaign, lucky_draw):
         return lib.helper.lucky_draw_helper.LuckyDraw.draw_from_candidate(campaign, lucky_draw.prize,  candidate_set=candidate_set, num_of_winner=lucky_draw.num_of_winner)
     elif lucky_draw.type == models.campaign.campaign_lucky_draw.TYPE_PURCHASE:
         candidate_set = lib.helper.lucky_draw_helper.PurchaseCandidateSetGenerator.get_candidate_set(campaign, lucky_draw)
+        return lib.helper.lucky_draw_helper.LuckyDraw.draw_from_candidate(campaign, lucky_draw.prize,  candidate_set=candidate_set, num_of_winner=lucky_draw.num_of_winner)
+    elif lucky_draw.type == models.campaign.campaign_lucky_draw.TYPE_POST:
+        candidate_set = lib.helper.lucky_draw_helper.SharedPostCandidateSetGenerator.get_candidate_set(campaign, lucky_draw)
         return lib.helper.lucky_draw_helper.LuckyDraw.draw_from_candidate(campaign, lucky_draw.prize,  candidate_set=candidate_set, num_of_winner=lucky_draw.num_of_winner)
     else:
         return []

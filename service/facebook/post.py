@@ -6,14 +6,14 @@ def get_post(page_token: str, post_id: str):
                             params=params).get()
     return ret
 
-def get_post_likes(page_token: str, post_id: str, after: str = None, limit=100):
+def get_post_likes(page_token: str, page_id:str, post_id: str, after: str = None, limit=100):
     params = {
         'limit': limit,
-        'fields' :'id,name,pic_large'
+        'fields' :'id,name,pic_large' # id is PSID
     }
     if after:
         params['after'] = after
-    ret = FacebookApiCaller(f'{post_id}/likes', bearer_token=page_token,
+    ret = FacebookApiCaller(f'{page_id}_{post_id}/likes', bearer_token=page_token,
                             params=params).get()
     return ret
 
@@ -68,4 +68,15 @@ def post_page_action_on_comment(page_token: str, comment_id: str, message_text: 
         to_comment_ret = post_page_comment_on_comment(
             page_token, comment_id, message_text)
         ret['to_comment'] = to_comment_ret
+    return ret
+
+def get_post_sharedpost(page_token: str, page_id:str, post_id: str, after: str = None, limit=100):
+    params = {
+        'limit': limit,
+        'fields' :'id,from' # id is ASID
+    }
+    if after:
+        params['after'] = after
+    ret = FacebookApiCaller(f'{page_id}_{post_id}/sharedposts', bearer_token=page_token,
+                            params=params).get()
     return ret
