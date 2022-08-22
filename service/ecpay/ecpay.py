@@ -7,7 +7,6 @@
 # spec.loader.exec_module(module)
 from .payment_sdk import ECPayPaymentSdk
 from .invoice_sdk import EcpayInvoice
-from .logistic import data_encode
 from datetime import datetime
 import time
 
