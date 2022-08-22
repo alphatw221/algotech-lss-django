@@ -925,6 +925,8 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
                 platform.append("instagram")
             if user_subscription.youtube_channels.all().exists():
                 platform.append("youtube")
+            if user_subscription.twitch_channels.all().exists():
+                platform.append("twitch")
             return platform
         api_user = Verify.get_seller_user(request)    
         user_subscription = Verify.get_user_subscription_from_api_user(api_user)

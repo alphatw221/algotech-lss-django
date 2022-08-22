@@ -26,8 +26,6 @@ class TwitchViewSet(viewsets.GenericViewSet):
         if 'twitch' not in user_subscription.user_plan.get('activated_platform'):
             raise lib.error_handle.error.api_error.ApiVerifyError('twitch not activated')
         
-        # service.rq.queue.enqueue_test_queue(jobs.twitch_chat_job.twitch_chat_job, campaign_id=campaign.id, comments=comments)
-
-        
+        service.rq.queue.enqueue_test_queue(jobs.twitch_chat_job.twitch_chat_job, campaign_id=campaign.id, comments=comments)
 
         return Response({'message': 'enqueue success'}, status=status.HTTP_200_OK)

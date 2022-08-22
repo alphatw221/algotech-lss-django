@@ -1,3 +1,4 @@
+from email.policy import default
 from django.contrib import admin
 from djongo import models
 
@@ -13,6 +14,7 @@ from api.models.user.user import User
 from api.models.user.user_subscription import UserSubscription, UserSubscriptionSerializer
 from api.models.youtube.youtube_channel import (YoutubeChannel,
                                                 YoutubeChannelInfoSerializer, YoutubeChannelSerializer)
+from api.models.twitch.twitch_channel import TwitchChannel, TwitchChannelSerializer, TwitchChannelInfoSerializer
 
 import business_policy
 
@@ -71,6 +73,13 @@ class Campaign(models.Model):
     youtube_channel = models.ForeignKey(
         YoutubeChannel, blank=True, null=True, on_delete=models.SET_NULL, related_name='campaigns')
     youtube_campaign = models.JSONField(null=True, blank=True, default=dict)
+
+    twitch_channel = models.ForeignKey(
+        TwitchChannel, blank=True, null=True, on_delete=models.SET_NULL, related_name='campaigns')
+    twitch_campaign = models.JSONField(null=True, blank=True, default=dict)
+
+    tiktok_campaign = models.JSONField(null=True, blank=True, default=dict)
+
     meta = models.JSONField(null=True, blank=True, default=dict)
     meta_payment = models.JSONField(null=True, blank=True, default=dict)
     meta_logistic = models.JSONField(default=dict, null=True, blank=dict)
@@ -116,6 +125,9 @@ class InstagramCampaignSerializer(serializers.Serializer):
     last_create_message_id = serializers.CharField(required=False, default="", allow_blank=True)
     is_failed = serializers.BooleanField(required=False, default=False)
 
+class TwitchCampaignSerializer(serializers.Serializer):
+    broadcaster_id = serializers.CharField(required=False, default="", allow_blank=True)
+    moderator_id = serializers.CharField(required=False, default="", allow_blank=True)
 
 class CampaignSerializer(serializers.ModelSerializer):
     class Meta:
@@ -129,6 +141,8 @@ class CampaignSerializer(serializers.ModelSerializer):
     youtube_campaign = YoutubeCampaignSerializer(default=dict)
     instagram_profile = InstagramProfileInfoSerializer(default=dict)
     instagram_campaign = InstagramCampaignSerializer(default=dict)
+    twitch_channel = TwitchChannelInfoSerializer(default=dict)
+    twitch_campaign = TwitchCampaignSerializer(default=dict)
 
     meta = serializers.JSONField(default=dict)
     meta_payment = serializers.JSONField(default=dict)
@@ -145,6 +159,7 @@ class CampaignSerializerCreate(serializers.ModelSerializer):
     facebook_campaign = FacebookCampaignSerializer(default=dict)
     youtube_campaign = YoutubeCampaignSerializer(default=dict)
     instagram_campaign = InstagramCampaignSerializer(default=dict)
+    twitch_campaign = TwitchCampaignSerializer(default=dict)
 
     meta = serializers.JSONField(default={"allow_checkout": 1})
     meta_payment = serializers.JSONField(default=dict)
@@ -161,6 +176,7 @@ class CampaignSerializerEdit(serializers.ModelSerializer):
     facebook_campaign = FacebookCampaignSerializer(default=dict)
     youtube_campaign = YoutubeCampaignSerializer(default=dict)
     instagram_campaign = InstagramCampaignSerializer(default=dict)
+    twitch_campaign = TwitchCampaignSerializer(default=dict)
 
     meta = serializers.JSONField(default={"allow_checkout": 1})
     meta_payment = serializers.JSONField(default=dict)
@@ -182,6 +198,7 @@ class CampaignSerializerRetreive(CampaignSerializer):
     facebook_page = FacebookPageSerializer(read_only=True)
     youtube_channel = YoutubeChannelSerializer(read_only=True)
     instagram_profile = InstagramProfileSerializer(read_only=True)
+    twitch_channel = TwitchChannelSerializer(read_only=True)
 
 class CampaignSerializerWithUserSubscription(CampaignSerializer):
 
@@ -189,6 +206,7 @@ class CampaignSerializerWithUserSubscription(CampaignSerializer):
     facebook_page = FacebookPageSerializer(read_only=True)
     youtube_channel = YoutubeChannelSerializer(read_only=True)
     instagram_profile = InstagramProfileSerializer(read_only=True)
+    twitch_channel = TwitchChannelSerializer(read_only=True)
 
 class CampaignAdmin(admin.ModelAdmin):
     model = Campaign

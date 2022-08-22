@@ -5,8 +5,13 @@ from rest_framework import serializers
 from api.models.user.user_subscription import UserSubscription
 
 TYPE_PERCENT_OFF = 'percent_off'
+TYPE_DEDUCT = 'deduct'
 
 LIMITATION_SPECIFIC_CAMPAIGN = 'specific_campaign'
+LIMITATION_SUBTOTAL_OVER_AMOUNT = 'subtotal_over_specific_amount'
+LIMITATION_PRODUCT_OVER_NUMBER = 'product_over_specific_number'
+
+
 class DiscountCode(models.Model):
     class Meta:
         db_table = 'api_discount_code'
