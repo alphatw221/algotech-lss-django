@@ -57,7 +57,7 @@ def comment_job(campaign_data, user_subscription_data, platform_name, platform_i
             customer_img= comment['image'],
             campaign_id= campaign_data['id'],
             platform= comment['platform'],
-            platform_id= platform_instance_data['id'],
+            platform_id= platform_instance_data.get('id'),
         )
 
     state = lib.helper.order_helper.PreOrderHelper.add_or_update_by_comment(
@@ -78,7 +78,7 @@ def command_responding(platform_name, platform_instance_data, campaign_data, use
 
         text = lib.i18n.comment_command.get_comment_command_response(
             campaign_data, comment, command, lang=campaign_data.get('lang'))
-        service.facebook.post.post_page_message_on_comment(platform_instance_data['token'], comment['id'], text)
+        service.facebook.post.post_page_message_on_comment(platform_instance_data.get('token'), comment['id'], text)
     elif platform_name == 'youtube':
         return
     elif platform_name == 'instagram':
@@ -102,10 +102,10 @@ def comment_responding(platform_name, platform_instance_data, campaign_data, use
             lib.helper.order_helper.RequestState.DELETED]:
             shopping_cart_info, info_in_pm_notice = "", ""
             
-        code, ret = service.facebook.post.post_page_comment_on_comment( platform_instance_data['token'], comment['id'], text+info_in_pm_notice)
+        code, ret = service.facebook.post.post_page_comment_on_comment( platform_instance_data.get('token'), comment['id'], text+info_in_pm_notice)
         if code!=200:
             print("response", ret)
-        code, ret = service.facebook.post.post_page_message_on_comment(platform_instance_data['token'], comment['id'], text+shopping_cart_info)
+        code, ret = service.facebook.post.post_page_message_on_comment(platform_instance_data.get('token'), comment['id'], text+shopping_cart_info)
         if code!=200:
             print("response", ret)
         
@@ -140,6 +140,14 @@ def comment_responding(platform_name, platform_instance_data, campaign_data, use
         # shopping_cart_info, info_in_pm_notice = lib.i18n.cart_product_request.get_additional_text(pre_order,
         #                                                                  lang=campaign_data.get('lang'))
        
-        code, ret =service.instagram.post.private_message( platform_instance_data['token'], comment['id'], text+shopping_cart_info)
+        code, ret =service.instagram.post.private_message( platform_instance_data.get('token'), comment['id'], text+shopping_cart_info)
+        if code!=200:
+            print("response", ret)
+    
+    elif platform_name == 'twitch':
+        text = lib.i18n.cart_product_request.get_request_response(
+            state, campaign_product, qty, lang=campaign_data.get('lang'))
+        
+        code, ret = service.twitch.post.whisper_to_user(platform_instance_data.get('token'), comment['customer_id'], text+shopping_cart_info)
         if code!=200:
             print("response", ret)

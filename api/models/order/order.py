@@ -79,6 +79,7 @@ class Order(models.Model):
     shipping_option = models.CharField(
         max_length=32, blank=True, default='')
     shipping_option_index = models.IntegerField(blank=True, null=True, default=None)
+    shipping_option_data = models.JSONField(default=dict, null=False, blank=False)
 
     platform = models.CharField(max_length=255, blank=True,
                                 choices=settings.SUPPORTED_PLATFORMS, default='n/a')
@@ -103,6 +104,11 @@ class Order(models.Model):
     buyer = models.ForeignKey(
         User, null=True, default=None, blank=True, on_delete=models.SET_NULL, related_name='orders')
 
+    
+    discount = models.FloatField(null=True, blank=True, default=0)
+    applied_discount = models.JSONField(blank=False, null = False, default = {})
+
+
 class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -115,7 +121,8 @@ class OrderSerializer(serializers.ModelSerializer):
     products = serializers.JSONField(default=dict)
     checkout_details = serializers.JSONField(default=dict)
     history = serializers.JSONField(default=dict)
-
+    applied_discount = serializers.JSONField(default=dict)
+    shipping_option_data = serializers.JSONField(default=dict)
 
 class OrderSerializerWithUserSubscription(serializers.ModelSerializer):
 
@@ -129,7 +136,8 @@ class OrderSerializerWithUserSubscription(serializers.ModelSerializer):
     products = serializers.JSONField(default=dict)
     checkout_details = serializers.JSONField(default=dict)
     history = serializers.JSONField(default=dict)
-
+    applied_discount = serializers.JSONField(default=dict)
+    shipping_option_data = serializers.JSONField(default=dict)
 class OrderSerializerUpdateShipping(serializers.ModelSerializer):
 
     class Meta:

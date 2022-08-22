@@ -37,8 +37,10 @@ def create_payment(client_id, client_secret, amount, currency, return_url, cance
                 "description": "This is the payment transaction description."
             }]
         })
-
+        print(amount)
+        print(currency)
         if not payment.create():
+            print(payment.error)
             return False
         return payment
     except Exception:

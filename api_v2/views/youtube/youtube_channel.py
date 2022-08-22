@@ -19,13 +19,13 @@ class YoutubeChannelViewSet(viewsets.GenericViewSet):
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         
         if 'youtube' not in user_subscription.user_plan.get('activated_platform'):
-            raise lib.error_handle.error.api_error.ApiVerifyError('youtube not activated')
+            raise lib.error_handle.error.api_error.ApiVerifyError('youtube_not_activated')
         
         youtube_channel = lib.util.verify.Verify.get_youtube_channel_from_user_subscription(user_subscription, pk)
         service.google.user.api_google_post_refresh_token(youtube_channel.refresh_token)
         is_token_valid = lib.util.verify.Verify.check_is_page_token_valid('youtube', youtube_channel.token, youtube_channel.channel_id)
         if not is_token_valid:
-            raise lib.error_handle.error.api_error.ApiVerifyError(f"YouTube channel <{youtube_channel.name}>: token expired or invalid. Please re-bind your channel on Platform page.")
+            raise lib.error_handle.error.api_error.ApiVerifyError("youtube_token_expired")
         return Response(models.youtube.youtube_channel.YoutubeChannelSerializer(youtube_channel).data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['GET'], url_path=r'post/check', permission_classes=(IsAuthenticated,))
@@ -36,7 +36,7 @@ class YoutubeChannelViewSet(viewsets.GenericViewSet):
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         
         if 'youtube' not in user_subscription.user_plan.get('activated_platform'):
-            raise lib.error_handle.error.api_error.ApiVerifyError('youtube not activated')
+            raise lib.error_handle.error.api_error.ApiVerifyError('youtube_not_activated')
         
         youtube_channel = lib.util.verify.Verify.get_youtube_channel_from_user_subscription(user_subscription, pk)
         code, response = service.youtube.viedo.get_video_info_with_access_token(youtube_channel.token, live_video_id)

@@ -1,3 +1,4 @@
+from platform import platform
 from rest_framework.response import Response
 from rest_framework import viewsets,status
 from rest_framework.pagination import PageNumberPagination
@@ -57,14 +58,16 @@ class OrderViewSet(viewsets.ModelViewSet):
     def guest_upload_receipt(self, request, order_oid):
 
         order = lib.util.verify.Verify.get_order_with_oid(order_oid)
+        campaign = lib.util.verify.Verify.get_campaign_from_order(order)
+
         last_five_digit, image, account_name, account_mode = lib.util.getter.getdata(request,('last_five_digit', 'image', 'account_name', 'account_mode'), required=False)
 
         if image in [None, '', "undefined", 'null']:
             pass
         elif image.size > models.order.order.IMAGE_MAXIMUM_SIZE:
-            raise lib.error_handle.error.api_error.ApiVerifyError(f'image size exceed maximum size')
+            raise lib.error_handle.error.api_error.ApiVerifyError('image_size_exceed_maximum_size')
         elif image.content_type not in models.order.order.IMAGE_SUPPORTED_TYPE:
-            raise lib.error_handle.error.api_error.ApiVerifyError(f'not support this image type')
+            raise lib.error_handle.error.api_error.ApiVerifyError('not_support_this_image_type')
         else:
             image_path = default_storage.save(
                 f'campaign/{order.campaign.id}/order/{order.id}/receipt/{image.name}', 
@@ -72,18 +75,17 @@ class OrderViewSet(viewsets.ModelViewSet):
             )
             order.meta["receipt_image"] = settings.GS_URL + image_path
 
-
         order.meta["last_five_digit"] = last_five_digit
         order.meta['account_name'] = account_name
         order.meta['account_mode'] = account_mode
-        order.payment_method = "Direct Payment"
+        order.payment_method = models.order.order.PAYMENT_METHOD_DIRECT
         order.status = "complete"
         order.save()
 
         lib.helper.order_helper.OrderHelper.sold_campaign_product(order.id)
         # content = lib.helper.order_helper.OrderHelper.get_confirmation_email_content(order)
-        subject = lib.i18n.email.order_comfirm_mail.i18n_get_mail_subject(order, order.campaign.created_by.lang)
-        content = lib.i18n.email.order_comfirm_mail.i18n_get_mail_content(order, order.campaign.created_by.lang)
+        subject = lib.i18n.email.order_comfirm_mail.i18n_get_mail_subject(order, lang=campaign.lang)
+        content = lib.i18n.email.order_comfirm_mail.i18n_get_mail_content(order, campaign, lang=campaign.lang)
         jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)     #queue this to redis if needed
 
         return Response(models.order.order.OrderSerializer(order).data, status=status.HTTP_200_OK)
@@ -128,6 +130,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         # api_user = lib.util.verify.Verify.get_customer_user(request)
         order = lib.util.verify.Verify.get_order_with_oid(order_oid)
+        campaign = lib.util.verify.Verify.get_campaign_from_order(order)
         last_five_digit, image, account_name, account_mode = lib.util.getter.getdata(request,('last_five_digit', 'image', 'account_name', 'account_mode'), required=False)
 
         if image not in [None, '', "undefined", 'null']:
@@ -140,7 +143,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         order.meta["last_five_digit"] = last_five_digit
         order.meta['account_name'] = account_name
         order.meta['account_mode'] = account_mode
-        order.payment_method = "Direct Payment"
+        order.payment_method = models.order.order.PAYMENT_METHOD_DIRECT
         order.status = "complete"
         order.save()
 
@@ -218,7 +221,6 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         api_user, campaign_id, search, page, page_size, order_status= lib.util.getter.getparams(request, ( 'campaign_id', 'search', 'page', 'page_size','status'),with_user=True, seller=True)
         payment_list, delivery_list, platform_list = lib.util.getter.getdata(request,('payment','delivery','platform'))
-        
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription,campaign_id)
 
@@ -235,7 +237,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         lib.util.verify.Verify.get_campaign_from_user_subscription(api_user.user_subscription, order.campaign.id)
         
         
-        content = lib.i18n.email.delivery_comfirm_mail.i18n_get_mail_content(order, api_user, order.campaign.created_by.lang) 
+        content = lib.i18n.email.delivery_comfirm_mail.i18n_get_mail_content(order=order, user=api_user, lang=order.campaign.lang) 
         jobs.send_email_job.send_email_job(f'Your order #{order.id} from {order.campaign.title} has shipped!', order.shipping_email, content=content)
         order.status = models.order.order.STATUS_SHIPPING_OUT
         order.save()

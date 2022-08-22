@@ -1,3 +1,4 @@
+from api.rule.check_rule.user_subscription_check_rule import UserSubscriptionCheckRule
 from api.rule.rule_checker.rule_checker import RuleChecker
 from api.rule import check_rule
 
@@ -28,4 +29,12 @@ class UpgradeRequireRefundChecker(RuleChecker):
         check_rule.stripe_check_rule.StripeCheckRule.adjust_amount_if_subscription_undue,
         check_rule.stripe_check_rule.StripeCheckRule.adjust_price_if_welcome_gift_not_used,
         check_rule.stripe_check_rule.StripeCheckRule.does_amount_match,
+    ]
+    
+class CreateCampaignRuleChecker(RuleChecker):
+
+    check_list=[
+        UserSubscriptionCheckRule.is_expired,
+        UserSubscriptionCheckRule.max_concurrent_live,
+        UserSubscriptionCheckRule.campaign_limit
     ]

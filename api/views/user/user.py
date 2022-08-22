@@ -18,7 +18,7 @@ from api.utils.common.verify import ApiVerifyError
 from api.utils.error_handle.error.api_error import ApiCallerError
 from api.utils.orm.deal import record_subscription_for_paid_user
 from api.views.user._user import facebook_login_helper, google_login_helper, google_authorize_helper
-from automation.jobs.send_email_job import send_email_job
+# from automation.jobs.send_email_job import send_email_job
 from backend.api.facebook.user import api_fb_get_accounts_from_user
 from backend.api.facebook.page import api_fb_get_page_picture
 from backend.api.youtube.channel import api_youtube_get_list_channel_by_token

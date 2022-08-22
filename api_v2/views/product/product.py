@@ -21,6 +21,7 @@ from api import rule
 class ProductPagination(PageNumberPagination):
     page_query_param = 'page'
     page_size_query_param = 'page_size'
+    sort_query_param = 'sort_by'
 
 
 class ProductViewSet(viewsets.ModelViewSet):
@@ -32,23 +33,26 @@ class ProductViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'], url_path=r'search', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def list_product(self, request):
-        api_user, search_column, keyword, product_status, product_type, category, exclude_products = \
-            lib.util.getter.getparams(request, ("search_column", "keyword", "product_status", "product_type", "category", "exclude"), with_user=True, seller=True)
+        api_user, search_column, keyword, product_status, product_type, category, exclude_products, sort_by = \
+            lib.util.getter.getparams(request, ("search_column", "keyword", "product_status", "product_type", "category", "exclude", "sort_by"), with_user=True, seller=True)
         
         user_subscription = \
             lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         
         kwargs = {'status': product_status if product_status else 'enabled'}
         if (search_column in ["", None]) and (keyword not in [None, ""]):
-            raise lib.error_handle.error.api_error.ApiVerifyError("search_column field can not be empty when keyword has value")
+            raise lib.error_handle.error.api_error.ApiVerifyError("search_can_not_empty")
         if (search_column not in ['undefined', '']) and (keyword not in ['undefined', '', None]):
             kwargs[search_column + '__icontains'] = keyword
         if ( product_type in [models.product.product.TYPE_PRODUCT, models.product.product.TYPE_LUCY_DRAW]):
             kwargs['type'] = product_type
         if category not in ['undefined', '', None]:
             kwargs['tag__icontains'] = category 
-
-        queryset = user_subscription.products.filter(**kwargs).order_by("-updated_at")
+        
+        if(sort_by in ['undefined', '', None]):
+            queryset = user_subscription.products.filter(**kwargs).order_by("-updated_at")
+        else: 
+            queryset = user_subscription.products.filter(**kwargs).order_by(sort_by)
         
         if exclude_products:
             exclude_products = exclude_products.split(",")
@@ -205,7 +209,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         product_categories = user_subscription.meta.get('product_categories',[])
         
         if category_name in product_categories:
-            raise lib.error_handle.error.api_error.ApiVerifyError("category already exists")
+            raise lib.error_handle.error.api_error.ApiVerifyError("category_already_exists")
         product_categories.append(category_name)
         user_subscription.meta['product_categories'] = product_categories
         user_subscription.save()
@@ -222,12 +226,12 @@ class ProductViewSet(viewsets.ModelViewSet):
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
 
         if category_name in ['undefined', '', None] or update_name in ['undefined', '', None]:
-            raise lib.error_handle.error.api_error.ApiVerifyError("invalid category name")
+            raise lib.error_handle.error.api_error.ApiVerifyError("invalid_category_name")
         
         categories_list = user_subscription.meta.get('product_categories', [])
 
         if category_name not in categories_list:
-            raise lib.error_handle.error.api_error.ApiVerifyError("category doesn't exists ")
+            raise lib.error_handle.error.api_error.ApiVerifyError("category_not_exist")
 
         categories_list = list(map(lambda x: x.replace(category_name, update_name), categories_list))            
         user_subscription.meta['product_categories'] = categories_list
@@ -248,12 +252,12 @@ class ProductViewSet(viewsets.ModelViewSet):
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
 
         if category_name in ['undefined', '', None] :
-            raise lib.error_handle.error.api_error.ApiVerifyError("invalid category name")
+            raise lib.error_handle.error.api_error.ApiVerifyError("invalid_category_name")
 
         categories_list = user_subscription.meta.get('product_categories', [])
 
         if category_name not in categories_list:
-            raise lib.error_handle.error.api_error.ApiVerifyError("category doesn't exists ")
+            raise lib.error_handle.error.api_error.ApiVerifyError("category_not_exist")
             
         categories_list.remove(category_name)
         user_subscription.meta['product_categories'] = categories_list

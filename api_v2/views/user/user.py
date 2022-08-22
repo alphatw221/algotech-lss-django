@@ -71,7 +71,7 @@ class UserViewSet(viewsets.ModelViewSet):
         email, password = lib.util.getter.getdata(request, ("email","password",), required=True)
         token = lib.helper.login_helper.GeneralLogin.get_token(email, password)
         if not token:
-            return Response({"message": "email or password incorrect"}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({"message":"email_or_password_incorrect"}, status=status.HTTP_401_UNAUTHORIZED)
         return Response(token, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['POST'], url_path=r'seller/login/google', permission_classes=())
@@ -88,6 +88,7 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(models.user.user.UserSerializerAccountInfo(api_user).data, status=status.HTTP_200_OK) 
 
     
+    # not use for now
     @action(detail=False, methods=['PUT'], url_path=r'seller/language/(?P<language>[^/.]+)', permission_classes=(IsAuthenticated, ))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def seller_change_language(self, request, language):
@@ -138,15 +139,15 @@ class UserViewSet(viewsets.ModelViewSet):
         auth_user = AuthUser.objects.get(email=email)
         
         api_user = models.user.user.User.objects.get(email=email,type='user')
-        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        # user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
 
         service.email.email_service.EmailService.send_email_template(
             jobs.send_email_job.send_email_job,
-            i18n_get_reset_password_success_mail_subject(lang=user_subscription.lang),
+            i18n_get_reset_password_success_mail_subject(lang=api_user.lang),
             email,
             "reset_password_success_email.html",
             {"email":email,"username":auth_user.username},
-            lang=user_subscription.lang
+            lang=api_user.lang
         )
         
         return Response(ret, status=status.HTTP_200_OK)
@@ -159,19 +160,19 @@ class UserViewSet(viewsets.ModelViewSet):
         email = email.replace(" ", "") #TODO add in checkrule
 
         if not AuthUser.objects.filter(email=email).exists() or not models.user.user.User.objects.filter(email=email,type='user').exists():
-            raise lib.error_handle.error.api_error.ApiVerifyError('The account doesn’t exist')
+            raise lib.error_handle.error.api_error.ApiVerifyError('account_not_exist')
 
         auth_user = AuthUser.objects.get(email=email)
         api_user = models.user.user.User.objects.get(email=email,type='user')
-        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
-        code = lib.code_manager.password_code_manager.PasswordResetCodeManager.generate(auth_user.id,user_subscription.lang)
+        # user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        code = lib.code_manager.password_code_manager.PasswordResetCodeManager.generate(auth_user.id,api_user.lang)
         service.email.email_service.EmailService.send_email_template(
             jobs.send_email_job.send_email_job,
-            i18n_get_reset_password_mail_subject(lang=user_subscription.lang),
+            i18n_get_reset_password_mail_subject(lang=api_user.lang),
             email,
             "email_reset_password_link.html",
             {"url":settings.GCP_API_LOADBALANCER_URL +"/seller/web/password/reset","code":code,"username":auth_user.username},
-            lang=user_subscription.lang)
+            lang=api_user.lang)
 
         return Response({"message":"The email has been sent. If you haven't received the email after a few minutes, please check your spam folder. "}, status=status.HTTP_200_OK)
 
@@ -198,7 +199,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
         intent = service.stripe.stripe.create_payment_intent(settings.STRIPE_API_KEY, amount, country_plan.currency, email)
         if not intent:
-            raise lib.error_handle.error.api_error.ApiCallerError("invalid email")
+            raise lib.error_handle.error.api_error.ApiCallerError("invalid_email")
 
         return Response({
             "client_secret":intent.client_secret,
@@ -221,7 +222,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
         paymentIntent = service.stripe.stripe.retrieve_payment_intent(settings.STRIPE_API_KEY, payment_intent_id)
         if not paymentIntent:
-            raise lib.error_handle.error.api_error.ApiCallerError("payment error, please contact support team")
+            raise lib.error_handle.error.api_error.ApiCallerError("payment_error")
         kwargs = {'paymentIntent':paymentIntent,'email':email,'plan':plan,'period':period, 'promoCode':promoCode}
         kwargs=rule.rule_checker.user_rule_checker.RegistrationPaymentCompleteChecker.check(**kwargs)
 
@@ -233,7 +234,7 @@ class UserViewSet(viewsets.ModelViewSet):
             kwargs=rule.rule_checker.user_rule_checker.RegistrationRequireRefundChecker.check(**kwargs)
         except Exception:
             #TODO refund
-            raise lib.error_handle.error.api_error.ApiVerifyError('data invalid, please contact support for refunding')
+            raise lib.error_handle.error.api_error.ApiVerifyError('support_for_refunding')
 
         email = kwargs.get('email')
         amount = kwargs.get('amount')
@@ -247,6 +248,7 @@ class UserViewSet(viewsets.ModelViewSet):
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def user_register_with_bank_transfer(self, request, country_code):
         country_code = business_policy.subscription.COUNTRY_SG if country_code in ['', 'undefined', 'null', None] else country_code
+        print(request.data)
         last_five_digit, image, bank_name, account_name, email, password, plan, period = lib.util.getter.getdata(request,("last_five_digit", "image", "bank_name", "account_name", "email", "password", "plan", "period"), required=True)
         firstName, lastName, contactNumber, country, promoCode, timezone = lib.util.getter.getdata(request, ("firstName", "lastName", "contactNumber", "country", "promoCode", "timezone"), required=False)
 
@@ -258,7 +260,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
             kwargs=rule.rule_checker.user_rule_checker.RegistrationRequireRefundChecker.check(**kwargs)
         except Exception:
-            raise lib.error_handle.error.api_error.ApiVerifyError('data invalid, please contact support for refunding')
+            raise lib.error_handle.error.api_error.ApiVerifyError('support_for_refunding')
         email = kwargs.get('email')
         amount = kwargs.get('amount')
 

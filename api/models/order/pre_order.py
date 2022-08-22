@@ -1,3 +1,4 @@
+from email.policy import default
 from api.models.campaign.campaign import Campaign, CampaignSerializer, CampaignSerializerRetreive, CampaignSerializerWithUserSubscription
 from django.conf import settings
 from django.contrib import admin
@@ -58,7 +59,8 @@ class PreOrder(models.Model):
     shipping_option = models.CharField(
         max_length=32, blank=True, default='')
     shipping_option_index = models.IntegerField(blank=True, null=True, default=None)
-    
+    shipping_option_data = models.JSONField(default=dict, null=False, blank=False)
+
     platform = models.CharField(max_length=255, blank=True,
                                 choices=settings.SUPPORTED_PLATFORMS, default='n/a')
     platform_id = models.IntegerField(blank=True, null=True, default=None)
@@ -82,6 +84,8 @@ class PreOrder(models.Model):
     buyer = models.ForeignKey(
         User, null=True, default=None, blank=True, on_delete=models.SET_NULL, related_name='pre_orders')
 
+    discount = models.FloatField(null=False, blank=False, default=0)
+    applied_discount = models.JSONField(blank=False, null = False, default = {})
 
 
 class PreOrderSerializer(serializers.ModelSerializer):
@@ -96,7 +100,8 @@ class PreOrderSerializer(serializers.ModelSerializer):
     products = serializers.JSONField(default=dict)
     checkout_details = serializers.JSONField(default=dict)
     history = serializers.JSONField(default=dict)
-
+    applied_discount = serializers.JSONField(default=dict)
+    shipping_option_data = serializers.JSONField(default=dict)
 class PreOrderSerializerWithSubscription(serializers.ModelSerializer):
 
     class Meta:
@@ -109,7 +114,8 @@ class PreOrderSerializerWithSubscription(serializers.ModelSerializer):
     products = serializers.JSONField(default=dict)
     checkout_details = serializers.JSONField(default=dict)
     history = serializers.JSONField(default=dict)
-
+    applied_discount = serializers.JSONField(default=dict)
+    shipping_option_data = serializers.JSONField(default=dict)
 
 class PreOrderSerializerUpdatePaymentShipping(serializers.ModelSerializer):
 
@@ -155,8 +161,9 @@ class PreOrderSerializerUpdateDelivery(serializers.ModelSerializer):
                   "shipping_option_index",
                   "pickup_address",
                   "remark",
+                  "shipping_option_data"
                 ]
-
+    shipping_option_data = serializers.JSONField(default=dict)
 class PreOrderSerializerUpdatePickup(serializers.ModelSerializer):
 
     class Meta:

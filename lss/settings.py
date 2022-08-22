@@ -181,7 +181,7 @@ DATABASES = {
             'password': 'algo83111T%%',
             'authSource': 'admin',
             'authMechanism': 'SCRAM-SHA-1',
-            'readPreference': 'primary',
+            'readPreference': 'secondaryPreferred',
             'ssl': False,
         }
     },
@@ -350,10 +350,12 @@ YOUTUBE_API_CONFIG = {
     }
 }
 
-TWITCH_OAUTH_API_URL = "https://id.twitch.tv/oauth2"
+TWITCH_API_URL="https://api.twitch.tv"
+TWITCH_OAUTH_URL = "https://id.twitch.tv"
 
 TWITCH_CLIENT_ID = "drsl6rugh7wf23ombongnhfec210gp"
-TWITCH_CLIENT_SECRET = "68zxbydfxro5bcx83gg025vyd6wgtn"
+TWITCH_CLIENT_SECRET = "po5bdm4ktrbrxy0eh9qa2rbkgt1h5k"
+TWITCH_FROM_USER_ID = "788983065"
 
 # Google API credentials
 GOOGLE_OAUTH_CLIENT_ID_FOR_LIVESHOWSELLER = "536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com"

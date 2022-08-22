@@ -23,4 +23,4 @@ class PreOrder(Collection):
                 "$set": kwargs,
             },session=session)
         if sync:
-            self.__sync(session=session)
+            self._sync(session=session)
