@@ -299,13 +299,12 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
         # api_user = lib.util.verify.Verify.get_customer_user(request)
 
-        discount_code = \
+        discount_code, = \
             lib.util.getter.getdata(request, ("discount_code",), required=True)
 
         pre_order = lib.util.verify.Verify.get_pre_order_with_oid(pre_order_oid)
         campaign = lib.util.verify.Verify.get_campaign_from_pre_order(pre_order)
         discount_codes = campaign.user_subscription.discount_codes.all()
-
 
         valid_discount_code = None
         for _discount_code in discount_codes:
@@ -321,7 +320,8 @@ class PreOrderViewSet(viewsets.ModelViewSet):
  
 
         discount_code_data = valid_discount_code.__dict__
-        del discount_code_data['_id']
+        print(discount_code_data)
+        del discount_code_data['_state']
         pre_order.applied_discount = discount_code_data
 
 
