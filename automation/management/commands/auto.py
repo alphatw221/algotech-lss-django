@@ -29,7 +29,7 @@ class Command(BaseCommand):
         rows=[]
         for campaign in models.campaign.campaign.Campaign.objects.filter(start_at__lt=pendulum.now(),end_at__gt=pendulum.now()):
             if not service.rq.job.exists(campaign.id):
-                service.rq.job.enqueue_campaign_queue(jobs.campaign_job.campaign_job,campaign.id)
+                service.rq.queue.enqueue_unique_job_to_campaign_queue(jobs.campaign_job.campaign_job, campaign_id = campaign.id)
                 rows.append([campaign.id, ""])
                 continue
 
@@ -48,6 +48,6 @@ class Command(BaseCommand):
             elif job_status in ('finished', 'failed', 'canceled'):  #
                 job.delete()
                 service.redis.redis.delete(campaign.id)
-                service.rq.job.enqueue_campaign_queue(jobs.campaign_job.campaign_job,campaign.id)
+                service.rq.queue.enqueue_unique_job_to_campaign_queue(jobs.campaign_job.campaign_job, campaign_id = campaign.id)
 
         lib.util.logger.print_table(["Campaign ID", "Status"],rows)

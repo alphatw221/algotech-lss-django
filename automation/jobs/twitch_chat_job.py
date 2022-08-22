@@ -51,6 +51,6 @@ def twitch_chat_job(campaign_id, comments):
 
             database.lss.campaign_comment.CampaignComment.create(**uni_format_comment, auto_inc=False)
             service.channels.campaign.send_comment_data(campaign.id, uni_format_comment)
-            service.rq.job.enqueue_comment_queue(jobs.comment_job.comment_job, campaign.data, user_subscription_data, 'twitch', twitch_channel.data, uni_format_comment, order_codes_mapping)
+            service.rq.queue.enqueue_comment_queue(jobs.comment_job.comment_job, campaign.data, user_subscription_data, 'twitch', twitch_channel.data, uni_format_comment, order_codes_mapping)
     except Exception as e:
         print(traceback.format_exc())

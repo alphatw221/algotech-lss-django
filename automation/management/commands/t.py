@@ -30,7 +30,7 @@ from backend.campaign.campaign_product.status_processor import \
 from backend.cart.cart.manager import CartManager
 from django.core.management.base import BaseCommand
 from backend.pymongo.mongodb import db, get_incremented_filed
-from automation.jobs.campaign_job import campaign_job
+# from automation.jobs.campaign_job import campaign_job
 from django.conf import settings
 
 from api.models.campaign.campaign import Campaign
