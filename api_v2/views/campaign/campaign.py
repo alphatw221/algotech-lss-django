@@ -363,6 +363,10 @@ class CampaignViewSet(viewsets.ModelViewSet):
             instagram_profile = lib.util.verify.Verify.get_instagram_profile_from_user_subscription(user_subscription, platform_id)
             campaign.instagram_campaign['live_media_id']=post_id
             campaign.instagram_profile = instagram_profile
+        elif platform == 'twitch':
+            twitch_channel = lib.util.verify.Verify.get_twitch_channel_from_user_subscription(user_subscription, platform_id)
+            campaign.twitch_campaign['channel_name'] = twitch_channel.name
+            campaign.twitch_channel = twitch_channel
         campaign.save()
         # return Response(models.campaign.campaign.CampaignSerializerRetreive(campaign).data, status=status.HTTP_200_OK)
         return Response(models.campaign.campaign.CampaignSerializer(campaign).data, status=status.HTTP_200_OK)
