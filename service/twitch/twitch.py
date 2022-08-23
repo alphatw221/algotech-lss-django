@@ -65,12 +65,12 @@ def refresh_exchange_access_token(refresh_token: str):
     headers = { 
         'Content-Type': 'application/x-www-form-urlencoded' 
     }
-    params = {
+    data = {
         'grant_type': 'refresh_token',
         'refresh_token': refresh_token,
         'client_id': settings.TWITCH_CLIENT_ID,
         'client_secret': settings.TWITCH_CLIENT_SECRET
     }
-    ret = TwitchOauthCaller('oauth2/token', headers=headers, params=params).post()
+    ret = TwitchOauthCaller('oauth2/token', headers=headers, data=data).post()
 
     return ret
