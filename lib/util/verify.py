@@ -19,6 +19,7 @@ from api.models.cart.cart import Cart
 from lib.error_handle.error.api_error import ApiVerifyError
 from backend.api.instagram.profile import api_ig_get_profile_live_media
 from backend.api.youtube.channel import api_youtube_get_list_channel_by_token
+import service
 from business_policy.subscription_plan import SubscriptionPlan
 import hashlib
 from api import models
@@ -284,6 +285,12 @@ class Verify():
         if not user_subscription.instagram_profiles.filter(id=instagram_profile_id).exists():
             raise ApiVerifyError("util.instagram_profile_not_bound_to_user_subscription")
         return user_subscription.instagram_profiles.get(id=instagram_profile_id)
+    
+    @staticmethod
+    def get_twitch_channel_from_user_subscription(user_subscription, twitch_channel_id):
+        if not user_subscription.twitch_channels.filter(id=twitch_channel_id).exists():
+            raise ApiVerifyError("util.twitch_channels_not_bound_to_user_subscription")
+        return user_subscription.twitch_channels.get(id=twitch_channel_id)
 
     @staticmethod
     def get_campaign(campaign_id):
@@ -453,6 +460,10 @@ class Verify():
                 if status_code == 200:
                     return True
                 return False
+            elif platform_name == 'twitch':
+                status_code, response = service.twitch.twitch.api_twitch_validate_token(access_token=officiall_page_token)
+                if status_code == 200:
+                    return True
         except Exception as e:
             return False
         return False
