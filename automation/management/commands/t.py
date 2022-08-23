@@ -51,7 +51,7 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.test_twitch()
+        self.test_easy_store()
         # self.test_remove_campaign_comment_duplicate()
 
     def modify_database(self):
@@ -421,28 +421,26 @@ class Command(BaseCommand):
     def test_easy_store(self):
         from plugins.easy_store import service
         from pprint import pprint
-        # shop = 'fantastyfrog.easy.co'
-        # access_token = '8cd8e2672d9031a9df5f5371b0c4ca41'
 
         shop = 'yihsuehlinlinyixue.easy.co'
         access_token = '698f9a9a7c8bbe5f65d0207fb6cba139'
-
+        
         # success, data = service.products.get_published_product(shop=shop, access_token=access_token,page=1)
 
         # pprint(success)
         # pprint(data)
 
 
-        line_items =  [
-                    {
-                        "variant_id": 36344238,
-                        "quantity": 2
-                    }
-                ]
+        # line_items =  [
+        #             {
+        #                 "variant_id": 36344238,
+        #                 "quantity": 2
+        #             }
+        #         ]
             
         
 
-        success, data =  service.checkouts.create_checkout(shop=shop, access_token=access_token, line_items=line_items)
+        # success, data =  service.checkouts.create_checkout(shop=shop, access_token=access_token, line_items=line_items)
         # pprint(success)
         # pprint(data)
 
@@ -450,6 +448,20 @@ class Command(BaseCommand):
 
         # success, data =  service.checkouts.retrieve_checkout(shop=shop, access_token=access_token, cart_token='a5318e0f-2317-445c-9c71-ab6c812666e9')
         # success, data =  service.checkouts.update_checkout(shop=shop, access_token=access_token, line_items=line_items, cart_token='a5318e0f-2317-445c-9c71-ab6c812666e9')
+
+
+
+        #webhook
+
+        # topic= 'order/create'
+        # url = 'https://staginglss.accoladeglobal.net/api/plugin/easy_store/webhook/order/create/'
+
+        # topic= 'order/paid'
+        # url = 'https://staginglss.accoladeglobal.net/api/plugin/easy_store/webhook/order/paid/'
+
+        success, data = service.webhooks.list_webhook(shop, access_token)
+        # success, data = service.webhooks.delete_webhook(shop, access_token, 1930323)
+        # success, data = service.webhooks.create_webhook(shop, token=access_token, topic=topic, url=url )
         pprint(success)
         pprint(data)
 

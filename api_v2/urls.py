@@ -15,6 +15,7 @@ from api_v2.views.business_policy import business_policy
 from api_v2.views.cart import cart
 from api_v2.views.discount_code import discount_code
 from api_v2.views.twitch import twitch_channel
+from api_v2.views.tiktok import tiktok_live
 
 router = routers.DefaultRouter()
 router.register(r'product', product.ProductViewSet)
@@ -37,6 +38,7 @@ router.register(r'business-policy',business_policy.BusinessPolicyViewSet)
 router.register(r'cart',cart.CartViewSet)
 router.register(r'discount-code',discount_code.DiscountCodeViewSet)
 router.register(r'twitch',twitch_channel.TwitchViewSet)
+router.register(r'tiktok',tiktok_live.TikTokViewSet)
 
 urlpatterns = [
     url(r'^', include(router.urls)),

@@ -614,7 +614,7 @@ class UserViewSet(viewsets.ModelViewSet):
             status='valid', 
             started_at=now,
             expired_at=expired_at, 
-            user_plan= {"activated_platform" : ["facebook","youtube","instagram"]}, 
+            user_plan= {"activated_platform" : ["facebook","youtube","instagram","twitch"]}, 
             meta_country={ 'activated_country': [country_code] },
             meta = {"stripe payment intent":intentSecret},
             type=plan,

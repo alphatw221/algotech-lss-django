@@ -15,6 +15,7 @@ from api.models.user.user_subscription import UserSubscription, UserSubscription
 from api.models.youtube.youtube_channel import (YoutubeChannel,
                                                 YoutubeChannelInfoSerializer, YoutubeChannelSerializer)
 from api.models.twitch.twitch_channel import TwitchChannel, TwitchChannelSerializer, TwitchChannelInfoSerializer
+from api.models.tiktok.tiktok_account import TikTokAccount, TikTokAccountSerializer, TikTokAccountInfoSerializer
 
 import business_policy
 
@@ -78,6 +79,8 @@ class Campaign(models.Model):
         TwitchChannel, blank=True, null=True, on_delete=models.SET_NULL, related_name='campaigns')
     twitch_campaign = models.JSONField(null=True, blank=True, default=dict)
 
+    tiktok_account = models.ForeignKey(
+        TikTokAccount, blank=True, null=True, on_delete=models.SET_NULL, related_name='campaigns')
     tiktok_campaign = models.JSONField(null=True, blank=True, default=dict)
 
     meta = models.JSONField(null=True, blank=True, default=dict)
