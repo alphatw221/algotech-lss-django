@@ -50,5 +50,5 @@ class TwitchChannelSerializer(serializers.ModelSerializer):
 class TwitchChannelInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = TwitchChannel
-        fields = ['id', 'user_name', 'name', 'remark', 'image', 'lang']
+        fields = ['id', 'user_name', 'name', 'remark', 'image', 'lang', 'token']
         read_only_fields = ['created_at', 'modified_at']
