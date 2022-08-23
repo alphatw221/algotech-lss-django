@@ -35,3 +35,8 @@ class TikTokAccountSerializer(serializers.ModelSerializer):
 
     meta = serializers.JSONField(default=dict)
 
+class TikTokAccountInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TikTokAccount
+        fields = ['id', 'user_name', 'name', 'remark', 'image']
+        read_only_fields = ['created_at', 'modified_at']

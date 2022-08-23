@@ -10,14 +10,14 @@ def __get_url(shop, cart_token=None):
 
 def create_checkout(shop, access_token, line_items):
     print(line_items)
-    data = json.dumps({
+    data = {
         "checkout": {
             "line_items":line_items
         }
-    })
+    }
     response = request("POST", __get_url(shop), 
         headers = get_header(access_token), 
-        data = data,
+        json = data,
         timeout=5
     )
     return load_response(response)
@@ -27,21 +27,21 @@ def retrieve_checkout(shop, access_token, cart_token):
     data = {}
     response = request("GET", __get_url(shop, cart_token), 
         headers = get_header(access_token), 
-        data = data,
+        json = data,
         timeout=5
     )
     return load_response(response)
 
 def update_checkout(shop, access_token, line_items, cart_token):
 
-    data = json.dumps({
+    data = {
         "checkout": {
             "line_items":line_items
         }
-    })
+    }
     response = request("PUT", __get_url(shop, cart_token), 
         headers = get_header(access_token), 
-        data = data,
+        json = data,
         timeout=5
     )
     print(response.status_code)
