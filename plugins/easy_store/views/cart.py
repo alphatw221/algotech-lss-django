@@ -68,5 +68,5 @@ class CartViewSet(viewsets.ModelViewSet):
         
         pre_order.meta.update(meta_data)
         pre_order.save()
-
+        print(checkout_url)
         return Response(checkout_url, status=status.HTTP_200_OK)
