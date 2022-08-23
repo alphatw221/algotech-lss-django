@@ -6,6 +6,7 @@ from api.models.facebook.facebook_page import (FacebookPage,
                                                FacebookPageInfoSerializer, FacebookPageSerializer)
 from api.models.instagram.instagram_profile import (
     InstagramProfile, InstagramProfileInfoSerializer, InstagramProfileSerializer)
+from api.models.tiktok.tiktok_account import TikTokAccount, TikTokAccountSerializer
 from api.models.youtube.youtube_channel import (YoutubeChannel,
                                                 YoutubeChannelInfoSerializer, YoutubeChannelSerializer)
 from api.models.twitch.twitch_channel import (TwitchChannel, TwitchChannelSerializer)
@@ -28,13 +29,15 @@ PLATFORM_FACEBOOK = 'facebook'
 PLATFORM_INSTAGRAM = 'instagram'
 PLATFORM_YOUTUBE = 'youtube'
 PLATFORM_TWITCH = 'twitch'
+PLATFORM_TIKTOK = 'tiktok'
 
 PLATFORM_ATTR={
     PLATFORM_FACEBOOK:{'attr':'facebook_pages','serializer':FacebookPageSerializer}, 
     PLATFORM_INSTAGRAM:{'attr':'instagram_profiles','serializer':InstagramProfileSerializer}, 
     PLATFORM_YOUTUBE:{'attr':'youtube_channels','serializer':YoutubeChannelSerializer},
-    PLATFORM_TWITCH:{'attr':'twitch_channels','serializer':TwitchChannelSerializer}
-    }
+    PLATFORM_TWITCH:{'attr':'twitch_channels','serializer':TwitchChannelSerializer},
+    PLATFORM_TIKTOK:{'attr':'tiktok_accounts','serializer':TikTokAccountSerializer}
+}
 class UserSubscription(models.Model):
 
     class Meta:
@@ -48,6 +51,8 @@ class UserSubscription(models.Model):
         YoutubeChannel, related_name='user_subscriptions')
     twitch_channels = models.ManyToManyField(
         TwitchChannel, related_name='user_subscriptions')
+    tiktok_accounts = models.ManyToManyField(
+        TikTokAccount, related_name='user_subscriptions')
 
     name = models.CharField(max_length=255, null=True, blank=True)
     description = models.TextField(null=True, blank=True, default=None)
