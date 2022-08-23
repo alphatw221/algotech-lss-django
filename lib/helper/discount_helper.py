@@ -7,7 +7,8 @@ def make_discount(before_discount_amount, discount_code):
         meta = discount_code['meta']
         if type==models.discount_code.discount_code.TYPE_PERCENT_OFF:
             rate = meta['discount_rate']
-            after_discount_amount = before_discount_amount*rate
+            
+            after_discount_amount = before_discount_amount*(1-rate/100)
             return after_discount_amount, before_discount_amount-after_discount_amount
         elif type==models.discount_code.discount_code.TYPE_DEDUCT:
             deduct_amount = meta['deduct_amount']
