@@ -453,11 +453,11 @@ class Command(BaseCommand):
 
         #webhook
 
-        # topic= 'order/create'
-        # url = 'https://staginglss.accoladeglobal.net/api/plugin/easy_store/webhook/order/create/'
+        topic= 'order/create'
+        url = 'https://staginglss.accoladeglobal.net/api/plugin/easy_store/order/webhook/create/'
 
-        # topic= 'order/paid'
-        # url = 'https://staginglss.accoladeglobal.net/api/plugin/easy_store/webhook/order/paid/'
+        topic= 'order/paid'
+        url = 'https://staginglss.accoladeglobal.net/api/plugin/easy_store/order/webhook/paid/'
 
         success, data = service.webhooks.list_webhook(shop, access_token)
         # success, data = service.webhooks.delete_webhook(shop, access_token, 1930323)
