@@ -25,7 +25,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['POST'], url_path=r'webhook/update', permission_classes=(), authentication_classes=[])
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def easy_store_order_create_webhook(self, request):
+    def easy_store_order_update_webhook(self, request):
 
 
         print(request.data)
@@ -34,7 +34,7 @@ class OrderViewSet(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['POST'], url_path=r'webhook/cancel', permission_classes=(), authentication_classes=[])
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def easy_store_order_create_webhook(self, request):
+    def easy_store_order_cancel_webhook(self, request):
 
 
         print(request.data)
@@ -43,7 +43,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['POST'], url_path=r'webhook/paid', permission_classes=(), authentication_classes=[])
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def easy_store_order_create_webhook(self, request):
+    def easy_store_order_paid_webhook(self, request):
 
 
         print(request.data)
@@ -52,7 +52,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['POST'], url_path=r'webhook/partially_fulfilled', permission_classes=(), authentication_classes=[])
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def easy_store_order_create_webhook(self, request):
+    def easy_store_order_partially_fulfilled_webhook(self, request):
 
 
         print(request.data)
