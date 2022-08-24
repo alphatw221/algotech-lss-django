@@ -426,7 +426,8 @@ class Command(BaseCommand):
         access_token = '698f9a9a7c8bbe5f65d0207fb6cba139'
         #product
         # success, data = service.products.get_published_product(shop=shop, access_token=access_token,page=1)
-
+        
+        #checkout
         line_items =  [
                     {
                         "variant_id": 36344238,
@@ -434,11 +435,11 @@ class Command(BaseCommand):
                     }
                 ]
             
-    
-        #checkout
+        success, data = service.checkouts.create_checkout(shop, access_token, line_items)
+        
 
         # success, data = service.checkouts.retrieve_checkout(shop, access_token, '64ef5862-4685-4aad-ae33-2d2d82428115')
-        success, data =  service.checkouts.update_checkout(shop, access_token, line_items, '64ef5862-4685-4aad-ae33-2d2d82428115')
+        # success, data =  service.checkouts.update_checkout(shop, access_token, line_items, '64ef5862-4685-4aad-ae33-2d2d82428115')
         # pprint(success)
         # pprint(data)
 

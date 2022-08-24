@@ -402,17 +402,17 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         original_total = pre_order.total
         original_free_delivery = pre_order.free_delivery
 
-        if pre_order.subtotal + adjust_price < 0:
-            adjust_price = -pre_order.subtotal
+        if original_total + adjust_price < 0:
+            adjust_price = -original_total
 
         pre_order.adjust_price = adjust_price
         pre_order.free_delivery = free_delivery
         pre_order.adjust_title = adjust_title
 
         if free_delivery:
-            pre_order.total = pre_order.subtotal + pre_order.adjust_price
+            pre_order.total = pre_order.subtotal - pre_order.discount + pre_order.adjust_price
         else:
-            pre_order.total = pre_order.subtotal + pre_order.adjust_price + pre_order.shipping_cost
+            pre_order.total = pre_order.subtotal - pre_order.discount + pre_order.adjust_price + pre_order.shipping_cost
 
         seller_adjust_history = pre_order.history.get('seller_adjust', [])
         seller_adjust_history.append(
