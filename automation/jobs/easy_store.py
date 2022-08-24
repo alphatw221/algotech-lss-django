@@ -108,8 +108,8 @@ def export_order_job(campaign_id, credential):
             
 
             for order in data.get('orders'):
-                print(order)
-                break
+                print(order.get('cart_token'))
+
             page_count = data.get('page_count')
             page+=1
         
