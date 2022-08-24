@@ -100,13 +100,13 @@ def export_order_job(campaign_id, credential):
         campaign = models.campaign.campaign.Campaign.objects.get(id=campaign_id)
 
         easy_store_order_dict = {str(order.meta.get('easy_store',{}).get('id')):order.id for order in campaign.orders.all() if order.meta.get('easy_store',{}).get('id')}
-        print(easy_store_order_dict)
+
         since = campaign.start_at.strftime("%Y-%m-%d %H:%M:%S")
         page = 1
         page_count = 1
         while(page_count>=page):
             success, data = easy_store_service.orders.list_order(credential.get('shop'), credential.get('access_token'), 
-            # created_at_min=since, 
+            created_at_min=since, 
             page=page)
             
             if not success:
@@ -123,7 +123,7 @@ def export_order_job(campaign_id, credential):
                         lss_order_id = easy_store_order_dict[str(order['id'])]
                         lss_order = models.order.order.Order.objects.get(id=lss_order_id)
 
-                        lss_order.status = models.order.order.STATUS_COMPLETE if order['financial_status']=='paid' else models.order.order.STATUS_PROCEED
+                        lss_order.status = models.order.order.STATUS_COMPLETE if order['financial_status']=='paid' else models.order.order.STATUS_REVIEW
                         lss_order.discount = float(order['total_discount'])
                         lss_order.subtotal = float(order['subtotal_price'])
                         lss_order.shipping_cost = float(order['total_shipping'])
@@ -137,7 +137,8 @@ def export_order_job(campaign_id, credential):
                             customer_id = pre_order.customer_id,
                             customer_name = pre_order.customer_name,
                             customer_img = pre_order.customer_img,
-                            status = models.order.order.STATUS_COMPLETE if order['financial_status']=='paid' else models.order.order.STATUS_PROCEED,
+                            platform = pre_order.platform,
+                            status = models.order.order.STATUS_COMPLETE if order['financial_status']=='paid' else models.order.order.STATUS_REVIEW,
                             discount = float(order['total_discount']),
                             subtotal = float(order['subtotal_price']),
                             shipping_cost = float(order['total_shipping']),
