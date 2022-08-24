@@ -88,13 +88,19 @@ def export_product_job(user_subscription_id, credential):
         easy_store_service.channels.export_product.send_result_data(user_subscription_id,{'result':'fail'})
 
 
-
+STATUS_PROCEED = 'proceed'
+STATUS_COMPLETE = 'complete'
+STATUS_REVIEW = 'review'
+STATUS_SHIPPING_OUT = 'shipping out'
+STATUS_EXPIRED = 'expired'
+STATUS_PENDING_REFUND = 'pending_refund'
 
 def export_order_job(campaign_id, credential):
     try:
         campaign = models.campaign.campaign.Campaign.objects.get(id=campaign_id)
 
-        print(campaign.meta)
+        easy_store_order_dict = {str(order.meta.get('easy_store',{}).get('id')):order.id for order in campaign.orders.all() if order.meta.get('easy_store',{}).get('id')}
+
         since = campaign.start_at.strftime("%Y-%m-%d %H:%M:%S")
         page = 1
         page_count = 1
@@ -108,7 +114,40 @@ def export_order_job(campaign_id, credential):
             
 
             for order in data.get('orders'):
-                print(order.get('cart_token'))
+                try:
+                    cart_token = order['cart_token']
+                    pre_order_id = campaign.meta[cart_token]
+                    pre_order = models.order.pre_order.PreOrder.objects.get(id=pre_order_id)
+
+                    if str(order['id']) in easy_store_order_dict:
+                        lss_order_id = easy_store_order_dict[str(order['id'])]
+                        lss_order = models.order.order.Order.objects.get(id=lss_order_id)
+
+                        lss_order.status = models.order.order.STATUS_COMPLETE if order['financial_status']=='paid' else models.order.order.STATUS_PROCEED,
+                        lss_order.discount = order['total_discount'],
+                        lss_order.subtotal = order['subtotal_price'],
+                        lss_order.shipping_cost = order['total_shipping'],
+                        lss_order.total = order['total_price'],
+                        lss_order.meta['easy_store']=order
+                        lss_order.save()
+                    else:
+                        models.order.order.Order.objects.create(
+                            campaign = campaign,
+                            customer_id = pre_order.customer_id,
+                            customer_name = pre_order.customer_name,
+                            customer_img = pre_order.customer_img,
+                            status = models.order.order.STATUS_COMPLETE if order['financial_status']=='paid' else models.order.order.STATUS_PROCEED,
+                            discount = order['total_discount'],
+                            subtotal = order['subtotal_price'],
+                            shipping_cost = order['total_shipping'],
+                            total = order['total_price'],
+
+                            meta = {'easy_store':order}
+                        )
+
+                except Exception as e:
+                    print(e)
+                    continue
 
             page_count = data.get('page_count')
             page+=1
