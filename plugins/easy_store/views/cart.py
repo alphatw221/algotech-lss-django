@@ -68,7 +68,8 @@ class CartViewSet(viewsets.ModelViewSet):
                             "cart_token":cart_token,
                             "checkout_url":checkout_url,
                         }}
-        
+        campaign.meta[cart_token]=pre_order.id
+        campaign.save()
         pre_order.meta.update(meta_data)
         pre_order.save()
         print(checkout_url)

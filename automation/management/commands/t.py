@@ -428,14 +428,14 @@ class Command(BaseCommand):
         # success, data = service.products.get_published_product(shop=shop, access_token=access_token,page=1)
         
         #checkout
-        line_items =  [
-                    {
-                        "variant_id": 36344238,
-                        "quantity": 2
-                    }
-                ]
+        # line_items =  [
+        #             {
+        #                 "variant_id": 36344238,
+        #                 "quantity": 2
+        #             }
+        #         ]
             
-        success, data = service.checkouts.create_checkout(shop, access_token, line_items)
+        # success, data = service.checkouts.create_checkout(shop, access_token, line_items)
         
 
         # success, data = service.checkouts.retrieve_checkout(shop, access_token, '64ef5862-4685-4aad-ae33-2d2d82428115')
@@ -461,9 +461,11 @@ class Command(BaseCommand):
         # success, data = service.webhooks.list_webhook(shop, access_token)
         # success, data = service.webhooks.delete_webhook(shop, access_token, 1930323)
         # success, data = service.webhooks.create_webhook(shop, token=access_token, topic=topic, url=url )
+
         #order
         # success, data = service.orders.retrieve_order(shop, access_token, 37069894)
         # success, data = service.orders.update_order(shop, access_token, {'remark':123}, 37069894)
+        success, data = service.orders.list_order(shop, access_token)
 
 
         # metafields

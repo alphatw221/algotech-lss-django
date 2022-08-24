@@ -34,3 +34,12 @@ def update_order(shop, access_token, data, order_id):
     )
 
     return load_response(response)
+
+def list_order(shop, access_token):
+    data = {}
+    response = request("GET", __get_url(shop), 
+        headers = get_header(access_token), 
+        json = data,
+        timeout=5
+    )
+    return load_response(response)
