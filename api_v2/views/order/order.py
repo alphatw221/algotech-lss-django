@@ -149,8 +149,8 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         lib.helper.order_helper.OrderHelper.sold_campaign_product(order.id)
         # content = lib.helper.order_helper.OrderHelper.get_confirmation_email_content(order)
-        subject = lib.i18n.email.order_comfirm_mail.i18n_get_mail_subject(order, order.campaign.created_by.lang)
-        content = lib.i18n.email.order_comfirm_mail.i18n_get_mail_content(order, order.campaign.created_by.lang)
+        subject = lib.i18n.email.order_comfirm_mail.i18n_get_mail_subject(order, campaign.lang)
+        content = lib.i18n.email.order_comfirm_mail.i18n_get_mail_content(order, campaign.lang)
         jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)     #queue this to redis if needed
 
         return Response(models.order.order.OrderSerializer(order).data, status=status.HTTP_200_OK)
