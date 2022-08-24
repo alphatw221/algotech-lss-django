@@ -222,8 +222,8 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         api_user = lib.util.verify.Verify.get_customer_user(request)
         pre_order = lib.util.verify.Verify.get_pre_order_with_oid(pre_order_oid)
 
-        # if pre_order.buyer and pre_order.buyer != api_user:
-        #     raise lib.error_handle.error.api_error.ApiVerifyError('invalid_user')
+        if pre_order.buyer and pre_order.buyer != api_user:
+            raise lib.error_handle.error.api_error.ApiVerifyError('invalid_user')
 
         campaign = lib.util.verify.Verify.get_campaign_from_pre_order(pre_order)
         pre_order = lib.helper.order_helper.PreOrderHelper.summarize_pre_order(pre_order, campaign, save=True)
