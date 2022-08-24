@@ -35,8 +35,8 @@ def update_order(shop, access_token, data, order_id):
 
     return load_response(response)
 
-def list_order(shop, access_token):
-    data = {}
+def list_order(shop, access_token, **kwargs):
+    data = {**kwargs}
     response = request("GET", __get_url(shop), 
         headers = get_header(access_token), 
         json = data,

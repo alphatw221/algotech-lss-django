@@ -2,7 +2,7 @@
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 
-from plugins.easy_store.consumers.export_product import PLUGIN_EASY_STORE
+
 
 PLUGIN_EASY_STORE = 'easy_store'
 

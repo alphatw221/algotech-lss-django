@@ -465,9 +465,9 @@ class Command(BaseCommand):
         #order
         # success, data = service.orders.retrieve_order(shop, access_token, 37069894)
         # success, data = service.orders.update_order(shop, access_token, {'remark':123}, 37069894)
-        success, data = service.orders.list_order(shop, access_token)
+        success, data = service.orders.list_order(shop, access_token, created_at_min='2022-08-23 08:18:00')
 
-
+        # 2022-08-23T08:18:22+00:00
         # metafields
         pprint(success)
         pprint(data)
