@@ -7,7 +7,7 @@ from automation import jobs
 
 PLUGIN_EASY_STORE='easy_store'
 class ExportProductConsumer(WebsocketConsumer):
-
+    
     @lib.error_handle.error_handler.web_socket_error_handler.web_socket_error_handler
     def connect(self):
 
@@ -38,10 +38,13 @@ class ExportProductConsumer(WebsocketConsumer):
         credential = user_subscription.user_plan.get('plugins',{}).get(PLUGIN_EASY_STORE)
         if not credential:
             raise lib.error_handle.error.api_error.ApiVerifyError('no_plugin')
-        
+        print(credential)
         service.rq.queue.enqueue_general_queue(jobs.easy_store.export_product_job, user_subscription_id = user_subscription.id, credential=credential)
         self.send(text_data=json.dumps({
-            'message': 'ok'
+            'type':'response_data',
+            'data':{
+                "message":'ok'
+            } 
         }))
 
     def result_data(self, event):
