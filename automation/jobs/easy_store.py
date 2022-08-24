@@ -116,9 +116,11 @@ def export_order_job(campaign_id, credential):
             for order in data.get('orders'):
                 try:
                     cart_token = order['cart_token']
+                    if cart_token not in campaign.meta:
+                        continue
                     pre_order_id = campaign.meta[cart_token]
                     pre_order = models.order.pre_order.PreOrder.objects.get(id=pre_order_id)
-                    print(order['subtotal_price'])
+
                     if str(order['id']) in easy_store_order_dict:
                         lss_order_id = easy_store_order_dict[str(order['id'])]
                         lss_order = models.order.order.Order.objects.get(id=lss_order_id)
