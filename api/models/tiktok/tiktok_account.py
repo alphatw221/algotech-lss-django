@@ -7,6 +7,7 @@ class TikTokAccount(models.Model):
         db_table = 'api_tiktok_account'
 
     name = models.CharField(max_length=255, null=True, blank=True)
+    advertiser_id = models.CharField(max_length=255, null=True, blank=True)
     token = models.CharField(max_length=255, null=True, blank=True)
     refresh_token = models.CharField(max_length=255, null=True, blank=True)
     user_name = models.CharField(max_length=255, null=True, blank=True)

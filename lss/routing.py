@@ -9,5 +9,5 @@ websocket_urlpatterns = [
 
     #------------------------------------------plugins--------------------------------------------
     re_path(r'ws/plugin/easy_store/product/export', easy_store_consumers.export_product.ExportProductConsumer.as_asgi()),
-    re_path(r'ws/plugin/easy_store/order/export', easy_store_consumers.export_order.ExportOrderConsumer.as_asgi())
+    re_path(r'ws/plugin/easy_store/order/export/(?P<campaign_id>\w+)/$', easy_store_consumers.export_order.ExportOrderConsumer.as_asgi())
 ]
