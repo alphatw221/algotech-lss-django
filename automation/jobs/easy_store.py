@@ -81,7 +81,7 @@ def export_product_job(user_subscription_id, credential):
             page+=1
 
         user_subscription.save()
-
+        easy_store_service.channels.export_product.send_result_data(user_subscription.id,{'result':'complete'})
     except Exception:
         print(traceback.format_exc())
-        # easy_store_service.channels.export_product.send_result_data(user_subscription_id,{'result':'fail'})
+        easy_store_service.channels.export_product.send_result_data(user_subscription_id,{'result':'fail'})
