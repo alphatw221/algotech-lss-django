@@ -1,6 +1,5 @@
 from django.conf import settings
 from api import models
-from api.models.tiktok.tiktok_account import TikTokAccount
 import service
 import lib
 
@@ -243,9 +242,9 @@ def bind_tiktok_accounts(request, user_subscription):
     
     for data in response.get("data").get("list"):
         try:
-            advertiser_account = TikTokAccount.objects.get(advertiser_id=data['advertiser_id'])
+            advertiser_account = models.tiktok.tiktok_account.TikTokAccount.objects.get(advertiser_id=data['advertiser_id'])
         except:
-            advertiser_account = TikTokAccount.objects.create(advertiser_id=data['advertiser_id'], name=data['name'])
+            advertiser_account = models.tiktok.tiktok_account.TikTokAccount.objects.create(advertiser_id=data['advertiser_id'], name=data['name'])
         
         advertiser_account.token = access_token
         advertiser_account.token_update_at = datetime.now()
