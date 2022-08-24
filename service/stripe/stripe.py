@@ -36,6 +36,8 @@ def create_checkout_session(secret, currency, order, decimal_places, price_unit,
                 unit_amount=int(__transform_payment_amount(product.get('price'), decimal_places, price_unit)*100),
                 currency=currency,
             )
+            print('product')
+            print(int(__transform_payment_amount(product.get('price'), decimal_places, price_unit)*100))
             items.append(
                 {
                     'price': price.id,
@@ -44,18 +46,27 @@ def create_checkout_session(secret, currency, order, decimal_places, price_unit,
             )
 
         discounts = []
+        amount_off = 0
         if order.adjust_price:
-            discount = stripe.Coupon.create(
-                amount_off=int(-__transform_payment_amount(order.adjust_price, decimal_places, price_unit) * 100),
-                currency=currency
-            )
-            discounts.append(
-                {
-                    'coupon': discount.id,
-                }
-            )
+            amount_off+=int(-__transform_payment_amount(order.adjust_price, decimal_places, price_unit) * 100)
+        if order.discount:
+            amount_off+=int(__transform_payment_amount(order.discount, decimal_places, price_unit) * 100)
+
+        discount = stripe.Coupon.create(
+            amount_off=amount_off,
+            currency=currency
+        )
+        discounts.append(
+            {
+                'coupon': discount.id,
+            }
+        )
+        print('discount+adjust')
+        print(amount_off)
+
 
         shipping_options = []
+
 
         if order.free_delivery or order.meta.get('subtotal_over_free_delivery_threshold') or order.meta.get('items_over_free_delivery_threshold'):
             shipping_rate = stripe.ShippingRate.create(
@@ -85,7 +96,8 @@ def create_checkout_session(secret, currency, order, decimal_places, price_unit,
                     'shipping_rate': shipping_rate.id,
                 }
             )
-
+        print('shipping')
+        print(int( __transform_payment_amount(order.shipping_cost, decimal_places, price_unit) * 100))
         checkout_session = stripe.checkout.Session.create(
             line_items=items,
             shipping_options=shipping_options,
@@ -94,9 +106,11 @@ def create_checkout_session(secret, currency, order, decimal_places, price_unit,
             success_url=success_url,
             cancel_url=cancel_url,
         )
+        
 
         return checkout_session
     except Exception:
+        print(traceback.format_exc())
         return False
 
 

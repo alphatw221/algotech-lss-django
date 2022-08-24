@@ -174,8 +174,8 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             lib.helper.subscription_helper.bind_youtube_channels(request, user_subscription) 
         
         elif platform_name == models.user.user_subscription.PLATFORM_TWITCH:
-            lib.helper.subscription_helper.bind_twitch_channels(request, user_subscription)
-            
+            channel_name, = lib.util.getter.getparams(request, ('channel_name',), with_user=False)
+            lib.helper.subscription_helper.bind_twitch_channels(request, user_subscription, channel_name)
         elif platform_name == models.user.user_subscription.PLATFORM_TIKTOK:
             lib.helper.subscription_helper.bind_tiktok_accounts(request, user_subscription)
                    
@@ -268,4 +268,18 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             "marketing_plans": marketing_plans,
             "period":period,
         }, status=status.HTTP_200_OK)
+
+
+# --------------------------------- admin console ---------------------------------
     
+    @action(detail=False, methods=['GET'], url_path=r'dashboard/cards', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def dealer_dashboard_cards_analysis(self, request):
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        dealer_user_subscription = lib.util.verify.Verify.get_dealer_user_subscription_from_api_user(api_user)
+
+        queryset = dealer_user_subscription.subscribers.all()
+
+        print (queryset)
+
+        return Response({'message': 'suc'}, status=status.HTTP_200_OK)

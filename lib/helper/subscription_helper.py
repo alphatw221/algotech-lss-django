@@ -178,7 +178,7 @@ def bind_youtube_channels(request, user_subscription):
         if youtube_channel not in user_subscription.youtube_channels.all():
             user_subscription.youtube_channels.add(youtube_channel)
 
-def bind_twitch_channels(request, user_subscription):
+def bind_twitch_channels(request, user_subscription, channel_name):
 
     code, = lib.util.getter.getdata(request,("code",), required=True)
 
@@ -189,16 +189,14 @@ def bind_twitch_channels(request, user_subscription):
     access_token = response.get("access_token")
     refresh_token = response.get("refresh_token")
 
-    response_code, response = service.twitch.twitch.get_user(access_token)
-    if not response_code / 100 == 2:
-        lib.error_handle.error.api_error.ApiCallerError('get twitch user detail fail')
-    
-    channel_name = response.get("preferred_username")
+    # response_code, response = service.twitch.twitch.get_user(access_token)
+    # if not response_code / 100 == 2:
+    #     lib.error_handle.error.api_error.ApiCallerError('get twitch user detail fail')
+    # channel_name = response.get("preferred_username")
 
     response_code, response = service.twitch.twitch.get_user_info(access_token, channel_name)
     if not response_code / 100 == 2:
         lib.error_handle.error.api_error.ApiCallerError('get twitch user info fail')
-    
     image = response.get("data")[0].get("profile_image_url")
 
     if models.twitch.twitch_channel.TwitchChannel.objects.filter(name=channel_name).exists():
