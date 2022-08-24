@@ -128,6 +128,7 @@ def export_order_job(campaign_id, credential):
                         lss_order.subtotal = float(order['subtotal_price'])
                         lss_order.shipping_cost = float(order['total_shipping'])
                         lss_order.total = float(order['total_price'])
+                        lss_order.products = {'easy_store':True}
                         lss_order.meta['easy_store']=order
                         lss_order.save()
                     else:
@@ -140,6 +141,7 @@ def export_order_job(campaign_id, credential):
                             discount = float(order['total_discount']),
                             subtotal = float(order['subtotal_price']),
                             shipping_cost = float(order['total_shipping']),
+                            products = {'easy_store':True},
                             total = float(order['total_price']),
 
                             meta = {'easy_store':order}
