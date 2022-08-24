@@ -81,7 +81,39 @@ def export_product_job(user_subscription_id, credential):
             page+=1
 
         user_subscription.save()
-
+        
+        easy_store_service.channels.export_product.send_result_data(user_subscription.id,{'result':'complete'})
     except Exception:
         print(traceback.format_exc())
-        # easy_store_service.channels.export_product.send_result_data(user_subscription_id,{'result':'fail'})
+        easy_store_service.channels.export_product.send_result_data(user_subscription_id,{'result':'fail'})
+
+
+
+
+def export_order_job(campaign_id, credential):
+    try:
+        campaign = models.campaign.campaign.Campaign.objects.get(id=campaign_id)
+
+        print(campaign.meta)
+        since = campaign.start_at.strftime("%Y-%m-%d %H:%M:%S")
+        page = 1
+        page_count = 1
+        while(page_count>=page):
+            success, data = easy_store_service.orders.list_order(credential.get('shop'), credential.get('access_token'), 
+            # created_at_min=since, 
+            page=page)
+            
+            if not success:
+                raise Exception()
+            
+
+            for order in data.get('orders'):
+                print(order)
+                break
+            page_count = data.get('page_count')
+            page+=1
+        
+        easy_store_service.channels.export_order.send_result_data(campaign.id,{'result':'complete'})
+    except Exception:
+        print(traceback.format_exc())
+        easy_store_service.channels.export_order.send_result_data(campaign.id,{'result':'fail'})
