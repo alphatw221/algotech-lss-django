@@ -100,7 +100,7 @@ def export_order_job(campaign_id, credential):
         campaign = models.campaign.campaign.Campaign.objects.get(id=campaign_id)
 
         easy_store_order_dict = {str(order.meta.get('easy_store',{}).get('id')):order.id for order in campaign.orders.all() if order.meta.get('easy_store',{}).get('id')}
-
+        print(easy_store_order_dict)
         since = campaign.start_at.strftime("%Y-%m-%d %H:%M:%S")
         page = 1
         page_count = 1
@@ -146,7 +146,7 @@ def export_order_job(campaign_id, credential):
                         )
 
                 except Exception as e:
-                    print(e)
+                    print(traceback.format_exc())
                     continue
 
             page_count = data.get('page_count')
