@@ -124,10 +124,10 @@ def export_order_job(campaign_id, credential):
                         lss_order = models.order.order.Order.objects.get(id=lss_order_id)
 
                         lss_order.status = models.order.order.STATUS_COMPLETE if order['financial_status']=='paid' else models.order.order.STATUS_PROCEED,
-                        lss_order.discount = order['total_discount'],
-                        lss_order.subtotal = order['subtotal_price'],
-                        lss_order.shipping_cost = order['total_shipping'],
-                        lss_order.total = order['total_price'],
+                        lss_order.discount = float(order['total_discount']),
+                        lss_order.subtotal = float(order['subtotal_price']),
+                        lss_order.shipping_cost = float(order['total_shipping']),
+                        lss_order.total = float(order['total_price']),
                         lss_order.meta['easy_store']=order
                         lss_order.save()
                     else:
@@ -137,10 +137,10 @@ def export_order_job(campaign_id, credential):
                             customer_name = pre_order.customer_name,
                             customer_img = pre_order.customer_img,
                             status = models.order.order.STATUS_COMPLETE if order['financial_status']=='paid' else models.order.order.STATUS_PROCEED,
-                            discount = order['total_discount'],
-                            subtotal = order['subtotal_price'],
-                            shipping_cost = order['total_shipping'],
-                            total = order['total_price'],
+                            discount = float(order['total_discount']),
+                            subtotal = float(order['subtotal_price']),
+                            shipping_cost = float(order['total_shipping']),
+                            total = float(order['total_price']),
 
                             meta = {'easy_store':order}
                         )
