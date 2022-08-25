@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-24 06:36+0000\n"
+"POT-Creation-Date: 2022-08-25 05:31+0000\n"
 "PO-Revision-Date: 2021-12-13 15:50+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -55,74 +55,71 @@ msgstr ""
 
 #: backend/i18n/cart_product_request.py:30
 #: backend/i18n/cart_product_request.py:66 lib/i18n/cart_product_request.py:49
-#: lib/i18n/cart_product_request.py:85
+#: lib/i18n/cart_product_request.py:89
 #, python-brace-format
 msgid "INVALID_EXCEED_MAX_ORDER_AMOUNT{order_code}{max_order_amount}"
 msgstr "{order_code} 無法新增，此商品單次限購數量為 {max_order_amount} 件。"
 
 #: backend/i18n/cart_product_request.py:36
 #: backend/i18n/cart_product_request.py:73 lib/i18n/cart_product_request.py:55
-#: lib/i18n/cart_product_request.py:92
+#: lib/i18n/cart_product_request.py:96
 msgid "ADDED"
 msgstr "下單成功！"
 
 #: backend/i18n/cart_product_request.py:38
 #: backend/i18n/cart_product_request.py:75 lib/i18n/cart_product_request.py:57
-#: lib/i18n/cart_product_request.py:94
+#: lib/i18n/cart_product_request.py:98
 msgid "UPDATED"
 msgstr "更新成功！"
 
 #: backend/i18n/cart_product_request.py:40
 #: backend/i18n/cart_product_request.py:77 lib/i18n/cart_product_request.py:59
-#: lib/i18n/cart_product_request.py:96
+#: lib/i18n/cart_product_request.py:100
 msgid "DELETED"
 msgstr "商品已從購物車刪除。"
 
 #: backend/i18n/cart_product_request.py:42
 #: backend/i18n/cart_product_request.py:79 lib/i18n/cart_product_request.py:61
-#: lib/i18n/cart_product_request.py:98
+#: lib/i18n/cart_product_request.py:102
 msgid "INSUFFICIENT_INV"
 msgstr "商品已售完。"
 
 #: backend/i18n/cart_product_request.py:44
 #: backend/i18n/cart_product_request.py:81 lib/i18n/cart_product_request.py:63
-#: lib/i18n/cart_product_request.py:100
+#: lib/i18n/cart_product_request.py:104
 msgid "INVALID_PRODUCT_NOT_ACTIVATED"
 msgstr "目前無法下單。"
 
 #: backend/i18n/cart_product_request.py:46
-#: backend/i18n/cart_product_request.py:83 lib/i18n/cart_product_request.py:65
-#: lib/i18n/cart_product_request.py:102
+#: backend/i18n/cart_product_request.py:83 lib/i18n/cart_product_request.py:69
+#: lib/i18n/cart_product_request.py:106
 msgid "INVALID_REMOVE_NOT_ALLOWED"
 msgstr "無法刪除。"
 
 #: backend/i18n/cart_product_request.py:48
-#: backend/i18n/cart_product_request.py:85 lib/i18n/cart_product_request.py:67
-#: lib/i18n/cart_product_request.py:104
+#: backend/i18n/cart_product_request.py:85 lib/i18n/cart_product_request.py:71
+#: lib/i18n/cart_product_request.py:108
 msgid "INVALID_EDIT_NOT_ALLOWED"
 msgstr "無法修改。"
 
 #: backend/i18n/cart_product_request.py:50
-#: backend/i18n/cart_product_request.py:87 lib/i18n/cart_product_request.py:69
-#: lib/i18n/cart_product_request.py:106
+#: backend/i18n/cart_product_request.py:87 lib/i18n/cart_product_request.py:73
+#: lib/i18n/cart_product_request.py:110
 msgid "INVALID_ADD_ZERO_QTY"
 msgstr "無法刪除。"
 
 #: backend/i18n/cart_product_request.py:52
-#: backend/i18n/cart_product_request.py:89 lib/i18n/cart_product_request.py:71
-#: lib/i18n/cart_product_request.py:108
+#: backend/i18n/cart_product_request.py:89 lib/i18n/cart_product_request.py:75
+#: lib/i18n/cart_product_request.py:112
 msgid "N/A"
 msgstr "操作錯誤。"
 
 #: backend/i18n/cart_product_request.py:54
-#: backend/i18n/cart_product_request.py:92 lib/i18n/cart_product_request.py:73
-#: lib/i18n/cart_product_request.py:111
+#: backend/i18n/cart_product_request.py:92 lib/i18n/cart_product_request.py:77
+#: lib/i18n/cart_product_request.py:115
 #, python-brace-format
 msgid "ITEM_INFO{order_code}{qty}{result}"
 msgstr "商品 {order_code} < {qty} 件>，{result}"
-
-msgid "ITEM_INFO{order_code}{result}"
-msgstr "商品 {order_code}，{result}"
 
 #: backend/i18n/comment_command.py:24 backend/i18n/comment_command.py:27
 #: backend/i18n/comment_command.py:29 lib/i18n/comment_command.py:25
@@ -289,12 +286,12 @@ msgid "EMAIL/DELIVERY_CONFIRM/RECEIVER"
 msgstr "收件人"
 
 #: lib/helper/order_helper.py:460 lib/helper/order_helper.py:594
-#: lib/helper/xlsx_helper.py:113 lib/i18n/email/order_comfirm_mail.py:50
+#: lib/i18n/email/order_comfirm_mail.py:50
 msgid "REPORT/COLUMN_TITLE/SHIPPING_PHONE"
 msgstr "客戶電話"
 
 #: lib/helper/order_helper.py:466 lib/helper/order_helper.py:610
-#: lib/helper/xlsx_helper.py:121 lib/i18n/email/order_comfirm_mail.py:55
+#: lib/i18n/email/order_comfirm_mail.py:55
 msgid "REPORT/COLUMN_TITLE/PICK_UP_STORE"
 msgstr "自取店家"
 
@@ -304,8 +301,7 @@ msgstr "自取店家"
 msgid "EMAIL/DELIVERY_CONFIRM/DELIVERY_ADDRESS"
 msgstr "收貨地址"
 
-#: lib/helper/order_helper.py:478 lib/helper/xlsx_helper.py:124
-#: lib/i18n/email/order_comfirm_mail.py:72
+#: lib/helper/order_helper.py:478 lib/i18n/email/order_comfirm_mail.py:72
 msgid "REPORT/COLUMN_TITLE/PAYMENT_METHOD"
 msgstr "付款方式"
 
@@ -356,70 +352,6 @@ msgstr "運送方式"
 msgid "EMAIL/ORDER_CONFIRM/PROCESS_PAYMENT"
 msgstr "前往付款"
 
-#: lib/helper/xlsx_helper.py:109
-msgid "REPORT/COLUMN_TITLE/ID"
-msgstr "編號"
-
-#: lib/helper/xlsx_helper.py:110
-msgid "REPORT/COLUMN_TITLE/ORDER_DATE"
-msgstr "訂單日期"
-
-#: lib/helper/xlsx_helper.py:111
-msgid "REPORT/COLUMN_TITLE/PLATFORM"
-msgstr "使用平台"
-
-#: lib/helper/xlsx_helper.py:112
-msgid "REPORT/COLUMN_TITLE/CUSTOMER_NAME"
-msgstr "客戶名稱"
-
-#: lib/helper/xlsx_helper.py:114
-msgid "REPORT/COLUMN_TITLE/EMAIL"
-msgstr "E-mail"
-
-#: lib/helper/xlsx_helper.py:115
-msgid "REPORT/COLUMN_TITLE/SHIPPING_METHOD"
-msgstr "運送方式"
-
-#: lib/helper/xlsx_helper.py:116
-msgid "REPORT/COLUMN_TITLE/SHIPPING_OPTION"
-msgstr "運送選項"
-
-#: lib/helper/xlsx_helper.py:117
-msgid "REPORT/COLUMN_TITLE/SHIPPING_ADDRESS_1"
-msgstr "收件住址"
-
-#: lib/helper/xlsx_helper.py:118
-msgid "REPORT/COLUMN_TITLE/LOCATION"
-msgstr "地點"
-
-#: lib/helper/xlsx_helper.py:119
-msgid "REPORT/COLUMN_TITLE/REGION"
-msgstr "區域"
-
-#: lib/helper/xlsx_helper.py:120
-msgid "REPORT/COLUMN_TITLE/POSTCODE"
-msgstr "郵遞區號"
-
-#: lib/helper/xlsx_helper.py:122
-msgid "REPORT/COLUMN_TITLE/PICK_UP_ADDRESS"
-msgstr "自取地址"
-
-#: lib/helper/xlsx_helper.py:123
-msgid "REPORT/COLUMN_TITLE/REMARK"
-msgstr "註記"
-
-#: lib/helper/xlsx_helper.py:125
-msgid "REPORT/COLUMN_TITLE/PAYMENT_STATUS"
-msgstr "付款狀態"
-
-#: lib/helper/xlsx_helper.py:126
-msgid "REPORT/COLUMN_TITLE/PAYMENT_RECORD"
-msgstr "付款證明"
-
-#: lib/helper/xlsx_helper.py:127
-msgid "REPORT/COLUMN_TITLE/TOTAL"
-msgstr "總金額"
-
 #: lib/helper/xlsx_helper.py:159
 msgid "REPORT/SECTION_TITLE/TITLE"
 msgstr "訂單報表"
@@ -445,6 +377,11 @@ msgstr "訂單資訊"
 msgid "QUIZ_GAME_WINNER{customer_name}{product_name}"
 msgstr ""
 "恭喜 {customer_name} 得獎，獲得 {product_name}！請至購物車確認您的獎品。"
+
+#: lib/i18n/cart_product_request.py:64
+#, python-brace-format
+msgid "ITEM_INFO{order_code}{result}"
+msgstr "商品 {order_code}，{result}"
 
 #: lib/i18n/email/delivery_comfirm_mail.py:34
 #: lib/i18n/email/delivery_comfirm_mail.py:37
@@ -614,6 +551,54 @@ msgstr "您在Live Show Seller 所使用的帳號"
 #: templates/reset_password_success_email.html:15
 msgid "EMAIL/PASSWORD_RESET_SUCCESS/CONTENT2"
 msgstr "已成功修改密碼. 若您沒有要求修改密碼, 請立即聯絡我們的客服專員。"
+
+#~ msgid "REPORT/COLUMN_TITLE/ID"
+#~ msgstr "編號"
+
+#~ msgid "REPORT/COLUMN_TITLE/ORDER_DATE"
+#~ msgstr "訂單日期"
+
+#~ msgid "REPORT/COLUMN_TITLE/PLATFORM"
+#~ msgstr "使用平台"
+
+#~ msgid "REPORT/COLUMN_TITLE/CUSTOMER_NAME"
+#~ msgstr "客戶名稱"
+
+#~ msgid "REPORT/COLUMN_TITLE/EMAIL"
+#~ msgstr "E-mail"
+
+#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_METHOD"
+#~ msgstr "運送方式"
+
+#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_OPTION"
+#~ msgstr "運送選項"
+
+#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_ADDRESS_1"
+#~ msgstr "收件住址"
+
+#~ msgid "REPORT/COLUMN_TITLE/LOCATION"
+#~ msgstr "地點"
+
+#~ msgid "REPORT/COLUMN_TITLE/REGION"
+#~ msgstr "區域"
+
+#~ msgid "REPORT/COLUMN_TITLE/POSTCODE"
+#~ msgstr "郵遞區號"
+
+#~ msgid "REPORT/COLUMN_TITLE/PICK_UP_ADDRESS"
+#~ msgstr "自取地址"
+
+#~ msgid "REPORT/COLUMN_TITLE/REMARK"
+#~ msgstr "註記"
+
+#~ msgid "REPORT/COLUMN_TITLE/PAYMENT_STATUS"
+#~ msgstr "付款狀態"
+
+#~ msgid "REPORT/COLUMN_TITLE/PAYMENT_RECORD"
+#~ msgstr "付款證明"
+
+#~ msgid "REPORT/COLUMN_TITLE/TOTAL"
+#~ msgstr "總金額"
 
 #~ msgid "EMAIL/ORDER_CONFIRM/TOTAL"
 #~ msgstr "總計"
