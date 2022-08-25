@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-25 08:49+0000\n"
+"POT-Creation-Date: 2022-08-25 10:32+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -288,13 +288,11 @@ msgstr "Người nhận"
 
 #: lib/helper/order_helper.py:460 lib/helper/order_helper.py:594
 #: lib/helper/xlsx_helper.py:115 lib/i18n/email/order_comfirm_mail.py:50
-#: lib/i18n/email/order_comfirm_mail.py:50
 msgid "REPORT/COLUMN_TITLE/SHIPPING_PHONE"
 msgstr "Số điện thoại"
 
 #: lib/helper/order_helper.py:466 lib/helper/order_helper.py:610
 #: lib/helper/xlsx_helper.py:123 lib/i18n/email/order_comfirm_mail.py:55
-#: lib/i18n/email/order_comfirm_mail.py:55
 msgid "REPORT/COLUMN_TITLE/PICK_UP_STORE"
 msgstr "Tên cửa hàng"
 
@@ -306,7 +304,6 @@ msgstr "Địa chỉ giao hàng"
 
 #: lib/helper/order_helper.py:478 lib/helper/xlsx_helper.py:126
 #: lib/i18n/email/order_comfirm_mail.py:72
-#: lib/helper/order_helper.py:478 lib/i18n/email/order_comfirm_mail.py:72
 msgid "REPORT/COLUMN_TITLE/PAYMENT_METHOD"
 msgstr "Phương thức thanh toán"
 
@@ -363,7 +360,6 @@ msgstr "Phương pháp vận chuyển"
 #: lib/helper/order_helper.py:629
 msgid "EMAIL/ORDER_CONFIRM/PROCESS_PAYMENT"
 msgstr "Quá trình thanh toán"
-
 
 #: lib/helper/xlsx_helper.py:111
 msgid "REPORT/COLUMN_TITLE/ID"
@@ -457,19 +453,24 @@ msgstr ""
 "Giải: {product_name}. Vui lòng kiểm tra giỏ hàng của bạn."
 
 #: lib/i18n/cart_product_request.py:64
-#, python-brace-format
+#, fuzzy, python-brace-format
+#| msgid "ITEM_INFO{order_code}{qty}{result}"
 msgid "ITEM_INFO{order_code}{result}"
-msgstr "\"{order_code}\" {result}. "
+msgstr "\"{order_code}\" Số lượng: {qty} {result}. "
 
 #: lib/i18n/email/delivery_comfirm_mail.py:10
 #, fuzzy, python-brace-format
-#| msgid "EMAIL/DELIVERY_CONFIRM/SUBJECT{order_id}{campaign_title}"
+#| msgid "EMAIL/ORDER_CONFIRM/SUBJECT{order_id}{campaign_title}"
 msgid "EMAIL/DELIVERY_CONFIRM/SUBJECT{order_id}{campaign_title}"
-msgstr "Your order #{order.id} from {order.campaign.title} has been shipped!"
+msgstr ""
+"Cảm ơn đơn đặt hàng của bạn! Đơn đặt hàng # {order_id} của bạn từ "
+"{campaign_title} đã được xác nhận!"
 
 #: lib/i18n/email/delivery_comfirm_mail.py:25
+#, fuzzy
+#| msgid "EMAIL/DELIVERY_CONFIRM/TOTAL"
 msgid "EMAIL/DELIVERY_CONFIRM/TITLE"
-msgstr "Your order has been shipped!"
+msgstr "Tổng số"
 
 #: lib/i18n/email/delivery_comfirm_mail.py:38
 #: lib/i18n/email/delivery_comfirm_mail.py:41
