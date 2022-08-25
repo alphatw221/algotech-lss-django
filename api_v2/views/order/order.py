@@ -146,11 +146,10 @@ class OrderViewSet(viewsets.ModelViewSet):
         order.payment_method = models.order.order.PAYMENT_METHOD_DIRECT
         order.status = "complete"
         order.save()
-
         lib.helper.order_helper.OrderHelper.sold_campaign_product(order.id)
         # content = lib.helper.order_helper.OrderHelper.get_confirmation_email_content(order)
-        subject = lib.i18n.email.order_comfirm_mail.i18n_get_mail_subject(order, order.campaign.created_by.lang)
-        content = lib.i18n.email.order_comfirm_mail.i18n_get_mail_content(order, order.campaign.created_by.lang)
+        subject = lib.i18n.email.order_comfirm_mail.i18n_get_mail_subject(order, lang=campaign.lang)
+        content = lib.i18n.email.order_comfirm_mail.i18n_get_mail_content(order, campaign, lang=campaign.lang)
         jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)     #queue this to redis if needed
 
         return Response(models.order.order.OrderSerializer(order).data, status=status.HTTP_200_OK)
@@ -236,9 +235,9 @@ class OrderViewSet(viewsets.ModelViewSet):
         order = lib.util.verify.Verify.get_order(pk)
         lib.util.verify.Verify.get_campaign_from_user_subscription(api_user.user_subscription, order.campaign.id)
         
-        
+        subject = lib.i18n.email.delivery_comfirm_mail.i18n_get_mail_subject(order=order, lang=order.campaign.lang) 
         content = lib.i18n.email.delivery_comfirm_mail.i18n_get_mail_content(order=order, user=api_user, lang=order.campaign.lang) 
-        jobs.send_email_job.send_email_job(f'Your order #{order.id} from {order.campaign.title} has shipped!', order.shipping_email, content=content)
+        jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)
         order.status = models.order.order.STATUS_SHIPPING_OUT
         order.save()
 
