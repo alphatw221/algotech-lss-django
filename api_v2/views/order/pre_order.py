@@ -14,13 +14,13 @@ from api import models
 from automation import jobs
 
 import lib
-import datetime
+
 import uuid
 import service
 import database
 import traceback
-
 from datetime import datetime
+
 class PreOrderPagination(PageNumberPagination):
     page_query_param = 'page'
     page_size_query_param = 'page_size'
@@ -419,7 +419,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
              "adjusted_total": pre_order.total,
              "original_free_delivery_status": original_free_delivery,
              "adjusted_free_delivery_status": pre_order.free_delivery,
-             "adjusted_at": datetime.datetime.utcnow(),
+             "adjusted_at": datetime.utcnow(),
              "adjusted_by": api_user.id
              }
         )
