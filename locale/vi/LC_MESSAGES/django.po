@@ -641,54 +641,6 @@ msgstr ""
 #~ msgid "REPORT/COLUMN_TITLE/TOTAL"
 #~ msgstr "Tổng thanh toán"
 
-#~ msgid "REPORT/COLUMN_TITLE/ID"
-#~ msgstr "ID"
-
-#~ msgid "REPORT/COLUMN_TITLE/ORDER_DATE"
-#~ msgstr "Ngày đặt hàng"
-
-#~ msgid "REPORT/COLUMN_TITLE/PLATFORM"
-#~ msgstr "Nền tảng"
-
-#~ msgid "REPORT/COLUMN_TITLE/CUSTOMER_NAME"
-#~ msgstr "Tên khách hàng"
-
-#~ msgid "REPORT/COLUMN_TITLE/EMAIL"
-#~ msgstr "E-mail"
-
-#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_METHOD"
-#~ msgstr "Phương thức giao hàng"
-
-#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_OPTION"
-#~ msgstr "Tùy chọn giao hàng"
-
-#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_ADDRESS_1"
-#~ msgstr "Địa chỉ giao hàng"
-
-#~ msgid "REPORT/COLUMN_TITLE/LOCATION"
-#~ msgstr "Địa điểm "
-
-#~ msgid "REPORT/COLUMN_TITLE/REGION"
-#~ msgstr "Khu vực"
-
-#~ msgid "REPORT/COLUMN_TITLE/POSTCODE"
-#~ msgstr "Mã bưu điện"
-
-#~ msgid "REPORT/COLUMN_TITLE/PICK_UP_ADDRESS"
-#~ msgstr "Địa chỉ cửa hàng"
-
-#~ msgid "REPORT/COLUMN_TITLE/REMARK"
-#~ msgstr "Nhận xét"
-
-#~ msgid "REPORT/COLUMN_TITLE/PAYMENT_STATUS"
-#~ msgstr "Tình trạng thanh toán"
-
-#~ msgid "REPORT/COLUMN_TITLE/PAYMENT_RECORD"
-#~ msgstr "Hóa đơn thanh toán"
-
-#~ msgid "REPORT/COLUMN_TITLE/TOTAL"
-#~ msgstr "Tổng thanh toán"
-
 #, fuzzy
 #~| msgid "DETAIL{link}\n"
 #~ msgid "DETAIL{link}"

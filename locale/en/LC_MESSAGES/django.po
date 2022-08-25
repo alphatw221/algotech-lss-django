@@ -641,54 +641,6 @@ msgstr ""
 #~ msgid "REPORT/COLUMN_TITLE/TOTAL"
 #~ msgstr "Total"
 
-#~ msgid "REPORT/COLUMN_TITLE/ID"
-#~ msgstr "ID"
-
-#~ msgid "REPORT/COLUMN_TITLE/ORDER_DATE"
-#~ msgstr "Order Date"
-
-#~ msgid "REPORT/COLUMN_TITLE/PLATFORM"
-#~ msgstr "Platform"
-
-#~ msgid "REPORT/COLUMN_TITLE/CUSTOMER_NAME"
-#~ msgstr "Customer Name"
-
-#~ msgid "REPORT/COLUMN_TITLE/EMAIL"
-#~ msgstr "E-mail"
-
-#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_METHOD"
-#~ msgstr "Shipping Method"
-
-#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_OPTION"
-#~ msgstr "Shipping Option"
-
-#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_ADDRESS_1"
-#~ msgstr "Shipping Address_1"
-
-#~ msgid "REPORT/COLUMN_TITLE/LOCATION"
-#~ msgstr "Location"
-
-#~ msgid "REPORT/COLUMN_TITLE/REGION"
-#~ msgstr "Region"
-
-#~ msgid "REPORT/COLUMN_TITLE/POSTCODE"
-#~ msgstr "Postcode"
-
-#~ msgid "REPORT/COLUMN_TITLE/PICK_UP_ADDRESS"
-#~ msgstr "Pick Up Address"
-
-#~ msgid "REPORT/COLUMN_TITLE/REMARK"
-#~ msgstr "Remark"
-
-#~ msgid "REPORT/COLUMN_TITLE/PAYMENT_STATUS"
-#~ msgstr "Payment Status"
-
-#~ msgid "REPORT/COLUMN_TITLE/PAYMENT_RECORD"
-#~ msgstr "Payment Record"
-
-#~ msgid "REPORT/COLUMN_TITLE/TOTAL"
-#~ msgstr "Total"
-
 #~ msgid "EMAIL/ORDER_CONFIRM/ORDER"
 #~ msgstr "Order"
 
