@@ -487,6 +487,18 @@ class Verify():
         if not models.campaign.campaign_quiz_game_bundle.CampaignQuizGameBundle.objects.filter(id=quiz_game_bundle_id).exists():
             raise ApiVerifyError('util.quiz_game_not_found')
         return models.campaign.campaign_quiz_game_bundle.CampaignQuizGameBundle.objects.get(id=quiz_game_bundle_id)
+    
+    @staticmethod
+    def get_user_register_by_email(user_register_email):
+        if not models.user.user_register.UserRegister.objects.filter(email=user_register_email).exists():
+            raise ApiVerifyError(f'user register not found by {user_register_email}')
+        return models.user.user_register.UserRegister.objects.filter(email=user_register_email).order_by('-created_at')[0]
+    
+    @staticmethod
+    def delete_user_register_by_email(user_register_email):
+        if not models.user.user_register.UserRegister.objects.filter(email=user_register_email).exists():
+            raise ApiVerifyError(f'user register not found by {user_register_email}')
+        return models.user.user_register.UserRegister.objects.filter(email=user_register_email).delete()
         
 
     # class PreOrderApi():

@@ -1,5 +1,6 @@
 from djongo import models
 import business_policy
+from rest_framework import serializers
 
 
 TIMEZONE_SG = 'Asia/Singapore'
@@ -23,3 +24,19 @@ class UserRegister(models.Model):
     
     def __str__(self):
         return str(self.name)
+    
+class UserRegisterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserRegister
+        fields = [
+                'name',
+                'type', 
+                'period', 
+                'timezone', 
+                'phone', 
+                'email',
+                'password',
+                'target_country',
+                'country',
+                'meta'
+                ]
