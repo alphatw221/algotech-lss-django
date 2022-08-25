@@ -127,9 +127,12 @@ msgstr "has an operation error"
 msgid "ITEM_INFO{order_code}{qty}{result}"
 msgstr "\"{order_code}\" Qty: {qty} {result}. "
 
-#: .\backend\i18n\comment_command.py:24 .\backend\i18n\comment_command.py:27
-#: .\backend\i18n\comment_command.py:29 .\lib\i18n\comment_command.py:25
-#: .\lib\i18n\comment_command.py:28 .\lib\i18n\comment_command.py:30
+msgid "ITEM_INFO{order_code}{result}"
+msgstr "\"{order_code}\" {result}. "
+
+#: backend/i18n/comment_command.py:24 backend/i18n/comment_command.py:27
+#: backend/i18n/comment_command.py:29 lib/i18n/comment_command.py:25
+#: lib/i18n/comment_command.py:28 lib/i18n/comment_command.py:30
 msgid "COMMENT_COMMAND_CART_NO_CART_PRODUCT"
 msgstr "There's no products in cart."
 

@@ -71,10 +71,12 @@ class PickupAddressMapper(FieldMapper):
 
 class PaymentMethodMapper(FieldMapper):
     def mapping(self, object):
-        data = f'{super().mapping(object)} - {object.meta.get("account_mode", "")}' if object.payment_method == 'Direct Payment' else super().mapping(object)
+        data = f'Direct Payment - {object.meta.get("account_mode", "")}' if object.payment_method == 'direct_payment' else super().mapping(object)
         return data
 class LastFiveDigitMapper(FieldMapper):
     def mapping(self, object):
+        if not object.meta.get(self.field_name, ''):
+            return object.meta.get('receipt_image', '')
         return object.meta.get(self.field_name, '')
 class TotalMapper(FieldMapper):
     def mapping(self, object, decimal_places):

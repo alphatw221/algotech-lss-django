@@ -82,3 +82,40 @@ def create_new_register_account(plan, country_plan, subscription_plan, timezone,
         "Subscription End Date":expired_at.strftime("%d %B %Y %H:%M"),
         "Receipt":paymentIntent.charges.get('data')[0].get('receipt_url') if paymentIntent else ""
     }
+
+
+def create_user_register(plan, timezone, period, firstName, lastName, email, password, country, country_code,  contactNumber ):
+
+
+    now = datetime.now(pytz.timezone(timezone)) if timezone in pytz.common_timezones else datetime.now()
+    # expired_at = now+timedelta(days=90) if period == business_policy.subscription.PERIOD_QUARTER else now+timedelta(days=365)
+    
+    # auth_user = AuthUser.objects.create_user(
+    #     username=f'{firstName} {lastName}', email=email, password=password)
+
+    # user_subscription = models.user.user_subscription.UserSubscription.objects.create(
+    #     name=f'{firstName} {lastName}', 
+    #     status='valid', 
+    #     started_at=now,
+    #     expired_at=expired_at, 
+    #     user_plan= {"activated_platform" : ["facebook","youtube","instagram"]}, 
+    #     meta_country={ 'activated_country': [country_code] },
+    #     meta = subscription_meta,
+    #     type=plan,
+    #     lang=country_plan.language,
+    #     country = country_code,
+    #     purchase_price = amount,
+    #     **business_policy.subscription_plan.SubscriptionPlan.get_plan_limit(plan)
+    #     )
+    user_register = models.user.user_register.UserRegister.objects.create(
+        name=f'{firstName} {lastName}',
+        password=password,
+        email=email,
+        phone=contactNumber,
+        period=period,
+        timezone=timezone,
+        created_at=now,
+        type=plan,
+        country=country_code,
+        target_country=country
+    )
