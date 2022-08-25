@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-24 06:36+0000\n"
+"POT-Creation-Date: 2022-08-25 09:01+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -287,12 +287,12 @@ msgid "EMAIL/DELIVERY_CONFIRM/RECEIVER"
 msgstr "Người nhận"
 
 #: lib/helper/order_helper.py:460 lib/helper/order_helper.py:594
-#: lib/helper/xlsx_helper.py:113 lib/i18n/email/order_comfirm_mail.py:50
+#: lib/helper/xlsx_helper.py:115 lib/i18n/email/order_comfirm_mail.py:50
 msgid "REPORT/COLUMN_TITLE/SHIPPING_PHONE"
 msgstr "Số điện thoại"
 
 #: lib/helper/order_helper.py:466 lib/helper/order_helper.py:610
-#: lib/helper/xlsx_helper.py:121 lib/i18n/email/order_comfirm_mail.py:55
+#: lib/helper/xlsx_helper.py:123 lib/i18n/email/order_comfirm_mail.py:55
 msgid "REPORT/COLUMN_TITLE/PICK_UP_STORE"
 msgstr "Tên cửa hàng"
 
@@ -302,7 +302,7 @@ msgstr "Tên cửa hàng"
 msgid "EMAIL/DELIVERY_CONFIRM/DELIVERY_ADDRESS"
 msgstr "Địa chỉ giao hàng"
 
-#: lib/helper/order_helper.py:478 lib/helper/xlsx_helper.py:124
+#: lib/helper/order_helper.py:478 lib/helper/xlsx_helper.py:126
 #: lib/i18n/email/order_comfirm_mail.py:72
 msgid "REPORT/COLUMN_TITLE/PAYMENT_METHOD"
 msgstr "Phương thức thanh toán"
@@ -361,87 +361,87 @@ msgstr "Phương pháp vận chuyển"
 msgid "EMAIL/ORDER_CONFIRM/PROCESS_PAYMENT"
 msgstr "Quá trình thanh toán"
 
-#: lib/helper/xlsx_helper.py:109
+#: lib/helper/xlsx_helper.py:111
 msgid "REPORT/COLUMN_TITLE/ID"
 msgstr "ID"
 
-#: lib/helper/xlsx_helper.py:110
+#: lib/helper/xlsx_helper.py:112
 msgid "REPORT/COLUMN_TITLE/ORDER_DATE"
 msgstr "Ngày đặt hàng"
 
-#: lib/helper/xlsx_helper.py:111
+#: lib/helper/xlsx_helper.py:113
 msgid "REPORT/COLUMN_TITLE/PLATFORM"
 msgstr "Nền tảng"
 
-#: lib/helper/xlsx_helper.py:112
+#: lib/helper/xlsx_helper.py:114
 msgid "REPORT/COLUMN_TITLE/CUSTOMER_NAME"
 msgstr "Tên khách hàng"
 
-#: lib/helper/xlsx_helper.py:114
+#: lib/helper/xlsx_helper.py:116
 msgid "REPORT/COLUMN_TITLE/EMAIL"
 msgstr "E-mail"
 
-#: lib/helper/xlsx_helper.py:115
+#: lib/helper/xlsx_helper.py:117
 msgid "REPORT/COLUMN_TITLE/SHIPPING_METHOD"
 msgstr "Phương thức giao hàng"
 
-#: lib/helper/xlsx_helper.py:116
+#: lib/helper/xlsx_helper.py:118
 msgid "REPORT/COLUMN_TITLE/SHIPPING_OPTION"
 msgstr "Tùy chọn giao hàng"
 
-#: lib/helper/xlsx_helper.py:117
+#: lib/helper/xlsx_helper.py:119
 msgid "REPORT/COLUMN_TITLE/SHIPPING_ADDRESS_1"
 msgstr "Địa chỉ giao hàng"
 
-#: lib/helper/xlsx_helper.py:118
+#: lib/helper/xlsx_helper.py:120
 msgid "REPORT/COLUMN_TITLE/LOCATION"
 msgstr "Địa điểm "
 
-#: lib/helper/xlsx_helper.py:119
+#: lib/helper/xlsx_helper.py:121
 msgid "REPORT/COLUMN_TITLE/REGION"
 msgstr "Khu vực"
 
-#: lib/helper/xlsx_helper.py:120
+#: lib/helper/xlsx_helper.py:122
 msgid "REPORT/COLUMN_TITLE/POSTCODE"
 msgstr "Mã bưu điện"
 
-#: lib/helper/xlsx_helper.py:122
+#: lib/helper/xlsx_helper.py:124
 msgid "REPORT/COLUMN_TITLE/PICK_UP_ADDRESS"
 msgstr "Địa chỉ cửa hàng"
 
-#: lib/helper/xlsx_helper.py:123
+#: lib/helper/xlsx_helper.py:125
 msgid "REPORT/COLUMN_TITLE/REMARK"
 msgstr "Nhận xét"
 
-#: lib/helper/xlsx_helper.py:125
+#: lib/helper/xlsx_helper.py:127
 msgid "REPORT/COLUMN_TITLE/PAYMENT_STATUS"
 msgstr "Tình trạng thanh toán"
 
-#: lib/helper/xlsx_helper.py:126
+#: lib/helper/xlsx_helper.py:128
 msgid "REPORT/COLUMN_TITLE/PAYMENT_RECORD"
 msgstr "Hóa đơn thanh toán"
 
-#: lib/helper/xlsx_helper.py:127
+#: lib/helper/xlsx_helper.py:129
 msgid "REPORT/COLUMN_TITLE/TOTAL"
 msgstr "Tổng thanh toán"
 
-#: lib/helper/xlsx_helper.py:159
+#: lib/helper/xlsx_helper.py:161
 msgid "REPORT/SECTION_TITLE/TITLE"
 msgstr "Báo cáo đơn hàng"
 
-#: lib/helper/xlsx_helper.py:162
+#: lib/helper/xlsx_helper.py:164
 msgid "REPORT/SECTION_TITLE/CONTACT_INFO"
 msgstr "Thông tin liên lạc"
 
-#: lib/helper/xlsx_helper.py:163
+#: lib/helper/xlsx_helper.py:165
 msgid "REPORT/SECTION_TITLE/DELIVERY_INFO"
 msgstr "Thông tin giao hàng"
 
-#: lib/helper/xlsx_helper.py:164 lib/i18n/email/order_comfirm_mail.py:68
+#: lib/helper/xlsx_helper.py:166 lib/i18n/email/order_comfirm_mail.py:68
 msgid "REPORT/SECTION_TITLE/PAYMENT_INFO"
 msgstr "Thông tin thanh toán"
 
-#: lib/helper/xlsx_helper.py:165
+#: lib/helper/xlsx_helper.py:167
 msgid "REPORT/SECTION_TITLE/ORDER_INFO"
 msgstr "Thông tin đặt hàng"
 

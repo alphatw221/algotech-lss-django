@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-24 06:36+0000\n"
+"POT-Creation-Date: 2022-08-25 09:01+0000\n"
 "PO-Revision-Date: 2021-12-13 15:50+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -286,12 +286,12 @@ msgid "EMAIL/DELIVERY_CONFIRM/RECEIVER"
 msgstr "收件人"
 
 #: lib/helper/order_helper.py:460 lib/helper/order_helper.py:594
-#: lib/helper/xlsx_helper.py:113 lib/i18n/email/order_comfirm_mail.py:50
+#: lib/helper/xlsx_helper.py:115 lib/i18n/email/order_comfirm_mail.py:50
 msgid "REPORT/COLUMN_TITLE/SHIPPING_PHONE"
 msgstr "客戶電話"
 
 #: lib/helper/order_helper.py:466 lib/helper/order_helper.py:610
-#: lib/helper/xlsx_helper.py:121 lib/i18n/email/order_comfirm_mail.py:55
+#: lib/helper/xlsx_helper.py:123 lib/i18n/email/order_comfirm_mail.py:55
 msgid "REPORT/COLUMN_TITLE/PICK_UP_STORE"
 msgstr "自取店家"
 
@@ -301,7 +301,7 @@ msgstr "自取店家"
 msgid "EMAIL/DELIVERY_CONFIRM/DELIVERY_ADDRESS"
 msgstr "收貨地址"
 
-#: lib/helper/order_helper.py:478 lib/helper/xlsx_helper.py:124
+#: lib/helper/order_helper.py:478 lib/helper/xlsx_helper.py:126
 #: lib/i18n/email/order_comfirm_mail.py:72
 msgid "REPORT/COLUMN_TITLE/PAYMENT_METHOD"
 msgstr "付款方式"
@@ -353,87 +353,87 @@ msgstr "運送方式"
 msgid "EMAIL/ORDER_CONFIRM/PROCESS_PAYMENT"
 msgstr "前往付款"
 
-#: lib/helper/xlsx_helper.py:109
+#: lib/helper/xlsx_helper.py:111
 msgid "REPORT/COLUMN_TITLE/ID"
 msgstr "編號"
 
-#: lib/helper/xlsx_helper.py:110
+#: lib/helper/xlsx_helper.py:112
 msgid "REPORT/COLUMN_TITLE/ORDER_DATE"
 msgstr "訂單日期"
 
-#: lib/helper/xlsx_helper.py:111
+#: lib/helper/xlsx_helper.py:113
 msgid "REPORT/COLUMN_TITLE/PLATFORM"
 msgstr "使用平台"
 
-#: lib/helper/xlsx_helper.py:112
+#: lib/helper/xlsx_helper.py:114
 msgid "REPORT/COLUMN_TITLE/CUSTOMER_NAME"
 msgstr "客戶名稱"
 
-#: lib/helper/xlsx_helper.py:114
+#: lib/helper/xlsx_helper.py:116
 msgid "REPORT/COLUMN_TITLE/EMAIL"
 msgstr "E-mail"
 
-#: lib/helper/xlsx_helper.py:115
+#: lib/helper/xlsx_helper.py:117
 msgid "REPORT/COLUMN_TITLE/SHIPPING_METHOD"
 msgstr "運送方式"
 
-#: lib/helper/xlsx_helper.py:116
+#: lib/helper/xlsx_helper.py:118
 msgid "REPORT/COLUMN_TITLE/SHIPPING_OPTION"
 msgstr "運送選項"
 
-#: lib/helper/xlsx_helper.py:117
+#: lib/helper/xlsx_helper.py:119
 msgid "REPORT/COLUMN_TITLE/SHIPPING_ADDRESS_1"
 msgstr "收件住址"
 
-#: lib/helper/xlsx_helper.py:118
+#: lib/helper/xlsx_helper.py:120
 msgid "REPORT/COLUMN_TITLE/LOCATION"
 msgstr "地點"
 
-#: lib/helper/xlsx_helper.py:119
+#: lib/helper/xlsx_helper.py:121
 msgid "REPORT/COLUMN_TITLE/REGION"
 msgstr "區域"
 
-#: lib/helper/xlsx_helper.py:120
+#: lib/helper/xlsx_helper.py:122
 msgid "REPORT/COLUMN_TITLE/POSTCODE"
 msgstr "郵遞區號"
 
-#: lib/helper/xlsx_helper.py:122
+#: lib/helper/xlsx_helper.py:124
 msgid "REPORT/COLUMN_TITLE/PICK_UP_ADDRESS"
 msgstr "自取地址"
 
-#: lib/helper/xlsx_helper.py:123
+#: lib/helper/xlsx_helper.py:125
 msgid "REPORT/COLUMN_TITLE/REMARK"
 msgstr "註記"
 
-#: lib/helper/xlsx_helper.py:125
+#: lib/helper/xlsx_helper.py:127
 msgid "REPORT/COLUMN_TITLE/PAYMENT_STATUS"
 msgstr "付款狀態"
 
-#: lib/helper/xlsx_helper.py:126
+#: lib/helper/xlsx_helper.py:128
 msgid "REPORT/COLUMN_TITLE/PAYMENT_RECORD"
 msgstr "付款證明"
 
-#: lib/helper/xlsx_helper.py:127
+#: lib/helper/xlsx_helper.py:129
 msgid "REPORT/COLUMN_TITLE/TOTAL"
 msgstr "總金額"
 
-#: lib/helper/xlsx_helper.py:159
+#: lib/helper/xlsx_helper.py:161
 msgid "REPORT/SECTION_TITLE/TITLE"
 msgstr "訂單報表"
 
-#: lib/helper/xlsx_helper.py:162
+#: lib/helper/xlsx_helper.py:164
 msgid "REPORT/SECTION_TITLE/CONTACT_INFO"
 msgstr "聯絡資訊"
 
-#: lib/helper/xlsx_helper.py:163
+#: lib/helper/xlsx_helper.py:165
 msgid "REPORT/SECTION_TITLE/DELIVERY_INFO"
 msgstr "出貨資訊"
 
-#: lib/helper/xlsx_helper.py:164 lib/i18n/email/order_comfirm_mail.py:68
+#: lib/helper/xlsx_helper.py:166 lib/i18n/email/order_comfirm_mail.py:68
 msgid "REPORT/SECTION_TITLE/PAYMENT_INFO"
 msgstr "付款資訊"
 
-#: lib/helper/xlsx_helper.py:165
+#: lib/helper/xlsx_helper.py:167
 msgid "REPORT/SECTION_TITLE/ORDER_INFO"
 msgstr "訂單資訊"
 

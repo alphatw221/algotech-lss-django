@@ -249,6 +249,7 @@ class LuckyDraw():
                     platform=winner.platform, 
                     platform_id=platform_id_dict.get(winner.platform))
 
+            print ('campaign_product', campaign_product)
 
             if prize_product := pre_order.products.get(str(campaign_product.id), None):
                 qty = prize_product['qty'] + 1
