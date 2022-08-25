@@ -27,7 +27,9 @@ IMAGE_PNG = 'image/png'
 IMAGE_SUPPORTED_TYPE = [IMAGE_JPEG, IMAGE_JPG, IMAGE_PNG]
 IMAGE_MAXIMUM_SIZE = 10*1024*1024
 
-
+STATUS_HISTORY = 'history'
+STATUS_SCHEDULED = 'scheduled'
+STATUS_ONGOING = 'ongoing'
 
 class Campaign(models.Model):
     class Meta:
@@ -216,7 +218,11 @@ class CampaignAdmin(admin.ModelAdmin):
     list_display = [field.name for field in Campaign._meta.fields]
     search_fields = [field.name for field in Campaign._meta.fields]
 
-
+class CampaignOptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Campaign
+        fields = ['id', 'title']
+        read_only_fields = ['id', 'title']
 
 
 
