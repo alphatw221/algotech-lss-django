@@ -126,6 +126,9 @@ msgstr "terjadi kesalahan operasi"
 msgid "ITEM_INFO{order_code}{qty}{result}"
 msgstr "“{order_code}” Jumlah: {qty} {result}. "
 
+msgid "ITEM_INFO{order_code}{result}"
+msgstr "“{order_code}” {result}. "
+
 #: backend/i18n/comment_command.py:24 backend/i18n/comment_command.py:27
 #: backend/i18n/comment_command.py:29 lib/i18n/comment_command.py:25
 #: lib/i18n/comment_command.py:28 lib/i18n/comment_command.py:30

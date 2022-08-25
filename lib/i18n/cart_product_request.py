@@ -61,6 +61,10 @@ def get_response_content(state, api_campaign_product, qty):
             result = _('INSUFFICIENT_INV')
         elif state == RequestState.INVALID_PRODUCT_NOT_ACTIVATED:
             result = _('INVALID_PRODUCT_NOT_ACTIVATED')
+            return _('ITEM_INFO{order_code}{result}').format(
+                order_code=api_campaign_product['order_code'],
+                result=result
+            )
         elif state == RequestState.INVALID_REMOVE_NOT_ALLOWED:
             result = _('INVALID_REMOVE_NOT_ALLOWED')
         elif state == RequestState.INVALID_EDIT_NOT_ALLOWED:
