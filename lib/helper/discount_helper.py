@@ -28,10 +28,14 @@ def check_limitation(limitation, pre_order):
             campaign_id = limitation['campaign_id']
             if pre_order.campaign.id != campaign_id:
                 return False
-        elif limitation['key']==models.discount_code.discount_code.LIMITATION_SPECIFIC_CAMPAIGN:
-            pass
+        elif limitation['key']==models.discount_code.discount_code.LIMITATION_PRODUCT_OVER_NUMBER:
+            number = limitation['number']
+            if len(pre_order.products) < number:
+                return False
         elif limitation['key']==models.discount_code.discount_code.LIMITATION_SUBTOTAL_OVER_AMOUNT:
-            pass
+            amount = limitation['amount']
+            if pre_order.subtotal < amount:
+                return False
     except Exception:
         return False
     return True

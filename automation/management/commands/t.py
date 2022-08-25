@@ -459,13 +459,13 @@ class Command(BaseCommand):
         # url = 'https://staginglss.accoladeglobal.net/api/plugin/easy_store/order/webhook/paid/'
 
         # success, data = service.webhooks.list_webhook(shop, access_token)
-        # success, data = service.webhooks.delete_webhook(shop, access_token, 1930323)
+        success, data = service.webhooks.delete_webhook(shop, access_token, 1930323)
         # success, data = service.webhooks.create_webhook(shop, token=access_token, topic=topic, url=url )
 
         #order
         # success, data = service.orders.retrieve_order(shop, access_token, 37069894)
         # success, data = service.orders.update_order(shop, access_token, {'remark':123}, 37069894)
-        success, data = service.orders.list_order(shop, access_token, created_at_min='2022-08-23 08:18:00')
+        # success, data = service.orders.list_order(shop, access_token, created_at_min='2022-08-23 08:18:00')
 
         # 2022-08-23T08:18:22+00:00
         # metafields

@@ -20,6 +20,7 @@ import service
 import database
 import traceback
 
+from datetime import datetime
 class PreOrderPagination(PageNumberPagination):
     page_query_param = 'page'
     page_size_query_param = 'page_size'
@@ -304,7 +305,8 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
         pre_order = lib.util.verify.Verify.get_pre_order_with_oid(pre_order_oid)
         campaign = lib.util.verify.Verify.get_campaign_from_pre_order(pre_order)
-        discount_codes = campaign.user_subscription.discount_codes.all()
+
+        discount_codes = campaign.user_subscription.discount_codes.filter(start_at__lte=datetime.utcnow()).filter(end_at__gte=datetime.utcnow())
 
         valid_discount_code = None
         for _discount_code in discount_codes:
@@ -320,7 +322,6 @@ class PreOrderViewSet(viewsets.ModelViewSet):
  
 
         discount_code_data = valid_discount_code.__dict__
-        print(discount_code_data)
         del discount_code_data['_state']
         pre_order.applied_discount = discount_code_data
 

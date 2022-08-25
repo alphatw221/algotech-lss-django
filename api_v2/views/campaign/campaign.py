@@ -63,6 +63,24 @@ class CampaignViewSet(viewsets.ModelViewSet):
         
         return Response(data, status=status.HTTP_200_OK)
 
+    @action(detail=False, methods=['GET'], url_path=r'list/(?P<_status>[^/.]+)/options', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def list_campaign_option(self, request, _status):
+
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        campaigns = user_subscription.campaigns.filter(id__isnull=False) # Due to problematic dirty data
+        if _status == models.campaign.campaign.STATUS_HISTORY:
+            campaigns = campaigns.filter(end_at__lt=datetime.utcnow())
+        elif _status == models.campaign.campaign.STATUS_SCHEDULED:
+            campaigns = campaigns.filter(end_at__gte=datetime.utcnow())
+        elif _status == models.campaign.campaign.STATUS_ONGOING:
+            campaigns = campaigns.filter(end_at__gte=datetime.utcnow())
+            campaigns = campaigns.filter(start_at__lte=datetime.utcnow())
+        else:
+            raise lib.error_handle.error.api_error.ApiVerifyError('invalid status')
+        return Response(models.campaign.campaign.CampaignOptionSerializer(campaigns, many=True).data, status=status.HTTP_200_OK)
+
     @action(detail=False, methods=['POST'], url_path=r'create', parser_classes=(MultiPartParser, ), permission_classes=(IsAuthenticated, ))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def create_campaign(self, request):
