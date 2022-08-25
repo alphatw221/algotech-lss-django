@@ -332,8 +332,8 @@ class PaymentViewSet(viewsets.GenericViewSet):
         payment_amount = lib.helper.payment_helper.transform_payment_amount(order.total, campaign.decimal_places, campaign.price_unit)
 
 
-        action,payment = service.ecpay.ecpay.create_order(merchant_id, hash_key, hash_iv, int(payment_amount) , order.id, 
-            f'https://ca87-220-136-97-201.jp.ngrok.io/api/v2/payment/ecpay/callback/success/{order_oid}/', 
+        action,payment = service.ecpay.ecpay.create_order(merchant_id, hash_key, hash_iv, int(payment_amount) , order, 
+            f'https://staginglss.accoladeglobal.net/api/v2/payment/ecpay/callback/success/{order_oid}/', 
             f'https://staginglss.accoladeglobal.net/buyer/order/{order_oid}/confirmation',
             )
         
@@ -410,6 +410,10 @@ class PaymentViewSet(viewsets.GenericViewSet):
 
         if payment_res['RtnCode'] == '0':
             raise lib.error_handle.error.api_error.ApiVerifyError('payment not successful',payment_res['RtnMsg'])
+        
+        if order.campaign.meta_payment['ecpay']['invoice_enabled']:
+            invoice = service.ecpay.ecpay.order_create_invoice(merchant_id, hash_key, hash_iv, order,int(payment_res['amount']))
+            order.meta['InvoiceNumber'] = invoice['InvoiceNumber']
         
         order.status = models.order.order.STATUS_COMPLETE
         order.payment_method = models.order.order.PAYMENT_METHOD_ECPAY
