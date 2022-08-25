@@ -671,7 +671,6 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         api_user = Verify.get_seller_user(request)
         dealer_user_subscription = Verify.get_dealer_user_subscription_from_api_user(api_user)
         user_subscription = Verify.get_user_subscription_from_dealer_user_subscription(dealer_user_subscription,pk)
-
         return Response(UserSubscriptionSerializerForDealerRetrieve(user_subscription).data, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['PUT'], url_path=r'unbind_facebook_page', permission_classes=(IsAuthenticated,))

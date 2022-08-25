@@ -137,14 +137,13 @@ class UserSubscriptionSerializerAccountInfo(serializers.ModelSerializer):
     meta_payment = serializers.JSONField(default=dict, required=False)
     meta_logistic = serializers.JSONField(default=dict, required=False)
     meta_country = serializers.JSONField(default=dict, required=False)
-    meta_code = serializers.JSONField(default=dict, required=False)
     user_plan = serializers.JSONField(default=dict, required=False)
 
 
 class UserSubscriptionSerializerForDealerRetrieve(serializers.ModelSerializer):
     class Meta:
         model = UserSubscription
-        exclude=['created_at', 'updated_at','meta_payment','meta_logistic','meta_country','meta_code','meta']
+        exclude=['created_at', 'updated_at','meta_payment','meta_logistic','meta_country','meta']
 
     facebook_pages = FacebookPageInfoSerializer(
         many=True, read_only=True, default=list)

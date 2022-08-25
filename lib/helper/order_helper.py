@@ -511,7 +511,7 @@ class OrderHelper():
             mail_content += f'<td width="1" style="white-space: nowrap; padding: 13px 0 13px 26px;" align="right" bgcolor="#ffffff" valign="top">\
                                     <p style="font-size: 16px; line-height: 26px; font-weight: 400; color: #666363; margin: 0;" align="right">\
                                     {order.campaign.currency}\
-                                    {floor((product["subtotal"] * (10 ** order.campaign.decimal_places))) / (10 ** order.campaign.decimal_places)}\
+                                    {adjust_decimal_places(product["subtotal"],order.campaign.decimal_places)}\
                                     {price_unit[order.campaign.price_unit]}\
                                     </p></td></tr></tbody></table></tr>'
             mail_content += f'</tr>'
@@ -525,19 +525,19 @@ class OrderHelper():
                             <tr>\
                                 <td data-key="1468271_subtotal" style="font-size: 15px; padding-top:13px; color: #4b4b4b; font-weight: 600; width: 35%; text-align:right;" align="right" bgcolor="#ffffff" valign="top">' + _('EMAIL/DELIVERY_CONFIRM/SUBTOTAL') + f'\
                                 <span style="width:120px; display:inline-block;">{order.campaign.currency}\
-                                {floor((order.subtotal * (10 ** order.campaign.decimal_places))) / (10 ** order.campaign.decimal_places)}\
+                                {adjust_decimal_places(order.subtotal,order.campaign.decimal_places)}\
                                 {price_unit[order.campaign.price_unit]}</span></td>\
                             </tr>\
                             <tr>\
                                 <td style="font-size: 15px; color: #4b4b4b; font-weight: 600; width: 35%; text-align:right; padding-bottom: 13px;" align="right" bgcolor="#ffffff" valign="top">' + _('EMAIL/DELIVERY_CONFIRM/DELIVERY_CHARGE') + f'\
                                 <span style="width:120px; display:inline-block;">{order.campaign.currency}\
-                                {floor((order.shipping_cost * (10 ** order.campaign.decimal_places))) / (10 ** order.campaign.decimal_places)}\
+                                {adjust_decimal_places(order.shipping_cost,order.campaign.decimal_places)}\
                                 {price_unit[order.campaign.price_unit]}</span></td>\
                             </tr>\
                             <tr>\
                                 <td data-key="1468271_total" style="font-size: 15px; line-height: 26px; font-weight: bold; text-align:right; color: #666363; width: 65%; padding: 4px 0; border-top: 1px solid #666363;" align="left" bgcolor="#ffffff"  valign="top">' + _('EMAIL/DELIVERY_CONFIRM/TOTAL') + f'\
                                 <span style="width:120px; display:inline-block;">{order.campaign.currency}\
-                                {floor((order.total * (10 ** order.campaign.decimal_places))) / (10 ** order.campaign.decimal_places)}\
+                                {adjust_decimal_places(order.total,order.campaign.decimal_places)}\
                                 {price_unit[order.campaign.price_unit]}</span></td>\
                             </tr>\
                             </tbody>\
@@ -661,7 +661,7 @@ class OrderHelper():
             mail_content += f'<td width="1" style="white-space: nowrap; padding: 13px 0 13px 26px;" align="right" bgcolor="#ffffff" valign="top">\
                                     <p style="font-size: 16px; line-height: 26px; font-weight: 400; color: #666363; margin: 0;" align="right">\
                                     {order.campaign.currency}\
-                                    {floor((product["subtotal"] * (10 ** order.campaign.decimal_places))) / (10 ** order.campaign.decimal_places)}\
+                                    {adjust_decimal_places(product["subtotal"],order.campaign.decimal_places)}\
                                     {price_unit[order.campaign.price_unit]}\
                                     </p></td></tr></tbody></table></tr>'
             mail_content += f'</tr>'
@@ -676,19 +676,19 @@ class OrderHelper():
                             <tr>\
                                 <td data-key="1468271_subtotal" style="font-size: 15px; padding-top:13px; color: #4b4b4b; font-weight: 600; width: 35%; text-align:right;" align="right" bgcolor="#ffffff" valign="top">' + _('EMAIL/DELIVERY_CONFIRM/SUBTOTAL') + f'\
                                 <span style="width:120px; display:inline-block;">{order.campaign.currency}\
-                                {floor((order.subtotal * (10 ** order.campaign.decimal_places))) / (10 ** order.campaign.decimal_places)}\
+                                {adjust_decimal_places(order.subtotal,order.campaign.decimal_places)}\
                                 {price_unit[order.campaign.price_unit]}</span></td>\
                             </tr>\
                             <tr>\
                                 <td style="font-size: 15px; color: #4b4b4b; font-weight: 600; width: 35%; text-align:right; padding-bottom: 13px;" align="right" bgcolor="#ffffff" valign="top">' + _('EMAIL/DELIVERY_CONFIRM/DELIVERY_CHARGE') + f'\
                                 <span style="width:120px; display:inline-block;">{order.campaign.currency}\
-                                {floor((order.shipping_cost * (10 ** order.campaign.decimal_places))) / (10 ** order.campaign.decimal_places)}\
+                                {adjust_decimal_places(order.shipping_cost,order.campaign.decimal_places)}\
                                 {price_unit[order.campaign.price_unit]}</span></td>\
                             </tr>\
                             <tr>\
                                 <td data-key="1468271_total" style="font-size: 15px; line-height: 26px; font-weight: bold; text-align:right; color: #666363; width: 65%; padding: 4px 0; border-top: 1px solid #666363;" align="left" bgcolor="#ffffff"  valign="top">' + _('EMAIL/DELIVERY_CONFIRM/TOTAL') + f'\
                                 <span style="width:120px; display:inline-block;">{order.campaign.currency}\
-                                {floor((order.total * (10 ** order.campaign.decimal_places))) / (10 ** order.campaign.decimal_places)}\
+                                {adjust_decimal_places(order.total,order.campaign.decimal_places)}\
                                 {price_unit[order.campaign.price_unit]}</span></td>\
                             </tr>\
                             </tbody>\
@@ -752,3 +752,10 @@ class OrderHelper():
                         "qty_add_to_cart":campaign_product.data.get('qty_add_to_cart'),
                     }
             service.channels.campaign.send_product_data(campaign_product.data.get("campaign_id"), product_data)
+            
+            
+def adjust_decimal_places(num,decimal_places):
+  if decimal_places == 0:
+    return floor((num * (10 ** decimal_places))) // (10 ** decimal_places)
+  else:
+    return floor((num * (10 ** decimal_places))) / (10 ** decimal_places)

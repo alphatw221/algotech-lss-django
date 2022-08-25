@@ -14,11 +14,12 @@ from api import models
 from automation import jobs
 
 import lib
-import datetime
+
 import uuid
 import service
 import database
 import traceback
+from datetime import datetime
 
 class PreOrderPagination(PageNumberPagination):
     page_query_param = 'page'
@@ -304,7 +305,8 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
         pre_order = lib.util.verify.Verify.get_pre_order_with_oid(pre_order_oid)
         campaign = lib.util.verify.Verify.get_campaign_from_pre_order(pre_order)
-        discount_codes = campaign.user_subscription.discount_codes.all()
+
+        discount_codes = campaign.user_subscription.discount_codes.filter(start_at__lte=datetime.utcnow()).filter(end_at__gte=datetime.utcnow())
 
         valid_discount_code = None
         for _discount_code in discount_codes:
@@ -320,7 +322,6 @@ class PreOrderViewSet(viewsets.ModelViewSet):
  
 
         discount_code_data = valid_discount_code.__dict__
-        print(discount_code_data)
         del discount_code_data['_state']
         pre_order.applied_discount = discount_code_data
 
@@ -418,7 +419,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
              "adjusted_total": pre_order.total,
              "original_free_delivery_status": original_free_delivery,
              "adjusted_free_delivery_status": pre_order.free_delivery,
-             "adjusted_at": datetime.datetime.utcnow(),
+             "adjusted_at": datetime.utcnow(),
              "adjusted_by": api_user.id
              }
         )
