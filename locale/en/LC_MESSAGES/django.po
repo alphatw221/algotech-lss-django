@@ -7,6 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
+
 "POT-Creation-Date: 2022-08-25 08:49+0000\n"
 "PO-Revision-Date: 2021-12-13 15:51+0800\n"
 "Last-Translator: \n"
@@ -290,11 +291,14 @@ msgid "EMAIL/DELIVERY_CONFIRM/RECEIVER"
 msgstr "Receiver"
 
 #: lib/helper/order_helper.py:460 lib/helper/order_helper.py:594
+
+#: lib/helper/xlsx_helper.py:115 lib/i18n/email/order_comfirm_mail.py:50
 #: lib/i18n/email/order_comfirm_mail.py:50
 msgid "REPORT/COLUMN_TITLE/SHIPPING_PHONE"
 msgstr "Phone"
 
 #: lib/helper/order_helper.py:466 lib/helper/order_helper.py:610
+#: lib/helper/xlsx_helper.py:123 lib/i18n/email/order_comfirm_mail.py:55
 #: lib/i18n/email/order_comfirm_mail.py:55
 msgid "REPORT/COLUMN_TITLE/PICK_UP_STORE"
 msgstr "Pick Up Store"
@@ -305,6 +309,8 @@ msgstr "Pick Up Store"
 msgid "EMAIL/DELIVERY_CONFIRM/DELIVERY_ADDRESS"
 msgstr "Delivery Address"
 
+#: lib/helper/order_helper.py:478 lib/helper/xlsx_helper.py:126
+#: lib/i18n/email/order_comfirm_mail.py:72
 #: lib/helper/order_helper.py:478 lib/i18n/email/order_comfirm_mail.py:72
 msgid "REPORT/COLUMN_TITLE/PAYMENT_METHOD"
 msgstr "Payment Method"
@@ -361,6 +367,71 @@ msgstr "Shipping Method"
 #: lib/helper/order_helper.py:629
 msgid "EMAIL/ORDER_CONFIRM/PROCESS_PAYMENT"
 msgstr "Process Payment"
+
+
+#: lib/helper/xlsx_helper.py:111
+msgid "REPORT/COLUMN_TITLE/ID"
+msgstr "ID"
+
+#: lib/helper/xlsx_helper.py:112
+msgid "REPORT/COLUMN_TITLE/ORDER_DATE"
+msgstr "Order Date"
+
+#: lib/helper/xlsx_helper.py:113
+msgid "REPORT/COLUMN_TITLE/PLATFORM"
+msgstr "Platform"
+
+#: lib/helper/xlsx_helper.py:114
+msgid "REPORT/COLUMN_TITLE/CUSTOMER_NAME"
+msgstr "Customer Name"
+
+#: lib/helper/xlsx_helper.py:116
+msgid "REPORT/COLUMN_TITLE/EMAIL"
+msgstr "E-mail"
+
+#: lib/helper/xlsx_helper.py:117
+msgid "REPORT/COLUMN_TITLE/SHIPPING_METHOD"
+msgstr "Shipping Method"
+
+#: lib/helper/xlsx_helper.py:118
+msgid "REPORT/COLUMN_TITLE/SHIPPING_OPTION"
+msgstr "Shipping Option"
+
+#: lib/helper/xlsx_helper.py:119
+msgid "REPORT/COLUMN_TITLE/SHIPPING_ADDRESS_1"
+msgstr "Shipping Address_1"
+
+#: lib/helper/xlsx_helper.py:120
+msgid "REPORT/COLUMN_TITLE/LOCATION"
+msgstr "Location"
+
+#: lib/helper/xlsx_helper.py:121
+msgid "REPORT/COLUMN_TITLE/REGION"
+msgstr "Region"
+
+#: lib/helper/xlsx_helper.py:122
+msgid "REPORT/COLUMN_TITLE/POSTCODE"
+msgstr "Postcode"
+
+#: lib/helper/xlsx_helper.py:124
+msgid "REPORT/COLUMN_TITLE/PICK_UP_ADDRESS"
+msgstr "Pick Up Address"
+
+#: lib/helper/xlsx_helper.py:125
+msgid "REPORT/COLUMN_TITLE/REMARK"
+msgstr "Remark"
+
+#: lib/helper/xlsx_helper.py:127
+msgid "REPORT/COLUMN_TITLE/PAYMENT_STATUS"
+msgstr "Payment Status"
+
+#: lib/helper/xlsx_helper.py:128
+msgid "REPORT/COLUMN_TITLE/PAYMENT_RECORD"
+msgstr "Payment Record"
+
+#: lib/helper/xlsx_helper.py:129
+msgid "REPORT/COLUMN_TITLE/TOTAL"
+msgstr "Total"
 
 #: lib/helper/xlsx_helper.py:161
 msgid "REPORT/SECTION_TITLE/TITLE"
@@ -588,75 +659,3 @@ msgid "EMAIL/PASSWORD_RESET_SUCCESS/CONTENT2"
 msgstr ""
 "has been successfully changed.\n"
 "If you did not request this change, please contact support immediately."
-
-#~ msgid "REPORT/COLUMN_TITLE/ID"
-#~ msgstr "ID"
-
-#~ msgid "REPORT/COLUMN_TITLE/ORDER_DATE"
-#~ msgstr "Order Date"
-
-#~ msgid "REPORT/COLUMN_TITLE/PLATFORM"
-#~ msgstr "Platform"
-
-#~ msgid "REPORT/COLUMN_TITLE/CUSTOMER_NAME"
-#~ msgstr "Customer Name"
-
-#~ msgid "REPORT/COLUMN_TITLE/EMAIL"
-#~ msgstr "E-mail"
-
-#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_METHOD"
-#~ msgstr "Shipping Method"
-
-#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_OPTION"
-#~ msgstr "Shipping Option"
-
-#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_ADDRESS_1"
-#~ msgstr "Shipping Address_1"
-
-#~ msgid "REPORT/COLUMN_TITLE/LOCATION"
-#~ msgstr "Location"
-
-#~ msgid "REPORT/COLUMN_TITLE/REGION"
-#~ msgstr "Region"
-
-#~ msgid "REPORT/COLUMN_TITLE/POSTCODE"
-#~ msgstr "Postcode"
-
-#~ msgid "REPORT/COLUMN_TITLE/PICK_UP_ADDRESS"
-#~ msgstr "Pick Up Address"
-
-#~ msgid "REPORT/COLUMN_TITLE/REMARK"
-#~ msgstr "Remark"
-
-#~ msgid "REPORT/COLUMN_TITLE/PAYMENT_STATUS"
-#~ msgstr "Payment Status"
-
-#~ msgid "REPORT/COLUMN_TITLE/PAYMENT_RECORD"
-#~ msgstr "Payment Record"
-
-#~ msgid "REPORT/COLUMN_TITLE/TOTAL"
-#~ msgstr "Total"
-
-#~ msgid "EMAIL/ORDER_CONFIRM/ORDER"
-#~ msgstr "Order"
-
-#~ msgid "EMAIL/ORDER_CONFIRM/CUSTOMER_NAME"
-#~ msgstr "Customer Name"
-
-#~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_TO"
-#~ msgstr "Delivery To"
-
-#~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_WAY"
-#~ msgstr "Delivery way"
-
-#~ msgid "EMAIL/ORDER_CONFIRM/PICK_UP_STORE"
-#~ msgstr "Pick up store"
-
-#~ msgid "EMAIL/ORDER_CONFIRM/PICK_UP_DATE"
-#~ msgstr "Pick up Date"
-
-#~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_ADDRESS"
-#~ msgstr "Delivery address"
-
-#~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_CHARGE"
-#~ msgstr "Delivery Charge"

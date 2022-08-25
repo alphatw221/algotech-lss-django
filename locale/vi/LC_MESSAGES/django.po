@@ -287,11 +287,13 @@ msgid "EMAIL/DELIVERY_CONFIRM/RECEIVER"
 msgstr "Người nhận"
 
 #: lib/helper/order_helper.py:460 lib/helper/order_helper.py:594
+#: lib/helper/xlsx_helper.py:115 lib/i18n/email/order_comfirm_mail.py:50
 #: lib/i18n/email/order_comfirm_mail.py:50
 msgid "REPORT/COLUMN_TITLE/SHIPPING_PHONE"
 msgstr "Số điện thoại"
 
 #: lib/helper/order_helper.py:466 lib/helper/order_helper.py:610
+#: lib/helper/xlsx_helper.py:123 lib/i18n/email/order_comfirm_mail.py:55
 #: lib/i18n/email/order_comfirm_mail.py:55
 msgid "REPORT/COLUMN_TITLE/PICK_UP_STORE"
 msgstr "Tên cửa hàng"
@@ -302,6 +304,8 @@ msgstr "Tên cửa hàng"
 msgid "EMAIL/DELIVERY_CONFIRM/DELIVERY_ADDRESS"
 msgstr "Địa chỉ giao hàng"
 
+#: lib/helper/order_helper.py:478 lib/helper/xlsx_helper.py:126
+#: lib/i18n/email/order_comfirm_mail.py:72
 #: lib/helper/order_helper.py:478 lib/i18n/email/order_comfirm_mail.py:72
 msgid "REPORT/COLUMN_TITLE/PAYMENT_METHOD"
 msgstr "Phương thức thanh toán"
@@ -359,6 +363,71 @@ msgstr "Phương pháp vận chuyển"
 #: lib/helper/order_helper.py:629
 msgid "EMAIL/ORDER_CONFIRM/PROCESS_PAYMENT"
 msgstr "Quá trình thanh toán"
+
+
+#: lib/helper/xlsx_helper.py:111
+msgid "REPORT/COLUMN_TITLE/ID"
+msgstr "ID"
+
+#: lib/helper/xlsx_helper.py:112
+msgid "REPORT/COLUMN_TITLE/ORDER_DATE"
+msgstr "Ngày đặt hàng"
+
+#: lib/helper/xlsx_helper.py:113
+msgid "REPORT/COLUMN_TITLE/PLATFORM"
+msgstr "Nền tảng"
+
+#: lib/helper/xlsx_helper.py:114
+msgid "REPORT/COLUMN_TITLE/CUSTOMER_NAME"
+msgstr "Tên khách hàng"
+
+#: lib/helper/xlsx_helper.py:116
+msgid "REPORT/COLUMN_TITLE/EMAIL"
+msgstr "E-mail"
+
+#: lib/helper/xlsx_helper.py:117
+msgid "REPORT/COLUMN_TITLE/SHIPPING_METHOD"
+msgstr "Phương thức giao hàng"
+
+#: lib/helper/xlsx_helper.py:118
+msgid "REPORT/COLUMN_TITLE/SHIPPING_OPTION"
+msgstr "Tùy chọn giao hàng"
+
+#: lib/helper/xlsx_helper.py:119
+msgid "REPORT/COLUMN_TITLE/SHIPPING_ADDRESS_1"
+msgstr "Địa chỉ giao hàng"
+
+#: lib/helper/xlsx_helper.py:120
+msgid "REPORT/COLUMN_TITLE/LOCATION"
+msgstr "Địa điểm "
+
+#: lib/helper/xlsx_helper.py:121
+msgid "REPORT/COLUMN_TITLE/REGION"
+msgstr "Khu vực"
+
+#: lib/helper/xlsx_helper.py:122
+msgid "REPORT/COLUMN_TITLE/POSTCODE"
+msgstr "Mã bưu điện"
+
+#: lib/helper/xlsx_helper.py:124
+msgid "REPORT/COLUMN_TITLE/PICK_UP_ADDRESS"
+msgstr "Địa chỉ cửa hàng"
+
+#: lib/helper/xlsx_helper.py:125
+msgid "REPORT/COLUMN_TITLE/REMARK"
+msgstr "Nhận xét"
+
+#: lib/helper/xlsx_helper.py:127
+msgid "REPORT/COLUMN_TITLE/PAYMENT_STATUS"
+msgstr "Tình trạng thanh toán"
+
+#: lib/helper/xlsx_helper.py:128
+msgid "REPORT/COLUMN_TITLE/PAYMENT_RECORD"
+msgstr "Hóa đơn thanh toán"
+
+#: lib/helper/xlsx_helper.py:129
+msgid "REPORT/COLUMN_TITLE/TOTAL"
+msgstr "Tổng thanh toán"
 
 #: lib/helper/xlsx_helper.py:161
 msgid "REPORT/SECTION_TITLE/TITLE"
@@ -588,54 +657,6 @@ msgstr ""
 "has been successfully changed.\n"
 "Nếu bạn không yêu cầu thay đổi này, vui lòng liên hệ với bộ phận hỗ trợ ngay "
 "lập tức."
-
-#~ msgid "REPORT/COLUMN_TITLE/ID"
-#~ msgstr "ID"
-
-#~ msgid "REPORT/COLUMN_TITLE/ORDER_DATE"
-#~ msgstr "Ngày đặt hàng"
-
-#~ msgid "REPORT/COLUMN_TITLE/PLATFORM"
-#~ msgstr "Nền tảng"
-
-#~ msgid "REPORT/COLUMN_TITLE/CUSTOMER_NAME"
-#~ msgstr "Tên khách hàng"
-
-#~ msgid "REPORT/COLUMN_TITLE/EMAIL"
-#~ msgstr "E-mail"
-
-#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_METHOD"
-#~ msgstr "Phương thức giao hàng"
-
-#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_OPTION"
-#~ msgstr "Tùy chọn giao hàng"
-
-#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_ADDRESS_1"
-#~ msgstr "Địa chỉ giao hàng"
-
-#~ msgid "REPORT/COLUMN_TITLE/LOCATION"
-#~ msgstr "Địa điểm "
-
-#~ msgid "REPORT/COLUMN_TITLE/REGION"
-#~ msgstr "Khu vực"
-
-#~ msgid "REPORT/COLUMN_TITLE/POSTCODE"
-#~ msgstr "Mã bưu điện"
-
-#~ msgid "REPORT/COLUMN_TITLE/PICK_UP_ADDRESS"
-#~ msgstr "Địa chỉ cửa hàng"
-
-#~ msgid "REPORT/COLUMN_TITLE/REMARK"
-#~ msgstr "Nhận xét"
-
-#~ msgid "REPORT/COLUMN_TITLE/PAYMENT_STATUS"
-#~ msgstr "Tình trạng thanh toán"
-
-#~ msgid "REPORT/COLUMN_TITLE/PAYMENT_RECORD"
-#~ msgstr "Hóa đơn thanh toán"
-
-#~ msgid "REPORT/COLUMN_TITLE/TOTAL"
-#~ msgstr "Tổng thanh toán"
 
 #, fuzzy
 #~| msgid "DETAIL{link}\n"

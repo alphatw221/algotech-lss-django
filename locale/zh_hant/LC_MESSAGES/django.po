@@ -286,11 +286,13 @@ msgid "EMAIL/DELIVERY_CONFIRM/RECEIVER"
 msgstr "收件人"
 
 #: lib/helper/order_helper.py:460 lib/helper/order_helper.py:594
+#: lib/helper/xlsx_helper.py:115 lib/i18n/email/order_comfirm_mail.py:50
 #: lib/i18n/email/order_comfirm_mail.py:50
 msgid "REPORT/COLUMN_TITLE/SHIPPING_PHONE"
 msgstr "客戶電話"
 
 #: lib/helper/order_helper.py:466 lib/helper/order_helper.py:610
+#: lib/helper/xlsx_helper.py:123 lib/i18n/email/order_comfirm_mail.py:55
 #: lib/i18n/email/order_comfirm_mail.py:55
 msgid "REPORT/COLUMN_TITLE/PICK_UP_STORE"
 msgstr "自取店家"
@@ -301,6 +303,8 @@ msgstr "自取店家"
 msgid "EMAIL/DELIVERY_CONFIRM/DELIVERY_ADDRESS"
 msgstr "收貨地址"
 
+#: lib/helper/order_helper.py:478 lib/helper/xlsx_helper.py:126
+#: lib/i18n/email/order_comfirm_mail.py:72
 #: lib/helper/order_helper.py:478 lib/i18n/email/order_comfirm_mail.py:72
 msgid "REPORT/COLUMN_TITLE/PAYMENT_METHOD"
 msgstr "付款方式"
@@ -351,6 +355,70 @@ msgstr "運送方式"
 #: lib/helper/order_helper.py:629
 msgid "EMAIL/ORDER_CONFIRM/PROCESS_PAYMENT"
 msgstr "前往付款"
+
+#: lib/helper/xlsx_helper.py:111
+msgid "REPORT/COLUMN_TITLE/ID"
+msgstr "編號"
+
+#: lib/helper/xlsx_helper.py:112
+msgid "REPORT/COLUMN_TITLE/ORDER_DATE"
+msgstr "訂單日期"
+
+#: lib/helper/xlsx_helper.py:113
+msgid "REPORT/COLUMN_TITLE/PLATFORM"
+msgstr "使用平台"
+
+#: lib/helper/xlsx_helper.py:114
+msgid "REPORT/COLUMN_TITLE/CUSTOMER_NAME"
+msgstr "客戶名稱"
+
+#: lib/helper/xlsx_helper.py:116
+msgid "REPORT/COLUMN_TITLE/EMAIL"
+msgstr "E-mail"
+
+#: lib/helper/xlsx_helper.py:117
+msgid "REPORT/COLUMN_TITLE/SHIPPING_METHOD"
+msgstr "運送方式"
+
+#: lib/helper/xlsx_helper.py:118
+msgid "REPORT/COLUMN_TITLE/SHIPPING_OPTION"
+msgstr "運送選項"
+
+#: lib/helper/xlsx_helper.py:119
+msgid "REPORT/COLUMN_TITLE/SHIPPING_ADDRESS_1"
+msgstr "收件住址"
+
+#: lib/helper/xlsx_helper.py:120
+msgid "REPORT/COLUMN_TITLE/LOCATION"
+msgstr "地點"
+
+#: lib/helper/xlsx_helper.py:121
+msgid "REPORT/COLUMN_TITLE/REGION"
+msgstr "區域"
+
+#: lib/helper/xlsx_helper.py:122
+msgid "REPORT/COLUMN_TITLE/POSTCODE"
+msgstr "郵遞區號"
+
+#: lib/helper/xlsx_helper.py:124
+msgid "REPORT/COLUMN_TITLE/PICK_UP_ADDRESS"
+msgstr "自取地址"
+
+#: lib/helper/xlsx_helper.py:125
+msgid "REPORT/COLUMN_TITLE/REMARK"
+msgstr "註記"
+
+#: lib/helper/xlsx_helper.py:127
+msgid "REPORT/COLUMN_TITLE/PAYMENT_STATUS"
+msgstr "付款狀態"
+
+#: lib/helper/xlsx_helper.py:128
+msgid "REPORT/COLUMN_TITLE/PAYMENT_RECORD"
+msgstr "付款證明"
+
+#: lib/helper/xlsx_helper.py:129
+msgid "REPORT/COLUMN_TITLE/TOTAL"
+msgstr "總金額"
 
 #: lib/helper/xlsx_helper.py:161
 msgid "REPORT/SECTION_TITLE/TITLE"
