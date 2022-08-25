@@ -7,8 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-
-"POT-Creation-Date: 2022-08-25 08:49+0000\n"
+"POT-Creation-Date: 2022-08-25 10:32+0000\n"
 "PO-Revision-Date: 2021-12-13 15:50+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -295,13 +294,11 @@ msgstr "Receiver"
 
 #: lib/helper/order_helper.py:460 lib/helper/order_helper.py:594
 #: lib/helper/xlsx_helper.py:115 lib/i18n/email/order_comfirm_mail.py:50
-#: lib/i18n/email/order_comfirm_mail.py:50
 msgid "REPORT/COLUMN_TITLE/SHIPPING_PHONE"
 msgstr "Phone"
 
 #: lib/helper/order_helper.py:466 lib/helper/order_helper.py:610
 #: lib/helper/xlsx_helper.py:123 lib/i18n/email/order_comfirm_mail.py:55
-#: lib/i18n/email/order_comfirm_mail.py:55
 msgid "REPORT/COLUMN_TITLE/PICK_UP_STORE"
 msgstr "Pick Up Store"
 
@@ -313,7 +310,6 @@ msgstr "Delivery Address"
 
 #: lib/helper/order_helper.py:478 lib/helper/xlsx_helper.py:126
 #: lib/i18n/email/order_comfirm_mail.py:72
-#: lib/helper/order_helper.py:478 lib/i18n/email/order_comfirm_mail.py:72
 msgid "REPORT/COLUMN_TITLE/PAYMENT_METHOD"
 msgstr "Payment Method"
 
@@ -462,19 +458,24 @@ msgstr ""
 "Hadiah: {product_name}. Mohon periksa keranjang belanja anda."
 
 #: lib/i18n/cart_product_request.py:64
-#, python-brace-format
+#, fuzzy, python-brace-format
+#| msgid "ITEM_INFO{order_code}{qty}{result}"
 msgid "ITEM_INFO{order_code}{result}"
-msgstr "“{order_code}” {result}. "
+msgstr "“{order_code}” Jumlah: {qty} {result}. "
 
 #: lib/i18n/email/delivery_comfirm_mail.py:10
 #, fuzzy, python-brace-format
-#| msgid "EMAIL/DELIVERY_CONFIRM/SUBJECT{order_id}{campaign_title}"
+#| msgid "EMAIL/ORDER_CONFIRM/SUBJECT{order_id}{campaign_title}"
 msgid "EMAIL/DELIVERY_CONFIRM/SUBJECT{order_id}{campaign_title}"
-msgstr "Your order #{order.id} from {order.campaign.title} has been shipped!"
+msgstr ""
+"Thanks for your order! Your order #{order_id} from {campaign_title} is "
+"confirmed!"
 
 #: lib/i18n/email/delivery_comfirm_mail.py:25
+#, fuzzy
+#| msgid "EMAIL/DELIVERY_CONFIRM/TOTAL"
 msgid "EMAIL/DELIVERY_CONFIRM/TITLE"
-msgstr "Your order has been shipped!"
+msgstr "Total"
 
 #: lib/i18n/email/delivery_comfirm_mail.py:38
 #: lib/i18n/email/delivery_comfirm_mail.py:41
@@ -501,8 +502,10 @@ msgstr ""
 "confirmed!"
 
 #: lib/i18n/email/order_comfirm_mail.py:23
+#, fuzzy
+#| msgid "EMAIL/ORDER_CONFIRM/TOTAL"
 msgid "EMAIL/ORDER_CONFIRM/TITLE"
-msgstr "Your Order Has Been Confirm!"
+msgstr "Total"
 
 #: lib/i18n/email/order_comfirm_mail.py:75
 msgid "EMAIL/ORDER_CONFIRM/ACCOUNT_MODE"
@@ -663,9 +666,6 @@ msgstr ""
 #~| msgid "DETAIL{link}\n"
 #~ msgid "DETAIL{link}"
 #~ msgstr "Pelajari lebih lanjut: {link}\n"
-
-#~ msgid "EMAIL/ORDER_CONFIRM/TOTAL"
-#~ msgstr "Total"
 
 #~ msgid "EMAIL/ORDER_CONFIRM/ORDER"
 #~ msgstr "Order"
