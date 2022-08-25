@@ -617,54 +617,6 @@ msgstr "已成功修改密碼. 若您沒有要求修改密碼, 請立即聯絡�
 #~ msgid "REPORT/COLUMN_TITLE/TOTAL"
 #~ msgstr "總金額"
 
-#~ msgid "REPORT/COLUMN_TITLE/ID"
-#~ msgstr "編號"
-
-#~ msgid "REPORT/COLUMN_TITLE/ORDER_DATE"
-#~ msgstr "訂單日期"
-
-#~ msgid "REPORT/COLUMN_TITLE/PLATFORM"
-#~ msgstr "使用平台"
-
-#~ msgid "REPORT/COLUMN_TITLE/CUSTOMER_NAME"
-#~ msgstr "客戶名稱"
-
-#~ msgid "REPORT/COLUMN_TITLE/EMAIL"
-#~ msgstr "E-mail"
-
-#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_METHOD"
-#~ msgstr "運送方式"
-
-#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_OPTION"
-#~ msgstr "運送選項"
-
-#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_ADDRESS_1"
-#~ msgstr "收件住址"
-
-#~ msgid "REPORT/COLUMN_TITLE/LOCATION"
-#~ msgstr "地點"
-
-#~ msgid "REPORT/COLUMN_TITLE/REGION"
-#~ msgstr "區域"
-
-#~ msgid "REPORT/COLUMN_TITLE/POSTCODE"
-#~ msgstr "郵遞區號"
-
-#~ msgid "REPORT/COLUMN_TITLE/PICK_UP_ADDRESS"
-#~ msgstr "自取地址"
-
-#~ msgid "REPORT/COLUMN_TITLE/REMARK"
-#~ msgstr "註記"
-
-#~ msgid "REPORT/COLUMN_TITLE/PAYMENT_STATUS"
-#~ msgstr "付款狀態"
-
-#~ msgid "REPORT/COLUMN_TITLE/PAYMENT_RECORD"
-#~ msgstr "付款證明"
-
-#~ msgid "REPORT/COLUMN_TITLE/TOTAL"
-#~ msgstr "總金額"
-
 #~ msgid "EMAIL/ORDER_CONFIRM/TOTAL"
 #~ msgstr "總計"
 

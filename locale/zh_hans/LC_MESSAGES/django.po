@@ -622,54 +622,6 @@ msgstr ""
 #~ msgid "REPORT/COLUMN_TITLE/TOTAL"
 #~ msgstr "总金额"
 
-#~ msgid "REPORT/COLUMN_TITLE/ID"
-#~ msgstr "编号"
-
-#~ msgid "REPORT/COLUMN_TITLE/ORDER_DATE"
-#~ msgstr "订单日期"
-
-#~ msgid "REPORT/COLUMN_TITLE/PLATFORM"
-#~ msgstr "使用平台"
-
-#~ msgid "REPORT/COLUMN_TITLE/CUSTOMER_NAME"
-#~ msgstr "客户名称"
-
-#~ msgid "REPORT/COLUMN_TITLE/EMAIL"
-#~ msgstr "E-mail"
-
-#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_METHOD"
-#~ msgstr "运送方式"
-
-#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_OPTION"
-#~ msgstr "运送选项"
-
-#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_ADDRESS_1"
-#~ msgstr "收件住址"
-
-#~ msgid "REPORT/COLUMN_TITLE/LOCATION"
-#~ msgstr "地点"
-
-#~ msgid "REPORT/COLUMN_TITLE/REGION"
-#~ msgstr "区域"
-
-#~ msgid "REPORT/COLUMN_TITLE/POSTCODE"
-#~ msgstr "邮递区号"
-
-#~ msgid "REPORT/COLUMN_TITLE/PICK_UP_ADDRESS"
-#~ msgstr "自取地址"
-
-#~ msgid "REPORT/COLUMN_TITLE/REMARK"
-#~ msgstr "注记"
-
-#~ msgid "REPORT/COLUMN_TITLE/PAYMENT_STATUS"
-#~ msgstr "付款状态"
-
-#~ msgid "REPORT/COLUMN_TITLE/PAYMENT_RECORD"
-#~ msgstr "付款证明"
-
-#~ msgid "REPORT/COLUMN_TITLE/TOTAL"
-#~ msgstr "总金额"
-
 #~ msgid "EMAIL/ORDER_CONFIRM/TOTAL"
 #~ msgstr "总计"
 
