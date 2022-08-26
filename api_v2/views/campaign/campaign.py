@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 
 from datetime import datetime
-from api import models
+from api import models, rule
 import api
 import lib
 import json
@@ -86,7 +86,11 @@ class CampaignViewSet(viewsets.ModelViewSet):
     def create_campaign(self, request):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
-
+        
+        ret = rule.rule_checker.user_subscription_rule_checker.CreateCampaignRuleChecker.check(**{
+            'api_user': api_user, 'user_subscription': user_subscription
+        })
+        
         campaignData, = lib.util.getter.getdata(request, ('data',), required=True)
         campaignData = json.loads(campaignData)
 

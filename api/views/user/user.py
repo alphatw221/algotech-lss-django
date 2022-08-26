@@ -7,7 +7,6 @@ from rest_framework.decorators import action, permission_classes
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from api.code.password_code_manager import PasswordResetCodeManager
 from api.models.instagram.instagram_profile import InstagramProfile, InstagramProfileSerializer
-from api.models.user.deal import Deal
 from api.models.user.promotion_code import PromotionCode
 from api.models.user.user import User, UserSerializer, UserSerializerAccountInfo
 from api.models.youtube.youtube_channel import YoutubeChannel, YoutubeChannelSerializer

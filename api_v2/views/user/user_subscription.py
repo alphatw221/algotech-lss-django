@@ -1,4 +1,3 @@
-from pyexpat import model
 from django.conf import settings
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
@@ -14,17 +13,10 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser, JSONParser, FormParser
 
+from api import rule, models, utils
+import stripe, pytz, lib, service, business_policy, json
 
-from api import rule
-from api import models
-from api import utils
-
-import lib
-import service
-import business_policy
-
-import json
-from datetime import datetime
+from datetime import datetime, timedelta
 class UserSubscriptionPagination(PageNumberPagination):
 
     page_query_param = 'page'
@@ -268,7 +260,87 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             "marketing_plans": marketing_plans,
             "period":period,
         }, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['POST'], url_path=r'upgrade')
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def upgrade(self, request):
+        email, password, plan, period, intentSecret, promoCode, timezone = \
+            lib.util.getter.getdata(request,("email", "password", "plan", "period", "intentSecret", "promoCode", "timezone"), required=False)
+        api_user = lib.util.verify.Verify.get_seller_user(request)    
+        api_user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        original_plan = api_user_subscription.type
+        payment_intent_id = intentSecret[:27]
+        stripe.api_key = settings.STRIPE_API_KEY
+        paymentIntent = stripe.PaymentIntent.retrieve(payment_intent_id)
 
+        kwargs = {'paymentIntent':paymentIntent,'email':email,'plan':plan,'period':period, 'promoCode':promoCode, 'api_user_subscription':api_user_subscription, 'api_user': api_user}
+        kwargs = rule.rule_checker.user_subscription_rule_checker.UpgradePaymentCompleteChecker.check(**kwargs)
+
+        try:
+            country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(api_user_subscription.country)
+            subscription_plan = country_plan.get_plan(plan)
+
+            kwargs.update({'country_plan':country_plan, 'subscription_plan':subscription_plan})
+            kwargs = rule.rule_checker.user_subscription_rule_checker.UpgradeRequireRefundChecker.check(**kwargs)
+        except Exception:
+            raise lib.error_handle.error.api_error.ApiVerifyError('data invalid, please contact support team for refunding')
+
+        email = kwargs.get('email')
+        amount = kwargs.get('amount')
+        adjust_amount = kwargs.get('adjust_amount')
+
+        now = datetime.now(pytz.timezone(timezone)) if timezone in pytz.common_timezones else datetime.now()
+        expired_at = now+timedelta(days=90) if period == "quarter" else now+timedelta(days=365)
+
+        data={
+                'type': plan,
+                'expired_at': expired_at,
+                'started_at': now,
+                'user_plan': {"activated_platform" : ["facebook","youtube","instagram"]},
+                'purchase_price': amount
+            }
+        data.update(business_policy.subscription_plan.SubscriptionPlan.get_plan_limit(plan))
+        serializer = models.user.user_subscription.UserSubscriptionSerializerUpgrade(api_user_subscription, data=data,partial=True)
+        if serializer.is_valid():
+            api_user_subscription = serializer.save()
+            
+        serializer = models.user.user_subscription.UserSubscriptionSerializerMeta(
+            api_user_subscription, 
+            data={
+                "meta": {"stripe payment intent":intentSecret}
+            },
+            partial=True
+        )
+        if serializer.is_valid():
+            api_user_subscription = serializer.save()
+        
+        deal_obj = utils.orm.deal.record_subscription_for_paid_user(api_user_subscription, plan, amount, api_user, original_plan=original_plan)
+        
+        marketing_plans = kwargs.get('marketing_plans')
+        for key, val in marketing_plans.items():
+            if key == "welcome_gift":
+                lib.util.marking_tool.WelcomeGiftUsedMark.mark(api_user, save = True)
+                try:
+                    promocode_obj = models.user.promotion_code.PromotionCode.objects.get(name=key, api_user=api_user, user_subscription=api_user_subscription)
+                    promocode_obj.used_at=datetime.utcnow()
+                    promocode_obj.deal = deal_obj
+                    promocode_obj.save()
+                except:
+                    models.user.promotion_code.PromotionCode.objects.create(
+                        name=key,
+                        api_user=api_user,
+                        user_subscription=api_user_subscription,
+                        used_at=datetime.utcnow(),
+                        deal=deal_obj
+                    )
+        ret = {
+            "Email": email,
+            "Your Plan": subscription_plan.get('text'),
+            "Subscription Period": period,
+            "Subscription End Date": expired_at.strftime("%d %B %Y %H:%M"),
+            "Receipt": paymentIntent.charges.get('data')[0].get('receipt_url')
+        }
+        return Response(ret, status=status.HTTP_200_OK)
 
 # --------------------------------- admin console ---------------------------------
     
