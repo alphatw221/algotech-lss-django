@@ -258,10 +258,10 @@ class DashboardViewSet(viewsets.ModelViewSet):
         campaign_complete_sales = get_campaign_complete_sales(campaign_id)
 
 
-        campaign_uncheckout_rate = campaign_pre_order_count / (campaign_order_complete_count + campaign_order_proceed_count + campaign_pre_order_count) * 100\
+        campaign_uncheckout_rate = (campaign_pre_order_count+campaign_order_proceed_count) / (campaign_order_complete_count + campaign_order_proceed_count + campaign_pre_order_count) * 100\
                 if (campaign_order_complete_count + campaign_order_proceed_count + campaign_pre_order_count) else 0
 
-        campaign_close_rate = (campaign_order_complete_count+campaign_order_proceed_count) / (campaign_order_complete_count + campaign_order_proceed_count + campaign_pre_order_count) * 100\
+        campaign_close_rate = (campaign_order_complete_count) / (campaign_order_complete_count + campaign_order_proceed_count + campaign_pre_order_count) * 100\
                 if (campaign_order_complete_count + campaign_order_proceed_count + campaign_pre_order_count) else 0
 
 
