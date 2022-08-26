@@ -663,16 +663,22 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             serializer = UserSubscriptionSerializerDealerList(queryset, many=True)
             data = serializer.data
 
-        return Response(data, status=status.HTTP_200_OK)
-    
-    @action(detail=True, methods=['GET'], url_path=r'dealer_retrieve', permission_classes=(IsAuthenticated,))
+        results = data.get('results')
+        results = json.loads(json.dumps(results))
+        print(result)
+        # result = {"data":results}
+        return Response(results, status=status.HTTP_200_OK)
+        
+    @action(detail=False, methods=['GET'], url_path=r'dealer_retrieve', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def dealer_retrieve_subscriber(self, request, pk=None):
         api_user = Verify.get_seller_user(request)
         dealer_user_subscription = Verify.get_dealer_user_subscription_from_api_user(api_user)
+        print(dealer_user_subscription)
         user_subscription = Verify.get_user_subscription_from_dealer_user_subscription(dealer_user_subscription,pk)
-
-        return Response(UserSubscriptionSerializerForDealerRetrieve(user_subscription).data, status=status.HTTP_200_OK)
+        
+        data = UserSubscriptionSerializerForDealerRetrieve(user_subscription).data
+        return Response(data, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['PUT'], url_path=r'unbind_facebook_page', permission_classes=(IsAuthenticated,))
     @api_error_handler
