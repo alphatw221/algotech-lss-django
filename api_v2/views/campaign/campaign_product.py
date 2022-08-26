@@ -262,3 +262,12 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
 
         serializer = models.campaign.campaign_product.CampaignProductSerializer(campaign_product)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['GET'], url_path=r'seller/pre_order/list', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def seller_list_for_pre_order(self, request):
+        order_id = request.query_params.get('order_id')
+        pre_order = lib.util.verify.Verify.get_pre_order(order_id)
+        campaign_products = pre_order.campaign.products.filter(Q(type='product') | Q(type="product-fast"))
+        
+        return Response(models.campaign.campaign_product.CampaignProductSerializer(campaign_products, many=True).data, status=status.HTTP_200_OK)

@@ -429,4 +429,16 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         pre_order.save()
         return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
     
+    @action(detail=False, methods=['PUT'], url_path=r'(?P<order_id>[^/.]+)/seller/add', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    @lib.error_handle.error_handler.order_operation_error_handler.order_operation_error_handler
+    def seller_add_order_product(self, request, order_id):
+        api_user, campaign_product_id, qty = lib.util.getter.getparams(request, ('campaign_product_id', 'qty',), with_user=True, seller=True)
+
+        pre_order = lib.util.verify.Verify.get_pre_order(order_id)
+        campaign_product = lib.util.verify.Verify.get_campaign_product_from_pre_order(pre_order, campaign_product_id)
+
+        lib.helper.order_helper.PreOrderHelper.add_product(api_user, pre_order.id, campaign_product.id, qty)
+        pre_order = lib.util.verify.Verify.get_pre_order(pre_order.id)
+        return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
         
