@@ -1,4 +1,4 @@
-from api.utils.error_handle.error.api_error import ApiVerifyError
+import lib
 from backend.pymongo.mongodb import db
 from django.conf import settings
 from datetime import datetime, timedelta, timezone
@@ -7,9 +7,10 @@ class UserSubscriptionCheckRule():
 
     @staticmethod
     def is_expired(**kwargs):
+        print("------------is_expired")
         user_subscription = kwargs.get('user_subscription')
         if datetime.now().replace(tzinfo=timezone(offset=timedelta())) > user_subscription.expired_at:
-            raise ApiVerifyError('helper.membership_out_of_date')
+            raise lib.error_handle.error.api_error.ApiVerifyError('helper.membership_out_of_date')
     
     @staticmethod
     def max_concurrent_live(**kwargs):
@@ -20,7 +21,7 @@ class UserSubscriptionCheckRule():
         if not user_subscription.campaign_live_limit:
             return
         if live_count >= user_subscription.campaign_live_limit:
-            raise ApiVerifyError('helper.reach_max_concurrent_campaigns')
+            raise lib.error_handle.error.api_error.ApiVerifyError('helper.reach_max_concurrent_campaigns')
         
     @staticmethod
     def campaign_limit(**kwargs):
@@ -30,4 +31,4 @@ class UserSubscriptionCheckRule():
         if not user_subscription.campaign_limit:
             return
         if campaigns_count >= user_subscription.campaign_limit:
-            raise ApiVerifyError('helper.reach_max_campaigns_limit')
+            raise lib.error_handle.error.api_error.ApiVerifyError('helper.reach_max_campaigns_limit')

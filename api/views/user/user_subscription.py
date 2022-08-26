@@ -674,7 +674,6 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
     def dealer_retrieve_subscriber(self, request, pk=None):
         api_user = Verify.get_seller_user(request)
         dealer_user_subscription = Verify.get_dealer_user_subscription_from_api_user(api_user)
-        print(dealer_user_subscription)
         user_subscription = Verify.get_user_subscription_from_dealer_user_subscription(dealer_user_subscription,pk)
         
         data = UserSubscriptionSerializerForDealerRetrieve(user_subscription).data

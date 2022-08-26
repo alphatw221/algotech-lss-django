@@ -291,6 +291,12 @@ class Verify():
         if not user_subscription.twitch_channels.filter(id=twitch_channel_id).exists():
             raise ApiVerifyError("util.twitch_channels_not_bound_to_user_subscription")
         return user_subscription.twitch_channels.get(id=twitch_channel_id)
+    
+    @staticmethod
+    def get_tiktok_channel_from_user_subscription(user_subscription, tiktok_account_id):
+        if not user_subscription.tiktok_accounts.filter(id=tiktok_account_id).exists():
+            raise ApiVerifyError("util.tiktok_accounts_not_bound_to_user_subscription")
+        return user_subscription.tiktok_accounts.get(id=tiktok_account_id)
 
     @staticmethod
     def get_campaign(campaign_id):
