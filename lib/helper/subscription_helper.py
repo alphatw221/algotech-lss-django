@@ -178,27 +178,27 @@ def bind_youtube_channels(request, user_subscription):
         if youtube_channel not in user_subscription.youtube_channels.all():
             user_subscription.youtube_channels.add(youtube_channel)
 
-def bind_twitch_channels(request, user_subscription):
+def bind_twitch_channels(request, user_subscription, channel_name):
 
     code, = lib.util.getter.getdata(request,("code",), required=True)
 
     response_code, response = service.twitch.twitch.get_token(code)
     if not response_code / 100 == 2:
         lib.error_handle.error.api_error.ApiCallerError('get twitch token fail')
+    print ('response1', response)
 
     access_token = response.get("access_token")
     refresh_token = response.get("refresh_token")
 
-    response_code, response = service.twitch.twitch.get_user(access_token)
-    if not response_code / 100 == 2:
-        lib.error_handle.error.api_error.ApiCallerError('get twitch user detail fail')
-    
-    channel_name = response.get("preferred_username")
+    # response_code, response = service.twitch.twitch.get_user(access_token)
+    # if not response_code / 100 == 2:
+    #     lib.error_handle.error.api_error.ApiCallerError('get twitch user detail fail')
+    # channel_name = response.get("preferred_username")
 
     response_code, response = service.twitch.twitch.get_user_info(access_token, channel_name)
     if not response_code / 100 == 2:
         lib.error_handle.error.api_error.ApiCallerError('get twitch user info fail')
-    
+    print ('response2', response)
     image = response.get("data")[0].get("profile_image_url")
 
     if models.twitch.twitch_channel.TwitchChannel.objects.filter(name=channel_name).exists():
@@ -223,3 +223,34 @@ def bind_twitch_channels(request, user_subscription):
 
     if twitch_channel not in user_subscription.twitch_channels.all():
         user_subscription.twitch_channels.add(twitch_channel)
+        
+def bind_tiktok_accounts(request, user_subscription):
+
+    auth_code, = lib.util.getter.getdata(request,("auth_code",), required=True)
+
+    response_code, response = service.tiktok.user.api_tiktok_get_token(auth_code)
+    if not response_code / 100 == 2:
+        lib.error_handle.error.api_error.ApiCallerError('get tiktok token fail')
+
+    access_token = response.get("data").get("access_token")
+    advertiser_ids = [str(i) for i in response.get("data").get("advertiser_ids")]
+
+    response_code, response = service.tiktok.user.api_tiktok_advertiser_info(token=access_token, advertiser_ids=advertiser_ids)
+    print(response)
+    
+    if not response_code / 100 == 2:
+        lib.error_handle.error.api_error.ApiCallerError('get tiktok token fail')
+        
+    
+    for data in response.get("data").get("list"):
+        try:
+            advertiser_account = models.tiktok.tiktok_account.TikTokAccount.objects.get(advertiser_id=data['advertiser_id'])
+        except:
+            advertiser_account = models.tiktok.tiktok_account.TikTokAccount.objects.create(advertiser_id=data['advertiser_id'], name=data['name'])
+        
+        advertiser_account.token = access_token
+        advertiser_account.token_update_at = datetime.now()
+        advertiser_account.save()
+    
+        if advertiser_account not in user_subscription.tiktok_accounts.all():
+            user_subscription.tiktok_accounts.add(advertiser_account)

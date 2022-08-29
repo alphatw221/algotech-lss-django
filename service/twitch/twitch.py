@@ -52,3 +52,25 @@ def get_user_info(access_token: str, user_name: str):
     ret = TwitchApiCaller('helix/users', headers=headers, params=params).get()
 
     return ret
+
+def api_twitch_validate_token(access_token: str):
+    headers = {
+        'Authorization': f'OAuth {access_token}',
+    }
+    ret = TwitchOauthCaller('oauth2/validate', headers=headers).get()
+
+    return ret
+
+def refresh_exchange_access_token(refresh_token: str):
+    headers = { 
+        'Content-Type': 'application/x-www-form-urlencoded' 
+    }
+    data = {
+        'grant_type': 'refresh_token',
+        'refresh_token': refresh_token,
+        'client_id': settings.TWITCH_CLIENT_ID,
+        'client_secret': settings.TWITCH_CLIENT_SECRET
+    }
+    ret = TwitchOauthCaller('oauth2/token', headers=headers, data=data).post()
+
+    return ret

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-19 11:46+0800\n"
+"POT-Creation-Date: 2022-08-25 10:32+0000\n"
 "PO-Revision-Date: 2021-12-13 15:50+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -18,546 +18,628 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: Poedit 3.0\n"
 
-#: .\backend\i18n\campaign_announcement.py:8
-#: .\lib\i18n\campaign_announcement.py:7
+#: backend/i18n/campaign_announcement.py:8 lib/i18n/campaign_announcement.py:7
 #, python-brace-format
 msgid "PRODUCT_CLOSED{order_code}"
 msgstr "商品 {order_code} 已停止接单。"
 
-#: .\backend\i18n\campaign_announcement.py:15
-#: .\lib\i18n\campaign_announcement.py:14
+#: backend/i18n/campaign_announcement.py:15
+#: lib/i18n/campaign_announcement.py:14
 #, python-brace-format
 msgid "PRODUCT_SOLD_OUT{order_code}"
 msgstr "商品 {order_code} 已售完。"
 
-#: .\backend\i18n\campaign_announcement.py:22
-#: .\lib\i18n\campaign_announcement.py:21
+#: backend/i18n/campaign_announcement.py:22
+#: lib/i18n/campaign_announcement.py:21
 #, python-brace-format
 msgid "LUCKY_DRAW_WINNER{customer_name}{product_name}"
 msgstr ""
 "恭喜 {customer_name} 中奖，获得 {product_name}！请至购物车确认您的奖品。"
 
-#: .\backend\i18n\cart_product_request.py:9
-#: .\lib\i18n\cart_product_request.py:11
+#: backend/i18n/cart_product_request.py:9 lib/i18n/cart_product_request.py:11
 msgid "MESSAGE_PREFIX"
 msgstr "Live Show Seller："
 
-#: .\backend\i18n\cart_product_request.py:21
-#: .\lib\i18n\cart_product_request.py:24 .\lib\i18n\cart_product_request.py:40
+#: backend/i18n/cart_product_request.py:21 lib/i18n/cart_product_request.py:24
+#: lib/i18n/cart_product_request.py:40
 #, python-brace-format
 msgid "SHOPPING_CART_INFO{link}"
 msgstr "长按以下连结并使用Chrome/Safari开启购物车：{link}"
 
-#: .\backend\i18n\cart_product_request.py:23
-#: .\lib\i18n\cart_product_request.py:26 .\lib\i18n\cart_product_request.py:42
+#: backend/i18n/cart_product_request.py:23 lib/i18n/cart_product_request.py:26
+#: lib/i18n/cart_product_request.py:42
 msgid "MORE_INFO_IN_PM_NOTICE"
 msgstr ""
 "购物车连结已传送到您的 FB Messenger，若没有收到讯息，请联络粉丝专页管理员/小"
 "编。"
 
-#: .\backend\i18n\cart_product_request.py:30
-#: .\backend\i18n\cart_product_request.py:66
-#: .\lib\i18n\cart_product_request.py:49 .\lib\i18n\cart_product_request.py:85
+#: backend/i18n/cart_product_request.py:30
+#: backend/i18n/cart_product_request.py:66 lib/i18n/cart_product_request.py:49
+#: lib/i18n/cart_product_request.py:89
 #, python-brace-format
 msgid "INVALID_EXCEED_MAX_ORDER_AMOUNT{order_code}{max_order_amount}"
 msgstr "{order_code} 无法新增，此商品单次限购数量为 {max_order_amount} 件。"
 
-#: .\backend\i18n\cart_product_request.py:36
-#: .\backend\i18n\cart_product_request.py:73
-#: .\lib\i18n\cart_product_request.py:55 .\lib\i18n\cart_product_request.py:92
+#: backend/i18n/cart_product_request.py:36
+#: backend/i18n/cart_product_request.py:73 lib/i18n/cart_product_request.py:55
+#: lib/i18n/cart_product_request.py:96
 msgid "ADDED"
 msgstr "下单成功！"
 
-#: .\backend\i18n\cart_product_request.py:38
-#: .\backend\i18n\cart_product_request.py:75
-#: .\lib\i18n\cart_product_request.py:57 .\lib\i18n\cart_product_request.py:94
+#: backend/i18n/cart_product_request.py:38
+#: backend/i18n/cart_product_request.py:75 lib/i18n/cart_product_request.py:57
+#: lib/i18n/cart_product_request.py:98
 msgid "UPDATED"
 msgstr "更新成功！"
 
-#: .\backend\i18n\cart_product_request.py:40
-#: .\backend\i18n\cart_product_request.py:77
-#: .\lib\i18n\cart_product_request.py:59 .\lib\i18n\cart_product_request.py:96
+#: backend/i18n/cart_product_request.py:40
+#: backend/i18n/cart_product_request.py:77 lib/i18n/cart_product_request.py:59
+#: lib/i18n/cart_product_request.py:100
 msgid "DELETED"
 msgstr "商品已从购物车删除，"
 
-#: .\backend\i18n\cart_product_request.py:42
-#: .\backend\i18n\cart_product_request.py:79
-#: .\lib\i18n\cart_product_request.py:61 .\lib\i18n\cart_product_request.py:98
+#: backend/i18n/cart_product_request.py:42
+#: backend/i18n/cart_product_request.py:79 lib/i18n/cart_product_request.py:61
+#: lib/i18n/cart_product_request.py:102
 msgid "INSUFFICIENT_INV"
 msgstr "商品已售完，"
 
-#: .\backend\i18n\cart_product_request.py:44
-#: .\backend\i18n\cart_product_request.py:81
-#: .\lib\i18n\cart_product_request.py:63 .\lib\i18n\cart_product_request.py:100
+#: backend/i18n/cart_product_request.py:44
+#: backend/i18n/cart_product_request.py:81 lib/i18n/cart_product_request.py:63
+#: lib/i18n/cart_product_request.py:104
 msgid "INVALID_PRODUCT_NOT_ACTIVATED"
 msgstr "商品目前无法下单，"
 
-#: .\backend\i18n\cart_product_request.py:46
-#: .\backend\i18n\cart_product_request.py:83
-#: .\lib\i18n\cart_product_request.py:65 .\lib\i18n\cart_product_request.py:102
+#: backend/i18n/cart_product_request.py:46
+#: backend/i18n/cart_product_request.py:83 lib/i18n/cart_product_request.py:69
+#: lib/i18n/cart_product_request.py:106
 msgid "INVALID_REMOVE_NOT_ALLOWED"
 msgstr "无法删除，"
 
-#: .\backend\i18n\cart_product_request.py:48
-#: .\backend\i18n\cart_product_request.py:85
-#: .\lib\i18n\cart_product_request.py:67 .\lib\i18n\cart_product_request.py:104
+#: backend/i18n/cart_product_request.py:48
+#: backend/i18n/cart_product_request.py:85 lib/i18n/cart_product_request.py:71
+#: lib/i18n/cart_product_request.py:108
 msgid "INVALID_EDIT_NOT_ALLOWED"
 msgstr "无法修改，"
 
-#: .\backend\i18n\cart_product_request.py:50
-#: .\backend\i18n\cart_product_request.py:87
-#: .\lib\i18n\cart_product_request.py:69 .\lib\i18n\cart_product_request.py:106
+#: backend/i18n/cart_product_request.py:50
+#: backend/i18n/cart_product_request.py:87 lib/i18n/cart_product_request.py:73
+#: lib/i18n/cart_product_request.py:110
 msgid "INVALID_ADD_ZERO_QTY"
 msgstr "无法删除，"
 
-#: .\backend\i18n\cart_product_request.py:52
-#: .\backend\i18n\cart_product_request.py:89
-#: .\lib\i18n\cart_product_request.py:71 .\lib\i18n\cart_product_request.py:108
+#: backend/i18n/cart_product_request.py:52
+#: backend/i18n/cart_product_request.py:89 lib/i18n/cart_product_request.py:75
+#: lib/i18n/cart_product_request.py:112
 msgid "N/A"
 msgstr "操作错误，"
 
-#: .\backend\i18n\cart_product_request.py:54
-#: .\backend\i18n\cart_product_request.py:92
-#: .\lib\i18n\cart_product_request.py:73 .\lib\i18n\cart_product_request.py:111
+#: backend/i18n/cart_product_request.py:54
+#: backend/i18n/cart_product_request.py:92 lib/i18n/cart_product_request.py:77
+#: lib/i18n/cart_product_request.py:115
 #, python-brace-format
 msgid "ITEM_INFO{order_code}{qty}{result}"
 msgstr "{result}商品 {order_code} <{qty} 件>。"
 
-#: .\backend\i18n\comment_command.py:24 .\backend\i18n\comment_command.py:27
-#: .\backend\i18n\comment_command.py:29 .\lib\i18n\comment_command.py:25
-#: .\lib\i18n\comment_command.py:28 .\lib\i18n\comment_command.py:30
+#: backend/i18n/comment_command.py:24 backend/i18n/comment_command.py:27
+#: backend/i18n/comment_command.py:29 lib/i18n/comment_command.py:25
+#: lib/i18n/comment_command.py:28 lib/i18n/comment_command.py:30
 msgid "COMMENT_COMMAND_CART_NO_CART_PRODUCT"
 msgstr "您的购物车内没有商品。"
 
-#: .\backend\i18n\comment_command.py:36 .\lib\i18n\comment_command.py:35
-#: .\templates\register_confirmation.html:11
-#: .\templates\register_confirmation.html:16
+#: backend/i18n/comment_command.py:36 lib/i18n/comment_command.py:35
+#: templates/register_confirmation.html:11
+#: templates/register_confirmation.html:16
 msgid "COMMENT_COMMAND_CART_MESSAGE_HEADER"
 msgstr "您的购物车："
 
-#: .\backend\i18n\comment_command.py:39 .\backend\i18n\comment_command.py:96
-#: .\lib\i18n\comment_command.py:38
+#: backend/i18n/comment_command.py:39 backend/i18n/comment_command.py:96
+#: lib/i18n/comment_command.py:38
 #, python-brace-format
 msgid "TOTAL{dollar_sign}{total}\n"
 msgstr ""
 "订单金额：{dollar_sign}{total}\n"
 "\n"
 
-#: .\backend\i18n\comment_command.py:41 .\backend\i18n\comment_command.py:99
-#: .\lib\i18n\comment_command.py:40
+#: backend/i18n/comment_command.py:41 backend/i18n/comment_command.py:99
+#: lib/i18n/comment_command.py:40
 #, python-brace-format
 msgid "DETAIL{link}\n"
 msgstr "查看购物车：{link}\n"
 
-#: .\backend\i18n\comment_command.py:76 .\backend\i18n\comment_command.py:79
-#: .\backend\i18n\comment_command.py:84
+#: backend/i18n/comment_command.py:76 backend/i18n/comment_command.py:79
+#: backend/i18n/comment_command.py:84
 msgid "COMMENT_COMMAND_ORDER_NO_ORDER"
 msgstr "您最近没有订单。"
 
-#: .\backend\i18n\comment_command.py:86
+#: backend/i18n/comment_command.py:86
 msgid "COMMENT_COMMAND_ORDER_MESSAGE_HEADER"
 msgstr "您的最新订单："
 
-#: .\backend\i18n\comment_command.py:90
+#: backend/i18n/comment_command.py:90
 #, python-brace-format
 msgid "DELIVERY{dollar_sign}{delivery}\n"
 msgstr "运费：{dollar_sign}{delivery}\n"
 
-#: .\backend\i18n\comment_command.py:93
+#: backend/i18n/comment_command.py:93
 #, python-brace-format
 msgid "OPTION{dollar_sign}{option}\n"
 msgstr "额外运费：{dollar_sign}{option}\n"
 
-#: .\backend\i18n\comment_command.py:117 .\lib\i18n\comment_command.py:117
+#: backend/i18n/comment_command.py:117 lib/i18n/comment_command.py:117
 #, python-brace-format
 msgid "ITEM_INFO{name}{qty}{dollar_sign}{total}\n"
 msgstr "{name} 数量：{qty} {dollar_sign}{total}\n"
 
-#: .\backend\i18n\email\subject.py:8
-#: .\templates\email_reset_password_link.html:7
-#: .\templates\reset_password_success_email.html:7
+#: backend/i18n/email/subject.py:8 templates/email_reset_password_link.html:7
+#: templates/reset_password_success_email.html:7
 msgid "EMAIL/PASSWORD_RESET_LINK/SUBJECT"
 msgstr "Live Show Seller 重設密碼通知"
 
-#: .\backend\i18n\email\subject.py:12
+#: backend/i18n/email/subject.py:12
 msgid "EMAIL/PASSWORD_RESET_SUCCESS/SUBJECT"
 msgstr "Live Show Seller 重設密碼通知"
 
-#: .\backend\i18n\payment_comfirm_mail.py:52
+#: backend/i18n/payment_comfirm_mail.py:52
 msgid "EMAIL/DELIVERY_CONFIRM/ORDER_CONFIRMATION"
 msgstr "订单确认"
 
-#: .\backend\i18n\register_confirm_mail.py:17
-#: .\lib\i18n\email\password_reset.py:5
+#: backend/i18n/register_confirm_mail.py:17 lib/i18n/email/password_reset.py:5
 msgid "MAIL_SUBJECT_WELCOME"
 msgstr ""
 
-#: .\backend\i18n\register_confirm_mail.py:22
+#: backend/i18n/register_confirm_mail.py:22
 msgid "MAIL_SUBJECT_ACTIVATION"
 msgstr ""
 
-#: .\business_policy\payment.py:21
+#: business_policy/payment.py:21
 msgid "PAYMENT/DIRECT_PAYMENT/NAME_OF_BANK_OR_PAYMENT_MODE"
 msgstr ""
 
-#: .\business_policy\payment.py:22
+#: business_policy/payment.py:22
 msgid "PAYMENT/DIRECT_PAYMENT/ACCOUNT_NAME"
 msgstr ""
 
-#: .\business_policy\payment.py:23
+#: business_policy/payment.py:23
 msgid "PAYMENT/DIRECT_PAYMENT/ACCOUNT_NUMBER"
 msgstr ""
 
-#: .\business_policy\payment.py:24
+#: business_policy/payment.py:24
 msgid "PAYMENT/DIRECT_PAYMENT/OTHER_NOTE"
 msgstr ""
 
-#: .\business_policy\payment.py:25
+#: business_policy/payment.py:25
 msgid "PAYMENT/DIRECT_PAYMENT/REQUIRE_CUSTOMER_PAYMENT_RECORD"
 msgstr ""
 
-#: .\business_policy\payment.py:38
+#: business_policy/payment.py:38
 msgid "PAYMENT/HIT_PAY/PAYMENT_BUTTON_TITLE"
 msgstr ""
 
-#: .\business_policy\payment.py:39 .\business_policy\payment.py:54
-#: .\business_policy\payment.py:68 .\business_policy\payment.py:106
+#: business_policy/payment.py:39 business_policy/payment.py:54
+#: business_policy/payment.py:68 business_policy/payment.py:106
 msgid "PAYMENT/CURRENCY_CODE"
 msgstr ""
 
-#: .\business_policy\payment.py:40
+#: business_policy/payment.py:40
 msgid "PAYMENT/HIT_PAY/API_KEY"
 msgstr ""
 
-#: .\business_policy\payment.py:41
+#: business_policy/payment.py:41
 msgid "PAYMENT/HIT_PAY/SALT"
 msgstr ""
 
-#: .\business_policy\payment.py:53
+#: business_policy/payment.py:53
 msgid "PAYMENT/PAYPAL/CLIENT_ID"
 msgstr ""
 
-#: .\business_policy\payment.py:55
+#: business_policy/payment.py:55
 msgid "PAYMENT/PAYPAL/SECRET"
 msgstr ""
 
-#: .\business_policy\payment.py:67 .\business_policy\payment.py:92
+#: business_policy/payment.py:67 business_policy/payment.py:92
 msgid "PAYMENT/SECRET_KEY"
 msgstr ""
 
-#: .\business_policy\payment.py:104
+#: business_policy/payment.py:104
 msgid "PAYMENT/FIRST_DATA/STORE_ID"
 msgstr ""
 
-#: .\business_policy\payment.py:105
+#: business_policy/payment.py:105
 msgid "PAYMENT/FIRST_DATA/SHARE_SECRET"
 msgstr ""
 
-#: .\business_policy\payment.py:107
+#: business_policy/payment.py:107
 msgid "PAYMENT/FIRST_DATA/TIME_ZONE"
 msgstr "地址: 8 Burn Road #15-13, Singapore 369977"
 
-#: .\lib\helper\order_helper.py:445 .\lib\helper\order_helper.py:586
-#: .\lib\i18n\email\delivery_comfirm_mail.py:21
-#: .\lib\i18n\email\order_comfirm_mail.py:24
+#: lib/helper/order_helper.py:432 lib/helper/order_helper.py:573
+#: lib/i18n/email/delivery_comfirm_mail.py:26
+#: lib/i18n/email/order_comfirm_mail.py:24
 msgid "EMAIL/DELIVERY_CONFIRM/ORDER_NO"
 msgstr "订单号。"
 
-#: .\lib\helper\order_helper.py:449 .\lib\helper\order_helper.py:590
-#: .\lib\i18n\email\delivery_comfirm_mail.py:24
-#: .\lib\i18n\email\order_comfirm_mail.py:28
+#: lib/helper/order_helper.py:436 lib/helper/order_helper.py:577
+#: lib/i18n/email/delivery_comfirm_mail.py:29
+#: lib/i18n/email/order_comfirm_mail.py:28
 msgid "EMAIL/DELIVERY_CONFIRM/ORDER_INFO"
 msgstr "订单信息"
 
-#: .\lib\helper\order_helper.py:455 .\lib\helper\order_helper.py:596
-#: .\lib\i18n\email\order_comfirm_mail.py:34
+#: lib/helper/order_helper.py:442 lib/helper/order_helper.py:583
+#: lib/i18n/email/order_comfirm_mail.py:34
 msgid "EMAIL/DELIVERY_CONFIRM/CAMPAIGN_TITLE"
 msgstr "活动名称"
 
-#: .\lib\helper\order_helper.py:460 .\lib\helper\order_helper.py:601
-#: .\lib\i18n\email\delivery_comfirm_mail.py:30
-#: .\lib\i18n\email\order_comfirm_mail.py:37
+#: lib/helper/order_helper.py:447 lib/helper/order_helper.py:588
+#: lib/i18n/email/delivery_comfirm_mail.py:35
+#: lib/i18n/email/order_comfirm_mail.py:37
 msgid "EMAIL/DELIVERY_CONFIRM/ORDER_DATE"
 msgstr "订单日期"
 
-#: .\lib\helper\order_helper.py:465 .\lib\i18n\email\order_comfirm_mail.py:42
+#: lib/helper/order_helper.py:452 lib/i18n/email/order_comfirm_mail.py:42
 msgid "EMAIL/DELIVERY_CONFIRM/BUYER"
 msgstr "买家"
 
-#: .\lib\helper\order_helper.py:470 .\lib\helper\order_helper.py:604
-#: .\lib\i18n\email\order_comfirm_mail.py:47
+#: lib/helper/order_helper.py:457 lib/helper/order_helper.py:591
+#: lib/i18n/email/order_comfirm_mail.py:47
 msgid "EMAIL/DELIVERY_CONFIRM/RECEIVER"
 msgstr "收货人"
 
-#: .\lib\helper\order_helper.py:473 .\lib\helper\order_helper.py:607
-#: .\lib\i18n\email\order_comfirm_mail.py:50
+#: lib/helper/order_helper.py:460 lib/helper/order_helper.py:594
+#: lib/helper/xlsx_helper.py:115 lib/i18n/email/order_comfirm_mail.py:50
 msgid "REPORT/COLUMN_TITLE/SHIPPING_PHONE"
 msgstr "客户电话"
 
-#: .\lib\helper\order_helper.py:479 .\lib\helper\order_helper.py:623
-#: .\lib\i18n\email\order_comfirm_mail.py:55
+#: lib/helper/order_helper.py:466 lib/helper/order_helper.py:610
+#: lib/helper/xlsx_helper.py:123 lib/i18n/email/order_comfirm_mail.py:55
 msgid "REPORT/COLUMN_TITLE/PICK_UP_STORE"
 msgstr "自取店家"
 
-#: .\lib\helper\order_helper.py:484 .\lib\helper\order_helper.py:627
-#: .\lib\i18n\email\delivery_comfirm_mail.py:106
-#: .\lib\i18n\email\order_comfirm_mail.py:60
+#: lib/helper/order_helper.py:471 lib/helper/order_helper.py:614
+#: lib/i18n/email/delivery_comfirm_mail.py:111
+#: lib/i18n/email/order_comfirm_mail.py:60
 msgid "EMAIL/DELIVERY_CONFIRM/DELIVERY_ADDRESS"
 msgstr "收货地址"
 
-#: .\lib\helper\order_helper.py:491 .\lib\i18n\email\order_comfirm_mail.py:72
+#: lib/helper/order_helper.py:478 lib/helper/xlsx_helper.py:126
+#: lib/i18n/email/order_comfirm_mail.py:72
 msgid "REPORT/COLUMN_TITLE/PAYMENT_METHOD"
 msgstr "付款方式"
 
-#: .\lib\helper\order_helper.py:539 .\lib\helper\order_helper.py:690
-#: .\lib\i18n\email\delivery_comfirm_mail.py:77
-#: .\lib\i18n\email\order_comfirm_mail.py:173
+#: lib/helper/order_helper.py:526 lib/helper/order_helper.py:677
+#: lib/i18n/email/delivery_comfirm_mail.py:82
+#: lib/i18n/email/order_comfirm_mail.py:173
 msgid "EMAIL/DELIVERY_CONFIRM/SUBTOTAL"
 msgstr "小计"
 
-#: .\lib\helper\order_helper.py:545 .\lib\helper\order_helper.py:696
-#: .\lib\i18n\email\delivery_comfirm_mail.py:83
-#: .\lib\i18n\email\order_comfirm_mail.py:179
+#: lib/helper/order_helper.py:532 lib/helper/order_helper.py:683
+#: lib/i18n/email/delivery_comfirm_mail.py:88
+#: lib/i18n/email/order_comfirm_mail.py:179
 msgid "EMAIL/DELIVERY_CONFIRM/DELIVERY_CHARGE"
 msgstr "运费"
 
-#: .\lib\helper\order_helper.py:551 .\lib\helper\order_helper.py:702
-#: .\lib\i18n\email\delivery_comfirm_mail.py:89
-#: .\lib\i18n\email\order_comfirm_mail.py:185
+#: lib/helper/order_helper.py:538 lib/helper/order_helper.py:689
+#: lib/i18n/email/delivery_comfirm_mail.py:94
+#: lib/i18n/email/order_comfirm_mail.py:185
 msgid "EMAIL/DELIVERY_CONFIRM/TOTAL"
 msgstr "总计"
 
-#: .\lib\helper\order_helper.py:564 .\lib\helper\order_helper.py:714
-#: .\lib\i18n\email\delivery_comfirm_mail.py:116
-#: .\lib\i18n\email\order_comfirm_mail.py:197
+#: lib/helper/order_helper.py:551 lib/helper/order_helper.py:701
+#: lib/i18n/email/delivery_comfirm_mail.py:121
+#: lib/i18n/email/order_comfirm_mail.py:197
 msgid "EMAIL/DELIVERY_CONFIRM/DO_NOT_REPLY_1"
 msgstr "此邮件为系统自动发送。请勿回覆。"
 
-#: .\lib\helper\order_helper.py:565 .\lib\helper\order_helper.py:715
-#: .\lib\i18n\email\delivery_comfirm_mail.py:117
-#: .\lib\i18n\email\order_comfirm_mail.py:198
+#: lib/helper/order_helper.py:552 lib/helper/order_helper.py:702
+#: lib/i18n/email/delivery_comfirm_mail.py:122
+#: lib/i18n/email/order_comfirm_mail.py:198
 msgid "EMAIL/DELIVERY_CONFIRM/DO_NOT_REPLY_2"
 msgstr "如有订单相关问题或意见，请联系卖家的电子邮件，谢谢!"
 
-#: .\lib\helper\order_helper.py:571
+#: lib/helper/order_helper.py:558
 #, python-brace-format
 msgid "EMAIL/ORDER_PLACED/SUBJECT{order_id}{campaign_title}"
 msgstr "感谢您的订单！您来自 {campaign_title} 的订单 #{order_id} 已下單！"
 
-#: .\lib\helper\order_helper.py:585 .\lib\i18n\email\order_comfirm_mail.py:23
+#: lib/helper/order_helper.py:572
 msgid "EMAIL/ORDER_PLACED/TITLE"
 msgstr "您的订单已成功下单"
 
-#: .\lib\helper\order_helper.py:610
+#: lib/helper/order_helper.py:597
 msgid "EMAIL/ORDER_CONFIRM/SHIPPING_METHOD"
 msgstr "邮寄方式"
 
-#: .\lib\helper\order_helper.py:642
+#: lib/helper/order_helper.py:629
 msgid "EMAIL/ORDER_CONFIRM/PROCESS_PAYMENT"
 msgstr "前往支付"
 
-#: .\lib\helper\xlsx_helper.py:159
+#: lib/helper/xlsx_helper.py:111
+msgid "REPORT/COLUMN_TITLE/ID"
+msgstr "编号"
+
+#: lib/helper/xlsx_helper.py:112
+msgid "REPORT/COLUMN_TITLE/ORDER_DATE"
+msgstr "订单日期"
+
+#: lib/helper/xlsx_helper.py:113
+msgid "REPORT/COLUMN_TITLE/PLATFORM"
+msgstr "使用平台"
+
+#: lib/helper/xlsx_helper.py:114
+msgid "REPORT/COLUMN_TITLE/CUSTOMER_NAME"
+msgstr "客户名称"
+
+#: lib/helper/xlsx_helper.py:116
+msgid "REPORT/COLUMN_TITLE/EMAIL"
+msgstr "E-mail"
+
+#: lib/helper/xlsx_helper.py:117
+msgid "REPORT/COLUMN_TITLE/SHIPPING_METHOD"
+msgstr "运送方式"
+
+#: lib/helper/xlsx_helper.py:118
+msgid "REPORT/COLUMN_TITLE/SHIPPING_OPTION"
+msgstr "运送选项"
+
+#: lib/helper/xlsx_helper.py:119
+msgid "REPORT/COLUMN_TITLE/SHIPPING_ADDRESS_1"
+msgstr "收件住址"
+
+#: lib/helper/xlsx_helper.py:120
+msgid "REPORT/COLUMN_TITLE/LOCATION"
+msgstr "地点"
+
+#: lib/helper/xlsx_helper.py:121
+msgid "REPORT/COLUMN_TITLE/REGION"
+msgstr "区域"
+
+#: lib/helper/xlsx_helper.py:122
+msgid "REPORT/COLUMN_TITLE/POSTCODE"
+msgstr "邮递区号"
+
+#: lib/helper/xlsx_helper.py:124
+msgid "REPORT/COLUMN_TITLE/PICK_UP_ADDRESS"
+msgstr "自取地址"
+
+#: lib/helper/xlsx_helper.py:125
+msgid "REPORT/COLUMN_TITLE/REMARK"
+msgstr "注记"
+
+#: lib/helper/xlsx_helper.py:127
+msgid "REPORT/COLUMN_TITLE/PAYMENT_STATUS"
+msgstr "付款状态"
+
+#: lib/helper/xlsx_helper.py:128
+msgid "REPORT/COLUMN_TITLE/PAYMENT_RECORD"
+msgstr "付款证明"
+
+#: lib/helper/xlsx_helper.py:129
+msgid "REPORT/COLUMN_TITLE/TOTAL"
+msgstr "总金额"
+
+#: lib/helper/xlsx_helper.py:161
 msgid "REPORT/SECTION_TITLE/TITLE"
 msgstr "订单报表"
 
-#: .\lib\helper\xlsx_helper.py:162
+#: lib/helper/xlsx_helper.py:164
 msgid "REPORT/SECTION_TITLE/CONTACT_INFO"
 msgstr "联络资讯"
 
-#: .\lib\helper\xlsx_helper.py:163
+#: lib/helper/xlsx_helper.py:165
 msgid "REPORT/SECTION_TITLE/DELIVERY_INFO"
 msgstr "出货资讯"
 
-#: .\lib\helper\xlsx_helper.py:164 .\lib\i18n\email\order_comfirm_mail.py:68
+#: lib/helper/xlsx_helper.py:166 lib/i18n/email/order_comfirm_mail.py:68
 msgid "REPORT/SECTION_TITLE/PAYMENT_INFO"
 msgstr "付款资讯"
 
-#: .\lib\helper\xlsx_helper.py:165
+#: lib/helper/xlsx_helper.py:167
 msgid "REPORT/SECTION_TITLE/ORDER_INFO"
 msgstr "订单资讯"
 
-#: .\lib\i18n\campaign_announcement.py:29
+#: lib/i18n/campaign_announcement.py:29
 #, python-brace-format
 msgid "QUIZ_GAME_WINNER{customer_name}{product_name}"
 msgstr ""
 "恭喜 {customer_name} 得奖，获得 {product_name}！请至购物车确认您的奖品。"
 
-#: .\lib\i18n\email\delivery_comfirm_mail.py:33
-#: .\lib\i18n\email\delivery_comfirm_mail.py:36
+#: lib/i18n/cart_product_request.py:64
+#, fuzzy, python-brace-format
+#| msgid "ITEM_INFO{order_code}{qty}{result}"
+msgid "ITEM_INFO{order_code}{result}"
+msgstr "{result}商品 {order_code} <{qty} 件>。"
+
+#: lib/i18n/email/delivery_comfirm_mail.py:10
+#, fuzzy, python-brace-format
+#| msgid "EMAIL/ORDER_CONFIRM/SUBJECT{order_id}{campaign_title}"
+msgid "EMAIL/DELIVERY_CONFIRM/SUBJECT{order_id}{campaign_title}"
+msgstr "感谢您的订单！您来自 {campaign_title} 的订单 #{order_id} 已确认！"
+
+#: lib/i18n/email/delivery_comfirm_mail.py:25
+#, fuzzy
+#| msgid "EMAIL/DELIVERY_CONFIRM/TOTAL"
+msgid "EMAIL/DELIVERY_CONFIRM/TITLE"
+msgstr "总计"
+
+#: lib/i18n/email/delivery_comfirm_mail.py:38
+#: lib/i18n/email/delivery_comfirm_mail.py:41
 msgid "EMAIL/DELIVERY_CONFIRM/SELLER"
 msgstr "卖家"
 
-#: .\lib\i18n\email\delivery_comfirm_mail.py:98
+#: lib/i18n/email/delivery_comfirm_mail.py:103
 msgid "EMAIL/DELIVERY_CONFIRM/SHIPPING_INFO"
 msgstr "发货信息"
 
-#: .\lib\i18n\email\delivery_comfirm_mail.py:103
+#: lib/i18n/email/delivery_comfirm_mail.py:108
 msgid "EMAIL/DELIVERY_CONFIRM/SHIPPING_DATE"
 msgstr "发货日期"
 
-#: .\lib\i18n\email\delivery_comfirm_mail.py:109
+#: lib/i18n/email/delivery_comfirm_mail.py:114
 msgid "EMAIL/DELIVERY_CONFIRM/REMARK"
 msgstr "备注"
 
-#: .\lib\i18n\email\order_comfirm_mail.py:9
+#: lib/i18n/email/order_comfirm_mail.py:9
 #, python-brace-format
 msgid "EMAIL/ORDER_CONFIRM/SUBJECT{order_id}{campaign_title}"
 msgstr "感谢您的订单！您来自 {campaign_title} 的订单 #{order_id} 已确认！"
 
-#: .\lib\i18n\email\order_comfirm_mail.py:75
+#: lib/i18n/email/order_comfirm_mail.py:23
+#, fuzzy
+#| msgid "EMAIL/ORDER_CONFIRM/TOTAL"
+msgid "EMAIL/ORDER_CONFIRM/TITLE"
+msgstr "总计"
+
+#: lib/i18n/email/order_comfirm_mail.py:75
 msgid "EMAIL/ORDER_CONFIRM/ACCOUNT_MODE"
 msgstr "银行/金融服务"
 
-#: .\lib\i18n\email\order_comfirm_mail.py:78
+#: lib/i18n/email/order_comfirm_mail.py:78
 msgid "EMAIL/ORDER_CONFIRM/SELLER_ACCOUNT"
 msgstr "收款银行账户"
 
-#: .\lib\i18n\email\order_comfirm_mail.py:83
+#: lib/i18n/email/order_comfirm_mail.py:83
 msgid "EMAIL/ORDER_CONFIRM/LAST_FIVE_DIGIT"
 msgstr "支付账戶末五码"
 
-#: .\lib\i18n\email\order_comfirm_mail.py:95
+#: lib/i18n/email/order_comfirm_mail.py:95
 msgid "EMAIL/ORDER_CONFIRM/SELLER_CONTACT"
 msgstr "联络卖家营销号"
 
-#: .\templates\email_reset_password_link.html:12
-#: .\templates\reset_password_success_email.html:12
+#: templates/email_reset_password_link.html:12
+#: templates/reset_password_success_email.html:12
 msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT1"
 msgstr "您好 "
 
-#: .\templates\email_reset_password_link.html:15
+#: templates/email_reset_password_link.html:15
 msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT2"
 msgstr ""
 "我們收到重設Live Show Seller 密碼的要求。請點擊下方連結, 即可重新設定。"
 
-#: .\templates\email_reset_password_link.html:18
+#: templates/email_reset_password_link.html:18
 msgid "EMAIL/PASSWORD_RESET_LINK/BUTTON"
 msgstr "重設密碼"
 
-#: .\templates\email_reset_password_link.html:21
+#: templates/email_reset_password_link.html:21
 msgid "EMAIL/IF_YOU_CAN_NOT_CLICK"
 msgstr ""
 
-#: .\templates\email_reset_password_link.html:23
+#: templates/email_reset_password_link.html:23
 msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT3"
 msgstr ""
 "若您忽略此封信件, 原本的密碼不會有所變更。若您並沒有要求重設密碼, 請與我們聯"
 "繫。"
 
-#: .\templates\email_reset_password_link.html:25
-#: .\templates\reset_password_success_email.html:17
+#: templates/email_reset_password_link.html:25
+#: templates/reset_password_success_email.html:17
 msgid "CONTACT_INFO/EMAIL"
 msgstr "電子信箱: app@algotech.app"
 
-#: .\templates\email_reset_password_link.html:26
+#: templates/email_reset_password_link.html:26
 msgid "CONTACT_INFO/PHONE"
 msgstr "聯絡電話: +65 9489 2086"
 
-#: .\templates\email_reset_password_link.html:27
+#: templates/email_reset_password_link.html:27
 msgid "CONTACT_INFO/ADDRESS"
 msgstr ""
 
-#: .\templates\register_activation.html:10
+#: templates/register_activation.html:10
 msgid "TITLE_ACTIVATION"
 msgstr ""
 
-#: .\templates\register_activation.html:18
+#: templates/register_activation.html:18
 msgid "YOUR_ACTIVATION"
 msgstr ""
 
-#: .\templates\register_activation.html:18
+#: templates/register_activation.html:18
 msgid "PLAN_ACCOUNT_ACTIVATION"
 msgstr ""
 
-#: .\templates\register_activation.html:19
+#: templates/register_activation.html:19
 msgid "LOGIN_ACTIVATION"
 msgstr ""
 
-#: .\templates\register_activation.html:19
-#: .\templates\register_confirmation.html:31
+#: templates/register_activation.html:19
+#: templates/register_confirmation.html:31
 msgid "LOGIN_2_WELCOME"
 msgstr ""
 
-#: .\templates\register_activation.html:27
+#: templates/register_activation.html:27
 msgid "STEP1_ACTIVATION"
 msgstr ""
 
-#: .\templates\register_activation.html:28
+#: templates/register_activation.html:28
 msgid "STEP2_ACTIVATION"
 msgstr ""
 
-#: .\templates\register_activation.html:29
+#: templates/register_activation.html:29
 msgid "STEP3_ACTIVATION"
 msgstr ""
 
-#: .\templates\register_activation.html:29
+#: templates/register_activation.html:29
 msgid "STEP4_ACTIVATION"
 msgstr ""
 
-#: .\templates\register_activation.html:33
+#: templates/register_activation.html:33
 msgid "REGARDS_ACTIVATION"
 msgstr ""
 
-#: .\templates\register_activation.html:34
-#: .\templates\register_confirmation.html:47
+#: templates/register_activation.html:34
+#: templates/register_confirmation.html:47
 msgid "CONGRATS_3_WELCOME"
 msgstr ""
 
-#: .\templates\register_confirmation.html:22
+#: templates/register_confirmation.html:22
 msgid "TITLE_WELCOME"
 msgstr ""
 
-#: .\templates\register_confirmation.html:30
+#: templates/register_confirmation.html:30
 msgid "THANKS_PHRASE_WELCOME"
 msgstr ""
 
-#: .\templates\register_confirmation.html:31
+#: templates/register_confirmation.html:31
 msgid "LOGIN_1_WELCOME"
 msgstr ""
 
-#: .\templates\register_confirmation.html:31
+#: templates/register_confirmation.html:31
 msgid "LOGIN_3_WELCOME"
 msgstr ""
 
-#: .\templates\register_confirmation.html:39
+#: templates/register_confirmation.html:39
 msgid "PLAN_CHOOSE_1_WELCOME"
 msgstr ""
 
-#: .\templates\register_confirmation.html:40
+#: templates/register_confirmation.html:40
 msgid "PLAN_CHOOSE_2_WELCOME"
 msgstr ""
 
-#: .\templates\register_confirmation.html:41
+#: templates/register_confirmation.html:41
 msgid "PLAN_CHOOSE_3_WELCOME"
 msgstr ""
 
-#: .\templates\register_confirmation.html:41
+#: templates/register_confirmation.html:41
 msgid "PLAN_CHOOSE_4_WELCOME"
 msgstr ""
 
-#: .\templates\register_confirmation.html:45
+#: templates/register_confirmation.html:45
 msgid "CONGRATS_1_WELCOME"
 msgstr ""
 
-#: .\templates\register_confirmation.html:46
+#: templates/register_confirmation.html:46
 msgid "CONGRATS_2_WELCOME"
 msgstr ""
 
-#: .\templates\reset_password_success_email.html:15
+#: templates/reset_password_success_email.html:15
 #, fuzzy
 #| msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT1"
 msgid "EMAIL/PASSWORD_RESET_SUCCESS/CONTENT1"
 msgstr "您好 "
 
-#: .\templates\reset_password_success_email.html:15
+#: templates/reset_password_success_email.html:15
 #, fuzzy
 #| msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT2"
 msgid "EMAIL/PASSWORD_RESET_SUCCESS/CONTENT2"
 msgstr ""
 "我們收到重設Live Show Seller 密碼的要求。請點擊下方連結, 即可重新設定。"
-
-#~ msgid "EMAIL/ORDER_CONFIRM/TOTAL"
-#~ msgstr "总计"
 
 #~ msgid "EMAIL/ORDER_CONFIRM/PAYMENT_METHOD"
 #~ msgstr "支付方式"
@@ -585,51 +667,3 @@ msgstr ""
 
 #~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_CHARGE"
 #~ msgstr "运费"
-
-#~ msgid "REPORT/COLUMN_TITLE/ID"
-#~ msgstr "编号"
-
-#~ msgid "REPORT/COLUMN_TITLE/ORDER_DATE"
-#~ msgstr "订单日期"
-
-#~ msgid "REPORT/COLUMN_TITLE/PLATFORM"
-#~ msgstr "使用平台"
-
-#~ msgid "REPORT/COLUMN_TITLE/CUSTOMER_NAME"
-#~ msgstr "客户名称"
-
-#~ msgid "REPORT/COLUMN_TITLE/EMAIL"
-#~ msgstr "E-mail"
-
-#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_METHOD"
-#~ msgstr "运送方式"
-
-#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_OPTION"
-#~ msgstr "运送选项"
-
-#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_ADDRESS_1"
-#~ msgstr "收件住址"
-
-#~ msgid "REPORT/COLUMN_TITLE/LOCATION"
-#~ msgstr "地点"
-
-#~ msgid "REPORT/COLUMN_TITLE/REGION"
-#~ msgstr "区域"
-
-#~ msgid "REPORT/COLUMN_TITLE/POSTCODE"
-#~ msgstr "邮递区号"
-
-#~ msgid "REPORT/COLUMN_TITLE/PICK_UP_ADDRESS"
-#~ msgstr "自取地址"
-
-#~ msgid "REPORT/COLUMN_TITLE/REMARK"
-#~ msgstr "注记"
-
-#~ msgid "REPORT/COLUMN_TITLE/PAYMENT_STATUS"
-#~ msgstr "付款状态"
-
-#~ msgid "REPORT/COLUMN_TITLE/PAYMENT_RECORD"
-#~ msgstr "付款证明"
-
-#~ msgid "REPORT/COLUMN_TITLE/TOTAL"
-#~ msgstr "总金额"

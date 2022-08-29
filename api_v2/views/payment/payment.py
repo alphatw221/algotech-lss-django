@@ -59,7 +59,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             order,
             campaign.decimal_places,
             campaign.price_unit,
-            success_url=settings.GCP_API_LOADBALANCER_URL + '/api/v2/payment/strip/callback/success?session_id={CHECKOUT_SESSION_ID}&order_oid=' + str(order_oid), 
+            success_url=settings.GCP_API_LOADBALANCER_URL + '/api/v2/payment/stripe/callback/success?session_id={CHECKOUT_SESSION_ID}&order_oid=' + str(order_oid), 
             cancel_url=f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{str(order_oid)}/payment')
 
         if not checkout_session:
