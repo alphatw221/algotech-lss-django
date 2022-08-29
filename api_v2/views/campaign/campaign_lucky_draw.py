@@ -8,7 +8,7 @@ from rest_framework.parsers import MultiPartParser
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 
-from api import models
+from api import models, rule
 import lib, json
 
 
@@ -54,11 +54,12 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
 
         data = json.loads(data)
         type = data.get('type', '')
+        prize = data.get('prize', {})
 
-        if type not in models.campaign.campaign_lucky_draw.TYPE_CHOICES:
-            raise lib.error_handle.error.api_error.ApiVerifyError('invalid_lucky_draw_type')
-        elif type == models.campaign.campaign_lucky_draw.TYPE_PRODUCT and data.get('campaign_product', '') == '': 
-            raise lib.error_handle.error.api_error.ApiVerifyError('invalid_lucky_draw_product')
+        
+        ret = rule.rule_checker.lucky_draw_rule_checker.LuckyDrawCreateRuleChecker.check(**{
+            'type': type, 'prize': prize, 'campaign': campaign
+        })
         
         prize = lib.util.verify.Verify.get_campaign_product_from_campaign(campaign, int(data.get('prize', {}).get('id', 0)))
         if animation and data.get('path', '') == '':
@@ -100,11 +101,11 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
 
         data = json.loads(data)
         type = data.get('type', '')
+        prize = data.get('prize', {})
 
-        if type not in models.campaign.campaign_lucky_draw.TYPE_CHOICES:
-            raise lib.error_handle.error.api_error.ApiVerifyError('invalid_lucky_draw_type')
-        elif type == models.campaign.campaign_lucky_draw.TYPE_PRODUCT and data.get('campaign_product', '') == '': 
-            raise lib.error_handle.error.api_error.ApiVerifyError('invalid_lucky_draw_product')
+        ret = rule.rule_checker.lucky_draw_rule_checker.LuckyDrawCreateRuleChecker.check(**{
+            'type': type, 'prize': prize, 'campaign': campaign
+        })
 
         prize = lib.util.verify.Verify.get_campaign_product_from_campaign(campaign, int(data.get('prize', {}).get('id', 0)))
         if animation and data.get('path', '') == '':
