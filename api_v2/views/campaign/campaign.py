@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 
 from datetime import datetime
-from api import models
+from api import models, rule
 import api
 import lib
 import json
@@ -86,7 +86,11 @@ class CampaignViewSet(viewsets.ModelViewSet):
     def create_campaign(self, request):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
-
+        
+        ret = rule.rule_checker.user_subscription_rule_checker.CreateCampaignRuleChecker.check(**{
+            'api_user': api_user, 'user_subscription': user_subscription
+        })
+        
         campaignData, = lib.util.getter.getdata(request, ('data',), required=True)
         campaignData = json.loads(campaignData)
 
@@ -359,9 +363,9 @@ class CampaignViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['PUT'], url_path=r'live/update', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def update_campaign_live_data(self, request, pk):
-        api_user, platform, platform_id, post_id = \
-            lib.util.getter.getparams(request, ("platform", "platform_id", "post_id"), with_user=True, seller=True)
-
+        platform, platform_id, post_id, username = \
+            lib.util.getter.getdata(request, ("platform", "platform_id", "post_id", "username"), required=False)
+        api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = \
             lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, pk)
@@ -385,6 +389,10 @@ class CampaignViewSet(viewsets.ModelViewSet):
             twitch_channel = lib.util.verify.Verify.get_twitch_channel_from_user_subscription(user_subscription, platform_id)
             campaign.twitch_campaign['channel_name'] = twitch_channel.name
             campaign.twitch_channel = twitch_channel
+        elif platform == 'tiktok':
+            # tiktok_account = lib.util.verify.Verify.get_tiktok_channel_from_user_subscription(user_subscription, platform_id)
+            campaign.tiktok_campaign['username'] = username
+            # campaign.tiktok_account = tiktok_account
         campaign.save()
         # return Response(models.campaign.campaign.CampaignSerializerRetreive(campaign).data, status=status.HTTP_200_OK)
         return Response(models.campaign.campaign.CampaignSerializer(campaign).data, status=status.HTTP_200_OK)

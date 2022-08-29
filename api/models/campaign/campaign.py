@@ -134,6 +134,10 @@ class TwitchCampaignSerializer(serializers.Serializer):
     broadcaster_id = serializers.CharField(required=False, default="", allow_blank=True)
     moderator_id = serializers.CharField(required=False, default="", allow_blank=True)
 
+class TiktokCampaignSerializer(serializers.Serializer):
+    username = serializers.CharField(required=False, default="", allow_blank=True)
+
+
 class CampaignSerializer(serializers.ModelSerializer):
     class Meta:
         model = Campaign
@@ -148,6 +152,7 @@ class CampaignSerializer(serializers.ModelSerializer):
     instagram_campaign = InstagramCampaignSerializer(default=dict)
     twitch_channel = TwitchChannelInfoSerializer(default=dict)
     twitch_campaign = TwitchCampaignSerializer(default=dict)
+    tiktok_campaign = TiktokCampaignSerializer(default=dict)
 
     meta = serializers.JSONField(default=dict)
     meta_payment = serializers.JSONField(default=dict)

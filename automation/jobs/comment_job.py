@@ -92,15 +92,15 @@ def comment_responding(platform_name, platform_instance_data, campaign_data, use
     else:
         shopping_cart_info, info_in_pm_notice = lib.i18n.cart_product_request.get_additional_text(pre_order, lang=campaign_data.get('lang'))
 
+    if state not in [ lib.helper.order_helper.RequestState.ADDED, 
+            lib.helper.order_helper.RequestState.UPDATED, 
+            lib.helper.order_helper.RequestState.DELETED]:
+            shopping_cart_info, info_in_pm_notice = "", ""
+            
     if platform_name == 'facebook':
 
         text = lib.i18n.cart_product_request.get_request_response(
             state, campaign_product, qty, lang=campaign_data.get('lang'))
-
-        if state not in [ lib.helper.order_helper.RequestState.ADDED, 
-            lib.helper.order_helper.RequestState.UPDATED, 
-            lib.helper.order_helper.RequestState.DELETED]:
-            shopping_cart_info, info_in_pm_notice = "", ""
             
         code, ret = service.facebook.post.post_page_comment_on_comment( platform_instance_data.get('token'), comment['id'], text+info_in_pm_notice)
         if code!=200:
@@ -113,13 +113,10 @@ def comment_responding(platform_name, platform_instance_data, campaign_data, use
         text = lib.i18n.cart_product_request.get_request_response(
         state, campaign_product, qty, lang=campaign_data.get('lang'))
 
-        # shopping_cart_info, info_in_pm_notice = lib.i18n.cart_product_request.get_additional_text(pre_order,
-        #                                                                  lang=campaign_data.get('lang'))
-        
-
         customer_name =comment['customer_name']
-        link = settings.SHOPPING_CART_URL + '/' + str(pre_order._id)
-        text = f"@{customer_name}"+ text+f"Shopping Cart: {link}"
+        
+        text = f"@{customer_name}"+ text + shopping_cart_info
+        
         live_chat_id = comment.get("live_chat_id")
         
         if not live_chat_id:
@@ -137,9 +134,6 @@ def comment_responding(platform_name, platform_instance_data, campaign_data, use
         text = lib.i18n.cart_product_request.get_request_response(
             state, campaign_product, qty, lang=campaign_data.get('lang'))
 
-        # shopping_cart_info, info_in_pm_notice = lib.i18n.cart_product_request.get_additional_text(pre_order,
-        #                                                                  lang=campaign_data.get('lang'))
-       
         code, ret =service.instagram.post.private_message( platform_instance_data.get('token'), comment['id'], text+shopping_cart_info)
         if code!=200:
             print("response", ret)
