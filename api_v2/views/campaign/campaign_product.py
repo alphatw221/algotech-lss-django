@@ -192,11 +192,12 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'], url_path=r'seller/list', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def seller_retrieve_campaign_products(self, request):
-        api_user, campaign_id, category = lib.util.getter.getparams(request, ("campaign_id", "category"), with_user=True, seller=True)
+        api_user, campaign_id, category, type = lib.util.getter.getparams(request, ("campaign_id", "category", "type"), with_user=True, seller=True)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
 
         kwargs = {'tag__icontains':category} if category not in ['undefined', '', None, 'null'] else {}
+        kwargs = {'type__in':['product','product-fast']} if type not in ['undefined', '', None, 'null'] and type=='product' else {}
         queryset = campaign.products.filter(**kwargs)
         page = self.paginate_queryset(queryset)
         if page is not None:
