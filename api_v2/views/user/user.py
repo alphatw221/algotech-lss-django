@@ -60,6 +60,32 @@ class UserViewSet(viewsets.ModelViewSet):
         api_user = lib.util.verify.Verify.get_customer_user(request)
         return Response(models.user.user.UserSerializerAccountInfo(api_user).data, status=status.HTTP_200_OK)    
 
+#-----------------------------------------Dealer----------------------------------------------------------------------------------------------
+
+    @action(detail=False, methods=['POST'], url_path=r'dealer/login', permission_classes=(IsAdminUser,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def dealer_login(self, request):
+        email, password = lib.util.getter.getdata(request, ("email","password",), required=True)
+        api_user = lib.util.verify.Verify.get_customer_user(request)
+        dealer_user_subscription = lib.util.verify.Verify.get_dealer_user_subscription_from_api_user(api_user)
+        if not dealer_user_subscription:
+            return Response({"message":"not_dealer_account"}, status=status.HTTP_401_UNAUTHORIZED)
+        token = lib.helper.login_helper.GeneralLogin.get_token(email, password)
+        if not token:
+            return Response({"message":"email_or_password_incorrect"}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response(token, status=status.HTTP_200_OK)
+
+#-----------------------------------------Admin----------------------------------------------------------------------------------------------
+
+    @action(detail=False, methods=['POST'], url_path=r'admin/login', permission_classes=())
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def admin_login(self, request):
+        email, password = lib.util.getter.getdata(request, ("email","password",), required=True)
+        token = lib.helper.login_helper.GeneralLogin.get_token(email, password)
+        if not token:
+            return Response({"message":"email_or_password_incorrect"}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response(token, status=status.HTTP_200_OK)
+
 #-----------------------------------------seller----------------------------------------------------------------------------------------------
     
     @action(detail=False, methods=['POST'], url_path=r'seller/login/facebook', permission_classes=())
