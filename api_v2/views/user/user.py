@@ -3,6 +3,7 @@ from django.contrib.auth.models import User as AuthUser
 from django.conf import settings
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
+from lib.util import verify
 
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -22,10 +23,12 @@ from automation import jobs
 import service
 import lib
 import business_policy
-from backend.i18n.email.subject import i18n_get_reset_password_success_mail_subject, i18n_get_reset_password_mail_subject #temp
+from backend.i18n.email.subject import i18n_get_reset_password_success_mail_subject, i18n_get_reset_password_mail_subject, i18n_get_verify_code_subject #temp
 
 from datetime import datetime, timedelta
 import pytz
+import random
+import string
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -75,6 +78,18 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response({"message":"email_or_password_incorrect"}, status=status.HTTP_401_UNAUTHORIZED)
         return Response(token, status=status.HTTP_200_OK)
 
+    @action(detail=False, methods=['POST'], url_path=r'dealer/verify_code')
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def dealer_verify_code(self, request):
+        email, = lib.util.getter.getdata(request, ("user_email",), required=True)
+        api_user = models.user.user.User.objects.get(email=email,type='user')
+        code = string.digits
+        code = ''.join(random.choice(code) for i in range(4))
+
+        jobs.send_email_job.send_email_job(i18n_get_verify_code_subject(lang=api_user.lang),email, 'email_verification_code.html', parameters={"verify_code":code}, lang=api_user.lang)
+
+        return Response(code, status=status.HTTP_200_OK)
+
 #-----------------------------------------Admin----------------------------------------------------------------------------------------------
 
     @action(detail=False, methods=['POST'], url_path=r'admin/login', permission_classes=())
@@ -84,7 +99,14 @@ class UserViewSet(viewsets.ModelViewSet):
         token = lib.helper.login_helper.GeneralLogin.get_token(email, password)
         if not token:
             return Response({"message":"email_or_password_incorrect"}, status=status.HTTP_401_UNAUTHORIZED)
-        return Response(token, status=status.HTTP_200_OK)
+        code = string.digits
+        code = ''.join(random.choice(code) for i in range(4))
+
+        api_user = models.user.user.User.objects.get(email=email,type='user')
+
+        jobs.send_email_job.send_email_job(i18n_get_verify_code_subject(lang=api_user.lang),email, 'email_verification_code.html', parameters={"verify_code":code}, lang=api_user.lang)
+
+        return Response({'token':token,'verify_code':code} , status=status.HTTP_200_OK)
 
 #-----------------------------------------seller----------------------------------------------------------------------------------------------
     
