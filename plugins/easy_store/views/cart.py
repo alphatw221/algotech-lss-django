@@ -12,7 +12,8 @@ from .. import service as easy_store_service
 from automation import jobs
 
 PLUGIN_EASY_STORE = 'easy_store'
-class CartViewSet(viewsets.ModelViewSet):
+
+class CartViewSet(viewsets.GenericViewSet):
     queryset = models.order.pre_order.PreOrder.objects.none()
 
     @action(detail=False, methods=['GET'], url_path=r'gateway/(?P<cart_oid>[^/.]+)', permission_classes=(), authentication_classes=[])

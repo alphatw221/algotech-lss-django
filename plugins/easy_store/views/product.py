@@ -11,7 +11,7 @@ import service
 from automation import jobs
 
 PLUGIN_EASY_STORE = 'easy_store'
-class ProductViewSet(viewsets.ModelViewSet):
+class ProductViewSet(viewsets.GenericViewSet):
     queryset = models.product.product.Product.objects.all()
 
     # @action(detail=False, methods=['GET'], url_path=r'export', permission_classes=(IsAuthenticated,))
