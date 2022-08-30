@@ -87,12 +87,14 @@ class CampaignViewSet(viewsets.ModelViewSet):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         
-        ret = rule.rule_checker.user_subscription_rule_checker.CreateCampaignRuleChecker.check(**{
-            'api_user': api_user, 'user_subscription': user_subscription
-        })
-        
         campaignData, = lib.util.getter.getdata(request, ('data',), required=True)
         campaignData = json.loads(campaignData)
+        end_at = campaignData['end_at']
+        ret = rule.rule_checker.user_subscription_rule_checker.CreateCampaignRuleChecker.check(**{
+            'api_user': api_user, 'user_subscription': user_subscription, 'end_at': end_at
+        })
+        
+        
 
         serializer = models.campaign.campaign.CampaignSerializerCreate(data=campaignData)
         if not serializer.is_valid():

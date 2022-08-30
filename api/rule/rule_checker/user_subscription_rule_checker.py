@@ -35,6 +35,7 @@ class CreateCampaignRuleChecker(RuleChecker):
 
     check_list=[
         UserSubscriptionCheckRule.is_expired,
+        UserSubscriptionCheckRule.campaign_end_time_over_subscription_period,
         UserSubscriptionCheckRule.max_concurrent_live,
-        UserSubscriptionCheckRule.campaign_limit
+        UserSubscriptionCheckRule.campaign_limit,
     ]

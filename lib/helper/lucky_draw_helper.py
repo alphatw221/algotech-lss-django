@@ -82,6 +82,7 @@ class LikesCandidateSetGenerator(CandidateSetGenerator):
         candidate_set = set()
         
         likes_user_list=[]
+        response = {}
 
         if campaign.facebook_page_id and models.facebook.facebook_page.FacebookPage.objects.filter(id=campaign.facebook_page_id).exists():
             facebook_page = models.facebook.facebook_page.FacebookPage.objects.get(id=campaign.facebook_page_id)

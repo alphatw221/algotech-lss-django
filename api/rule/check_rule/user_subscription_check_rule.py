@@ -2,22 +2,24 @@ import lib
 from backend.pymongo.mongodb import db
 from django.conf import settings
 from datetime import datetime, timedelta, timezone
+import arrow
 
 class UserSubscriptionCheckRule():
 
     @staticmethod
     def is_expired(**kwargs):
-        print("------------is_expired")
         user_subscription = kwargs.get('user_subscription')
-        if datetime.now().replace(tzinfo=timezone(offset=timedelta())) > user_subscription.expired_at:
+        subscription_expired_at = arrow.get(user_subscription.expired_at)
+        
+        if arrow.utcnow() > subscription_expired_at:
             raise lib.error_handle.error.api_error.ApiVerifyError('helper.membership_out_of_date')
     
     @staticmethod
     def max_concurrent_live(**kwargs):
 
         user_subscription = kwargs.get('user_subscription')
-        now = datetime.now()
-        live_count = user_subscription.campaigns.filter(start_at__lte=now, end_at__gte=now).count()  
+        now = arrow.utcnow().datetime
+        live_count = user_subscription.campaigns.filter(start_at__lte=now, end_at__gte=now).count()
         if not user_subscription.campaign_live_limit:
             return
         if live_count >= user_subscription.campaign_live_limit:
@@ -32,3 +34,10 @@ class UserSubscriptionCheckRule():
             return
         if campaigns_count >= user_subscription.campaign_limit:
             raise lib.error_handle.error.api_error.ApiVerifyError('helper.reach_max_campaigns_limit')
+        
+    def campaign_end_time_over_subscription_period(**kwargs):
+        user_subscription = kwargs.get('user_subscription')
+        end_at = arrow.get(kwargs.get('end_at'))
+        subscription_expired_at = arrow.get(user_subscription.expired_at)
+        if end_at > subscription_expired_at:
+            raise lib.error_handle.error.api_error.ApiVerifyError('helper.campaign_end_time_not_later_subscription_period')

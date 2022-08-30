@@ -25,7 +25,7 @@ def check_limitation(limitation, pre_order):
     try:
 
         if limitation['key']==models.discount_code.discount_code.LIMITATION_SPECIFIC_CAMPAIGN:
-            campaign_id = limitation['campaign_id']
+            campaign_id = int(limitation['campaign_id'])
             if pre_order.campaign.id != campaign_id:
                 return False
         elif limitation['key']==models.discount_code.discount_code.LIMITATION_PRODUCT_OVER_NUMBER:

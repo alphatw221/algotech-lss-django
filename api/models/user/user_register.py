@@ -28,15 +28,5 @@ class UserRegister(models.Model):
 class UserRegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserRegister
-        fields = [
-                'name',
-                'type', 
-                'period', 
-                'timezone', 
-                'phone', 
-                'email',
-                'password',
-                'target_country',
-                'country',
-                'meta'
-                ]
+        fields = '__all__'
+        read_only_fields = ['created_at']
