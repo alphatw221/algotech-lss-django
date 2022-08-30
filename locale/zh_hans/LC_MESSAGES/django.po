@@ -76,50 +76,50 @@ msgstr "更新成功！"
 #: backend/i18n/cart_product_request.py:77 lib/i18n/cart_product_request.py:59
 #: lib/i18n/cart_product_request.py:100
 msgid "DELETED"
-msgstr "商品已从购物车删除，"
+msgstr "商品已从购物车删除。"
 
 #: backend/i18n/cart_product_request.py:42
 #: backend/i18n/cart_product_request.py:79 lib/i18n/cart_product_request.py:61
 #: lib/i18n/cart_product_request.py:102
 msgid "INSUFFICIENT_INV"
-msgstr "商品已售完，"
+msgstr "商品已售完。"
 
 #: backend/i18n/cart_product_request.py:44
 #: backend/i18n/cart_product_request.py:81 lib/i18n/cart_product_request.py:63
 #: lib/i18n/cart_product_request.py:104
 msgid "INVALID_PRODUCT_NOT_ACTIVATED"
-msgstr "商品目前无法下单，"
+msgstr "目前无法下单。"
 
 #: backend/i18n/cart_product_request.py:46
 #: backend/i18n/cart_product_request.py:83 lib/i18n/cart_product_request.py:69
 #: lib/i18n/cart_product_request.py:106
 msgid "INVALID_REMOVE_NOT_ALLOWED"
-msgstr "无法删除，"
+msgstr "无法删除。"
 
 #: backend/i18n/cart_product_request.py:48
 #: backend/i18n/cart_product_request.py:85 lib/i18n/cart_product_request.py:71
 #: lib/i18n/cart_product_request.py:108
 msgid "INVALID_EDIT_NOT_ALLOWED"
-msgstr "无法修改，"
+msgstr "无法修改。"
 
 #: backend/i18n/cart_product_request.py:50
 #: backend/i18n/cart_product_request.py:87 lib/i18n/cart_product_request.py:73
 #: lib/i18n/cart_product_request.py:110
 msgid "INVALID_ADD_ZERO_QTY"
-msgstr "无法删除，"
+msgstr "无法删除。"
 
 #: backend/i18n/cart_product_request.py:52
 #: backend/i18n/cart_product_request.py:89 lib/i18n/cart_product_request.py:75
 #: lib/i18n/cart_product_request.py:112
 msgid "N/A"
-msgstr "操作错误，"
+msgstr "操作错误。"
 
 #: backend/i18n/cart_product_request.py:54
 #: backend/i18n/cart_product_request.py:92 lib/i18n/cart_product_request.py:77
 #: lib/i18n/cart_product_request.py:115
 #, python-brace-format
 msgid "ITEM_INFO{order_code}{qty}{result}"
-msgstr "{result}商品 {order_code} <{qty} 件>。"
+msgstr "商品 {order_code} < {qty} 件，{result}"
 
 #: backend/i18n/comment_command.py:24 backend/i18n/comment_command.py:27
 #: backend/i18n/comment_command.py:29 lib/i18n/comment_command.py:25
@@ -444,7 +444,7 @@ msgstr ""
 "恭喜 {customer_name} 得奖，获得 {product_name}！请至购物车确认您的奖品。"
 
 msgid "ITEM_INFO{order_code}{result}"
-msgstr "{result}商品 {order_code} <{qty} 件>。"
+msgstr "商品 {order_code}，{result}"
 
 msgid "EMAIL/DELIVERY_CONFIRM/SUBJECT{order_id}{campaign_title}"
 msgstr "感谢您的订单！您来自 {campaign_title} 的订单 #{order_id} 已确认！"
