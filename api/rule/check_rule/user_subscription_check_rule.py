@@ -40,4 +40,4 @@ class UserSubscriptionCheckRule():
         end_at = arrow.get(kwargs.get('end_at'))
         subscription_expired_at = arrow.get(user_subscription.expired_at)
         if end_at > subscription_expired_at:
-            raise lib.error_handle.error.api_error.ApiVerifyError('helper.campaign_end_time_not_later_subscription_period')
+            raise lib.error_handle.error.api_error.ApiVerifyError('helper.campaign_end_time_not_later_subscription_period', {"datetime_subscription_expired_at": subscription_expired_at.format('YYYY-MM-DD HH:mm:ss ZZ')})
