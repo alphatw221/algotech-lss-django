@@ -443,23 +443,14 @@ msgid "QUIZ_GAME_WINNER{customer_name}{product_name}"
 msgstr ""
 "恭喜 {customer_name} 得奖，获得 {product_name}！请至购物车确认您的奖品。"
 
-#: lib/i18n/cart_product_request.py:64
-#, fuzzy, python-brace-format
-#| msgid "ITEM_INFO{order_code}{qty}{result}"
 msgid "ITEM_INFO{order_code}{result}"
 msgstr "{result}商品 {order_code} <{qty} 件>。"
 
-#: lib/i18n/email/delivery_comfirm_mail.py:10
-#, fuzzy, python-brace-format
-#| msgid "EMAIL/ORDER_CONFIRM/SUBJECT{order_id}{campaign_title}"
 msgid "EMAIL/DELIVERY_CONFIRM/SUBJECT{order_id}{campaign_title}"
 msgstr "感谢您的订单！您来自 {campaign_title} 的订单 #{order_id} 已确认！"
 
-#: lib/i18n/email/delivery_comfirm_mail.py:25
-#, fuzzy
-#| msgid "EMAIL/DELIVERY_CONFIRM/TOTAL"
 msgid "EMAIL/DELIVERY_CONFIRM/TITLE"
-msgstr "总计"
+msgstr "您的訂單已經寄出"
 
 #: lib/i18n/email/delivery_comfirm_mail.py:38
 #: lib/i18n/email/delivery_comfirm_mail.py:41
@@ -626,42 +617,36 @@ msgstr ""
 msgid "CONGRATS_2_WELCOME"
 msgstr ""
 
-#: templates/reset_password_success_email.html:15
-#, fuzzy
-#| msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT1"
 msgid "EMAIL/PASSWORD_RESET_SUCCESS/CONTENT1"
 msgstr "您好 "
 
-#: templates/reset_password_success_email.html:15
-#, fuzzy
-#| msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT2"
 msgid "EMAIL/PASSWORD_RESET_SUCCESS/CONTENT2"
 msgstr ""
 "我們收到重設Live Show Seller 密碼的要求。請點擊下方連結, 即可重新設定。"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/PAYMENT_METHOD"
-#~ msgstr "支付方式"
+msgid "EMAIL/ORDER_CONFIRM/PAYMENT_METHOD"
+msgstr "支付方式"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/ORDER"
-#~ msgstr "订单"
+msgid "EMAIL/ORDER_CONFIRM/ORDER"
+msgstr "订单"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/CUSTOMER_NAME"
-#~ msgstr "客户名称"
+msgid "EMAIL/ORDER_CONFIRM/CUSTOMER_NAME"
+msgstr "客户名称"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_TO"
-#~ msgstr "送货到"
+msgid "EMAIL/ORDER_CONFIRM/DELIVERY_TO"
+msgstr "送货到"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_WAY"
-#~ msgstr "发货方式"
+msgid "EMAIL/ORDER_CONFIRM/DELIVERY_WAY"
+msgstr "发货方式"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/PICK_UP_STORE"
-#~ msgstr "取货店"
+msgid "EMAIL/ORDER_CONFIRM/PICK_UP_STORE"
+msgstr "取货店"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/PICK_UP_DATE"
-#~ msgstr "取货日期"
+msgid "EMAIL/ORDER_CONFIRM/PICK_UP_DATE"
+msgstr "取货日期"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_ADDRESS"
-#~ msgstr "收货地址"
+msgid "EMAIL/ORDER_CONFIRM/DELIVERY_ADDRESS"
+msgstr "收货地址"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_CHARGE"
-#~ msgstr "运费"
+msgid "EMAIL/ORDER_CONFIRM/DELIVERY_CHARGE"
+msgstr "运费"

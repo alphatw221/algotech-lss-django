@@ -452,23 +452,14 @@ msgstr ""
 "Xin chúc mừng {customer_name} đã rút thăm trúng thưởng!"
 "Giải: {product_name}. Vui lòng kiểm tra giỏ hàng của bạn."
 
-#: lib/i18n/cart_product_request.py:64
-#, fuzzy, python-brace-format
-#| msgid "ITEM_INFO{order_code}{qty}{result}"
 msgid "ITEM_INFO{order_code}{result}"
 msgstr "\"{order_code}\" Số lượng: {qty} {result}. "
 
-#: lib/i18n/email/delivery_comfirm_mail.py:10
-#, fuzzy, python-brace-format
-#| msgid "EMAIL/ORDER_CONFIRM/SUBJECT{order_id}{campaign_title}"
 msgid "EMAIL/DELIVERY_CONFIRM/SUBJECT{order_id}{campaign_title}"
 msgstr ""
 "Cảm ơn đơn đặt hàng của bạn! Đơn đặt hàng # {order_id} của bạn từ "
 "{campaign_title} đã được xác nhận!"
 
-#: lib/i18n/email/delivery_comfirm_mail.py:25
-#, fuzzy
-#| msgid "EMAIL/DELIVERY_CONFIRM/TOTAL"
 msgid "EMAIL/DELIVERY_CONFIRM/TITLE"
 msgstr "Tổng số"
 
@@ -659,40 +650,38 @@ msgstr ""
 "Nếu bạn không yêu cầu thay đổi này, vui lòng liên hệ với bộ phận hỗ trợ ngay "
 "lập tức."
 
-#, fuzzy
-#~| msgid "DETAIL{link}\n"
-#~ msgid "DETAIL{link}"
-#~ msgstr "Tìm hiểu chi tiết: {link}\n"
+msgid "DETAIL{link}"
+msgstr "Tìm hiểu chi tiết: {link}\n"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/ORDER"
-#~ msgstr "Đặt hàng"
+msgid "EMAIL/ORDER_CONFIRM/ORDER"
+msgstr "Đặt hàng"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/CUSTOMER_NAME"
-#~ msgstr "Tên khách hàng"
+msgid "EMAIL/ORDER_CONFIRM/CUSTOMER_NAME"
+msgstr "Tên khách hàng"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_TO"
-#~ msgstr "Giao hàng tới"
+msgid "EMAIL/ORDER_CONFIRM/DELIVERY_TO"
+msgstr "Giao hàng tới"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_WAY"
-#~ msgstr "Cách giao hàng"
+msgid "EMAIL/ORDER_CONFIRM/DELIVERY_WAY"
+msgstr "Cách giao hàng"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/PICK_UP_STORE"
-#~ msgstr "Nhận hàng tại cửa hàng"
+msgid "EMAIL/ORDER_CONFIRM/PICK_UP_STORE"
+msgstr "Nhận hàng tại cửa hàng"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/PICK_UP_DATE"
-#~ msgstr "Ngày đón"
+msgid "EMAIL/ORDER_CONFIRM/PICK_UP_DATE"
+msgstr "Ngày đón"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_ADDRESS"
-#~ msgstr "Địa chỉ giao hàng"
+msgid "EMAIL/ORDER_CONFIRM/DELIVERY_ADDRESS"
+msgstr "Địa chỉ giao hàng"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/PAYMENT_METHOD"
-#~ msgstr "Phương thức thanh toán"
+msgid "EMAIL/ORDER_CONFIRM/PAYMENT_METHOD"
+msgstr "Phương thức thanh toán"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_CHARGE"
-#~ msgstr "Phí giao hàng"
+msgid "EMAIL/ORDER_CONFIRM/DELIVERY_CHARGE"
+msgstr "Phí giao hàng"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_DATE"
-#~ msgstr "Ngày giao hàng"
+msgid "EMAIL/ORDER_CONFIRM/DELIVERY_DATE"
+msgstr "Ngày giao hàng"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/TOTAL"
-#~ msgstr "Tổng số"
+msgid "EMAIL/ORDER_CONFIRM/TOTAL"
+msgstr "Tổng số"
