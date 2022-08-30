@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-29 10:45+0000\n"
+"POT-Creation-Date: 2022-08-30 09:44+0000\n"
 "PO-Revision-Date: 2021-12-13 15:50+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -443,12 +443,17 @@ msgid "QUIZ_GAME_WINNER{customer_name}{product_name}"
 msgstr ""
 "恭喜 {customer_name} 得獎，獲得 {product_name}！請至購物車確認您的獎品。"
 
+#: lib/i18n/cart_product_request.py:64
+#, python-brace-format
 msgid "ITEM_INFO{order_code}{result}"
 msgstr "商品 {order_code}，{result}"
 
+#: lib/i18n/email/delivery_comfirm_mail.py:10
+#, python-brace-format
 msgid "EMAIL/DELIVERY_CONFIRM/SUBJECT{order_id}{campaign_title}"
 msgstr "感謝您的訂單！您來自 {campaign_title} 的訂單 #{order_id} 已確認！"
 
+#: lib/i18n/email/delivery_comfirm_mail.py:25
 msgid "EMAIL/DELIVERY_CONFIRM/TITLE"
 msgstr "您得訂單已經寄出."
 
@@ -625,23 +630,23 @@ msgstr "您在Live Show Seller 所使用的帳號"
 msgid "EMAIL/PASSWORD_RESET_SUCCESS/CONTENT2"
 msgstr "已成功修改密碼. 若您沒有要求修改密碼, 請立即聯絡我們的客服專員。"
 
-msgid "EMAIL/ORDER_CONFIRM/PAYMENT_METHOD"
-msgstr "付款方式"
+#~ msgid "EMAIL/ORDER_CONFIRM/PAYMENT_METHOD"
+#~ msgstr "付款方式"
 
-msgid "EMAIL/ORDER_CONFIRM/ORDER"
-msgstr "訂單"
+#~ msgid "EMAIL/ORDER_CONFIRM/ORDER"
+#~ msgstr "訂單"
 
-msgid "EMAIL/ORDER_CONFIRM/CUSTOMER_NAME"
-msgstr "客戶名稱"
+#~ msgid "EMAIL/ORDER_CONFIRM/CUSTOMER_NAME"
+#~ msgstr "客戶名稱"
 
-msgid "EMAIL/ORDER_CONFIRM/DELIVERY_WAY"
-msgstr "發貨方式"
+#~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_WAY"
+#~ msgstr "發貨方式"
 
-msgid "EMAIL/ORDER_CONFIRM/PICK_UP_STORE"
-msgstr "取貨店"
+#~ msgid "EMAIL/ORDER_CONFIRM/PICK_UP_STORE"
+#~ msgstr "取貨店"
 
-msgid "EMAIL/ORDER_CONFIRM/DELIVERY_ADDRESS"
-msgstr "收貨地址"
+#~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_ADDRESS"
+#~ msgstr "收貨地址"
 
-msgid "EMAIL/ORDER_CONFIRM/DELIVERY_CHARGE"
-msgstr "運費"
+#~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_CHARGE"
+#~ msgstr "運費"

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-29 10:45+0000\n"
+"POT-Creation-Date: 2022-08-30 09:44+0000\n"
 "PO-Revision-Date: 2021-12-13 15:51+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -423,6 +423,12 @@ msgstr "Payment Status"
 msgid "REPORT/COLUMN_TITLE/PAYMENT_RECORD"
 msgstr "Payment Record"
 
+#: lib/helper/xlsx_helper.py:129
+#, fuzzy
+#| msgid "REPORT/COLUMN_TITLE/EMAIL"
+msgid "REPORT/COLUMN_TITLE/TOTAL"
+msgstr "E-mail"
+
 #: lib/helper/xlsx_helper.py:161
 msgid "REPORT/SECTION_TITLE/TITLE"
 msgstr "Order Report"
@@ -450,14 +456,20 @@ msgstr ""
 "Congratulations to {customer_name} on winning quiz game! Prize: "
 "{product_name}. Please check your shopping cart."
 
+#: lib/i18n/cart_product_request.py:64
+#, fuzzy, python-brace-format
+#| msgid "ITEM_INFO{order_code}{result}"
 msgid "ITEM_INFO{order_code}{result}"
 msgstr "\"{order_code}\" Qty: {qty} {result}. "
 
+#: lib/i18n/email/delivery_comfirm_mail.py:10
+#, python-brace-format
 msgid "EMAIL/DELIVERY_CONFIRM/SUBJECT{order_id}{campaign_title}"
 msgstr ""
 "Thanks for your order! Your order #{order_id} from {campaign_title} is "
 "confirmed!"
 
+#: lib/i18n/email/delivery_comfirm_mail.py:25
 msgid "EMAIL/DELIVERY_CONFIRM/TITLE"
 msgstr "Total"
 
@@ -642,26 +654,27 @@ msgstr "The password for your Live Show Seller account"
 
 #: templates/reset_password_success_email.html:15
 msgid "EMAIL/PASSWORD_RESET_SUCCESS/CONTENT2"
-msgstr "has been successfully changed"
-"If you did not request this change, please contact support immediately."
+msgstr ""
+"has been successfully changedIf you did not request this change, please "
+"contact support immediately."
 
-msgid "EMAIL/ORDER_CONFIRM/CUSTOMER_NAME"
-msgstr "Customer Name"
+#~ msgid "EMAIL/ORDER_CONFIRM/CUSTOMER_NAME"
+#~ msgstr "Customer Name"
 
-msgid "EMAIL/ORDER_CONFIRM/DELIVERY_TO"
-msgstr "Delivery To"
+#~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_TO"
+#~ msgstr "Delivery To"
 
-msgid "EMAIL/ORDER_CONFIRM/DELIVERY_WAY"
-msgstr "Delivery way"
+#~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_WAY"
+#~ msgstr "Delivery way"
 
-msgid "EMAIL/ORDER_CONFIRM/PICK_UP_STORE"
-msgstr "Pick up store"
+#~ msgid "EMAIL/ORDER_CONFIRM/PICK_UP_STORE"
+#~ msgstr "Pick up store"
 
-msgid "EMAIL/ORDER_CONFIRM/PICK_UP_DATE"
-msgstr "Pick up Date"
+#~ msgid "EMAIL/ORDER_CONFIRM/PICK_UP_DATE"
+#~ msgstr "Pick up Date"
 
-msgid "EMAIL/ORDER_CONFIRM/DELIVERY_ADDRESS"
-msgstr "Delivery address"
+#~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_ADDRESS"
+#~ msgstr "Delivery address"
 
-msgid "EMAIL/ORDER_CONFIRM/DELIVERY_CHARGE"
-msgstr "Delivery Charge"
+#~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_CHARGE"
+#~ msgstr "Delivery Charge"
