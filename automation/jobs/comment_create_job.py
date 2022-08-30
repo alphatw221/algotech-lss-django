@@ -33,6 +33,8 @@ def comment_create_job(campaign_id, comments, platform, push_comment:bool):
 
     if len(comments) != len(comments_category):
         comments_category = []*len(comments)
+    
+    print (comments_category)
 
     for i, comment in enumerate(comments):
 
