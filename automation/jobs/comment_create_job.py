@@ -44,7 +44,7 @@ def comment_create_job(campaign_id, comments, platform, push_comment:bool):
         except Exception as e: #duplicate key error might happen here
 
             continue
-        print(comment)
+
         if push_comment:
             service.channels.campaign.send_comment_data(campaign.id, comment)
         service.rq.queue.enqueue_comment_queue(jobs.comment_job.comment_job, campaign.data, user_subscription_data, platform, platform_instance_data, comment, order_codes_mapping)
