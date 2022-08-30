@@ -452,11 +452,8 @@ msgstr ""
 "Xin chúc mừng {customer_name} đã rút thăm trúng thưởng!"
 "Giải: {product_name}. Vui lòng kiểm tra giỏ hàng của bạn."
 
-#: lib/i18n/cart_product_request.py:64
-#, fuzzy, python-brace-format
-#| msgid "ITEM_INFO{order_code}{qty}{result}"
 msgid "ITEM_INFO{order_code}{result}"
-msgstr "\"{order_code}\" Số lượng: {qty} {result}. "
+msgstr "\"{order_code}\" {result}."
 
 #: lib/i18n/email/delivery_comfirm_mail.py:10
 #, fuzzy, python-brace-format

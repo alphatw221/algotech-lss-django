@@ -457,11 +457,8 @@ msgstr ""
 "Selamat kepada {customer_name} karena telah memenangkan undian berhadiah! "
 "Hadiah: {product_name}. Mohon periksa keranjang belanja anda."
 
-#: lib/i18n/cart_product_request.py:64
-#, fuzzy, python-brace-format
-#| msgid "ITEM_INFO{order_code}{qty}{result}"
 msgid "ITEM_INFO{order_code}{result}"
-msgstr "“{order_code}” Jumlah: {qty} {result}. "
+msgstr "“{order_code}” {result}."
 
 #: lib/i18n/email/delivery_comfirm_mail.py:10
 #, fuzzy, python-brace-format
