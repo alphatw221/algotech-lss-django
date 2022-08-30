@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-30 09:53+0000\n"
+"POT-Creation-Date: 2022-08-30 10:44+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -690,3 +690,21 @@ msgstr ""
 
 #~ msgid "EMAIL/ORDER_CONFIRM/TOTAL"
 #~ msgstr "Tổng số"
+
+#~ msgid "EMAIL/VERIFY/SUBJECT"
+#~ msgstr "Your LSS login verification code"
+
+#~ msgid "EMAIL/VERIFY/TITLE"
+#~ msgstr "Hi, Someone tried to log in to your LSS account."
+
+#~ msgid "EMAIL/VERIFY/TEXT_1"
+#~ msgstr "If this was you, please use the following code to log in:"
+
+#~ msgid "EMAIL/VERIFY/TEXT_2_1"
+#~ msgstr "If this wasn't you, please"
+
+#~ msgid "EMAIL/VERIFY/TEXT_2_2"
+#~ msgstr "reset your password"
+
+#~ msgid "EMAIL/VERIFY/TEXT_2_3"
+#~ msgstr "to secure your account."
