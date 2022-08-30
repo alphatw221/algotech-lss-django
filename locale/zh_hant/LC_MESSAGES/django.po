@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-30 09:53+0000\n"
+"POT-Creation-Date: 2022-08-30 10:44+0000\n"
 "PO-Revision-Date: 2021-12-13 15:50+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -650,3 +650,21 @@ msgstr "已成功修改密碼. 若您沒有要求修改密碼, 請立即聯絡�
 
 #~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_CHARGE"
 #~ msgstr "運費"
+
+#~ msgid "EMAIL/VERIFY/SUBJECT"
+#~ msgstr "您的LSS登入验证码"
+
+#~ msgid "EMAIL/VERIFY/TITLE"
+#~ msgstr "您好，有人试图登录您的 LSS 帐户。"
+
+#~ msgid "EMAIL/VERIFY/TEXT_1"
+#~ msgstr "如果是您本人，请使用以下驗證碼登录："
+
+#~ msgid "EMAIL/VERIFY/TEXT_2_1"
+#~ msgstr "如果這不是你，请"
+
+#~ msgid "EMAIL/VERIFY/TEXT_2_2"
+#~ msgstr "重置您的密码"
+
+#~ msgid "EMAIL/VERIFY/TEXT_2_3"
+#~ msgstr "以保护您的帐户。"

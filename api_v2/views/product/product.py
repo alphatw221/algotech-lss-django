@@ -163,10 +163,15 @@ class ProductViewSet(viewsets.ModelViewSet):
     def bulk_update_product(self, request, pk=None):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        categories, product_status, stock_id_list = lib.util.getter.getdata(request,('categories', 'status', 'stockIdList'), required=False)
 
-        print (request.data)
+        for stock_id in stock_id_list:
+            stock = models.product.product.Product.objects.get(id=stock_id)
+            stock.status = product_status
+            stock.tag = categories
+            stock.save()
 
-        return Response('', status=status.HTTP_200_OK)
+        return Response({'message': 'success'}, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['DELETE'], url_path=r'delete', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
