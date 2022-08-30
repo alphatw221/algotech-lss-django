@@ -8,6 +8,7 @@ router = routers.DefaultRouter()
 router.register(r'product', easy_store_views.product.ProductViewSet)
 router.register(r'cart', easy_store_views.cart.CartViewSet)
 router.register(r'order', easy_store_views.order.OrderViewSet)
+router.register(r'authorization', easy_store_views.autherization.AuthorizationViewSet)
 
 urlpatterns = [
     url(r'^', include(router.urls)),
