@@ -12,7 +12,7 @@ from automation import jobs
 
 from pprint import pprint
 PLUGIN_EASY_STORE = 'easy_store'
-class OrderViewSet(viewsets.ModelViewSet):
+class OrderViewSet(viewsets.GenericViewSet):
     queryset = models.order.order.Order.objects.none()
 
     @action(detail=False, methods=['POST'], url_path=r'webhook/create', permission_classes=(), authentication_classes=[])
