@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-29 10:45+0000\n"
+"POT-Creation-Date: 2022-08-30 09:53+0000\n"
 "PO-Revision-Date: 2021-12-13 15:50+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -443,20 +443,19 @@ msgid "QUIZ_GAME_WINNER{customer_name}{product_name}"
 msgstr ""
 "恭喜 {customer_name} 得奖，获得 {product_name}！请至购物车确认您的奖品。"
 
+#: lib/i18n/cart_product_request.py:64
+#, python-brace-format
 msgid "ITEM_INFO{order_code}{result}"
 msgstr "商品 {order_code}，{result}"
 
 #: lib/i18n/email/delivery_comfirm_mail.py:10
-#, fuzzy, python-brace-format
-#| msgid "EMAIL/ORDER_CONFIRM/SUBJECT{order_id}{campaign_title}"
+#, python-brace-format
 msgid "EMAIL/DELIVERY_CONFIRM/SUBJECT{order_id}{campaign_title}"
 msgstr "感谢您的订单！您来自 {campaign_title} 的订单 #{order_id} 已确认！"
 
 #: lib/i18n/email/delivery_comfirm_mail.py:25
-#, fuzzy
-#| msgid "EMAIL/DELIVERY_CONFIRM/TOTAL"
 msgid "EMAIL/DELIVERY_CONFIRM/TITLE"
-msgstr "总计"
+msgstr "您的訂單已經寄出"
 
 #: lib/i18n/email/delivery_comfirm_mail.py:38
 #: lib/i18n/email/delivery_comfirm_mail.py:41
@@ -624,14 +623,10 @@ msgid "CONGRATS_2_WELCOME"
 msgstr ""
 
 #: templates/reset_password_success_email.html:15
-#, fuzzy
-#| msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT1"
 msgid "EMAIL/PASSWORD_RESET_SUCCESS/CONTENT1"
 msgstr "您好 "
 
 #: templates/reset_password_success_email.html:15
-#, fuzzy
-#| msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT2"
 msgid "EMAIL/PASSWORD_RESET_SUCCESS/CONTENT2"
 msgstr ""
 "我們收到重設Live Show Seller 密碼的要求。請點擊下方連結, 即可重新設定。"

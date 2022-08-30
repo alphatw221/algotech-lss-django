@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-29 10:45+0000\n"
+"POT-Creation-Date: 2022-08-30 09:53+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -452,20 +452,19 @@ msgstr ""
 "Xin chúc mừng {customer_name} đã rút thăm trúng thưởng!"
 "Giải: {product_name}. Vui lòng kiểm tra giỏ hàng của bạn."
 
+#: lib/i18n/cart_product_request.py:64
+#, python-brace-format
 msgid "ITEM_INFO{order_code}{result}"
 msgstr "\"{order_code}\" {result}."
 
 #: lib/i18n/email/delivery_comfirm_mail.py:10
-#, fuzzy, python-brace-format
-#| msgid "EMAIL/ORDER_CONFIRM/SUBJECT{order_id}{campaign_title}"
+#, python-brace-format
 msgid "EMAIL/DELIVERY_CONFIRM/SUBJECT{order_id}{campaign_title}"
 msgstr ""
 "Cảm ơn đơn đặt hàng của bạn! Đơn đặt hàng # {order_id} của bạn từ "
 "{campaign_title} đã được xác nhận!"
 
 #: lib/i18n/email/delivery_comfirm_mail.py:25
-#, fuzzy
-#| msgid "EMAIL/DELIVERY_CONFIRM/TOTAL"
 msgid "EMAIL/DELIVERY_CONFIRM/TITLE"
 msgstr "Tổng số"
 
@@ -656,8 +655,6 @@ msgstr ""
 "Nếu bạn không yêu cầu thay đổi này, vui lòng liên hệ với bộ phận hỗ trợ ngay "
 "lập tức."
 
-#, fuzzy
-#~| msgid "DETAIL{link}\n"
 #~ msgid "DETAIL{link}"
 #~ msgstr "Tìm hiểu chi tiết: {link}\n"
 

@@ -389,7 +389,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
             campaign.instagram_profile = instagram_profile
         elif platform == 'twitch':
             twitch_channel = lib.util.verify.Verify.get_twitch_channel_from_user_subscription(user_subscription, platform_id)
-            campaign.twitch_campaign['channel_name'] = twitch_channel.name
+            campaign.twitch_campaign['channel_name'] = twitch_channel.channel_name
             campaign.twitch_campaign['token']=twitch_channel.token
             campaign.twitch_channel = twitch_channel
         elif platform == 'tiktok':
