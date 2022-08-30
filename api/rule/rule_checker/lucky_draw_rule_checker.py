@@ -15,3 +15,11 @@ class LuckyDrawUpdateRuleChecker(RuleChecker):
         LuckyDrawCheckRule.is_draw_prize_valid,
         LuckyDrawCheckRule.is_connected_to_any_platform
     ]
+    
+class LuckyDrawStartRuleChecker(RuleChecker):
+
+    check_list=[
+        LuckyDrawCheckRule.is_draw_type_valid,
+        LuckyDrawCheckRule.is_draw_prize_valid,
+        LuckyDrawCheckRule.is_connected_to_any_platform
+    ]
