@@ -131,6 +131,8 @@ class InstagramCampaignSerializer(serializers.Serializer):
     is_failed = serializers.BooleanField(required=False, default=False)
 
 class TwitchCampaignSerializer(serializers.Serializer):
+    token = serializers.CharField(required=False, default="", allow_blank=True)
+    channel_name = serializers.CharField(required=False, default="", allow_blank=True)
     broadcaster_id = serializers.CharField(required=False, default="", allow_blank=True)
     moderator_id = serializers.CharField(required=False, default="", allow_blank=True)
 
@@ -189,7 +191,7 @@ class CampaignSerializerEdit(serializers.ModelSerializer):
     instagram_campaign = InstagramCampaignSerializer(default=dict)
     twitch_campaign = TwitchCampaignSerializer(default=dict)
     tiktok_campaign = TwitchCampaignSerializer(default=dict)
-    
+
     meta = serializers.JSONField(default={"allow_checkout": 1})
     meta_payment = serializers.JSONField(default=dict)
     meta_logistic = serializers.JSONField(default=dict)
