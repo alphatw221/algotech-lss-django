@@ -53,7 +53,7 @@ class AuthorizationViewSet(viewsets.GenericViewSet):
             user_subscription.user_plan['plugins']['easy_store']=credential
         else:
             user_subscription.user_lan['plugins']={'easy_store':credential}
-        user_subscription.user_plan
-  
+
+        user_subscription.save()
 
         return Response('ok', status=status.HTTP_200_OK)
