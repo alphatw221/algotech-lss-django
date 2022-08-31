@@ -12,6 +12,7 @@ from api.models.campaign.campaign import Campaign
 from api.models.campaign.campaign_product import CampaignProduct
 from api.models.cart.cart_product import CartProduct
 from api.models.order import pre_order
+from api.models.user import developer
 from api.models.user.user import User
 from api.models.user.user_subscription import UserSubscription
 from api.utils.orm import campaign_comment, cart_product
@@ -51,7 +52,7 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.test_easy_store()
+        self.test_discripting_token()
         # self.test_remove_campaign_comment_duplicate()
 
     def modify_database(self):
@@ -494,3 +495,78 @@ class Command(BaseCommand):
 
         ret = service.twitch.twitch.whisper_to_user('17uulrj9lsj7zqpwrvsneildfcs947', '818419850', 'eat poop poop')
         print (ret)
+
+    def test_create_developer(self):
+        import uuid, base64, random, string
+        from api import models
+        data = {
+            "api_key" : base64.urlsafe_b64encode(uuid.uuid4().bytes).rstrip(b'=').decode('ascii'),
+            "secret_key" : ''.join(random.choice(string.ascii_letters+string.digits) for _ in range(12)),
+            "name" : 'Mr.Modi',
+            "phone" : '+918401060120',
+        }
+        print(data)
+        models.user.developer.Developer.objects.create(**data)
+
+    def test_generate_developer_token(self):
+        import hashlib, hmac
+        import json, base64
+        from django.conf import settings
+        from datetime import datetime, timedelta
+
+
+        header_data = {
+            'alg':'sha256',
+            'typ':'v1'
+        }
+        header_json = json.dumps(header_data)
+        header = base64.urlsafe_b64encode(header_json.encode('utf-8')).rstrip(b'=').decode('utf-8')
+
+        developer = models.user.developer.Developer.objects.get(api_key='7bbdrA5kQ06nAZP9ieEhTA')
+
+        payload_1_data = {
+            'key':developer.api_key, 
+            'perm':developer.permissions,
+            'auth':developer.authorization,
+            'meta':developer.meta,
+            'exp':int((datetime.now()+timedelta(days=7)).timestamp())
+        }
+        payload_1_json = json.dumps(payload_1_data)
+        payload_1 = base64.urlsafe_b64encode(payload_1_json.encode('utf-8')).rstrip(b'=').decode('utf-8')
+
+        head_and_claim = header+'.'+payload_1
+        signature_1 = hmac.new(settings.SECRET_KEY.encode(), msg=head_and_claim.encode(), digestmod=hashlib.sha256).hexdigest()
+
+        secret_key_hash_bytes = hmac.new(settings.SECRET_KEY.encode(), msg=developer.secret_key.encode(), digestmod=hashlib.sha256).digest()
+
+        secret_key_hash = base64.urlsafe_b64encode(secret_key_hash_bytes).rstrip(b'=').decode('utf-8')
+        token = head_and_claim+'.'+signature_1+'.'+developer.api_key+'.'+secret_key_hash
+
+
+        print(token)
+
+    def test_discripting_token(self):
+        
+        import hashlib, hmac
+        import json, base64
+        from django.conf import settings
+        from datetime import datetime, timedelta
+
+        token = 'eyJhbGciOiAic2hhMjU2IiwgInR5cCI6ICJ2MSJ9.eyJrZXkiOiAiN2JiZHJBNWtRMDZuQVpQOWllRWhUQSIsICJwZXJtIjoge30sICJhdXRoIjogbnVsbCwgIm1ldGEiOiB7fSwgImV4cCI6IDE2NjI1NDAyNjh9.8a1a3f2735e90bd3a8abd9615e7bc26e5860297968250268d371a31728c04556.7bbdrA5kQ06nAZP9ieEhTA.a1ttdUyxI3KdlcO1evA_Fyy1icAxQd8nXgGUlEThLoE'
+        header, payload, signature, api_key, secret_key_hash = token.split('.')
+
+        header_data = json.loads(base64.urlsafe_b64decode(header+'=='))
+
+        if header_data.get('typ')=='v1':
+
+            developer = models.user.developer.Developer.objects.get(api_key=api_key)
+
+            secret_key_hash_bytes = hmac.new(settings.SECRET_KEY.encode(), msg=developer.secret_key.encode(), digestmod=hashlib.sha256).digest()
+            _secret_key_hash = base64.urlsafe_b64encode(secret_key_hash_bytes).rstrip(b'=').decode('utf-8')
+            print(_secret_key_hash)
+            print(secret_key_hash)
+        else:
+            print('error')
+
+
+

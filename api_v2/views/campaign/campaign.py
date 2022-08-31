@@ -87,12 +87,14 @@ class CampaignViewSet(viewsets.ModelViewSet):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         
-        ret = rule.rule_checker.user_subscription_rule_checker.CreateCampaignRuleChecker.check(**{
-            'api_user': api_user, 'user_subscription': user_subscription
-        })
-        
         campaignData, = lib.util.getter.getdata(request, ('data',), required=True)
         campaignData = json.loads(campaignData)
+        end_at = campaignData['end_at']
+        ret = rule.rule_checker.user_subscription_rule_checker.CreateCampaignRuleChecker.check(**{
+            'api_user': api_user, 'user_subscription': user_subscription, 'end_at': end_at
+        })
+        
+        
 
         serializer = models.campaign.campaign.CampaignSerializerCreate(data=campaignData)
         if not serializer.is_valid():
@@ -388,6 +390,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
         elif platform == 'twitch':
             twitch_channel = lib.util.verify.Verify.get_twitch_channel_from_user_subscription(user_subscription, platform_id)
             campaign.twitch_campaign['channel_name'] = twitch_channel.name
+            campaign.twitch_campaign['token']=twitch_channel.token
             campaign.twitch_channel = twitch_channel
         elif platform == 'tiktok':
             # tiktok_account = lib.util.verify.Verify.get_tiktok_channel_from_user_subscription(user_subscription, platform_id)

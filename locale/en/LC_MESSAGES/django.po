@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-25 10:32+0000\n"
+"POT-Creation-Date: 2022-08-30 10:44+0000\n"
 "PO-Revision-Date: 2021-12-13 15:51+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -186,7 +186,7 @@ msgstr "Your Live Show Seller password has been successfully changed"
 
 #: backend/i18n/payment_comfirm_mail.py:52
 msgid "EMAIL/DELIVERY_CONFIRM/ORDER_CONFIRMATION"
-msgstr "order confirmation"
+msgstr "Order confirmation"
 
 #: backend/i18n/register_confirm_mail.py:17 lib/i18n/email/password_reset.py:5
 msgid "MAIL_SUBJECT_WELCOME"
@@ -457,22 +457,18 @@ msgstr ""
 "{product_name}. Please check your shopping cart."
 
 #: lib/i18n/cart_product_request.py:64
-#, fuzzy, python-brace-format
-#| msgid "ITEM_INFO{order_code}{qty}{result}"
+#, python-brace-format
 msgid "ITEM_INFO{order_code}{result}"
-msgstr "\"{order_code}\" Qty: {qty} {result}. "
+msgstr "\"{order_code}\" {result}."
 
 #: lib/i18n/email/delivery_comfirm_mail.py:10
-#, fuzzy, python-brace-format
-#| msgid "EMAIL/ORDER_CONFIRM/SUBJECT{order_id}{campaign_title}"
+#, python-brace-format
 msgid "EMAIL/DELIVERY_CONFIRM/SUBJECT{order_id}{campaign_title}"
 msgstr ""
 "Thanks for your order! Your order #{order_id} from {campaign_title} is "
 "confirmed!"
 
 #: lib/i18n/email/delivery_comfirm_mail.py:25
-#, fuzzy
-#| msgid "EMAIL/DELIVERY_CONFIRM/TOTAL"
 msgid "EMAIL/DELIVERY_CONFIRM/TITLE"
 msgstr "Total"
 
@@ -501,10 +497,8 @@ msgstr ""
 "confirmed!"
 
 #: lib/i18n/email/order_comfirm_mail.py:23
-#, fuzzy
-#| msgid "EMAIL/ORDER_CONFIRM/ORDER"
 msgid "EMAIL/ORDER_CONFIRM/TITLE"
-msgstr "Order"
+msgstr "Thanks for your order!"
 
 #: lib/i18n/email/order_comfirm_mail.py:75
 msgid "EMAIL/ORDER_CONFIRM/ACCOUNT_MODE"
@@ -660,8 +654,8 @@ msgstr "The password for your Live Show Seller account"
 #: templates/reset_password_success_email.html:15
 msgid "EMAIL/PASSWORD_RESET_SUCCESS/CONTENT2"
 msgstr ""
-"has been successfully changed.\n"
-"If you did not request this change, please contact support immediately."
+"has been successfully changedIf you did not request this change, please "
+"contact support immediately."
 
 #~ msgid "EMAIL/ORDER_CONFIRM/CUSTOMER_NAME"
 #~ msgstr "Customer Name"
@@ -683,3 +677,21 @@ msgstr ""
 
 #~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_CHARGE"
 #~ msgstr "Delivery Charge"
+
+#~ msgid "EMAIL/VERIFY/SUBJECT"
+#~ msgstr "Your LSS login verification code"
+
+#~ msgid "EMAIL/VERIFY/TITLE"
+#~ msgstr "Hi, Someone tried to log in to your LSS account."
+
+#~ msgid "EMAIL/VERIFY/TEXT_1"
+#~ msgstr "If this was you, please use the following code to log in:"
+
+#~ msgid "EMAIL/VERIFY/TEXT_2_1"
+#~ msgstr "If this wasn't you, please"
+
+#~ msgid "EMAIL/VERIFY/TEXT_2_2"
+#~ msgstr "reset your password"
+
+#~ msgid "EMAIL/VERIFY/TEXT_2_3"
+#~ msgstr "to secure your account."

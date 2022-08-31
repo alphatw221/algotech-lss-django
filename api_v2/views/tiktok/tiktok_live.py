@@ -25,9 +25,11 @@ class TikTokViewSet(viewsets.GenericViewSet):
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
 
 
-        if 'tiktok' not in user_subscription.user_plan.get('activated_platform'):
-            raise lib.error_handle.error.api_error.ApiVerifyError('tiktok_not_activated')
+        # if 'tiktok' not in user_subscription.user_plan.get('activated_platform'):
+        #     raise lib.error_handle.error.api_error.ApiVerifyError('tiktok_not_activated')
         
-        service.rq.queue.enqueue_test_queue(jobs.comment_create_job.comment_create_job, campaign_id = campaign.id, comments = request.data, platform='tiktok', push_comment = True)
-        # service.rq.queue.enqueue_campaign_queue(jobs.comment_create_job.comment_create_job, campaign_id = campaign.id, comments = request.data, platform='tiktok', push_comment = True)
+
+
+        service.rq.queue.enqueue_campaign_queue(jobs.comment_create_job.comment_create_job, campaign_id = campaign.id, comments = request.data, platform='tiktok', push_comment = True)
+
         return Response({'message': 'enqueue success'}, status=status.HTTP_200_OK)

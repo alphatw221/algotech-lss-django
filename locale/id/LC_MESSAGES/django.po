@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-25 10:32+0000\n"
+"POT-Creation-Date: 2022-08-30 10:44+0000\n"
 "PO-Revision-Date: 2021-12-13 15:50+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -182,8 +182,6 @@ msgid "EMAIL/PASSWORD_RESET_LINK/SUBJECT"
 msgstr "Live Show Seller Password Reset"
 
 #: backend/i18n/email/subject.py:12
-#, fuzzy
-#| msgid "EMAIL/PASSWORD_RESET_LINK/SUBJECT"
 msgid "EMAIL/PASSWORD_RESET_SUCCESS/SUBJECT"
 msgstr "Live Show Seller Password Reset"
 
@@ -458,24 +456,20 @@ msgstr ""
 "Hadiah: {product_name}. Mohon periksa keranjang belanja anda."
 
 #: lib/i18n/cart_product_request.py:64
-#, fuzzy, python-brace-format
-#| msgid "ITEM_INFO{order_code}{qty}{result}"
+#, python-brace-format
 msgid "ITEM_INFO{order_code}{result}"
-msgstr "“{order_code}” Jumlah: {qty} {result}. "
+msgstr "“{order_code}” {result}."
 
 #: lib/i18n/email/delivery_comfirm_mail.py:10
-#, fuzzy, python-brace-format
-#| msgid "EMAIL/ORDER_CONFIRM/SUBJECT{order_id}{campaign_title}"
+#, python-brace-format
 msgid "EMAIL/DELIVERY_CONFIRM/SUBJECT{order_id}{campaign_title}"
 msgstr ""
 "Thanks for your order! Your order #{order_id} from {campaign_title} is "
 "confirmed!"
 
 #: lib/i18n/email/delivery_comfirm_mail.py:25
-#, fuzzy
-#| msgid "EMAIL/DELIVERY_CONFIRM/TOTAL"
 msgid "EMAIL/DELIVERY_CONFIRM/TITLE"
-msgstr "Total"
+msgstr "Your Order Has Been Shipped !."
 
 #: lib/i18n/email/delivery_comfirm_mail.py:38
 #: lib/i18n/email/delivery_comfirm_mail.py:41
@@ -502,10 +496,8 @@ msgstr ""
 "confirmed!"
 
 #: lib/i18n/email/order_comfirm_mail.py:23
-#, fuzzy
-#| msgid "EMAIL/ORDER_CONFIRM/TOTAL"
 msgid "EMAIL/ORDER_CONFIRM/TITLE"
-msgstr "Total"
+msgstr "Thanks for your order!"
 
 #: lib/i18n/email/order_comfirm_mail.py:75
 msgid "EMAIL/ORDER_CONFIRM/ACCOUNT_MODE"
@@ -649,21 +641,15 @@ msgid "CONGRATS_2_WELCOME"
 msgstr ""
 
 #: templates/reset_password_success_email.html:15
-#, fuzzy
-#| msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT1"
 msgid "EMAIL/PASSWORD_RESET_SUCCESS/CONTENT1"
 msgstr "Hi"
 
 #: templates/reset_password_success_email.html:15
-#, fuzzy
-#| msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT2"
 msgid "EMAIL/PASSWORD_RESET_SUCCESS/CONTENT2"
 msgstr ""
 "Nakuha na namin ang inyong request para i-reset ang inyong Live Show Seller "
 "password. I-click ang link sa ibaba para gumawa ng panibago:"
 
-#, fuzzy
-#~| msgid "DETAIL{link}\n"
 #~ msgid "DETAIL{link}"
 #~ msgstr "Pelajari lebih lanjut: {link}\n"
 
@@ -693,3 +679,21 @@ msgstr ""
 
 #~ msgid "MESSAGE_HEADER"
 #~ msgstr "Pesanan anda:"
+
+#~ msgid "EMAIL/VERIFY/SUBJECT"
+#~ msgstr "Your LSS login verification code"
+
+#~ msgid "EMAIL/VERIFY/TITLE"
+#~ msgstr "Hi, Someone tried to log in to your LSS account."
+
+#~ msgid "EMAIL/VERIFY/TEXT_1"
+#~ msgstr "If this was you, please use the following code to log in:"
+
+#~ msgid "EMAIL/VERIFY/TEXT_2_1"
+#~ msgstr "If this wasn't you, please"
+
+#~ msgid "EMAIL/VERIFY/TEXT_2_2"
+#~ msgstr "reset your password"
+
+#~ msgid "EMAIL/VERIFY/TEXT_2_3"
+#~ msgstr "to secure your account."

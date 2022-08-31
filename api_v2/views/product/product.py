@@ -138,7 +138,6 @@ class ProductViewSet(viewsets.ModelViewSet):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         product = serializer.save()
-        print(image)
         if image in ['null', None, '', 'undefined']:
             pass
         elif image =='._no_image':
@@ -158,6 +157,21 @@ class ProductViewSet(viewsets.ModelViewSet):
         user_subscription.save()
 
         return Response(models.product.product.ProductSerializer(product).data, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['PUT'], url_path=r'bulk/update', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def bulk_update_product(self, request, pk=None):
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        categories, product_status, stock_id_list = lib.util.getter.getdata(request,('categories', 'status', 'stockIdList'), required=False)
+
+        for stock_id in stock_id_list:
+            stock = models.product.product.Product.objects.get(id=stock_id)
+            stock.status = product_status
+            stock.tag = categories
+            stock.save()
+
+        return Response({'message': 'success'}, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['DELETE'], url_path=r'delete', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
