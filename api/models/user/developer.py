@@ -6,10 +6,13 @@ class Developer(models.Model):
 
     api_key = models.CharField(max_length=255, null=True, blank=True)
     secret_key = models.CharField(max_length=255, null=True, blank=True)
+    salt = models.CharField(max_length=255, null=True, blank=True)
 
     name = models.CharField(max_length=255, null=True, blank=True)
     email = models.CharField(max_length=255, null=True, blank=True)
     phone = models.CharField(max_length=255, null=True, blank=True)
+
+    authorization = models.JSONField(null=False, blank=False, default=dict)
 
     permissions = models.JSONField(null=False, blank=False, default=dict)
     meta = models.JSONField(null=False, blank=False, default=dict)
