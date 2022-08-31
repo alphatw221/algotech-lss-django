@@ -144,17 +144,17 @@ class PreOrderViewSet(viewsets.ModelViewSet):
                 platform = None,
                 platform_id = None)
 
-            for campaign_product in campaign.products.filter(Q(type=models.campaign.campaign_product.TYPE_PRODUCT)|Q(type=models.campaign.campaign_product.TYPE_PRODUCT_FAST)):   #status=True cause databaseError here
+            # for campaign_product in campaign.products.filter(Q(type=models.campaign.campaign_product.TYPE_PRODUCT)|Q(type=models.campaign.campaign_product.TYPE_PRODUCT_FAST)):   #status=True cause databaseError here
 
-                if not campaign_product.status or not campaign_product.qty_for_sale - campaign_product.qty_sold:
-                    continue
+            #     if not campaign_product.status or not campaign_product.qty_for_sale - campaign_product.qty_sold:
+            #         continue
 
-                try:
-                    lib.helper.order_helper.PreOrderHelper.add_product(None, pre_order.id, campaign_product.id, 1)
-                except Exception:
-                    print('add_proudct fail')
-                    print(traceback.format_exc())
-                    continue
+            #     try:
+            #         lib.helper.order_helper.PreOrderHelper.add_product(None, pre_order.id, campaign_product.id, 1)
+            #     except Exception:
+            #         print('add_proudct fail')
+            #         print(traceback.format_exc())
+            #         continue
             
         pre_order_oid = database.lss.pre_order.get_oid_by_id(pre_order.id)
         
@@ -199,17 +199,17 @@ class PreOrderViewSet(viewsets.ModelViewSet):
                 platform = None,
                 platform_id = None)
 
-            for campaign_product in campaign.products.filter(Q(type=models.campaign.campaign_product.TYPE_PRODUCT)|Q(type=models.campaign.campaign_product.TYPE_PRODUCT_FAST)):   #status=True cause databaseError here
+            # for campaign_product in campaign.products.filter(Q(type=models.campaign.campaign_product.TYPE_PRODUCT)|Q(type=models.campaign.campaign_product.TYPE_PRODUCT_FAST)):   #status=True cause databaseError here
 
-                if not campaign_product.status or not campaign_product.qty_for_sale - campaign_product.qty_sold:
-                    continue
+            #     if not campaign_product.status or not campaign_product.qty_for_sale - campaign_product.qty_sold:
+            #         continue
 
-                try:
-                    lib.helper.order_helper.PreOrderHelper.add_product(None, pre_order.id, campaign_product.id, 1)
-                except Exception:
-                    print('add_proudct fail')
-                    print(traceback.format_exc())
-                    continue
+            #     try:
+            #         lib.helper.order_helper.PreOrderHelper.add_product(None, pre_order.id, campaign_product.id, 1)
+            #     except Exception:
+            #         print('add_proudct fail')
+            #         print(traceback.format_exc())
+            #         continue
 
         pre_order_oid = database.lss.pre_order.get_oid_by_id(pre_order.id)
         return Response({ 'pre_order_oid':pre_order_oid}, status=status.HTTP_200_OK)
