@@ -51,7 +51,7 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.test_easy_store()
+        self.test_create_developer_token()
         # self.test_remove_campaign_comment_duplicate()
 
     def modify_database(self):
@@ -494,3 +494,13 @@ class Command(BaseCommand):
 
         ret = service.twitch.twitch.whisper_to_user('17uulrj9lsj7zqpwrvsneildfcs947', '818419850', 'eat poop poop')
         print (ret)
+
+    def test_create_developer_token(self):
+        import uuid, base64, random, string
+        data = {
+            "api_key" : base64.urlsafe_b64encode(uuid.uuid4().bytes).rstrip(b'=').decode('ascii'),
+            "secret_key" : ''.join(random.choice(string.ascii_letters+string.digits) for _ in range(12)),
+            "name" : 'Mr.Modi',
+            "phone" : '+918401060120',
+        }
+        print(data)
