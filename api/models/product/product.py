@@ -69,9 +69,9 @@ class Product(models.Model):
     customer_editable = models.BooleanField(
         blank=False, null=True, default=False)
 
-    type = models.CharField(max_length=255, null=True, blank=True)
+    type = models.CharField(max_length=255, null=True, blank=True, default=TYPE_PRODUCT)
     status = models.CharField(max_length=255, blank=True,
-                              choices=STATUS_CHOICES, default='enabled')
+                              choices=STATUS_CHOICES, default=STATUS_ENABLED)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
