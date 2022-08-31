@@ -37,6 +37,8 @@ def classify_comment_v2(texts):
         response = requests.post(url=url,json=data, timeout=5)
         data = json.loads(response.text)
         predictions = np.array(data.get('predictions'))
+        print ('predictions')
+        print (predictions)
         class_index = np.argmax(predictions, axis=1)
         return list(categories[class_index])
 

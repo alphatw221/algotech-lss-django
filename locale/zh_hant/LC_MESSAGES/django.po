@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-29 10:45+0000\n"
+"POT-Creation-Date: 2022-08-30 10:44+0000\n"
 "PO-Revision-Date: 2021-12-13 15:50+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -76,50 +76,50 @@ msgstr "更新成功！"
 #: backend/i18n/cart_product_request.py:77 lib/i18n/cart_product_request.py:59
 #: lib/i18n/cart_product_request.py:100
 msgid "DELETED"
-msgstr "商品已從購物車刪除，"
+msgstr "商品已從購物車刪除。"
 
 #: backend/i18n/cart_product_request.py:42
 #: backend/i18n/cart_product_request.py:79 lib/i18n/cart_product_request.py:61
 #: lib/i18n/cart_product_request.py:102
 msgid "INSUFFICIENT_INV"
-msgstr "商品已售完，"
+msgstr "商品已售完。"
 
 #: backend/i18n/cart_product_request.py:44
 #: backend/i18n/cart_product_request.py:81 lib/i18n/cart_product_request.py:63
 #: lib/i18n/cart_product_request.py:104
 msgid "INVALID_PRODUCT_NOT_ACTIVATED"
-msgstr "商品目前無法下單，"
+msgstr "目前無法下單。"
 
 #: backend/i18n/cart_product_request.py:46
 #: backend/i18n/cart_product_request.py:83 lib/i18n/cart_product_request.py:69
 #: lib/i18n/cart_product_request.py:106
 msgid "INVALID_REMOVE_NOT_ALLOWED"
-msgstr "無法刪除，"
+msgstr "無法刪除。"
 
 #: backend/i18n/cart_product_request.py:48
 #: backend/i18n/cart_product_request.py:85 lib/i18n/cart_product_request.py:71
 #: lib/i18n/cart_product_request.py:108
 msgid "INVALID_EDIT_NOT_ALLOWED"
-msgstr "無法修改，"
+msgstr "無法修改。"
 
 #: backend/i18n/cart_product_request.py:50
 #: backend/i18n/cart_product_request.py:87 lib/i18n/cart_product_request.py:73
 #: lib/i18n/cart_product_request.py:110
 msgid "INVALID_ADD_ZERO_QTY"
-msgstr "無法刪除，"
+msgstr "無法刪除。"
 
 #: backend/i18n/cart_product_request.py:52
 #: backend/i18n/cart_product_request.py:89 lib/i18n/cart_product_request.py:75
 #: lib/i18n/cart_product_request.py:112
 msgid "N/A"
-msgstr "操作錯誤，"
+msgstr "操作錯誤。"
 
 #: backend/i18n/cart_product_request.py:54
 #: backend/i18n/cart_product_request.py:92 lib/i18n/cart_product_request.py:77
 #: lib/i18n/cart_product_request.py:115
 #, python-brace-format
 msgid "ITEM_INFO{order_code}{qty}{result}"
-msgstr "{result}商品 {order_code} <{qty} 件>。"
+msgstr "商品 {order_code} < {qty} 件>，{result}"
 
 #: backend/i18n/comment_command.py:24 backend/i18n/comment_command.py:27
 #: backend/i18n/comment_command.py:29 lib/i18n/comment_command.py:25
@@ -444,22 +444,18 @@ msgstr ""
 "恭喜 {customer_name} 得獎，獲得 {product_name}！請至購物車確認您的獎品。"
 
 #: lib/i18n/cart_product_request.py:64
-#, fuzzy, python-brace-format
-#| msgid "ITEM_INFO{order_code}{qty}{result}"
+#, python-brace-format
 msgid "ITEM_INFO{order_code}{result}"
-msgstr "{result}商品 {order_code} <{qty} 件>。"
+msgstr "商品 {order_code}，{result}"
 
 #: lib/i18n/email/delivery_comfirm_mail.py:10
-#, fuzzy, python-brace-format
-#| msgid "EMAIL/ORDER_CONFIRM/SUBJECT{order_id}{campaign_title}"
+#, python-brace-format
 msgid "EMAIL/DELIVERY_CONFIRM/SUBJECT{order_id}{campaign_title}"
 msgstr "感謝您的訂單！您來自 {campaign_title} 的訂單 #{order_id} 已確認！"
 
 #: lib/i18n/email/delivery_comfirm_mail.py:25
-#, fuzzy
-#| msgid "EMAIL/DELIVERY_CONFIRM/TOTAL"
 msgid "EMAIL/DELIVERY_CONFIRM/TITLE"
-msgstr "總計"
+msgstr "您得訂單已經寄出."
 
 #: lib/i18n/email/delivery_comfirm_mail.py:38
 #: lib/i18n/email/delivery_comfirm_mail.py:41
@@ -654,3 +650,21 @@ msgstr "已成功修改密碼. 若您沒有要求修改密碼, 請立即聯絡�
 
 #~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_CHARGE"
 #~ msgstr "運費"
+
+#~ msgid "EMAIL/VERIFY/SUBJECT"
+#~ msgstr "您的LSS登入验证码"
+
+#~ msgid "EMAIL/VERIFY/TITLE"
+#~ msgstr "您好，有人试图登录您的 LSS 帐户。"
+
+#~ msgid "EMAIL/VERIFY/TEXT_1"
+#~ msgstr "如果是您本人，请使用以下驗證碼登录："
+
+#~ msgid "EMAIL/VERIFY/TEXT_2_1"
+#~ msgstr "如果這不是你，请"
+
+#~ msgid "EMAIL/VERIFY/TEXT_2_2"
+#~ msgstr "重置您的密码"
+
+#~ msgid "EMAIL/VERIFY/TEXT_2_3"
+#~ msgstr "以保护您的帐户。"

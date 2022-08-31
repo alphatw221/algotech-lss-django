@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-29 10:45+0000\n"
+"POT-Creation-Date: 2022-08-30 10:44+0000\n"
 "PO-Revision-Date: 2021-12-13 15:50+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -76,50 +76,50 @@ msgstr "更新成功！"
 #: backend/i18n/cart_product_request.py:77 lib/i18n/cart_product_request.py:59
 #: lib/i18n/cart_product_request.py:100
 msgid "DELETED"
-msgstr "商品已从购物车删除，"
+msgstr "商品已从购物车删除。"
 
 #: backend/i18n/cart_product_request.py:42
 #: backend/i18n/cart_product_request.py:79 lib/i18n/cart_product_request.py:61
 #: lib/i18n/cart_product_request.py:102
 msgid "INSUFFICIENT_INV"
-msgstr "商品已售完，"
+msgstr "商品已售完。"
 
 #: backend/i18n/cart_product_request.py:44
 #: backend/i18n/cart_product_request.py:81 lib/i18n/cart_product_request.py:63
 #: lib/i18n/cart_product_request.py:104
 msgid "INVALID_PRODUCT_NOT_ACTIVATED"
-msgstr "商品目前无法下单，"
+msgstr "目前无法下单。"
 
 #: backend/i18n/cart_product_request.py:46
 #: backend/i18n/cart_product_request.py:83 lib/i18n/cart_product_request.py:69
 #: lib/i18n/cart_product_request.py:106
 msgid "INVALID_REMOVE_NOT_ALLOWED"
-msgstr "无法删除，"
+msgstr "无法删除。"
 
 #: backend/i18n/cart_product_request.py:48
 #: backend/i18n/cart_product_request.py:85 lib/i18n/cart_product_request.py:71
 #: lib/i18n/cart_product_request.py:108
 msgid "INVALID_EDIT_NOT_ALLOWED"
-msgstr "无法修改，"
+msgstr "无法修改。"
 
 #: backend/i18n/cart_product_request.py:50
 #: backend/i18n/cart_product_request.py:87 lib/i18n/cart_product_request.py:73
 #: lib/i18n/cart_product_request.py:110
 msgid "INVALID_ADD_ZERO_QTY"
-msgstr "无法删除，"
+msgstr "无法删除。"
 
 #: backend/i18n/cart_product_request.py:52
 #: backend/i18n/cart_product_request.py:89 lib/i18n/cart_product_request.py:75
 #: lib/i18n/cart_product_request.py:112
 msgid "N/A"
-msgstr "操作错误，"
+msgstr "操作错误。"
 
 #: backend/i18n/cart_product_request.py:54
 #: backend/i18n/cart_product_request.py:92 lib/i18n/cart_product_request.py:77
 #: lib/i18n/cart_product_request.py:115
 #, python-brace-format
 msgid "ITEM_INFO{order_code}{qty}{result}"
-msgstr "{result}商品 {order_code} <{qty} 件>。"
+msgstr "商品 {order_code} < {qty} 件，{result}"
 
 #: backend/i18n/comment_command.py:24 backend/i18n/comment_command.py:27
 #: backend/i18n/comment_command.py:29 lib/i18n/comment_command.py:25
@@ -444,22 +444,18 @@ msgstr ""
 "恭喜 {customer_name} 得奖，获得 {product_name}！请至购物车确认您的奖品。"
 
 #: lib/i18n/cart_product_request.py:64
-#, fuzzy, python-brace-format
-#| msgid "ITEM_INFO{order_code}{qty}{result}"
+#, python-brace-format
 msgid "ITEM_INFO{order_code}{result}"
-msgstr "{result}商品 {order_code} <{qty} 件>。"
+msgstr "商品 {order_code}，{result}"
 
 #: lib/i18n/email/delivery_comfirm_mail.py:10
-#, fuzzy, python-brace-format
-#| msgid "EMAIL/ORDER_CONFIRM/SUBJECT{order_id}{campaign_title}"
+#, python-brace-format
 msgid "EMAIL/DELIVERY_CONFIRM/SUBJECT{order_id}{campaign_title}"
 msgstr "感谢您的订单！您来自 {campaign_title} 的订单 #{order_id} 已确认！"
 
 #: lib/i18n/email/delivery_comfirm_mail.py:25
-#, fuzzy
-#| msgid "EMAIL/DELIVERY_CONFIRM/TOTAL"
 msgid "EMAIL/DELIVERY_CONFIRM/TITLE"
-msgstr "总计"
+msgstr "您的訂單已經寄出"
 
 #: lib/i18n/email/delivery_comfirm_mail.py:38
 #: lib/i18n/email/delivery_comfirm_mail.py:41
@@ -627,14 +623,10 @@ msgid "CONGRATS_2_WELCOME"
 msgstr ""
 
 #: templates/reset_password_success_email.html:15
-#, fuzzy
-#| msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT1"
 msgid "EMAIL/PASSWORD_RESET_SUCCESS/CONTENT1"
 msgstr "您好 "
 
 #: templates/reset_password_success_email.html:15
-#, fuzzy
-#| msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT2"
 msgid "EMAIL/PASSWORD_RESET_SUCCESS/CONTENT2"
 msgstr ""
 "我們收到重設Live Show Seller 密碼的要求。請點擊下方連結, 即可重新設定。"
@@ -665,3 +657,21 @@ msgstr ""
 
 #~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_CHARGE"
 #~ msgstr "运费"
+
+#~ msgid "EMAIL/VERIFY/SUBJECT"
+#~ msgstr "您的LSS登入驗證碼"
+
+#~ msgid "EMAIL/VERIFY/TITLE"
+#~ msgstr "您好，有人試圖登入您的 LSS 帳戶。"
+
+#~ msgid "EMAIL/VERIFY/TEXT_1"
+#~ msgstr "如果是您本人，請使用以下驗證碼登入："
+
+#~ msgid "EMAIL/VERIFY/TEXT_2_1"
+#~ msgstr "如果這不是你，請"
+
+#~ msgid "EMAIL/VERIFY/TEXT_2_2"
+#~ msgstr "重置您的密碼"
+
+#~ msgid "EMAIL/VERIFY/TEXT_2_3"
+#~ msgstr "以保護您的帳戶。"
