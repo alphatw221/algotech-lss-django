@@ -142,7 +142,7 @@ def comment_responding(platform_name, platform_instance_data, campaign_data, use
         text = lib.i18n.cart_product_request.get_request_response(
             state, campaign_product, qty, lang=campaign_data.get('lang'))
         
-        code, ret = service.twitch.twitch.whisper_to_user(platform_instance_data.get('token'), comment['customer_id'], text+shopping_cart_info)
+        code, ret = service.twitch.twitch.whisper_to_user(platform_instance_data.get('token'), platform_instance_data.get('user_name'), comment['customer_id'], text+shopping_cart_info)
         if code!=200:
             print("response", ret)
     elif platform_name == 'tiktok':

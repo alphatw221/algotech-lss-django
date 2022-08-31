@@ -350,8 +350,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         dealer_user_subscription = lib.util.verify.Verify.get_dealer_user_subscription_from_api_user(api_user)
 
-        queryset = dealer_user_subscription.subscribers.all()
-
-        print (queryset)
+        slist = utils.advance_query.user_subscription.get_dealer_total_transaction(dealer_user_subscription.id)
+        print (slist)
 
         return Response({'message': 'suc'}, status=status.HTTP_200_OK)
