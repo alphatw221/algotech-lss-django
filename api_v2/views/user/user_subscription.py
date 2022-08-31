@@ -17,6 +17,7 @@ from api import rule, models, utils
 import stripe, pytz, lib, service, business_policy, json
 
 from datetime import datetime, timedelta
+import database
 class UserSubscriptionPagination(PageNumberPagination):
 
     page_query_param = 'page'
@@ -355,3 +356,10 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         print (queryset)
 
         return Response({'message': 'suc'}, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['GET'], url_path=r'seller/search/list', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def accounts_list(self, request):
+        data = database.lss.user_subscription.get_user_subscription_from_dealer(1)
+
+        return Response({'data':data}, status=status.HTTP_200_OK)
