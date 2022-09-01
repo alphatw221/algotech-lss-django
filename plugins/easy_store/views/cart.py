@@ -12,7 +12,8 @@ from .. import service as easy_store_service
 from automation import jobs
 
 PLUGIN_EASY_STORE = 'easy_store'
-class CartViewSet(viewsets.ModelViewSet):
+
+class CartViewSet(viewsets.GenericViewSet):
     queryset = models.order.pre_order.PreOrder.objects.none()
 
     @action(detail=False, methods=['GET'], url_path=r'gateway/(?P<cart_oid>[^/.]+)', permission_classes=(), authentication_classes=[])
@@ -44,6 +45,7 @@ class CartViewSet(viewsets.ModelViewSet):
           campaign_product = campaign_product_dict[campaign_product_id_str]
           line_items.append({'variant_id':campaign_product.meta.get('easy_store',{}).get('variant_id'), 'quantity':product.get('qty')})
         
+        print(line_items)
 
         # if cart_token := pre_order.meta.get('easy_store',{}).get('cart_token'):
         #     success, data = easy_store_service.checkouts.update_checkout(credential.get('shop'), credential.get('access_token'), line_items, cart_token)
@@ -53,6 +55,8 @@ class CartViewSet(viewsets.ModelViewSet):
         if not success:
             raise lib.error_handle.error.api_error.ApiCallerError('please place your order again')
 
+        print(data)
+        
         checkout = data.get('checkout')
         id = checkout.get('id')
         token = checkout.get('token')
@@ -65,8 +69,9 @@ class CartViewSet(viewsets.ModelViewSet):
                             "cart_token":cart_token,
                             "checkout_url":checkout_url,
                         }}
-        
+        campaign.meta[cart_token]=pre_order.id
+        campaign.save()
         pre_order.meta.update(meta_data)
         pre_order.save()
-
+        print(checkout_url)
         return Response(checkout_url, status=status.HTTP_200_OK)

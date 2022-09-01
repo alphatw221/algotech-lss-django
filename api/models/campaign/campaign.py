@@ -15,6 +15,7 @@ from api.models.user.user_subscription import UserSubscription, UserSubscription
 from api.models.youtube.youtube_channel import (YoutubeChannel,
                                                 YoutubeChannelInfoSerializer, YoutubeChannelSerializer)
 from api.models.twitch.twitch_channel import TwitchChannel, TwitchChannelSerializer, TwitchChannelInfoSerializer
+from api.models.tiktok.tiktok_account import TikTokAccount, TikTokAccountSerializer, TikTokAccountInfoSerializer
 
 import business_policy
 
@@ -26,7 +27,9 @@ IMAGE_PNG = 'image/png'
 IMAGE_SUPPORTED_TYPE = [IMAGE_JPEG, IMAGE_JPG, IMAGE_PNG]
 IMAGE_MAXIMUM_SIZE = 10*1024*1024
 
-
+STATUS_HISTORY = 'history'
+STATUS_SCHEDULED = 'scheduled'
+STATUS_ONGOING = 'ongoing'
 
 class Campaign(models.Model):
     class Meta:
@@ -78,6 +81,8 @@ class Campaign(models.Model):
         TwitchChannel, blank=True, null=True, on_delete=models.SET_NULL, related_name='campaigns')
     twitch_campaign = models.JSONField(null=True, blank=True, default=dict)
 
+    tiktok_account = models.ForeignKey(
+        TikTokAccount, blank=True, null=True, on_delete=models.SET_NULL, related_name='campaigns')
     tiktok_campaign = models.JSONField(null=True, blank=True, default=dict)
 
     meta = models.JSONField(null=True, blank=True, default=dict)
@@ -126,8 +131,14 @@ class InstagramCampaignSerializer(serializers.Serializer):
     is_failed = serializers.BooleanField(required=False, default=False)
 
 class TwitchCampaignSerializer(serializers.Serializer):
+    token = serializers.CharField(required=False, default="", allow_blank=True)
+    channel_name = serializers.CharField(required=False, default="", allow_blank=True)
     broadcaster_id = serializers.CharField(required=False, default="", allow_blank=True)
     moderator_id = serializers.CharField(required=False, default="", allow_blank=True)
+
+class TiktokCampaignSerializer(serializers.Serializer):
+    username = serializers.CharField(required=False, default="", allow_blank=True)
+
 
 class CampaignSerializer(serializers.ModelSerializer):
     class Meta:
@@ -143,6 +154,7 @@ class CampaignSerializer(serializers.ModelSerializer):
     instagram_campaign = InstagramCampaignSerializer(default=dict)
     twitch_channel = TwitchChannelInfoSerializer(default=dict)
     twitch_campaign = TwitchCampaignSerializer(default=dict)
+    tiktok_campaign = TiktokCampaignSerializer(default=dict)
 
     meta = serializers.JSONField(default=dict)
     meta_payment = serializers.JSONField(default=dict)
@@ -160,6 +172,7 @@ class CampaignSerializerCreate(serializers.ModelSerializer):
     youtube_campaign = YoutubeCampaignSerializer(default=dict)
     instagram_campaign = InstagramCampaignSerializer(default=dict)
     twitch_campaign = TwitchCampaignSerializer(default=dict)
+    tiktok_campaign = TiktokCampaignSerializer(default=dict)
 
     meta = serializers.JSONField(default={"allow_checkout": 1})
     meta_payment = serializers.JSONField(default=dict)
@@ -177,6 +190,7 @@ class CampaignSerializerEdit(serializers.ModelSerializer):
     youtube_campaign = YoutubeCampaignSerializer(default=dict)
     instagram_campaign = InstagramCampaignSerializer(default=dict)
     twitch_campaign = TwitchCampaignSerializer(default=dict)
+    tiktok_campaign = TiktokCampaignSerializer(default=dict)
 
     meta = serializers.JSONField(default={"allow_checkout": 1})
     meta_payment = serializers.JSONField(default=dict)
@@ -213,7 +227,11 @@ class CampaignAdmin(admin.ModelAdmin):
     list_display = [field.name for field in Campaign._meta.fields]
     search_fields = [field.name for field in Campaign._meta.fields]
 
-
+class CampaignOptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Campaign
+        fields = ['id', 'title']
+        read_only_fields = ['id', 'title']
 
 
 

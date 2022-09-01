@@ -1,1 +1,1 @@
-from . import util,i18n,helper, error_handle, code_manager
+from . import util,i18n,helper, error_handle, code_manager, authentication_class, permission_class

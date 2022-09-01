@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 
 from datetime import datetime
-from api import models
+from api import models, rule
 import api
 import lib
 import json
@@ -63,14 +63,38 @@ class CampaignViewSet(viewsets.ModelViewSet):
         
         return Response(data, status=status.HTTP_200_OK)
 
+    @action(detail=False, methods=['GET'], url_path=r'list/(?P<_status>[^/.]+)/options', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def list_campaign_option(self, request, _status):
+
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        campaigns = user_subscription.campaigns.filter(id__isnull=False) # Due to problematic dirty data
+        if _status == models.campaign.campaign.STATUS_HISTORY:
+            campaigns = campaigns.filter(end_at__lt=datetime.utcnow())
+        elif _status == models.campaign.campaign.STATUS_SCHEDULED:
+            campaigns = campaigns.filter(end_at__gte=datetime.utcnow())
+        elif _status == models.campaign.campaign.STATUS_ONGOING:
+            campaigns = campaigns.filter(end_at__gte=datetime.utcnow())
+            campaigns = campaigns.filter(start_at__lte=datetime.utcnow())
+        else:
+            raise lib.error_handle.error.api_error.ApiVerifyError('invalid status')
+        return Response(models.campaign.campaign.CampaignOptionSerializer(campaigns, many=True).data, status=status.HTTP_200_OK)
+
     @action(detail=False, methods=['POST'], url_path=r'create', parser_classes=(MultiPartParser, ), permission_classes=(IsAuthenticated, ))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def create_campaign(self, request):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
-
+        
         campaignData, = lib.util.getter.getdata(request, ('data',), required=True)
         campaignData = json.loads(campaignData)
+        end_at = campaignData['end_at']
+        ret = rule.rule_checker.user_subscription_rule_checker.CreateCampaignRuleChecker.check(**{
+            'api_user': api_user, 'user_subscription': user_subscription, 'end_at': end_at
+        })
+        
+        
 
         serializer = models.campaign.campaign.CampaignSerializerCreate(data=campaignData)
         if not serializer.is_valid():
@@ -341,9 +365,9 @@ class CampaignViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['PUT'], url_path=r'live/update', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def update_campaign_live_data(self, request, pk):
-        api_user, platform, platform_id, post_id = \
-            lib.util.getter.getparams(request, ("platform", "platform_id", "post_id"), with_user=True, seller=True)
-
+        platform, platform_id, post_id, username = \
+            lib.util.getter.getdata(request, ("platform", "platform_id", "post_id", "username"), required=False)
+        api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = \
             lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, pk)
@@ -363,6 +387,15 @@ class CampaignViewSet(viewsets.ModelViewSet):
             instagram_profile = lib.util.verify.Verify.get_instagram_profile_from_user_subscription(user_subscription, platform_id)
             campaign.instagram_campaign['live_media_id']=post_id
             campaign.instagram_profile = instagram_profile
+        elif platform == 'twitch':
+            twitch_channel = lib.util.verify.Verify.get_twitch_channel_from_user_subscription(user_subscription, platform_id)
+            campaign.twitch_campaign['channel_name'] = twitch_channel.name
+            campaign.twitch_campaign['token']=twitch_channel.token
+            campaign.twitch_channel = twitch_channel
+        elif platform == 'tiktok':
+            # tiktok_account = lib.util.verify.Verify.get_tiktok_channel_from_user_subscription(user_subscription, platform_id)
+            campaign.tiktok_campaign['username'] = username
+            # campaign.tiktok_account = tiktok_account
         campaign.save()
         # return Response(models.campaign.campaign.CampaignSerializerRetreive(campaign).data, status=status.HTTP_200_OK)
         return Response(models.campaign.campaign.CampaignSerializer(campaign).data, status=status.HTTP_200_OK)

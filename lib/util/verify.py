@@ -19,6 +19,7 @@ from api.models.cart.cart import Cart
 from lib.error_handle.error.api_error import ApiVerifyError
 from backend.api.instagram.profile import api_ig_get_profile_live_media
 from backend.api.youtube.channel import api_youtube_get_list_channel_by_token
+import service
 from business_policy.subscription_plan import SubscriptionPlan
 import hashlib
 from api import models
@@ -284,6 +285,18 @@ class Verify():
         if not user_subscription.instagram_profiles.filter(id=instagram_profile_id).exists():
             raise ApiVerifyError("util.instagram_profile_not_bound_to_user_subscription")
         return user_subscription.instagram_profiles.get(id=instagram_profile_id)
+    
+    @staticmethod
+    def get_twitch_channel_from_user_subscription(user_subscription, twitch_channel_id):
+        if not user_subscription.twitch_channels.filter(id=twitch_channel_id).exists():
+            raise ApiVerifyError("util.twitch_channels_not_bound_to_user_subscription")
+        return user_subscription.twitch_channels.get(id=twitch_channel_id)
+    
+    @staticmethod
+    def get_tiktok_channel_from_user_subscription(user_subscription, tiktok_account_id):
+        if not user_subscription.tiktok_accounts.filter(id=tiktok_account_id).exists():
+            raise ApiVerifyError("util.tiktok_accounts_not_bound_to_user_subscription")
+        return user_subscription.tiktok_accounts.get(id=tiktok_account_id)
 
     @staticmethod
     def get_campaign(campaign_id):
@@ -453,6 +466,10 @@ class Verify():
                 if status_code == 200:
                     return True
                 return False
+            elif platform_name == 'twitch':
+                status_code, response = service.twitch.twitch.api_twitch_validate_token(access_token=officiall_page_token)
+                if status_code == 200:
+                    return True
         except Exception as e:
             return False
         return False
@@ -476,6 +493,18 @@ class Verify():
         if not models.campaign.campaign_quiz_game_bundle.CampaignQuizGameBundle.objects.filter(id=quiz_game_bundle_id).exists():
             raise ApiVerifyError('util.quiz_game_not_found')
         return models.campaign.campaign_quiz_game_bundle.CampaignQuizGameBundle.objects.get(id=quiz_game_bundle_id)
+    
+    @staticmethod
+    def get_user_register_by_email(user_register_email):
+        if not models.user.user_register.UserRegister.objects.filter(email=user_register_email).exists():
+            raise ApiVerifyError(f'user register not found by {user_register_email}')
+        return models.user.user_register.UserRegister.objects.filter(email=user_register_email).order_by('-created_at')[0]
+    
+    @staticmethod
+    def delete_user_register_by_email(user_register_email):
+        if not models.user.user_register.UserRegister.objects.filter(email=user_register_email).exists():
+            raise ApiVerifyError(f'user register not found by {user_register_email}')
+        return models.user.user_register.UserRegister.objects.filter(email=user_register_email).delete()
         
 
     # class PreOrderApi():

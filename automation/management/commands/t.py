@@ -12,6 +12,7 @@ from api.models.campaign.campaign import Campaign
 from api.models.campaign.campaign_product import CampaignProduct
 from api.models.cart.cart_product import CartProduct
 from api.models.order import pre_order
+from api.models.user import developer
 from api.models.user.user import User
 from api.models.user.user_subscription import UserSubscription
 from api.utils.orm import campaign_comment, cart_product
@@ -51,7 +52,7 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.test_twitch()
+        self.test_discripting_token()
         # self.test_remove_campaign_comment_duplicate()
 
     def modify_database(self):
@@ -421,28 +422,25 @@ class Command(BaseCommand):
     def test_easy_store(self):
         from plugins.easy_store import service
         from pprint import pprint
-        # shop = 'fantastyfrog.easy.co'
-        # access_token = '8cd8e2672d9031a9df5f5371b0c4ca41'
 
         shop = 'yihsuehlinlinyixue.easy.co'
         access_token = '698f9a9a7c8bbe5f65d0207fb6cba139'
-
+        #product
         # success, data = service.products.get_published_product(shop=shop, access_token=access_token,page=1)
-
-        # pprint(success)
-        # pprint(data)
-
-
-        line_items =  [
-                    {
-                        "variant_id": 36344238,
-                        "quantity": 2
-                    }
-                ]
+        
+        #checkout
+        # line_items =  [
+        #             {
+        #                 "variant_id": 36344238,
+        #                 "quantity": 2
+        #             }
+        #         ]
             
+        # success, data = service.checkouts.create_checkout(shop, access_token, line_items)
         
 
-        success, data =  service.checkouts.create_checkout(shop=shop, access_token=access_token, line_items=line_items)
+        # success, data = service.checkouts.retrieve_checkout(shop, access_token, '64ef5862-4685-4aad-ae33-2d2d82428115')
+        # success, data =  service.checkouts.update_checkout(shop, access_token, line_items, '64ef5862-4685-4aad-ae33-2d2d82428115')
         # pprint(success)
         # pprint(data)
 
@@ -450,6 +448,28 @@ class Command(BaseCommand):
 
         # success, data =  service.checkouts.retrieve_checkout(shop=shop, access_token=access_token, cart_token='a5318e0f-2317-445c-9c71-ab6c812666e9')
         # success, data =  service.checkouts.update_checkout(shop=shop, access_token=access_token, line_items=line_items, cart_token='a5318e0f-2317-445c-9c71-ab6c812666e9')
+
+
+
+        #webhook
+
+        # topic= 'order/create'
+        # url = 'https://staginglss.accoladeglobal.net/api/plugin/easy_store/order/webhook/create/'
+
+        # topic= 'order/paid'
+        # url = 'https://staginglss.accoladeglobal.net/api/plugin/easy_store/order/webhook/paid/'
+
+        # success, data = service.webhooks.list_webhook(shop, access_token)
+        success, data = service.webhooks.delete_webhook(shop, access_token, 1930323)
+        # success, data = service.webhooks.create_webhook(shop, token=access_token, topic=topic, url=url )
+
+        #order
+        # success, data = service.orders.retrieve_order(shop, access_token, 37069894)
+        # success, data = service.orders.update_order(shop, access_token, {'remark':123}, 37069894)
+        # success, data = service.orders.list_order(shop, access_token, created_at_min='2022-08-23 08:18:00')
+
+        # 2022-08-23T08:18:22+00:00
+        # metafields
         pprint(success)
         pprint(data)
 
@@ -475,3 +495,78 @@ class Command(BaseCommand):
 
         ret = service.twitch.twitch.whisper_to_user('17uulrj9lsj7zqpwrvsneildfcs947', '818419850', 'eat poop poop')
         print (ret)
+
+    def test_create_developer(self):
+        import uuid, base64, random, string
+        from api import models
+        data = {
+            "api_key" : base64.urlsafe_b64encode(uuid.uuid4().bytes).rstrip(b'=').decode('ascii'),
+            "secret_key" : ''.join(random.choice(string.ascii_letters+string.digits) for _ in range(12)),
+            "name" : 'Mr.Modi',
+            "phone" : '+918401060120',
+        }
+        print(data)
+        models.user.developer.Developer.objects.create(**data)
+
+    def test_generate_developer_token(self):
+        import hashlib, hmac
+        import json, base64
+        from django.conf import settings
+        from datetime import datetime, timedelta
+
+
+        header_data = {
+            'alg':'sha256',
+            'typ':'v1'
+        }
+        header_json = json.dumps(header_data)
+        header = base64.urlsafe_b64encode(header_json.encode('utf-8')).rstrip(b'=').decode('utf-8')
+
+        developer = models.user.developer.Developer.objects.get(api_key='7bbdrA5kQ06nAZP9ieEhTA')
+
+        payload_1_data = {
+            'key':developer.api_key, 
+            'perm':developer.permissions,
+            'auth':developer.authorization,
+            'meta':developer.meta,
+            'exp':int((datetime.now()+timedelta(days=7)).timestamp())
+        }
+        payload_1_json = json.dumps(payload_1_data)
+        payload_1 = base64.urlsafe_b64encode(payload_1_json.encode('utf-8')).rstrip(b'=').decode('utf-8')
+
+        head_and_claim = header+'.'+payload_1
+        signature_1 = hmac.new(settings.SECRET_KEY.encode(), msg=head_and_claim.encode(), digestmod=hashlib.sha256).hexdigest()
+
+        secret_key_hash_bytes = hmac.new(settings.SECRET_KEY.encode(), msg=developer.secret_key.encode(), digestmod=hashlib.sha256).digest()
+
+        secret_key_hash = base64.urlsafe_b64encode(secret_key_hash_bytes).rstrip(b'=').decode('utf-8')
+        token = head_and_claim+'.'+signature_1+'.'+developer.api_key+'.'+secret_key_hash
+
+
+        print(token)
+
+    def test_discripting_token(self):
+        
+        import hashlib, hmac
+        import json, base64
+        from django.conf import settings
+        from datetime import datetime, timedelta
+
+        token = 'eyJhbGciOiAic2hhMjU2IiwgInR5cCI6ICJ2MSJ9.eyJrZXkiOiAiN2JiZHJBNWtRMDZuQVpQOWllRWhUQSIsICJwZXJtIjoge30sICJhdXRoIjogbnVsbCwgIm1ldGEiOiB7fSwgImV4cCI6IDE2NjI1NDAyNjh9.8a1a3f2735e90bd3a8abd9615e7bc26e5860297968250268d371a31728c04556.7bbdrA5kQ06nAZP9ieEhTA.a1ttdUyxI3KdlcO1evA_Fyy1icAxQd8nXgGUlEThLoE'
+        header, payload, signature, api_key, secret_key_hash = token.split('.')
+
+        header_data = json.loads(base64.urlsafe_b64decode(header+'=='))
+
+        if header_data.get('typ')=='v1':
+
+            developer = models.user.developer.Developer.objects.get(api_key=api_key)
+
+            secret_key_hash_bytes = hmac.new(settings.SECRET_KEY.encode(), msg=developer.secret_key.encode(), digestmod=hashlib.sha256).digest()
+            _secret_key_hash = base64.urlsafe_b64encode(secret_key_hash_bytes).rstrip(b'=').decode('utf-8')
+            print(_secret_key_hash)
+            print(secret_key_hash)
+        else:
+            print('error')
+
+
+

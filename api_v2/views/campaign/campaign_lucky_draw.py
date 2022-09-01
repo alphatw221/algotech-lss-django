@@ -8,7 +8,7 @@ from rest_framework.parsers import MultiPartParser
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 
-from api import models
+from api import models, rule
 import lib, json
 
 
@@ -54,11 +54,12 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
 
         data = json.loads(data)
         type = data.get('type', '')
+        prize = data.get('prize', {})
 
-        if type not in models.campaign.campaign_lucky_draw.TYPE_CHOICES:
-            raise lib.error_handle.error.api_error.ApiVerifyError('invalid_lucky_draw_type')
-        elif type == models.campaign.campaign_lucky_draw.TYPE_PRODUCT and data.get('campaign_product', '') == '': 
-            raise lib.error_handle.error.api_error.ApiVerifyError('invalid_lucky_draw_product')
+        
+        ret = rule.rule_checker.lucky_draw_rule_checker.LuckyDrawCreateRuleChecker.check(**{
+            'type': type, 'prize': prize, 'campaign': campaign
+        })
         
         prize = lib.util.verify.Verify.get_campaign_product_from_campaign(campaign, int(data.get('prize', {}).get('id', 0)))
         if animation and data.get('path', '') == '':
@@ -100,11 +101,11 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
 
         data = json.loads(data)
         type = data.get('type', '')
+        prize = data.get('prize', {})
 
-        if type not in models.campaign.campaign_lucky_draw.TYPE_CHOICES:
-            raise lib.error_handle.error.api_error.ApiVerifyError('invalid_lucky_draw_type')
-        elif type == models.campaign.campaign_lucky_draw.TYPE_PRODUCT and data.get('campaign_product', '') == '': 
-            raise lib.error_handle.error.api_error.ApiVerifyError('invalid_lucky_draw_product')
+        ret = rule.rule_checker.lucky_draw_rule_checker.LuckyDrawUpdateRuleChecker.check(**{
+            'type': type, 'prize': prize, 'campaign': campaign
+        })
 
         prize = lib.util.verify.Verify.get_campaign_product_from_campaign(campaign, int(data.get('prize', {}).get('id', 0)))
         if animation and data.get('path', '') == '':
@@ -173,6 +174,22 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
 
         winner_list = lib.helper.lucky_draw_helper.draw(campaign, lucky_draw)
         return Response(winner_list, status=status.HTTP_200_OK)
+    
+    @action(detail=True, methods=['GET'], url_path=r'draw/check', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def check_draw_valid(self, request, pk):
+
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        lucky_draw = lib.util.verify.Verify.get_lucky_draw(pk)
+        campaign = lucky_draw.campaign
+        lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign.id)
+        
+        ret = rule.rule_checker.lucky_draw_rule_checker.LuckyDrawStartRuleChecker.check(**{
+            'type': lucky_draw.type, 'prize': lucky_draw.prize, 'campaign': campaign
+        })
+
+        return Response("success", status=status.HTTP_200_OK)
 
 
     @action(detail=False, methods=['GET'], url_path=r'list/animation', permission_classes=(IsAuthenticated,))

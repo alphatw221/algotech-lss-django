@@ -9,10 +9,13 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.parsers import MultiPartParser
+
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.renderers import StaticHTMLRenderer
 
 from api import models
 from api import rule
+from api.models.user import user_register
 
 from automation import jobs
 
@@ -113,7 +116,7 @@ class UserViewSet(viewsets.ModelViewSet):
         auth_user = request.user
         
         if not auth_user.check_password(password):
-            return Response({"message": "password incorrect"}, status=status.HTTP_401_UNAUTHORIZED)
+            raise lib.error_handle.error.api_error.ApiVerifyError("password_incorrect")
         rule.rule_checker.user_rule_checker.SellerChangePasswordRuleChecker.check(**{"password":password,"new_password":new_password})
 
         auth_user.set_password(new_password)
@@ -272,3 +275,90 @@ class UserViewSet(viewsets.ModelViewSet):
         ret = lib.helper.register_helper.create_new_register_account(plan, country_plan, subscription_plan, timezone, period, firstName, lastName, email, password, country, country_code,  contactNumber,  amount, subscription_meta=subscription_meta)
 
         return Response(ret, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['POST'], url_path=r'register/(?P<country_code>[^/.]+)/ecpay')
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def user_register_with_ecpay(self, request, country_code):
+        country_code = business_policy.subscription.COUNTRY_SG if country_code in ['', 'undefined', 'null', None] else country_code
+        print(request.data)
+        email, password, plan, period = lib.util.getter.getdata(request,("email", "password", "plan", "period"), required=True)
+        firstName, lastName, contactNumber, country, promoCode, timezone = lib.util.getter.getdata(request, ("firstName", "lastName", "contactNumber", "country", "promoCode", "timezone"), required=False)
+
+        try:
+            country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(country_code)
+            subscription_plan = country_plan.get_plan(plan)
+
+            kwargs={'email':email,'plan':plan,'period':period, 'promoCode':promoCode, 'country_plan':country_plan, 'subscription_plan':subscription_plan}
+
+            kwargs=rule.rule_checker.user_rule_checker.RegistrationRequireRefundChecker.check(**kwargs)
+        except Exception:
+            raise lib.error_handle.error.api_error.ApiVerifyError('support_for_refunding')
+        email = kwargs.get('email')
+        amount = kwargs.get('amount')
+        
+        # just test: merchant_id ,hash_key ,hash_iv
+        merchant_id='2000132'
+        hash_key='5294y06JbISpM5x9'
+        hash_iv='v77hoKGq4kWxNNIS'
+        
+        action,payment = service.ecpay.ecpay.create_register_order(merchant_id, hash_key, hash_iv, int(amount) , str(plan), 
+            f'https://staginglss.accoladeglobal.net/api/v2/user/register/ecpay/callback/?email={email}', 
+            f'https://liveshowseller.com/thank-you/',
+        )
+        
+        # get_user_register = lib.util.verify.Verify.get_user_register_by_email(email)
+        # user_register = models.user.user_register.UserRegisterSerializer(get_user_register).data
+        # print(user_register['type'])
+        
+        
+        lib.helper.register_helper.create_user_register(plan, timezone, period, firstName, lastName, email, password, country, country_code,  contactNumber)
+
+        return Response({'action':action,'data':payment}, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['POST'], url_path=r'register/ecpay/callback',parser_classes=(FormParser,), renderer_classes = (StaticHTMLRenderer,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def user_register_with_ecpay_callback(self, request):
+        email = request.query_params['email']
+        # get register data
+        get_user_register = lib.util.verify.Verify.get_user_register_by_email(email)
+        user_register = models.user.user_register.UserRegisterSerializer(get_user_register).data
+        
+        # just test: merchant_id ,hash_key ,hash_iv
+        merchant_id='2000132'
+        hash_key='5294y06JbISpM5x9'
+        hash_iv='v77hoKGq4kWxNNIS'
+        
+        # get paymeny res
+        payment_res = request.data.dict()
+        
+        check_value = service.ecpay.ecpay.check_mac_value(merchant_id, hash_key, hash_iv, payment_res)
+        
+        if not payment_res or payment_res['CheckMacValue'] != check_value :
+            return print('order is not match')
+        if payment_res['RtnCode'] == '0':
+            raise lib.error_handle.error.api_error.ApiVerifyError('payment not successful',payment_res['RtnMsg'])
+        
+        try:
+            country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(user_register['country'])
+            subscription_plan = country_plan.get_plan(user_register['type'])
+
+            kwargs={'email':email,'plan':user_register['type'],'period':user_register['period'], 'country_plan':country_plan, 'subscription_plan':subscription_plan}
+
+            kwargs=rule.rule_checker.user_rule_checker.RegistrationRequireRefundChecker.check(**kwargs)
+        except Exception:
+            raise lib.error_handle.error.api_error.ApiVerifyError('support_for_refunding')
+        
+        # create invoice
+        invoice = service.ecpay.ecpay.register_create_invoice(merchant_id, hash_key, hash_iv, user_register,int(payment_res['amount']))
+        subscription_meta={}
+        subscription_meta['InvoiceNumber'] = invoice['InvoiceNumber']
+        
+        # create user
+        ret = lib.helper.register_helper.create_new_register_account(user_register['type'], country_plan, subscription_plan, user_register['timezone'], user_register['period'], user_register['name'], '', email, user_register['password'], user_register['country'], user_register['target_country'],  user_register['phone'], int(payment_res['amount']), subscription_meta=subscription_meta)
+        print(ret)
+        
+        # delete user register by same email
+        lib.util.verify.Verify.delete_user_register_by_email(email)
+        
+        
+        return Response('1|ok')

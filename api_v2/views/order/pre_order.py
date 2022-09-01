@@ -14,11 +14,12 @@ from api import models
 from automation import jobs
 
 import lib
-import datetime
+
 import uuid
 import service
 import database
 import traceback
+from datetime import datetime
 
 class PreOrderPagination(PageNumberPagination):
     page_query_param = 'page'
@@ -143,17 +144,17 @@ class PreOrderViewSet(viewsets.ModelViewSet):
                 platform = None,
                 platform_id = None)
 
-            for campaign_product in campaign.products.filter(Q(type=models.campaign.campaign_product.TYPE_PRODUCT)|Q(type=models.campaign.campaign_product.TYPE_PRODUCT_FAST)):   #status=True cause databaseError here
+            # for campaign_product in campaign.products.filter(Q(type=models.campaign.campaign_product.TYPE_PRODUCT)|Q(type=models.campaign.campaign_product.TYPE_PRODUCT_FAST)):   #status=True cause databaseError here
 
-                if not campaign_product.status or not campaign_product.qty_for_sale - campaign_product.qty_sold:
-                    continue
+            #     if not campaign_product.status or not campaign_product.qty_for_sale - campaign_product.qty_sold:
+            #         continue
 
-                try:
-                    lib.helper.order_helper.PreOrderHelper.add_product(None, pre_order.id, campaign_product.id, 1)
-                except Exception:
-                    print('add_proudct fail')
-                    print(traceback.format_exc())
-                    continue
+            #     try:
+            #         lib.helper.order_helper.PreOrderHelper.add_product(None, pre_order.id, campaign_product.id, 1)
+            #     except Exception:
+            #         print('add_proudct fail')
+            #         print(traceback.format_exc())
+            #         continue
             
         pre_order_oid = database.lss.pre_order.get_oid_by_id(pre_order.id)
         
@@ -198,17 +199,17 @@ class PreOrderViewSet(viewsets.ModelViewSet):
                 platform = None,
                 platform_id = None)
 
-            for campaign_product in campaign.products.filter(Q(type=models.campaign.campaign_product.TYPE_PRODUCT)|Q(type=models.campaign.campaign_product.TYPE_PRODUCT_FAST)):   #status=True cause databaseError here
+            # for campaign_product in campaign.products.filter(Q(type=models.campaign.campaign_product.TYPE_PRODUCT)|Q(type=models.campaign.campaign_product.TYPE_PRODUCT_FAST)):   #status=True cause databaseError here
 
-                if not campaign_product.status or not campaign_product.qty_for_sale - campaign_product.qty_sold:
-                    continue
+            #     if not campaign_product.status or not campaign_product.qty_for_sale - campaign_product.qty_sold:
+            #         continue
 
-                try:
-                    lib.helper.order_helper.PreOrderHelper.add_product(None, pre_order.id, campaign_product.id, 1)
-                except Exception:
-                    print('add_proudct fail')
-                    print(traceback.format_exc())
-                    continue
+            #     try:
+            #         lib.helper.order_helper.PreOrderHelper.add_product(None, pre_order.id, campaign_product.id, 1)
+            #     except Exception:
+            #         print('add_proudct fail')
+            #         print(traceback.format_exc())
+            #         continue
 
         pre_order_oid = database.lss.pre_order.get_oid_by_id(pre_order.id)
         return Response({ 'pre_order_oid':pre_order_oid}, status=status.HTTP_200_OK)
@@ -293,19 +294,19 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
 
 
-    @action(detail=False, methods=['PUT'], url_path=r'(?P<pre_order_oid>[^/.]+)/buyer/discount', permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['PUT'], url_path=r'(?P<pre_order_oid>[^/.]+)/buyer/discount',  permission_classes=(), authentication_classes=[])
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def buyer_apply_discount_code(self, request, pre_order_oid):
 
         # api_user = lib.util.verify.Verify.get_customer_user(request)
 
-        discount_code = \
+        discount_code, = \
             lib.util.getter.getdata(request, ("discount_code",), required=True)
 
         pre_order = lib.util.verify.Verify.get_pre_order_with_oid(pre_order_oid)
         campaign = lib.util.verify.Verify.get_campaign_from_pre_order(pre_order)
-        discount_codes = campaign.user_subscription.discount_codes.all()
 
+        discount_codes = campaign.user_subscription.discount_codes.filter(start_at__lte=datetime.utcnow()).filter(end_at__gte=datetime.utcnow())
 
         valid_discount_code = None
         for _discount_code in discount_codes:
@@ -321,7 +322,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
  
 
         discount_code_data = valid_discount_code.__dict__
-        del discount_code_data['_id']
+        del discount_code_data['_state']
         pre_order.applied_discount = discount_code_data
 
 
@@ -397,22 +398,20 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         pre_order = lib.util.verify.Verify.get_pre_order(pk)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, pre_order.campaign.id)
-        
 
         original_total = pre_order.total
         original_free_delivery = pre_order.free_delivery
 
-        if pre_order.subtotal + adjust_price < 0:
-            adjust_price = -pre_order.subtotal
+        if free_delivery:
+            pre_order.total = pre_order.subtotal - pre_order.discount 
+        else:
+            pre_order.total = pre_order.subtotal - pre_order.discount + pre_order.shipping_cost
 
-        pre_order.adjust_price = adjust_price
         pre_order.free_delivery = free_delivery
         pre_order.adjust_title = adjust_title
+        pre_order.adjust_price = -pre_order.total if pre_order.total + adjust_price < 0 else adjust_price
+        pre_order.total+=pre_order.adjust_price
 
-        if free_delivery:
-            pre_order.total = pre_order.subtotal + pre_order.adjust_price
-        else:
-            pre_order.total = pre_order.subtotal + pre_order.adjust_price + pre_order.shipping_cost
 
         seller_adjust_history = pre_order.history.get('seller_adjust', [])
         seller_adjust_history.append(
@@ -420,7 +419,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
              "adjusted_total": pre_order.total,
              "original_free_delivery_status": original_free_delivery,
              "adjusted_free_delivery_status": pre_order.free_delivery,
-             "adjusted_at": datetime.datetime.utcnow(),
+             "adjusted_at": datetime.utcnow(),
              "adjusted_by": api_user.id
              }
         )
@@ -429,4 +428,16 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         pre_order.save()
         return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
     
+    @action(detail=False, methods=['PUT'], url_path=r'(?P<pre_order_id>[^/.]+)/seller/add', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    @lib.error_handle.error_handler.order_operation_error_handler.order_operation_error_handler
+    def seller_add_order_product(self, request, pre_order_id):
+        api_user, campaign_product_id, qty = lib.util.getter.getparams(request, ('campaign_product_id', 'qty',), with_user=True, seller=True)
+
+        pre_order = lib.util.verify.Verify.get_pre_order(pre_order_id)
+        campaign_product = lib.util.verify.Verify.get_campaign_product_from_pre_order(pre_order, campaign_product_id)
+
+        lib.helper.order_helper.PreOrderHelper.add_product(api_user, pre_order.id, campaign_product.id, qty)
+        pre_order = lib.util.verify.Verify.get_pre_order(pre_order.id)
+        return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
         
