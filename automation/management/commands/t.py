@@ -52,7 +52,7 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.test_discripting_token()
+        self.test_set_password()
         # self.test_remove_campaign_comment_duplicate()
 
     def modify_database(self):
@@ -192,9 +192,9 @@ class Command(BaseCommand):
 
         from django.contrib.auth.models import User as AuthUser
 
-        auth_user = AuthUser.objects.get(id=422)
+        auth_user = AuthUser.objects.get(id=672)
 
-        auth_user.set_password("12345678")
+        auth_user.set_password("gsc2022#9")
         auth_user.save()
 
     def test_send_email(self):
@@ -568,5 +568,75 @@ class Command(BaseCommand):
         else:
             print('error')
 
+    def test_tiktok(self):
 
+        from TikTokLive import TikTokLiveClient
+        from TikTokLive.types.events import CommentEvent, ConnectEvent
+
+        # Instantiate the client with the user's username
+        client: TikTokLiveClient = TikTokLiveClient(unique_id="@caishangkun",**(
+        {
+
+            # Custom Asyncio event loop
+            "loop": None,
+
+            # Custom Client params
+            "client_params": {},
+
+            # Custom request headers
+            "headers": {},
+
+            # Custom timeout for Webcast API requests
+            "timeout_ms": 1000,
+
+            # How frequently to make requests the webcast API when long polling
+            "ping_interval_ms": 1000,
+
+            # Whether to process initial data (cached chats, etc.)
+            "process_initial_data": True,
+
+            # Whether to get extended gift info (Image URLs, etc.)
+            "enable_extended_gift_info": True,
+
+            # Whether to trust environment variables that provide proxies to be used in http requests
+            "trust_env": False,
+
+            # A dict object for proxies requests
+            # "proxies": {
+            #     "http://": "http://username:password@localhost:8030",
+            #     "https://": "http://420.69.420:8031",
+            # },
+
+            # Set the language for Webcast responses (Changes extended_gift's language)
+            "lang": "en-US",
+
+            # Connect info (viewers, stream status, etc.)
+            "fetch_room_info_on_connect": True,
+
+            # Whether to allow Websocket connections
+            "websocket_enabled": False,
+            
+            # Parameter to increase the amount of connections made per minute via a Sign Server API key. 
+            # If you need this, contact the project maintainer.
+            "sign_api_key": None
+
+        }
+    ))
+
+
+        # Define how you want to handle specific events via decorator
+        @client.on("connect")
+        async def on_connect(_: ConnectEvent):
+            print("Connected to Room ID:", client.room_id)
+
+
+        # # Notice no decorator?
+        # async def on_comment(event: CommentEvent):
+        #     print(f"{event.user.nickname} -> {event.comment}")
+
+
+        # # Define handling an event via "callback"
+        # client.add_listener("comment", on_comment)
+
+        client.run(session_id='c07dd598131dc2bb7b0eac8dcd09ee93')
 
