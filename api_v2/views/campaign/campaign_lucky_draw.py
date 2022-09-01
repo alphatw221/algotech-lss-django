@@ -103,7 +103,7 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
         type = data.get('type', '')
         prize = data.get('prize', {})
 
-        ret = rule.rule_checker.lucky_draw_rule_checker.LuckyDrawCreateRuleChecker.check(**{
+        ret = rule.rule_checker.lucky_draw_rule_checker.LuckyDrawUpdateRuleChecker.check(**{
             'type': type, 'prize': prize, 'campaign': campaign
         })
 
