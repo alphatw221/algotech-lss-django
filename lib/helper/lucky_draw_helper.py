@@ -128,8 +128,7 @@ class ProductCandidateSetGenerator(CandidateSetGenerator):
         winner_list = campaign.meta.get('winner_list',[])
         candidate_set = set()
 
-        order_products = models.order.order_product.OrderProduct.objects.filter(campaign=campaign, campaign_product=lucky_draw.campaign_product)
-
+        order_products = models.order.order_product.OrderProduct.objects.filter(campaign=campaign, campaign_product=lucky_draw.campaign_product, platform__isnull=False)
         for order_product in order_products:
             img_url = models.order.pre_order.PreOrder.objects.get(customer_id=order_product.customer_id, campaign=campaign.id).customer_img
             candidate = LuckyDrawCandidate(
@@ -158,8 +157,7 @@ class PurchaseCandidateSetGenerator(CandidateSetGenerator):
         candidate_set = set()
 
         orders = models.order.order.Order.objects.filter(campaign=campaign)
-        pre_orders = models.order.pre_order.PreOrder.objects.filter(campaign=campaign,subtotal__gt=0)
-
+        pre_orders = models.order.pre_order.PreOrder.objects.filter(campaign=campaign,subtotal__gt=0, platform__isnull=False)
         for order in orders:
             candidate = LuckyDrawCandidate(
                 platform=order.platform, 
