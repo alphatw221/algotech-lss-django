@@ -318,14 +318,25 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         
         for limitation in valid_discount_code.limitations:
             if not lib.helper.discount_helper.check_limitation(limitation, pre_order):
-                 raise lib.error_handle.error.api_error.ApiVerifyError('not_eligible')
- 
+                raise lib.error_handle.error.api_error.ApiVerifyError('not_eligible')
 
         discount_code_data = valid_discount_code.__dict__
         del discount_code_data['_state']
         pre_order.applied_discount = discount_code_data
 
+        pre_order = lib.helper.order_helper.PreOrderHelper.summarize_pre_order(pre_order, campaign, save=True)
 
+        return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['DELETE'], url_path=r'(?P<pre_order_oid>[^/.]+)/buyer/discount/cancel',  permission_classes=(), authentication_classes=[])
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def buyer_cancel_discount_code(self, request, pre_order_oid):
+
+        pre_order = lib.util.verify.Verify.get_pre_order_with_oid(pre_order_oid)
+        campaign = lib.util.verify.Verify.get_campaign_from_pre_order(pre_order)
+
+        pre_order.applied_discount = {}
+        pre_order.save()
         pre_order = lib.helper.order_helper.PreOrderHelper.summarize_pre_order(pre_order, campaign, save=True)
 
         return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)

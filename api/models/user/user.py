@@ -12,6 +12,12 @@ from api.models.user.user_subscription import UserSubscription, UserSubscription
 from api.models.youtube.youtube_channel import YoutubeChannelInfoSerializer
 
 import business_policy
+
+TYPE_SELLER = 'user'
+TYPE_BUYER = 'customer'
+
+STATUS_NEW = 'new'
+STATUS_VALID = 'valid'
 class User(models.Model):
     class Meta:
         db_table = 'api_user'

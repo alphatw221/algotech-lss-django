@@ -1,12 +1,13 @@
-from itsdangerous import Serializer
+from django.conf import settings
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
+
 from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.response import Response
-
 from rest_framework.parsers import MultiPartParser
-from django.core.files.base import ContentFile
-from django.core.files.storage import default_storage
+
 
 from api import models, rule
 import lib, json
@@ -63,10 +64,11 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
         
         prize = lib.util.verify.Verify.get_campaign_product_from_campaign(campaign, int(data.get('prize', {}).get('id', 0)))
         if animation and data.get('path', '') == '':
+            animation_name = animation.name.replace(" ","")
             animation_path = default_storage.save(
-                f'{user_subscription.id}/luckydraw/{animation.name}', ContentFile(animation.read()))
+                f'user_subscription/{user_subscription.id}/luckydraw/{animation_name}', ContentFile(animation.read()))
             models.user.static_assets.StaticAssets.objects.create(user_subscription=user_subscription, name=animation.name, path=animation_path, type=models.user.static_assets.TYPE_ANIMATION)
-            data['animation'] = animation_path
+            data['animation'] = settings.GS_URL + animation_path
         else:
             data['animation'] = data.get('path', '')
 
@@ -109,10 +111,11 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
 
         prize = lib.util.verify.Verify.get_campaign_product_from_campaign(campaign, int(data.get('prize', {}).get('id', 0)))
         if animation and data.get('path', '') == '':
+            animation_name = animation.name.replace(" ","")
             animation_path = default_storage.save(
-                f'{user_subscription.id}/luckydraw/{animation.name}', ContentFile(animation.read()))
+                f'user_subscription/{user_subscription.id}/luckydraw/{animation_name}', ContentFile(animation.read()))
             models.user.static_assets.StaticAssets.objects.create(user_subscription=user_subscription, name=animation.name, path=animation_path, type=models.user.static_assets.TYPE_ANIMATION)
-            data['animation'] = animation_path
+            data['animation'] = settings.GS_URL + animation_path
         else:
             data['animation'] = data.get('path', '')
             

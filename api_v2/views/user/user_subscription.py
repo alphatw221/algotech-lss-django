@@ -17,6 +17,7 @@ from api import rule, models, utils
 import stripe, pytz, lib, service, business_policy, json
 
 from datetime import datetime, timedelta
+from database import lss
 class UserSubscriptionPagination(PageNumberPagination):
 
     page_query_param = 'page'
@@ -58,9 +59,10 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
         animation, = lib.util.getter.getdata(request, ("animation", ), required=True)
         if animation:
+            animation_name=animation.name.replace(" ","")
             animation_path = default_storage.save(
-                f'{user_subscription.id}/luckydraw/{animation.name}', ContentFile(animation.read()))
-            models.user.static_assets.StaticAssets.objects.create(user_subscription=user_subscription, name=animation.name, path=animation_path, type=models.user.static_assets.TYPE_ANIMATION)
+                f'user_subscription/{user_subscription.id}/luckydraw/{animation_name}', ContentFile(animation.read()))
+            models.user.static_assets.StaticAssets.objects.create(user_subscription=user_subscription, name=animation.name, path=settings.GS_URL+animation_path, type=models.user.static_assets.TYPE_ANIMATION)
         
         return Response({'message': 'success'}, status=status.HTTP_200_OK)
 
@@ -88,10 +90,10 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
                     continue
                 elif image.content_type not in models.user.user_subscription.IMAGE_SUPPORTED_TYPE:
                     continue
-                
+                image_name = image.name.replace(" ","")
                 image_path = default_storage.save(
-                        f'/{user_subscription.id}/payment/direct_payment/{image.name}', ContentFile(image.read()))
-                account['image'] = image_path
+                        f'user_subscription/{user_subscription.id}/payment/direct_payment/{image_name}', ContentFile(image.read()))
+                account['image'] = settings.GS_URL+image_path
         else:
             data = request.data
 
@@ -342,7 +344,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         }
         return Response(ret, status=status.HTTP_200_OK)
 
-# --------------------------------- admin console ---------------------------------
+# --------------------------------- dealer ---------------------------------
     
     @action(detail=False, methods=['GET'], url_path=r'dashboard/cards', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
@@ -350,8 +352,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         dealer_user_subscription = lib.util.verify.Verify.get_dealer_user_subscription_from_api_user(api_user)
 
-        queryset = dealer_user_subscription.subscribers.all()
+        campaigns_analysis = lss.dealer.get_dealer_campaigns_info_analysis(dealer_user_subscription.id)
+        print (campaigns_analysis)
 
-        print (queryset)
-
-        return Response({'message': 'suc'}, status=status.HTTP_200_OK)
+        return Response(campaigns_analysis, status=status.HTTP_200_OK)

@@ -25,6 +25,7 @@ IMAGE_JPG = 'image/jpg'
 IMAGE_PNG = 'image/png'
 IMAGE_SUPPORTED_TYPE = [IMAGE_JPEG, IMAGE_JPG, IMAGE_PNG]
 IMAGE_MAXIMUM_SIZE = 10*1024*1024
+
 PLATFORM_FACEBOOK = 'facebook'
 PLATFORM_INSTAGRAM = 'instagram'
 PLATFORM_YOUTUBE = 'youtube'
@@ -38,6 +39,9 @@ PLATFORM_ATTR={
     PLATFORM_TWITCH:{'attr':'twitch_channels','serializer':TwitchChannelSerializer},
     PLATFORM_TIKTOK:{'attr':'tiktok_accounts','serializer':TikTokAccountSerializer}
 }
+
+STATUS_VALID='valid'
+STATUS_INVALID='invalid'
 class UserSubscription(models.Model):
 
     class Meta:

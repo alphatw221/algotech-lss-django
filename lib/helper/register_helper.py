@@ -8,6 +8,55 @@ import business_policy
 from datetime import datetime, timedelta
 import pytz
 
+
+
+
+
+
+def create_account_with_user_register(user_register):
+
+
+    country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(user_register.country)
+
+    now = datetime.now()
+    expired_at = now+timedelta(days=90) if user_register.period == business_policy.subscription.PERIOD_QUARTER else now+timedelta(days=365)
+    
+    auth_user = AuthUser.objects.create_user(
+        username=user_register.name, email=user_register.email, password=user_register.password)
+
+    user_subscription = models.user.user_subscription.UserSubscription.objects.create(
+        name=user_register.name, 
+        status=models.user.user_subscription.STATUS_VALID, 
+        started_at=now,
+        expired_at=expired_at, 
+        user_plan= {"activated_platform" : [models.user.user_subscription.PLATFORM_FACEBOOK,models.user.user_subscription.PLATFORM_YOUTUBE,models.user.user_subscription.PLATFORM_INSTAGRAM]}, 
+        meta_country={ 'activated_country': [user_register.country] },
+        type=user_register.type,
+        lang=country_plan.language,
+        country = user_register.country,
+        purchase_price = user_register.payment_amount,
+        **business_policy.subscription_plan.SubscriptionPlan.get_plan_limit(user_register.type)
+        )
+        
+    api_user = models.user.user.User.objects.create(
+        name=user_register.name, email=user_register.email, type=models.user.user.TYPE_SELLER, status=models.user.user.STATUS_VALID, phone=user_register.phone, auth_user=auth_user, user_subscription=user_subscription)
+    
+    models.user.deal.Deal.objects.create(
+        user_subscription=user_subscription,
+        purchased_plan=user_register.type, 
+        total=user_register.payment_amount, 
+        status=models.user.deal.STATUS_SUCCESS, 
+        payer=api_user, 
+        payment_time=datetime.utcnow()
+    )
+
+    
+    lib.util.marking_tool.NewUserMark.mark(api_user, save = True)
+
+
+
+
+
 def create_new_register_account(plan, country_plan, subscription_plan, timezone, period, firstName, lastName, email, password, country, country_code,  contactNumber,  amount, paymentIntent=None, subscription_meta:dict={}):
 
 
