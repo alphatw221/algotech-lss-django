@@ -116,7 +116,7 @@ class UserViewSet(viewsets.ModelViewSet):
         auth_user = request.user
         
         if not auth_user.check_password(password):
-            return Response({"message": "password incorrect"}, status=status.HTTP_401_UNAUTHORIZED)
+            raise lib.error_handle.error.api_error.ApiVerifyError("password_incorrect")
         rule.rule_checker.user_rule_checker.SellerChangePasswordRuleChecker.check(**{"password":password,"new_password":new_password})
 
         auth_user.set_password(new_password)

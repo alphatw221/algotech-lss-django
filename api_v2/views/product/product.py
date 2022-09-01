@@ -131,7 +131,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         data = json.loads(data)
         categories = data.get('tag', [])
         
-        rule.rule_checker.product_rule_checker.ProductCreateRuleChecker.check(product_data=data, image=image)
+        rule.rule_checker.product_rule_checker.ProductUpdateRuleChecker.check(product_data=data, image=image)
 
         serializer=models.product.product.ProductSerializerUpdate(product, data=data, partial=True) 
         
