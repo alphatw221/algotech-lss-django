@@ -200,11 +200,12 @@ def bind_twitch_channels(request, user_subscription, channel_name):
         lib.error_handle.error.api_error.ApiCallerError('get twitch user info fail')
     print ('response2', response)
     image = response.get("data")[0].get("profile_image_url")
+    user_id = response.get("data")[0].get("id")
 
     if models.twitch.twitch_channel.TwitchChannel.objects.filter(name=channel_name).exists():
         twitch_channel = models.twitch.twitch_channel.TwitchChannel.objects.get(name=channel_name)
         twitch_channel.name = channel_name
-        twitch_channel.user_name = channel_name
+        twitch_channel.user_name = user_id
         twitch_channel.token = access_token
         twitch_channel.refresh_token = refresh_token
         twitch_channel.token_update_at = datetime.now()
@@ -213,7 +214,7 @@ def bind_twitch_channels(request, user_subscription, channel_name):
     else:
         twitch_channel = models.twitch.twitch_channel.TwitchChannel.objects.create(
             name=channel_name, 
-            user_name=channel_name, 
+            user_name=user_id, 
             token=access_token, 
             refresh_token=refresh_token,
             token_update_at=datetime.now(), 

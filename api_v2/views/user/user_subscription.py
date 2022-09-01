@@ -17,6 +17,7 @@ from api import rule, models, utils
 import stripe, pytz, lib, service, business_policy, json
 
 from datetime import datetime, timedelta
+from database import lss
 class UserSubscriptionPagination(PageNumberPagination):
 
     page_query_param = 'page'
@@ -342,7 +343,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         }
         return Response(ret, status=status.HTTP_200_OK)
 
-# --------------------------------- admin console ---------------------------------
+# --------------------------------- dealer ---------------------------------
     
     @action(detail=False, methods=['GET'], url_path=r'dashboard/cards', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
@@ -350,8 +351,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         dealer_user_subscription = lib.util.verify.Verify.get_dealer_user_subscription_from_api_user(api_user)
 
-        queryset = dealer_user_subscription.subscribers.all()
+        campaigns_analysis = lss.dealer.get_dealer_campaigns_info_analysis(dealer_user_subscription.id)
+        print (campaigns_analysis)
 
-        print (queryset)
-
-        return Response({'message': 'suc'}, status=status.HTTP_200_OK)
+        return Response(campaigns_analysis, status=status.HTTP_200_OK)
