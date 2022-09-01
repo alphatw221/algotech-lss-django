@@ -5,6 +5,7 @@
 # )
 # module = importlib.util.module_from_spec(spec)
 # spec.loader.exec_module(module)
+import traceback
 from .payment_sdk import ECPayPaymentSdk
 from .invoice_sdk import EcpayInvoice
 from datetime import datetime
@@ -70,35 +71,36 @@ def create_order(merchant_id, hash_key, hash_iv,payment_amount, order, return_ur
         
 
 def create_register_order(merchant_id, hash_key, hash_iv,payment_amount:int,plan:str, return_url, order_result_url):
-    params = {
-    'MerchantTradeNo': str(random.randint(0,1000))+str(datetime.now().strftime("%Y%m%d%H%M")) ,
-    'StoreID': '',
-    'MerchantTradeDate': datetime.now().strftime("%Y/%m/%d %H:%M:%S"),
-    'PaymentType': 'aio',
-    'TotalAmount': payment_amount,
-    'TradeDesc': 'test order',
-    'ItemName': plan,
-    'ReturnURL': str(return_url),
-    'ChoosePayment': 'ALL',
-    'ClientBackURL': '',
-    'ItemURL': '',
-    'Remark': '',
-    'ChooseSubPayment': '',
-    'OrderResultURL': str(order_result_url),
-    'NeedExtraPaidInfo': 'Y',
-    'DeviceSource': '',
-    'IgnorePayment': '',
-    'PlatformID': '',
-    'InvoiceMark': 'N',
-    'EncryptType': 1,
-    }
-    
-    ecpay_payment_sdk = ECPayPaymentSdk(
-        MerchantID=merchant_id,
-        HashKey=hash_key,
-        HashIV=hash_iv
-    )
     try:
+        params = {
+        'MerchantTradeNo': str(random.randint(0,1000))+str(datetime.now().strftime("%Y%m%d%H%M")) ,
+        'StoreID': '',
+        'MerchantTradeDate': datetime.now().strftime("%Y/%m/%d %H:%M:%S"),
+        'PaymentType': 'aio',
+        'TotalAmount': payment_amount,
+        'TradeDesc': 'test order',
+        'ItemName': plan,
+        'ReturnURL': str(return_url),
+        'ChoosePayment': 'ALL',
+        'ClientBackURL': '',
+        'ItemURL': '',
+        'Remark': '',
+        'ChooseSubPayment': '',
+        'OrderResultURL': str(order_result_url),
+        'NeedExtraPaidInfo': 'Y',
+        'DeviceSource': '',
+        'IgnorePayment': '',
+        'PlatformID': '',
+        'InvoiceMark': 'N',
+        'EncryptType': 1,
+        }
+        
+        ecpay_payment_sdk = ECPayPaymentSdk(
+            MerchantID=merchant_id,
+            HashKey=hash_key,
+            HashIV=hash_iv
+        )
+
         # 產生綠界訂單所需參數
         final_order_params = ecpay_payment_sdk.create_order(params)
 
@@ -106,12 +108,13 @@ def create_register_order(merchant_id, hash_key, hash_iv,payment_amount:int,plan
         action_url = 'https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5'  # 測試環境
         # action_url = 'https://payment.ecpay.com.tw/Cashier/AioCheckOut/V5' # 正式環境
         html = ecpay_payment_sdk.gen_html_post_form(action_url, final_order_params)
-        # return action_url,final_order_params
-        return action_url,final_order_params
-    except Exception as error:
-        print('An exception happened: ' + str(error))
-        
-def check_mac_value(merchant_id,hash_key,hash_iv,payment_res):
+
+        return True, action_url, final_order_params
+    except Exception:
+        print(traceback.format_exc())
+    return False, None, None
+
+def check_mac_value(merchant_id,hash_key,hash_iv,params):
     
     ecpay_payment_sdk = ECPayPaymentSdk(
         MerchantID=merchant_id,
@@ -119,7 +122,7 @@ def check_mac_value(merchant_id,hash_key,hash_iv,payment_res):
         HashIV=hash_iv
     )
     
-    check_value = ecpay_payment_sdk.generate_check_value(payment_res)
+    check_value = ecpay_payment_sdk.generate_check_value(params)
     
     return check_value
 
