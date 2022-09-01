@@ -197,8 +197,7 @@ class SharedPostCandidateSetGenerator(CandidateSetGenerator):
 
         winner_list = campaign.meta.get('winner_list',[])
         candidate_set = set()
-        
-        likes_user_list=[]
+        users_like_and_comment_set = set()
         response = {}
         
         if campaign.facebook_page_id and models.facebook.facebook_page.FacebookPage.objects.filter(id=campaign.facebook_page_id).exists():
@@ -206,30 +205,93 @@ class SharedPostCandidateSetGenerator(CandidateSetGenerator):
             post_id=campaign.facebook_campaign.get('post_id')
             token=facebook_page.token   
 
-            code, response = service.facebook.post.get_post_sharedpost(token, facebook_page.page_id, post_id, after=None, limit=limit)
+            code, response = service.facebook.post.get_post(token, facebook_page.page_id, post_id)
             if code!=200 :
                 raise lib.error_handle.error.api_error.ApiVerifyError('helper.fb_api_fail')
+        
+        shares_count = response.get("shares", {}).get("count", 0)
+        # print(shares_count)
+        if not shares_count:
+            return candidate_set
+        
+        like_data = response.get("likes",{}).get("data",[])
+        # print(like_data)
+        like_user_id_set = set([i["id"] for i in like_data])
+        
+        comments_data = models.campaign.campaign_comment.CampaignComment.objects.filter(
+            campaign=campaign, platform="facebook")
+        campaign_comments_user_id_set = set(comments_data.values_list("customer_id", flat=True))
+        
+        
+        
+        if len(like_user_id_set) and len(campaign_comments_user_id_set):
+            users_like_and_comment_set = like_user_id_set.intersection(campaign_comments_user_id_set)
+            data = []
+            for i in like_data:
+                if i["id"] in users_like_and_comment_set and i["id"] not in data:
+                    data.append(i)
+            for user in data:
+                candidate = LuckyDrawCandidate(
+                    platform='facebook', 
+                    customer_id=user.get('id'),     #ASID over here!! might have some issues 
+                    customer_name=user.get('name'),
+                    customer_image=user.get('pic_large'),
+                    draw_type=lucky_draw.type,
+                    prize=lucky_draw.prize.name)
 
-        for user in response.get('data',[]):
-            customer_image = ""
-            user_asid = user.get('from').get("id")
-            code, resp = service.facebook.page.get_user_picture(user_asid, token)
-            if code == 200:
-                customer_image = resp.get("picture").get("data","").get("url", "")
-            candidate = LuckyDrawCandidate(
-                platform='facebook', 
-                customer_id=user_asid,     #ASID over here!! might have some issues 
-                customer_name=user.get('from').get('name'),
-                customer_image=customer_image,
-                draw_type=lucky_draw.type,
-                prize=lucky_draw.prize.name)
+                if not lucky_draw.repeatable and candidate in winner_list:
+                    continue
+                
+                candidate_set.add(candidate)
+                
+        elif not len(like_user_id_set) and not len(campaign_comments_user_id_set):
+            return candidate_set
+        
+        elif len(like_user_id_set):
+            users_like_and_comment_set = like_user_id_set
+            data = []
+            for i in like_data:
+                if i["id"] in users_like_and_comment_set and i["id"] not in data:
+                    data.append(i)
+            for user in data:
+                candidate = LuckyDrawCandidate(
+                    platform='facebook', 
+                    customer_id=user.get('id'),     #ASID over here!! might have some issues 
+                    customer_name=user.get('name'),
+                    customer_image=user.get('pic_large'),
+                    draw_type=lucky_draw.type,
+                    prize=lucky_draw.prize.name)
 
-            if not lucky_draw.repeatable and candidate in winner_list:
-                continue
+                if not lucky_draw.repeatable and candidate in winner_list:
+                    continue
+                candidate_set.add(candidate)
+                
+        elif len(campaign_comments_user_id_set):
+            users_like_and_comment_set = campaign_comments_user_id_set
+            campaign_comments = []
+            for i in comments_data:
+                if i.id in users_like_and_comment_set and i.id not in campaign_comments:
+                    campaign_comments.append(i)
+            for campaign_comment in campaign_comments:
 
-            candidate_set.add(candidate)
+                candidate = LuckyDrawCandidate(
+                    platform=campaign_comment.platform, 
+                    customer_id=campaign_comment.customer_id, 
+                    comment_id = campaign_comment.id,
+                    customer_name=campaign_comment.customer_name,
+                    customer_image=campaign_comment.image,
+                    draw_type=lucky_draw.type,
+                    prize=lucky_draw.prize.name)
 
-        return candidate_set
+                if not lucky_draw.repeatable and candidate in winner_list:
+                    continue
+
+                candidate_set.add(candidate)
+        
+        num_of_candidate = len(candidate_set) if shares_count > len(candidate_set) else shares_count
+        candidates = random.sample(list(candidate_set), num_of_candidate)
+        
+        return candidates
     
 class LuckyDraw():
 

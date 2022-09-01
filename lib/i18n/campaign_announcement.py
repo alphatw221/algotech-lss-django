@@ -20,7 +20,7 @@ def get_campaign_announcement_lucky_draw_winner(product_name: str, customer_name
     return _(
         'LUCKY_DRAW_WINNER{customer_name}{product_name}'
     ).format(product_name=product_name,
-             customer_name=customer_name) + 'link: https://staginglss.accoladeglobal.net/buyer/cart/63030005f5f1b6d81d880996'
+             customer_name=customer_name)
 
 
 @lang_translate_default_en

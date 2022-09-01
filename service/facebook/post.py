@@ -1,8 +1,10 @@
 from ._fb_api_caller import FacebookApiCaller
 
-def get_post(page_token: str, post_id: str):
-    params = {}
-    ret = FacebookApiCaller(f'{post_id}', bearer_token=page_token,
+def get_post(page_token: str, page_id:str, post_id: str):
+    params = {
+        "fields": "likes{id,name,pic_large},shares,sharedposts"
+    }
+    ret = FacebookApiCaller(f'{page_id}_{post_id}', bearer_token=page_token,
                             params=params).get()
     return ret
 
