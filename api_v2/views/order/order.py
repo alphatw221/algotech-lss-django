@@ -69,8 +69,9 @@ class OrderViewSet(viewsets.ModelViewSet):
         elif image.content_type not in models.order.order.IMAGE_SUPPORTED_TYPE:
             raise lib.error_handle.error.api_error.ApiVerifyError('not_support_this_image_type')
         else:
+            image_name = image.name.replace(" ","")
             image_path = default_storage.save(
-                f'campaign/{order.campaign.id}/order/{order.id}/receipt/{image.name}', 
+                f'campaign/{order.campaign.id}/order/{order.id}/receipt/{image_name}', 
                 ContentFile(image.read())
             )
             order.meta["receipt_image"] = settings.GS_URL + image_path
@@ -134,8 +135,9 @@ class OrderViewSet(viewsets.ModelViewSet):
         last_five_digit, image, account_name, account_mode = lib.util.getter.getdata(request,('last_five_digit', 'image', 'account_name', 'account_mode'), required=False)
 
         if image not in [None, '', "undefined", 'null']:
+            image_name = image.name.replace(" ","")
             image_path = default_storage.save(
-                f'campaign/{order.campaign.id}/order/{order.id}/receipt/{image.name}', 
+                f'campaign/{order.campaign.id}/order/{order.id}/receipt/{image_name}', 
                 ContentFile(image.read())
             )
             order.meta["receipt_image"] = settings.GS_URL + image_path

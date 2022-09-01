@@ -1,5 +1,8 @@
-from math import prod
-from unicodedata import category
+
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
+from django.conf import settings
+
 from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
@@ -7,17 +10,12 @@ from rest_framework.parsers import MultiPartParser
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser
-from django.core.files.base import ContentFile
-from django.core.files.storage import default_storage
-from api import utils
 
-from django.core.files.storage import default_storage
-from django.core.files.base import ContentFile
 
 from api import models
-import lib, json
 from api import rule
 
+import lib, json
 class ProductPagination(PageNumberPagination):
     page_query_param = 'page'
     page_size_query_param = 'page_size'
@@ -102,9 +100,10 @@ class ProductViewSet(viewsets.ModelViewSet):
         elif image =='._no_image':
             product.image = models.product.product.IMAGE_NULL
         else:
+            image_name = image.name.replace(" ","")
             image_path = default_storage.save(
-                f'{user_subscription.id}/product/{product.id}/{image.name}', ContentFile(image.read()))
-            product.image = image_path
+                f'user_subscription/{user_subscription.id}/product/{product.id}/{image_name}', ContentFile(image.read()))
+            product.image = settings.GS_URL+image_path
             
         product.user_subscription = user_subscription
         product.save()
@@ -143,9 +142,11 @@ class ProductViewSet(viewsets.ModelViewSet):
         elif image =='._no_image':
             product.image = models.product.product.IMAGE_NULL
         elif image:
+            image_name = image.name.replace(" ", "")
             image_path = default_storage.save(
-                f'{user_subscription.id}/product/{product.id}/{image.name}', ContentFile(image.read()))
-            product.image = image_path
+                f'user_subscription/{user_subscription.id}/product/{product.id}/{image_name}', ContentFile(image.read()))
+            settings.GS_URL
+            product.image = settings.GS_URL+image_path
 
         product.save()
 
