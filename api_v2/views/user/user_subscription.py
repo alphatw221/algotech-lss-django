@@ -17,7 +17,7 @@ from api import rule, models, utils
 import stripe, pytz, lib, service, business_policy, json
 
 from datetime import datetime, timedelta
-import database
+from database import lss
 class UserSubscriptionPagination(PageNumberPagination):
 
     page_query_param = 'page'
@@ -343,7 +343,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         }
         return Response(ret, status=status.HTTP_200_OK)
 
-# --------------------------------- admin console ---------------------------------
+# --------------------------------- dealer ---------------------------------
     
     @action(detail=False, methods=['GET'], url_path=r'dashboard/cards', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
@@ -351,15 +351,16 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         dealer_user_subscription = lib.util.verify.Verify.get_dealer_user_subscription_from_api_user(api_user)
 
-        queryset = dealer_user_subscription.subscribers.all()
+        campaigns_analysis = lss.dealer.get_dealer_campaigns_info_analysis(dealer_user_subscription.id)
+        print (campaigns_analysis)
 
-        print (queryset)
-
-        return Response({'message': 'suc'}, status=status.HTTP_200_OK)
+        return Response(campaigns_analysis, status=status.HTTP_200_OK)
     
-    @action(detail=False, methods=['GET'], url_path=r'seller/search/list', permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['GET'], url_path=r'user/search/list', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def accounts_list(self, request):
-        data = database.lss.user_subscription.get_user_subscription_from_dealer(1)
+    def user_list_from_dealer(self, request):
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        dealer_user_subscription = lib.util.verify.Verify.get_dealer_user_subscription_from_api_user(api_user)
+        data = lss.dealer.get_seller_info_from_dealer(dealer_user_subscription.id)
 
-        return Response({'data':data}, status=status.HTTP_200_OK)
+        return Response(data, status=status.HTTP_200_OK)
