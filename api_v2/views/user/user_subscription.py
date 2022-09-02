@@ -61,9 +61,10 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
         animation, = lib.util.getter.getdata(request, ("animation", ), required=True)
         if animation:
+            animation_name=animation.name.replace(" ","")
             animation_path = default_storage.save(
-                f'{user_subscription.id}/luckydraw/{animation.name}', ContentFile(animation.read()))
-            models.user.static_assets.StaticAssets.objects.create(user_subscription=user_subscription, name=animation.name, path=animation_path, type=models.user.static_assets.TYPE_ANIMATION)
+                f'user_subscription/{user_subscription.id}/luckydraw/{animation_name}', ContentFile(animation.read()))
+            models.user.static_assets.StaticAssets.objects.create(user_subscription=user_subscription, name=animation.name, path=settings.GS_URL+animation_path, type=models.user.static_assets.TYPE_ANIMATION)
         
         return Response({'message': 'success'}, status=status.HTTP_200_OK)
 
@@ -91,10 +92,10 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
                     continue
                 elif image.content_type not in models.user.user_subscription.IMAGE_SUPPORTED_TYPE:
                     continue
-                
+                image_name = image.name.replace(" ","")
                 image_path = default_storage.save(
-                        f'/{user_subscription.id}/payment/direct_payment/{image.name}', ContentFile(image.read()))
-                account['image'] = image_path
+                        f'user_subscription/{user_subscription.id}/payment/direct_payment/{image_name}', ContentFile(image.read()))
+                account['image'] = settings.GS_URL+image_path
         else:
             data = request.data
 

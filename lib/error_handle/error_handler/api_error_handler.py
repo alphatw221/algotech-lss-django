@@ -18,16 +18,13 @@ def api_error_handler(func):
         except lib.error_handle.error.api_error.ApiCallerError as e:
         # except ApiCallerError as e:
             print(traceback.format_exc())
-            params = e.params
-            return Response({"message": str(e), "params":params}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": str(e), "params":e.params}, status=status.HTTP_400_BAD_REQUEST)
         # except ApiVerifyError as e:
         except lib.error_handle.error.api_error.ApiVerifyError as e:
             print(traceback.format_exc())
-            params = e.params
             # ApiLogEntry.write_entry(str(datetime.now()) + ' - ' +  traceback.format_exc())
             print('error is raised')
-            print({"message": str(e), **params})
-            return Response({"message": str(e), "params":params}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": str(e), "params":e.params}, status=status.HTTP_400_BAD_REQUEST)
         except KeyError as e:
             print(traceback.format_exc())
             # ApiLogEntry.write_entry(str(datetime.now()) + ' - ' +  traceback.format_exc())

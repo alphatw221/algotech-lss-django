@@ -1,5 +1,5 @@
-from api.utils.error_handle.error.api_error import ApiVerifyError
-from api.utils.error_handle.error.pre_order_error import PreOrderErrors
+from lib.error_handle.error.api_error import ApiVerifyError
+from lib.error_handle.error.pre_order_error import PreOrderErrors
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -19,7 +19,7 @@ def worker_error_handler(func):
         except ApiVerifyError as e:
             print(traceback.format_exc())
             # ApiLogEntry.write_entry(str(datetime.now()) + ' - ' +  traceback.format_exc())
-            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": str(e), "params":e.params}, status=status.HTTP_400_BAD_REQUEST)
         except KeyError as e:
             print(traceback.format_exc())
             # ApiLogEntry.write_entry(str(datetime.now()) + ' - ' +  traceback.format_exc())
@@ -30,7 +30,7 @@ def worker_error_handler(func):
             return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         except PreOrderErrors.PreOrderException as e:
             print(traceback.format_exc())
-            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": str(e), "params":e.params}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             print(traceback.format_exc())
             # ApiLogEntry.write_entry(str(datetime.now()) + ' - ' +  traceback.format_exc())

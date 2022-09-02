@@ -1,5 +1,11 @@
 from ._fb_api_caller import FacebookApiCaller
 
+def get_user_picture(user_asid:str, page_token: str):
+    params = {
+        'fields': "id,name,picture"
+    }
+    ret = FacebookApiCaller(user_asid, bearer_token=page_token, params=params).get()
+    return ret
 
 def get_page_posts(page_token: str, page_id: str, limit: int):
     params = {

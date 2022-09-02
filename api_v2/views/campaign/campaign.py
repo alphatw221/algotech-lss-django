@@ -1,7 +1,7 @@
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.http import HttpResponse
-
+from django.conf import settings
 
 from rest_framework import status, viewsets
 from rest_framework.parsers import MultiPartParser
@@ -120,8 +120,9 @@ class CampaignViewSet(viewsets.ModelViewSet):
                     continue
                 
                 account_name = account.get('name','')
-                image_path = default_storage.save(f'/campaign/{campaign.id}/payment/direct_payment/accounts/{account_name}/{image.name}', ContentFile(image.read()))
-                account['image'] = image_path
+                image_name = image.name.replace(" ","")
+                image_path = default_storage.save(f'campaign/{campaign.id}/payment/direct_payment/accounts/{account_name}/{image_name}', ContentFile(image.read()))
+                account['image'] = settings.GS_URL + image_path
 
         campaign.save()
         
@@ -201,8 +202,9 @@ class CampaignViewSet(viewsets.ModelViewSet):
                     save=True
                     continue
                 account_name = account.get('name','')
-                image_path = default_storage.save(f'/campaign/{campaign.id}/payment/direct_payment/accounts/{account_name}/{image.name}', ContentFile(image.read()))
-                account['image'] = image_path
+                image_name = image.name.replace(" ","")
+                image_path = default_storage.save(f'campaign/{campaign.id}/payment/direct_payment/accounts/{account_name}/{image_name}', ContentFile(image.read()))
+                account['image'] = settings.GS_URL + image_path
                 save=True
 
         if save:
