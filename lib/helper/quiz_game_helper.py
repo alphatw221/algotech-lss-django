@@ -17,6 +17,7 @@ class QuizGameCandidate():
         self.customer_image = customer_image
         self.prize = prize
         self.timestamp = timestamp
+        self.type = "quiz_game"
 
     def __hash__(self) -> int:
         return (self.platform, self.customer_id).__hash__()
@@ -30,7 +31,7 @@ class QuizGameCandidate():
             return False
 
     def to_dict(self):
-        return {'platform': self.platform, 'customer_id': self.customer_id, 'customer_name': self.customer_name, 'customer_image': self.customer_image, 'prize': self.prize, 'timestamp': self.timestamp}
+        return {'platform': self.platform, 'customer_id': self.customer_id, 'customer_name': self.customer_name, 'customer_image': self.customer_image, 'prize': self.prize, 'timestamp': self.timestamp, "type": self.type}
 
 
 class CandidateSetGenerator():
@@ -52,13 +53,12 @@ class QuizGameCandidateSetGenerator(CandidateSetGenerator):
         for quiz_game in quiz_game_bundle.quiz_games.all() :
             if not quiz_game.id or not quiz_game.start_at or not quiz_game.end_at:
                 continue
-
             campaign_comments = campaign.comments.filter(
                 message__icontains=quiz_game.answer,
                 created_time__gte=datetime.datetime.timestamp(quiz_game.start_at),
                 created_time__lte=datetime.datetime.timestamp(quiz_game.end_at)
             ).order_by('created_time')[:limit]
-
+            print(campaign_comments)
             alive_candidate_set = set()
             
             for campaign_comment in campaign_comments:
