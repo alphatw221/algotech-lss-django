@@ -1,3 +1,4 @@
+from tracemalloc import start
 from django.conf import settings
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
@@ -17,7 +18,8 @@ from api import rule, models, utils
 import stripe, pytz, lib, service, business_policy, json
 
 from datetime import datetime, timedelta
-from database import lss
+from dateutil.relativedelta import relativedelta
+import database
 class UserSubscriptionPagination(PageNumberPagination):
 
     page_query_param = 'page'
@@ -351,7 +353,40 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         dealer_user_subscription = lib.util.verify.Verify.get_dealer_user_subscription_from_api_user(api_user)
 
-        campaigns_analysis = lss.dealer.get_dealer_campaigns_info_analysis(dealer_user_subscription.id)
-        print (campaigns_analysis)
+        campaigns_analysis = database.lss.dealer.get_dealer_campaigns_info_analysis(dealer_user_subscription.id)
 
         return Response(campaigns_analysis, status=status.HTTP_200_OK)
+    
+
+    @action(detail=False, methods=['GET'], url_path=r'dashboard/members/growing', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def dealer_dashboard_members_growing(self, request):
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        dealer_user_subscription = lib.util.verify.Verify.get_dealer_user_subscription_from_api_user(api_user)
+        date_period, = lib.util.getter.getparams(request, ('date_period',), with_user=False)
+
+        subcriptions_count_list = []
+        start_date = datetime.now()
+        if date_period == 'year':
+            end_date = datetime.now() - relativedelta(years=1)
+            while start_date > end_date:
+                this_end_date = start_date - relativedelta(months=1)
+                this_period = f'{this_end_date.year}-{this_end_date.month}'
+                members_growing = database.lss.dealer.get_dealer_members_growing(dealer_user_subscription.id, start_date, this_end_date)
+                count_obj = { this_period: members_growing[0].get('subscription_count') } if members_growing else { this_period: 0 }
+                subcriptions_count_list.append(count_obj)
+
+                start_date = this_end_date
+        elif date_period == 'month':
+            end_date = datetime.now() - relativedelta(months=1)
+            while start_date > end_date:
+                this_end_date = start_date - relativedelta(days=1)
+                this_period = f'{this_end_date.year}-{this_end_date.month}-{this_end_date.day}'
+                members_growing = database.lss.dealer.get_dealer_members_growing(dealer_user_subscription.id, start_date, this_end_date)
+
+                break
+                start_date = this_end_date
+
+        print (subcriptions_count_list)
+
+        return Response('campaigns_analysis', status=status.HTTP_200_OK)
