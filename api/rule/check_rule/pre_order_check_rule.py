@@ -1,6 +1,5 @@
 from django.conf import settings
 from datetime import datetime
-from lib.error_handle.error.pre_order_error import PreOrderErrors
 import lib
 
 class PreOrderCheckRule():
@@ -9,7 +8,7 @@ class PreOrderCheckRule():
     def is_campaign_product_exist(**kwargs):
         api_campaign_product = kwargs.get('api_campaign_product')
         if not api_campaign_product:
-            raise PreOrderErrors.PreOrderException('helper.campaign_product_been_deleted')
+            raise lib.error_handle.error.pre_order_error.PreOrderErrors.PreOrderException('helper.campaign_product_been_deleted')
 
     @staticmethod
     def is_order_lock(**kwargs):
@@ -20,16 +19,16 @@ class PreOrderCheckRule():
         if api_user.type == 'customer':
             return
         if api_pre_order['lock_at'] and datetime.timestamp(api_pre_order['lock_at'])+settings.CART_LOCK_INTERVAL > datetime.timestamp(datetime.now()):
-            raise PreOrderErrors.PreOrderException('helper.cart_in_use')
+            raise lib.error_handle.error.pre_order_error.PreOrderErrors.PreOrderException('helper.cart_in_use')
 
     @staticmethod
     def is_qty_valid(**kwargs):
         qty = kwargs.get('qty')
         if not qty:
-            raise PreOrderErrors.PreOrderException('helper.enter_qty')
+            raise lib.error_handle.error.pre_order_error.PreOrderErrors.PreOrderException('helper.enter_qty')
         qty = int(qty)
         if not qty:
-            raise PreOrderErrors.PreOrderException(
+            raise lib.error_handle.error.pre_order_error.PreOrderErrors.PreOrderException(
                 'helper.qty_not_be_zero_or_negative')
         return {'qty': qty}
 
@@ -41,7 +40,7 @@ class PreOrderCheckRule():
         original_qty = api_order_product['qty'] if api_order_product else 0
         qty_difference = int(request_qty)-original_qty
         if qty_difference and api_campaign_product["qty_for_sale"]-api_campaign_product["qty_sold"] < qty_difference:
-            raise PreOrderErrors.UnderStock("helper.out_of_stock")
+            raise lib.error_handle.error.pre_order_error.PreOrderErrors.UnderStock("helper.out_of_stock")
         return {"qty_difference" : qty_difference}
 
     @staticmethod
@@ -55,7 +54,7 @@ class PreOrderCheckRule():
         if api_user.type=="user":
             return
         if not api_campaign_product['customer_removable']:
-            raise PreOrderErrors.RemoveNotAllowed("helper.not_removable")
+            raise lib.error_handle.error.pre_order_error.PreOrderErrors.RemoveNotAllowed("helper.not_removable")
 
     @staticmethod
     def is_order_product_editable(**kwargs):
@@ -69,9 +68,9 @@ class PreOrderCheckRule():
         if api_user.type=="user":
             return
         if not api_campaign_product.get('customer_editable',False):
-            raise PreOrderErrors.EditNotAllowed("helper.not_editable")
+            raise lib.error_handle.error.pre_order_error.PreOrderErrors.EditNotAllowed("helper.not_editable")
         if api_campaign_product.get('type') == "lucky_draw":
-            raise PreOrderErrors.EditNotAllowed("helper.not_editable")
+            raise lib.error_handle.error.pre_order_error.PreOrderErrors.EditNotAllowed("helper.not_editable")
 
 
     @staticmethod
@@ -80,7 +79,7 @@ class PreOrderCheckRule():
         api_pre_order = kwargs.get('api_pre_order')
         api_campaign_product = kwargs.get('api_campaign_product')
         if str(api_campaign_product["id"]) in api_pre_order["products"]:
-            raise PreOrderErrors.PreOrderException(
+            raise lib.error_handle.error.pre_order_error.PreOrderErrors.PreOrderException(
                 "helper.product_already_in_pre_order")
 
     @staticmethod
@@ -94,7 +93,7 @@ class PreOrderCheckRule():
         if lucky_draw_repeat:
             return
         if api_campaign_product.get('max_order_amount') and qty > api_campaign_product.get('max_order_amount'):
-            raise PreOrderErrors.PreOrderException(
+            raise lib.error_handle.error.pre_order_error.PreOrderErrors.PreOrderException(
                 "helper.exceeds_max_order_amount")
 
     @staticmethod
@@ -103,7 +102,7 @@ class PreOrderCheckRule():
         api_pre_order = kwargs.get('api_pre_order')
 
         if not bool(api_pre_order['products']):
-            raise PreOrderErrors.PreOrderException('helper.cart_is_empty')
+            raise lib.error_handle.error.pre_order_error.PreOrderErrors.PreOrderException('helper.cart_is_empty')
 
     @staticmethod
     def allow_checkout(**kwargs):
@@ -116,7 +115,7 @@ class PreOrderCheckRule():
                 return
             if campaign.data.get('stop_checkout',False):
 
-                raise PreOrderErrors.PreOrderException('helper.unable_purchase_now')
+                raise lib.error_handle.error.pre_order_error.PreOrderErrors.PreOrderException('helper.unable_purchase_now')
 
         else:
             campaign = pre_order.campaign
@@ -125,7 +124,7 @@ class PreOrderCheckRule():
                 return
             if campaign.stop_checkout:
 
-                raise PreOrderErrors.PreOrderException('helper.unable_purchase_now')
+                raise lib.error_handle.error.pre_order_error.PreOrderErrors.PreOrderException('helper.unable_purchase_now')
 
     @staticmethod
     def campaign_product_type(**kwargs):
@@ -135,7 +134,7 @@ class PreOrderCheckRule():
         if api_campaign_product['type'] == 'lucky_draw' or api_campaign_product['type'] == 'lucky_draw-fast':
             api_campaign_product['price'] = 0
         elif api_campaign_product['type'] == 'n/a':
-            raise PreOrderErrors.UnderStock('helper.out_of_stock')
+            raise lib.error_handle.error.pre_order_error.PreOrderErrors.UnderStock('helper.out_of_stock')
     
     @staticmethod
     def orders_limit(**kwargs):

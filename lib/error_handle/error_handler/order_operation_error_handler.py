@@ -16,6 +16,6 @@ def order_operation_error_handler(func):
        
         except PreOrderErrors.PreOrderException as e:
             print(traceback.format_exc())
-            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": str(e), "params":e.params}, status=status.HTTP_400_BAD_REQUEST)
         
     return wrapper

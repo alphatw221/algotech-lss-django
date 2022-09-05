@@ -18,6 +18,7 @@ from api import rule
 from api.models.user import user_register
 
 from automation import jobs
+import database
 
 import service
 import lib
@@ -251,7 +252,7 @@ class UserViewSet(viewsets.ModelViewSet):
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def user_register_with_bank_transfer(self, request, country_code):
         country_code = business_policy.subscription.COUNTRY_SG if country_code in ['', 'undefined', 'null', None] else country_code
-        print(request.data)
+
         last_five_digit, image, bank_name, account_name, email, password, plan, period = lib.util.getter.getdata(request,("last_five_digit", "image", "bank_name", "account_name", "email", "password", "plan", "period"), required=True)
         firstName, lastName, contactNumber, country, promoCode, timezone = lib.util.getter.getdata(request, ("firstName", "lastName", "contactNumber", "country", "promoCode", "timezone"), required=False)
 
@@ -268,97 +269,137 @@ class UserViewSet(viewsets.ModelViewSet):
         amount = kwargs.get('amount')
 
         if image:
-            image_path = default_storage.save(f'register/receipt/{datetime.now().strftime("%Y/%m/%d, %H:%M:%S")}/{image.name}', ContentFile(image.read()))
+            image_name = image.name.replace(" ","")
+            image_path = default_storage.save(f'register/receipt/{datetime.now().strftime("%Y/%m/%d,%H:%M:%S")}/{image_name}', ContentFile(image.read()))
 
-        subscription_meta = {"last_five_digit":last_five_digit, 'bank_name':bank_name, "account_name": account_name, "receipt":image_path}
+        subscription_meta = {"last_five_digit":last_five_digit, 'bank_name':bank_name, "account_name": account_name, "receipt":settings.GS_URL+image_path}
 
         ret = lib.helper.register_helper.create_new_register_account(plan, country_plan, subscription_plan, timezone, period, firstName, lastName, email, password, country, country_code,  contactNumber,  amount, subscription_meta=subscription_meta)
 
         return Response(ret, status=status.HTTP_200_OK)
     
-    @action(detail=False, methods=['POST'], url_path=r'register/(?P<country_code>[^/.]+)/ecpay')
+    @action(detail=False, methods=['POST'], url_path=r'register/(?P<country_code>[^/.]+)')
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def user_register_with_ecpay(self, request, country_code):
-        country_code = business_policy.subscription.COUNTRY_SG if country_code in ['', 'undefined', 'null', None] else country_code
-        print(request.data)
+
         email, password, plan, period = lib.util.getter.getdata(request,("email", "password", "plan", "period"), required=True)
         firstName, lastName, contactNumber, country, promoCode, timezone = lib.util.getter.getdata(request, ("firstName", "lastName", "contactNumber", "country", "promoCode", "timezone"), required=False)
+        country_code = business_policy.subscription.COUNTRY_SG if country_code in ['', 'undefined', 'null', None] else country_code
 
-        try:
-            country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(country_code)
-            subscription_plan = country_plan.get_plan(plan)
+        country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(country_code)
+        subscription_plan = country_plan.get_plan(plan)
 
-            kwargs={'email':email,'plan':plan,'period':period, 'promoCode':promoCode, 'country_plan':country_plan, 'subscription_plan':subscription_plan}
-
-            kwargs=rule.rule_checker.user_rule_checker.RegistrationRequireRefundChecker.check(**kwargs)
-        except Exception:
-            raise lib.error_handle.error.api_error.ApiVerifyError('support_for_refunding')
+        kwargs={'email':email,'plan':plan,'period':period, 'promoCode':promoCode, 'country_plan':country_plan, 'subscription_plan':subscription_plan}
+        kwargs=rule.rule_checker.user_rule_checker.RegistrationDataRuleChecker.check(**kwargs)
         email = kwargs.get('email')
         amount = kwargs.get('amount')
+
+        user_register = models.user.user_register.UserRegister.objects.create(
+            name=f'{firstName} {lastName}',
+            password=password,
+            email=email,
+            phone=contactNumber,
+            period=period,
+            timezone=timezone,
+            type=plan,
+            country=country_code,
+            target_country=country,
+            payment_amount = amount
+        )
+        data = models.user.user_register.UserRegisterSerializer(user_register).data
+        data['oid'] = database.lss.user_register.get_oid_by_id(user_register.id)
+        return Response(data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['POST'], url_path=r'register/(?P<user_register_oid>[^/.]+)/pay/ecpay')
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def user_register_with_ecpay(self, request, user_register_oid):
+
+        user_register = lib.util.verify.Verify.get_user_register_with_oid(user_register_oid)
+        MERCHANT_ID = '2000132'
+        HASH_KEY='5294y06JbISpM5x9'
+        HASH_IV='v77hoKGq4kWxNNIS'    #put this to settings in the future
         
-        # just test: merchant_id ,hash_key ,hash_iv
-        merchant_id='2000132'
-        hash_key='5294y06JbISpM5x9'
-        hash_iv='v77hoKGq4kWxNNIS'
-        
-        action,payment = service.ecpay.ecpay.create_register_order(merchant_id, hash_key, hash_iv, int(amount) , str(plan), 
-            f'https://staginglss.accoladeglobal.net/api/v2/user/register/ecpay/callback/?email={email}', 
+        success, url, params = service.ecpay.ecpay.create_register_order(MERCHANT_ID, HASH_KEY, HASH_IV, user_register.payment_amount , user_register.type, 
+            f'{settings.GCP_API_LOADBALANCER_URL}/api/v2/user/register/ecpay/callback/?oid={user_register_oid}', 
             f'https://liveshowseller.com/thank-you/',
         )
         
-        # get_user_register = lib.util.verify.Verify.get_user_register_by_email(email)
-        # user_register = models.user.user_register.UserRegisterSerializer(get_user_register).data
-        # print(user_register['type'])
-        
-        
-        lib.helper.register_helper.create_user_register(plan, timezone, period, firstName, lastName, email, password, country, country_code,  contactNumber)
+        if not success:
+            raise lib.error_handle.error.api_error.ApiCallerError('please contact support team or try another payment method.')
 
-        return Response({'action':action,'data':payment}, status=status.HTTP_200_OK)
+        return Response({'url':url,'params':params}, status=status.HTTP_200_OK)
+
+    # @action(detail=False, methods=['POST'], url_path=r'register/(?P<country_code>[^/.]+)/ecpay')
+    # @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    # def user_register_with_ecpay(self, request, country_code):
+    #     country_code = business_policy.subscription.COUNTRY_SG if country_code in ['', 'undefined', 'null', None] else country_code
+
+    #     email, password, plan, period = lib.util.getter.getdata(request,("email", "password", "plan", "period"), required=True)
+    #     firstName, lastName, contactNumber, country, promoCode, timezone = lib.util.getter.getdata(request, ("firstName", "lastName", "contactNumber", "country", "promoCode", "timezone"), required=False)
+
+    #     try:
+    #         country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(country_code)
+    #         subscription_plan = country_plan.get_plan(plan)
+
+    #         kwargs={'email':email,'plan':plan,'period':period, 'promoCode':promoCode, 'country_plan':country_plan, 'subscription_plan':subscription_plan}
+
+    #         kwargs=rule.rule_checker.user_rule_checker.RegistrationRequireRefundChecker.check(**kwargs)
+    #     except Exception:
+    #         raise lib.error_handle.error.api_error.ApiVerifyError('support_for_refunding')
+    #     email = kwargs.get('email')
+    #     amount = kwargs.get('amount')
+        
+    #     # just test: merchant_id ,hash_key ,hash_iv
+    #     merchant_id='2000132'
+    #     hash_key='5294y06JbISpM5x9'
+    #     hash_iv='v77hoKGq4kWxNNIS'
+        
+    #     action,payment = service.ecpay.ecpay.create_register_order(merchant_id, hash_key, hash_iv, int(amount) , str(plan), 
+    #         f'https://staginglss.accoladeglobal.net/api/v2/user/register/ecpay/callback/?email={email}', 
+    #         f'https://liveshowseller.com/thank-you/',
+    #     )
+        
+    #     # get_user_register = lib.util.verify.Verify.get_user_register_by_email(email)
+    #     # user_register = models.user.user_register.UserRegisterSerializer(get_user_register).data
+    #     # print(user_register['type'])
+        
+        
+    #     lib.helper.register_helper.create_user_register(plan, timezone, period, firstName, lastName, email, password, country, country_code,  contactNumber)
+
+    #     return Response({'action':action,'data':payment}, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['POST'], url_path=r'register/ecpay/callback',parser_classes=(FormParser,), renderer_classes = (StaticHTMLRenderer,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def user_register_with_ecpay_callback(self, request):
-        email = request.query_params['email']
-        # get register data
-        get_user_register = lib.util.verify.Verify.get_user_register_by_email(email)
-        user_register = models.user.user_register.UserRegisterSerializer(get_user_register).data
-        
-        # just test: merchant_id ,hash_key ,hash_iv
-        merchant_id='2000132'
-        hash_key='5294y06JbISpM5x9'
-        hash_iv='v77hoKGq4kWxNNIS'
-        
-        # get paymeny res
-        payment_res = request.data.dict()
-        
-        check_value = service.ecpay.ecpay.check_mac_value(merchant_id, hash_key, hash_iv, payment_res)
-        
-        if not payment_res or payment_res['CheckMacValue'] != check_value :
-            return print('order is not match')
-        if payment_res['RtnCode'] == '0':
-            raise lib.error_handle.error.api_error.ApiVerifyError('payment not successful',payment_res['RtnMsg'])
-        
-        try:
-            country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(user_register['country'])
-            subscription_plan = country_plan.get_plan(user_register['type'])
 
-            kwargs={'email':email,'plan':user_register['type'],'period':user_register['period'], 'country_plan':country_plan, 'subscription_plan':subscription_plan}
+        oid, = lib.util.getter.getparams(request, ('oid',), with_user=False)
+        user_register = lib.util.verify.Verify.get_user_register_with_oid(oid)
 
-            kwargs=rule.rule_checker.user_rule_checker.RegistrationRequireRefundChecker.check(**kwargs)
-        except Exception:
+        MERCHANT_ID = '2000132'
+        HASH_KEY='5294y06JbISpM5x9'
+        HASH_IV='v77hoKGq4kWxNNIS'
+        
+        params = request.data.dict()
+        
+        check_mac_value = service.ecpay.ecpay.check_mac_value(MERCHANT_ID, HASH_KEY, HASH_IV, params)
+        
+        if not params or params.get('CheckMacValue') != check_mac_value :
+            raise lib.error_handle.error.api_error.ApiVerifyError('invalid')
+
+        if params.get('RtnCode') == '0':
+            raise lib.error_handle.error.api_error.ApiVerifyError('fail')
+        
+        if params.get('amount') != user_register.payment_amount:
+            user_register.status = models.user.user_register.STATUS_PENDING_REFUND
+            user_register.save()
             raise lib.error_handle.error.api_error.ApiVerifyError('support_for_refunding')
-        
-        # create invoice
-        invoice = service.ecpay.ecpay.register_create_invoice(merchant_id, hash_key, hash_iv, user_register,int(payment_res['amount']))
-        subscription_meta={}
-        subscription_meta['InvoiceNumber'] = invoice['InvoiceNumber']
-        
-        # create user
-        ret = lib.helper.register_helper.create_new_register_account(user_register['type'], country_plan, subscription_plan, user_register['timezone'], user_register['period'], user_register['name'], '', email, user_register['password'], user_register['country'], user_register['target_country'],  user_register['phone'], int(payment_res['amount']), subscription_meta=subscription_meta)
-        print(ret)
-        
-        # delete user register by same email
-        lib.util.verify.Verify.delete_user_register_by_email(email)
-        
-        
+
+        invoice = service.ecpay.ecpay.register_create_invoice(MERCHANT_ID, HASH_KEY, HASH_IV, user_register, user_register.payment_amount)
+
+        user_register.meta['ecpay']={'InvoiceNumber':invoice['InvoiceNumber']}
+        user_register.status = models.user.user_register.STATUS_COMPLETE
+        user_register.save()
+
+        lib.helper.register_helper.create_account_with_user_register(user_register)
+
         return Response('1|ok')

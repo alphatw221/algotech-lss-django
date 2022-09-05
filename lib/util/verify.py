@@ -175,6 +175,18 @@ class Verify():
             raise ApiVerifyError('util.no_cart_found')
         return Cart.objects.get(id=cart['id'])
 
+    @staticmethod
+    def get_user_register_with_oid(oid):
+        try:
+            _id=ObjectId(oid)
+        except Exception:
+            raise ApiVerifyError('no registeration found')
+        
+        user_register = database.lss.user_register.UserRegister.get(_id=_id)
+        if not user_register:
+            raise ApiVerifyError('no registeration found')
+        return models.user.user_register.UserRegister.objects.get(id=user_register['id'])
+
 
     @staticmethod
     def get_pre_order(pre_order_id):
@@ -500,11 +512,7 @@ class Verify():
             raise ApiVerifyError(f'user register not found by {user_register_email}')
         return models.user.user_register.UserRegister.objects.filter(email=user_register_email).order_by('-created_at')[0]
     
-    @staticmethod
-    def delete_user_register_by_email(user_register_email):
-        if not models.user.user_register.UserRegister.objects.filter(email=user_register_email).exists():
-            raise ApiVerifyError(f'user register not found by {user_register_email}')
-        return models.user.user_register.UserRegister.objects.filter(email=user_register_email).delete()
+
         
 
     # class PreOrderApi():
