@@ -107,4 +107,59 @@ def get_dealer_members_growing(user_subscription_id, start_date, end_date):
 
     l = list(cursor)
     return l
-    
+
+
+def get_dealer_period_revenue(user_subscription_id, start_date, end_date):
+    cursor = db.api_user_subscription.aggregate([
+        {'$match': {
+            '$and': [
+                {'dealer_id': user_subscription_id},
+                {'started_at': {'$gte': end_date, '$lte': start_date}},
+                {'type': {'$ne': 'dealer'}}
+            ]
+        }},
+        {'$project': {
+            '_id': 0, 
+            'id': 1,
+            'type': 1,
+            'licence_period': {'$divide': [{'$subtract': ['$expired_at', '$started_at']}, 2592000000]}
+        }},
+        {'$group': {
+            '_id': '$type',
+            'id_list': {'$push': '$id'},
+            'licence_count': {'$push': '$licence_period'},
+            'count': {'$sum': 1}
+        }}
+    ])
+
+    l = list(cursor)
+    return l
+
+
+def get_premium_period_order_count(user_subscription_id, start_date, end_date):
+    cursor = db.api_campaign.aggregate([
+        {'$match': {
+            '$and': [
+                {'user_subscription_id': user_subscription_id},
+                {'created_at': {'$gte': end_date, '$lte': start_date}},
+            ]
+        }},
+        {'$lookup': {
+            'from': 'api_order',
+            'as': 'orders',
+            'let': { 'id': '$id' },
+            'pipeline': [
+                {'$match': {
+                    '$expr': { '$eq': [ '$$id', '$campaign_id'] }
+                }},
+            ]
+        }},
+        {'$group': {
+            '_id': None,
+            'id_list': {'$addToSet': '$id'}
+        }},
+        {'$project': {'order_count': {'$size': '$id_list'}}}
+    ])
+
+    l = list(cursor)
+    return l
