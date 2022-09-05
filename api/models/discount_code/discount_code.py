@@ -7,6 +7,12 @@ from api.models.user.user_subscription import UserSubscription
 TYPE_PERCENT_OFF = 'percent_off'
 TYPE_DEDUCT = 'deduct'
 
+TYPE_CART_REFERAL = 'cart_referal'
+TYPE_GENERAL = 'general'
+
+DISCOUNT_TYPE_PERCENT_OFF = 'percent_off'
+DISCOUNT_TYPE_DEDUCT = 'deduct'
+
 LIMITATION_SPECIFIC_CAMPAIGN = 'specific_campaign'
 LIMITATION_SUBTOTAL_OVER_AMOUNT = 'subtotal_over_specific_amount'
 LIMITATION_PRODUCT_OVER_NUMBER = 'product_over_specific_number'
@@ -28,8 +34,8 @@ class DiscountCode(models.Model):
     start_at = models.DateTimeField(null=True, blank=True, default=None)
     end_at = models.DateTimeField(null=True, blank=True, default=None)
 
-    type = models.CharField(max_length=255, null=True, blank=True)
-    # limitation = models.CharField(max_length=255, null=True, blank=True)
+    type = models.CharField(max_length=255, null=False, blank=False, default=TYPE_GENERAL)
+    discount_type = models.CharField(max_length=255, null=True, blank=True)
 
     limitations = models.JSONField(null=False, blank=False, default=[])
     meta = models.JSONField(null=True, blank=True, default=dict)
