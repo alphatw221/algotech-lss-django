@@ -43,10 +43,11 @@ class CartViewSet(viewsets.GenericViewSet):
           if campaign_product_id_str not in campaign_product_dict:
               continue
           campaign_product = campaign_product_dict[campaign_product_id_str]
-          product_items.append({'Id':campaign_product.meta.get(PLUGIN_ORDR_STARTR,{}).get('ordr_startr_id'), 'Keyword':product.order_code, 'Qty':product.get('qty')})
+          product_items.append({'Id':campaign_product.meta.get(PLUGIN_ORDR_STARTR,{}).get('ordr_startr_id'), 'Keyword':campaign_product.order_code, 'Qty':product.get('qty')})
         
-
+        # print(product_items)
         success, data = ordr_startr_service.order.create_order(key=credential.get('key'),user_id=pre_order.customer_id, user_name=pre_order.customer_name, platform=pre_order.platform, product_items=product_items)
+        print(data)
         # if not success:
         #     raise lib.error_handle.error.api_error.ApiCallerError('please place your order again')
 
@@ -69,5 +70,6 @@ class CartViewSet(viewsets.GenericViewSet):
         # pre_order.meta.update(meta_data)
         # pre_order.save()
         # print(checkout_url)
+        #https://localhost:3000/buyer/recaptcha/ordr_startr/6315979a19ec784a705c4697
 
         return Response(data.get('CheckoutUrl'), status=status.HTTP_200_OK)

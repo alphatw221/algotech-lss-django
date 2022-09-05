@@ -12,12 +12,12 @@ def create_order(key, user_id, user_name, platform, product_items):
     data = {
         "User":{
             "Id":user_id,
-            "SourceType":platform_source_type_map.get('platform',platform),
+            "SourceType":platform_source_type_map.get(platform,platform),
             "Name": user_name
         },
         "Items":product_items
     }
-
+    print(data)
 
     response = request("POST", __get_url(), 
         headers = get_header(key), 
