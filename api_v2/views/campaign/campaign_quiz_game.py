@@ -149,7 +149,7 @@ class CampaignQuizGameViewSet(viewsets.ModelViewSet):
 
         campaign = quiz_game.quiz_game_bundle.campaign
         lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign.id)
-        quiz_game.start_at = datetime.datetime.now()
+        quiz_game.start_at = datetime.datetime.utcnow()
         quiz_game.save()
 
         return Response(models.campaign.campaign_quiz_game.CampaignQuizGameSerializer(quiz_game).data, status=status.HTTP_200_OK)
@@ -164,7 +164,8 @@ class CampaignQuizGameViewSet(viewsets.ModelViewSet):
 
         campaign = quiz_game.quiz_game_bundle.campaign
         lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign.id)
-        quiz_game.end_at = datetime.datetime.now()
+        quiz_game.end_at = datetime.datetime.utcnow()
+        
         quiz_game.save()
 
         return Response(models.campaign.campaign_quiz_game.CampaignQuizGameSerializer(quiz_game).data, status=status.HTTP_200_OK)

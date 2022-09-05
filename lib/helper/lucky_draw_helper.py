@@ -83,13 +83,13 @@ class LikesCandidateSetGenerator(CandidateSetGenerator):
         
         likes_user_list=[]
         response = {}
-
+        
         if campaign.facebook_page_id and models.facebook.facebook_page.FacebookPage.objects.filter(id=campaign.facebook_page_id).exists():
             facebook_page = models.facebook.facebook_page.FacebookPage.objects.get(id=campaign.facebook_page_id)
             post_id=campaign.facebook_campaign.get('post_id')
             token=facebook_page.token   
 
-            code, response = service.facebook.post.get_post_likes(token, post_id, after=None, limit=limit)
+            code, response = service.facebook.post.get_post_likes(token, facebook_page.page_id, post_id, after=None, limit=limit)
             # print(code)
             # print(response)
             if code!=200 :
@@ -128,8 +128,7 @@ class ProductCandidateSetGenerator(CandidateSetGenerator):
         winner_list = campaign.meta.get('winner_list',[])
         candidate_set = set()
 
-        order_products = models.order.order_product.OrderProduct.objects.filter(campaign=campaign, campaign_product=lucky_draw.campaign_product)
-
+        order_products = models.order.order_product.OrderProduct.objects.filter(campaign=campaign, campaign_product=lucky_draw.campaign_product, platform__isnull=False)
         for order_product in order_products:
             img_url = models.order.pre_order.PreOrder.objects.get(customer_id=order_product.customer_id, campaign=campaign.id).customer_img
             candidate = LuckyDrawCandidate(
@@ -158,8 +157,7 @@ class PurchaseCandidateSetGenerator(CandidateSetGenerator):
         candidate_set = set()
 
         orders = models.order.order.Order.objects.filter(campaign=campaign)
-        pre_orders = models.order.pre_order.PreOrder.objects.filter(campaign=campaign,subtotal__gt=0)
-
+        pre_orders = models.order.pre_order.PreOrder.objects.filter(campaign=campaign,subtotal__gt=0, platform__isnull=False)
         for order in orders:
             candidate = LuckyDrawCandidate(
                 platform=order.platform, 
@@ -190,6 +188,109 @@ class PurchaseCandidateSetGenerator(CandidateSetGenerator):
 
         return candidate_set
 
+class SharedPostCandidateSetGenerator(CandidateSetGenerator):
+
+    @classmethod
+    def get_candidate_set(cls, campaign, lucky_draw, limit=1000):
+
+        winner_list = campaign.meta.get('winner_list',[])
+        candidate_set = set()
+        users_like_and_comment_set = set()
+        response = {}
+        
+        if campaign.facebook_page_id and models.facebook.facebook_page.FacebookPage.objects.filter(id=campaign.facebook_page_id).exists():
+            facebook_page = models.facebook.facebook_page.FacebookPage.objects.get(id=campaign.facebook_page_id)
+            post_id=campaign.facebook_campaign.get('post_id')
+            token=facebook_page.token   
+
+            code, response = service.facebook.post.get_post(token, facebook_page.page_id, post_id)
+            if code!=200 :
+                raise lib.error_handle.error.api_error.ApiVerifyError('helper.fb_api_fail')
+        
+        shares_count = response.get("shares", {}).get("count", 0)
+        # print(shares_count)
+        if not shares_count:
+            return candidate_set
+        
+        like_data = response.get("likes",{}).get("data",[])
+        # print(like_data)
+        like_user_id_set = set([i["id"] for i in like_data])
+        
+        comments_data = models.campaign.campaign_comment.CampaignComment.objects.filter(
+            campaign=campaign, platform="facebook")
+        campaign_comments_user_id_set = set(comments_data.values_list("customer_id", flat=True))
+        
+        
+        
+        if len(like_user_id_set) and len(campaign_comments_user_id_set):
+            users_like_and_comment_set = like_user_id_set.intersection(campaign_comments_user_id_set)
+            data = []
+            for i in like_data:
+                if i["id"] in users_like_and_comment_set and i["id"] not in data:
+                    data.append(i)
+            for user in data:
+                candidate = LuckyDrawCandidate(
+                    platform='facebook', 
+                    customer_id=user.get('id'),     #ASID over here!! might have some issues 
+                    customer_name=user.get('name'),
+                    customer_image=user.get('pic_large'),
+                    draw_type=lucky_draw.type,
+                    prize=lucky_draw.prize.name)
+
+                if not lucky_draw.repeatable and candidate in winner_list:
+                    continue
+                
+                candidate_set.add(candidate)
+                
+        elif not len(like_user_id_set) and not len(campaign_comments_user_id_set):
+            return candidate_set
+        
+        elif len(like_user_id_set):
+            users_like_and_comment_set = like_user_id_set
+            data = []
+            for i in like_data:
+                if i["id"] in users_like_and_comment_set and i["id"] not in data:
+                    data.append(i)
+            for user in data:
+                candidate = LuckyDrawCandidate(
+                    platform='facebook', 
+                    customer_id=user.get('id'),     #ASID over here!! might have some issues 
+                    customer_name=user.get('name'),
+                    customer_image=user.get('pic_large'),
+                    draw_type=lucky_draw.type,
+                    prize=lucky_draw.prize.name)
+
+                if not lucky_draw.repeatable and candidate in winner_list:
+                    continue
+                candidate_set.add(candidate)
+                
+        elif len(campaign_comments_user_id_set):
+            users_like_and_comment_set = campaign_comments_user_id_set
+            campaign_comments = []
+            for i in comments_data:
+                if i.id in users_like_and_comment_set and i.id not in campaign_comments:
+                    campaign_comments.append(i)
+            for campaign_comment in campaign_comments:
+
+                candidate = LuckyDrawCandidate(
+                    platform=campaign_comment.platform, 
+                    customer_id=campaign_comment.customer_id, 
+                    comment_id = campaign_comment.id,
+                    customer_name=campaign_comment.customer_name,
+                    customer_image=campaign_comment.image,
+                    draw_type=lucky_draw.type,
+                    prize=lucky_draw.prize.name)
+
+                if not lucky_draw.repeatable and candidate in winner_list:
+                    continue
+
+                candidate_set.add(candidate)
+        
+        num_of_candidate = len(candidate_set) if shares_count > len(candidate_set) else shares_count
+        candidates = random.sample(list(candidate_set), num_of_candidate)
+        
+        return candidates
+    
 class LuckyDraw():
 
     @classmethod
@@ -309,6 +410,9 @@ def draw(campaign, lucky_draw):
         return lib.helper.lucky_draw_helper.LuckyDraw.draw_from_candidate(campaign, lucky_draw.prize,  candidate_set=candidate_set, num_of_winner=lucky_draw.num_of_winner)
     elif lucky_draw.type == models.campaign.campaign_lucky_draw.TYPE_PURCHASE:
         candidate_set = lib.helper.lucky_draw_helper.PurchaseCandidateSetGenerator.get_candidate_set(campaign, lucky_draw)
+        return lib.helper.lucky_draw_helper.LuckyDraw.draw_from_candidate(campaign, lucky_draw.prize,  candidate_set=candidate_set, num_of_winner=lucky_draw.num_of_winner)
+    elif lucky_draw.type == models.campaign.campaign_lucky_draw.TYPE_POST:
+        candidate_set = lib.helper.lucky_draw_helper.SharedPostCandidateSetGenerator.get_candidate_set(campaign, lucky_draw)
         return lib.helper.lucky_draw_helper.LuckyDraw.draw_from_candidate(campaign, lucky_draw.prize,  candidate_set=candidate_set, num_of_winner=lucky_draw.num_of_winner)
     else:
         return []

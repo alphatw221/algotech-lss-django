@@ -10,7 +10,7 @@ class LuckyDrawCheckRule():
         campaign = kwargs.get('campaign')
         if type not in models.campaign.campaign_lucky_draw.TYPE_CHOICES:
             raise lib.error_handle.error.api_error.ApiVerifyError('invalid_lucky_draw_type')
-        if type == "like" and campaign.facebook_campaign.get('post_id', "") == "":
+        if type in [models.campaign.campaign_lucky_draw.TYPE_LIKE, models.campaign.campaign_lucky_draw.TYPE_POST] and campaign.facebook_campaign.get('post_id', "") == "":
             raise lib.error_handle.error.api_error.ApiVerifyError('draw_like_type_need_connect_to_facebook_post')
         
     @staticmethod
