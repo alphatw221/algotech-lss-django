@@ -388,7 +388,7 @@ GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
     os.path.join(BASE_DIR, "liveshowseller-b4308e2f9dc6.json")
 )
 GS_URL = "https://storage.googleapis.com/lss_public_bucket/"
-
+GOOGLE_STORAGE_STATIC_DIR=GS_URL+'static/'
 # google monitoring
 GCP_PROJECT_ID = "liveshowseller"
 

@@ -10,7 +10,9 @@ import lib
 from lib.authentication_class.v1_token_authentication import V1PermanentTokenAuthentication
 from lib.permission_class.v1_token_permission import IsAuthenticated, IsAuthorizedByUserSubscription
 
-PLUGIN_EASY_STORE = 'ordr_startr'
+
+
+PLUGIN_ORDR_STARTR = 'ordr_startr'
 
 def ordr_startr_2_lss(ordr_startr_product, user_subscription):
     return {
@@ -46,13 +48,13 @@ class ProductViewSet(viewsets.GenericViewSet):
         product_categories:list = user_subscription.meta.get('product_categories',[])
         tag_set:set = set(product_categories) 
 
-        product_dict = {product.meta.get('ordr_startr_id') : product.id for product in user_subscription.products.all() if product.meta.get('ordr_startr_id')}
+        product_dict = {product.meta.get(PLUGIN_ORDR_STARTR,{}).get('ordr_startr_id') : product.id for product in user_subscription.products.all() if product.meta.get(PLUGIN_ORDR_STARTR,{}).get('ordr_startr_id')}
         
         for product in added_products:
             if product.get('_id') in product_dict:
                 continue
             data = ordr_startr_2_lss(product, user_subscription)
-            lss_product = models.product.product.Product.objects.create(**data, meta={'ordr_startr_id':product.get('_id')})
+            lss_product = models.product.product.Product.objects.create(**data, meta={PLUGIN_ORDR_STARTR:{'ordr_startr_id':product.get('_id')}})
             product_dict[product.get('_id')] = lss_product.id
             update_category(product, product_categories, tag_set)
             

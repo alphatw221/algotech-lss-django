@@ -3,8 +3,10 @@ from api.models.user.user_subscription import (UserSubscription,
                                                UserSubscriptionSerializer)
 from django.contrib import admin
 from djongo import models
+
 from rest_framework import serializers
 
+from django.conf import settings
 
 TYPE_PRODUCT='product'
 TYPE_LUCY_DRAW='lucky_draw'
@@ -57,7 +59,7 @@ class Product(models.Model):
     upc = models.CharField(
         max_length=255, null=True, blank=True, default=None)
     image = models.CharField(
-        max_length=255, null=True, blank=True, default=None)
+        max_length=255, null=True, blank=True, default=settings.GOOGLE_STORAGE_STATIC_DIR)
     sort_order = models.IntegerField(
         null=True, blank=True, default=0)
 

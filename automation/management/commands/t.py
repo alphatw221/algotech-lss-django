@@ -52,7 +52,7 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.test_set_password()
+        self.test_temp()
         # self.test_remove_campaign_comment_duplicate()
 
     def modify_database(self):
@@ -640,3 +640,11 @@ class Command(BaseCommand):
 
         client.run(session_id='c07dd598131dc2bb7b0eac8dcd09ee93')
 
+    def test_temp(self):
+        from database.lss._config import db
+
+        products = db.api_product.find({"user_subscription_id":617})
+        for product in products:
+            ordr_startr_id = product.get('meta',{}).get('ordr_startr_id')
+            db.api_product.update_one({'id':product.get('id')},{"$set":{"meta":{'ordr_startr':{'ordr_startr_id':ordr_startr_id}}}})
+            # print(product.get('meta'))
