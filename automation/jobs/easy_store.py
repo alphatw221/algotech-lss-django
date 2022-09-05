@@ -67,6 +67,7 @@ def export_product_job(user_subscription_id, credential):
                     if sku in sku_dict:
                         lss_product = models.product.product.Product.objects.get(id=sku_dict[sku])
                         lss_product.price = price
+                        lss_product.image = image_url
                         lss_product.name = name
                         lss_product.description = description
                         lss_product.tag = tags
