@@ -9,7 +9,7 @@ def __get_url(shop, cart_token=None):
     return f"https://{shop}/api/3.0/checkouts.json"
 
 def create_checkout(shop, access_token, line_items):
-    print(line_items)
+    # print(line_items)
     data = {
         "checkout": {
             "line_items":line_items

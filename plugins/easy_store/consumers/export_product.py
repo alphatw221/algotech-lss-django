@@ -30,7 +30,6 @@ class ExportProductConsumer(WebsocketConsumer):
         )
 
     def receive(self, text_data):
-        print(text_data)
 
         api_user = lib.util.verify.Verify.get_seller_user_from_scope(self.scope)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
@@ -38,7 +37,7 @@ class ExportProductConsumer(WebsocketConsumer):
         credential = user_subscription.user_plan.get('plugins',{}).get(PLUGIN_EASY_STORE)
         if not credential:
             raise lib.error_handle.error.api_error.ApiVerifyError('no_plugin')
-        print(credential)
+
         service.rq.queue.enqueue_general_queue(jobs.easy_store.export_product_job, user_subscription_id = user_subscription.id, credential=credential)
         self.send(text_data=json.dumps({
             'type':'response_data',

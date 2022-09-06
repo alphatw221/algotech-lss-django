@@ -14,4 +14,4 @@ def get_header(key):
         'Cookie':'connect.sid=s%3AhZb3dTGG8XBUGVW1mQP-unVbg7E1V_lK.dqbneJMgVqa%2BvrCeWKzxvUcNd91JViu4hQXs7Qls%2FuA'  #temp
     }
 
-platform_source_type_map = {'facebook':'FB', 'instagram':'IG', 'youtube':'YT', 'twitch':'twitch', 'tiktok':'tiktok'}
+platform_source_type_map = {'facebook':'FB', 'instagram':'IG', 'youtube':'YT', 'twitch':'TW', 'tiktok':'TT'}
