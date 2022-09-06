@@ -197,7 +197,7 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
 
         kwargs = {'tag__icontains':category} if category not in ['undefined', '', None, 'null'] else {}
-        kwargs = {'type__in':['product','product-fast']} if type not in ['undefined', '', None, 'null'] and type=='product' else {}
+        kwargs = {'type__in':['product','product-fast']} if type not in ['undefined', '', None, 'null'] and type=='product' else kwargs
         queryset = campaign.products.filter(**kwargs)
         page = self.paginate_queryset(queryset)
         if page is not None:
