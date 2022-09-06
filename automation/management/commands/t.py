@@ -52,7 +52,7 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.test_temp()
+        self.test_ordr_startr()
         # self.test_remove_campaign_comment_duplicate()
 
     def modify_database(self):
@@ -648,3 +648,11 @@ class Command(BaseCommand):
             ordr_startr_id = product.get('meta',{}).get('ordr_startr_id')
             db.api_product.update_one({'id':product.get('id')},{"$set":{"meta":{'ordr_startr':{'ordr_startr_id':ordr_startr_id}}}})
             # print(product.get('meta'))
+    def test_ordr_startr(self):
+        from plugins.ordr_startr import service as ordr_startr_service
+
+        success, data = ordr_startr_service.product.get_products('ordrstartr2022!')
+        print(success)
+        print(data)
+
+        

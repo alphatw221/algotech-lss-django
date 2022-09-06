@@ -15,6 +15,7 @@ def create_checkout(shop, access_token, line_items):
             "line_items":line_items
         }
     }
+    print(data)
     response = request("POST", __get_url(shop), 
         headers = get_header(access_token), 
         json = data,

@@ -304,7 +304,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         pre_order = lib.util.verify.Verify.get_pre_order_with_oid(pre_order_oid)
         campaign = lib.util.verify.Verify.get_campaign_from_pre_order(pre_order)
 
-        discount_codes = campaign.user_subscription.discount_codes.filter(start_at__lte=datetime.utcnow()).filter(end_at__gte=datetime.utcnow())
+        discount_codes = campaign.user_subscription.discount_codes.filter(start_at__lte=datetime.utcnow(),end_at__gte=datetime.utcnow())
 
         valid_discount_code = None
         for _discount_code in discount_codes:

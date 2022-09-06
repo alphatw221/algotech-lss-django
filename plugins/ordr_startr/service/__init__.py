@@ -1,1 +1,1 @@
-from . import order
+from . import order,product,channels
