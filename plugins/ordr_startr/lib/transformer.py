@@ -43,7 +43,7 @@ def to_lss_order(ordr_startr_order_data, pre_order):
         "shipping_phone":ordr_startr_order_data.get('ShippingMobile'),
         "shipping_postcode":ordr_startr_order_data.get('ShippingPostalCode'),
         "shipping_address_1":ordr_startr_order_data.get('ShippingAddress1'),
-        "shipping_address_2":ordr_startr_order_data.get('ShippingAddress2'),
+
         "status":models.order.order.STATUS_COMPLETE if ordr_startr_order_data.get('PaymentStatus')=='paid' else models.order.order.STATUS_REVIEW,
         "meta":{
             'ordr_startr':{

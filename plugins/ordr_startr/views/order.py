@@ -18,14 +18,16 @@ from bson.objectid import ObjectId
 class OrderViewSet(viewsets.GenericViewSet):
     queryset = models.order.order.Order.objects.none()
 
-    @action(detail=False, methods=['PUT'], url_path=r'callback/payment/complete/', permission_classes=(IsAuthenticated,IsAuthorizedByUserSubscription), authentication_classes=[V1PermanentTokenAuthentication,])
+    @action(detail=False, methods=['PUT'], url_path=r'callback/(?P<user_subscription_id>[^/.]+)/payment/complete', permission_classes=(IsAuthenticated,IsAuthorizedByUserSubscription), authentication_classes=[V1PermanentTokenAuthentication,])
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def order_payment_complete_callback(self, request, user_subscription_id):
 
-        ordr_startr_order_data = lib.util.getter.getdata(request,('order',),required=True)
+        ordr_startr_order_data, = lib.util.getter.getdata(request,('order',),required=True)
         lss_pre_order_oid = ordr_startr_order_data.get('externalReferenceId')
         pre_order = lib.util.verify.Verify.get_pre_order_with_oid(lss_pre_order_oid)
         campaign = pre_order.campaign
+        if campaign.user_subscription.id != int(user_subscription_id):
+            raise lib.error_handle.error.api_error.ApiVerifyError('invalid')
         campaign_product_map = ordr_startr_lib.mapping_helper.get_campaign_product_map(campaign)
 
         lss_order_data = ordr_startr_lib.transformer.to_lss_order(ordr_startr_order_data, pre_order)
