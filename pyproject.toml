@@ -47,6 +47,7 @@ django-vite = "^2.0.2"
 pandas = "^1.4.3"
 TikTokLive = "^4.3.5"
 protobuf = "3.19.4"
+pottery = "^3.0.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

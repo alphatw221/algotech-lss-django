@@ -52,7 +52,7 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.test_ordr_startr()
+        self.test_set_password()
         # self.test_remove_campaign_comment_duplicate()
 
     def modify_database(self):
@@ -192,9 +192,9 @@ class Command(BaseCommand):
 
         from django.contrib.auth.models import User as AuthUser
 
-        auth_user = AuthUser.objects.get(id=672)
+        auth_user = AuthUser.objects.get(id=380)
 
-        auth_user.set_password("gsc2022#9")
+        auth_user.set_password("12345678")
         auth_user.save()
 
     def test_send_email(self):
