@@ -1,3 +1,5 @@
+from re import sub
+from tracemalloc import start
 from django.conf import settings
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
@@ -15,9 +17,13 @@ from rest_framework.parsers import MultiPartParser, JSONParser, FormParser
 
 from api import rule, models, utils
 import stripe, pytz, lib, service, business_policy, json
+from backend.pymongo.mongodb import db
 
 from datetime import datetime, timedelta
-from database import lss
+from dateutil.relativedelta import relativedelta
+import database
+
+
 class UserSubscriptionPagination(PageNumberPagination):
 
     page_query_param = 'page'
@@ -346,14 +352,14 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
 # --------------------------------- dealer ---------------------------------
     
+
     @action(detail=False, methods=['GET'], url_path=r'dashboard/cards', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def dealer_dashboard_cards_analysis(self, request):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         dealer_user_subscription = lib.util.verify.Verify.get_dealer_user_subscription_from_api_user(api_user)
 
-        campaigns_analysis = lss.dealer.get_dealer_campaigns_info_analysis(dealer_user_subscription.id)
-        print (campaigns_analysis)
+        campaigns_analysis = database.lss.dealer.get_dealer_campaigns_info_analysis(dealer_user_subscription.id)
 
         return Response(campaigns_analysis, status=status.HTTP_200_OK)
     
@@ -365,3 +371,83 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         data = lss.dealer.get_seller_info_from_dealer(dealer_user_subscription.id)
 
         return Response(data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['GET'], url_path=r'dashboard/members/growing', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def dealer_dashboard_members_growing(self, request):
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        dealer_user_subscription = lib.util.verify.Verify.get_dealer_user_subscription_from_api_user(api_user)
+        date_period, = lib.util.getter.getparams(request, ('date_period',), with_user=False)
+
+        subcriptions_count_list = []
+        start_date = datetime.now()
+        end_date = start_date - relativedelta(years=1) if date_period == 'year' else start_date - relativedelta(months=1)
+        while start_date > end_date:
+            if date_period == 'year':
+                this_end_date = start_date - relativedelta(months=1)
+                this_period = f'{this_end_date.year}-{this_end_date.month}'
+            elif date_period == 'month':
+                this_end_date = start_date - relativedelta(days=1)
+                this_period = f'{this_end_date.year}-{this_end_date.month}-{this_end_date.day}'
+                
+            members_growing = database.lss.dealer.get_dealer_members_growing(dealer_user_subscription.id, start_date, this_end_date)
+            count_obj = { this_period: members_growing[0].get('subscription_count') } if members_growing else { this_period: 0 }
+            subcriptions_count_list.append(count_obj)
+            start_date = this_end_date
+
+        return Response(subcriptions_count_list, status=status.HTTP_200_OK)
+    
+
+    @action(detail=False, methods=['GET'], url_path=r'dashboard/period/revenue', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def dealer_period_revenue(self, request):
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        dealer_user_subscription = lib.util.verify.Verify.get_dealer_user_subscription_from_api_user(api_user)
+        date_period, country_code = lib.util.getter.getparams(request, ('date_period', 'country_code'), with_user=False)
+
+        dealer_revenue = []
+        premium_list = []
+        for subscriber in db.api_user_subscription.find({'$and': [{'dealer_id': dealer_user_subscription.id}, {'type': 'premium'}]}):
+            premium_list.append(subscriber.get('id'))
+        
+        start_date = datetime.now()
+        end_date = start_date - relativedelta(years=1) if date_period == 'year' else start_date - relativedelta(months=1)
+        while start_date > end_date:
+            if date_period == 'year':
+                this_end_date = start_date - relativedelta(months=1)
+                this_period = f'{this_end_date.year}-{this_end_date.month}'
+            elif date_period == 'month':
+                this_end_date = start_date - relativedelta(days=1)
+                this_period = f'{this_end_date.year}-{this_end_date.month}-{this_end_date.day}'
+
+            this_period_revenue = 0
+            for premium_id in premium_list: 
+                premium_order_count = database.lss.dealer.get_premium_period_order_count(premium_id, start_date, this_end_date)
+                if premium_order_count:
+                    if country_code == 'MY':
+                        this_period_revenue += float(premium_order_count[0].get('order_count', 0) * 0.2)
+                    else:
+                        this_period_revenue += float(premium_order_count[0].get('order_count', 0) * 0.1)
+            
+            plan_count = database.lss.dealer.get_dealer_period_revenue(dealer_user_subscription.id, start_date, this_end_date)
+            for plan in plan_count:
+                if plan.get('_id') == 'trial':
+                    continue
+                country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(country_code)
+                subscription_plan = country_plan.get_plan(plan.get('_id'))
+                for period in plan.get('licence_count'):
+                    if abs(round(period)) == 1:
+                        period_name = 'month'
+                    elif abs(round(period)) == 3:
+                        period_name = 'quarter'
+                    elif abs(round(period)) == 12:
+                        period_name = 'year'
+                    this_period_revenue += subscription_plan.get('price').get(period_name)
+            
+            count_obj = { this_period: format(this_period_revenue, '.2f') }
+            dealer_revenue.append(count_obj)
+            start_date = this_end_date
+        
+        print (dealer_revenue)
+
+        return Response('suc', status=status.HTTP_200_OK)
