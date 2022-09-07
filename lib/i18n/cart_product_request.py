@@ -34,6 +34,14 @@ def get_plugins_additional_text(pre_order, _plugins:dict, lang=None):
         more_info_in_pm_notice = _('MORE_INFO_IN_PM_NOTICE')
 
         return shopping_cart_info, more_info_in_pm_notice
+    elif plugins.shopify.SHOPIFY in _plugins:
+        link = settings.SHOPPING_CART_RECAPTCHA_URL + f'/{plugins.shopify.SHOPIFY}/{str(pre_order._id)}'
+    
+        shopping_cart_info = _('SHOPPING_CART_INFO{link}'
+                            ).format(link=link)
+        more_info_in_pm_notice = _('MORE_INFO_IN_PM_NOTICE')
+
+        return shopping_cart_info, more_info_in_pm_notice
     else:
         return get_additional_text(pre_order, lang=lang)
 
