@@ -298,21 +298,39 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def buyer_apply_discount_code(self, request, pre_order_oid):
 
-        # api_user = lib.util.verify.Verify.get_customer_user(request)
-
         discount_code, = \
             lib.util.getter.getdata(request, ("discount_code",), required=True)
 
         pre_order = lib.util.verify.Verify.get_pre_order_with_oid(pre_order_oid)
         campaign = lib.util.verify.Verify.get_campaign_from_pre_order(pre_order)
 
-        discount_codes = campaign.user_subscription.discount_codes.filter(start_at__lte=datetime.utcnow()).filter(end_at__gte=datetime.utcnow())
+        discount_codes = campaign.user_subscription.discount_codes.filter(start_at__lte=datetime.utcnow(),end_at__gte=datetime.utcnow())
 
         valid_discount_code = None
         for _discount_code in discount_codes:
-            if discount_code == _discount_code.code:
+
+            if _discount_code.type ==models.discount_code.discount_code.TYPE_GENERAL and discount_code == _discount_code.code:
                 valid_discount_code = _discount_code
                 break
+            elif _discount_code.type == models.discount_code.discount_code.TYPE_CART_REFERAL :
+                code_length = len(_discount_code.code)
+                if code_length+1 > len(discount_code) or _discount_code.code!=discount_code[:code_length]:
+                    continue
+                pre_order_oid = discount_code[code_length+1:]
+                try:
+                    referrer_pre_order=lib.util.verify.Verify.get_pre_order_with_oid(pre_order_oid)
+                except Exception:
+                    break
+                if referrer_pre_order.campaign.user_subscription != campaign.user_subscription or referrer_pre_order == pre_order:
+                    continue
+                if not referrer_pre_order.applied_discount and lib.helper.discount_helper.check_limitations(_discount_code.limitations,referrer_pre_order) :
+                    discount_code_data = _discount_code.__dict__.copy()
+                    del discount_code_data['_state']
+                    referrer_pre_order.applied_discount = discount_code_data
+                    referrer_pre_order.save()
+                valid_discount_code = _discount_code
+                break
+
         if not valid_discount_code:
             raise lib.error_handle.error.api_error.ApiVerifyError('invalid_discount_code')
         
@@ -320,7 +338,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
             if not lib.helper.discount_helper.check_limitation(limitation, pre_order):
                 raise lib.error_handle.error.api_error.ApiVerifyError('not_eligible')
 
-        discount_code_data = valid_discount_code.__dict__
+        discount_code_data = valid_discount_code.__dict__.copy()
         del discount_code_data['_state']
         pre_order.applied_discount = discount_code_data
 

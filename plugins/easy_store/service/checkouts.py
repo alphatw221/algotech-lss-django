@@ -9,12 +9,13 @@ def __get_url(shop, cart_token=None):
     return f"https://{shop}/api/3.0/checkouts.json"
 
 def create_checkout(shop, access_token, line_items):
-    print(line_items)
+    # print(line_items)
     data = {
         "checkout": {
             "line_items":line_items
         }
     }
+    print(data)
     response = request("POST", __get_url(shop), 
         headers = get_header(access_token), 
         json = data,
@@ -39,6 +40,34 @@ def update_checkout(shop, access_token, line_items, cart_token):
             "line_items":line_items
         }
     }
+
+    response = request("POST", 
+        f"https://{shop}/api/3.0/checkouts.json", 
+        headers = {'EasyStore-Access-Token': access_token}, 
+        data = data
+    )
+
+    print(response)
+    print(response.text)
+    if not response.status_code / 100 == 2:
+        return False, None
+
+    return True, json.loads(response.text)
+
+
+def update_checkouts(shop, access_token):
+    response = request("PUT", 
+        f"https://{shop}/api/3.0/checkouts.json/", 
+        headers = {'EasyStore-Access-Token': access_token}, 
+    )
+
+    print(response.text)
+    if not response.status_code / 100 == 2:
+        return False, None
+
+    return True, json.loads(response.text)
+
+    
     response = request("PUT", __get_url(shop, cart_token), 
         headers = get_header(access_token), 
         json = data,

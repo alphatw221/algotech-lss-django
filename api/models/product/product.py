@@ -59,7 +59,7 @@ class Product(models.Model):
     upc = models.CharField(
         max_length=255, null=True, blank=True, default=None)
     image = models.CharField(
-        max_length=255, null=True, blank=True, default=settings.GOOGLE_STORAGE_STATIC_DIR)
+        max_length=255, null=True, blank=True, default=settings.GOOGLE_STORAGE_STATIC_DIR+IMAGE_NULL)
     sort_order = models.IntegerField(
         null=True, blank=True, default=0)
 
