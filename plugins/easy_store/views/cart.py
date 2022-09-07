@@ -24,7 +24,7 @@ class CartViewSet(viewsets.GenericViewSet):
         recaptcha_token, = lib.util.getter.getparams(request, ('recaptcha_token',), with_user=False)
         
         code, response = service.recaptcha.recaptcha.verify_token(recaptcha_token)
-
+        print(response)
         if code!=200 or not response.get('success'):
             raise lib.error_handle.error.api_error.ApiVerifyError('Please Refresh The Page And Retry Again')
 
