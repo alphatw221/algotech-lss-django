@@ -7,7 +7,7 @@ def __get_url():
     return 'https://dev.liveorder.thevelocitee.com:9000/api/Orders/FbPage/105929794479727/createNewOrder' #temp
 
 
-def create_order(key, user_id, user_name, platform, product_items):
+def create_order(key, cart_oid, user_id, user_name, platform, product_items):
 
     data = {
         "User":{
@@ -15,6 +15,7 @@ def create_order(key, user_id, user_name, platform, product_items):
             "SourceType":platform_source_type_map.get(platform,platform),
             "Name": user_name
         },
+        "externalReferenceId":cart_oid,
         "Items":product_items
     }
     print(data)
