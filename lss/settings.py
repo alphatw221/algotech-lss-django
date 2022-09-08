@@ -499,3 +499,6 @@ DJANGO_VITE_DEV_MODE = DEBUG
 
 #Recaptcha V2
 RECAPTCHA_SECRET_KEY='6LeNPyMhAAAAADlvfRDj_WThJc7pCrFzFFaPgwWz'
+
+# template global value
+LOGO_URL = "https://storage.googleapis.com/lss_public_bucket/static/LSSlogo-300-172.png"
