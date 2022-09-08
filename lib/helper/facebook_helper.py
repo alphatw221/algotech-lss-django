@@ -4,7 +4,7 @@ import service
 import database
 
 def handle_auto_response(object, page_id, sender_id, message):
-    words = message.replace('\n',' ').split(' ')
+    words = message.get('text','').replace('\n',' ').split(' ')
     if object == "page":
         fb_id = models.facebook.facebook_page.FacebookPage.objects.get(page_id = page_id).id
 
