@@ -82,11 +82,7 @@ def export_order_job(campaign_id, credential):
 
         since = campaign.start_at.strftime("%Y-%m-%d %H:%M:%S")
         
-        print('WS TEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEST')
-        
         success, data = shopify_service.orders.list_order(credential.get('shop'), credential.get('access_token'))
-        
-        print('WS TEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEST')
         
         if not success:
             raise Exception()
