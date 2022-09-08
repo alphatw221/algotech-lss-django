@@ -2,7 +2,7 @@ from api import models
 import database
 
 
-PLUGIN_SHOPIFY = 'easy_store'
+PLUGIN_SHOPIFY = 'shopify'
 
 class CampaignProduct:
     
