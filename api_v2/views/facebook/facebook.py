@@ -10,7 +10,7 @@ import json
 
 
 @api_view(['GET', 'POST'])
-def facebook_messenger_webhook(self, request):
+def facebook_messenger_webhook(request):
     try:
         if request.method == 'GET':
             mode = request.query_params.get('hub.mode', None)
