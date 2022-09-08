@@ -15,7 +15,7 @@ def create_order(key, cart_oid, user_id, user_name, platform, product_items):
             "SourceType":platform_source_type_map.get(platform,platform),
             "Name": user_name
         },
-        "externalReferenceId":cart_oid,
+        "ExternalReferenceId":cart_oid,
         "Items":product_items
     }
     print(data)
