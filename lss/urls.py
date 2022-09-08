@@ -26,11 +26,13 @@ from django.views.generic import TemplateView
 
 from lss.views.email import test
 from lss.views.chat import index,room
+from api_v2.views.facebook.facebook import facebook_messenger_webhook
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),
     path('api/v2/', include('api_v2.urls')),
-    path('chat_bot/', include('chat_bot.urls')),
+    # path('chat_bot/', include('chat_bot.urls')),
+    
 
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
@@ -44,7 +46,9 @@ urlpatterns = [
          name='custom_token_verify'),
 
     path('backend/', include('backend.urls')),
-
+    
+    path('chat_bot/facebook/', facebook_messenger_webhook),
+    
     re_path(r'^lss/',TemplateView.as_view(template_name="lss_entry.html")),
     re_path(r'^seller/',TemplateView.as_view(template_name="lss_enigma_entry.html")),
     re_path(r'^buyer/',TemplateView.as_view(template_name="lss_enigma_entry.html")),

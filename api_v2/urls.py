@@ -27,6 +27,7 @@ router.register(r'pre_order', pre_order.PreOrderViewSet)
 router.register(r'order-product', order_product.OrderProductViewSet)
 router.register(r'order', order.OrderViewSet)
 router.register(r'facebook-page', facebook_page.FacebookPageViewSet)
+
 router.register(r'youtube-channel', youtube_channel.YoutubeChannelViewSet)
 router.register(r'instagram-profile', instagram_profile.InstagramProfileViewSet)
 router.register(r'payment', payment.PaymentViewSet)
