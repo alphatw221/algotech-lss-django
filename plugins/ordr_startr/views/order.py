@@ -23,7 +23,7 @@ class OrderViewSet(viewsets.GenericViewSet):
     def order_payment_complete_callback(self, request, user_subscription_id):
 
         ordr_startr_order_data, ordr_startr_products_data = lib.util.getter.getdata(request,('order', 'products'),required=True)
-        lss_pre_order_oid = ordr_startr_order_data.get('externalReferenceId')
+        lss_pre_order_oid = ordr_startr_order_data.get('ExternalReferenceId')
         pre_order = lib.util.verify.Verify.get_pre_order_with_oid(lss_pre_order_oid)
         campaign = pre_order.campaign
         if campaign.user_subscription.id != int(user_subscription_id):
