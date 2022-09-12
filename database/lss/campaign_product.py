@@ -15,7 +15,12 @@ class CampaignProduct(Collection):
         self._collection.update_one({'id':self.id},{"$inc": {'qty_sold': qty},"$set":{'updated_at':datetime.utcnow()}}, session=session)
         if sync:
             self._sync(session=session)
-    
+            
+    def set_qty_sold(self, qty, sync=True, session=None):
+        self._collection.update_one({'id':self.id},{"$set":{'qty_sold':qty, 'updated_at':datetime.utcnow()}}, session=session)
+        if sync:
+            self._sync(session=session)
+
     def sold(self, qty, sync=True, session=None):
         self._collection.update_one({'id':self.id},{"$inc": {'qty_sold': qty, 'qty_add_to_cart': -qty},"$set":{'updated_at':datetime.utcnow()}}, session=session)
         if sync:

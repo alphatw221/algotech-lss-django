@@ -47,7 +47,7 @@ class OrderViewSet(viewsets.GenericViewSet):
             if product.get('_id') not in campaign_product_external_internal_map:
                 continue
             lss_campaign_product_data = campaign_product_external_internal_map[product.get('_id')]
-            database.lss.campaign_product.CampaignProduct(id = lss_campaign_product_data.get('id')).sold_from_external(qty=product.get('sold'), sync=False)
+            database.lss.campaign_product.CampaignProduct(id = lss_campaign_product_data.get('id')).set_qty_sold(qty=product.get('sold'), sync=False)
 
         return Response('ok', status=status.HTTP_200_OK)
 
