@@ -52,7 +52,7 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.test_cache_redis()
+        self.test_easy_store()
         # self.test_remove_campaign_comment_duplicate()
 
     def modify_database(self):
@@ -420,58 +420,65 @@ class Command(BaseCommand):
         )
 
     def test_easy_store(self):
-        from plugins.easy_store import service
-        from pprint import pprint
+        from automation import jobs
 
-        shop = 'yihsuehlinlinyixue.easy.co'
-        access_token = '698f9a9a7c8bbe5f65d0207fb6cba139'
-        #product
-        # success, data = service.products.get_published_product(shop=shop, access_token=access_token,page=1)
+        jobs.easy_store.export_product_job(618,{
+        "shop": "keepsake.easy.co",
+        "access_token": "bb11090512508f226d8e6c457402ae27"
+      })
+
+        # from plugins.easy_store import service
+        # from pprint import pprint
+
+        # shop = 'yihsuehlinlinyixue.easy.co'
+        # access_token = '698f9a9a7c8bbe5f65d0207fb6cba139'
+        # #product
+        # # success, data = service.products.get_published_product(shop=shop, access_token=access_token,page=1)
         
-        #checkout
-        # line_items =  [
-        #             {
-        #                 "variant_id": 36344238,
-        #                 "quantity": 2
-        #             }
-        #         ]
+        # #checkout
+        # # line_items =  [
+        # #             {
+        # #                 "variant_id": 36344238,
+        # #                 "quantity": 2
+        # #             }
+        # #         ]
             
-        # success, data = service.checkouts.create_checkout(shop, access_token, line_items)
+        # # success, data = service.checkouts.create_checkout(shop, access_token, line_items)
         
 
-        # success, data = service.checkouts.retrieve_checkout(shop, access_token, '64ef5862-4685-4aad-ae33-2d2d82428115')
-        # success, data =  service.checkouts.update_checkout(shop, access_token, line_items, '64ef5862-4685-4aad-ae33-2d2d82428115')
+        # # success, data = service.checkouts.retrieve_checkout(shop, access_token, '64ef5862-4685-4aad-ae33-2d2d82428115')
+        # # success, data =  service.checkouts.update_checkout(shop, access_token, line_items, '64ef5862-4685-4aad-ae33-2d2d82428115')
+        # # pprint(success)
+        # # pprint(data)
+
+        # # a5318e0f-2317-445c-9c71-ab6c812666e9
+
+        # # success, data =  service.checkouts.retrieve_checkout(shop=shop, access_token=access_token, cart_token='a5318e0f-2317-445c-9c71-ab6c812666e9')
+        # # success, data =  service.checkouts.update_checkout(shop=shop, access_token=access_token, line_items=line_items, cart_token='a5318e0f-2317-445c-9c71-ab6c812666e9')
+
+
+
+        # #webhook
+
+        # # topic= 'order/create'
+        # # url = 'https://staginglss.accoladeglobal.net/api/plugin/easy_store/order/webhook/create/'
+
+        # # topic= 'order/paid'
+        # # url = 'https://staginglss.accoladeglobal.net/api/plugin/easy_store/order/webhook/paid/'
+
+        # # success, data = service.webhooks.list_webhook(shop, access_token)
+        # success, data = service.webhooks.delete_webhook(shop, access_token, 1930323)
+        # # success, data = service.webhooks.create_webhook(shop, token=access_token, topic=topic, url=url )
+
+        # #order
+        # # success, data = service.orders.retrieve_order(shop, access_token, 37069894)
+        # # success, data = service.orders.update_order(shop, access_token, {'remark':123}, 37069894)
+        # # success, data = service.orders.list_order(shop, access_token, created_at_min='2022-08-23 08:18:00')
+
+        # # 2022-08-23T08:18:22+00:00
+        # # metafields
         # pprint(success)
         # pprint(data)
-
-        # a5318e0f-2317-445c-9c71-ab6c812666e9
-
-        # success, data =  service.checkouts.retrieve_checkout(shop=shop, access_token=access_token, cart_token='a5318e0f-2317-445c-9c71-ab6c812666e9')
-        # success, data =  service.checkouts.update_checkout(shop=shop, access_token=access_token, line_items=line_items, cart_token='a5318e0f-2317-445c-9c71-ab6c812666e9')
-
-
-
-        #webhook
-
-        # topic= 'order/create'
-        # url = 'https://staginglss.accoladeglobal.net/api/plugin/easy_store/order/webhook/create/'
-
-        # topic= 'order/paid'
-        # url = 'https://staginglss.accoladeglobal.net/api/plugin/easy_store/order/webhook/paid/'
-
-        # success, data = service.webhooks.list_webhook(shop, access_token)
-        success, data = service.webhooks.delete_webhook(shop, access_token, 1930323)
-        # success, data = service.webhooks.create_webhook(shop, token=access_token, topic=topic, url=url )
-
-        #order
-        # success, data = service.orders.retrieve_order(shop, access_token, 37069894)
-        # success, data = service.orders.update_order(shop, access_token, {'remark':123}, 37069894)
-        # success, data = service.orders.list_order(shop, access_token, created_at_min='2022-08-23 08:18:00')
-
-        # 2022-08-23T08:18:22+00:00
-        # metafields
-        pprint(success)
-        pprint(data)
 
     def test_remove_campaign_comment_duplicate(self):
 

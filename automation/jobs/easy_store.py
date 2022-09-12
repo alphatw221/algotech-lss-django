@@ -54,6 +54,7 @@ def export_product_job(user_subscription_id, credential):
                     tags.append(collection_name)
 
                 for variant in product.get('variants'):
+
                     lss_product_data = easy_store_lib.transformer.to_lss_product(product,variant, user_subscription, tags)
                     variant_id = variant.get('id')
                     variant_name = variant.get('name')
