@@ -368,7 +368,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
     def user_list_from_dealer(self, request):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         dealer_user_subscription = lib.util.verify.Verify.get_dealer_user_subscription_from_api_user(api_user)
-        data = lss.dealer.get_seller_info_from_dealer(dealer_user_subscription.id)
+        data = database.lss.dealer.get_seller_info_from_dealer(dealer_user_subscription.id)
 
         return Response(data, status=status.HTTP_200_OK)
 
