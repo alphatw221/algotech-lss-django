@@ -24,7 +24,7 @@ def to_lss_order(ordr_startr_order_data, pre_order, campaign_product_external_in
     subtotal = 0
     for item in ordr_startr_order_data.get('Items',[]):
         subtotal+=item.get('total',0)
-        if item.get('_id') not in campaign_product_external_internal_map:
+        if item.get('id') not in campaign_product_external_internal_map:
             continue
         lss_campaign_product_data = campaign_product_external_internal_map[item.get('id')]
         lss_products[str(lss_campaign_product_data.get('id'))] = {

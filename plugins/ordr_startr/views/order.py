@@ -80,3 +80,23 @@ class OrderViewSet(viewsets.GenericViewSet):
         #     'DeliveryTimeSlot': None, 
         #     'Items': [{'_id': '631eca9030c53159c9cbed92', 'id': '6315cc771cd21f3691d51bad', 'itemName': 'Naomi Card Wallet -W.Green (WxH: 4.4"x3.2")', 'qty': 1, 'price': 230, 'keyword': 'NW03', 'SKU': 'NW03', 'total': 230, 'supplierName': 'Korea', 'Date': '2022-09-12T05:58:40.000Z'}], 'Name': 'Yi-Hsueh Lin', 'Residential_Type': 'HDB', 'ShippingAddress1': '1234', 'ShippingEmail': 'asdfasdf', 'ShippingMobile': '1234', 'ShippingName': 'Yi-Hsueh Lin', 'ShippingPostalCode': '1234', 'ShippingSupplier': [], 'Total': 230, '__v': 0, 'createdAt': '2022-09-12T05:58:33.684Z', 'updatedAt': '2022-09-12T05:59:32.216Z', 'MisMatchItems': [], 'ValidItems': [], 'ShippingAddress2': None, 'PaymentDate': '2022-09-12T05:59:32.000Z'}
         # map = {'6315cc771cd21f3691d51bad': {'id': 9393, 'name': 'NW03', 'image': 'https://storage.googleapis.com/lss_public_bucket/static/no_image.jpeg', 'type': 'product'}, '6315cc771cd21f3691d51bac': {'id': 9394, 'name': 'NW02', 'image': 'https://storage.googleapis.com/lss_public_bucket/static/no_image.jpeg', 'type': 'product'}}
+
+
+
+
+
+        # data = {
+        #     'FbId': '4422762234485468', 
+        #     'Status': 'confirmed', 
+        #     'Is_FirstOrder': False, 
+        #     'ShippingCharge': 0, 'PaymentStatus': 'paid', 'DiscountAmount': 0, 
+        #     'PaidAmount': 230, 'Payment_id': 'payment_ba95947116bc3b114059816fecbf8b01', 
+        #     'ApplyPoint': 0, 'DiscountAmountPoint': 0, 'OrderWisePoint': 460, 
+        #     'PaymentClientStatus': 'completed', 'DeductQtyUponPaymentStatus': '', 
+        #     'ReferralCode': '', 'OrcCode': '', 
+        #     'HideDeliveryMessage': 'Supplier will contact you within 5 working days to arrange delivery with you. \xf0\x9f\x99\x82', 
+        #     'RemarkMessage': 'Remark Message', 'FeedBackMessage': '', 'ExternalReferenceId': 
+        #     '631ec4112db8f9159224c78a', '_id': '631ecc7630c53159c9cbed96', 'FbPageId': '105929794479727', 'sourceType': 'FB', 
+        #     'Date': '2022-09-12T06:06:46.000Z', 'DeliveryTimeSlot': None, 
+        #     'Items': [{'_id': '631ecc7630c53159c9cbed97', 'id': '6315cc771cd21f3691d51bac', 'itemName': 'Naomi Card Wallet -Butter (WxH: 4.4"x3.2")', 'qty': 1, 'price': 230, 'keyword': 'NW02', 'SKU': 'NW02', 'total': 230, 'supplierName': 'Korea', 'Date': '2022-09-12T06:06:46.000Z'}], 'Name': 'Yi-Hsueh Lin', 'Residential_Type': 'HDB', 'ShippingAddress1': 'asdf', 'ShippingEmail': 'asdfasdf', 'ShippingMobile': '1234', 'ShippingName': 'Yi-Hsueh Lin', 'ShippingPostalCode': '12', 'ShippingSupplier': [], 'Total': 230, '__v': 0, 'createdAt': '2022-09-12T06:06:46.032Z', 'updatedAt': '2022-09-12T06:07:34.181Z', 'MisMatchItems': [], 'ValidItems': [], 'ShippingAddress2': None, 'PaymentDate': '2022-09-12T06:07:34.000Z'}
+        # map =  {'6315cc771cd21f3691d51bad': {'id': 9393, 'name': 'NW03', 'image': 'https://storage.googleapis.com/lss_public_bucket/static/no_image.jpeg', 'type': 'product'}, '6315cc771cd21f3691d51bac': {'id': 9394, 'name': 'NW02', 'image': 'https://storage.googleapis.com/lss_public_bucket/static/no_image.jpeg', 'type': 'product'}}
