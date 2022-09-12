@@ -44,14 +44,14 @@ class OrderViewSet(viewsets.GenericViewSet):
         print(ordr_startr_products_data)
         ##update campaign product quantity:
         for product in ordr_startr_products_data:
-            if product.get('id') not in campaign_product_external_internal_map:
+            if product.get('_id') not in campaign_product_external_internal_map:
                 continue
-            lss_campaign_product_data = campaign_product_external_internal_map[product.get('id')]
+            lss_campaign_product_data = campaign_product_external_internal_map[product.get('_id')]
             database.lss.campaign_product.CampaignProduct(id = lss_campaign_product_data.get('id')).sold_from_external(qty=product.get('sold'), sync=False)
 
         return Response('ok', status=status.HTTP_200_OK)
 
-
+        ordr_startr_products_data = [{'maxQty': 5, 'defaultMaxQty': 5, 'SKU': 'NW02', 'visible': True, 'sold': 2, 'supplierName': 'Korea', 'counter': 30, '_id': '6315cc771cd21f3691d51bac', 'description': 'Naomi Card Wallet -Butter (WxH: 4.4"x3.2")', 'keyword': 'NW02', 'price': 230, 'stock': 3, 'reply_message': 'Naomi Card Wallet -Butter (WxH: 4.4"x3.2")', 'FbPageId': '105929794479727', 'createdAt': '2022-09-05T10:16:24.002Z', 'updatedAt': '2022-09-09T10:03:50.990Z', '__v': 0}, {'maxQty': 5, 'defaultMaxQty': 5, 'SKU': 'NW03', 'visible': True, 'sold': 0, 'supplierName': 'Korea', 'counter': 31, '_id': '6315cc771cd21f3691d51bad', 'description': 'Naomi Card Wallet -W.Green (WxH: 4.4"x3.2")', 'keyword': 'NW03', 'price': 230, 'stock': 5, 'reply_message': 'Naomi Card Wallet -W.Green (WxH: 4.4"x3.2")', 'FbPageId': '105929794479727', 'createdAt': '2022-09-05T10:16:24.002Z', 'updatedAt': '2022-09-09T10:03:50.990Z', '__v': 0}]
 
         # data = {
         #     'FbId': '4422762234485468', 
