@@ -403,6 +403,8 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             premium_list.append(subscriber.get('id'))
         
         start_date = datetime.now()
+        if date_period == 'quarter':
+            start_date = datetime(start_date.year, 12, 31) 
         end_date = start_date - relativedelta(years=1)
         while start_date > end_date:
             if date_period == 'year':
