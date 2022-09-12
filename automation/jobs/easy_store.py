@@ -88,8 +88,8 @@ def export_order_job(campaign_id, credential):
     try:
         campaign = models.campaign.campaign.Campaign.objects.get(id=campaign_id)
 
-        easy_store_order_dict = {str(order.meta.get('easy_store',{}).get('id')):order.id for order in campaign.orders.all() if order.meta.get('easy_store',{}).get('id')}
-
+        # easy_store_order_dict = {str(order.meta.get('easy_store',{}).get('id')):order.id for order in campaign.orders.all() if order.meta.get('easy_store',{}).get('id')}
+        order_external_internal_map = {str(order.meta.get('easy_store',{}).get('id')):order.id for order in campaign.orders.all() if order.meta.get('easy_store',{}).get('id')}
         since = campaign.start_at.strftime("%Y-%m-%d %H:%M:%S")
         page = 1
         page_count = 1
@@ -102,42 +102,45 @@ def export_order_job(campaign_id, credential):
                 raise Exception()
             
 
-            for order in data.get('orders'):
+            for easy_store_order in data.get('orders'):
                 try:
-                    cart_token = order['cart_token']
+                    cart_token = easy_store_order['cart_token']
                     if cart_token not in campaign.meta:
                         continue
-                    pre_order_id = campaign.meta[cart_token]
-                    pre_order = models.order.pre_order.PreOrder.objects.get(id=pre_order_id)
+                    lss_pre_order_id = campaign.meta[cart_token]
+                    lss_pre_order = models.order.pre_order.PreOrder.objects.get(id=lss_pre_order_id)
+                    data = easy_store_lib.transformer.to_lss_order(easy_store_order,lss_pre_order)
+                    if str(easy_store_order['id']) in order_external_internal_map:
+                        lss_order_id = order_external_internal_map[str(easy_store_order['id'])]
+                        models.order.order.Order.objects.filter(id=lss_order_id).update(**data)
+                        # lss_order_id = easy_store_order_dict[str(order['id'])]
+                        # lss_order = models.order.order.Order.objects.get(id=lss_order_id)
 
-                    if str(order['id']) in easy_store_order_dict:
-                        lss_order_id = easy_store_order_dict[str(order['id'])]
-                        lss_order = models.order.order.Order.objects.get(id=lss_order_id)
-
-                        lss_order.status = models.order.order.STATUS_COMPLETE if order['financial_status']=='paid' else models.order.order.STATUS_REVIEW
-                        lss_order.discount = float(order['total_discount'])
-                        lss_order.subtotal = float(order['subtotal_price'])
-                        lss_order.shipping_cost = float(order['total_shipping'])
-                        lss_order.total = float(order['total_price'])
-                        lss_order.products = {'easy_store':True}
-                        lss_order.meta['easy_store']=order
-                        lss_order.save()
+                        # lss_order.status = models.order.order.STATUS_COMPLETE if order['financial_status']=='paid' else models.order.order.STATUS_REVIEW
+                        # lss_order.discount = float(order['total_discount'])
+                        # lss_order.subtotal = float(order['subtotal_price'])
+                        # lss_order.shipping_cost = float(order['total_shipping'])
+                        # lss_order.total = float(order['total_price'])
+                        # lss_order.products = {'easy_store':True}
+                        # lss_order.meta['easy_store']=order
+                        # lss_order.save()
                     else:
-                        models.order.order.Order.objects.create(
-                            campaign = campaign,
-                            customer_id = pre_order.customer_id,
-                            customer_name = pre_order.customer_name,
-                            customer_img = pre_order.customer_img,
-                            platform = pre_order.platform,
-                            status = models.order.order.STATUS_COMPLETE if order['financial_status']=='paid' else models.order.order.STATUS_REVIEW,
-                            discount = float(order['total_discount']),
-                            subtotal = float(order['subtotal_price']),
-                            shipping_cost = float(order['total_shipping']),
-                            products = {'easy_store':True},
-                            total = float(order['total_price']),
+                        models.order.order.Order.objects.create(**data)
+                        # models.order.order.Order.objects.create(
+                        #     campaign = campaign,
+                        #     customer_id = pre_order.customer_id,
+                        #     customer_name = pre_order.customer_name,
+                        #     customer_img = pre_order.customer_img,
+                        #     platform = pre_order.platform,
+                        #     status = models.order.order.STATUS_COMPLETE if order['financial_status']=='paid' else models.order.order.STATUS_REVIEW,
+                        #     discount = float(order['total_discount']),
+                        #     subtotal = float(order['subtotal_price']),
+                        #     shipping_cost = float(order['total_shipping']),
+                        #     products = {'easy_store':True},
+                        #     total = float(order['total_price']),
 
-                            meta = {'easy_store':order}
-                        )
+                        #     meta = {'easy_store':order}
+                        # )
 
                 except Exception as e:
                     print(traceback.format_exc())
