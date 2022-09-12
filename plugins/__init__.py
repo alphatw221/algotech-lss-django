@@ -1,2 +1,2 @@
-from . import easy_store, ordr_startr
+from . import easy_store, ordr_startr, shopify
 
