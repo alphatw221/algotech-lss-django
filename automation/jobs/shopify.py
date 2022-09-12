@@ -109,6 +109,15 @@ def export_order_job(campaign_id, credential):
                     lss_order.subtotal = float(order['subtotal_price'])
                     lss_order.shipping_cost = float(order['total_shipping_price_set']['shop_money']['amount'])
                     lss_order.total = float(order['total_price'])
+                    lss_order.payment_method = order['payment_gateway_names'][0]
+                    
+                    lss_order.shipping_location = float(order['shipping_address']['city'])
+                    lss_order.shipping_address_1 = float(order['shipping_address']['address1'])
+                    lss_order.shipping_postcode = float(order['shipping_address']['zip'])
+                    lss_order.shipping_first_name = float(order['shipping_address']['first_name'])
+                    lss_order.shipping_last_name = float(order['shipping_address']['last_name'])
+                    lss_order.shipping_method = "delivery"
+                    
                     lss_order.products = {'shopify':True}
                     lss_order.meta['shopify']=order
                     lss_order.save()
@@ -123,6 +132,15 @@ def export_order_job(campaign_id, credential):
                         discount = float(order['total_discounts']),
                         subtotal = float(order['subtotal_price']),
                         shipping_cost = float(order['total_shipping_price_set']['shop_money']['amount']),
+                        payment_method = order['payment_gateway_names'][0],
+                        
+                        shipping_location = float(order['shipping_address']['city']),
+                        shipping_address_1 = float(order['shipping_address']['address1']),
+                        shipping_postcode = float(order['shipping_address']['zip']),
+                        shipping_first_name = float(order['shipping_address']['first_name']),
+                        shipping_last_name = float(order['shipping_address']['last_name']),
+                        shipping_method = "delivery",
+                        
                         products = {'shopify':True},
                         total = float(order['total_price']),
 
