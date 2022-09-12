@@ -313,7 +313,7 @@ class PreOrderHelper():
 
                 order = database.lss.order.Order.create_object(session=session, **order_data)
                 database.lss.order_product.OrderProduct.transfer_to_order(pre_order=pre_order, order=order, session=session)
-                pre_order.update(session=session, sync=False, products={},total=0,subtotal=0, adjust_price=0, adjust_title="", free_delivery=False, history={}, meta={})
+                pre_order.update(session=session, sync=False, products={},total=0,subtotal=0,discount=0, adjust_price=0, adjust_title="", free_delivery=False, history={}, meta={},applied_discount={})
                 
         return True, order
 
