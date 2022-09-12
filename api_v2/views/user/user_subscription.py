@@ -412,7 +412,14 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
                 this_period = f'{this_end_date.year}-{this_end_date.month}'
             elif date_period == 'quarter':
                 this_end_date = start_date - relativedelta(months=3)
-                this_period = f'{this_end_date.year}-{this_end_date.month}'
+                if this_end_date.month == 12:
+                    this_period = 'Q1'
+                elif this_end_date.month == 3:
+                    this_period = 'Q2'
+                elif this_end_date.month == 6:
+                    this_period = 'Q3'
+                elif this_end_date.month == 9:
+                    this_period = 'Q4'
 
             this_period_revenue = 0
             for premium_id in premium_list: 
