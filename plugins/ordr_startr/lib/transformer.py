@@ -34,7 +34,7 @@ def to_lss_order(ordr_startr_order_data, pre_order, campaign_product_external_in
             "price":float(item.get('price')),
             "type":lss_campaign_product_data.get('type'),
             "qty":float(item.get('qty')),
-            "subtotal":float(item.get('subtotal'))
+            "subtotal":float(item.get('total'))
         }
 
 
