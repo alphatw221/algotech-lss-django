@@ -363,14 +363,6 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
         return Response(campaigns_analysis, status=status.HTTP_200_OK)
     
-    @action(detail=False, methods=['GET'], url_path=r'user/search/list', permission_classes=(IsAuthenticated,))
-    @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def user_list_from_dealer(self, request):
-        api_user = lib.util.verify.Verify.get_seller_user(request)
-        dealer_user_subscription = lib.util.verify.Verify.get_dealer_user_subscription_from_api_user(api_user)
-        data = database.lss.dealer.get_seller_info_from_dealer(dealer_user_subscription.id)
-
-        return Response(data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET'], url_path=r'dashboard/members/growing', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
