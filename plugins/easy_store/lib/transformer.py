@@ -4,10 +4,10 @@ from django.conf import settings
 def to_lss_product(easy_store_product, easy_store_variant_product, user_subscription, tags):
     product_image = easy_store_product.get('images')[0].get('url') if easy_store_product.get('images') else  settings.GOOGLE_STORAGE_STATIC_DIR+models.product.product.IMAGE_NULL
     image_url_dict = {str(image.id):image.get('url') for image in easy_store_product.get('images')}
-    
+    image_id_str = str(easy_store_variant_product.get('image_id'))
     data = {
         'name':easy_store_product.get('name')+'-'+easy_store_variant_product.get('name'),
-        'image': image_url_dict[easy_store_variant_product.get('image_id')] if easy_store_variant_product.get('image_id') in image_url_dict else product_image,
+        'image': image_url_dict[image_id_str] if image_id_str in image_url_dict else product_image,
         'sku':easy_store_variant_product.get('sku'),
         'price':easy_store_variant_product.get('price'),
         'qty':easy_store_variant_product.get('inventory_quantity'),
