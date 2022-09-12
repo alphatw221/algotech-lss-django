@@ -47,8 +47,12 @@ class OrderViewSet(viewsets.GenericViewSet):
             if product.get('_id') not in campaign_product_external_internal_map:
                 continue
             lss_campaign_product_data = campaign_product_external_internal_map[product.get('_id')]
-            qty_sold = lss_campaign_product_data.get('qty_for_sale',0)-product.get('stock',0) if lss_campaign_product_data.get('qty_for_sale',0)>product.get('stock',0) else 0
-            database.lss.campaign_product.CampaignProduct(id = lss_campaign_product_data.get('id')).set_qty_sold(qty=qty_sold, sync=False)
+            pymongo_campaign_product = database.lss.campaign_product.CampaignProduct(id = lss_campaign_product_data.get('id'))
+            if lss_campaign_product_data.get('qty_for_sale',0)>=product.get('stock',0):
+                pymongo_campaign_product.sold_from_external(qty=product.get('sold',0))
+            else:
+                qty_sold = lss_campaign_product_data.get('qty_for_sale',0)-product.get('stock',0) 
+                pymongo_campaign_product.set_qty_sold(qty=qty_sold, sync=False)
 
         return Response('ok', status=status.HTTP_200_OK)
 
