@@ -1,39 +1,74 @@
-import pottery 
-from . import redis
+import pottery
+
+from api.models import campaign 
+from . import redis, get_key
 KEY = 'campaign_products'
 
-def __get_key(campaign_id):
-    return f'{KEY}_{campaign_id}'
+DATA_EXTERNAL_INTERNAL_MAP = 'external_internal_map'
+DATA_INTERNAL_EXTERNAL_MAP = 'internal_external_map'
 
-def get_campaign_products_map(campaign_id, plugin):
-    if not redis.exists(f'{KEY}_{campaign_id}_{plugin}'):
+AUTO_RELEASE_TIME = 2
+
+def leash_get_external_internal_map(campaign_id, plugin):
+    try:
+        key = get_key(KEY, campaign_id, plugin, DATA_EXTERNAL_INTERNAL_MAP)
+        print(key)
+        data = dict(pottery.RedisDict(redis=redis,key=key))
+        if not data:
+            campaign_product_map_lock = pottery.Redlock(key=key, masters={redis}, auto_release_time=AUTO_RELEASE_TIME)
+            return False, None, campaign_product_map_lock
+        return True, data, None
+    except Exception:
+        return False, None, None
+        
+def set_external_internal_map(campaign_id, plugin, external_internal_map):
+    key = get_key(KEY, campaign_id, plugin, DATA_EXTERNAL_INTERNAL_MAP)
+    print(key)
+    if redis.exists(key):
+        redis.delete(key)
+    return pottery.RedisDict(external_internal_map, redis=redis, key=key)
+
+def leash_get_internal_external_map(campaign_id, plugin):
+    try:
+        key = get_key(KEY, campaign_id, plugin, DATA_INTERNAL_EXTERNAL_MAP)
+        data = dict(pottery.RedisDict(redis=redis,key=key))
+        if not data:
+            campaign_product_map_lock = pottery.Redlock(key=key, masters={redis}, auto_release_time=AUTO_RELEASE_TIME)
+            return False, None, campaign_product_map_lock
+        return True, data, None
+    except Exception:
+        return False, None, None
+
+def set_internal_external_map(campaign_id, plugin, internal_external_map):
+    key = get_key(KEY, campaign_id, plugin, DATA_INTERNAL_EXTERNAL_MAP)
+    if redis.exists(key):
+        redis.delete(key)
+    return pottery.RedisDict(internal_external_map, redis=redis, key=key)
+
+
+
+
+
+
+def get(campaign_id):
+    if not redis.exists(get_key(KEY,campaign_id)):
         return None
-    return pottery.RedisDict(redis=redis,key=f'{KEY}_{campaign_id}_{plugin}')
+    return pottery.RedisList(redis=redis,key=get_key(KEY,campaign_id))
 
-def leash_get_campaign_products_map(campaign_id, plugin):
-    if redis.exists(f'{KEY}_{campaign_id}_{plugin}'):
-        return True, pottery.RedisDict(redis=redis,key=f'{KEY}_{campaign_id}_{plugin}'), None
+def leash_get(campaign_id):
+    if redis.exists(get_key(KEY,campaign_id)):
+        return True, pottery.RedisList(redis=redis,key=get_key(KEY,campaign_id)), None
 
-    campaign_product_map_lock = pottery.Redlock(key=f'{KEY}_{campaign_id}_{plugin}', masters={redis}, auto_release_time=5)
-    return False, None, campaign_product_map_lock
-
-
-def get_campaign_products(campaign_id):
-    if not redis.exists(__get_key(campaign_id)):
-        return None
-    return pottery.RedisList(redis=redis,key=__get_key(campaign_id))
-
-def leash_get_campaign_products(campaign_id):
-    if redis.exists(__get_key(campaign_id)):
-        return True, pottery.RedisList(redis=redis,key=__get_key(campaign_id)), None
-
-    campaign_product_lock = pottery.Redlock(key=__get_key(campaign_id), masters={redis}, auto_release_time=5)
+    campaign_product_lock = pottery.Redlock(key=get_key(KEY,campaign_id), masters={redis}, auto_release_time=5)
     return False, None, campaign_product_lock
 
-def set_campaign_products(campaign_id, campaign_products):
-    if redis.exists(__get_key(campaign_id)):
-        redis.delete(__get_key(campaign_id))
-    return pottery.RedisList(campaign_products, redis=redis, key=__get_key(campaign_id))
+def set(campaign_id, campaign_products):
+    if redis.exists(get_key(KEY,campaign_id)):
+        redis.delete(get_key(KEY,campaign_id))
+    return pottery.RedisList(campaign_products, redis=redis, key=get_key(KEY,campaign_id))
 
-def invalidate(campaign_id):
-    redis.delete(__get_key(campaign_id))
+
+def invalidate(*args):
+    key = get_key(KEY,*args)
+    print(key)
+    redis.delete(key)
