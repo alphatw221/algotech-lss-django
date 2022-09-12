@@ -14,6 +14,7 @@ websocket_urlpatterns = [
     re_path(r'ws/plugin/easy_store/product/export', easy_store_consumers.export_product.ExportProductConsumer.as_asgi()),
     re_path(r'ws/plugin/easy_store/order/export/(?P<campaign_id>\w+)/$', easy_store_consumers.export_order.ExportOrderConsumer.as_asgi()),
     re_path(r'ws/plugin/ordr_startr/product/export', ordr_startr_consumers.export_product.ExportProductConsumer.as_asgi()),
-    re_path(r'ws/plugin/shopify/product/export', shopify_consumers.export_product.ExportProductConsumer.as_asgi())
+    re_path(r'ws/plugin/shopify/product/export', shopify_consumers.export_product.ExportProductConsumer.as_asgi()),
+    re_path(r'ws/plugin/shopify/order/export/(?P<campaign_id>\w+)/$', shopify_consumers.export_order.ExportOrderConsumer.as_asgi())
 
 ]
