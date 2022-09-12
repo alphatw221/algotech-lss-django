@@ -120,7 +120,7 @@ def export_order_job(campaign_id, credential):
                     
                     lss_order = models.order.order.Order.objects.create(**lss_order_data)
                     pymongo_lss_pre_order = database.lss.pre_order.PreOrder(id=lss_pre_order.id)
-                    for campaign_product_id_str, product in lss_order_data.products.items():
+                    for campaign_product_id_str, product in lss_order.products.items():
                         database.lss.campaign_product.CampaignProduct(id = int(campaign_product_id_str)).sold_from_external(product.get('qty'), sync=False) 
 
                     for campaign_product_id_str, product in lss_pre_order.products.items():
