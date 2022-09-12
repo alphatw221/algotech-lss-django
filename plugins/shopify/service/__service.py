@@ -11,5 +11,5 @@ def load_response(response):
 def get_header(token):
     return {
         'Content-Type': 'application/json',
-        'Easystore-Access-Token': token
+        'X-Shopify-Access-Token': "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"
     }
