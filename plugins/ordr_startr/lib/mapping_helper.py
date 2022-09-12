@@ -34,7 +34,8 @@ class CampaignProduct:
             'id':product.id,
             'name':product.name,
             'image':product.image,
-            'type':product.type
+            'type':product.type,
+            'qty_for_sale' :product.qty_for_sale
             } 
             for product in  campaign.products.all() if product.meta.get(PLUGIN_ORDR_STARTR,{}).get('id')}
 
