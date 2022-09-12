@@ -43,11 +43,40 @@ class OrderViewSet(viewsets.GenericViewSet):
 
         ##update campaign product quantity:
         for product in ordr_startr_products_data:
-            if product.get('_id') not in campaign_product_external_internal_map:
+            if product.get('id') not in campaign_product_external_internal_map:
                 continue
-            lss_campaign_product_data = campaign_product_external_internal_map[product.get('_id')]
+            lss_campaign_product_data = campaign_product_external_internal_map[product.get('id')]
             database.lss.campaign_product.CampaignProduct(id = lss_campaign_product_data.get('id')).sold_from_external(qty=product.get('sold'), sync=False)
 
         return Response('ok', status=status.HTTP_200_OK)
 
 
+
+        # data = {
+        #     'FbId': '4422762234485468', 
+        #     'Status': 'confirmed', 
+        #     'Is_FirstOrder': False, 
+        #     'ShippingCharge': 0, 
+        #     'PaymentStatus': 'paid', 
+        #     'DiscountAmount': 0, 
+        #     'PaidAmount': 230, 
+        #     'Payment_id': 'payment_aef65717a624d8117d2945edadca65c9', 
+        #     'ApplyPoint': 0, 
+        #     'DiscountAmountPoint': 0, 
+        #     'OrderWisePoint': 460, 
+        #     'PaymentClientStatus': 'completed', 
+        #     'DeductQtyUponPaymentStatus': '', 
+        #     'ReferralCode': '', 
+        #     'OrcCode': '', 
+        #     'HideDeliveryMessage': 
+        #     'Supplier will contact you within 5 working days to arrange delivery with you. \xf0\x9f\x99\x82', 
+        #     'RemarkMessage': 'Remark Message', 
+        #     'FeedBackMessage': '', 
+        #     'ExternalReferenceId': '631ec4112db8f9159224c78a', 
+        #     '_id': '631eca8930c53159c9cbed8e', 
+        #     'FbPageId': '105929794479727', 
+        #     'sourceType': 'FB', 
+        #     'Date': '2022-09-12T05:58:40.000Z', 
+        #     'DeliveryTimeSlot': None, 
+        #     'Items': [{'_id': '631eca9030c53159c9cbed92', 'id': '6315cc771cd21f3691d51bad', 'itemName': 'Naomi Card Wallet -W.Green (WxH: 4.4"x3.2")', 'qty': 1, 'price': 230, 'keyword': 'NW03', 'SKU': 'NW03', 'total': 230, 'supplierName': 'Korea', 'Date': '2022-09-12T05:58:40.000Z'}], 'Name': 'Yi-Hsueh Lin', 'Residential_Type': 'HDB', 'ShippingAddress1': '1234', 'ShippingEmail': 'asdfasdf', 'ShippingMobile': '1234', 'ShippingName': 'Yi-Hsueh Lin', 'ShippingPostalCode': '1234', 'ShippingSupplier': [], 'Total': 230, '__v': 0, 'createdAt': '2022-09-12T05:58:33.684Z', 'updatedAt': '2022-09-12T05:59:32.216Z', 'MisMatchItems': [], 'ValidItems': [], 'ShippingAddress2': None, 'PaymentDate': '2022-09-12T05:59:32.000Z'}
+        # map = {'6315cc771cd21f3691d51bad': {'id': 9393, 'name': 'NW03', 'image': 'https://storage.googleapis.com/lss_public_bucket/static/no_image.jpeg', 'type': 'product'}, '6315cc771cd21f3691d51bac': {'id': 9394, 'name': 'NW02', 'image': 'https://storage.googleapis.com/lss_public_bucket/static/no_image.jpeg', 'type': 'product'}}
