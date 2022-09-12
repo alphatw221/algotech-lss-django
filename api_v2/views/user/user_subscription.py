@@ -440,6 +440,4 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             dealer_revenue.append(count_obj)
             start_date = this_end_date
         
-        print (dealer_revenue)
-
-        return Response('suc', status=status.HTTP_200_OK)
+        return Response(dealer_revenue, status=status.HTTP_200_OK)
