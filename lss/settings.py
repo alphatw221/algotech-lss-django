@@ -424,7 +424,7 @@ CACHE_SERVER = {
     "host": "34.124.140.74",
     "port": "6380",
     "username": None,
-    "password": r"1234"}
+    "password": r"algo83111T%%"}
 
 # REDIS_SERVER = {
 #     "host": "127.0.0.1",

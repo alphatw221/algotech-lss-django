@@ -52,7 +52,7 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.test_set_password()
+        self.test_cache_redis()
         # self.test_remove_campaign_comment_duplicate()
 
     def modify_database(self):
@@ -656,3 +656,16 @@ class Command(BaseCommand):
         print(data)
 
         
+    def test_cache_redis(self):
+        import database
+
+        # database.lss_cache.campaign_product.invalidate(1162,'ordr_startr','external_internal_map')
+        success, data, lock = database.lss_cache.campaign_product.leash_get_external_internal_map(1165,'ordr_startr')
+        print(success)
+        if not success:
+            with lock:
+                data = {'a':1}
+                database.lss_cache.campaign_product.set_external_internal_map(1165, 'ordr_startr', data)
+
+        
+        print(data)
