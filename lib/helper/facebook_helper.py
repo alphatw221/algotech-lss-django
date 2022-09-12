@@ -6,13 +6,13 @@ import database
 def handle_auto_response(object, page_id, sender_id, message):
     words = message.get('text','').replace('\n',' ').split(' ')
     if object == "page":
-        fb_id = models.facebook.facebook_page.FacebookPage.objects.get(page_id = page_id).id
 
+        facebook_page = models.facebook.facebook_page.FacebookPage.objects.get(page_id = page_id)
         
-        auto_responses_data = database.lss.auto_response.AutoResponse.filter(facebook_page_id=fb_id,input_msg={'$in':words})
+        auto_responses_data = database.lss.auto_response.AutoResponse.filter(facebook_page_id=facebook_page.id,input_msg={'$in':words})
 
         for auto_response_data in auto_responses_data:
-            service.facebook.chat_bot.post_page_text_message_chat_bot(page_token, sender_id, auto_response_data.get('output_msg'))
+            service.facebook.chat_bot.post_page_text_message_chat_bot(facebook_page.token, sender_id, auto_response_data.get('output_msg'))
 
 
     elif object == "instagram":
