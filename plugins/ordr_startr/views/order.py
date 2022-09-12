@@ -23,13 +23,14 @@ class OrderViewSet(viewsets.GenericViewSet):
     def order_payment_complete_callback(self, request, user_subscription_id):
 
         ordr_startr_order_data, ordr_startr_products_data = lib.util.getter.getdata(request,('order', 'products'),required=True)
+        print(ordr_startr_order_data)
         lss_pre_order_oid = ordr_startr_order_data.get('ExternalReferenceId')
         pre_order = lib.util.verify.Verify.get_pre_order_with_oid(lss_pre_order_oid)
         campaign = pre_order.campaign
         if campaign.user_subscription.id != int(user_subscription_id):
             raise lib.error_handle.error.api_error.ApiVerifyError('invalid')
         campaign_product_external_internal_map = ordr_startr_lib.mapping_helper.CampaignProduct.get_external_internal_map(campaign)
-
+        print(campaign_product_external_internal_map)
 
         lss_order_data = ordr_startr_lib.transformer.to_lss_order(ordr_startr_order_data, pre_order, campaign_product_external_internal_map)
 
