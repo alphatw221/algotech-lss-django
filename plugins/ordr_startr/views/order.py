@@ -48,7 +48,7 @@ class OrderViewSet(viewsets.GenericViewSet):
                 continue
             lss_campaign_product_data = campaign_product_external_internal_map[product.get('_id')]
             pymongo_campaign_product = database.lss.campaign_product.CampaignProduct(id = lss_campaign_product_data.get('id'))
-            if lss_campaign_product_data.get('qty_for_sale',0)>=product.get('stock',0):
+            if lss_campaign_product_data.get('qty_for_sale',0)<=product.get('stock',0):
                 pymongo_campaign_product.sold_from_external(qty=product.get('sold',0))
             else:
                 qty_sold = lss_campaign_product_data.get('qty_for_sale',0)-product.get('stock',0) 
