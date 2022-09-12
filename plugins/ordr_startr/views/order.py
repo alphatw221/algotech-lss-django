@@ -41,6 +41,7 @@ class OrderViewSet(viewsets.GenericViewSet):
         database.lss.pre_order.PreOrder(id=pre_order.id).reset_pre_order(sync=False)            #do this anyway
         database.lss.order_product.OrderProduct.transfer_to_order(pre_order, lss_order)         #do this anyway
 
+        print(ordr_startr_products_data)
         ##update campaign product quantity:
         for product in ordr_startr_products_data:
             if product.get('id') not in campaign_product_external_internal_map:
