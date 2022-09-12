@@ -90,8 +90,8 @@ def export_order_job(campaign_id, credential):
     try:
         campaign = models.campaign.campaign.Campaign.objects.get(id=campaign_id)
 
-        order_external_internal_map = {str(order.meta.get('easy_store',{}).get('id')):order.id for order in campaign.orders.all() if order.meta.get('easy_store',{}).get('id')}
-        campaign_product_dict =  { product.meta.get(PLUGIN_EASY_STORE,{}).get('variant_id'):product for product in campaign.products.all() if product.meta.get(PLUGIN_EASY_STORE,{}).get('variant_id')}
+        order_external_internal_map = {str(order.meta.get(PLUGIN_EASY_STORE,{}).get('id')):order.id for order in campaign.orders.all() if order.meta.get(PLUGIN_EASY_STORE,{}).get('id')}
+        campaign_product_external_internal_map = easy_store_lib.mapping_helper.CampaignProduct.get_external_internal_map(campaign)
         since = campaign.start_at.strftime("%Y-%m-%d %H:%M:%S")
         page = 1
         page_count = 1
@@ -112,14 +112,18 @@ def export_order_job(campaign_id, credential):
                     lss_pre_order_id = campaign.meta[cart_token]
                     lss_pre_order = models.order.pre_order.PreOrder.objects.get(id=lss_pre_order_id)
 
-                    lss_order_data = easy_store_lib.transformer.to_lss_order(easy_store_order, lss_pre_order, campaign_product_dict)
-                    if str(easy_store_order['id']) in order_external_internal_map:
-                        lss_order_id = order_external_internal_map[str(easy_store_order['id'])]
-                        models.order.order.Order.objects.filter(id=lss_order_id).update(**lss_order_data)
-                    else:
-                        lss_order = models.order.order.Order.objects.create(**lss_order_data)
-                        pymongo_lss_pre_order = database.lss.pre_order.PreOrder(id=lss_pre_order.id)
+                    lss_order_data = easy_store_lib.transformer.to_lss_order(easy_store_order, lss_pre_order, campaign_product_external_internal_map)
 
+                    if str(easy_store_order['id']) in order_external_internal_map:
+                        continue
+                    
+                    lss_order = models.order.order.Order.objects.create(**lss_order_data)
+                    pymongo_lss_pre_order = database.lss.pre_order.PreOrder(id=lss_pre_order.id)
+                    for campaign_product_id_str, product in lss_order_data.products.items():
+                        database.lss.campaign_product.CampaignProduct(id = int(campaign_product_id_str)).sold_from_external(product.get('qty'), sync=False) 
+
+                    for campaign_product_id_str, product in lss_pre_order.products.items():
+                        database.lss.campaign_product.CampaignProduct(id = int(campaign_product_id_str)).customer_return(product.get('qty'), sync=False) #do this anyway
                     database.lss.pre_order.PreOrder(id=lss_pre_order.id).reset_pre_order(sync=False)            #do this anyway
                     database.lss.order_product.OrderProduct.transfer_to_order(pymongo_lss_pre_order, lss_order) #do this anyway
 

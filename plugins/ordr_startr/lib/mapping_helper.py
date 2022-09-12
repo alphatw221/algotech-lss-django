@@ -12,6 +12,19 @@ class CampaignProduct:
         return {str(product.id):{'id':product.meta.get(PLUGIN_ORDR_STARTR,{}).get('id'),'order_code':product.order_code} for product in  campaign.products.all() if product.meta.get(PLUGIN_ORDR_STARTR,{}).get('id')}
 
     def get_external_internal_map(campaign):
-        return {product.meta.get(PLUGIN_ORDR_STARTR,{}).get('id'):product.id for product in  campaign.products.all() if product.meta.get(PLUGIN_ORDR_STARTR,{}).get('id')}
+
+
+        # "name":campaign_product.name,
+        #     "image":campaign_product.image,
+        #     "price":float(item.get('price')),
+        #     "type":campaign_product.type,
+
+        return {product.meta.get(PLUGIN_ORDR_STARTR,{}).get('id'):{
+            'id':product.id,
+            'name':product.name,
+            'image':product.image,
+            'type':product.type
+            } 
+            for product in  campaign.products.all() if product.meta.get(PLUGIN_ORDR_STARTR,{}).get('id')}
 
 

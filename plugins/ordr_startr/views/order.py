@@ -31,16 +31,21 @@ class OrderViewSet(viewsets.GenericViewSet):
         campaign_product_external_internal_map = ordr_startr_lib.mapping_helper.CampaignProduct.get_external_internal_map(campaign)
 
 
-        lss_order_data = ordr_startr_lib.transformer.to_lss_order(ordr_startr_order_data, pre_order)
+        lss_order_data = ordr_startr_lib.transformer.to_lss_order(ordr_startr_order_data, pre_order, campaign_product_external_internal_map)
 
-        models.order.order.Order.objects.create(**lss_order_data)
+        lss_order = models.order.order.Order.objects.create(**lss_order_data)
+
+        for campaign_product_id_str,product in pre_order.products.items():
+            database.lss.campaign_product.CampaignProduct(id = int(campaign_product_id_str)).customer_return(product.get('qty'), sync=False) #do this anyway
+        database.lss.pre_order.PreOrder(id=pre_order.id).reset_pre_order(sync=False)            #do this anyway
+        database.lss.order_product.OrderProduct.transfer_to_order(pre_order, lss_order)         #do this anyway
 
         ##update campaign product quantity:
         for product in ordr_startr_products_data:
             if product.get('_id') not in campaign_product_external_internal_map:
                 continue
-            lss_campaign_product_id = campaign_product_external_internal_map[product.get('_id')]
-            database.lss.campaign_product.CampaignProduct(id = lss_campaign_product_id).sold(qty=product.get('sold'), sync=False)
+            lss_campaign_product_data = campaign_product_external_internal_map[product.get('_id')]
+            database.lss.campaign_product.CampaignProduct(id = lss_campaign_product_data.get('id')).sold_from_external(qty=product.get('sold'), sync=False)
 
         return Response('ok', status=status.HTTP_200_OK)
 

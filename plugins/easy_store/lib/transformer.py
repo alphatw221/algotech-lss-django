@@ -19,21 +19,21 @@ def to_lss_product(easy_store_product, easy_store_variant_product, user_subscrip
     return data
 
 
-def to_lss_order(easy_store_order, lss_pre_order, campaign_product_dict):
+def to_lss_order(easy_store_order, lss_pre_order, campaign_product_external_internal_map):
 
 
 
     lss_products = {}
     for item in easy_store_order.get('line_items'):
-        if item.get('variant_id') not in campaign_product_dict:
+        if item.get('variant_id') not in campaign_product_external_internal_map:
             continue
-        campaign_product = campaign_product_dict[item.get('variant_id')]
-        lss_products[str(campaign_product.id)] = {
+        campaign_product_data = campaign_product_external_internal_map[item.get('variant_id')]
+        lss_products[str(campaign_product_data.get('id'))] = {
             "order_product_id":None,   #TODO
-            "name":campaign_product.name,
-            "image":campaign_product.image,
+            "name":campaign_product_data.get('name'),
+            "image":campaign_product_data.get('image'),
             "price":float(item.get('price')),
-            "type":campaign_product.type,
+            "type":campaign_product_data.get('type'),
             "qty":float(item.get('quantity')),
             "subtotal":float(item.get('subtotal'))
         }
