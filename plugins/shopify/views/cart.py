@@ -58,9 +58,9 @@ class CartViewSet(viewsets.GenericViewSet):
 
         if not response.status_code != '201':
             raise 'failed'
-        
+
         checkout_url = json.loads(response.text).get('draft_order').get('invoice_url')
-        order_key = checkout_url[checkout_url.find('com/') + 4 : checkout_url.find('/invoices')]        
+        order_key = checkout_url[checkout_url.find('invoices/') + 9 : ]      
 
         campaign.meta[order_key] = pre_order.id
         campaign.save()
