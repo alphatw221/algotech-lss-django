@@ -39,8 +39,9 @@ def facebook_messenger_webhook(request):
                     if message.get('is_echo'):
                         continue
                     if message.get('text'):
+
                         lib.helper.facebook_helper.handle_auto_response(body.get('object'), page_id, sender_psid, message)
-                        print(message)
+                        print(message['text'].encode('latin1').decode('unicode_escape').encode('latin1').decode('utf8'))
                         # print(type(message['text']))
                         # print(message['text'].encode('latin-1','ignore').decode())
                         # print (message['text'], time_of_event)
