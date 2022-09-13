@@ -38,6 +38,8 @@ class CampaignProduct(models.Model):
     qty_add_to_cart = models.IntegerField(blank=False, null=False, default=0)
 
     oversell = models.BooleanField(
+        blank=False, null=False, default=False)
+    overbook = models.BooleanField(
         blank=False, null=False, default=True)
 
     name = models.CharField(max_length=255, null=True,
