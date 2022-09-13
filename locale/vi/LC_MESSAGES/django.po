@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-13 07:19+0000\n"
+"POT-Creation-Date: 2022-09-13 10:25+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -309,31 +309,31 @@ msgid "EMAIL/DELIVERY_CONFIRM/DELIVERY_ADDRESS"
 msgstr "Địa chỉ giao hàng"
 
 #: lib/helper/order_helper.py:478 lib/helper/xlsx_helper.py:131
-#: lib/i18n/email/order_comfirm_mail.py:72
+#: lib/i18n/email/order_comfirm_mail.py:78
 msgid "REPORT/COLUMN_TITLE/PAYMENT_METHOD"
 msgstr "Phương thức thanh toán"
 
 #: lib/helper/order_helper.py:526 lib/helper/order_helper.py:677
 #: lib/i18n/email/delivery_comfirm_mail.py:82
-#: lib/i18n/email/order_comfirm_mail.py:173
+#: lib/i18n/email/order_comfirm_mail.py:179
 msgid "EMAIL/DELIVERY_CONFIRM/SUBTOTAL"
 msgstr "Tổng phụ"
 
 #: lib/helper/order_helper.py:532 lib/helper/order_helper.py:683
 #: lib/i18n/email/delivery_comfirm_mail.py:88
-#: lib/i18n/email/order_comfirm_mail.py:179
+#: lib/i18n/email/order_comfirm_mail.py:185
 msgid "EMAIL/DELIVERY_CONFIRM/DELIVERY_CHARGE"
 msgstr "Phí giao hàng"
 
 #: lib/helper/order_helper.py:538 lib/helper/order_helper.py:689
 #: lib/i18n/email/delivery_comfirm_mail.py:94
-#: lib/i18n/email/order_comfirm_mail.py:185
+#: lib/i18n/email/order_comfirm_mail.py:191
 msgid "EMAIL/DELIVERY_CONFIRM/TOTAL"
 msgstr "Tổng số"
 
 #: lib/helper/order_helper.py:551 lib/helper/order_helper.py:701
 #: lib/i18n/email/delivery_comfirm_mail.py:121
-#: lib/i18n/email/order_comfirm_mail.py:197
+#: lib/i18n/email/order_comfirm_mail.py:203
 #: templates/email_verification_code.html:15
 msgid "EMAIL/DELIVERY_CONFIRM/DO_NOT_REPLY_1"
 msgstr ""
@@ -342,7 +342,7 @@ msgstr ""
 
 #: lib/helper/order_helper.py:552 lib/helper/order_helper.py:702
 #: lib/i18n/email/delivery_comfirm_mail.py:122
-#: lib/i18n/email/order_comfirm_mail.py:198
+#: lib/i18n/email/order_comfirm_mail.py:204
 msgid "EMAIL/DELIVERY_CONFIRM/DO_NOT_REPLY_2"
 msgstr ""
 "Đối với các câu hỏi về đơn đặt hàng, các câu hỏi hoặc nhận xét khác, vui "
@@ -448,7 +448,7 @@ msgstr "Thông tin liên lạc"
 msgid "REPORT/SECTION_TITLE/DELIVERY_INFO"
 msgstr "Thông tin giao hàng"
 
-#: lib/helper/xlsx_helper.py:171 lib/i18n/email/order_comfirm_mail.py:68
+#: lib/helper/xlsx_helper.py:171 lib/i18n/email/order_comfirm_mail.py:74
 msgid "REPORT/SECTION_TITLE/PAYMENT_INFO"
 msgstr "Thông tin thanh toán"
 
@@ -507,19 +507,23 @@ msgstr ""
 msgid "EMAIL/ORDER_CONFIRM/TITLE"
 msgstr "Đơn đặt hàng của bạn đã được xác nhận!"
 
-#: lib/i18n/email/order_comfirm_mail.py:75
+#: lib/i18n/email/order_comfirm_mail.py:68
+msgid "EMAIL/ORDER_CONFIRM/DIRECT_PAYMENT"
+msgstr "Thanh toán trực tiếp"
+
+#: lib/i18n/email/order_comfirm_mail.py:81
 msgid "EMAIL/ORDER_CONFIRM/ACCOUNT_MODE"
 msgstr "Ngân hàng / Dịch vụ tài chính"
 
-#: lib/i18n/email/order_comfirm_mail.py:78
+#: lib/i18n/email/order_comfirm_mail.py:84
 msgid "EMAIL/ORDER_CONFIRM/SELLER_ACCOUNT"
 msgstr "Của người bán số tài khoản"
 
-#: lib/i18n/email/order_comfirm_mail.py:83
+#: lib/i18n/email/order_comfirm_mail.py:89
 msgid "EMAIL/ORDER_CONFIRM/LAST_FIVE_DIGIT"
 msgstr "Tài khoản thanh toán Năm chữ số cuối cùng"
 
-#: lib/i18n/email/order_comfirm_mail.py:95
+#: lib/i18n/email/order_comfirm_mail.py:101
 msgid "EMAIL/ORDER_CONFIRM/SELLER_CONTACT"
 msgstr "Liên hệ với người bán"
 
