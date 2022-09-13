@@ -403,14 +403,23 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             premium_list.append(subscriber.get('id'))
         
         start_date = datetime.now()
-        end_date = start_date - relativedelta(years=1) if date_period == 'year' else start_date - relativedelta(months=1)
+        if date_period == 'quarter':
+            start_date = datetime(start_date.year, 12, 31) 
+        end_date = start_date - relativedelta(years=1)
         while start_date > end_date:
             if date_period == 'year':
                 this_end_date = start_date - relativedelta(months=1)
                 this_period = f'{this_end_date.year}-{this_end_date.month}'
-            elif date_period == 'month':
-                this_end_date = start_date - relativedelta(days=1)
-                this_period = f'{this_end_date.year}-{this_end_date.month}-{this_end_date.day}'
+            elif date_period == 'quarter':
+                this_end_date = start_date - relativedelta(months=3)
+                if this_end_date.month == 12:
+                    this_period = 'Q1'
+                elif this_end_date.month == 3:
+                    this_period = 'Q2'
+                elif this_end_date.month == 6:
+                    this_period = 'Q3'
+                elif this_end_date.month == 9:
+                    this_period = 'Q4'
 
             this_period_revenue = 0
             for premium_id in premium_list: 
@@ -440,6 +449,4 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             dealer_revenue.append(count_obj)
             start_date = this_end_date
         
-        print (dealer_revenue)
-
-        return Response('suc', status=status.HTTP_200_OK)
+        return Response(dealer_revenue, status=status.HTTP_200_OK)
