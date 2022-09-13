@@ -6,6 +6,8 @@ import database
 def handle_auto_response(object, page_id, sender_id, message):
     # text = str(message.get('text','')).encode('latin1').decode('unicode_escape')#.encode('latin1').decode('utf8')
     text = message.get('text','')
+    for c in text :
+        print(c)
     print(text)
     words = text.replace('\n',' ').split(' ')
     if object == "page":
