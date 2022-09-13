@@ -47,8 +47,8 @@ class ExportOrderConsumer(WebsocketConsumer):
             raise lib.error_handle.error.api_error.ApiVerifyError('no_plugin')
 
         
-        jobs.shopify.export_order_job(campaign_id,credential)
-        # service.rq.queue.enqueue_general_queue(jobs.shopify.export_order_job, campaign_id = campaign_id, credential=credential)
+        # jobs.shopify.export_order_job(campaign_id,credential)
+        service.rq.queue.enqueue_general_queue(jobs.shopify.export_order_job, campaign_id = campaign_id, credential=credential)
         # print(campaign_id,api_user,user_subscription,credential)
         self.send(text_data=json.dumps({
             'type':'response_data',
