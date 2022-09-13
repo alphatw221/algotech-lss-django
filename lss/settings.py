@@ -404,6 +404,7 @@ EMAIL_HOST_PASSWORD = 'bq5^82DrrpQ4'  # jyhudyfbvpmewjsc
 # cron app
 CRON_CLASSES = [
     "cron.cron.CampaignReminderCronJob",
+    "cron.abandon_order_product_recycle.AbandonOrderProductRecycleCronJob"
 ]
 DJANGO_CRON_DELETE_LOGS_OLDER_THAN = 10
 

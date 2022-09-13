@@ -1,7 +1,7 @@
 from ._config import db
 from ._config import Collection
 from api import models
-from datetime import datetime
+from datetime import datetime, timedelta
 
 __collection = db.api_pre_order
 
@@ -53,3 +53,15 @@ class PreOrder(Collection):
         if sync:
             self._sync()
 
+
+def get_abandon_pre_order_which_contain_campaign_product(campaign_product_id, havent_updated_in:timedelta):
+    cursor = __collection.aggregate([
+        {'$match': {
+            "updated_at":{"$lt":datetime.utcnow()-havent_updated_in},
+            f"products.{campaign_product_id}":{ "$exists" : True },
+        }},
+        {"$project":{"_id":0,"id":1}},
+    ])
+
+    l = list(cursor)
+    return l
