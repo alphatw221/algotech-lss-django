@@ -39,7 +39,8 @@ def facebook_messenger_webhook(request):
                     if message.get('is_echo'):
                         continue
                     if message.get('text'):
-
+                        print(type(message))
+                        print(message)
                         lib.helper.facebook_helper.handle_auto_response(body.get('object'), page_id, sender_psid, message)
                         # print(message['text'].encode('latin1').decode('unicode_escape').encode('latin1').decode('utf8'))
                         # print(type(message['text']))
