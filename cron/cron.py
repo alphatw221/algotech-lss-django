@@ -94,3 +94,4 @@ class CampaignReminderCronJob(CronJobBase):
             title = campaign['title']
             remind_time = campaign['remind_time']
             async_to_sync(channel_layer.group_send)(f"user_subscription_{user_subscription_id}", {"type": "notification_message","data":{"message":{"id": id, "title": title, "remind_time": remind_time}}})
+

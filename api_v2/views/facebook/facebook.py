@@ -40,6 +40,8 @@ def facebook_messenger_webhook(request):
                         continue
                     if message.get('text'):
                         lib.helper.facebook_helper.handle_auto_response(body.get('object'), page_id, sender_psid, message)
+                        print(type(message['text']))
+                        print(message['text'].encode('latin-1','ignore').decode())
                         print (message['text'], time_of_event)
                         
                     elif message.get('attachments'):

@@ -5,6 +5,9 @@ from api import models
 
 from bson.json_util import loads, dumps
 from pprint import pprint
+
+from datetime import datetime
+
 __collection = db.api_campaign
 
 
@@ -100,3 +103,31 @@ def get_merge_order_list_pagination(campaign_id, search:str, status:str, filter_
     data_json = loads(data_str)    #TODO optimize # use skip limit  sum
 
     return data_json, total_count
+
+
+
+def get_ongoing_campaign_disallow_overbook_campaign_product():
+    cursor = __collection.aggregate([
+        {'$match': {
+            "start_at":{"$lt":datetime.utcnow()},
+            "end_at":{"$gt":datetime.utcnow()}
+        }},
+        {'$lookup': {
+            'from': 'api_campaign_product',
+            'as': 'campaign_products',
+            'let': { 'id': '$id' },
+            'pipeline': [
+                {'$match': {
+                    '$expr': { '$eq': [ '$$id', '$campaign_id'] },
+                    'overbook':False
+                }},
+                {"$project":{"_id":0,"id":1}}
+            ]
+        }},
+        {"$project":{"_id":0,"campaign_products":1}},
+        { "$unwind": "$campaign_products" },
+        {"$project":{"id":"$campaign_products.id"}},
+    ])
+
+    l = list(cursor)
+    return l
