@@ -24,3 +24,26 @@ class PreOrder(Collection):
             },session=session)
         if sync:
             self._sync(session=session)
+
+    def reset_pre_order(self, sync=True):
+
+        db.api_pre_order.update_one(
+            {'id': self.id},
+            {
+                "$set": {
+                    "products":{},
+                    "total" : 0,
+                    "subtotal" : 0,
+                    "discount" : 0,
+                    "adjust_price":0, 
+                    "adjust_title":"", 
+                    "free_delivery":False, 
+                    "history":{}, 
+                    "meta":{},
+                    "applied_discount":{}
+                },
+            }
+        )
+        if sync:
+            self._sync()
+
