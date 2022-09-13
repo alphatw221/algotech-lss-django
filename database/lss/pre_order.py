@@ -1,6 +1,7 @@
 from ._config import db
 from ._config import Collection
 from api import models
+from datetime import datetime
 
 __collection = db.api_pre_order
 
@@ -20,7 +21,10 @@ class PreOrder(Collection):
                 "$unset":{
                     f"products.{str(campaign_product.id)}": "",
                 },
-                "$set": kwargs,
+                "$set": {
+                    'updated_at':datetime.utcnow(),
+                    **kwargs
+                },
             },session=session)
         if sync:
             self._sync(session=session)
@@ -40,7 +44,9 @@ class PreOrder(Collection):
                     "free_delivery":False, 
                     "history":{}, 
                     "meta":{},
-                    "applied_discount":{}
+                    "applied_discount":{},
+
+                    'updated_at':datetime.utcnow()
                 },
             }
         )
