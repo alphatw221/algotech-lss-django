@@ -10,6 +10,8 @@ def handle_auto_response(object, page_id, sender_id, message):
         print(c)
     print(text)
     words = text.replace('\n',' ').split(' ')
+    for w in words:
+        print(w)
     if object == "page":
 
         facebook_page = models.facebook.facebook_page.FacebookPage.objects.get(page_id = page_id)
