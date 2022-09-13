@@ -90,7 +90,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
                 if image in ['null', None, '', 'undefined']:
                     continue
                 elif image =='._no_image':
-                    account['image'] = models.user.user_subscription.IMAGE_NULL
+                    account['image'] = settings.GOOGLE_STORAGE_STATIC_DIR+models.user.user_subscription.IMAGE_NULL
                     continue
                 elif image.size > models.user.user_subscription.IMAGE_MAXIMUM_SIZE:
                     continue
