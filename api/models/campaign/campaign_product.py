@@ -37,9 +37,9 @@ class CampaignProduct(models.Model):
     qty_sold = models.IntegerField(blank=False, null=True, default=0)
     qty_add_to_cart = models.IntegerField(blank=False, null=False, default=0)
 
-    oversold = models.BooleanField(
+    oversell = models.BooleanField(
         blank=False, null=False, default=True)
-        
+
     name = models.CharField(max_length=255, null=True,
                             blank=True, default=None)
     excerpt = models.TextField(null=True, blank=True, default=None)
