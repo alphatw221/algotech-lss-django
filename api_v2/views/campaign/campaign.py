@@ -112,7 +112,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
                 if image in ['null', None, '', 'undefined']:
                     continue
                 elif image =='._no_image':
-                    account['image'] = models.campaign.campaign.IMAGE_NULL
+                    account['image'] = settings.GOOGLE_STORAGE_STATIC_DIR+models.campaign.campaign.IMAGE_NULL
                     continue
                 elif image.size > models.campaign.campaign.IMAGE_MAXIMUM_SIZE:
                     continue
@@ -198,7 +198,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
                 elif image.content_type not in models.campaign.campaign.IMAGE_SUPPORTED_TYPE:
                     continue
                 elif image == '._no_image':
-                    account['image'] = models.campaign.campaign.IMAGE_NULL
+                    account['image'] = settings.GOOGLE_STORAGE_STATIC_DIR+models.campaign.campaign.IMAGE_NULL
                     save=True
                     continue
                 account_name = account.get('name','')
