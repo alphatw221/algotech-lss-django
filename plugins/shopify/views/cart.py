@@ -11,8 +11,8 @@ import service
 from .. import service as shopify_service
 from .. import lib as shopify_lib
 
-from automation import jobs
-from requests import request as request_url
+# from automation import jobs
+# from requests import request as request_url
 
 PLUGIN_SHOPIFY = 'shopify'
 
@@ -33,7 +33,6 @@ class CartViewSet(viewsets.GenericViewSet):
         
         internal_external_map = shopify_lib.mapping_helper.CampaignProduct.get_internal_external_map(campaign)
 
-        draft_order = {}
         line_items = []
         for campaign_product_id_str, product in pre_order.products.items():
             if campaign_product_id_str not in internal_external_map:
@@ -41,28 +40,52 @@ class CartViewSet(viewsets.GenericViewSet):
             variant_id = internal_external_map[campaign_product_id_str]
             line_items.append({'variant_id': variant_id, 'quantity': product.get('qty')})
         
-        draft_order['line_items'] = line_items
-        
-        if pre_order.discount > 0:
-            applied_discount = {
-                "description": "Referr discount",
-                "value_type": "fixed_amount",
-                "value": str(pre_order.discount),
-                "amount": str(pre_order.discount),
-                "title": "Referr discount"
-            }
-            draft_order['applied_discount'] = applied_discount
-        
-        data = { "draft_order": draft_order }
-        response = request_url("POST", f"https://{credential.get('shop')}/admin/api/2022-07/draft_orders.json", headers={'X-Shopify-Access-Token': credential.get('access_token')}, json=data, timeout=5)
+        success, response = shopify_service.checkouts.create_checkout(credential.get('shop'), credential.get('access_token'), line_items, pre_order.discount)
+        if not success:
+            raise lib.error_handle.error.api_error.ApiCallerError('please try again')
 
-        if not response.status_code != '201':
-            raise 'failed'
-
-        checkout_url = json.loads(response.text).get('draft_order').get('invoice_url')
-        order_key = checkout_url[checkout_url.find('invoices/') + 9 : ]      
-
+        invoice_url = response.get('draft_order',{}).get('invoice_url')
+        order_key = invoice_url[-32:]
         campaign.meta[order_key] = pre_order.id
         campaign.save()
 
-        return Response(checkout_url, status=status.HTTP_200_OK)
+        return Response(invoice_url, status=status.HTTP_200_OK)
+
+
+
+        # {
+        #     'draft_order': {
+        #         'id': 929987330239, 
+        #         'note': None, 
+        #         'email': None, 
+        #         'taxes_included': False, 
+        #         'currency': 'TWD', 
+        #         'invoice_sent_at': None, 
+        #         'created_at': '2022-09-14T00:36:13+08:00', 
+        #         'updated_at': '2022-09-14T00:36:13+08:00', 
+        #         'tax_exempt': False, 
+        #         'completed_at': None, 
+        #         'name': '#D22', 
+        #         'status': 'open', 
+        #         'line_items': [{'id': 57449776382143, 'variant_id': 41918730272959, 'product_id': 7340180799679, 'title': 'frog w.', 'variant_title': None, 'sku': '', 'vendor': 'frog sweat home', 'quantity': 1, 'requires_shipping': True, 'taxable': True, 'gift_card': False, 'fulfillment_service': 'manual', 'grams': 0, 'tax_lines': [{'rate': 0.05, 'title': 'VAT', 'price': '0.50'}], 
+        #             'applied_discount': None, 
+        #             'name': 'frog w.', 
+        #             'properties': [], 
+        #             'custom': False, 
+        #             'price': '10.00', 
+        #             'admin_graphql_api_id': 'gid://shopify/DraftOrderLineItem/57449776382143'}], 
+        #         'shipping_address': None, 
+        #         'billing_address': None, 
+        #         'invoice_url': 'https://frog-sweat-home.myshopify.com/62622073023/invoices/f1709525213b97862284beae33ac6bcf', 
+        #         'applied_discount': None, 
+        #         'order_id': None, 
+        #         'shipping_line': None, 
+        #         'tax_lines': [{'rate': 0.05, 'title': 'VAT', 'price': '0.50'}], 
+        #         'tags': '', 
+        #         'note_attributes': [],
+        #         'total_price': '10.50', 
+        #         'subtotal_price': '10.00', 
+        #         'total_tax': '0.50', 
+        #         'payment_terms': None, 
+        #         'admin_graphql_api_id': 'gid://shopify/DraftOrder/929987330239', 
+        #         'customer': None}}

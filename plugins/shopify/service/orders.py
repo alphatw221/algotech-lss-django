@@ -5,7 +5,7 @@ import json
 def __get_url(shop, order_id=None):
     if order_id:
         return f"https://{shop}/admin/api/2022-07/orders/{order_id}.json"
-    return f"https://{shop}/admin/api/2022-07/orders.json?status=any"
+    return f"https://{shop}/admin/api/2022-07/orders.json?status=closed"
 
 def list_order(shop, access_token, **kwargs):
     data = {**kwargs}

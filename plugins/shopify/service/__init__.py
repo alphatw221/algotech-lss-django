@@ -1,1 +1,1 @@
-from . import channels, products,orders
+from . import channels, products,orders, checkouts

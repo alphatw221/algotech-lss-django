@@ -683,5 +683,11 @@ class Command(BaseCommand):
         print(data)
 
     def test_shit(self):
-        t = {'a':1,'text':'\xe6\xb8\xac\xe8\xa9\xa6'}
-        print(t)
+        from automation import jobs
+        from pprint import pprint
+        c= {
+            "shop": "frog-sweat-home.myshopify.com",
+            "access_token": "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"
+        }
+        data = jobs.shopify.export_order_job(1190,c)
+        pprint(data)
