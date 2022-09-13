@@ -4,7 +4,8 @@ import service
 import database
 
 def handle_auto_response(object, page_id, sender_id, message):
-    text = message.get('text','').encode('latin1').decode('unicode_escape').encode('latin1').decode('utf8')
+    text = message.get('text','').encode('utf8').decode('latin1').encode('latin1').decode('unicode_escape').encode('latin1').decode('utf8')
+    print(text)
     words = text.replace('\n',' ').split(' ')
     if object == "page":
 
