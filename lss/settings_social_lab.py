@@ -65,5 +65,5 @@ CHAT_BOT_FACEBOOK = {
 WORDPRESS_WEBHOOK_SECRET = '}:`o1k$UoF767:RQO^+mW(9D7!O*Hst*?#<X&bLOINz[ro#F6k'
 
 # template global value
-LOGO_URL = "https://storage.googleapis.com/lss_public_bucket/static/LSSlogo-300-172.png"
+LOGO_URL = GOOGLE_STORAGE_STATIC_DIR + "LSSlogo-300-172.png"
 NOTIFICATION_EMAIL = 'lss@algotech.app'
