@@ -52,7 +52,7 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.test_mongodb_query()
+        self.test_shit()
         # self.test_remove_campaign_comment_duplicate()
 
     def modify_database(self):
@@ -681,3 +681,7 @@ class Command(BaseCommand):
 
         
         print(data)
+
+    def test_shit(self):
+        t = {'a':1,'text':'\xe6\xb8\xac\xe8\xa9\xa6'}
+        print(t)
