@@ -293,10 +293,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         
         if "wish_list" in product.meta:
             if not api_user.email in product.meta["wish_list"]:
-                # product.meta['wish_list'].append(api_user.email)
-                print("not in")
-            else:
-                print("in")
+                product.meta['wish_list'].append(api_user.email)
         else:
             product.meta['wish_list'] = [str(api_user.email)]
         
