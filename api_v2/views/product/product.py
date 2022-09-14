@@ -284,3 +284,21 @@ class ProductViewSet(viewsets.ModelViewSet):
             obj.save()
 
         return Response(categories_list, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['GET'], url_path=r'(?P<product_id>[^/.]+)/wish_list/add', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def wish_list_add(self, request, product_id):
+        api_user = lib.util.verify.Verify.get_customer_user(request)
+        product = lib.util.verify.Verify.get_product_by_id(product_id)
+        
+        if "wish_list" in product.meta:
+            if not api_user.email in product.meta["wish_list"]:
+                # product.meta['wish_list'].append(api_user.email)
+                print("not in")
+            else:
+                print("in")
+        else:
+            product.meta['wish_list'] = [str(api_user.email)]
+        
+        product.save()
+        return Response(models.product.product.ProductSerializer(product).data, status=status.HTTP_200_OK)
