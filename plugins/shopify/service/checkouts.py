@@ -12,13 +12,13 @@ def create_checkout(shop, access_token, line_items, discount):
     data = {
         "draft_order":{
             "line_items":line_items,
-            # "applied_discount":{
-            #         "description": "Referr discount",
-            #         "value_type": "fixed_amount",
-            #         "value": str(discount),
-            #         "amount": str(discount),
-            #         "title": "Referr discount"
-            #     } if discount else None
+            "applied_discount":{
+                    "description": "Referr discount",
+                    "value_type": "fixed_amount",
+                    "value": str(discount),
+                    "amount": str(discount),
+                    "title": "Referr discount"
+                } if discount else None
         }
         
     }
