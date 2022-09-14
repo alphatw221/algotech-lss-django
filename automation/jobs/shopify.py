@@ -83,7 +83,11 @@ def export_order_job(campaign_id, credential):
         campaign_product_external_internal_map = shopify_lib.mapping_helper.CampaignProduct.get_external_internal_map(campaign)
         since = campaign.start_at.strftime("%Y-%m-%d %H:%M:%S")
         
-        success, data = shopify_service.orders.list_order(credential.get('shop'), credential.get('access_token'), created_at_min=since)
+        success, data = shopify_service.orders.list_order(
+            credential.get('shop'), 
+            credential.get('access_token'), 
+            created_at_min=since
+            )
 
 
         if not success:
@@ -92,7 +96,13 @@ def export_order_job(campaign_id, credential):
 
         for order in data.get('orders'):
             try:
+                if order.get('financial_status')!='paid':   #shopify status no paid
+                    continue
+            
                 landing_site = order.get('landing_site','')
+                if not landing_site:
+                    continue
+                
                 order_key = landing_site[-32:]
                 
                 if order_key not in campaign.meta:

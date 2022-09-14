@@ -48,7 +48,7 @@ def to_lss_order(lss_pre_order, shopify_order_data, campaign_product_external_in
         "discount" : float(shopify_order_data.get('total_discounts')),
         "subtotal" : float(shopify_order_data.get('subtotal_price')),
         "shipping_cost" : float(shopify_order_data.get('total_shipping_price_set',{}).get('shop_money',{}).get('amount')),
-        "payment_method" : shopify_order_data['payment_gateway_names'][0],
+        # "payment_method" : shopify_order_data['payment_gateway_names'][0],   #don't need this in lss
         
         "shipping_location" : shopify_order_data['shipping_address']['city'],
         "shipping_address_1" : shopify_order_data['shipping_address']['address1'],
