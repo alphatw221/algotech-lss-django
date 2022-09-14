@@ -16,13 +16,26 @@ def to_lss_product(ordr_startr_product, user_subscription):
 
     }
 
-def to_lss_order(ordr_startr_order_data, pre_order):
+def to_lss_order(ordr_startr_order_data, pre_order, campaign_product_external_internal_map):
 
 
 
+    lss_products = {}
     subtotal = 0
     for item in ordr_startr_order_data.get('Items',[]):
         subtotal+=item.get('total',0)
+        if item.get('id') not in campaign_product_external_internal_map:
+            continue
+        lss_campaign_product_data = campaign_product_external_internal_map[item.get('id')]
+        lss_products[str(lss_campaign_product_data.get('id'))] = {
+            "order_product_id":None,   #TODO
+            "name":lss_campaign_product_data.get('name'),
+            "image":lss_campaign_product_data.get('image'),
+            "price":float(item.get('price')),
+            "type":lss_campaign_product_data.get('type'),
+            "qty":float(item.get('qty')),
+            "subtotal":float(item.get('total'))
+        }
 
 
     return {
@@ -49,7 +62,9 @@ def to_lss_order(ordr_startr_order_data, pre_order):
             'ordr_startr':{
                 'id':ordr_startr_order_data.get('_id')
             }
-        }
+        },
+
+        "products":lss_products
     }
 
 # def to_lss_order(ordr_startr_order_data, lss_pre_order_data):

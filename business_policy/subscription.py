@@ -79,6 +79,7 @@ PRICE_UNIT_CHOICES=[
 TYPE_TRIAL='trial'
 TYPE_LITE='lite'
 TYPE_STANDARD='standard'
+TYPE_PRO='pro' # for social lab
 TYPE_PREMIUM='premium'
 TYPE_DEALER='dealer'
 
@@ -86,6 +87,7 @@ TYPE_CHOICES = [
     (TYPE_TRIAL, 'Trial'),
     (TYPE_LITE, 'Lite'),
     (TYPE_STANDARD, 'Standard'),
+    (TYPE_PRO, 'Pro'), # for social lab
     (TYPE_PREMIUM, 'Premium'),
     (TYPE_DEALER,'Dealer'),
 ]

@@ -34,9 +34,13 @@ class DateTimeMapper(FieldMapper):
     def mapping(self, object):
         return super().mapping(object).strftime("%Y-%m-%d")
 
-class CustomerNameMapper(FieldMapper):
+class ShippingNameMapper(FieldMapper):
     def mapping(self, object):
         return  f'{object.shipping_last_name} {object.shipping_first_name}'
+
+class CustomerNameMapper(FieldMapper):
+    def mapping(self, object):
+        return getattr(object, 'customer_name')
 
 class ShippingMethodMapper(FieldMapper):
     def mapping(self, object):
@@ -112,6 +116,7 @@ class OrderReport(XlsxHelper):
             DateTimeMapper('created_at', 'Order Date', i18n_key='REPORT/COLUMN_TITLE/ORDER_DATE'),
             FieldMapper('platform', 'Platform', i18n_key='REPORT/COLUMN_TITLE/PLATFORM'),
             CustomerNameMapper('customer_name', 'Customer Name', i18n_key='REPORT/COLUMN_TITLE/CUSTOMER_NAME'),
+            ShippingNameMapper('shipping_name', 'Shipping Name', i18n_key='REPORT/COLUMN_TITLE/SHIPPING_NAME'),
             FieldMapper('shipping_phone', 'Shipping Phone', i18n_key='REPORT/COLUMN_TITLE/SHIPPING_PHONE'),
             FieldMapper('shipping_email', 'E-mail', i18n_key='REPORT/COLUMN_TITLE/EMAIL'),
             ShippingMethodMapper('shipping_method', 'Shipping Method', i18n_key='REPORT/COLUMN_TITLE/SHIPPING_METHOD'),
@@ -161,8 +166,8 @@ class OrderReport(XlsxHelper):
             report_title = campaign.title + ' ' + _('REPORT/SECTION_TITLE/TITLE')
             worksheet.merge_range(cls.row, 0, cls.row, len(cls.columns) + campaign_products_count - 1, report_title, title_format)
             cls._next_row()
-            worksheet.merge_range(cls.row, 0, cls.row, 5, _('REPORT/SECTION_TITLE/CONTACT_INFO'), info_format)
-            worksheet.merge_range(cls.row, 6, cls.row, 15, _('REPORT/SECTION_TITLE/DELIVERY_INFO'), info_format)
+            worksheet.merge_range(cls.row, 0, cls.row, 6, _('REPORT/SECTION_TITLE/CONTACT_INFO'), info_format)
+            worksheet.merge_range(cls.row, 7, cls.row, 15, _('REPORT/SECTION_TITLE/DELIVERY_INFO'), info_format)
             worksheet.merge_range(cls.row, 16, cls.row, 19, _('REPORT/SECTION_TITLE/PAYMENT_INFO'), info_format)
             worksheet.merge_range(cls.row, 20, cls.row, 20 + campaign_products_count - 1, _('REPORT/SECTION_TITLE/ORDER_INFO'), info_format)
         cls._next_row()

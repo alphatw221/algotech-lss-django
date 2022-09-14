@@ -404,6 +404,7 @@ EMAIL_HOST_PASSWORD = 'bq5^82DrrpQ4'  # jyhudyfbvpmewjsc
 # cron app
 CRON_CLASSES = [
     "cron.cron.CampaignReminderCronJob",
+    "cron.abandon_order_product_recycle.AbandonOrderProductRecycleCronJob"
 ]
 DJANGO_CRON_DELETE_LOGS_OLDER_THAN = 10
 
@@ -424,7 +425,7 @@ CACHE_SERVER = {
     "host": "34.124.140.74",
     "port": "6380",
     "username": None,
-    "password": r"1234"}
+    "password": r"algo83111T%%"}
 
 # REDIS_SERVER = {
 #     "host": "127.0.0.1",
@@ -501,4 +502,4 @@ DJANGO_VITE_DEV_MODE = DEBUG
 RECAPTCHA_SECRET_KEY='6LeNPyMhAAAAADlvfRDj_WThJc7pCrFzFFaPgwWz'
 
 # template global value
-LOGO_URL = "https://storage.googleapis.com/lss_public_bucket/static/LSSlogo-300-172.png"
+LOGO_URL = GOOGLE_STORAGE_STATIC_DIR + "LSSlogo-300-172.png"

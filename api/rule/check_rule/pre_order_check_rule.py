@@ -39,7 +39,9 @@ class PreOrderCheckRule():
         api_order_product = kwargs.get('api_order_product')
         original_qty = api_order_product['qty'] if api_order_product else 0
         qty_difference = int(request_qty)-original_qty
-        if qty_difference and api_campaign_product["qty_for_sale"]-api_campaign_product["qty_sold"] < qty_difference:
+
+        qty_check_field = 'qty_sold' if api_campaign_product.get('overbook') else 'qty_add_to_cart'
+        if qty_difference and api_campaign_product["qty_for_sale"]-api_campaign_product[qty_check_field] < qty_difference:
             raise lib.error_handle.error.pre_order_error.PreOrderErrors.UnderStock("helper.out_of_stock")
         return {"qty_difference" : qty_difference}
 

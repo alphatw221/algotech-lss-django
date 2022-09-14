@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-30 10:44+0000\n"
+"POT-Creation-Date: 2022-09-13 10:25+0000\n"
 "PO-Revision-Date: 2021-12-13 15:50+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -42,7 +42,8 @@ msgid "MESSAGE_PREFIX"
 msgstr "Live Show Seller: "
 
 #: backend/i18n/cart_product_request.py:21 lib/i18n/cart_product_request.py:24
-#: lib/i18n/cart_product_request.py:40
+#: lib/i18n/cart_product_request.py:32 lib/i18n/cart_product_request.py:40
+#: lib/i18n/cart_product_request.py:55
 #, python-brace-format
 msgid "SHOPPING_CART_INFO{link}"
 msgstr ""
@@ -50,15 +51,16 @@ msgstr ""
 "atau Chrome: {link}"
 
 #: backend/i18n/cart_product_request.py:23 lib/i18n/cart_product_request.py:26
-#: lib/i18n/cart_product_request.py:42
+#: lib/i18n/cart_product_request.py:34 lib/i18n/cart_product_request.py:42
+#: lib/i18n/cart_product_request.py:57
 msgid "MORE_INFO_IN_PM_NOTICE"
 msgstr ""
 "Tautan Keranjang Belanja telah dikirim melalui FB Messenger, mohon hubungi "
 "admin halaman apabila anda tidak menerima notifikasi apapun."
 
 #: backend/i18n/cart_product_request.py:30
-#: backend/i18n/cart_product_request.py:66 lib/i18n/cart_product_request.py:49
-#: lib/i18n/cart_product_request.py:89
+#: backend/i18n/cart_product_request.py:66 lib/i18n/cart_product_request.py:64
+#: lib/i18n/cart_product_request.py:104
 #, python-brace-format
 msgid "INVALID_EXCEED_MAX_ORDER_AMOUNT{order_code}{max_order_amount}"
 msgstr ""
@@ -66,62 +68,62 @@ msgstr ""
 "{max_order_amount}. "
 
 #: backend/i18n/cart_product_request.py:36
-#: backend/i18n/cart_product_request.py:73 lib/i18n/cart_product_request.py:55
-#: lib/i18n/cart_product_request.py:96
+#: backend/i18n/cart_product_request.py:73 lib/i18n/cart_product_request.py:70
+#: lib/i18n/cart_product_request.py:111
 msgid "ADDED"
 msgstr "telah ditambah"
 
 #: backend/i18n/cart_product_request.py:38
-#: backend/i18n/cart_product_request.py:75 lib/i18n/cart_product_request.py:57
-#: lib/i18n/cart_product_request.py:98
+#: backend/i18n/cart_product_request.py:75 lib/i18n/cart_product_request.py:72
+#: lib/i18n/cart_product_request.py:113
 msgid "UPDATED"
 msgstr "telah diperbarui"
 
 #: backend/i18n/cart_product_request.py:40
-#: backend/i18n/cart_product_request.py:77 lib/i18n/cart_product_request.py:59
-#: lib/i18n/cart_product_request.py:100
+#: backend/i18n/cart_product_request.py:77 lib/i18n/cart_product_request.py:74
+#: lib/i18n/cart_product_request.py:115
 msgid "DELETED"
 msgstr "telah dibuang"
 
 #: backend/i18n/cart_product_request.py:42
-#: backend/i18n/cart_product_request.py:79 lib/i18n/cart_product_request.py:61
-#: lib/i18n/cart_product_request.py:102
+#: backend/i18n/cart_product_request.py:79 lib/i18n/cart_product_request.py:76
+#: lib/i18n/cart_product_request.py:117
 msgid "INSUFFICIENT_INV"
 msgstr "telah habis terjual"
 
 #: backend/i18n/cart_product_request.py:44
-#: backend/i18n/cart_product_request.py:81 lib/i18n/cart_product_request.py:63
-#: lib/i18n/cart_product_request.py:104
+#: backend/i18n/cart_product_request.py:81 lib/i18n/cart_product_request.py:78
+#: lib/i18n/cart_product_request.py:119
 msgid "INVALID_PRODUCT_NOT_ACTIVATED"
 msgstr "sudah tidak tersedia"
 
 #: backend/i18n/cart_product_request.py:46
-#: backend/i18n/cart_product_request.py:83 lib/i18n/cart_product_request.py:69
-#: lib/i18n/cart_product_request.py:106
+#: backend/i18n/cart_product_request.py:83 lib/i18n/cart_product_request.py:84
+#: lib/i18n/cart_product_request.py:121
 msgid "INVALID_REMOVE_NOT_ALLOWED"
 msgstr "tidak diperbolehkan untuk membuang"
 
 #: backend/i18n/cart_product_request.py:48
-#: backend/i18n/cart_product_request.py:85 lib/i18n/cart_product_request.py:71
-#: lib/i18n/cart_product_request.py:108
+#: backend/i18n/cart_product_request.py:85 lib/i18n/cart_product_request.py:86
+#: lib/i18n/cart_product_request.py:123
 msgid "INVALID_EDIT_NOT_ALLOWED"
 msgstr "tidak diperbolehkan untuk mengubah"
 
 #: backend/i18n/cart_product_request.py:50
-#: backend/i18n/cart_product_request.py:87 lib/i18n/cart_product_request.py:73
-#: lib/i18n/cart_product_request.py:110
+#: backend/i18n/cart_product_request.py:87 lib/i18n/cart_product_request.py:88
+#: lib/i18n/cart_product_request.py:125
 msgid "INVALID_ADD_ZERO_QTY"
 msgstr "tidak dapat ditambahkan dengan “0”"
 
 #: backend/i18n/cart_product_request.py:52
-#: backend/i18n/cart_product_request.py:89 lib/i18n/cart_product_request.py:75
-#: lib/i18n/cart_product_request.py:112
+#: backend/i18n/cart_product_request.py:89 lib/i18n/cart_product_request.py:90
+#: lib/i18n/cart_product_request.py:127
 msgid "N/A"
 msgstr "terjadi kesalahan operasi"
 
 #: backend/i18n/cart_product_request.py:54
-#: backend/i18n/cart_product_request.py:92 lib/i18n/cart_product_request.py:77
-#: lib/i18n/cart_product_request.py:115
+#: backend/i18n/cart_product_request.py:92 lib/i18n/cart_product_request.py:92
+#: lib/i18n/cart_product_request.py:130
 #, python-brace-format
 msgid "ITEM_INFO{order_code}{qty}{result}"
 msgstr "“{order_code}” Jumlah: {qty} {result}. "
@@ -184,6 +186,10 @@ msgstr "Live Show Seller Password Reset"
 #: backend/i18n/email/subject.py:12
 msgid "EMAIL/PASSWORD_RESET_SUCCESS/SUBJECT"
 msgstr "Live Show Seller Password Reset"
+
+#: backend/i18n/email/subject.py:16
+msgid "EMAIL/VERIFY/SUBJECT"
+msgstr "Your LSS login verification code"
 
 #: backend/i18n/payment_comfirm_mail.py:52
 msgid "EMAIL/DELIVERY_CONFIRM/ORDER_CONFIRMATION"
@@ -291,12 +297,12 @@ msgid "EMAIL/DELIVERY_CONFIRM/RECEIVER"
 msgstr "Receiver"
 
 #: lib/helper/order_helper.py:460 lib/helper/order_helper.py:594
-#: lib/helper/xlsx_helper.py:115 lib/i18n/email/order_comfirm_mail.py:50
+#: lib/helper/xlsx_helper.py:120 lib/i18n/email/order_comfirm_mail.py:50
 msgid "REPORT/COLUMN_TITLE/SHIPPING_PHONE"
 msgstr "Phone"
 
 #: lib/helper/order_helper.py:466 lib/helper/order_helper.py:610
-#: lib/helper/xlsx_helper.py:123 lib/i18n/email/order_comfirm_mail.py:55
+#: lib/helper/xlsx_helper.py:128 lib/i18n/email/order_comfirm_mail.py:55
 msgid "REPORT/COLUMN_TITLE/PICK_UP_STORE"
 msgstr "Pick Up Store"
 
@@ -306,32 +312,33 @@ msgstr "Pick Up Store"
 msgid "EMAIL/DELIVERY_CONFIRM/DELIVERY_ADDRESS"
 msgstr "Delivery Address"
 
-#: lib/helper/order_helper.py:478 lib/helper/xlsx_helper.py:126
-#: lib/i18n/email/order_comfirm_mail.py:72
+#: lib/helper/order_helper.py:478 lib/helper/xlsx_helper.py:131
+#: lib/i18n/email/order_comfirm_mail.py:78
 msgid "REPORT/COLUMN_TITLE/PAYMENT_METHOD"
 msgstr "Payment Method"
 
 #: lib/helper/order_helper.py:526 lib/helper/order_helper.py:677
 #: lib/i18n/email/delivery_comfirm_mail.py:82
-#: lib/i18n/email/order_comfirm_mail.py:173
+#: lib/i18n/email/order_comfirm_mail.py:179
 msgid "EMAIL/DELIVERY_CONFIRM/SUBTOTAL"
 msgstr "Subtotal"
 
 #: lib/helper/order_helper.py:532 lib/helper/order_helper.py:683
 #: lib/i18n/email/delivery_comfirm_mail.py:88
-#: lib/i18n/email/order_comfirm_mail.py:179
+#: lib/i18n/email/order_comfirm_mail.py:185
 msgid "EMAIL/DELIVERY_CONFIRM/DELIVERY_CHARGE"
 msgstr "Delivery Charge"
 
 #: lib/helper/order_helper.py:538 lib/helper/order_helper.py:689
 #: lib/i18n/email/delivery_comfirm_mail.py:94
-#: lib/i18n/email/order_comfirm_mail.py:185
+#: lib/i18n/email/order_comfirm_mail.py:191
 msgid "EMAIL/DELIVERY_CONFIRM/TOTAL"
 msgstr "Total"
 
 #: lib/helper/order_helper.py:551 lib/helper/order_helper.py:701
 #: lib/i18n/email/delivery_comfirm_mail.py:121
-#: lib/i18n/email/order_comfirm_mail.py:197
+#: lib/i18n/email/order_comfirm_mail.py:203
+#: templates/email_verification_code.html:15
 msgid "EMAIL/DELIVERY_CONFIRM/DO_NOT_REPLY_1"
 msgstr ""
 "Please do not reply to this e-mail. This mailbox is not monitored and you "
@@ -339,7 +346,7 @@ msgstr ""
 
 #: lib/helper/order_helper.py:552 lib/helper/order_helper.py:702
 #: lib/i18n/email/delivery_comfirm_mail.py:122
-#: lib/i18n/email/order_comfirm_mail.py:198
+#: lib/i18n/email/order_comfirm_mail.py:204
 msgid "EMAIL/DELIVERY_CONFIRM/DO_NOT_REPLY_2"
 msgstr ""
 "For questions about an order, other questions or comments, please contact "
@@ -364,87 +371,91 @@ msgstr "Payment method"
 msgid "EMAIL/ORDER_CONFIRM/PROCESS_PAYMENT"
 msgstr "Process Payment"
 
-#: lib/helper/xlsx_helper.py:111
+#: lib/helper/xlsx_helper.py:115
 msgid "REPORT/COLUMN_TITLE/ID"
 msgstr "ID"
 
-#: lib/helper/xlsx_helper.py:112
+#: lib/helper/xlsx_helper.py:116
 msgid "REPORT/COLUMN_TITLE/ORDER_DATE"
 msgstr "Order Date"
 
-#: lib/helper/xlsx_helper.py:113
+#: lib/helper/xlsx_helper.py:117
 msgid "REPORT/COLUMN_TITLE/PLATFORM"
 msgstr "Platform"
 
-#: lib/helper/xlsx_helper.py:114
+#: lib/helper/xlsx_helper.py:118
 msgid "REPORT/COLUMN_TITLE/CUSTOMER_NAME"
+msgstr "Account Name"
+
+#: lib/helper/xlsx_helper.py:119
+msgid "REPORT/COLUMN_TITLE/SHIPPING_NAME"
 msgstr "Customer Name"
 
-#: lib/helper/xlsx_helper.py:116
+#: lib/helper/xlsx_helper.py:121
 msgid "REPORT/COLUMN_TITLE/EMAIL"
 msgstr "E-mail"
 
-#: lib/helper/xlsx_helper.py:117
+#: lib/helper/xlsx_helper.py:122
 msgid "REPORT/COLUMN_TITLE/SHIPPING_METHOD"
 msgstr "Shipping_Method"
 
-#: lib/helper/xlsx_helper.py:118
+#: lib/helper/xlsx_helper.py:123
 msgid "REPORT/COLUMN_TITLE/SHIPPING_OPTION"
 msgstr "Shipping Option"
 
-#: lib/helper/xlsx_helper.py:119
+#: lib/helper/xlsx_helper.py:124
 msgid "REPORT/COLUMN_TITLE/SHIPPING_ADDRESS_1"
 msgstr "Shipping Address_1"
 
-#: lib/helper/xlsx_helper.py:120
+#: lib/helper/xlsx_helper.py:125
 msgid "REPORT/COLUMN_TITLE/LOCATION"
 msgstr "Location"
 
-#: lib/helper/xlsx_helper.py:121
+#: lib/helper/xlsx_helper.py:126
 msgid "REPORT/COLUMN_TITLE/REGION"
 msgstr "Region"
 
-#: lib/helper/xlsx_helper.py:122
+#: lib/helper/xlsx_helper.py:127
 msgid "REPORT/COLUMN_TITLE/POSTCODE"
 msgstr "Postcode"
 
-#: lib/helper/xlsx_helper.py:124
+#: lib/helper/xlsx_helper.py:129
 msgid "REPORT/COLUMN_TITLE/PICK_UP_ADDRESS"
 msgstr "Pick Up Addrwess"
 
-#: lib/helper/xlsx_helper.py:125
+#: lib/helper/xlsx_helper.py:130
 msgid "REPORT/COLUMN_TITLE/REMARK"
 msgstr "Remark"
 
-#: lib/helper/xlsx_helper.py:127
+#: lib/helper/xlsx_helper.py:132
 msgid "REPORT/COLUMN_TITLE/PAYMENT_STATUS"
 msgstr "Payment Status"
 
-#: lib/helper/xlsx_helper.py:128
+#: lib/helper/xlsx_helper.py:133
 msgid "REPORT/COLUMN_TITLE/PAYMENT_RECORD"
 msgstr "Payment Record"
 
-#: lib/helper/xlsx_helper.py:129
+#: lib/helper/xlsx_helper.py:134
 msgid "REPORT/COLUMN_TITLE/TOTAL"
 msgstr "Total"
 
-#: lib/helper/xlsx_helper.py:161
+#: lib/helper/xlsx_helper.py:166
 msgid "REPORT/SECTION_TITLE/TITLE"
 msgstr "Order Report"
 
-#: lib/helper/xlsx_helper.py:164
+#: lib/helper/xlsx_helper.py:169
 msgid "REPORT/SECTION_TITLE/CONTACT_INFO"
 msgstr "Contact Information"
 
-#: lib/helper/xlsx_helper.py:165
+#: lib/helper/xlsx_helper.py:170
 msgid "REPORT/SECTION_TITLE/DELIVERY_INFO"
 msgstr "Delivery Information"
 
-#: lib/helper/xlsx_helper.py:166 lib/i18n/email/order_comfirm_mail.py:68
+#: lib/helper/xlsx_helper.py:171 lib/i18n/email/order_comfirm_mail.py:74
 msgid "REPORT/SECTION_TITLE/PAYMENT_INFO"
 msgstr "Payment Information"
 
-#: lib/helper/xlsx_helper.py:167
+#: lib/helper/xlsx_helper.py:172
 msgid "REPORT/SECTION_TITLE/ORDER_INFO"
 msgstr "Order Information"
 
@@ -455,7 +466,7 @@ msgstr ""
 "Selamat kepada {customer_name} karena telah memenangkan undian berhadiah! "
 "Hadiah: {product_name}. Mohon periksa keranjang belanja anda."
 
-#: lib/i18n/cart_product_request.py:64
+#: lib/i18n/cart_product_request.py:79
 #, python-brace-format
 msgid "ITEM_INFO{order_code}{result}"
 msgstr "“{order_code}” {result}."
@@ -499,19 +510,23 @@ msgstr ""
 msgid "EMAIL/ORDER_CONFIRM/TITLE"
 msgstr "Thanks for your order!"
 
-#: lib/i18n/email/order_comfirm_mail.py:75
+#: lib/i18n/email/order_comfirm_mail.py:68
+msgid "EMAIL/ORDER_CONFIRM/DIRECT_PAYMENT"
+msgstr "Direct Payment"
+
+#: lib/i18n/email/order_comfirm_mail.py:81
 msgid "EMAIL/ORDER_CONFIRM/ACCOUNT_MODE"
 msgstr "Banking / Financial Services"
 
-#: lib/i18n/email/order_comfirm_mail.py:78
+#: lib/i18n/email/order_comfirm_mail.py:84
 msgid "EMAIL/ORDER_CONFIRM/SELLER_ACCOUNT"
 msgstr "Seller's account number"
 
-#: lib/i18n/email/order_comfirm_mail.py:83
+#: lib/i18n/email/order_comfirm_mail.py:89
 msgid "EMAIL/ORDER_CONFIRM/LAST_FIVE_DIGIT"
 msgstr "Billing Account Last Five Digits"
 
-#: lib/i18n/email/order_comfirm_mail.py:95
+#: lib/i18n/email/order_comfirm_mail.py:101
 msgid "EMAIL/ORDER_CONFIRM/SELLER_CONTACT"
 msgstr "Contact seller"
 
@@ -553,6 +568,26 @@ msgstr "Contact Number: +65 9489 2086"
 #: templates/email_reset_password_link.html:27
 msgid "CONTACT_INFO/ADDRESS"
 msgstr "Address: 8 Burn Road #15-13, Singapore 369977"
+
+#: templates/email_verification_code.html:9
+msgid "EMAIL/VERIFY/TITLE"
+msgstr "Hi, Someone tried to log in to your LSS account."
+
+#: templates/email_verification_code.html:10
+msgid "EMAIL/VERIFY/TEXT_1"
+msgstr "If this was you, please use the following code to log in:"
+
+#: templates/email_verification_code.html:12
+msgid "EMAIL/VERIFY/TEXT_2_1"
+msgstr "If this wasn't you, please"
+
+#: templates/email_verification_code.html:13
+msgid "EMAIL/VERIFY/TEXT_2_2"
+msgstr "reset your password"
+
+#: templates/email_verification_code.html:13
+msgid "EMAIL/VERIFY/TEXT_2_3"
+msgstr "to secure your account."
 
 #: templates/register_activation.html:10
 msgid "TITLE_ACTIVATION"
@@ -679,21 +714,3 @@ msgstr ""
 
 #~ msgid "MESSAGE_HEADER"
 #~ msgstr "Pesanan anda:"
-
-#~ msgid "EMAIL/VERIFY/SUBJECT"
-#~ msgstr "Your LSS login verification code"
-
-#~ msgid "EMAIL/VERIFY/TITLE"
-#~ msgstr "Hi, Someone tried to log in to your LSS account."
-
-#~ msgid "EMAIL/VERIFY/TEXT_1"
-#~ msgstr "If this was you, please use the following code to log in:"
-
-#~ msgid "EMAIL/VERIFY/TEXT_2_1"
-#~ msgstr "If this wasn't you, please"
-
-#~ msgid "EMAIL/VERIFY/TEXT_2_2"
-#~ msgstr "reset your password"
-
-#~ msgid "EMAIL/VERIFY/TEXT_2_3"
-#~ msgstr "to secure your account."

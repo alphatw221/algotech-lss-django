@@ -98,7 +98,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         if image in ['null', None, '', 'undefined']:
             pass
         elif image =='._no_image':
-            product.image = models.product.product.IMAGE_NULL
+            product.image = settings.GOOGLE_STORAGE_STATIC_DIR+models.product.product.IMAGE_NULL
         else:
             image_name = image.name.replace(" ","")
             image_path = default_storage.save(
@@ -140,7 +140,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         if image in ['null', None, '', 'undefined']:
             pass
         elif image =='._no_image':
-            product.image = models.product.product.IMAGE_NULL
+            product.image = settings.GOOGLE_STORAGE_STATIC_DIR+models.product.product.IMAGE_NULL
         elif image:
             image_name = image.name.replace(" ", "")
             image_path = default_storage.save(

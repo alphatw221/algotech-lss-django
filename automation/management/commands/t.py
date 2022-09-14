@@ -52,7 +52,7 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.test_set_password()
+        self.test_shit()
         # self.test_remove_campaign_comment_duplicate()
 
     def modify_database(self):
@@ -181,12 +181,17 @@ class Command(BaseCommand):
 
     
     def test_mongodb_query(self):
-        from backend.pymongo.mongodb import db
-        from api.utils.advance_query.dashboard import get_total_revenue, get_order_total_sales, get_pre_order_total_sales, \
-        get_order_total_sales_by_month,get_campaign_comment_rank, get_campaign_order_rank, get_campaign_complete_sales, get_total_order_complete_proceed,\
-        get_total_pre_order_count, get_campaign_order_complete_proceed,get_total_average_sales,get_total_average_comment_count,get_campaign_merge_order_list
+        import database
+        from pprint import pprint
+        # from backend.pymongo.mongodb import db
+        # from api.utils.advance_query.dashboard import get_total_revenue, get_order_total_sales, get_pre_order_total_sales, \
+        # get_order_total_sales_by_month,get_campaign_comment_rank, get_campaign_order_rank, get_campaign_complete_sales, get_total_order_complete_proceed,\
+        # get_total_pre_order_count, get_campaign_order_complete_proceed,get_total_average_sales,get_total_average_comment_count,get_campaign_merge_order_list
 
-        print(get_total_revenue(1))
+        # print(get_total_revenue(1))
+        # campaign_products = database.lss.campaign.get_ongoing_campaign_disallow_overbook_campaign_product()
+        pre_orders = database.lss.pre_order.get_pre_order_contain_campaign_product(9381)
+        pprint(pre_orders)
 
     def test_set_password(self):
 
@@ -420,58 +425,65 @@ class Command(BaseCommand):
         )
 
     def test_easy_store(self):
-        from plugins.easy_store import service
-        from pprint import pprint
+        from automation import jobs
 
-        shop = 'yihsuehlinlinyixue.easy.co'
-        access_token = '698f9a9a7c8bbe5f65d0207fb6cba139'
-        #product
-        # success, data = service.products.get_published_product(shop=shop, access_token=access_token,page=1)
+        jobs.easy_store.export_product_job(618,{
+        "shop": "keepsake.easy.co",
+        "access_token": "bb11090512508f226d8e6c457402ae27"
+      })
+
+        # from plugins.easy_store import service
+        # from pprint import pprint
+
+        # shop = 'yihsuehlinlinyixue.easy.co'
+        # access_token = '698f9a9a7c8bbe5f65d0207fb6cba139'
+        # #product
+        # # success, data = service.products.get_published_product(shop=shop, access_token=access_token,page=1)
         
-        #checkout
-        # line_items =  [
-        #             {
-        #                 "variant_id": 36344238,
-        #                 "quantity": 2
-        #             }
-        #         ]
+        # #checkout
+        # # line_items =  [
+        # #             {
+        # #                 "variant_id": 36344238,
+        # #                 "quantity": 2
+        # #             }
+        # #         ]
             
-        # success, data = service.checkouts.create_checkout(shop, access_token, line_items)
+        # # success, data = service.checkouts.create_checkout(shop, access_token, line_items)
         
 
-        # success, data = service.checkouts.retrieve_checkout(shop, access_token, '64ef5862-4685-4aad-ae33-2d2d82428115')
-        # success, data =  service.checkouts.update_checkout(shop, access_token, line_items, '64ef5862-4685-4aad-ae33-2d2d82428115')
+        # # success, data = service.checkouts.retrieve_checkout(shop, access_token, '64ef5862-4685-4aad-ae33-2d2d82428115')
+        # # success, data =  service.checkouts.update_checkout(shop, access_token, line_items, '64ef5862-4685-4aad-ae33-2d2d82428115')
+        # # pprint(success)
+        # # pprint(data)
+
+        # # a5318e0f-2317-445c-9c71-ab6c812666e9
+
+        # # success, data =  service.checkouts.retrieve_checkout(shop=shop, access_token=access_token, cart_token='a5318e0f-2317-445c-9c71-ab6c812666e9')
+        # # success, data =  service.checkouts.update_checkout(shop=shop, access_token=access_token, line_items=line_items, cart_token='a5318e0f-2317-445c-9c71-ab6c812666e9')
+
+
+
+        # #webhook
+
+        # # topic= 'order/create'
+        # # url = 'https://staginglss.accoladeglobal.net/api/plugin/easy_store/order/webhook/create/'
+
+        # # topic= 'order/paid'
+        # # url = 'https://staginglss.accoladeglobal.net/api/plugin/easy_store/order/webhook/paid/'
+
+        # # success, data = service.webhooks.list_webhook(shop, access_token)
+        # success, data = service.webhooks.delete_webhook(shop, access_token, 1930323)
+        # # success, data = service.webhooks.create_webhook(shop, token=access_token, topic=topic, url=url )
+
+        # #order
+        # # success, data = service.orders.retrieve_order(shop, access_token, 37069894)
+        # # success, data = service.orders.update_order(shop, access_token, {'remark':123}, 37069894)
+        # # success, data = service.orders.list_order(shop, access_token, created_at_min='2022-08-23 08:18:00')
+
+        # # 2022-08-23T08:18:22+00:00
+        # # metafields
         # pprint(success)
         # pprint(data)
-
-        # a5318e0f-2317-445c-9c71-ab6c812666e9
-
-        # success, data =  service.checkouts.retrieve_checkout(shop=shop, access_token=access_token, cart_token='a5318e0f-2317-445c-9c71-ab6c812666e9')
-        # success, data =  service.checkouts.update_checkout(shop=shop, access_token=access_token, line_items=line_items, cart_token='a5318e0f-2317-445c-9c71-ab6c812666e9')
-
-
-
-        #webhook
-
-        # topic= 'order/create'
-        # url = 'https://staginglss.accoladeglobal.net/api/plugin/easy_store/order/webhook/create/'
-
-        # topic= 'order/paid'
-        # url = 'https://staginglss.accoladeglobal.net/api/plugin/easy_store/order/webhook/paid/'
-
-        # success, data = service.webhooks.list_webhook(shop, access_token)
-        success, data = service.webhooks.delete_webhook(shop, access_token, 1930323)
-        # success, data = service.webhooks.create_webhook(shop, token=access_token, topic=topic, url=url )
-
-        #order
-        # success, data = service.orders.retrieve_order(shop, access_token, 37069894)
-        # success, data = service.orders.update_order(shop, access_token, {'remark':123}, 37069894)
-        # success, data = service.orders.list_order(shop, access_token, created_at_min='2022-08-23 08:18:00')
-
-        # 2022-08-23T08:18:22+00:00
-        # metafields
-        pprint(success)
-        pprint(data)
 
     def test_remove_campaign_comment_duplicate(self):
 
@@ -656,3 +668,26 @@ class Command(BaseCommand):
         print(data)
 
         
+    def test_cache_redis(self):
+        import database
+
+        # database.lss_cache.campaign_product.invalidate(1162,'ordr_startr','external_internal_map')
+        success, data, lock = database.lss_cache.campaign_product.leash_get_external_internal_map(1165,'ordr_startr')
+        print(success)
+        if not success:
+            with lock:
+                data = {'a':1}
+                database.lss_cache.campaign_product.set_external_internal_map(1165, 'ordr_startr', data)
+
+        
+        print(data)
+
+    def test_shit(self):
+        from automation import jobs
+        from pprint import pprint
+        c= {
+            "shop": "frog-sweat-home.myshopify.com",
+            "access_token": "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"
+        }
+        data = jobs.shopify.export_order_job(1190,c)
+        pprint(data)

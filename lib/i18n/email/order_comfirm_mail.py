@@ -63,13 +63,19 @@ def i18n_get_mail_content(order, campaign, lang=None):
     except:
         pass
 
+    payment_method = ''
+    if order.payment_method == 'direct_payment':
+        payment_method = _('EMAIL/ORDER_CONFIRM/DIRECT_PAYMENT')
+    else:
+        payment_method = order.payment_method.upper()
+
     #payment
     mail_content += '<div style="margin-top: 1%; font-size: 0.9rem; line-height: 2; sm:padding: 13px 30px;">\
                 <p style="text-align: left; font-weight: 700; font-size: 1rem; line-height: 2;">' + _('REPORT/SECTION_TITLE/PAYMENT_INFO') + '</p>\
                     <div style="border-bottom: 3px solid #ffd000; width: 20%; margin-bottom: 3%;"></div>'
 
     mail_content+=  f'<tr>\
-                        <td style="color: #4b4b4b; font-weight: 600; width: 35%; text-align:left;" valign="top">' + _('REPORT/COLUMN_TITLE/PAYMENT_METHOD') + f' : {order.payment_method}</td>\
+                        <td style="color: #4b4b4b; font-weight: 600; width: 35%; text-align:left;" valign="top">' + _('REPORT/COLUMN_TITLE/PAYMENT_METHOD') + f' : {payment_method}</td>\
                     </tr>\
                     <tr>\
                         <td style="color: #4b4b4b; font-weight: 600; width: 35%; text-align:left;" valign="top">' + _('EMAIL/ORDER_CONFIRM/ACCOUNT_MODE') + f' : {order.meta["account_mode"]} </td>\
