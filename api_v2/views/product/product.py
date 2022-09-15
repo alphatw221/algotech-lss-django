@@ -316,5 +316,7 @@ class ProductViewSet(viewsets.ModelViewSet):
             print(email)
             
         
+        product.meta['wish_list'] = [] 
+        product.save()
         
         return Response("OK", status=status.HTTP_200_OK)
