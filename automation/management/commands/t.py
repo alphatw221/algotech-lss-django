@@ -688,7 +688,7 @@ class Command(BaseCommand):
         from plugins.shopify.service.checkouts import create_checkout
 
 
-        user_subscription = models.user.user_subscription.UserSubscription.objects.get(id=631)
+        user_subscription = models.user.user_subscription.UserSubscription.objects.get(id=566)
         c = user_subscription.user_plan.get('plugins').get('shopify')
         print(c)
         # line_items=[{'variant_id':41928314388671,'quantity':1}]
@@ -701,6 +701,7 @@ class Command(BaseCommand):
         #     "access_token": "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"
         # }
         data = jobs.shopify.export_product_job(user_subscription.id,c)
+        pprint(data)
         # print(len(data.get('products')))
         # data = jobs.shopify.export_order_job(1193,c)
         # print(len(data.get('orders')))

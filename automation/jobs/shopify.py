@@ -59,10 +59,10 @@ def export_product_job(user_subscription_id, credential):
 
                 if variant_id in product_dict:
                     lss_product_id = product_dict[variant_id]
-                    # models.product.product.Product.objects.filter(id=lss_product_id).update(**lss_product_data)
+                    models.product.product.Product.objects.filter(id=lss_product_id).update(**lss_product_data)
                 else:
                     pass
-                    # models.product.product.Product.objects.create(**lss_product_data, meta = meta_data)
+                    models.product.product.Product.objects.create(**lss_product_data, meta = meta_data)
 
         user_subscription.save()
 
