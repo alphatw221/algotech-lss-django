@@ -52,7 +52,7 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.test_shopify()
+        self.test_easy_store()
         # self.test_remove_campaign_comment_duplicate()
 
     def modify_database(self):
@@ -705,3 +705,15 @@ class Command(BaseCommand):
         # data = jobs.shopify.export_order_job(1193,c)
         # print(len(data.get('orders')))
         # pprint(data)
+    def test_easy_store(self):
+        from api import models
+        from automation import jobs
+        from pprint import pprint
+
+        user_subscription = models.user.user_subscription.UserSubscription.objects.get(id=618)
+        c = user_subscription.user_plan.get('plugins').get('easy_store')
+        print(c)
+        campaign_id = 1198
+        jobs.easy_store.export_order_job(campaign_id, c)
+
+
