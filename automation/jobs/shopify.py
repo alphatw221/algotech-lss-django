@@ -89,6 +89,7 @@ def export_order_job(campaign_id, credential):
             created_at_min=since
             )
 
+        return data
 
         if not success:
             raise Exception()

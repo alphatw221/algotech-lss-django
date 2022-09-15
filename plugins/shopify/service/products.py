@@ -4,7 +4,7 @@ from .__service import get_header, load_response
 import json
 
 def __get_url(shop):
-    return f"https://{shop}/admin/api/2022-07/products.json"
+    return f"https://{shop}/admin/api/2022-07/products.json?status=active"
 
 def get_published_product(shop, access_token):
 
