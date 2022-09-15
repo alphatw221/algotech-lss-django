@@ -39,7 +39,10 @@ class CartViewSet(viewsets.GenericViewSet):
                 continue
             variant_id = internal_external_map[campaign_product_id_str]
             line_items.append({'variant_id': variant_id, 'quantity': product.get('qty')})
-        
+
+        if pre_order.subtotal>200:      # TEMP
+            pre_order.discount+=59      # TEMP
+            
         success, response = shopify_service.checkouts.create_checkout(credential.get('shop'), credential.get('access_token'), line_items, pre_order.discount)
         if not success:
             raise lib.error_handle.error.api_error.ApiCallerError('please try again')
