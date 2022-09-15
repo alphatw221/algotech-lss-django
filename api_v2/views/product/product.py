@@ -11,6 +11,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser
 
+from automation import jobs
 
 from api import models
 from api import rule
@@ -284,3 +285,38 @@ class ProductViewSet(viewsets.ModelViewSet):
             obj.save()
 
         return Response(categories_list, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['GET'], url_path=r'(?P<product_id>[^/.]+)/wish_list/add', permission_classes=())
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def wish_list_add(self, request, product_id):
+        email, = lib.util.getter.getparams(request, ('email',), with_user=False)
+        product = lib.util.verify.Verify.get_product_by_id(product_id)
+        
+        if "wish_list" in product.meta:
+            if not email in product.meta["wish_list"]:
+                product.meta['wish_list'].append(email)
+        else:
+            product.meta['wish_list'] = [email]
+        
+        product.save()
+        return Response(models.product.product.ProductSerializer(product).data, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['GET'], url_path=r'(?P<product_id>[^/.]+)/wish_list/send/email', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def wish_list_send_email(self, request, product_id):
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        product = lib.util.verify.Verify.get_product_from_user_subscription(user_subscription, product_id)
+        
+        for email in product.meta['wish_list']:
+            title = ""
+            #send email or do something #TODO
+            # content = lib.helper.order_helper.OrderHelper.get_checkout_email_content(product,email)
+            # jobs.send_email_job.send_email_job(title, email, content=content)
+            print(email)
+            
+        
+        product.meta['wish_list'] = [] 
+        product.save()
+        
+        return Response("OK", status=status.HTTP_200_OK)
