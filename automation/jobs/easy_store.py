@@ -99,7 +99,6 @@ def export_order_job(campaign_id, credential):
         while(page_count>=page):
             success, data = easy_store_service.orders.list_order(credential.get('shop'), credential.get('access_token'), 
             created_at_min=since, 
-            financial_status='paid',
             page=page)
             
             if not success:
