@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-30 10:44+0000\n"
+"POT-Creation-Date: 2022-09-13 10:25+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -42,7 +42,8 @@ msgid "MESSAGE_PREFIX"
 msgstr "Live Show Seller: "
 
 #: backend/i18n/cart_product_request.py:21 lib/i18n/cart_product_request.py:24
-#: lib/i18n/cart_product_request.py:40
+#: lib/i18n/cart_product_request.py:32 lib/i18n/cart_product_request.py:40
+#: lib/i18n/cart_product_request.py:55
 #, python-brace-format
 msgid "SHOPPING_CART_INFO{link}"
 msgstr ""
@@ -50,76 +51,77 @@ msgstr ""
 "{link}"
 
 #: backend/i18n/cart_product_request.py:23 lib/i18n/cart_product_request.py:26
-#: lib/i18n/cart_product_request.py:42
+#: lib/i18n/cart_product_request.py:34 lib/i18n/cart_product_request.py:42
+#: lib/i18n/cart_product_request.py:57
 msgid "MORE_INFO_IN_PM_NOTICE"
 msgstr ""
 "Link giỏ hàng được gửi qua FB Messenger, vui lòng liên hệ quản trị viên "
 "trang (page admin) nếu không nhận được thông báo."
 
 #: backend/i18n/cart_product_request.py:30
-#: backend/i18n/cart_product_request.py:66 lib/i18n/cart_product_request.py:49
-#: lib/i18n/cart_product_request.py:89
+#: backend/i18n/cart_product_request.py:66 lib/i18n/cart_product_request.py:64
+#: lib/i18n/cart_product_request.py:104
 #, python-brace-format
 msgid "INVALID_EXCEED_MAX_ORDER_AMOUNT{order_code}{max_order_amount}"
 msgstr "\"{order_code}\" có số lượng đặt hàng tối đa là {max_order_amount}. "
 
 #: backend/i18n/cart_product_request.py:36
-#: backend/i18n/cart_product_request.py:73 lib/i18n/cart_product_request.py:55
-#: lib/i18n/cart_product_request.py:96
+#: backend/i18n/cart_product_request.py:73 lib/i18n/cart_product_request.py:70
+#: lib/i18n/cart_product_request.py:111
 msgid "ADDED"
 msgstr "được thêm vào"
 
 #: backend/i18n/cart_product_request.py:38
-#: backend/i18n/cart_product_request.py:75 lib/i18n/cart_product_request.py:57
-#: lib/i18n/cart_product_request.py:98
+#: backend/i18n/cart_product_request.py:75 lib/i18n/cart_product_request.py:72
+#: lib/i18n/cart_product_request.py:113
 msgid "UPDATED"
 msgstr "được cập nhật"
 
 #: backend/i18n/cart_product_request.py:40
-#: backend/i18n/cart_product_request.py:77 lib/i18n/cart_product_request.py:59
-#: lib/i18n/cart_product_request.py:100
+#: backend/i18n/cart_product_request.py:77 lib/i18n/cart_product_request.py:74
+#: lib/i18n/cart_product_request.py:115
 msgid "DELETED"
 msgstr "được xóa bỏ"
 
 #: backend/i18n/cart_product_request.py:42
-#: backend/i18n/cart_product_request.py:79 lib/i18n/cart_product_request.py:61
-#: lib/i18n/cart_product_request.py:102
+#: backend/i18n/cart_product_request.py:79 lib/i18n/cart_product_request.py:76
+#: lib/i18n/cart_product_request.py:117
 msgid "INSUFFICIENT_INV"
 msgstr "đã bán hết"
 
 #: backend/i18n/cart_product_request.py:44
-#: backend/i18n/cart_product_request.py:81 lib/i18n/cart_product_request.py:63
-#: lib/i18n/cart_product_request.py:104
+#: backend/i18n/cart_product_request.py:81 lib/i18n/cart_product_request.py:78
+#: lib/i18n/cart_product_request.py:119
 msgid "INVALID_PRODUCT_NOT_ACTIVATED"
 msgstr "không có sẵn"
 
 #: backend/i18n/cart_product_request.py:46
-#: backend/i18n/cart_product_request.py:83 lib/i18n/cart_product_request.py:69
-#: lib/i18n/cart_product_request.py:106
+#: backend/i18n/cart_product_request.py:83 lib/i18n/cart_product_request.py:84
+#: lib/i18n/cart_product_request.py:121
 msgid "INVALID_REMOVE_NOT_ALLOWED"
 msgstr "không được phép xóa bỏ"
 
 #: backend/i18n/cart_product_request.py:48
-#: backend/i18n/cart_product_request.py:85 lib/i18n/cart_product_request.py:71
-#: lib/i18n/cart_product_request.py:108
+#: backend/i18n/cart_product_request.py:85 lib/i18n/cart_product_request.py:86
+#: lib/i18n/cart_product_request.py:123
 msgid "INVALID_EDIT_NOT_ALLOWED"
 msgstr "không được phép chỉnh sửa"
 
 #: backend/i18n/cart_product_request.py:50
-#: backend/i18n/cart_product_request.py:87 lib/i18n/cart_product_request.py:73
-#: lib/i18n/cart_product_request.py:110
+#: backend/i18n/cart_product_request.py:87 lib/i18n/cart_product_request.py:88
+#: lib/i18n/cart_product_request.py:125
 msgid "INVALID_ADD_ZERO_QTY"
 msgstr "không thể thêm vào với số lượng bằng 0"
 
 #: backend/i18n/cart_product_request.py:52
-#: backend/i18n/cart_product_request.py:89 lib/i18n/cart_product_request.py:75
-#: lib/i18n/cart_product_request.py:112
+#: backend/i18n/cart_product_request.py:89 lib/i18n/cart_product_request.py:90
+#: lib/i18n/cart_product_request.py:127
 msgid "N/A"
 msgstr "lỗi hoạt động"
 
 #: backend/i18n/cart_product_request.py:54
-#: backend/i18n/cart_product_request.py:92 lib/i18n/cart_product_request.py:77
-#: lib/i18n/cart_product_request.py:115
+#: backend/i18n/cart_product_request.py:92 lib/i18n/cart_product_request.py:92
+#: lib/i18n/cart_product_request.py:130
 #, python-brace-format
 msgid "ITEM_INFO{order_code}{qty}{result}"
 msgstr "\"{order_code}\" Số lượng: {qty} {result}. "
@@ -180,6 +182,10 @@ msgstr "Live Show Seller Xin chào"
 #: backend/i18n/email/subject.py:12
 msgid "EMAIL/PASSWORD_RESET_SUCCESS/SUBJECT"
 msgstr "Mật khẩu Live Show Seller của bạn đã được thay đổi thành công"
+
+#: backend/i18n/email/subject.py:16
+msgid "EMAIL/VERIFY/SUBJECT"
+msgstr "Your LSS login verification code"
 
 #: backend/i18n/payment_comfirm_mail.py:52
 msgid "EMAIL/DELIVERY_CONFIRM/ORDER_CONFIRMATION"
@@ -287,12 +293,12 @@ msgid "EMAIL/DELIVERY_CONFIRM/RECEIVER"
 msgstr "Người nhận"
 
 #: lib/helper/order_helper.py:460 lib/helper/order_helper.py:594
-#: lib/helper/xlsx_helper.py:115 lib/i18n/email/order_comfirm_mail.py:50
+#: lib/helper/xlsx_helper.py:120 lib/i18n/email/order_comfirm_mail.py:50
 msgid "REPORT/COLUMN_TITLE/SHIPPING_PHONE"
 msgstr "Số điện thoại"
 
 #: lib/helper/order_helper.py:466 lib/helper/order_helper.py:610
-#: lib/helper/xlsx_helper.py:123 lib/i18n/email/order_comfirm_mail.py:55
+#: lib/helper/xlsx_helper.py:128 lib/i18n/email/order_comfirm_mail.py:55
 msgid "REPORT/COLUMN_TITLE/PICK_UP_STORE"
 msgstr "Tên cửa hàng"
 
@@ -302,32 +308,33 @@ msgstr "Tên cửa hàng"
 msgid "EMAIL/DELIVERY_CONFIRM/DELIVERY_ADDRESS"
 msgstr "Địa chỉ giao hàng"
 
-#: lib/helper/order_helper.py:478 lib/helper/xlsx_helper.py:126
-#: lib/i18n/email/order_comfirm_mail.py:72
+#: lib/helper/order_helper.py:478 lib/helper/xlsx_helper.py:131
+#: lib/i18n/email/order_comfirm_mail.py:78
 msgid "REPORT/COLUMN_TITLE/PAYMENT_METHOD"
 msgstr "Phương thức thanh toán"
 
 #: lib/helper/order_helper.py:526 lib/helper/order_helper.py:677
 #: lib/i18n/email/delivery_comfirm_mail.py:82
-#: lib/i18n/email/order_comfirm_mail.py:173
+#: lib/i18n/email/order_comfirm_mail.py:179
 msgid "EMAIL/DELIVERY_CONFIRM/SUBTOTAL"
 msgstr "Tổng phụ"
 
 #: lib/helper/order_helper.py:532 lib/helper/order_helper.py:683
 #: lib/i18n/email/delivery_comfirm_mail.py:88
-#: lib/i18n/email/order_comfirm_mail.py:179
+#: lib/i18n/email/order_comfirm_mail.py:185
 msgid "EMAIL/DELIVERY_CONFIRM/DELIVERY_CHARGE"
 msgstr "Phí giao hàng"
 
 #: lib/helper/order_helper.py:538 lib/helper/order_helper.py:689
 #: lib/i18n/email/delivery_comfirm_mail.py:94
-#: lib/i18n/email/order_comfirm_mail.py:185
+#: lib/i18n/email/order_comfirm_mail.py:191
 msgid "EMAIL/DELIVERY_CONFIRM/TOTAL"
 msgstr "Tổng số"
 
 #: lib/helper/order_helper.py:551 lib/helper/order_helper.py:701
 #: lib/i18n/email/delivery_comfirm_mail.py:121
-#: lib/i18n/email/order_comfirm_mail.py:197
+#: lib/i18n/email/order_comfirm_mail.py:203
+#: templates/email_verification_code.html:15
 msgid "EMAIL/DELIVERY_CONFIRM/DO_NOT_REPLY_1"
 msgstr ""
 "Vui lòng không trả lời e-mail này. Hộp thư này không được theo dõi và bạn sẽ "
@@ -335,7 +342,7 @@ msgstr ""
 
 #: lib/helper/order_helper.py:552 lib/helper/order_helper.py:702
 #: lib/i18n/email/delivery_comfirm_mail.py:122
-#: lib/i18n/email/order_comfirm_mail.py:198
+#: lib/i18n/email/order_comfirm_mail.py:204
 msgid "EMAIL/DELIVERY_CONFIRM/DO_NOT_REPLY_2"
 msgstr ""
 "Đối với các câu hỏi về đơn đặt hàng, các câu hỏi hoặc nhận xét khác, vui "
@@ -361,87 +368,91 @@ msgstr "Phương pháp vận chuyển"
 msgid "EMAIL/ORDER_CONFIRM/PROCESS_PAYMENT"
 msgstr "Quá trình thanh toán"
 
-#: lib/helper/xlsx_helper.py:111
+#: lib/helper/xlsx_helper.py:115
 msgid "REPORT/COLUMN_TITLE/ID"
 msgstr "ID"
 
-#: lib/helper/xlsx_helper.py:112
+#: lib/helper/xlsx_helper.py:116
 msgid "REPORT/COLUMN_TITLE/ORDER_DATE"
 msgstr "Ngày đặt hàng"
 
-#: lib/helper/xlsx_helper.py:113
+#: lib/helper/xlsx_helper.py:117
 msgid "REPORT/COLUMN_TITLE/PLATFORM"
 msgstr "Nền tảng"
 
-#: lib/helper/xlsx_helper.py:114
+#: lib/helper/xlsx_helper.py:118
 msgid "REPORT/COLUMN_TITLE/CUSTOMER_NAME"
 msgstr "Tên khách hàng"
 
-#: lib/helper/xlsx_helper.py:116
+#: lib/helper/xlsx_helper.py:119
+msgid "REPORT/COLUMN_TITLE/SHIPPING_NAME"
+msgstr "Tên tài khoản"
+
+#: lib/helper/xlsx_helper.py:121
 msgid "REPORT/COLUMN_TITLE/EMAIL"
 msgstr "E-mail"
 
-#: lib/helper/xlsx_helper.py:117
+#: lib/helper/xlsx_helper.py:122
 msgid "REPORT/COLUMN_TITLE/SHIPPING_METHOD"
 msgstr "Phương thức giao hàng"
 
-#: lib/helper/xlsx_helper.py:118
+#: lib/helper/xlsx_helper.py:123
 msgid "REPORT/COLUMN_TITLE/SHIPPING_OPTION"
 msgstr "Tùy chọn giao hàng"
 
-#: lib/helper/xlsx_helper.py:119
+#: lib/helper/xlsx_helper.py:124
 msgid "REPORT/COLUMN_TITLE/SHIPPING_ADDRESS_1"
 msgstr "Địa chỉ giao hàng"
 
-#: lib/helper/xlsx_helper.py:120
+#: lib/helper/xlsx_helper.py:125
 msgid "REPORT/COLUMN_TITLE/LOCATION"
 msgstr "Địa điểm "
 
-#: lib/helper/xlsx_helper.py:121
+#: lib/helper/xlsx_helper.py:126
 msgid "REPORT/COLUMN_TITLE/REGION"
 msgstr "Khu vực"
 
-#: lib/helper/xlsx_helper.py:122
+#: lib/helper/xlsx_helper.py:127
 msgid "REPORT/COLUMN_TITLE/POSTCODE"
 msgstr "Mã bưu điện"
 
-#: lib/helper/xlsx_helper.py:124
+#: lib/helper/xlsx_helper.py:129
 msgid "REPORT/COLUMN_TITLE/PICK_UP_ADDRESS"
 msgstr "Địa chỉ cửa hàng"
 
-#: lib/helper/xlsx_helper.py:125
+#: lib/helper/xlsx_helper.py:130
 msgid "REPORT/COLUMN_TITLE/REMARK"
 msgstr "Nhận xét"
 
-#: lib/helper/xlsx_helper.py:127
+#: lib/helper/xlsx_helper.py:132
 msgid "REPORT/COLUMN_TITLE/PAYMENT_STATUS"
 msgstr "Tình trạng thanh toán"
 
-#: lib/helper/xlsx_helper.py:128
+#: lib/helper/xlsx_helper.py:133
 msgid "REPORT/COLUMN_TITLE/PAYMENT_RECORD"
 msgstr "Hóa đơn thanh toán"
 
-#: lib/helper/xlsx_helper.py:129
+#: lib/helper/xlsx_helper.py:134
 msgid "REPORT/COLUMN_TITLE/TOTAL"
 msgstr "Tổng thanh toán"
 
-#: lib/helper/xlsx_helper.py:161
+#: lib/helper/xlsx_helper.py:166
 msgid "REPORT/SECTION_TITLE/TITLE"
 msgstr "Báo cáo đơn hàng"
 
-#: lib/helper/xlsx_helper.py:164
+#: lib/helper/xlsx_helper.py:169
 msgid "REPORT/SECTION_TITLE/CONTACT_INFO"
 msgstr "Thông tin liên lạc"
 
-#: lib/helper/xlsx_helper.py:165
+#: lib/helper/xlsx_helper.py:170
 msgid "REPORT/SECTION_TITLE/DELIVERY_INFO"
 msgstr "Thông tin giao hàng"
 
-#: lib/helper/xlsx_helper.py:166 lib/i18n/email/order_comfirm_mail.py:68
+#: lib/helper/xlsx_helper.py:171 lib/i18n/email/order_comfirm_mail.py:74
 msgid "REPORT/SECTION_TITLE/PAYMENT_INFO"
 msgstr "Thông tin thanh toán"
 
-#: lib/helper/xlsx_helper.py:167
+#: lib/helper/xlsx_helper.py:172
 msgid "REPORT/SECTION_TITLE/ORDER_INFO"
 msgstr "Thông tin đặt hàng"
 
@@ -452,7 +463,7 @@ msgstr ""
 "Xin chúc mừng {customer_name} đã rút thăm trúng thưởng!"
 "Giải: {product_name}. Vui lòng kiểm tra giỏ hàng của bạn."
 
-#: lib/i18n/cart_product_request.py:64
+#: lib/i18n/cart_product_request.py:79
 #, python-brace-format
 msgid "ITEM_INFO{order_code}{result}"
 msgstr "\"{order_code}\" {result}."
@@ -496,19 +507,23 @@ msgstr ""
 msgid "EMAIL/ORDER_CONFIRM/TITLE"
 msgstr "Đơn đặt hàng của bạn đã được xác nhận!"
 
-#: lib/i18n/email/order_comfirm_mail.py:75
+#: lib/i18n/email/order_comfirm_mail.py:68
+msgid "EMAIL/ORDER_CONFIRM/DIRECT_PAYMENT"
+msgstr "Thanh toán trực tiếp"
+
+#: lib/i18n/email/order_comfirm_mail.py:81
 msgid "EMAIL/ORDER_CONFIRM/ACCOUNT_MODE"
 msgstr "Ngân hàng / Dịch vụ tài chính"
 
-#: lib/i18n/email/order_comfirm_mail.py:78
+#: lib/i18n/email/order_comfirm_mail.py:84
 msgid "EMAIL/ORDER_CONFIRM/SELLER_ACCOUNT"
 msgstr "Của người bán số tài khoản"
 
-#: lib/i18n/email/order_comfirm_mail.py:83
+#: lib/i18n/email/order_comfirm_mail.py:89
 msgid "EMAIL/ORDER_CONFIRM/LAST_FIVE_DIGIT"
 msgstr "Tài khoản thanh toán Năm chữ số cuối cùng"
 
-#: lib/i18n/email/order_comfirm_mail.py:95
+#: lib/i18n/email/order_comfirm_mail.py:101
 msgid "EMAIL/ORDER_CONFIRM/SELLER_CONTACT"
 msgstr "Liên hệ với người bán"
 
@@ -551,6 +566,26 @@ msgstr "Contact Number: +65 9489 2086"
 #: templates/email_reset_password_link.html:27
 msgid "CONTACT_INFO/ADDRESS"
 msgstr "Address: 8 Burn Road #15-13, Singapore 369977"
+
+#: templates/email_verification_code.html:9
+msgid "EMAIL/VERIFY/TITLE"
+msgstr "Hi, Someone tried to log in to your LSS account."
+
+#: templates/email_verification_code.html:10
+msgid "EMAIL/VERIFY/TEXT_1"
+msgstr "If this was you, please use the following code to log in:"
+
+#: templates/email_verification_code.html:12
+msgid "EMAIL/VERIFY/TEXT_2_1"
+msgstr "If this wasn't you, please"
+
+#: templates/email_verification_code.html:13
+msgid "EMAIL/VERIFY/TEXT_2_2"
+msgstr "reset your password"
+
+#: templates/email_verification_code.html:13
+msgid "EMAIL/VERIFY/TEXT_2_3"
+msgstr "to secure your account."
 
 #: templates/register_activation.html:10
 msgid "TITLE_ACTIVATION"
@@ -690,21 +725,3 @@ msgstr ""
 
 #~ msgid "EMAIL/ORDER_CONFIRM/TOTAL"
 #~ msgstr "Tổng số"
-
-#~ msgid "EMAIL/VERIFY/SUBJECT"
-#~ msgstr "Your LSS login verification code"
-
-#~ msgid "EMAIL/VERIFY/TITLE"
-#~ msgstr "Hi, Someone tried to log in to your LSS account."
-
-#~ msgid "EMAIL/VERIFY/TEXT_1"
-#~ msgstr "If this was you, please use the following code to log in:"
-
-#~ msgid "EMAIL/VERIFY/TEXT_2_1"
-#~ msgstr "If this wasn't you, please"
-
-#~ msgid "EMAIL/VERIFY/TEXT_2_2"
-#~ msgstr "reset your password"
-
-#~ msgid "EMAIL/VERIFY/TEXT_2_3"
-#~ msgstr "to secure your account."

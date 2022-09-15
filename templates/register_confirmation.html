@@ -18,7 +18,7 @@
         </div> -->
         
         <div>
-            <img src="https://storage.googleapis.com/lss_public_bucket/static/Welcome-400x150.jpg">
+            <img src="{% settings_value "WELCOME_HEADER__URL" %}">
             <h3>{% translate "TITLE_WELCOME" %}, {{ firstName }} !</h3>
         </div>
         <br>
@@ -28,7 +28,7 @@
         <br>
         <div>
             <p>{% translate "THANKS_PHRASE_WELCOME" %}</p>
-            <p>{% translate "LOGIN_1_WELCOME" %} <a href="https://v1login.liveshowseller.com/login">{% translate "LOGIN_2_WELCOME" %}</a> {% translate "LOGIN_3_WELCOME" %}</p>
+            <p>{% translate "LOGIN_1_WELCOME" %} <a href="{% settings_value "WEB_SERVER_URL" %}/login">{% translate "LOGIN_2_WELCOME" %}</a> {% translate "LOGIN_3_WELCOME" %}</p>
         </div>
         <div>
             <p>Email: {{ email }}</p>
@@ -38,14 +38,14 @@
         <div>
             <p>{% translate "PLAN_CHOOSE_1_WELCOME" %}</p>
             <p>{% translate "PLAN_CHOOSE_2_WELCOME" %}</p>
-            <p>{% translate "PLAN_CHOOSE_3_WELCOME" %} <a href="">lss@algotech.app</a> {% translate "PLAN_CHOOSE_4_WELCOME" %}</p>
+            <p>{% translate "PLAN_CHOOSE_3_WELCOME" %} <a href="">{% settings_value "NOTIFICATION_EMAIL" %}</a> {% translate "PLAN_CHOOSE_4_WELCOME" %}</p>
         </div>
         <br>
         <div>
             <p>{% translate "CONGRATS_1_WELCOME" %}</p>
             <p>{% translate "CONGRATS_2_WELCOME" %}</p>
             <p>{% translate "CONGRATS_3_WELCOME" %}</p>
-            <img src="https://storage.googleapis.com/lss_public_bucket/static/LSSlogo-300-172.png" style="width: 200px">
+            <img src="{% settings_value "LOGO_URL" %}" style="width: 200px">
         </div>
 
     </body>

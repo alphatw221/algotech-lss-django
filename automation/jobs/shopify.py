@@ -13,6 +13,7 @@ from plugins.shopify import lib as shopify_lib
 from api import models
 
 import traceback
+import database
 
 PLUGIN_SHOPIFY = 'shopify'
 
@@ -33,11 +34,11 @@ def export_product_job(user_subscription_id, credential):
             product_id = product.get('id')
 
             tags = product.get('tags').split(',')
-            if tags:
-                for tag in tags:
-                    if tag not in tag_set:
-                        product_categories.append(tag)
-                        tag_set.add(tag)
+            # if tags:
+            for tag in tags:
+                if tag not in tag_set:
+                    product_categories.append(tag)
+                    tag_set.add(tag)
 
 
             for variant in product.get('variants'):
@@ -78,74 +79,53 @@ def export_order_job(campaign_id, credential):
     try:
         campaign = models.campaign.campaign.Campaign.objects.get(id=campaign_id)
 
-        shopify_order_dict = {str(order.meta.get('shopify',{}).get('id')):order.id for order in campaign.orders.all() if order.meta.get('shopify',{}).get('id')}
-
+        shopify_order_dict = {str(order.meta.get(PLUGIN_SHOPIFY,{}).get('id')):order.id for order in campaign.orders.all() if order.meta.get(PLUGIN_SHOPIFY,{}).get('id')}
+        campaign_product_external_internal_map = shopify_lib.mapping_helper.CampaignProduct.get_external_internal_map(campaign)
         since = campaign.start_at.strftime("%Y-%m-%d %H:%M:%S")
         
-        success, data = shopify_service.orders.list_order(credential.get('shop'), credential.get('access_token'))
-        
+        success, data = shopify_service.orders.list_order(
+            credential.get('shop'), 
+            credential.get('access_token'), 
+            created_at_min=since
+            )
+
+        return data
+
         if not success:
             raise Exception()
         
 
         for order in data.get('orders'):
             try:
-                order_key = order['landing_site']
-                if order_key:
-                    order_key = order_key[order_key.find('/')+1:order_key.find('/invoices')]
+                if order.get('financial_status')!='paid':   #shopify status no paid
+                    continue
+            
+                landing_site = order.get('landing_site','')
+                if not landing_site:
+                    continue
+                
+                order_key = landing_site[-32:]
                 
                 if order_key not in campaign.meta:
-                    print(order_key)
                     continue
-                pre_order_id = campaign.meta[order_key]
-                pre_order = models.order.pre_order.PreOrder.objects.get(id=pre_order_id)
+                lss_pre_order_id = campaign.meta[order_key]
+                lss_pre_order = models.order.pre_order.PreOrder.objects.get(id=lss_pre_order_id)
 
-                if str(order['id']) in shopify_order_dict:
-                    lss_order_id = shopify_order_dict[str(order['id'])]
-                    lss_order = models.order.order.Order.objects.get(id=lss_order_id)
+                lss_order_data=shopify_lib.transformer.to_lss_order(lss_pre_order, order, campaign_product_external_internal_map)
 
-                    lss_order.status = models.order.order.STATUS_COMPLETE if order['financial_status']=='paid' else models.order.order.STATUS_REVIEW
-                    lss_order.discount = float(order['total_discounts'])
-                    lss_order.subtotal = float(order['subtotal_price'])
-                    lss_order.shipping_cost = float(order['total_shipping_price_set']['shop_money']['amount'])
-                    lss_order.total = float(order['total_price'])
-                    lss_order.payment_method = order['payment_gateway_names'][0]
-                    
-                    lss_order.shipping_location = float(order['shipping_address']['city'])
-                    lss_order.shipping_address_1 = float(order['shipping_address']['address1'])
-                    lss_order.shipping_postcode = float(order['shipping_address']['zip'])
-                    lss_order.shipping_first_name = float(order['shipping_address']['first_name'])
-                    lss_order.shipping_last_name = float(order['shipping_address']['last_name'])
-                    lss_order.shipping_method = "delivery"
-                    
-                    lss_order.products = {'shopify':True}
-                    lss_order.meta['shopify']=order
-                    lss_order.save()
-                else:
-                    models.order.order.Order.objects.create(
-                        campaign = campaign,
-                        customer_id = pre_order.customer_id,
-                        customer_name = pre_order.customer_name,
-                        customer_img = pre_order.customer_img,
-                        platform = pre_order.platform,
-                        status = models.order.order.STATUS_COMPLETE if order['financial_status']=='paid' else models.order.order.STATUS_REVIEW,
-                        discount = float(order['total_discounts']),
-                        subtotal = float(order['subtotal_price']),
-                        shipping_cost = float(order['total_shipping_price_set']['shop_money']['amount']),
-                        payment_method = order['payment_gateway_names'][0],
-                        
-                        shipping_location = float(order['shipping_address']['city']),
-                        shipping_address_1 = float(order['shipping_address']['address1']),
-                        shipping_postcode = float(order['shipping_address']['zip']),
-                        shipping_first_name = float(order['shipping_address']['first_name']),
-                        shipping_last_name = float(order['shipping_address']['last_name']),
-                        shipping_method = "delivery",
-                        
-                        products = {'shopify':True},
-                        total = float(order['total_price']),
+                if str(order.get('id')) in shopify_order_dict:
+                    continue
 
-                        meta = {'shopify':order}
-                    )
+                lss_order = models.order.order.Order.objects.create(**lss_order_data)
+
+                for campaign_product_id_str, product in lss_order.products.items():
+                    database.lss.campaign_product.CampaignProduct(id = int(campaign_product_id_str)).sold_from_external(product.get('qty'), sync=False) 
+
+                for campaign_product_id_str, product in lss_pre_order.products.items():
+                    database.lss.campaign_product.CampaignProduct(id = int(campaign_product_id_str)).customer_return(product.get('qty'), sync=False) #do this anyway
+                database.lss.pre_order.PreOrder(id=lss_pre_order.id).reset_pre_order(sync=False)        #do this anyway
+                database.lss.order_product.OrderProduct.transfer_to_order(lss_pre_order, lss_order)     #do this anyway
+
 
             except Exception as e:
                 print(traceback.format_exc())

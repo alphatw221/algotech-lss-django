@@ -292,7 +292,7 @@ LOCAL_API_SERVER = "http://localhost:8001"
 TEST_API_SERVER = "http://192.168.74.114/lss-backend"
 
 # Live Show Seller info
-WEB_SERVER_URL = "https://v1login.liveshowseller.com"
+WEB_SERVER_URL = "https://v2login.liveshowseller.com"
 # for social lab
 # WEB_SERVER_URL = "https://plusone.sociallab.ph/lss/public"
 
@@ -503,3 +503,4 @@ RECAPTCHA_SECRET_KEY='6LeNPyMhAAAAADlvfRDj_WThJc7pCrFzFFaPgwWz'
 
 # template global value
 LOGO_URL = GOOGLE_STORAGE_STATIC_DIR + "LSSlogo-300-172.png"
+WELCOME_HEADER__URL = GOOGLE_STORAGE_STATIC_DIR + "Welcome-400x150.jpg"
