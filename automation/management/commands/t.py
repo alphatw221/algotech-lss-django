@@ -52,7 +52,7 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.test_easy_store()
+        self.test_shopify()
         # self.test_remove_campaign_comment_duplicate()
 
     def modify_database(self):
@@ -688,19 +688,19 @@ class Command(BaseCommand):
         from plugins.shopify.service.checkouts import create_checkout
 
 
-        user_subscription = models.user.user_subscription.UserSubscription.objects.get(id=21)
+        user_subscription = models.user.user_subscription.UserSubscription.objects.get(id=631)
         c = user_subscription.user_plan.get('plugins').get('shopify')
         print(c)
-        line_items=[{'variant_id':41928314388671,'quantity':1}]
+        # line_items=[{'variant_id':41928314388671,'quantity':1}]
 
-        success,data = create_checkout(c.get('shop'),c.get('store_front_token'),line_items,0)
-        pprint(data)
+        # success,data = create_checkout(c.get('shop'),c.get('store_front_token'),line_items,0)
+        # pprint(data)
         # campaign_id = 
         # c= {
         #     "shop": "frog-sweat-home.myshopify.com",
         #     "access_token": "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"
         # }
-        # data = jobs.shopify.export_product_job(user_subscription.id,c)
+        data = jobs.shopify.export_product_job(user_subscription.id,c)
         # print(len(data.get('products')))
         # data = jobs.shopify.export_order_job(1193,c)
         # print(len(data.get('orders')))
