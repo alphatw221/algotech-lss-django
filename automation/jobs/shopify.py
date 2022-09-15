@@ -39,7 +39,7 @@ def export_product_job(user_subscription_id, credential):
 
 
             for tag in tags:
-                if tag not in tag_set:
+                if tag and tag not in tag_set:
                     product_categories.append(tag)
                     tag_set.add(tag)
    
