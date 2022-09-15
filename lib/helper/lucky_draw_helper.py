@@ -440,7 +440,7 @@ def draw(campaign, lucky_draw):
 
         fb_like_candidate_set = lib.helper.lucky_draw_helper.LikesCandidateSetGenerator.get_candidate_set(campaign, lucky_draw, limit=100)
         comment_candidate_set = lib.helper.lucky_draw_helper.CommentCandidateSetGenerator.get_candidate_set(campaign, lucky_draw, limit=100)
-        candidate_set = fb_like_candidate_set.union(comment_candidate_set)
+        candidate_set = fb_like_candidate_set.intersection(comment_candidate_set)
     
     elif lucky_draw.type == models.campaign.campaign_lucky_draw.TYPE_POST:
         candidate_set = lib.helper.lucky_draw_helper.SharedPostCandidateSetGenerator.get_candidate_set(campaign, lucky_draw)
