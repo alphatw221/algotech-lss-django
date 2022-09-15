@@ -42,8 +42,7 @@ def export_product_job(user_subscription_id, credential):
                 if tag not in tag_set:
                     product_categories.append(tag)
                     tag_set.add(tag)
-                    print(product_categories)
-                    print(tag_set)
+   
 
             for variant in product.get('variants'):
                 lss_product_data = shopify_lib.transformer.to_lss_product(product, variant, user_subscription, tags)
