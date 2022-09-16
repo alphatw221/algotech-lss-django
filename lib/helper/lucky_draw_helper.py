@@ -185,7 +185,7 @@ class PurchaseCandidateSetGenerator(CandidateSetGenerator):
         winner_list = campaign.meta.get('winner_list',[])
         candidate_set = set()
 
-        orders = models.order.order.Order.objects.filter(campaign=campaign)
+        orders = models.order.order.Order.objects.filter(campaign=campaign, platform__isnull=False)
         pre_orders = models.order.pre_order.PreOrder.objects.filter(campaign=campaign,subtotal__gt=0, platform__isnull=False)
         for order in orders:
             candidate = LuckyDrawCandidate(
