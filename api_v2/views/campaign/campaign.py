@@ -193,14 +193,15 @@ class CampaignViewSet(viewsets.ModelViewSet):
                 image=request.data.get(key)
                 if image in ['null', None, '', 'undefined']:
                     continue
-                elif image.size > models.campaign.campaign.IMAGE_MAXIMUM_SIZE:
-                    continue
-                elif image.content_type not in models.campaign.campaign.IMAGE_SUPPORTED_TYPE:
-                    continue
                 elif image == '._no_image':
                     account['image'] = settings.GOOGLE_STORAGE_STATIC_DIR+models.campaign.campaign.IMAGE_NULL
                     save=True
                     continue
+                elif image.size > models.campaign.campaign.IMAGE_MAXIMUM_SIZE:
+                    continue
+                elif image.content_type not in models.campaign.campaign.IMAGE_SUPPORTED_TYPE:
+                    continue
+                
                 account_name = account.get('name','')
                 image_name = image.name.replace(" ","")
                 image_path = default_storage.save(f'campaign/{campaign.id}/payment/direct_payment/accounts/{account_name}/{image_name}', ContentFile(image.read()))

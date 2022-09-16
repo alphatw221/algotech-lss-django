@@ -19,7 +19,7 @@ def get_id(token: str, user_or_page_id: str):
 
 
 def get_me_accounts(user_token: str):
-    params = {"fields":"id,name,access_token"}
+    params = {"fields":"id,name,username,access_token"}
     ret = FacebookApiCaller('/v13.0/me/accounts',
                             bearer_token=user_token,params=params).get()
     return ret

@@ -19,7 +19,7 @@ from api.models.tiktok.tiktok_account import TikTokAccount, TikTokAccountSeriali
 
 import business_policy
 
-IMAGE_NULL='/no_image.jpeg'
+IMAGE_NULL='no_image.jpeg'
 IMAGE_GIF = 'image/gif'
 IMAGE_JPEG = 'image/jpeg'
 IMAGE_JPG = 'image/jpg'
