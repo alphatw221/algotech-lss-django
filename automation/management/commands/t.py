@@ -52,7 +52,7 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.test_shit()
+        self.test_shopify()
         # self.test_remove_campaign_comment_duplicate()
 
     def modify_database(self):
@@ -197,9 +197,8 @@ class Command(BaseCommand):
 
         from django.contrib.auth.models import User as AuthUser
 
-        auth_user = AuthUser.objects.get(id=380)
-
-        auth_user.set_password("12345678")
+        auth_user = AuthUser.objects.get(id=685)
+        auth_user.set_password("hmh1730")
         auth_user.save()
 
     def test_send_email(self):
@@ -682,12 +681,40 @@ class Command(BaseCommand):
         
         print(data)
 
-    def test_shit(self):
+    def test_shopify(self):
+        from api import models
         from automation import jobs
         from pprint import pprint
-        c= {
-            "shop": "frog-sweat-home.myshopify.com",
-            "access_token": "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"
-        }
-        data = jobs.shopify.export_order_job(1193,c)
+        from plugins.shopify.service.checkouts import create_checkout
+
+
+        user_subscription = models.user.user_subscription.UserSubscription.objects.get(id=566)
+        c = user_subscription.user_plan.get('plugins').get('shopify')
+        print(c)
+        # line_items=[{'variant_id':41928314388671,'quantity':1}]
+
+        # success,data = create_checkout(c.get('shop'),c.get('store_front_token'),line_items,0)
+        # pprint(data)
+        # campaign_id = 
+        # c= {
+        #     "shop": "frog-sweat-home.myshopify.com",
+        #     "access_token": "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"
+        # }
+        data = jobs.shopify.export_product_job(user_subscription.id,c)
         pprint(data)
+        # print(len(data.get('products')))
+        # data = jobs.shopify.export_order_job(1193,c)
+        # print(len(data.get('orders')))
+        # pprint(data)
+    def test_easy_store(self):
+        from api import models
+        from automation import jobs
+        from pprint import pprint
+
+        user_subscription = models.user.user_subscription.UserSubscription.objects.get(id=618)
+        c = user_subscription.user_plan.get('plugins').get('easy_store')
+        print(c)
+        campaign_id = 1198
+        jobs.easy_store.export_order_job(campaign_id, c)
+
+
