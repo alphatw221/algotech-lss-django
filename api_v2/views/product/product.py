@@ -309,6 +309,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         product = lib.util.verify.Verify.get_product_from_user_subscription(user_subscription, product_id)
+        image_path = settings.GS_URL+product.image
 
         for email in product.meta['wish_list']:
             title = ""
@@ -319,7 +320,7 @@ class ProductViewSet(viewsets.ModelViewSet):
                 i18n_get_notify_wishlist_subject(lang=api_user.lang),
                 email, 
                 'email_notify_wishlist.html', 
-                parameters={"product_name":product, "seller":api_user}, 
+                parameters={"product_name":product, "seller":api_user, "image_path":image_path}, 
                 lang=api_user.lang)
             
         

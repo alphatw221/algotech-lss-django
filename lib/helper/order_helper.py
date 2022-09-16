@@ -427,6 +427,11 @@ class OrderHelper():
         }
         date_time = order.created_at.strftime("%b %d %Y")
 
+        if 'code' not in order.applied_discount:
+            discount_code = ''
+        else:
+            discount_code = str(order.applied_discount['code'])
+
         mail_content = f'<div style="width:100%; background: #eaeaea; font-family: \'Open Sans\', sans-serif;"><div style="margin: auto; padding:1%; max-width:900px; background: #ffffff;">'
         mail_content += f'<h1 data-key="1468266_heading" style="text-align:center; font-family: Georgia,serif,\'Playfair Display\'; font-size: 28px; line-height: 46px; font-weight: 700; color: #4b4b4b; text-transform: none; background-color: #ffffff; margin: 0;">Thanks for Ordering:</h1>'
         mail_content += '<p data-key="1468270_order_number" style="text-align:center; color:#666363; font-weight: 500;">' + _('EMAIL/DELIVERY_CONFIRM/ORDER_NO') + f'# {str(order.id)} </p>'
@@ -521,27 +526,33 @@ class OrderHelper():
         # mail_content+= '</table>'
 
         mail_content += f'<table cellspacing="0" cellpadding="0" border="0" width="100%" style="min-width: 100%;" role="presentation">\
-                            <tbody>\
-                            <tr>\
-                                <td data-key="1468271_subtotal" style="font-size: 15px; padding-top:13px; color: #4b4b4b; font-weight: 600; width: 35%; text-align:right;" align="right" bgcolor="#ffffff" valign="top">' + _('EMAIL/DELIVERY_CONFIRM/SUBTOTAL') + f'\
-                                <span style="width:120px; display:inline-block;">{order.campaign.currency}\
-                                {adjust_decimal_places(order.subtotal,order.campaign.decimal_places)}\
-                                {price_unit[order.campaign.price_unit]}</span></td>\
-                            </tr>\
-                            <tr>\
-                                <td style="font-size: 15px; color: #4b4b4b; font-weight: 600; width: 35%; text-align:right; padding-bottom: 13px;" align="right" bgcolor="#ffffff" valign="top">' + _('EMAIL/DELIVERY_CONFIRM/DELIVERY_CHARGE') + f'\
-                                <span style="width:120px; display:inline-block;">{order.campaign.currency}\
-                                {adjust_decimal_places(order.shipping_cost,order.campaign.decimal_places)}\
-                                {price_unit[order.campaign.price_unit]}</span></td>\
-                            </tr>\
-                            <tr>\
-                                <td data-key="1468271_total" style="font-size: 15px; line-height: 26px; font-weight: bold; text-align:right; color: #666363; width: 65%; padding: 4px 0; border-top: 1px solid #666363;" align="left" bgcolor="#ffffff"  valign="top">' + _('EMAIL/DELIVERY_CONFIRM/TOTAL') + f'\
-                                <span style="width:120px; display:inline-block;">{order.campaign.currency}\
-                                {adjust_decimal_places(order.total,order.campaign.decimal_places)}\
-                                {price_unit[order.campaign.price_unit]}</span></td>\
-                            </tr>\
-                            </tbody>\
-                        </table>'
+                        <tbody>\
+                        <tr>\
+                            <td data-key="1468271_subtotal" style="font-size: 15px; padding-top:13px; color: #4b4b4b; font-weight: 600; width: 35%; text-align:right;" align="right" bgcolor="#ffffff" valign="top">' + _('EMAIL/DELIVERY_CONFIRM/SUBTOTAL') + f'\
+                            <span style="width:120px; display:inline-block;">{order.campaign.currency}\
+                            {adjust_decimal_places(order.subtotal,order.campaign.decimal_places)}\
+                            {price_unit[order.campaign.price_unit]}</span></td>\
+                        </tr>\
+                        <tr>\
+                            <td style="font-size: 15px; color: #4b4b4b; font-weight: 600; width: 35%; text-align:right; padding-bottom: 13px;" align="right" bgcolor="#ffffff" valign="top">' + _('EMAIL/DELIVERY_CONFIRM/DISCOUNT') + f'<span style="color: #b91c1c;"> { discount_code } </span> \
+                            <span style="width:120px; display:inline-block;">{order.campaign.currency}\
+                            -{adjust_decimal_places(order.discount,order.campaign.decimal_places)}\
+                            {price_unit[order.campaign.price_unit]}</span></td>\
+                        </tr>\
+                        <tr>\
+                            <td style="font-size: 15px; color: #4b4b4b; font-weight: 600; width: 35%; text-align:right; padding-bottom: 13px;" align="right" bgcolor="#ffffff" valign="top">' + _('EMAIL/DELIVERY_CONFIRM/DELIVERY_CHARGE') + f'\
+                            <span style="width:120px; display:inline-block;">{order.campaign.currency}\
+                            {adjust_decimal_places(order.shipping_cost,order.campaign.decimal_places)}\
+                            {price_unit[order.campaign.price_unit]}</span></td>\
+                        </tr>\
+                        <tr>\
+                            <td data-key="1468271_total" style="font-size: 15px; line-height: 26px; font-weight: bold; text-align:right; color: #666363; width: 65%; padding: 4px 0; border-top: 1px solid #666363;" align="left" bgcolor="#ffffff"  valign="top">' + _('EMAIL/DELIVERY_CONFIRM/TOTAL') + f'\
+                            <span style="width:120px; display:inline-block;">{order.campaign.currency}\
+                            {adjust_decimal_places(order.total,order.campaign.decimal_places)}\
+                            {price_unit[order.campaign.price_unit]}</span></td>\
+                        </tr>\
+                        </tbody>\
+                    </table>'
         
         # mail_content+= '<br>Delivery Charge: ' 
         # mail_content+= '$'+ str("%.2f" % float(order.shipping_cost))+'<br>'
@@ -567,6 +578,11 @@ class OrderHelper():
         }
         order_detail_link = f"{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}"
         date_time = order.created_at.strftime("%b %d %Y")
+
+        if 'code' not in order.applied_discount:
+            discount_code = ''
+        else:
+            discount_code = str(order.applied_discount['code'])
 
         mail_content = f'<div style="width:100%; background: #eaeaea; font-family: \'Open Sans\', sans-serif;"><div style="margin: auto; padding:1%; max-width:900px; background: #ffffff;">'
         mail_content += '<h1 data-key="1468266_heading" style="text-align:center; font-family: Georgia,serif,\'Playfair Display\'; font-size: 28px; line-height: 46px; font-weight: 700; color: #4b4b4b; text-transform: none; background-color: #ffffff; margin: 0;">' + _('EMAIL/ORDER_PLACED/TITLE') + '</h1>'
@@ -671,28 +687,34 @@ class OrderHelper():
         #     mail_content+= f'<tr><td style="border: 1px solid black;">{product["name"]}</td><td style="border: 1px solid black;">${product["price"]}</td><td style="border: 1px solid black;">{product["qty"]}</td><td style="border: 1px solid black;">{product["subtotal"]}</td></tr>'
         # mail_content+= '</table>'
 
-        mail_content += '<table cellspacing="0" cellpadding="0" border="0" width="100%" style="min-width: 100%;" role="presentation">\
-                            <tbody>\
-                            <tr>\
-                                <td data-key="1468271_subtotal" style="font-size: 15px; padding-top:13px; color: #4b4b4b; font-weight: 600; width: 35%; text-align:right;" align="right" bgcolor="#ffffff" valign="top">' + _('EMAIL/DELIVERY_CONFIRM/SUBTOTAL') + f'\
-                                <span style="width:120px; display:inline-block;">{order.campaign.currency}\
-                                {adjust_decimal_places(order.subtotal,order.campaign.decimal_places)}\
-                                {price_unit[order.campaign.price_unit]}</span></td>\
-                            </tr>\
-                            <tr>\
-                                <td style="font-size: 15px; color: #4b4b4b; font-weight: 600; width: 35%; text-align:right; padding-bottom: 13px;" align="right" bgcolor="#ffffff" valign="top">' + _('EMAIL/DELIVERY_CONFIRM/DELIVERY_CHARGE') + f'\
-                                <span style="width:120px; display:inline-block;">{order.campaign.currency}\
-                                {adjust_decimal_places(order.shipping_cost,order.campaign.decimal_places)}\
-                                {price_unit[order.campaign.price_unit]}</span></td>\
-                            </tr>\
-                            <tr>\
-                                <td data-key="1468271_total" style="font-size: 15px; line-height: 26px; font-weight: bold; text-align:right; color: #666363; width: 65%; padding: 4px 0; border-top: 1px solid #666363;" align="left" bgcolor="#ffffff"  valign="top">' + _('EMAIL/DELIVERY_CONFIRM/TOTAL') + f'\
-                                <span style="width:120px; display:inline-block;">{order.campaign.currency}\
-                                {adjust_decimal_places(order.total,order.campaign.decimal_places)}\
-                                {price_unit[order.campaign.price_unit]}</span></td>\
-                            </tr>\
-                            </tbody>\
-                        </table>'
+        mail_content += f'<table cellspacing="0" cellpadding="0" border="0" width="100%" style="min-width: 100%;" role="presentation">\
+                        <tbody>\
+                        <tr>\
+                            <td data-key="1468271_subtotal" style="font-size: 15px; padding-top:13px; color: #4b4b4b; font-weight: 600; width: 35%; text-align:right;" align="right" bgcolor="#ffffff" valign="top">' + _('EMAIL/DELIVERY_CONFIRM/SUBTOTAL') + f'\
+                            <span style="width:120px; display:inline-block;">{order.campaign.currency}\
+                            {adjust_decimal_places(order.subtotal,order.campaign.decimal_places)}\
+                            {price_unit[order.campaign.price_unit]}</span></td>\
+                        </tr>\
+                        <tr>\
+                            <td style="font-size: 15px; color: #4b4b4b; font-weight: 600; width: 35%; text-align:right; padding-bottom: 13px;" align="right" bgcolor="#ffffff" valign="top">' + _('EMAIL/DELIVERY_CONFIRM/DISCOUNT') + f'<span style="color: #b91c1c;"> { discount_code } </span> \
+                            <span style="width:120px; display:inline-block;">{order.campaign.currency}\
+                            -{adjust_decimal_places(order.discount,order.campaign.decimal_places)}\
+                            {price_unit[order.campaign.price_unit]}</span></td>\
+                        </tr>\
+                        <tr>\
+                            <td style="font-size: 15px; color: #4b4b4b; font-weight: 600; width: 35%; text-align:right; padding-bottom: 13px;" align="right" bgcolor="#ffffff" valign="top">' + _('EMAIL/DELIVERY_CONFIRM/DELIVERY_CHARGE') + f'\
+                            <span style="width:120px; display:inline-block;">{order.campaign.currency}\
+                            {adjust_decimal_places(order.shipping_cost,order.campaign.decimal_places)}\
+                            {price_unit[order.campaign.price_unit]}</span></td>\
+                        </tr>\
+                        <tr>\
+                            <td data-key="1468271_total" style="font-size: 15px; line-height: 26px; font-weight: bold; text-align:right; color: #666363; width: 65%; padding: 4px 0; border-top: 1px solid #666363;" align="left" bgcolor="#ffffff"  valign="top">' + _('EMAIL/DELIVERY_CONFIRM/TOTAL') + f'\
+                            <span style="width:120px; display:inline-block;">{order.campaign.currency}\
+                            {adjust_decimal_places(order.total,order.campaign.decimal_places)}\
+                            {price_unit[order.campaign.price_unit]}</span></td>\
+                        </tr>\
+                        </tbody>\
+                    </table>'
         # mail_content+= '<br>Delivery Charge: ' 
         # mail_content+= '$'+ str("%.2f" % float(order.shipping_cost))+'<br>'
         # mail_content+= 'Total : $' + str("%.2f" % float(order.total))+'<br>'
