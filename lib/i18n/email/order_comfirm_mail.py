@@ -1,3 +1,4 @@
+from xml.etree.ElementTree import tostring
 from backend.i18n._helper import lang_translate_default_en
 from django.conf import settings
 from django.utils.translation import ugettext as _
@@ -18,6 +19,11 @@ def i18n_get_mail_content(order, campaign, lang=None):
         "1000000":"M"
     }
     date_time = order.created_at.strftime("%b %d %Y")
+    
+    if 'code' not in order.applied_discount:
+        discount_code = ''
+    else:
+        discount_code = str(order.applied_discount['code'])
 
     mail_content = f'<div style="width:100%; background: #eaeaea; font-family: \'Open Sans\', sans-serif;"><div style="margin: auto; padding:1%; max-width:900px; background: #ffffff;">'
     mail_content += f'<h1 data-key="1468266_heading" style="text-align:center; font-family: Georgia,serif,\'Playfair Display\'; font-size: 28px; line-height: 46px; font-weight: 700; color: #4b4b4b; text-transform: none; background-color: #ffffff; margin: 0;">' + _('EMAIL/ORDER_CONFIRM/TITLE') + '</h1>'
@@ -179,6 +185,12 @@ def i18n_get_mail_content(order, campaign, lang=None):
                             <td data-key="1468271_subtotal" style="font-size: 15px; padding-top:13px; color: #4b4b4b; font-weight: 600; width: 35%; text-align:right;" align="right" bgcolor="#ffffff" valign="top">' + _('EMAIL/DELIVERY_CONFIRM/SUBTOTAL') + f'\
                             <span style="width:120px; display:inline-block;">{order.campaign.currency}\
                             {adjust_decimal_places(order.subtotal,order.campaign.decimal_places)}\
+                            {price_unit[order.campaign.price_unit]}</span></td>\
+                        </tr>\
+                        <tr>\
+                            <td style="font-size: 15px; color: #4b4b4b; font-weight: 600; width: 35%; text-align:right; padding-bottom: 13px;" align="right" bgcolor="#ffffff" valign="top">' + _('EMAIL/DELIVERY_CONFIRM/DISCOUNT') + f'<span style="color: #b91c1c;"> { discount_code } </span> \
+                            <span style="width:120px; display:inline-block;">{order.campaign.currency}\
+                            -{adjust_decimal_places(order.discount,order.campaign.decimal_places)}\
                             {price_unit[order.campaign.price_unit]}</span></td>\
                         </tr>\
                         <tr>\

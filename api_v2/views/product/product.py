@@ -1,4 +1,5 @@
 
+from platform import platform
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.conf import settings
@@ -10,6 +11,7 @@ from rest_framework.parsers import MultiPartParser
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser
+from backend.i18n.email.subject import i18n_get_notify_wishlist_subject #temp
 
 from automation import jobs
 
@@ -307,13 +309,18 @@ class ProductViewSet(viewsets.ModelViewSet):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         product = lib.util.verify.Verify.get_product_from_user_subscription(user_subscription, product_id)
-        
+
         for email in product.meta['wish_list']:
             title = ""
             #send email or do something #TODO
             # content = lib.helper.order_helper.OrderHelper.get_checkout_email_content(product,email)
             # jobs.send_email_job.send_email_job(title, email, content=content)
-            print(email)
+            jobs.send_email_job.send_email_job(
+                i18n_get_notify_wishlist_subject(lang=api_user.lang),
+                email, 
+                'email_notify_wishlist.html', 
+                parameters={"product_name":product, "seller":api_user}, 
+                lang=api_user.lang)
             
         
         product.meta['wish_list'] = [] 
