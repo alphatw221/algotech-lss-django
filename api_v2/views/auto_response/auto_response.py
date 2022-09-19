@@ -86,23 +86,27 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
         data = request.data
         data['input_msg'] = data['input_msg'].lower()
         data['user_subscription'] = user_subscription.id
+
+        auto_responses = []
         for chosen_page in data.get('chosenPage'):
-            platform_name = 'facebook' if chosen_page.get('page_id') else 'instagram'
+            
+            platform_name = models.user.user_subscription.PLATFORM_FACEBOOK if chosen_page.get('page_id') else models.user.user_subscription.PLATFORM_INSTAGRAM
             platform_id = chosen_page.get('id')
             platform = lib.util.verify.Verify.get_platform_from_user_subscription(user_subscription, platform_name, platform_id)
-            if platform_name == 'facebook':
+            if platform_name == models.user.user_subscription.PLATFORM_FACEBOOK:
                 data['facebook_page'] = platform.id
-            elif platform_name == 'youtube':
-                data['youtube_channel'] = platform.id
-            elif platform_name == 'instagram':
+            # elif platform_name == 'youtube':
+            #     data['youtube_channel'] = platform.id
+            elif platform_name == models.user.user_subscription.PLATFORM_INSTAGRAM:
                 data['instagram_profile'] = platform.id
             
             serializer = models.auto_response.auto_response.AutoResponseSerializer(data=data)
             if not serializer.is_valid():
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            obj = serializer.save()
+            auto_res = serializer.save()
+            auto_responses.append(models.auto_response.auto_response.AutoResponseSerializer(auto_res).data)
 
-        return Response({'message': 'create success'}, status=status.HTTP_200_OK)
+        return Response(auto_responses, status=status.HTTP_200_OK)
 
 
     @action(detail=True, methods=['PUT'], url_path=r'update', permission_classes=(IsAuthenticated,))
@@ -141,10 +145,12 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         
-        if type(request.data) == list:
-            for reply_id in request.data:
-                auto_response = lib.util.verify.Verify.get_auto_response_from_user_subscription(user_subscription, reply_id)
-                auto_response.delete()
+        if type(request.data) != list:
+            raise lib.error_handle.error.api_error.ApiVerifyError('invalid')
+
+        for auto_response_id in request.data:
+            auto_response = lib.util.verify.Verify.get_auto_response_from_user_subscription(user_subscription, auto_response_id)
+            auto_response.delete()
 
         return Response({"message": "delete success"}, status=status.HTTP_200_OK)
 
