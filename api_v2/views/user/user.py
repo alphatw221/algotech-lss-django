@@ -112,7 +112,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
         api_user = models.user.user.User.objects.get(email=email,type='user')
 
-        jobs.send_email_job.send_email_job( lib.i18n.email.veification_code_email.i18n_get_notify_wishlist_subject(lang=api_user.lang),email, 'email_verification_code.html', parameters={"verify_code":code}, lang=api_user.lang)
+        jobs.send_email_job.send_email_job( lib.i18n.veification_code_email.i18n_get_notify_wishlist_subject(lang=api_user.lang),email, 'email_verification_code.html', parameters={"verify_code":code}, lang=api_user.lang)
 
         return Response({'token':token,'verify_code':code} , status=status.HTTP_200_OK)
 
