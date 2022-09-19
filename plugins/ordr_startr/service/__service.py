@@ -11,7 +11,8 @@ def get_header(key):
     return {
         'Content-Type': 'application/json',
         'Authorization':f'key {key}',
-        'Cookie':'connect.sid=s%3AhZb3dTGG8XBUGVW1mQP-unVbg7E1V_lK.dqbneJMgVqa%2BvrCeWKzxvUcNd91JViu4hQXs7Qls%2FuA'  #temp
+        'Cookie':'connect.sid=s%3AYL50XGi9b8BAy7GBuuduq_uwU8ppmgMq.25FGPwhdtTR1uchnIRAFd6Z7CHU9R57EhBa5x1IDW6I' 
+
     }
 
 platform_source_type_map = {'facebook':'FB', 'instagram':'IG', 'youtube':'YT', 'twitch':'TW', 'tiktok':'TT'}
