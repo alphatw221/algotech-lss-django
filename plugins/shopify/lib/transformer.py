@@ -57,7 +57,6 @@ def to_lss_order(lss_pre_order, shopify_order_data, campaign_product_external_in
         "shipping_last_name" : shopify_order_data['shipping_address']['last_name'],
         "shipping_method" : "delivery",
         "shipping_email":shopify_order_data["contact_email"],
-        
         "products" : lss_products,
         "total" : float(shopify_order_data['total_price']),
 

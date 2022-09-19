@@ -16,7 +16,7 @@ from pathlib import Path
 
 from google.oauth2 import service_account
 from corsheaders.defaults import default_headers
-
+import config
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -166,6 +166,7 @@ WSGI_APPLICATION = 'lss.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
+
 DATABASES = {
     'default': {
         'ENGINE': 'djongo',
@@ -177,9 +178,9 @@ DATABASES = {
             # Production external
             'host': 'mongodb://34.126.92.142:27017, 35.240.200.4:27017, 34.126.155.150:27017',
             'replicaSet': 'rs0',
-            'username': 'lss',
-            'password': 'algo83111T%%',
-            'authSource': 'admin',
+            'username': config.MONGO_DB_USERNAME,
+            'password': config.MONGO_DB_PASSWORD,
+            'authSource': config.MONGO_DB_AUTH_SOURCE,
             'authMechanism': 'SCRAM-SHA-1',
             'readPreference': 'secondaryPreferred',
             'ssl': False,
@@ -202,7 +203,11 @@ DATABASES = {
     #     }
     # }
 }
-MONGODB_CONNECTION_STRING = 'mongodb://lss:algo83111T%%@34.126.92.142:27017,35.240.200.4:27017,34.126.155.150:27017'
+MONGODB_CONNECTION_STRING = \
+    'mongodb://'+config.MONGO_DB_USERNAME+':'+config.MONGO_DB_PASSWORD+\
+    '@34.126.92.142:27017,35.240.200.4:27017,34.126.155.150:27017/'+\
+    '?authSource='+config.MONGO_DB_AUTH_SOURCE
+    
 # for social lab
 # MONGODB_CONNECTION_STRING = 'mongodb://admin:admin@52.221.239.166:27017,13.215.51.14:27017,18.142.57.3:27017'
 MONGODB_DATABASE_NAME = 'lss'
