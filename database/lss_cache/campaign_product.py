@@ -50,11 +50,11 @@ def set_internal_external_map(campaign_id, plugin, internal_external_map):
 
 
 
-def leash_get_product_for_sell(campaign_id):
+def leash_get_products_for_sell(campaign_id):
     key = get_key(KEY, campaign_id, DATA_FOR_SELL)
     return _leash_get_list(key)
 
-def set_product_for_sell(campaign_id, campaign_products):
+def set_products_for_sell(campaign_id, campaign_products):
     key = get_key(KEY, campaign_id, DATA_FOR_SELL)
     _set_list(key, campaign_products)
 

@@ -52,7 +52,7 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.test_shopify()
+        self.test_cache_redis()
         # self.test_remove_campaign_comment_duplicate()
 
     def modify_database(self):
@@ -671,15 +671,24 @@ class Command(BaseCommand):
         import database
 
         # database.lss_cache.campaign_product.invalidate(1162,'ordr_startr','external_internal_map')
-        success, data, lock = database.lss_cache.campaign_product.leash_get_external_internal_map(1165,'ordr_startr')
-        print(success)
-        if not success:
-            with lock:
-                data = {'a':1}
-                database.lss_cache.campaign_product.set_external_internal_map(1165, 'ordr_startr', data)
+        # success, data, lock = database.lss_cache.campaign_product.leash_get_external_internal_map(1165,'ordr_startr')
+        # print(success)
+        # if not success:
+        #     with lock:
+        #         data = {'a':1}
+        #         database.lss_cache.campaign_product.set_external_internal_map(1165, 'ordr_startr', data)
 
         
+        # print(data)
+
+        success, data, lock = database.lss_cache.campaign_product.leash_get_products_for_sell(1211)
+        if not success and lock:
+            with lock:
+                data = [{'a':1}]
+                database.lss_cache.campaign_product.set_products_for_sell(1211, data)
+        print(success)
         print(data)
+
 
     def test_shopify(self):
         from api import models
