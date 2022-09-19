@@ -40,7 +40,7 @@ class FacebookPageViewSet(viewsets.ModelViewSet):
             raise lib.error_handle.error.api_error.ApiVerifyError('facebook_not_activated')
         
         facebook_page = lib.util.verify.Verify.get_facebook_page_from_user_subscription(user_subscription, pk)
-        code, response = service.facebook.post.get_post(facebook_page.token, facebook_page.page_id, post_id)
+        code, response = service.facebook.post.get_post_comments(facebook_page.token, post_id)
         if code !=200:
             return Response({"error_response": response}, status=status.HTTP_200_OK)
         return Response({"success_response": response}, status=status.HTTP_200_OK)
