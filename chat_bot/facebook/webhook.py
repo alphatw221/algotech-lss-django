@@ -54,4 +54,4 @@ def facebook_receive(request):
 
         return HttpResponse('EVENT_RECEIVED', status=200)
     else:
-        return HttpResponse(status=404)
+        return HttpResponse('ERROR', status=200)

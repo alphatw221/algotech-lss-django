@@ -133,9 +133,10 @@ class OrderViewSet(viewsets.ModelViewSet):
         order = lib.util.verify.Verify.get_order_with_oid(order_oid)
         campaign = lib.util.verify.Verify.get_campaign_from_order(order)
         last_five_digit, image, account_name, account_mode = lib.util.getter.getdata(request,('last_five_digit', 'image', 'account_name', 'account_mode'), required=False)
-
+        print(image)
         if image not in [None, '', "undefined", 'null']:
             image_name = image.name.replace(" ","")
+            print(image.name)
             image_path = default_storage.save(
                 f'campaign/{order.campaign.id}/order/{order.id}/receipt/{image_name}', 
                 ContentFile(image.read())
