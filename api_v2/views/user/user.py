@@ -1,7 +1,6 @@
 
 from django.contrib.auth.models import User as AuthUser
 from django.conf import settings
-from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from lib.util import verify
 
@@ -325,9 +324,10 @@ class UserViewSet(viewsets.ModelViewSet):
 
         if image:
             image_name = image.name.replace(" ","")
-            image_path = default_storage.save(f'register/receipt/{datetime.now().strftime("%Y/%m/%d,%H:%M:%S")}/{image_name}', ContentFile(image.read()))
+            image_dir = f'register/receipt/{datetime.now().strftime("%Y/%m/%d,%H:%M:%S")}'
+            image_url = lib.util.storage.upload_image(image_dir, image_name, image)
 
-        subscription_meta = {"last_five_digit":last_five_digit, 'bank_name':bank_name, "account_name": account_name, "receipt":settings.GS_URL+image_path}
+        subscription_meta = {"last_five_digit":last_five_digit, 'bank_name':bank_name, "account_name": account_name, "receipt":image_url}
 
         ret = lib.helper.register_helper.create_new_register_account(plan, country_plan, subscription_plan, timezone, period, firstName, lastName, email, password, country, country_code,  contactNumber,  amount, subscription_meta=subscription_meta)
 

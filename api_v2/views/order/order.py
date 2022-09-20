@@ -7,7 +7,6 @@ from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser
 
 
-from django.core.files.storage import default_storage
 from django.conf import settings
 from django.core.files.base import ContentFile
 
@@ -69,12 +68,14 @@ class OrderViewSet(viewsets.ModelViewSet):
         elif image.content_type not in models.order.order.IMAGE_SUPPORTED_TYPE:
             raise lib.error_handle.error.api_error.ApiVerifyError('not_support_this_image_type')
         else:
-            image_name = image.name.replace(" ","")
-            image_path = default_storage.save(
-                f'campaign/{order.campaign.id}/order/{order.id}/receipt/{image_name}', 
-                ContentFile(image.read())
-            )
-            order.meta["receipt_image"] = settings.GS_URL + image_path
+            try:
+                image_name = image.name.replace(" ","")
+                image_dir = f'campaign/{order.campaign.id}/order/{order.id}/receipt'
+                image_url = lib.util.storage.upload_image(image_dir, image_name, image)
+                order.meta["receipt_image"] = image_url
+            except Exception as e:
+                history = order.history
+                history["receipt_image_error"] = str(e)
 
         order.meta["last_five_digit"] = last_five_digit
         order.meta['account_name'] = account_name
@@ -135,14 +136,15 @@ class OrderViewSet(viewsets.ModelViewSet):
         last_five_digit, image, account_name, account_mode = lib.util.getter.getdata(request,('last_five_digit', 'image', 'account_name', 'account_mode'), required=False)
         print(image)
         if image not in [None, '', "undefined", 'null']:
-            image_name = image.name.replace(" ","")
-            print(image.name)
-            image_path = default_storage.save(
-                f'campaign/{order.campaign.id}/order/{order.id}/receipt/{image_name}', 
-                ContentFile(image.read())
-            )
-            order.meta["receipt_image"] = settings.GS_URL + image_path
-
+            try:
+                image_name = image.name.replace(" ","")
+                image_dir = f'campaign/{order.campaign.id}/order/{order.id}/receipt'
+                image_url = lib.util.storage.upload_image(image_dir, image_name, image)
+                order.meta["receipt_image"] = image_url
+            except Exception as e:
+                history = order.history
+                history["receipt_image_error"] = str(e)
+                
         order.meta["last_five_digit"] = last_five_digit
         order.meta['account_name'] = account_name
         order.meta['account_mode'] = account_mode
