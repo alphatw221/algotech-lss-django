@@ -105,6 +105,8 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             auto_res = serializer.save()
             auto_responses.append(models.auto_response.auto_response.AutoResponseSerializer(auto_res).data)
+            data.pop('facebook_page', None)
+            data.pop('instagram_profile', None)
 
         return Response(auto_responses, status=status.HTTP_200_OK)
 
