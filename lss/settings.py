@@ -385,6 +385,10 @@ FACEBOOK_COMMENT_CAPTURING = {
 CHAT_BOT_FACEBOOK = {
     'VERIFY_TOKEN': 'ALGOTECHLSSMESSENGER'
 }
+#FTP
+FTP_STORAGE_LOCATION = "ftp://lssimages@tig.algotech.app:_TqUPZc*CMdG@74.124.210.137:21" #FTP server: ftp.tig.algotech.app
+BASE_URL = "https://tig.algotech.app/lssimages/"
+FTP_STORAGE_ENCODING = 'utf-8'
 
 # google storage
 DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
