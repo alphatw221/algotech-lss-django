@@ -1,7 +1,6 @@
 
 from platform import platform
 from django.core.files.base import ContentFile
-from django.core.files.storage import default_storage
 from django.conf import settings
 
 from rest_framework import status, viewsets
@@ -103,9 +102,9 @@ class ProductViewSet(viewsets.ModelViewSet):
             product.image = settings.GOOGLE_STORAGE_STATIC_DIR+models.product.product.IMAGE_NULL
         else:
             image_name = image.name.replace(" ","")
-            image_path = default_storage.save(
-                f'user_subscription/{user_subscription.id}/product/{product.id}/{image_name}', ContentFile(image.read()))
-            product.image = settings.GS_URL+image_path
+            image_dir = f'user_subscription/{user_subscription.id}/product/{product.id}'
+            image_url = lib.util.storage.upload_image(image_dir, image_name, image)
+            product.image = image_url
             
         product.user_subscription = user_subscription
         product.save()
@@ -144,11 +143,11 @@ class ProductViewSet(viewsets.ModelViewSet):
         elif image =='._no_image':
             product.image = settings.GOOGLE_STORAGE_STATIC_DIR+models.product.product.IMAGE_NULL
         elif image:
-            image_name = image.name.replace(" ", "")
-            image_path = default_storage.save(
-                f'user_subscription/{user_subscription.id}/product/{product.id}/{image_name}', ContentFile(image.read()))
-            settings.GS_URL
-            product.image = settings.GS_URL+image_path
+            
+            image_name = image.name.replace(" ","")
+            image_dir = f'user_subscription/{user_subscription.id}/product/{product.id}'
+            image_url = lib.util.storage.upload_image(image_dir, image_name, image)
+            product.image = image_url
 
         product.save()
 
@@ -287,6 +286,8 @@ class ProductViewSet(viewsets.ModelViewSet):
 
         return Response(categories_list, status=status.HTTP_200_OK)
     
+
+    #-------for buyer------
     @action(detail=False, methods=['POST'], url_path=r'(?P<product_id>[^/.]+)/wish_list/add', permission_classes=(),  authentication_classes=[])
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def wish_list_add(self, request, product_id):

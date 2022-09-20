@@ -17,8 +17,14 @@ PLUGIN_ORDR_STARTR = 'ordr_startr'
 
 def export_product_job(user_subscription_id, credential):
     try:
-  
+        
+
+
         user_subscription = models.user.user_subscription.UserSubscription.objects.get(id=user_subscription_id)
+
+        models.product.product.Product.objects.filter(user_subscription=user_subscription).delete()
+        user_subscription.meta['product_categories']=[]
+
         product_categories:list = user_subscription.meta.get('product_categories',[])
 
         product_dict = {product.meta.get(PLUGIN_ORDR_STARTR,{}).get('id') : product.id for product in user_subscription.products.all() if product.meta.get(PLUGIN_ORDR_STARTR,{}).get('id')}

@@ -88,7 +88,8 @@ class Campaign(models.Model):
     meta = models.JSONField(null=True, blank=True, default=dict)
     meta_payment = models.JSONField(null=True, blank=True, default=dict)
     meta_logistic = models.JSONField(default=dict, null=True, blank=dict)
-
+    meta_reply = models.JSONField(null=False, blank=False, default=dict)
+    
     lang = models.CharField(max_length=255, blank=False, null=False,
                             choices=business_policy.subscription.LANGUAGE_CHOICES, default=business_policy.subscription.LANGUAGE_ENGLICH)
     price_unit =   models.CharField(max_length=255, null=False, blank=True,
@@ -159,7 +160,7 @@ class CampaignSerializer(serializers.ModelSerializer):
     meta = serializers.JSONField(default=dict)
     meta_payment = serializers.JSONField(default=dict)
     meta_logistic = serializers.JSONField(default=dict)
-
+    meta_reply = serializers.JSONField(default=dict)
 
 class CampaignSerializerCreate(serializers.ModelSerializer):
     class Meta:
@@ -177,7 +178,7 @@ class CampaignSerializerCreate(serializers.ModelSerializer):
     meta = serializers.JSONField(default={"allow_checkout": 1})
     meta_payment = serializers.JSONField(default=dict)
     meta_logistic = serializers.JSONField(default=dict)
-
+    meta_reply = serializers.JSONField(default=dict)
 
 class CampaignSerializerEdit(serializers.ModelSerializer):
     class Meta:
@@ -195,18 +196,18 @@ class CampaignSerializerEdit(serializers.ModelSerializer):
     meta = serializers.JSONField(default={"allow_checkout": 1})
     meta_payment = serializers.JSONField(default=dict)
     meta_logistic = serializers.JSONField(default=dict)
-
+    
 
 class CampaignSerializerUpdate(serializers.ModelSerializer):
 
     class Meta:
         model = Campaign
-        fields = ['title', 'start_at', 'end_at', 'meta', 'meta_payment', 'meta_logistic', 'lang', 'currency', 'price_unit', 'decimal_places']
+        fields = ['title', 'start_at', 'end_at', 'meta', 'meta_payment', 'meta_logistic', 'lang', 'currency', 'price_unit', 'decimal_places', 'meta_reply']
 
     meta = serializers.JSONField(default={"allow_checkout": 1})
     meta_payment = serializers.JSONField(default=dict)
     meta_logistic = serializers.JSONField(default=dict)
-
+    meta_reply = serializers.JSONField(default=dict)
 
 class CampaignSerializerRetreive(CampaignSerializer):
     facebook_page = FacebookPageSerializer(read_only=True)
