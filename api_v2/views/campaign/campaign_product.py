@@ -172,6 +172,7 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
                                 customer_removable=bool(request_data.get('customer_removable', True)),
                                 tag=list(request_data.get('tag',[])),
                                 type=str(request_data.get('type',models.product.product.TYPE_PRODUCT)),
+                                description = request_data.get('description',''),
                                 product_id = int(request_data.get('id')) if request_data.get('id') else None,
                                 campaign_id=campaign.id,
                                 meta = api_product.data.get('meta',{}),      
