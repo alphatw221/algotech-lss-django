@@ -17,6 +17,7 @@ from backend.utils.text_processing.order_code_processor import \
 import lib
 import database
 import service
+import plugins as lss_plugins
 
 @lib.error_handle.error_handler.comment_job_error_handler.comment_job_error_handler
 def comment_job(campaign_data, user_subscription_data, platform_name, platform_instance_data, comment, order_codes_mapping):
@@ -25,13 +26,13 @@ def comment_job(campaign_data, user_subscription_data, platform_name, platform_i
     logs.append(["platform",platform_name])
     logs.append(["message",comment['message']])
 
-    command = CommandTextProcessor.process(comment['message'])
-    if command:
-        logs.append(["action",'command'])
-        command_responding(platform_name, platform_instance_data,
-                           campaign_data, user_subscription_data, comment, command)
-        lib.util.logger.print_table(["Campaign ID", campaign_data.get('id')],logs)
-        return
+    # command = CommandTextProcessor.process(comment['message'])
+    # if command:
+    #     logs.append(["action",'command'])
+    #     command_responding(platform_name, platform_instance_data,
+    #                        campaign_data, user_subscription_data, comment, command)
+    #     lib.util.logger.print_table(["Campaign ID", campaign_data.get('id')],logs)
+    #     return
 
     order_placement = None
     for order_code, campaign_product in order_codes_mapping.items():
@@ -72,52 +73,36 @@ def comment_job(campaign_data, user_subscription_data, platform_name, platform_i
                        comment, campaign_product, qty, state)
     lib.util.logger.print_table(["Campaign ID", campaign_data.get('id')],logs)
 
-def command_responding(platform_name, platform_instance_data, campaign_data, user_subscription_data, comment, command):
-    # return
-    if platform_name == 'facebook':
+# def command_responding(platform_name, platform_instance_data, campaign_data, user_subscription_data, comment, command):
+#     # return
+#     if platform_name == 'facebook':
 
-        text = lib.i18n.comment_command.get_comment_command_response(
-            campaign_data, comment, command, lang=campaign_data.get('lang'))
-        service.facebook.post.post_page_message_on_comment(platform_instance_data.get('token'), comment['id'], text)
-    elif platform_name == 'youtube':
-        return
-    elif platform_name == 'instagram':
-        return
+#         text = lib.i18n.comment_command.get_comment_command_response(
+#             campaign_data, comment, command, lang=campaign_data.get('lang'))
+#         service.facebook.post.post_page_message_on_comment(platform_instance_data.get('token'), comment['id'], text)
+#     elif platform_name == 'youtube':
+#         return
+#     elif platform_name == 'instagram':
+#         return
 
 
 def comment_responding(platform_name, platform_instance_data, campaign_data, user_subscription_data, pre_order, comment, campaign_product, qty, state):
 
-    if plugins:=user_subscription_data.get('user_plan',{}).get('plugins'):
-        shopping_cart_info, info_in_pm_notice = lib.i18n.cart_product_request.get_plugins_additional_text(pre_order, plugins, lang=campaign_data.get('lang'))
-    else:
-        shopping_cart_info, info_in_pm_notice = lib.i18n.cart_product_request.get_additional_text(pre_order, lang=campaign_data.get('lang'))
-
-    if state not in [ lib.helper.order_helper.RequestState.ADDED, 
-            lib.helper.order_helper.RequestState.UPDATED, 
-            lib.helper.order_helper.RequestState.DELETED]:
-            shopping_cart_info, info_in_pm_notice = "", ""
-            
+    _, private_message = __get_comment_and_private_message(user_subscription_data, pre_order, campaign_data, state, campaign_product, qty)
     if platform_name == 'facebook':
 
-        text = lib.i18n.cart_product_request.get_request_response(
-            state, campaign_product, qty, lang=campaign_data.get('lang'))
-
-        if state == lib.helper.order_helper.RequestState.INSUFFICIENT_INV:    
-            code, ret = service.facebook.post.post_page_comment_on_comment( platform_instance_data.get('token'), comment['id'], text+info_in_pm_notice)
-            if code!=200:
-                print("response", ret)
-        code, ret = service.facebook.post.post_page_message_on_comment(platform_instance_data.get('token'), comment['id'], text+shopping_cart_info)
+        # if state == lib.helper.order_helper.RequestState.INSUFFICIENT_INV:    
+        #     code, ret = service.facebook.post.post_page_comment_on_comment( platform_instance_data.get('token'), comment['id'], comment_message)
+        #     if code!=200:
+        #         print("response", ret)
+        code, ret = service.facebook.post.post_page_message_on_comment(platform_instance_data.get('token'), comment['id'], private_message)
         if code!=200:
             print("response", ret)
         
     elif platform_name == 'youtube':
-        text = lib.i18n.cart_product_request.get_request_response(
-        state, campaign_product, qty, lang=campaign_data.get('lang'))
 
         customer_name =comment['customer_name']
-        
-        text = f"@{customer_name}"+ text + shopping_cart_info
-        
+        text = f"@{customer_name}"+ private_message
         live_chat_id = comment.get("live_chat_id")
         
         if not live_chat_id:
@@ -132,19 +117,54 @@ def comment_responding(platform_name, platform_instance_data, campaign_data, use
             print("response", ret)
 
     elif platform_name == 'instagram':
-        text = lib.i18n.cart_product_request.get_request_response(
-            state, campaign_product, qty, lang=campaign_data.get('lang'))
 
-        code, ret =service.instagram.post.private_message( platform_instance_data.get('token'), comment['id'], text+shopping_cart_info)
+        code, ret =service.instagram.post.private_message( platform_instance_data.get('token'), comment['id'], private_message)
         if code!=200:
             print("response", ret)
     
     elif platform_name == 'twitch':
-        text = lib.i18n.cart_product_request.get_request_response(
-            state, campaign_product, qty, lang=campaign_data.get('lang'))
         
-        code, ret = service.twitch.twitch.whisper_to_user(platform_instance_data.get('token'), platform_instance_data.get('user_name'), comment['customer_id'], text+shopping_cart_info)
+        code, ret = service.twitch.twitch.whisper_to_user(platform_instance_data.get('token'), platform_instance_data.get('user_name'), comment['customer_id'], private_message)
         if code!=200:
             print("response", ret)
+
     elif platform_name == 'tiktok':
         pass
+
+def __get_comment_and_private_message(user_subscription_data, pre_order, campaign_data, state, campaign_product, qty):
+
+    plugins = user_subscription_data.get('user_plan',{}).get('plugins')
+    if state in campaign_data.get('meta_reply',{}):
+        link = __get_link(pre_order, plugins)
+        reply_message = campaign_data.get('meta_reply',{}).get(state)
+        reply_message.replace('[LINK]',link)
+        reply_message.replace('[PRODUCT_NAME]', campaign_product.get('name'))
+        reply_message.replace('[ORDER_CODE]', campaign_product.get('order_code'))
+        reply_message.replace('[QTY]', qty)
+        return "", reply_message
+
+    if plugins:
+        shopping_cart_info, info_in_pm_notice = lib.i18n.cart_product_request.get_plugins_additional_text(pre_order, plugins, lang=campaign_data.get('lang'))
+    else:
+        shopping_cart_info, info_in_pm_notice = lib.i18n.cart_product_request.get_additional_text(pre_order, lang=campaign_data.get('lang'))
+
+    if state not in [ lib.helper.order_helper.RequestState.ADDED, 
+            lib.helper.order_helper.RequestState.UPDATED, 
+            lib.helper.order_helper.RequestState.DELETED]:
+            shopping_cart_info, info_in_pm_notice = "", ""
+    
+    text = lib.i18n.cart_product_request.get_request_response(
+            state, campaign_product, qty, lang=campaign_data.get('lang'))
+    return text+info_in_pm_notice, text+shopping_cart_info
+
+
+def __get_link(pre_order, plugins=None):
+
+    if lss_plugins.easy_store.EASY_STORE in plugins:
+        return settings.SHOPPING_CART_RECAPTCHA_URL + f'/{lss_plugins.easy_store.EASY_STORE}/{str(pre_order._id)}'
+    elif lss_plugins.ordr_startr.ORDR_STARTR in plugins:
+        return settings.SHOPPING_CART_RECAPTCHA_URL + f'/{lss_plugins.ordr_startr.ORDR_STARTR}/{str(pre_order._id)}'
+    elif lss_plugins.shopify.SHOPIFY in plugins:
+        return settings.SHOPPING_CART_URL + '/' + str(pre_order._id)
+
+    return settings.SHOPPING_CART_URL + '/' + str(pre_order._id)
