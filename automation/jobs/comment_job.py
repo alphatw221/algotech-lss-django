@@ -137,10 +137,11 @@ def __get_comment_and_private_message(user_subscription_data, pre_order, campaig
     if state in campaign_data.get('meta_reply',{}):
         link = __get_link(pre_order, plugins)
         reply_message = campaign_data.get('meta_reply',{}).get(state)
-        reply_message.replace('[LINK]',link)
-        reply_message.replace('[PRODUCT_NAME]', campaign_product.get('name'))
-        reply_message.replace('[ORDER_CODE]', campaign_product.get('order_code'))
-        reply_message.replace('[QTY]', qty)
+        reply_message = reply_message.replace('[LINK]',link)
+        reply_message = reply_message.replace('[PRODUCT_NAME]', campaign_product.get('name'))
+        #reply_message = reply_message.replace('[ORDER_CODE]', campaign_product.get('order_code'))
+        reply_message = reply_message.replace('[DESCRIPTION]', campaign_product.get('description'))
+        # reply_message.replace('[QTY]', str(qty))
         return "", reply_message
 
     if plugins:
@@ -168,3 +169,7 @@ def __get_link(pre_order, plugins=None):
         return settings.SHOPPING_CART_URL + '/' + str(pre_order._id)
 
     return settings.SHOPPING_CART_URL + '/' + str(pre_order._id)
+
+    # {
+    #     'added':'You successfully bidded for:\n [PRODUCT_NAME] - [DESCRIPTION]\n\nCut Off Time:Thursday, 25th August 2022, 12 noon!\n\nKindly click View Order and proceed to make payment before cut off time to secure your order.\n[LINK]',
+    # }
