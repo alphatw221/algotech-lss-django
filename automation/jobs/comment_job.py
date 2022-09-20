@@ -101,10 +101,11 @@ def comment_responding(platform_name, platform_instance_data, campaign_data, use
 
         text = lib.i18n.cart_product_request.get_request_response(
             state, campaign_product, qty, lang=campaign_data.get('lang'))
-            
-        # code, ret = service.facebook.post.post_page_comment_on_comment( platform_instance_data.get('token'), comment['id'], text+info_in_pm_notice)
-        # if code!=200:
-        #     print("response", ret)
+
+        if state == lib.helper.order_helper.RequestState.INSUFFICIENT_INV:    
+            code, ret = service.facebook.post.post_page_comment_on_comment( platform_instance_data.get('token'), comment['id'], text+info_in_pm_notice)
+            if code!=200:
+                print("response", ret)
         code, ret = service.facebook.post.post_page_message_on_comment(platform_instance_data.get('token'), comment['id'], text+shopping_cart_info)
         if code!=200:
             print("response", ret)
