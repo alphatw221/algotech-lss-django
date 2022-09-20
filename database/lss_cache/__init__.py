@@ -40,7 +40,9 @@ def _leash_get_list(key):
         if not redis.exists(key):
             redis_lock = pottery.Redlock(key=key, masters={redis}, auto_release_time=AUTO_RELEASE_TIME)
             return False, None, redis_lock
-        data = list(pottery.RedisList(redis=redis,key=key))
+        pottery_list = pottery.RedisList(redis=redis,key=key)
+        print(pottery_list)
+        data = list(pottery_list)
         return True, data, None
     except Exception:
         return False, None, None

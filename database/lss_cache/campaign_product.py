@@ -69,6 +69,7 @@ def set_product_all(campaign_id, campaign_products):
 
 
 
+
 # def get(campaign_id):
 #     if not redis.exists(get_key(KEY,campaign_id)):
 #         return None

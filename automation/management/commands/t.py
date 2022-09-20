@@ -669,7 +669,7 @@ class Command(BaseCommand):
         
     def test_cache_redis(self):
         import database
-
+        import json
         # database.lss_cache.campaign_product.invalidate(1162,'ordr_startr','external_internal_map')
         # success, data, lock = database.lss_cache.campaign_product.leash_get_external_internal_map(1165,'ordr_startr')
         # print(success)
@@ -680,14 +680,19 @@ class Command(BaseCommand):
 
         
         # print(data)
-
+        data = [json.dumps({'a':1})]
+        database.lss_cache.campaign_product.set_products_for_sell(1211, data)
         success, data, lock = database.lss_cache.campaign_product.leash_get_products_for_sell(1211)
-        if not success and lock:
-            with lock:
-                data = [{'a':1}]
-                database.lss_cache.campaign_product.set_products_for_sell(1211, data)
         print(success)
         print(data)
+
+
+        # if not success and lock:
+        #     with lock:
+        #         data = [json.loads({'a':1})]
+        #         database.lss_cache.campaign_product.set_products_for_sell(1211, data)
+        # print(success)
+        # print(data)
 
 
     def test_shopify(self):
