@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.core.management.base import BaseCommand
 
 from automation.utils.timeloop import time_loop
@@ -27,7 +28,14 @@ class Command(BaseCommand):
 
         # CommentQueueLengthMetric.write_time_series(len(comment_queue.jobs))
         rows=[]
-        for campaign in models.campaign.campaign.Campaign.objects.filter(start_at__lt=pendulum.now(),end_at__gt=pendulum.now()):
+        for campaign in models.campaign.campaign.Campaign.objects.filter(user_subscription__isnull=False, start_at__lt=datetime.utcnow(),end_at__gt=datetime.utcnow()):
+            invalid_facebook = not campaign.facebook_campaign.get("post_id", None)
+            invalid_instagram = not campaign.instagram_campaign.get("live_media_id", None)
+            invalid_youtube = not campaign.youtube_campaign.get("live_video_id", None)
+            invalid_twitch = not campaign.twitch_campaign.get("channel_name", None)
+            invalid_tiktok = not campaign.tiktok_campaign.get("username", None)
+            if invalid_facebook and invalid_instagram and invalid_youtube and invalid_twitch and invalid_tiktok:
+                continue
             if not service.rq.job.exists(campaign.id):
                 service.rq.queue.enqueue_unique_job_to_campaign_queue(jobs.campaign_job.campaign_job, campaign_id = campaign.id)
                 rows.append([campaign.id, ""])
