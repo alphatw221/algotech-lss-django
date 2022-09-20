@@ -138,9 +138,10 @@ def __get_comment_and_private_message(user_subscription_data, pre_order, campaig
         link = __get_link(pre_order, plugins)
         reply_message = campaign_data.get('meta_reply',{}).get(state)
         reply_message = reply_message.replace('[LINK]',link)
-        reply_message = reply_message.replace('[PRODUCT_NAME]', campaign_product.get('name'))
+        reply_message = reply_message.replace('[PRODUCT_NAME]', campaign_product.get('name',''))
         #reply_message = reply_message.replace('[ORDER_CODE]', campaign_product.get('order_code'))
-        reply_message = reply_message.replace('[DESCRIPTION]', campaign_product.get('description'))
+        description = campaign_product.get('description') if campaign_product.get('description') else ''
+        reply_message = reply_message.replace('[DESCRIPTION]', description)
         # reply_message.replace('[QTY]', str(qty))
         return "", reply_message
 
