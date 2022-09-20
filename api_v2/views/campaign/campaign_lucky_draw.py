@@ -56,9 +56,9 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
         prize = data.get('prize', {})
 
         
-        ret = rule.rule_checker.lucky_draw_rule_checker.LuckyDrawCreateRuleChecker.check(**{
-            'type': type, 'prize': prize, 'campaign': campaign
-        })
+        # ret = rule.rule_checker.lucky_draw_rule_checker.LuckyDrawCreateRuleChecker.check(**{
+        #     'type': type, 'prize': prize, 'campaign': campaign
+        # })
         
         prize = lib.util.verify.Verify.get_campaign_product_from_campaign(campaign, int(data.get('prize', {}).get('id', 0)))
         if animation and data.get('path', '') == '':
@@ -103,9 +103,9 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
         type = data.get('type', '')
         prize = data.get('prize', {})
 
-        ret = rule.rule_checker.lucky_draw_rule_checker.LuckyDrawUpdateRuleChecker.check(**{
-            'type': type, 'prize': prize, 'campaign': campaign
-        })
+        # ret = rule.rule_checker.lucky_draw_rule_checker.LuckyDrawUpdateRuleChecker.check(**{
+        #     'type': type, 'prize': prize, 'campaign': campaign
+        # })
 
         prize = lib.util.verify.Verify.get_campaign_product_from_campaign(campaign, int(data.get('prize', {}).get('id', 0)))
         if animation and data.get('path', '') == '':
