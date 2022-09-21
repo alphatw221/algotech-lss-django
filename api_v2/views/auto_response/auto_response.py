@@ -146,7 +146,7 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['POST'], url_path=r'batch/delete', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def delete_auto_response(self, request, pk=None):
+    def batch_delete_auto_response(self, request, pk=None):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         
