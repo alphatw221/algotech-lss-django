@@ -11,7 +11,6 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
 
-from django.core.files.storage import default_storage
 from django.conf import settings
 from rest_framework.parsers import MultiPartParser, FormParser,FileUploadParser, BaseParser
 from rest_framework.renderers import HTMLFormRenderer,StaticHTMLRenderer

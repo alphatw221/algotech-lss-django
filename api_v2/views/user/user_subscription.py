@@ -1,7 +1,6 @@
 from re import sub
 from tracemalloc import start
 from django.conf import settings
-from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.http import HttpResponseRedirect
 from itsdangerous import Serializer
@@ -66,9 +65,9 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         animation, = lib.util.getter.getdata(request, ("animation", ), required=True)
         if animation:
             animation_name=animation.name.replace(" ","")
-            animation_path = default_storage.save(
-                f'user_subscription/{user_subscription.id}/luckydraw/{animation_name}', ContentFile(animation.read()))
-            models.user.static_assets.StaticAssets.objects.create(user_subscription=user_subscription, name=animation.name, path=settings.GS_URL+animation_path, type=models.user.static_assets.TYPE_ANIMATION)
+            animation_path = f'user_subscription/{user_subscription.id}/luckydraw'
+            animation_url = lib.util.storage.upload_image(animation_path, animation_name, animation)
+            models.user.static_assets.StaticAssets.objects.create(user_subscription=user_subscription, name=animation.name, path=animation_url, type=models.user.static_assets.TYPE_ANIMATION)
         
         return Response({'message': 'success'}, status=status.HTTP_200_OK)
 
@@ -97,9 +96,9 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
                 elif image.content_type not in models.user.user_subscription.IMAGE_SUPPORTED_TYPE:
                     continue
                 image_name = image.name.replace(" ","")
-                image_path = default_storage.save(
-                        f'user_subscription/{user_subscription.id}/payment/direct_payment/{image_name}', ContentFile(image.read()))
-                account['image'] = settings.GS_URL+image_path
+                image_dir = f'user_subscription/{user_subscription.id}/payment/direct_payment'
+                image_url = lib.util.storage.upload_image(image_dir, image_name, image)
+                account['image'] = image_url
         else:
             data = request.data
 
