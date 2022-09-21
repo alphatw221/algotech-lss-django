@@ -1,7 +1,9 @@
 import pottery
 
-from api.models import campaign 
-from . import redis, get_key, _leash_get_dict, _leash_get_list, _set_dict, _set_list
+from api import models
+from . import redis, get_key
+
+
 KEY = 'campaign_products'
 
 DATA_EXTERNAL_INTERNAL_MAP = 'external_internal_map'
@@ -50,24 +52,46 @@ def set_internal_external_map(campaign_id, plugin, internal_external_map):
 
 
 
-def leash_get_products_for_sell(campaign_id):
+# def leash_get_products_for_sell(campaign_id):
+#     key = get_key(KEY, campaign_id, DATA_FOR_SELL)
+#     return _leash_get_list(key)
+
+# def set_products_for_sell(campaign_id, campaign_products):
+#     key = get_key(KEY, campaign_id, DATA_FOR_SELL)
+#     _set_list(key, campaign_products)
+
+
+# def leash_get_product_all(campaign_id):
+#     key = get_key(KEY, campaign_id, DATA_ALL)
+#     return _leash_get_list(key)
+
+# def set_product_all(campaign_id, campaign_products):
+#     key = get_key(KEY, campaign_id, DATA_ALL)
+#     _set_list(key, campaign_products)
+
+
+
+def get_products_for_sell(campaign_id, bypass=False):
     key = get_key(KEY, campaign_id, DATA_FOR_SELL)
-    return _leash_get_list(key)
+    @pottery.redis_cache(redis=redis, key=key)
+    def f():
+        campaign = models.campaign.campaign.Campaign.objects.get(id=campaign_id)
+        campaign_products = models.campaign.campaign_product.CampaignProduct.objects.filter(campaign = campaign, type=models.campaign.campaign_product.TYPE_LUCKY_DRAW)
+        return models.campaign.campaign_product.CampaignProductSerializer(campaign_products, many=True).data
+    if bypass:
+        return f.__bypass__()
+    return f()
 
-def set_products_for_sell(campaign_id, campaign_products):
-    key = get_key(KEY, campaign_id, DATA_FOR_SELL)
-    _set_list(key, campaign_products)
-
-
-def leash_get_product_all(campaign_id):
+def get_products_all(campaign_id, bypass=False):
     key = get_key(KEY, campaign_id, DATA_ALL)
-    return _leash_get_list(key)
-
-def set_product_all(campaign_id, campaign_products):
-    key = get_key(KEY, campaign_id, DATA_ALL)
-    _set_list(key, campaign_products)
-
-
+    @pottery.redis_cache(redis=redis, key=key)
+    def f():
+        campaign = models.campaign.campaign.Campaign.objects.get(id=campaign_id)
+        campaign_products = models.campaign.campaign_product.CampaignProduct.objects.filter(campaign = campaign)
+        return models.campaign.campaign_product.CampaignProductSerializer(campaign_products, many=True).data
+    if bypass:
+        return f.__bypass__()
+    return f()
 
 
 # def get(campaign_id):

@@ -668,8 +668,21 @@ class Command(BaseCommand):
 
         
     def test_cache_redis(self):
+        import pottery
         import database
-        import json
+        from pprint import pprint
+
+        # database.lss_cache.redis.delete('default')
+        campaign_products = database.lss_cache.campaign_product.get_products_all(1211, bypass=True)
+        print(campaign_products)
+        # @pottery.redis_cache(redis=database.lss_cache.redis, key='default')
+        # def test(key=None):
+        #     print('in')
+        #     return 1
+
+        # print(test(key='b'))
+        # print(test.cache_info())
+    # return collection.filter(**kwargs)
         # database.lss_cache.campaign_product.invalidate(1162,'ordr_startr','external_internal_map')
         # success, data, lock = database.lss_cache.campaign_product.leash_get_external_internal_map(1165,'ordr_startr')
         # print(success)
@@ -680,11 +693,11 @@ class Command(BaseCommand):
 
         
         # print(data)
-        data = [json.dumps({'a':1})]
-        database.lss_cache.campaign_product.set_products_for_sell(1211, data)
-        success, data, lock = database.lss_cache.campaign_product.leash_get_products_for_sell(1211)
-        print(success)
-        print(data)
+        # data = database.lss_cache.campaign_product.get_products_all(1211)
+        # pprint(data)
+        # success, data, lock = database.lss_cache.campaign_product.leash_get_products_for_sell(1211)
+        # print(success)
+        # print(data)
 
 
         # if not success and lock:
