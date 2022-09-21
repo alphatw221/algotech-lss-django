@@ -52,7 +52,7 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.test_shopify()
+        self.test_cache_redis()
         # self.test_remove_campaign_comment_duplicate()
 
     def modify_database(self):
@@ -668,18 +668,45 @@ class Command(BaseCommand):
 
         
     def test_cache_redis(self):
+        import pottery
         import database
+        from pprint import pprint
 
+        # database.lss_cache.redis.delete('default')
+        campaign_products = database.lss_cache.campaign_product.get_products_all(1211, bypass=True)
+        print(campaign_products)
+        # @pottery.redis_cache(redis=database.lss_cache.redis, key='default')
+        # def test(key=None):
+        #     print('in')
+        #     return 1
+
+        # print(test(key='b'))
+        # print(test.cache_info())
+    # return collection.filter(**kwargs)
         # database.lss_cache.campaign_product.invalidate(1162,'ordr_startr','external_internal_map')
-        success, data, lock = database.lss_cache.campaign_product.leash_get_external_internal_map(1165,'ordr_startr')
-        print(success)
-        if not success:
-            with lock:
-                data = {'a':1}
-                database.lss_cache.campaign_product.set_external_internal_map(1165, 'ordr_startr', data)
+        # success, data, lock = database.lss_cache.campaign_product.leash_get_external_internal_map(1165,'ordr_startr')
+        # print(success)
+        # if not success:
+        #     with lock:
+        #         data = {'a':1}
+        #         database.lss_cache.campaign_product.set_external_internal_map(1165, 'ordr_startr', data)
 
         
-        print(data)
+        # print(data)
+        # data = database.lss_cache.campaign_product.get_products_all(1211)
+        # pprint(data)
+        # success, data, lock = database.lss_cache.campaign_product.leash_get_products_for_sell(1211)
+        # print(success)
+        # print(data)
+
+
+        # if not success and lock:
+        #     with lock:
+        #         data = [json.loads({'a':1})]
+        #         database.lss_cache.campaign_product.set_products_for_sell(1211, data)
+        # print(success)
+        # print(data)
+
 
     def test_shopify(self):
         from api import models
