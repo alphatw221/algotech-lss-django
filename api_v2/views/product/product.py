@@ -193,7 +193,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         product = lib.util.verify.Verify.get_product_from_user_subscription(user_subscription, pk)
 
-        models.product.product.Product.objects.create(
+        copy_product = models.product.product.Product.objects.create(
             user_subscription=user_subscription,
             qty=product.qty,
             name=f'copy - {product.name}',
@@ -204,7 +204,7 @@ class ProductViewSet(viewsets.ModelViewSet):
             tag=product.tag            
         )
 
-        return Response({"message": "copy success"}, status=status.HTTP_200_OK)
+        return Response({"message": copy_product.id}, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET'], url_path=r'categories', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
