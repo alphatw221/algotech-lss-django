@@ -38,6 +38,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
             campaigns = campaigns.filter(end_at__lt=datetime.utcnow())
         elif campaign_status == 'scheduled':
             campaigns = campaigns.filter(end_at__gte=datetime.utcnow())
+            campaigns = campaigns.filter(start_at__gte=datetime.utcnow())
         elif campaign_status == 'ongoing':
             campaigns = campaigns.filter(end_at__gte=datetime.utcnow())
             campaigns = campaigns.filter(start_at__lte=datetime.utcnow())
