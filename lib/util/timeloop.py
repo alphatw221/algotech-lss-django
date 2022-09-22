@@ -6,10 +6,17 @@ def time_loop(sleep_time):
     def decorator(func):
         def wrapper(*args, **kwargs):
             while True:
-                try:
-                    func(*args, **kwargs)
-                except Exception:
-                    print(traceback.format_exc())
+                output = func(*args, **kwargs)
+                if output=='break':
+                    break
                 time.sleep(sleep_time)
+        return wrapper
+    return decorator
+
+def infinite_loop():
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            while True:
+                func(*args, **kwargs)
         return wrapper
     return decorator
