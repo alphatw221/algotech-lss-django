@@ -311,7 +311,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         product = lib.util.verify.Verify.get_product_from_user_subscription(user_subscription, product_id)
-        image_path = settings.GS_URL+product.image
+        image_path = product.image
 
         for email, counter in product.meta.get('wish_list',{}).items():
             title = ""
