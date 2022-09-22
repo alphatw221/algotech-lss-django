@@ -28,7 +28,7 @@ def create_checkout_session(secret, currency, order, decimal_places, price_unit,
         for key, product in order.products.items():
             stripe_product = stripe.Product.create(
                 name=product.get('name',''),
-                images=[urllib.parse.quote(f"{settings.GS_URL}{product.get('image','')}").replace("%3A", ":")]
+                images=[urllib.parse.quote(f"{product.get('image','')}").replace("%3A", ":")]
             )
             
             price = stripe.Price.create(
