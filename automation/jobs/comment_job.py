@@ -58,6 +58,7 @@ def comment_job(campaign_data, user_subscription_data, platform_name, platform_i
             campaign_id= campaign_data['id'],
             platform= comment['platform'],
             platform_id= platform_instance_data.get('id'),
+            meta = {'comment':comment}      # for ordr_startr might be useful for other integration
         )
 
     state = lib.helper.order_helper.PreOrderHelper.add_or_update_by_comment(
