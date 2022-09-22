@@ -19,7 +19,9 @@ def make_discount(before_discount_amount, discount_code):
         elif discount_type==models.discount_code.discount_code.DISCOUNT_TYPE_DEDUCT:
             deduct_amount = meta['deduct_amount']
             after_discount_amount = before_discount_amount-deduct_amount
-            return after_discount_amount, deduct_amount
+            if after_discount_amount < 0:
+                after_discount_amount = 0
+            return after_discount_amount, before_discount_amount-after_discount_amount
 
 
     except Exception:
