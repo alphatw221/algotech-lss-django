@@ -11,7 +11,7 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.test_tiktok()
+        self.test_facebook_messenger()
 
 
     def modify_database(self):
@@ -722,3 +722,26 @@ class Command(BaseCommand):
         jobs.easy_store.export_order_job(campaign_id, c)
 
 
+    def test_facebook_messenger(self):
+
+        import service
+        token = 'EAANwBngXqOABAG2i9ZAsCqFZCMz9Wykmd43JbZAzEIgnZCYszZCcxhnSkw4rTvTO8KCdMbXt3P1IIiF7KmvIBbgLGR4N8QwiXO9AOCzfumh3v95yfFJgOBNhqo3O71MkwZAl2ZAJJoxTi3MoBs0JMdFVTTuKD0LqZCPmdPPOiWvlLFZAhZBXsvvlPTdbPkIDJEDAEZD'
+
+        psid = "4422762234485468" 
+
+        attachment={
+            "type":"template",
+            "payload":{
+                "template_type":"button",
+                "text":"What do you want to do next?",
+                "buttons":[
+                {
+                    "type":"web_url",
+                    "url":"https://www.messenger.com",
+                    "title":"Visit Messenger"
+                }]
+            }
+        }
+        a,b = service.facebook.message.send_private_message(token,psid,'hi', attachment = attachment)
+        print(a)
+        print(b)

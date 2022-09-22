@@ -87,14 +87,33 @@ def comment_job(campaign_data, user_subscription_data, platform_name, platform_i
 
 
 def comment_responding(platform_name, platform_instance_data, campaign_data, user_subscription_data, pre_order, comment, campaign_product, qty, state):
-
-    _, private_message = __get_comment_and_private_message(user_subscription_data, pre_order, campaign_data, state, campaign_product, qty)
+    
+    plugins = user_subscription_data.get('user_plan',{}).get('plugins')
+    link = __get_link(pre_order, plugins)
+    
+    _, private_message = __get_comment_and_private_message( pre_order, campaign_data, state, campaign_product, qty, link, plugins)
     if platform_name == 'facebook':
 
         # if state == lib.helper.order_helper.RequestState.INSUFFICIENT_INV:    
         #     code, ret = service.facebook.post.post_page_comment_on_comment( platform_instance_data.get('token'), comment['id'], comment_message)
         #     if code!=200:
         #         print("response", ret)
+
+        if 'facebook_buttons' in campaign_data.get('meta_reply',{}):
+            facebook_buttons = campaign_data.get('meta_reply',{}).get('facebook_buttons',[])
+
+            view_order_button =  {
+                "type":"web_url",
+                "url":link,
+                "title":"View Order"
+            }
+            facebook_buttons.insert(0,view_order_button)    # for ordr_startr 
+
+            code, ret = service.facebook.message.send_private_message_with_buttons(platform_instance_data.get('token'), comment['id'], private_message, facebook_buttons)
+            if code!=200:
+                print("response", ret)
+            return
+
         code, ret = service.facebook.post.post_page_message_on_comment(platform_instance_data.get('token'), comment['id'], private_message)
         if code!=200:
             print("response", ret)
@@ -131,11 +150,10 @@ def comment_responding(platform_name, platform_instance_data, campaign_data, use
     elif platform_name == 'tiktok':
         pass
 
-def __get_comment_and_private_message(user_subscription_data, pre_order, campaign_data, state, campaign_product, qty):
+def __get_comment_and_private_message( pre_order, campaign_data, state, campaign_product, qty, link, plugins):
 
-    plugins = user_subscription_data.get('user_plan',{}).get('plugins')
+
     if state in campaign_data.get('meta_reply',{}):
-        link = __get_link(pre_order, plugins)
         reply_message = campaign_data.get('meta_reply',{}).get(state)
         reply_message = reply_message.replace('[LINK]',link)
         reply_message = reply_message.replace('[PRODUCT_NAME]', campaign_product.get('name',''))
