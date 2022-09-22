@@ -84,6 +84,7 @@ class Command(BaseCommand):
             invalid_twitch = not campaign.twitch_campaign.get("channel_name", None)
             invalid_tiktok = not campaign.tiktok_campaign.get("username", None)
             if invalid_facebook and invalid_instagram and invalid_youtube and invalid_twitch and invalid_tiktok:
+                rows.append([campaign.id, "invalid"])
                 continue
             if not service.rq.job.exists(campaign.id):
                 service.rq.queue.enqueue_unique_job_to_campaign_queue(jobs.campaign_job.campaign_job, campaign_id = campaign.id)
