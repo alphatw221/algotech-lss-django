@@ -45,7 +45,14 @@ class CartViewSet(viewsets.GenericViewSet):
           campaign_product_data = internal_external_map[campaign_product_id_str]
           product_items.append({'Id':campaign_product_data.get('id'), 'Keyword':campaign_product_data.get('order_code'), 'Qty':product.get('qty')})
         
-        success, data = ordr_startr_service.order.create_order(key=credential.get('key'), cart_oid=cart_oid, user_id=pre_order.customer_id, user_name=pre_order.customer_name, platform=pre_order.platform, product_items=product_items)
+        success, data = ordr_startr_service.order.create_order(
+            key=credential.get('key'), 
+            cart_oid=cart_oid, 
+            user_id=pre_order.customer_id, 
+            comment_id = pre_order.meta.get('comment',{}).get('id'),
+            user_name=pre_order.customer_name, 
+            platform=pre_order.platform, 
+            product_items=product_items)
         
         print(data)
 
