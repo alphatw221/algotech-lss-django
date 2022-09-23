@@ -180,15 +180,17 @@ def __get_comment_and_private_message( pre_order, campaign_data, state, campaign
 
 
 def __get_link(pre_order, plugins=None):
+    if plugins:
+        if lss_plugins.easy_store.EASY_STORE in plugins:
+            return settings.SHOPPING_CART_RECAPTCHA_URL + f'/{lss_plugins.easy_store.EASY_STORE}/{str(pre_order._id)}'
+        elif lss_plugins.ordr_startr.ORDR_STARTR in plugins:
+            return settings.SHOPPING_CART_RECAPTCHA_URL + f'/{lss_plugins.ordr_startr.ORDR_STARTR}/{str(pre_order._id)}'
+        elif lss_plugins.shopify.SHOPIFY in plugins:
+            return settings.SHOPPING_CART_URL + '/' + str(pre_order._id)
 
-    if lss_plugins.easy_store.EASY_STORE in plugins:
-        return settings.SHOPPING_CART_RECAPTCHA_URL + f'/{lss_plugins.easy_store.EASY_STORE}/{str(pre_order._id)}'
-    elif lss_plugins.ordr_startr.ORDR_STARTR in plugins:
-        return settings.SHOPPING_CART_RECAPTCHA_URL + f'/{lss_plugins.ordr_startr.ORDR_STARTR}/{str(pre_order._id)}'
-    elif lss_plugins.shopify.SHOPIFY in plugins:
         return settings.SHOPPING_CART_URL + '/' + str(pre_order._id)
-
-    return settings.SHOPPING_CART_URL + '/' + str(pre_order._id)
+    else:
+        return settings.SHOPPING_CART_URL + '/' + str(pre_order._id)
 
     # {
     #     'added':'You successfully bidded for:\n [PRODUCT_NAME] - [DESCRIPTION]\n\nCut Off Time:Thursday, 25th August 2022, 12 noon!\n\nKindly click View Order and proceed to make payment before cut off time to secure your order.\n[LINK]',
