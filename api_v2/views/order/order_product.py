@@ -27,6 +27,7 @@ class OrderProductViewSet(viewsets.ModelViewSet):
             None, pre_order.id, order_product.id)
 
         pre_order = lib.util.verify.Verify.get_pre_order(pre_order.id)
+        pre_order = lib.helper.order_helper.PreOrderHelper.summarize_pre_order(pre_order, pre_order.campaign, save=True)
         return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
 
 
@@ -44,6 +45,7 @@ class OrderProductViewSet(viewsets.ModelViewSet):
             None, pre_order.id, order_product.id, qty)
 
         pre_order = lib.util.verify.Verify.get_pre_order(pre_order.id)
+        pre_order = lib.helper.order_helper.PreOrderHelper.summarize_pre_order(pre_order, pre_order.campaign, save=True)
         return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
 
     #------------------------------------------------- buyer -------------------------------------------------------
@@ -63,6 +65,7 @@ class OrderProductViewSet(viewsets.ModelViewSet):
             api_user, pre_order.id, order_product.id)
 
         pre_order = lib.util.verify.Verify.get_pre_order(pre_order.id)
+        pre_order = lib.helper.order_helper.PreOrderHelper.summarize_pre_order(pre_order, pre_order.campaign, save=True)
         return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
 
 
@@ -80,6 +83,7 @@ class OrderProductViewSet(viewsets.ModelViewSet):
             api_user, pre_order.id, order_product.id, qty)
 
         pre_order = lib.util.verify.Verify.get_pre_order(pre_order.id)
+        pre_order = lib.helper.order_helper.PreOrderHelper.summarize_pre_order(pre_order, pre_order.campaign, save=True)
         return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
     
     # ---------------------------------------------------------seller---------------------------------------------
@@ -100,6 +104,7 @@ class OrderProductViewSet(viewsets.ModelViewSet):
             api_user, pre_order.id, order_product.id)
 
         pre_order = lib.util.verify.Verify.get_pre_order(pre_order.id)
+        pre_order = lib.helper.order_helper.PreOrderHelper.summarize_pre_order(pre_order, pre_order.campaign, save=True)
         return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
 
 
@@ -118,5 +123,6 @@ class OrderProductViewSet(viewsets.ModelViewSet):
             api_user, pre_order.id, order_product.id, qty)
 
         pre_order = lib.util.verify.Verify.get_pre_order(pre_order.id)
+        pre_order = lib.helper.order_helper.PreOrderHelper.summarize_pre_order(pre_order, pre_order.campaign, save=True)
         return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
 
