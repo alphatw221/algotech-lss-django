@@ -388,7 +388,7 @@ class PreOrderHelper():
         is_items_over_free_delivery_threshold = len(pre_order.products) >= float(meta_logistic.get('free_delivery_for_how_many_order_minimum')) if meta_logistic.get('is_free_delivery_for_how_many_order_minimum') else False
 
 
-        if (pre_order.shipping_option_index and delivery_options[pre_order.shipping_option_index] ):
+        if (pre_order.shipping_option_index != None and delivery_options[pre_order.shipping_option_index] ):
             option = delivery_options[pre_order.shipping_option_index]
 
             if option.get('type') == '+':
