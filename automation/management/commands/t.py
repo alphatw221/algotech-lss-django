@@ -11,7 +11,7 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.test_facebook_messenger()
+        self.test_get_facebook_app_secret_proof()
 
 
     def modify_database(self):
@@ -745,3 +745,11 @@ class Command(BaseCommand):
         a,b = service.facebook.message.send_private_message(token,psid,'hi', attachment = attachment)
         print(a)
         print(b)
+    
+    def test_get_facebook_app_secret_proof(self):
+        import hashlib, hmac
+
+        page_token = 'EAANwBngXqOABAAOHBdSPAZAWckuo6imoCtBHH8c26aAhZASsIGv9VBvaMuy7pb1lrpieSZASIkC5fQAQoxgPsnpeVRkG4KF5bsSvzmVJimvhxfVIGgcXEA3JdHkyYyZCenGYYeChEaZCWSeL9TK7e60uRU7GdxZAYtRTl4FTftSRvBf3Yg3Mr129Dc0ZA4MnMqlegX0oiAkKWUWriE1Ifzs1XUQUJeUxNkZD'
+        app_secret='e36ab1560c8d85cbc413e07fb7232f99'
+        app_secret_proof = hmac.new(app_secret.encode(), msg=page_token.encode(), digestmod=hashlib.sha256).hexdigest()
+        print(app_secret_proof)
