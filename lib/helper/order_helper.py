@@ -367,14 +367,13 @@ class PreOrderHelper():
     
     @classmethod
     def summarize_pre_order(cls, pre_order, campaign, shipping_option=None, save=False):
-        
 
         after_discount_subtotal, discount = lib.helper.discount_helper.make_discount(pre_order.subtotal, pre_order.applied_discount)
         pre_order.discount = discount
 
         if pre_order.shipping_method == 'pickup':
             pre_order.shipping_cost = 0
-            pre_order.total = pre_order.subtotal - pre_order.discount + pre_order.adjust_price
+            pre_order.total = 0 if (after_discount_subtotal + pre_order.adjust_price) < 0 else (after_discount_subtotal + pre_order.adjust_price)
             if save:
                 pre_order.save()
                 return pre_order
@@ -406,10 +405,14 @@ class PreOrderHelper():
         if is_items_over_free_delivery_threshold:
             delivery_charge = 0
             pre_order.meta['items_over_free_delivery_threshold'] = True
-
-        total = pre_order.subtotal - pre_order.discount + pre_order.adjust_price + delivery_charge
-        pre_order.total  = 0 if total<0 else total
+        
         pre_order.shipping_cost = delivery_charge
+        total = after_discount_subtotal + pre_order.adjust_price + delivery_charge
+        if total < 0:
+            pre_order.total  = 0
+            pre_order.discount -= -total
+        else:
+            pre_order.total = total
         
         if save:
             pre_order.save()
