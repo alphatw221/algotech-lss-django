@@ -359,7 +359,7 @@ TWITCH_API_URL="https://api.twitch.tv"
 TWITCH_OAUTH_URL = "https://id.twitch.tv"
 
 TWITCH_CLIENT_ID = "drsl6rugh7wf23ombongnhfec210gp"
-TWITCH_CLIENT_SECRET = "po5bdm4ktrbrxy0eh9qa2rbkgt1h5k"
+TWITCH_CLIENT_SECRET = "a0i3kpoz7jzk4v48bsmt9vieriqg8j"
 TWITCH_FROM_USER_ID = "788983065"
 
 # Google API credentials

@@ -38,6 +38,10 @@ class DiscountCode(models.Model):
     discount_type = models.CharField(max_length=255, null=True, blank=True)
 
     limitations = models.JSONField(null=False, blank=False, default=[])
+
+    applied_count = models.IntegerField( blank=False, null=False, default=0)
+    used_count = models.IntegerField( blank=False, null=False, default=0)
+    
     meta = models.JSONField(null=True, blank=True, default=dict)
 
     created_at = models.DateTimeField(auto_now_add=True)

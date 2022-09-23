@@ -33,6 +33,7 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
 
         return Response(models.auto_response.auto_response.AutoResponseSerializer(auto_response).data, status=status.HTTP_200_OK)
 
+
     @action(detail=False, methods=['GET'], url_path=r'list', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def list_auto_response(self, request):
@@ -105,6 +106,8 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             auto_res = serializer.save()
             auto_responses.append(models.auto_response.auto_response.AutoResponseSerializer(auto_res).data)
+            data.pop('facebook_page', None)
+            data.pop('instagram_profile', None)
 
         return Response(auto_responses, status=status.HTTP_200_OK)
 
@@ -128,6 +131,7 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+
     @action(detail=True, methods=['DELETE'], url_path=r'delete', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def delete_auto_response(self, request, pk=None):
@@ -139,9 +143,10 @@ class AutoResponseViewSet(viewsets.ModelViewSet):
 
         return Response({"message": "delete success"}, status=status.HTTP_200_OK)
     
+
     @action(detail=False, methods=['POST'], url_path=r'batch/delete', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def delete_auto_response(self, request, pk=None):
+    def batch_delete_auto_response(self, request, pk=None):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         

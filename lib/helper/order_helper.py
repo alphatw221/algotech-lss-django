@@ -367,14 +367,13 @@ class PreOrderHelper():
     
     @classmethod
     def summarize_pre_order(cls, pre_order, campaign, shipping_option=None, save=False):
-        
 
         after_discount_subtotal, discount = lib.helper.discount_helper.make_discount(pre_order.subtotal, pre_order.applied_discount)
         pre_order.discount = discount
 
         if pre_order.shipping_method == 'pickup':
             pre_order.shipping_cost = 0
-            pre_order.total = pre_order.subtotal - pre_order.discount + pre_order.adjust_price
+            pre_order.total = 0 if (after_discount_subtotal + pre_order.adjust_price) < 0 else (after_discount_subtotal + pre_order.adjust_price)
             if save:
                 pre_order.save()
                 return pre_order
@@ -389,7 +388,7 @@ class PreOrderHelper():
         is_items_over_free_delivery_threshold = len(pre_order.products) >= float(meta_logistic.get('free_delivery_for_how_many_order_minimum')) if meta_logistic.get('is_free_delivery_for_how_many_order_minimum') else False
 
 
-        if (pre_order.shipping_option_index and delivery_options[pre_order.shipping_option_index] ):
+        if (pre_order.shipping_option_index != None and delivery_options[pre_order.shipping_option_index] ):
             option = delivery_options[pre_order.shipping_option_index]
 
             if option.get('type') == '+':
@@ -406,10 +405,14 @@ class PreOrderHelper():
         if is_items_over_free_delivery_threshold:
             delivery_charge = 0
             pre_order.meta['items_over_free_delivery_threshold'] = True
-
-        total = pre_order.subtotal - pre_order.discount + pre_order.adjust_price + delivery_charge
-        pre_order.total  = 0 if total<0 else total
+        
         pre_order.shipping_cost = delivery_charge
+        total = after_discount_subtotal + pre_order.adjust_price + delivery_charge
+        if total < 0:
+            pre_order.total  = 0
+            pre_order.discount -= -total
+        else:
+            pre_order.total = total
         
         if save:
             pre_order.save()
@@ -496,7 +499,7 @@ class OrderHelper():
         for key, product in order.products.items():
             mail_content += f'<tr>'
             mail_content += f'<td width="1" style="mso-line-height-rule: exactly; padding: 13px 13px 13px 0;" bgcolor="#ffffff" valign="middle">\
-                                <img width="140" src="{settings.GS_URL+product["image"]}" alt="Product Image" style="vertical-align: middle; text-align: center; width: 140px; max-width: 140px; height: auto !important; border-radius: 1px; padding: 0px;">\
+                                <img width="140" src="{product["image"]}" alt="Product Image" style="vertical-align: middle; text-align: center; width: 140px; max-width: 140px; height: auto !important; border-radius: 1px; padding: 0px;">\
                             </td>'
             mail_content += f'<tr style="mso-line-height-rule: exactly; padding-top: 13px; padding-bottom: 13px; border-bottom-width: 2px; border-bottom-color: #dadada; border-bottom-style: solid;" bgcolor="#ffffff" valign="middle">'
             mail_content += f'<table cellspacing="0" cellpadding="0" border="0" width="100%" style="min-width: 100%; border-bottom: 1px solid #a5a5a5;" role="presentation">\
@@ -657,7 +660,7 @@ class OrderHelper():
         for key, product in order.products.items():
             mail_content += f'<tr>'
             mail_content += f'<td width="1" style="mso-line-height-rule: exactly; padding: 13px 13px 13px 0;" bgcolor="#ffffff" valign="middle">\
-                                <img width="140" src="{settings.GS_URL+product["image"]}" alt="Product Image" style="vertical-align: middle; text-align: center; width: 140px; max-width: 140px; height: auto !important; border-radius: 1px; padding: 0px;">\
+                                <img width="140" src="{product["image"]}" alt="Product Image" style="vertical-align: middle; text-align: center; width: 140px; max-width: 140px; height: auto !important; border-radius: 1px; padding: 0px;">\
                             </td>'
             mail_content += f'<tr style="mso-line-height-rule: exactly; padding-top: 13px; padding-bottom: 13px; border-bottom-width: 2px; border-bottom-color: #dadada; border-bottom-style: solid;" bgcolor="#ffffff" valign="middle">'
             mail_content += f'<table cellspacing="0" cellpadding="0" border="0" width="100%" style="min-width: 100%; border-bottom: 1px solid #a5a5a5;" role="presentation">\
