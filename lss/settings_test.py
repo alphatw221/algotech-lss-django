@@ -1,5 +1,9 @@
 from lss.settings import *
+
 DEBUG = True
+TEST = True            
+MOCK_SERVICE = True
+
 GCP_API_LOADBALANCER_URL = "http://localhost:8000"
 WEB_SERVER_URL = "http://localhost:3000"
 

@@ -15,7 +15,7 @@ class Campaign(Collection):
 
     _collection = db.api_campaign
     collection_name='api_campaign'
-
+    template = models.campaign.campaign.api_campaign_template
 
 
 

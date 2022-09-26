@@ -17,12 +17,13 @@ class V1PermanentTokenAuthentication(authentication.TokenAuthentication):
     
     def authenticate_credentials(self, key):
         try:
+
             header, payload, signature, api_key, secret_key_hash = key.split('.')
 
             header_data = json.loads(base64.urlsafe_b64decode(header+'=='))
 
             if header_data.get('typ')!='v1':
-                return None
+                return False
 
             developer = models.user.developer.Developer.objects.get(api_key=api_key)
 
@@ -31,6 +32,7 @@ class V1PermanentTokenAuthentication(authentication.TokenAuthentication):
             if _secret_key_hash!=secret_key_hash:
                 raise exceptions.AuthenticationFailed('Invalid token.')
 
+            setattr(developer,'is_authenticated',True)
             return (developer,None)
         except Exception :
             print(traceback.format_exc())

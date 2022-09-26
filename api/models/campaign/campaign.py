@@ -235,5 +235,5 @@ class CampaignOptionSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'title']
 
 
-
+api_campaign_template={f.get_attname():f.get_default() if f.has_default() else None for f in Campaign._meta.fields}
 

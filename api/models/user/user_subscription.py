@@ -242,3 +242,4 @@ class UserSubscriptionAdmin(admin.ModelAdmin):
 
 
 
+api_user_subscription_template={f.get_attname():f.get_default() if f.has_default() else None for f in UserSubscription._meta.fields}
