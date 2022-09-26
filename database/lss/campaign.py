@@ -70,7 +70,6 @@ def get_merge_order_list_pagination(campaign_id, search:str, status:str, filter_
         },
         {"$project":{"_id":0,"data":{"$concatArrays":["$orders","$pre_orders"]}} },
         { "$unwind": "$data" },
-        { "$sort" : { "data.created_at" : -1 } },
         {"$group":{
             "_id": {
                 "id": "$data.id",
@@ -87,8 +86,10 @@ def get_merge_order_list_pagination(campaign_id, search:str, status:str, filter_
             "shipping_method":{"$first":"$data.shipping_method"},
             "meta":{"$first":"$data.meta"},
             "status":{"$first":"$data.status"},
-            "type":{"$first":"$data.type"}
+            "type":{"$first":"$data.type"},
+            "created_at":{"$first":"$data.created_at"}
         }},
+        { "$sort" : { "created_at" : -1 } },
         {"$project":{"_id":0,}},
     ]
 
