@@ -61,6 +61,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
         lib.helper.order_helper.PreOrderHelper.add_product(None,pre_order.id, campaign_product.id, qty)
         pre_order = lib.util.verify.Verify.get_pre_order(pre_order.id)
+        pre_order = lib.helper.order_helper.PreOrderHelper.summarize_pre_order(pre_order, pre_order.campaign, save=True)
         return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['PUT'], url_path=r'(?P<pre_order_oid>[^/.]+)/guest/delivery', permission_classes=(), authentication_classes=[])
@@ -291,6 +292,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
         lib.helper.order_helper.PreOrderHelper.add_product(api_user, pre_order.id, campaign_product.id, qty)
         pre_order = lib.util.verify.Verify.get_pre_order(pre_order.id)
+        pre_order = lib.helper.order_helper.PreOrderHelper.summarize_pre_order(pre_order, pre_order.campaign, save=True)
         return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
 
 
@@ -464,5 +466,6 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
         lib.helper.order_helper.PreOrderHelper.add_product(api_user, pre_order.id, campaign_product.id, qty)
         pre_order = lib.util.verify.Verify.get_pre_order(pre_order.id)
+        pre_order = lib.helper.order_helper.PreOrderHelper.summarize_pre_order(pre_order, pre_order.campaign, save=True)
         return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
         
