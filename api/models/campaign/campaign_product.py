@@ -131,8 +131,8 @@ class CampaignProductSerializerUpdate(CampaignProductSerializer):
             'max_order_amount', 
             'type', 
             'order_code', 
-            'over_sell', 
-            'over_book'
+            'oversell', 
+            'overbook'
         ]
 
 
