@@ -338,6 +338,9 @@ msgstr "Discount"
 msgid "EMAIL/DELIVERY_CONFIRM/DELIVERY_CHARGE"
 msgstr "Delivery Charge"
 
+msgid "EMAIL/DELIVERY_CONFIRM/TAX"
+msgstr "Tax"
+
 #: lib/helper/order_helper.py:549 lib/helper/order_helper.py:711
 #: lib/i18n/email/delivery_comfirm_mail.py:94
 #: lib/i18n/email/order_comfirm_mail.py:203
