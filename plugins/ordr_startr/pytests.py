@@ -31,74 +31,149 @@ import lib
 #     assert True
 
 
+# @pytest.mark.django_db
+# def test_create_data_helper():
+#     data = lib.helper.unit_test_helper.UnitTestHelper.create_test_data(collections_data={
+#         'user_subscription':{'name':'test_user_subscription'},
+#         'campaign':{'title':'test'}
+#     })
+
+#     print(data)
+
 @pytest.mark.django_db
-def test_create_data_helper():
-    data = lib.helper.unit_test_helper.UnitTestHelper.create_test_data(collections_data={
-        'user_subscription':{'name':'test_user_subscription'},
-        'campaign':{'title':'test'}
-    })
+def test_payment_callback(client):
 
-    print(data)
-
-
-# def test_payment_callback(client):
     
 
-#     url = reverse('ordr_startr:order-payment_complete_callback', kwargs={'user_subscription_id':1}) #'<namespace>:<view_set_name>-<url_name>'
-#     headers = {'Authorization':'Token eyJhbGciOiAic2hhMjU2IiwgInR5cCI6ICJ2MSJ9.eyJrZXkiOiAiN2JiZHJBNWtRMDZuQVpQOWllRWhUQSIsICJwZXJtIjoge30sICJhdXRoIjogbnVsbCwgIm1ldGEiOiB7fSwgImV4cCI6IDE2NjI1NDAyNjh9.8a1a3f2735e90bd3a8abd9615e7bc26e5860297968250268d371a31728c04556.7bbdrA5kQ06nAZP9ieEhTA.a1ttdUyxI3KdlcO1evA_Fyy1icAxQd8nXgGUlEThLoE'}
-#     data = {
-#         "order":{
-#             "FbId":"5134093353312051",
-#             "Status":"confirmed",
-#             "Is_FirstOrder":True,
-#             "ShippingCharge":0,
-#             "PaymentStatus":"paid",
-#             "DiscountAmount":0,
-#             "PaidAmount":1150,
-#             "Payment_id":"payment_8550798dce33aacdb5ac6c7752e52b78",
-#             "ApplyPoint":0,
-#             "DiscountAmountPoint":0,
-#             "OrderWisePoint":2300,
-#             "PaymentClientStatus":"completed",
-#             "DeductQtyUponPaymentStatus":"",
-#             "ReferralCode":"",
-#             "OrcCode":"",
-#             "HideDeliveryMessage":"Supplier will contact you within 5 working days to arrange delivery with you. �",
-#             "RemarkMessage":"Remark Message",
-#             "FeedBackMessage":"",
-#             "ExternalReferenceId":"63197fd40b497c2c440f71a1",
-#             "id":"63198013608d6432adc048a7",
-#             "FbPageId":"105929794479727",
-#             "sourceType":"FB",
-#             "Date":"2022-09-08T05:39:31.000Z",
-#             "DeliveryTimeSlot":None,
-#             "Items":[{"_id":"63198013608d6432adc048a8","id":"6315cc771cd21f3691d51bab","itemName":"Naomi Card Wallet -Black (WxH: 4.4\"x3.2\")","qty":3,"price":230,"keyword":"NW01","SKU":"NW01","total":690,"supplierName":"Korea","Date":"2022-09-08T05:39:31.000Z"},{"_id":"63198013608d6432adc048a9","id":"6315cc771cd21f3691d51bac","itemName":"Naomi Card Wallet -Butter (WxH: 4.4\"x3.2\")","qty":2,"price":230,"keyword":"NW02","SKU":"NW02","total":460,"supplierName":"Korea","Date":"2022-09-08T05:39:31.000Z"}],
-#             "Name":"鄭曉筠",
-#             "Residential_Type":"Landed",
-#             "ShippingAddress1":"Tpe",
-#             "ShippingEmail":"ceciliacheng@accoladeglobal.net",
-#             "ShippingMobile":"0938865798",
-#             "ShippingName":"鄭曉筠",
-#             "ShippingPostalCode":"333",
-#             "ShippingSupplier":[],
-#             "Total":1150,
-#             "v":0,
-#             "createdAt":"2022-09-08T05:39:31.134Z",
-#             "updatedAt":"2022-09-08T05:59:07.565Z",
-#             "MisMatchItems":[],
-#             "ValidItems":[],
-#             "ShippingAddress2":None,
-#             "PaymentDate":"2022-09-08T05:59:07.000Z"},
+    data1 = lib.helper.unit_test_helper.UnitTestHelper.create_test_data(collections_data={
+        'user_subscription':{'name':'test_user_subscription'},
+        'user':{'email':'test@email.com'},
+        'campaign':{'title':'test'},
+        'product':{'name':'test'},
+        'campaign_product':{'name':'test_campaign_product', 'order_code':'NW01', 'qty_for_sale':1, 'qty_add_to_cart':1, 'qty_sold':0, 'price':10,'meta':{'ordr_startr':{'id':'123'}}}
+    })
 
-#             "products":[
-#                 {"maxQty":5,"defaultMaxQty":5,"SKU":"NW01","visible":True,"sold":3,"supplierName":"Korea","counter":29,"_id":"6315cc771cd21f3691d51bab","description":"Naomi Card Wallet -Black (WxH: 4.4\"x3.2\")","keyword":"NW01","price":230,"stock":2,"reply_message":"Naomi Card Wallet -Black (WxH: 4.4\"x3.2\")","FbPageId":"105929794479727","createdAt":"2022-09-05T10:16:23.972Z","updatedAt":"2022-09-08T05:57:18.132Z","v":0},{"maxQty":5,"defaultMaxQty":5,"SKU":"NW02","visible":true,"sold":2,"supplierName":"Korea","counter":30,"_id":"6315cc771cd21f3691d51bac","description":"Naomi Card Wallet -Butter (WxH: 4.4\"x3.2\")","keyword":"NW02","price":230,"stock":3,"reply_message":"Naomi Card Wallet -Butter (WxH: 4.4\"x3.2\")","FbPageId":"105929794479727","createdAt":"2022-09-05T10:16:24.002Z","updatedAt":"2022-09-08T05:57:18.136Z","_v":0}
-#                 ]
-#             }
-#     response = client.put(url,headers={'Authorization':'Token 123asd'},json={})
+    data2 = lib.helper.unit_test_helper.UnitTestHelper.create_test_data(collections_data={
+        'pre_order':{
+            'platform':'facebook',
+            'customer_id':'123',
+            'customer_name':'123',
+            'customer_img':None,
+            'products':{
+                str(data1.get('campaign_product_id')):{
+                    "order_product_id": None,
+                    "name": "test_campaign_product",
+                    "image": None,
+                    "price": 10,
+                    "type": "product",
+                    "qty": 1,
+                    "subtotal": 10
+                }
+            }   
+        }
+    })
 
-#     assert response.status_code==200
+    developer=models.user.developer.Developer.objects.create(**{
+            "api_key" : '123',
+            "secret_key" : '123',
+            "name" : 'test',
+            "authorization": {
+                "user_subscription": {
+                        str(data1.get('user_subscription_id')): {},
+                    }
+            },
+        })
 
-    # assert campaign_product qty correct
+    token = lib.helper.token_helper.V1DeveloperTokenHelper.generate_token(developer)
+    # print(token)
+    user_subscription_id = data1.get('user_subscription_id')
+    pre_order_oid = data2.get('pre_order_oid')
+
+
+    url = reverse('ordr_startr:order-payment_complete_callback', kwargs={'user_subscription_id':user_subscription_id}) #'<namespace>:<view_set_name>-<url_name>'
+    headers = {'Authorization':f'Token {token}'}
+    headers = {
+        'HTTP_X_HTTP_METHOD_OVERRIDE': 'PUT',
+        'HTTP_AUTHORIZATION':f'Token {token}'
+        }
+
+    data = {
+        "order":{
+            "FbId":"5134093353312051",
+            "Status":"confirmed",
+            "Is_FirstOrder":True,
+            "ShippingCharge":0,
+            "PaymentStatus":"paid",
+            "DiscountAmount":0,
+            "PaidAmount":10,
+            "Payment_id":"payment_8550798dce33aacdb5ac6c7752e52b78",
+            "ApplyPoint":0,
+            "DiscountAmountPoint":0,
+            "OrderWisePoint":2300,
+            "PaymentClientStatus":"completed",
+            "DeductQtyUponPaymentStatus":"",
+            "ReferralCode":"",
+            "OrcCode":"",
+            "HideDeliveryMessage":"Supplier will contact you within 5 working days to arrange delivery with you. �",
+            "RemarkMessage":"Remark Message",
+            "FeedBackMessage":"",
+            "ExternalReferenceId":pre_order_oid,
+            "id":"63198013608d6432adc048a7",
+            "FbPageId":"105929794479727",
+            "sourceType":"FB",
+            "Date":"2022-09-08T05:39:31.000Z",
+            "DeliveryTimeSlot":None,
+
+            "Items":[
+                {"_id":"123",               #*
+                "id":"123",                 #*
+                "itemName":"Naomi Card Wallet -Black (WxH: 4.4\"x3.2\")",
+                "qty":1,                    #*
+                "price":10,                 #*
+                "keyword":"NW01",
+                "SKU":"NW01",
+                "total":10  ,                #*
+                "supplierName":"Korea",
+                "Date":"2022-09-08T05:39:31.000Z"}],
+
+            "Name":"鄭曉筠",
+            "Residential_Type":"Landed",
+            "ShippingAddress1":"Tpe",
+            "ShippingEmail":"ceciliacheng@accoladeglobal.net",
+            "ShippingMobile":"0938865798",
+            "ShippingName":"鄭曉筠",
+            "ShippingPostalCode":"333",
+            "ShippingSupplier":[],
+            "Total":10,
+            "v":0,
+            "createdAt":"2022-09-08T05:39:31.134Z",
+            "updatedAt":"2022-09-08T05:59:07.565Z",
+            "MisMatchItems":[],
+            "ValidItems":[],
+            "ShippingAddress2":None,
+            "PaymentDate":"2022-09-08T05:59:07.000Z"},
+
+            "products":[
+                {
+                    "maxQty":5,
+                    "defaultMaxQty":5,
+                    "SKU":"NW01",
+                    "visible":True,
+                    "sold":1,                       #*
+                    "supplierName":"Korea",
+                    "counter":29,
+                    "_id":"123",
+                    "description":"Naomi Card Wallet -Black (WxH: 4.4\"x3.2\")","keyword":"NW01",
+                    "price":10,                     #*
+                    "stock":0,                      #*
+                    "reply_message":"Naomi Card Wallet -Black (WxH: 4.4\"x3.2\")","FbPageId":"105929794479727","createdAt":"2022-09-05T10:16:23.972Z","updatedAt":"2022-09-08T05:57:18.132Z","v":0}
+                ]
+            }
+    response = client.put(url,content_type='application/json', json=data, **headers)
+
+    # assert response.status_code==200
+    assert True
+
 
 
 
