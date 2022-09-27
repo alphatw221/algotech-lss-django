@@ -221,12 +221,13 @@ class OrderViewSet(viewsets.ModelViewSet):
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def get_merge_order_list(self, request):
 
-        api_user, campaign_id, search, page, page_size, order_status= lib.util.getter.getparams(request, ( 'campaign_id', 'search', 'page', 'page_size','status'),with_user=True, seller=True)
-        payment_list, delivery_list, platform_list = lib.util.getter.getdata(request,('payment','delivery','platform'))
+        api_user, campaign_id, search, page, page_size, order_status, = lib.util.getter.getparams(request, ( 'campaign_id', 'search', 'page', 'page_size','status'),with_user=True, seller=True)
+        
+        payment_list, delivery_list, platform_list, sort_by = lib.util.getter.getdata(request,('payment','delivery','platform', 'sort_by'))
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription,campaign_id)
 
-        json_data, total_count = database.lss.campaign.get_merge_order_list_pagination(campaign.id, search, order_status, payment_list, delivery_list, platform_list , int(page), int(page_size))
+        json_data, total_count = database.lss.campaign.get_merge_order_list_pagination(campaign.id, search, order_status, payment_list, delivery_list, platform_list , int(page), int(page_size), sort_by)
 
         return Response({'count':total_count,'data':json_data}, status=status.HTTP_200_OK)
     

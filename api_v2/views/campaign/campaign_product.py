@@ -170,6 +170,8 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
                                 price=float(request_data.get('price', 0)) if request_data.get('price') else 0, 
                                 customer_editable=bool(request_data.get('customer_editable', True)), 
                                 customer_removable=bool(request_data.get('customer_removable', True)),
+                                oversell = bool(request_data.get('oversell', False)),
+                                overbook = bool(request_data.get('overbook', True)),
                                 tag=list(request_data.get('tag',[])),
                                 type=str(request_data.get('type',models.product.product.TYPE_PRODUCT)),
                                 description = request_data.get('description',''),

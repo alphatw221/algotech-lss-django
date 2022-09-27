@@ -20,7 +20,7 @@ class Campaign(Collection):
 
 
 
-def get_merge_order_list_pagination(campaign_id, search:str, status:str, filter_payment:list, filter_delivery:list, filter_platform:list, page:int=1, page_size:int=25):
+def get_merge_order_list_pagination(campaign_id, search:str, status:str, filter_payment:list, filter_delivery:list, filter_platform:list, page:int=1, page_size:int=25, sort_by:dict={}):
 
     filter_query = {'$expr': { '$eq': ["$$id", "$campaign_id"] },"id":{"$ne":None} ,"products":{"$ne":{}}}
 
@@ -45,7 +45,11 @@ def get_merge_order_list_pagination(campaign_id, search:str, status:str, filter_
             filter_query['status']['$in']+=filter_delivery
         else:
             filter_query['status']={"$in": filter_delivery}
-
+            
+    if sort_by == {}:
+        sort_query = { "created_at" : -1 }
+    else:
+        sort_query = sort_by
     query = [
         {"$match":{"id":campaign_id}},
         {
@@ -70,7 +74,6 @@ def get_merge_order_list_pagination(campaign_id, search:str, status:str, filter_
         },
         {"$project":{"_id":0,"data":{"$concatArrays":["$orders","$pre_orders"]}} },
         { "$unwind": "$data" },
-        { "$sort" : { "data.created_at" : -1 } },
         {"$group":{
             "_id": {
                 "id": "$data.id",
@@ -87,8 +90,10 @@ def get_merge_order_list_pagination(campaign_id, search:str, status:str, filter_
             "shipping_method":{"$first":"$data.shipping_method"},
             "meta":{"$first":"$data.meta"},
             "status":{"$first":"$data.status"},
-            "type":{"$first":"$data.type"}
+            "type":{"$first":"$data.type"},
+            "created_at":{"$first":"$data.created_at"}
         }},
+        { "$sort" : sort_query},
         {"$project":{"_id":0,}},
     ]
 
