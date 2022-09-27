@@ -6,61 +6,41 @@ from pytest_django import asserts
 import json
 from django.urls import reverse
 import lib
-# @pytest.mark.django_db
-# def test_product_sync_user():
-#     user_plan = {
-#         "plugins": {
-#             "ordr_startr": {
-#                 "key": "ordrstartr2022!"
-#             }
-#         }
-#     }
-#     models.user.user_subscription.UserSubscription.objects.create(name='test',user_plan = user_plan)
 
 
-#     user_subscription = models.user.user_subscription.UserSubscription.objects.get(name='test')
-#     credential = user_subscription.user_plan.get('plugins',{}).get('ordr_startr')
-#     jobs.ordr_startr.export_product_job(user_subscription_id=user_subscription.id, credential=credential)
-    
-#     data = models.product.product.ProductSerializer(user_subscription.products, many=True).data
-#     print(dict(data))
-#     # expect_data = [{"meta":{"ordr_startr":{"id":"633019a4d21f1b6bfe15bf40"}}, "meta_logistic":{}, 'tag':['Japan'], 'qty':2, 'name':'AA225',''}]
-#     # asserts.assertJSONEqual(json.dumps(data),expect_data)
-
-#     # assert models.product.product.ProductSerializer(user_subscription.products, many=True).data==True
-#     assert True
-
-
-# @pytest.mark.django_db
-# def test_create_data_helper():
-#     data = lib.helper.unit_test_helper.UnitTestHelper.create_test_data(collections_data={
-#         'user_subscription':{'name':'test_user_subscription'},
-#         'campaign':{'title':'test'}
-#     })
-
-#     print(data)
-
-@pytest.mark.django_db
-def test_payment_callback(client):
-
-    
-
-    data1 = lib.helper.unit_test_helper.UnitTestHelper.create_test_data(collections_data={
-        'user_subscription':{'name':'test_user_subscription'},
+def __get_startup_data():
+    startup_data = lib.helper.unit_test_helper.UnitTestHelper.create_test_data(collections_data={
+        'user_subscription':{
+            'name':'test_user_subscription', 
+            'user_plan':{
+                "plugins": {
+                    "ordr_startr": {
+                        "key": "ordrstartr2022!"
+                    }
+                }
+            }},
         'user':{'email':'test@email.com'},
         'campaign':{'title':'test'},
-        'product':{'name':'test'},
-        'campaign_product':{'name':'test_campaign_product', 'order_code':'NW01', 'qty_for_sale':1, 'qty_add_to_cart':1, 'qty_sold':0, 'price':10,'meta':{'ordr_startr':{'id':'123'}}}
+        # 'product':{'name':'test'},
+        'campaign_product':{
+            'name':'test_campaign_product', 
+            'order_code':'NW01', 
+            'type':'product',
+            'qty_for_sale':1, 
+            'qty_add_to_cart':1, 
+            'qty_sold':0, 
+            'price':10,
+            'meta':{'ordr_startr':{'id':'123'}}}
     })
 
-    data2 = lib.helper.unit_test_helper.UnitTestHelper.create_test_data(collections_data={
+    startup_data = lib.helper.unit_test_helper.UnitTestHelper.create_test_data(collections_data={
         'pre_order':{
             'platform':'facebook',
             'customer_id':'123',
             'customer_name':'123',
             'customer_img':None,
             'products':{
-                str(data1.get('campaign_product_id')):{
+                str(startup_data.get('campaign_product_id')):{
                     "order_product_id": None,
                     "name": "test_campaign_product",
                     "image": None,
@@ -71,7 +51,41 @@ def test_payment_callback(client):
                 }
             }   
         }
-    })
+    }, **startup_data)
+
+    return startup_data
+
+
+
+@pytest.mark.django_db(transaction=False)
+def test_product_sync(client):
+    startup_data = __get_startup_data()
+    user_subscription = models.user.user_subscription.UserSubscription.objects.get(id=startup_data.get('user_subscription_id'))
+    credential = user_subscription.user_plan.get('plugins',{}).get('ordr_startr')
+
+    jobs.ordr_startr.export_product_job(user_subscription_id=user_subscription.id, credential=credential)
+    
+
+    the_only_product = user_subscription.products.all().first()
+
+
+    assert the_only_product.meta == {
+            'ordr_startr':{
+                'id':'123'
+            }
+        }
+    assert the_only_product.tag == ['Japan']
+    assert the_only_product.qty==1
+    assert the_only_product.name=='test'
+    assert the_only_product.price==10.0
+    assert the_only_product.type =='product'
+    
+
+
+
+@pytest.mark.django_db(transaction=False)
+def test_payment_callback(client):
+    startup_data = __get_startup_data()
 
     developer=models.user.developer.Developer.objects.create(**{
             "api_key" : '123',
@@ -79,19 +93,19 @@ def test_payment_callback(client):
             "name" : 'test',
             "authorization": {
                 "user_subscription": {
-                        str(data1.get('user_subscription_id')): {},
+                        str(startup_data.get('user_subscription_id')): {},
                     }
             },
         })
 
     token = lib.helper.token_helper.V1DeveloperTokenHelper.generate_token(developer)
-    # print(token)
-    user_subscription_id = data1.get('user_subscription_id')
-    pre_order_oid = data2.get('pre_order_oid')
+
+    user_subscription_id = startup_data.get('user_subscription_id')
+    pre_order_oid = startup_data.get('pre_order_oid')
 
 
     url = reverse('ordr_startr:order-payment_complete_callback', kwargs={'user_subscription_id':user_subscription_id}) #'<namespace>:<view_set_name>-<url_name>'
-    headers = {'Authorization':f'Token {token}'}
+
     headers = {
         'HTTP_X_HTTP_METHOD_OVERRIDE': 'PUT',
         'HTTP_AUTHORIZATION':f'Token {token}'
@@ -169,12 +183,39 @@ def test_payment_callback(client):
                     "reply_message":"Naomi Card Wallet -Black (WxH: 4.4\"x3.2\")","FbPageId":"105929794479727","createdAt":"2022-09-05T10:16:23.972Z","updatedAt":"2022-09-08T05:57:18.132Z","v":0}
                 ]
             }
-    response = client.put(url,content_type='application/json', json=data, **headers)
 
-    # assert response.status_code==200
-    assert True
+    
 
 
+    campaign_product = models.campaign.campaign_product.CampaignProduct.objects.get(id = startup_data.get('campaign_product_id'))
+    assert campaign_product.qty_sold == 0
+    assert campaign_product.qty_add_to_cart == 1
+
+    pre_order = models.order.pre_order.PreOrder.objects.get(id=startup_data.get('pre_order_id'))
+    assert str(campaign_product.id) in pre_order.products
+
+    response = client.put(url,content_type='application/json', data=data, **headers)
+
+    assert response.status_code==200
+
+    #check pre_order has been cleared
+    pre_order = models.order.pre_order.PreOrder.objects.get(id=startup_data.get('pre_order_id'))
+    assert pre_order.products=={}
+
+
+    #check campaign product qty
+    campaign_product = models.campaign.campaign_product.CampaignProduct.objects.get(id = startup_data.get('campaign_product_id'))
+    assert campaign_product.qty_sold == 1
+    assert campaign_product.qty_add_to_cart == 0
+
+    
+    #check order has been created
+    order = models.order.order.Order.objects.filter(platform = pre_order.platform, customer_id = pre_order.customer_id, campaign = pre_order.campaign).first()
+    assert order != None
+    assert order.total == 10
+    assert str(campaign_product.id) in order.products
+
+    
 
 
 

@@ -5,9 +5,8 @@ from django.contrib.auth.models import User as AuthUser
 class UnitTestHelper:
 
     @classmethod
-    def create_test_data(cls, collections_data:dict={}):
+    def create_test_data(cls, collections_data:dict={}, **kwargs):
 
-        kwargs = {}
         for collection_name, collections_data in collections_data.items():
 
             if collection_name=='auth_user':
@@ -15,7 +14,7 @@ class UnitTestHelper:
                 continue
                
             kwargs = cls.__create_collection(collection_name, collections_data, **kwargs)
-        print(kwargs)
+
         return kwargs
 
     @staticmethod
@@ -24,13 +23,9 @@ class UnitTestHelper:
         class_name = "".join([word.capitalize() for word in collection_name.split('_')])
         collection_class = getattr(getattr(database.lss, collection_name), class_name)
 
-        # print(kwargs)
-        # print(collections_data)
         relation_data = {k: kwargs[k] for k in collection_class.template.keys() & kwargs.keys() } 
 
-        # print(relation_data)
         collections_data.update(relation_data)
-        # print(collections_data)
 
         document_object = collection_class.create_object(**collections_data)
         kwargs[f'{collection_name}_id']=document_object.id

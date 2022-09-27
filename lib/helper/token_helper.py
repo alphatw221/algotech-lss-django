@@ -49,22 +49,22 @@ class V1DeveloperTokenHelper:
     def validate_permanent_token(cls, token):
         
         try:
-            print('in helper')
+
             header, payload, signature, api_key, secret_key_hash = token.split('.')   #permanent_token no need payload and signature
 
             header_data = json.loads(base64.urlsafe_b64decode(header+'=='))
-            print(header_data)
+
             if header_data!=cls.header_data:
 
                 return None, None
 
             developer = models.user.developer.Developer.objects.get(api_key=api_key)
-            print(developer)
+
             secret_key_hash_bytes = hmac.new(settings.SECRET_KEY.encode(), msg=developer.secret_key.encode(), digestmod=hashlib.sha256).digest()
             _secret_key_hash = base64.urlsafe_b64encode(secret_key_hash_bytes).rstrip(b'=').decode('utf-8')
-            
+
             if _secret_key_hash == secret_key_hash:
-                True, developer
+                return True, developer
         except Exception:
             print(traceback.format_exc())
             return False, None
