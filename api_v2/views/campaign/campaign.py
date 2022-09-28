@@ -403,6 +403,41 @@ class CampaignViewSet(viewsets.ModelViewSet):
         # return Response(models.campaign.campaign.CampaignSerializerRetreive(campaign).data, status=status.HTTP_200_OK)
         return Response(models.campaign.campaign.CampaignSerializer(campaign).data, status=status.HTTP_200_OK)
 
+    @action(detail=True, methods=['PUT'], url_path=r'live/delete/(?P<platform>[^/.]+)', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def delete_campaign_live_data(self, request, pk,platform):
+        # platform = \
+        #     lib.util.getter.getdata(request, ("platform",), required=False)
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = \
+            lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, pk)
+
+        if platform not in user_subscription.user_plan.get('activated_platform'):
+            raise lib.error_handle.error.api_error.ApiCallerError(f'{platform} not activated')
+
+        if platform=='facebook':
+            campaign.facebook_campaign['post_id']=''
+            campaign.facebook_page = None
+        elif platform =='youtube':
+            campaign.youtube_campaign['live_video_id']=''
+            campaign.youtube_channel = None
+        elif platform =='instagram':
+            campaign.instagram_campaign['live_media_id']=''
+            campaign.instagram_profile = None
+        elif platform == 'twitch':
+            campaign.twitch_campaign['channel_name'] = ''
+            campaign.twitch_campaign['token']=''
+            campaign.twitch_campaign['user_name']=''
+            campaign.twitch_channel = None
+        elif platform == 'tiktok':
+            # tiktok_account = lib.util.verify.Verify.get_tiktok_channel_from_user_subscription(user_subscription, platform_id)
+            campaign.tiktok_campaign['username'] = ''
+            # campaign.tiktok_account = tiktok_account
+        campaign.save()
+        # return Response(models.campaign.campaign.CampaignSerializerRetreive(campaign).data, status=status.HTTP_200_OK)
+        return Response(models.campaign.campaign.CampaignSerializer(campaign).data, status=status.HTTP_200_OK)
+
     @action(detail=False, methods=['PUT'], url_path=r'delivery/setting/update', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def save_delivery_default_settings(self, request):
