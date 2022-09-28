@@ -10,15 +10,37 @@ import traceback
 
 from math import floor
 
-def __transform_payment_amount(amount, decimal_places, price_unit):
+def __transform_payment_amount(amount, decimal_places, price_unit, currency=None):
     
     amount = __to_decimal_places(amount, decimal_places)
     amount = amount*int(price_unit)
-    return amount
+
+    if currency in [
+        'BIF',
+        'CLP',
+        'DJF',
+        'GNF',
+        'JPY',
+        'KMF',
+        'KRW',
+        'MGA',
+        'PYG',
+        'RWF',
+        'UGX',
+        'VND',
+        'VUV',
+        'XAF',
+        'XOF',
+        'XPF',
+        ]:
+
+        return int(amount)
+    return int(amount*100)
 
 
 def __to_decimal_places(amount , decimal_places):
     return floor((amount * (10 ** decimal_places))) / (10 ** decimal_places)
+
 
 
 def create_checkout_session(secret, currency, order, decimal_places, price_unit, success_url, cancel_url):
@@ -33,11 +55,11 @@ def create_checkout_session(secret, currency, order, decimal_places, price_unit,
             
             price = stripe.Price.create(
                 product=stripe_product.id,
-                unit_amount=int(__transform_payment_amount(product.get('price'), decimal_places, price_unit)*100),
+                unit_amount=__transform_payment_amount(product.get('price'), decimal_places, price_unit, currency=currency),
                 currency=currency,
             )
-            print('product')
-            print(int(__transform_payment_amount(product.get('price'), decimal_places, price_unit)*100))
+            # print('product')
+            # print(__transform_payment_amount(product.get('price'), decimal_places, price_unit, currency=currency))
             items.append(
                 {
                     'price': price.id,
@@ -48,9 +70,9 @@ def create_checkout_session(secret, currency, order, decimal_places, price_unit,
         discounts = []
         amount_off = 0
         if order.adjust_price:
-            amount_off+=int(-__transform_payment_amount(order.adjust_price, decimal_places, price_unit) * 100)
+            amount_off-=__transform_payment_amount(order.adjust_price, decimal_places, price_unit, currency=currency)
         if order.discount:
-            amount_off+=int(__transform_payment_amount(order.discount, decimal_places, price_unit) * 100)
+            amount_off+=__transform_payment_amount(order.discount, decimal_places, price_unit, currency=currency)
 
         discount = stripe.Coupon.create(
             amount_off=amount_off,
@@ -61,8 +83,8 @@ def create_checkout_session(secret, currency, order, decimal_places, price_unit,
                 'coupon': discount.id,
             }
         )
-        print('discount+adjust')
-        print(amount_off)
+        # print('discount+adjust')
+        # print(amount_off)
 
 
         shipping_options = []
@@ -87,7 +109,7 @@ def create_checkout_session(secret, currency, order, decimal_places, price_unit,
                 display_name="General Shipping",
                 type="fixed_amount",
                 fixed_amount={
-                    'amount': int( __transform_payment_amount(order.shipping_cost, decimal_places, price_unit) * 100),
+                    'amount': __transform_payment_amount(order.shipping_cost, decimal_places, price_unit, currency=currency),
                     'currency': currency,
                 }
             )
@@ -96,8 +118,8 @@ def create_checkout_session(secret, currency, order, decimal_places, price_unit,
                     'shipping_rate': shipping_rate.id,
                 }
             )
-        print('shipping')
-        print(int( __transform_payment_amount(order.shipping_cost, decimal_places, price_unit) * 100))
+        # print('shipping')
+        # print(__transform_payment_amount(order.shipping_cost, decimal_places, price_unit, currency=currency) )
         checkout_session = stripe.checkout.Session.create(
             line_items=items,
             shipping_options=shipping_options,
@@ -133,7 +155,10 @@ def is_payment_successful(secret, session_id):
 def create_payment_intent(api_key:str,  amount:float, currency:str, receipt_email:str):
     try:
         stripe.api_key = api_key
-        return stripe.PaymentIntent.create( amount=int(amount*100), currency=currency, receipt_email=receipt_email)        
+
+
+        amount = __transform_payment_amount(amount, decimal_places = 0, price_unit='1', currency=currency)
+        return stripe.PaymentIntent.create( amount=amount, currency=currency, receipt_email=receipt_email)        
     except stripe.error.CardError as e:
         # Since it's a decline, stripe.error.CardError will be caught
         print ('Status, Code, Param, Message', e.http_status, e.code, e.param, e.user_message)
@@ -142,6 +167,7 @@ def create_payment_intent(api_key:str,  amount:float, currency:str, receipt_emai
         # Too many requests made to the API too quickly
         raise lib.error_handle.error.api_error.ApiCallerError('stripe.rate_limit_error')
     except stripe.error.InvalidRequestError as e:
+        print(traceback.format_exc())
         if e.code == 'parameter_invalid_integer':
             raise lib.error_handle.error.api_error.ApiCallerError('stripe.invalid_request_error.invalid_integer')
         raise lib.error_handle.error.api_error.ApiCallerError('stripe.invalid_request_error.invalid_parameters')
