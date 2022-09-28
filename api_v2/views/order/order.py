@@ -52,7 +52,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         order = lib.util.verify.Verify.get_order_with_oid(order_oid)
         return Response(models.order.order.OrderSerializer(order).data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['PUT'], url_path=r'(?P<order_oid>[^/.]+)/guest/receipt/upload', parser_classes=(MultiPartParser,), permission_classes=(), authentication_classes=[])
+    @action(detail=False, methods=['PUT'], url_path=r'(?P<order_oid>[^/.]+)/guest/receipt/upload', url_name='guest_upload_receipt', parser_classes=(MultiPartParser,), permission_classes=(), authentication_classes=[])
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def guest_upload_receipt(self, request, order_oid):
 
