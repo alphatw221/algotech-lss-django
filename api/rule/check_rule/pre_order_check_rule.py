@@ -39,8 +39,23 @@ class PreOrderCheckRule():
         api_order_product = kwargs.get('api_order_product')
         original_qty = api_order_product['qty'] if api_order_product else 0
         qty_difference = int(request_qty)-original_qty
-        qty_check_field = 'qty_sold' if api_campaign_product.get('overbook') else 'qty_add_to_cart'
-        if qty_difference and api_campaign_product["qty_for_sale"]-api_campaign_product[qty_check_field] < qty_difference and api_campaign_product.get('oversell') == False:
+
+        if not qty_difference:
+            return {"qty_difference" : qty_difference}
+
+        able_to_add_to_cart = True
+        if api_campaign_product.get('overbook'):
+            able_to_add_to_cart = (api_campaign_product["qty_for_sale"]-api_campaign_product['qty_sold'] >= qty_difference) or api_campaign_product.get('oversell')
+        else:
+            able_to_add_to_cart = (api_campaign_product["qty_for_sale"]-api_campaign_product['qty_sold']-api_campaign_product['qty_add_to_cart'] >= qty_difference) or api_campaign_product.get('oversell')
+
+        able_to_purchase = True
+        if api_campaign_product.get('oversell'):
+            pass    #do nothing
+        else:
+            able_to_purchase = api_campaign_product["qty_for_sale"]-api_campaign_product['qty_sold'] >= qty_difference
+
+        if not able_to_add_to_cart or not able_to_purchase:
             raise lib.error_handle.error.pre_order_error.PreOrderErrors.UnderStock("helper.out_of_stock")
         return {"qty_difference" : qty_difference}
 
