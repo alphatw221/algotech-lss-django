@@ -47,11 +47,21 @@ class PreOrderHelper():
                 pre_order = database.lss.pre_order.PreOrder.get_object(id=pre_order_id,session=session)
                 campaign_product = database.lss.campaign_product.CampaignProduct.get_object(id=campaign_product_id,session=session)
 
-                ret = rule.rule_checker.pre_order_rule_checker.PreOrderAddProductRuleChecker.check(**{
-                    'api_user':api_user,
-                    'api_pre_order':pre_order.data,
-                    'api_campaign_product':campaign_product.data,
-                    'qty':qty,
+                ret = rule.rule_checker.pre_order_rule_checker.RuleChecker.check(
+                    check_list=[
+                        rule.check_rule.pre_order_check_rule.PreOrderCheckRule.is_campaign_product_exist,
+                        rule.check_rule.pre_order_check_rule.PreOrderCheckRule.is_order_lock,
+                        rule.check_rule.pre_order_check_rule.PreOrderCheckRule.is_qty_valid,
+                        rule.check_rule.pre_order_check_rule.PreOrderCheckRule.is_order_product_addable,
+                        rule.check_rule.pre_order_check_rule.PreOrderCheckRule.campaign_product_type,
+                        rule.check_rule.pre_order_check_rule.PreOrderCheckRule.is_stock_avaliable,
+                        rule.check_rule.pre_order_check_rule.PreOrderCheckRule.is_under_max_limit,
+                    ],
+                    **{
+                        'api_user':api_user,
+                        'api_pre_order':pre_order.data,
+                        'api_campaign_product':campaign_product.data,
+                        'qty':qty,
                     })
 
                 qty = ret.get('qty')
@@ -140,7 +150,15 @@ class PreOrderHelper():
                 order_product = database.lss.order_product.OrderProduct.get_object(id=order_product_id,session=session)
                 campaign_product = database.lss.campaign_product.CampaignProduct.get_object(id=order_product.data.get('campaign_product_id'),session=session)
 
-                ret = rule.rule_checker.pre_order_rule_checker.PreOrderUpdateProductRuleChecker.check(**{
+                ret = rule.rule_checker.pre_order_rule_checker.RuleChecker.check(check_list=[
+                    rule.check_rule.pre_order_check_rule.PreOrderCheckRule.is_campaign_product_exist,
+                    rule.check_rule.pre_order_check_rule.PreOrderCheckRule.is_order_lock,
+                    rule.check_rule.pre_order_check_rule.PreOrderCheckRule.is_qty_valid,
+                    rule.check_rule.pre_order_check_rule.PreOrderCheckRule.campaign_product_type,
+                    rule.check_rule.pre_order_check_rule.PreOrderCheckRule.is_order_product_editable,
+                    rule.check_rule.pre_order_check_rule.PreOrderCheckRule.is_stock_avaliable,
+                    rule.check_rule.pre_order_check_rule.PreOrderCheckRule.is_under_max_limit,
+                    ],**{
                     'api_user':api_user,
                     'api_pre_order':pre_order.data,
                     'api_order_product':order_product.data,
@@ -216,7 +234,11 @@ class PreOrderHelper():
                 order_product = database.lss.order_product.OrderProduct.get_object(id=order_product_id,session=session)
                 campaign_product = database.lss.campaign_product.CampaignProduct.get_object(id=order_product.data.get('campaign_product_id'),session=session)
 
-                rule.rule_checker.pre_order_rule_checker.PreOrderDeleteProductRuleChecker.check(**{
+                rule.rule_checker.pre_order_rule_checker.RuleChecker.check(
+                    check_list=[
+                        rule.check_rule.pre_order_check_rule.PreOrderCheckRule.is_order_lock,
+                        rule.check_rule.pre_order_check_rule.PreOrderCheckRule.is_order_product_removeable
+                    ],**{
                     'api_user':api_user,
                     'api_pre_order':pre_order.data,
                     'api_order_product':order_product.data,
@@ -270,41 +292,57 @@ class PreOrderHelper():
     @classmethod
     @lib.error_handle.error_handler.pymongo_error_handler.pymongo_error_handler
     def checkout(cls, api_user, campaign_id, pre_order_id):
+
         with database.lss.util.start_session() as session:
             with session.start_transaction():
+
                 success = True
                 campaign = database.lss.campaign.Campaign.get_object(id=campaign_id,session=session)
                 pre_order = database.lss.pre_order.PreOrder.get_object(id=pre_order_id,session=session)
 
-                rule.rule_checker.pre_order_rule_checker.PreOrderCheckoutRuleChecker.check(**{
-                    'api_user':api_user,
-                    'api_pre_order':pre_order.data,
-                    'campaign':campaign
+                rule.rule_checker.pre_order_rule_checker.RuleChecker.check(
+                    check_list=[
+                        rule.check_rule.pre_order_check_rule.PreOrderCheckRule.allow_checkout,
+                        rule.check_rule.pre_order_check_rule.PreOrderCheckRule.is_order_lock,
+                        rule.check_rule.pre_order_check_rule.PreOrderCheckRule.is_order_empty
+                    ],**{
+                        'api_user':api_user,
+                        'api_pre_order':pre_order.data,
+                        'campaign':campaign
                     })
 
-                for campaign_product_id_str in pre_order.data.get('products',{}).keys():
+                campaign_product_qty_tuples = []
+                for campaign_product_id_str, order_product_info in pre_order.data.get('products',{}).items():            
                     order_product_data = pre_order.data.get('products',{}).get(campaign_product_id_str)
                     order_product = database.lss.order_product.OrderProduct.get_object(id=order_product_data.get('order_product_id'), session=session)
                     campaign_product = database.lss.campaign_product.CampaignProduct.get_object(id=int(campaign_product_id_str), session=session)
+                    campaign_product_qty_tuples.append((campaign_product,order_product_info.get('qty')))
 
                     try:
-                        ret = rule.rule_checker.pre_order_rule_checker.OrderProductCheckoutRuleChecker.check(**{
+                        ret = rule.rule_checker.pre_order_rule_checker.OrderProductCheckoutRuleChecker.check(
+                            check_list=[
+                                rule.check_rule.order_product_check_rule.OrderProductCheckRule.is_stock_avaliable_for_checkout   
+                            ] , **{
                             'campaign_product':campaign_product,
                             'order_product':order_product,
                         })
                     except Exception:
-                        cls._delete_product(pre_order, campaign_product, order_product, api_user, session)
+                        cls._delete_product(pre_order, campaign_product, order_product, api_user, session)  #product sold out
                         print(traceback.format_exc())
                         success = False
                         continue
 
-                    if qty_difference := ret.get('qty_difference'):
+                    if qty_difference := ret.get('qty_difference'):                                         #product qty not enough 
                         qty = ret.get('qty')
                         cls._update_product(pre_order, order_product, campaign_product, qty, qty_difference, api_user, session)
                         success = False
 
                 if not success:
                     return False, pre_order
+
+                for campaign_product, qty in campaign_product_qty_tuples:    #second loop update qty_add_to_cart -> qty_pending_payment
+                    campaign_product.checkout( qty, sync=False, session = session)
+
 
                 order_data = pre_order.data.copy()
 
@@ -728,29 +766,29 @@ class OrderHelper():
 
         return mail_content 
 
-    @classmethod
-    @lib.error_handle.error_handler.pymongo_error_handler.pymongo_error_handler
-    def check_expired(cls, order_id):
-        with database.lss.util.start_session() as session:
-            with session.start_transaction():
+    # @classmethod
+    # @lib.error_handle.error_handler.pymongo_error_handler.pymongo_error_handler
+    # def check_expired(cls, order_id):
+    #     with database.lss.util.start_session() as session:
+    #         with session.start_transaction():
 
-                order = database.lss.order.Order.get_object(id=order_id,session=session)
+    #             order = database.lss.order.Order.get_object(id=order_id,session=session)
 
 
-                for campaign_product_id_str, order_product_data in order.data.get('products',{}).items():
-                    order_product = database.lss.order_product.OrderProduct.get_object(id=order_product_data.get('order_product_id'), session=session)
-                    campaign_product = database.lss.campaign_product.CampaignProduct.get_object(id=int(campaign_product_id_str), session=session)
+    #             for campaign_product_id_str, order_product_data in order.data.get('products',{}).items():
+    #                 order_product = database.lss.order_product.OrderProduct.get_object(id=order_product_data.get('order_product_id'), session=session)
+    #                 campaign_product = database.lss.campaign_product.CampaignProduct.get_object(id=int(campaign_product_id_str), session=session)
 
-                    try:
-                        ret = rule.rule_checker.pre_order_rule_checker.OrderProductCheckoutRuleChecker.check(**{
-                            'campaign_product':campaign_product,
-                            'order_product':order_product,
-                        })
-                    except Exception:
-                        order.update(status=models.order.order.STATUS_EXPIRED,session=session)
-                        return False, order
+    #                 try:
+    #                     ret = rule.rule_checker.pre_order_rule_checker.OrderProductCheckoutRuleChecker.check(**{
+    #                         'campaign_product':campaign_product,
+    #                         'order_product':order_product,
+    #                     })
+    #                 except Exception:
+    #                     order.update(status=models.order.order.STATUS_EXPIRED,session=session)
+    #                     return False, order
 
-        return True, order
+    #     return True, order
 
     
     @classmethod

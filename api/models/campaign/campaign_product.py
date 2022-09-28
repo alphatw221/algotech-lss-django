@@ -35,6 +35,7 @@ class CampaignProduct(models.Model):
 
     qty_for_sale = models.IntegerField(blank=False, null=True, default=0)
     qty_sold = models.IntegerField(blank=False, null=True, default=0)
+    qty_pending_payment = models.IntegerField(blank=False, null=False, default=0)
     qty_add_to_cart = models.IntegerField(blank=False, null=False, default=0)
 
     oversell = models.BooleanField(
