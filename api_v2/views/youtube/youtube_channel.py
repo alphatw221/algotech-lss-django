@@ -22,7 +22,11 @@ class YoutubeChannelViewSet(viewsets.GenericViewSet):
             raise lib.error_handle.error.api_error.ApiVerifyError('youtube_not_activated')
         
         youtube_channel = lib.util.verify.Verify.get_youtube_channel_from_user_subscription(user_subscription, pk)
-        service.google.user.api_google_post_refresh_token(youtube_channel.refresh_token)
+        refresh_api_status, refresh_response = service.google.user.api_google_post_refresh_token(youtube_channel.refresh_token)
+        if refresh_api_status == 200:
+            youtube_channel.token = refresh_response.get('access_token')
+            youtube_channel.save()
+
         is_token_valid = lib.util.verify.Verify.check_is_page_token_valid('youtube', youtube_channel.token, youtube_channel.channel_id)
         if not is_token_valid:
             raise lib.error_handle.error.api_error.ApiVerifyError("youtube_token_expired")
@@ -39,6 +43,12 @@ class YoutubeChannelViewSet(viewsets.GenericViewSet):
             raise lib.error_handle.error.api_error.ApiVerifyError('youtube_not_activated')
         
         youtube_channel = lib.util.verify.Verify.get_youtube_channel_from_user_subscription(user_subscription, pk)
+        
+        refresh_api_status, refresh_response = service.google.user.api_google_post_refresh_token(youtube_channel.refresh_token)
+        if refresh_api_status == 200:
+            youtube_channel.token = refresh_response.get('access_token')
+            youtube_channel.save()
+            
         code, response = service.youtube.viedo.get_video_info_with_access_token(youtube_channel.token, live_video_id)
         if not response.get('items'):
             return Response({"error_response": response}, status=status.HTTP_200_OK)

@@ -6,9 +6,9 @@ from rest_framework.response import Response
 from api import models
 import lib
 
-
+from rest_framework.permissions import IsAuthenticated
 from lib.authentication_class.v1_token_authentication import V1PermanentTokenAuthentication
-from lib.permission_class.v1_token_permission import IsAuthenticated, IsAuthorizedByUserSubscription
+from lib.permission_class.v1_token_permission import  IsAuthorizedByUserSubscription
 
 
 
