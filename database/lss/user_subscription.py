@@ -1,5 +1,6 @@
 from ._config import db
 from ._config import Collection
+from api import models
 
 __collection = db.api_user_subscription
 
@@ -8,7 +9,8 @@ class UserSubscription(Collection):
 
     _collection = db.api_user_subscription
     collection_name='api_user_subscription'
-
+    template = models.user.user_subscription.api_user_subscription_template
+    
 from pprint import pprint
 def get_user_subscription_campaign_count():
 

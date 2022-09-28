@@ -1,3 +1,4 @@
+from xml.etree.ElementTree import tostring
 from backend.i18n._helper import lang_translate_default_en
 from django.conf import settings
 from django.utils.translation import ugettext as _
@@ -18,6 +19,11 @@ def i18n_get_mail_content(order, campaign, lang=None):
         "1000000":"M"
     }
     date_time = order.created_at.strftime("%b %d %Y")
+    
+    if 'code' not in order.applied_discount:
+        discount_code = ''
+    else:
+        discount_code = str(order.applied_discount['code'])
 
     mail_content = f'<div style="width:100%; background: #eaeaea; font-family: \'Open Sans\', sans-serif;"><div style="margin: auto; padding:1%; max-width:900px; background: #ffffff;">'
     mail_content += f'<h1 data-key="1468266_heading" style="text-align:center; font-family: Georgia,serif,\'Playfair Display\'; font-size: 28px; line-height: 46px; font-weight: 700; color: #4b4b4b; text-transform: none; background-color: #ffffff; margin: 0;">' + _('EMAIL/ORDER_CONFIRM/TITLE') + '</h1>'
@@ -63,13 +69,19 @@ def i18n_get_mail_content(order, campaign, lang=None):
     except:
         pass
 
+    payment_method = ''
+    if order.payment_method == 'direct_payment':
+        payment_method = _('EMAIL/ORDER_CONFIRM/DIRECT_PAYMENT')
+    else:
+        payment_method = order.payment_method.upper()
+
     #payment
     mail_content += '<div style="margin-top: 1%; font-size: 0.9rem; line-height: 2; sm:padding: 13px 30px;">\
                 <p style="text-align: left; font-weight: 700; font-size: 1rem; line-height: 2;">' + _('REPORT/SECTION_TITLE/PAYMENT_INFO') + '</p>\
                     <div style="border-bottom: 3px solid #ffd000; width: 20%; margin-bottom: 3%;"></div>'
 
     mail_content+=  f'<tr>\
-                        <td style="color: #4b4b4b; font-weight: 600; width: 35%; text-align:left;" valign="top">' + _('REPORT/COLUMN_TITLE/PAYMENT_METHOD') + f' : {order.payment_method}</td>\
+                        <td style="color: #4b4b4b; font-weight: 600; width: 35%; text-align:left;" valign="top">' + _('REPORT/COLUMN_TITLE/PAYMENT_METHOD') + f' : {payment_method}</td>\
                     </tr>\
                     <tr>\
                         <td style="color: #4b4b4b; font-weight: 600; width: 35%; text-align:left;" valign="top">' + _('EMAIL/ORDER_CONFIRM/ACCOUNT_MODE') + f' : {order.meta["account_mode"]} </td>\
@@ -137,7 +149,7 @@ def i18n_get_mail_content(order, campaign, lang=None):
     for key, product in order.products.items():
         mail_content += f'<tr>'
         mail_content += f'<td width="1" style="mso-line-height-rule: exactly; padding: 13px 13px 13px 0;" bgcolor="#ffffff" valign="middle">\
-                            <img width="140" src="{settings.GS_URL+product["image"]}" alt="Product Image" style="vertical-align: middle; text-align: center; width: 140px; max-width: 140px; height: auto !important; border-radius: 1px; padding: 0px;">\
+                            <img width="140" src="{product["image"]}" alt="Product Image" style="vertical-align: middle; text-align: center; width: 140px; max-width: 140px; height: auto !important; border-radius: 1px; padding: 0px;">\
                         </td>'
         mail_content += f'<tr style="mso-line-height-rule: exactly; padding-top: 13px; padding-bottom: 13px; border-bottom-width: 2px; border-bottom-color: #dadada; border-bottom-style: solid;" bgcolor="#ffffff" valign="middle">'
         mail_content += f'<table cellspacing="0" cellpadding="0" border="0" width="100%" style="min-width: 100%; border-bottom: 1px solid #a5a5a5;" role="presentation">\
@@ -173,6 +185,12 @@ def i18n_get_mail_content(order, campaign, lang=None):
                             <td data-key="1468271_subtotal" style="font-size: 15px; padding-top:13px; color: #4b4b4b; font-weight: 600; width: 35%; text-align:right;" align="right" bgcolor="#ffffff" valign="top">' + _('EMAIL/DELIVERY_CONFIRM/SUBTOTAL') + f'\
                             <span style="width:120px; display:inline-block;">{order.campaign.currency}\
                             {adjust_decimal_places(order.subtotal,order.campaign.decimal_places)}\
+                            {price_unit[order.campaign.price_unit]}</span></td>\
+                        </tr>\
+                        <tr>\
+                            <td style="font-size: 15px; color: #4b4b4b; font-weight: 600; width: 35%; text-align:right; padding-bottom: 13px;" align="right" bgcolor="#ffffff" valign="top">' + _('EMAIL/DELIVERY_CONFIRM/DISCOUNT') + f'<span style="color: #b91c1c;"> { discount_code } </span> \
+                            <span style="width:120px; display:inline-block;">{order.campaign.currency}\
+                            -{adjust_decimal_places(order.discount,order.campaign.decimal_places)}\
                             {price_unit[order.campaign.price_unit]}</span></td>\
                         </tr>\
                         <tr>\

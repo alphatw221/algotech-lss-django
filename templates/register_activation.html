@@ -6,7 +6,7 @@
     </head>
     <body style="color:black;">
         <div>
-            <img src="https://storage.googleapis.com/lss_public_bucket/static/Welcome-400x150.jpg">
+            <img src="{% settings_value "WELCOME_HEADER__URL" %}">
             <h3>{% translate "TITLE_ACTIVATION" %}</h3>
         </div>
         <br>
@@ -16,7 +16,7 @@
         <br>
         <div>
             <p>{% translate "YOUR_ACTIVATION" %} {{ Plan }} {% translate "PLAN_ACCOUNT_ACTIVATION" %}</p>
-            <p>{% translate "LOGIN_ACTIVATION" %} <a href="https://v2login.liveshowseller.com/seller/web/login">{% translate "LOGIN_2_WELCOME" %}</a></p>
+            <p>{% translate "LOGIN_ACTIVATION" %} <a href="{% settings_value "WEB_SERVER_URL" %}/seller/web/login">{% translate "LOGIN_2_WELCOME" %}</a></p>
         </div>
         <div>
             <p>Email: {{ email }}</p>
@@ -26,13 +26,13 @@
         <div>
             <p>{% translate "STEP1_ACTIVATION" %}</p>
             <p>{% translate "STEP2_ACTIVATION" %}</p>
-            <p>{% translate "STEP3_ACTIVATION" %} <a href="">lss@algotech.app</a> {% translate "STEP4_ACTIVATION" %}</p>
+            <p>{% translate "STEP3_ACTIVATION" %} <a href="">{% settings_value "NOTIFICATION_EMAIL" %}</a> {% translate "STEP4_ACTIVATION" %}</p>
         </div>
         <br>
         <div>
             <p>{% translate "REGARDS_ACTIVATION" %}</p>
             <p>{% translate "CONGRATS_3_WELCOME" %}</p>
-            <img src="https://storage.googleapis.com/lss_public_bucket/static/LSSlogo-300-172.png" style="width: 200px">
+            <img src="{% settings_value "LOGO_URL" %}" style="width: 200px">
         </div>
 
     </body>

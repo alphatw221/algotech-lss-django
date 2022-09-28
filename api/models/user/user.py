@@ -131,3 +131,6 @@ class UserAdmin(admin.ModelAdmin):
     model = User
     list_display = [field.name for field in User._meta.fields]
     search_fields = [field.name for field in User._meta.fields]
+
+
+api_user_template={f.get_attname():f.get_default() if f.has_default() else None for f in User._meta.fields}

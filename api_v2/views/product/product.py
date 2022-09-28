@@ -1,6 +1,6 @@
 
+from platform import platform
 from django.core.files.base import ContentFile
-from django.core.files.storage import default_storage
 from django.conf import settings
 
 from rest_framework import status, viewsets
@@ -10,7 +10,9 @@ from rest_framework.parsers import MultiPartParser
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser
+from backend.i18n.email.subject import i18n_get_notify_wishlist_subject #temp
 
+from automation import jobs
 
 from api import models
 from api import rule
@@ -101,9 +103,9 @@ class ProductViewSet(viewsets.ModelViewSet):
             product.image = settings.GOOGLE_STORAGE_STATIC_DIR+models.product.product.IMAGE_NULL
         else:
             image_name = image.name.replace(" ","")
-            image_path = default_storage.save(
-                f'user_subscription/{user_subscription.id}/product/{product.id}/{image_name}', ContentFile(image.read()))
-            product.image = settings.GS_URL+image_path
+            image_dir = f'user_subscription/{user_subscription.id}/product/{product.id}'
+            image_url = lib.util.storage.upload_image(image_dir, image_name, image)
+            product.image = image_url
             
         product.user_subscription = user_subscription
         product.save()
@@ -142,11 +144,11 @@ class ProductViewSet(viewsets.ModelViewSet):
         elif image =='._no_image':
             product.image = settings.GOOGLE_STORAGE_STATIC_DIR+models.product.product.IMAGE_NULL
         elif image:
-            image_name = image.name.replace(" ", "")
-            image_path = default_storage.save(
-                f'user_subscription/{user_subscription.id}/product/{product.id}/{image_name}', ContentFile(image.read()))
-            settings.GS_URL
-            product.image = settings.GS_URL+image_path
+            
+            image_name = image.name.replace(" ","")
+            image_dir = f'user_subscription/{user_subscription.id}/product/{product.id}'
+            image_url = lib.util.storage.upload_image(image_dir, image_name, image)
+            product.image = image_url
 
         product.save()
 
@@ -191,7 +193,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         product = lib.util.verify.Verify.get_product_from_user_subscription(user_subscription, pk)
 
-        models.product.product.Product.objects.create(
+        copy_product = models.product.product.Product.objects.create(
             user_subscription=user_subscription,
             qty=product.qty,
             name=f'copy - {product.name}',
@@ -202,7 +204,7 @@ class ProductViewSet(viewsets.ModelViewSet):
             tag=product.tag            
         )
 
-        return Response({"message": "copy success"}, status=status.HTTP_200_OK)
+        return Response({"message": copy_product.id}, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET'], url_path=r'categories', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
@@ -284,3 +286,47 @@ class ProductViewSet(viewsets.ModelViewSet):
             obj.save()
 
         return Response(categories_list, status=status.HTTP_200_OK)
+    
+
+    #-------for buyer------
+    @action(detail=False, methods=['POST'], url_path=r'(?P<product_id>[^/.]+)/wish_list/add', permission_classes=(),  authentication_classes=[])
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def wish_list_add(self, request, product_id):
+
+        email, = lib.util.getter.getdata(request,('email',),required=True)
+        product = lib.util.verify.Verify.get_product_by_id(product_id)
+        
+        if "wish_list" in product.meta:
+            if not email in product.meta["wish_list"]:
+                product.meta['wish_list'][email]=0
+        else:
+            product.meta['wish_list'] = {email:0}
+        
+        product.save()
+        return Response(models.product.product.ProductSerializer(product).data, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['GET'], url_path=r'(?P<product_id>[^/.]+)/wish_list/send/email', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def wish_list_send_email(self, request, product_id):
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        product = lib.util.verify.Verify.get_product_from_user_subscription(user_subscription, product_id)
+        image_path = product.image
+
+        for email, counter in product.meta.get('wish_list',{}).items():
+            title = ""
+            #send email or do something #TODO
+            # content = lib.helper.order_helper.OrderHelper.get_checkout_email_content(product,email)
+            # jobs.send_email_job.send_email_job(title, email, content=content)
+            jobs.send_email_job.send_email_job(
+                i18n_get_notify_wishlist_subject(lang=api_user.lang),
+                email, 
+                'email_notify_wishlist.html', 
+                parameters={"product_name":product, "seller":api_user, "image_path":image_path}, 
+                lang=api_user.lang)
+            
+        
+        product.meta['wish_list'] = {} 
+        product.save()
+        
+        return Response("OK", status=status.HTTP_200_OK)

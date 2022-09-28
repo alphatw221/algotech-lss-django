@@ -52,6 +52,7 @@ def bind_facebook_pages(request, user_subscription):
         page_token = item.get('access_token')
         page_id = item.get('id')
         page_name = item.get('name')
+        page_username = item.get('username')
         status_code, picture_data = service.facebook.page.get_page_picture(page_token=page_token, page_id=page_id, height=100, width=100)
 
 
@@ -61,6 +62,7 @@ def bind_facebook_pages(request, user_subscription):
         if models.facebook.facebook_page.FacebookPage.objects.filter(page_id=page_id).exists():
             facebook_page = models.facebook.facebook_page.FacebookPage.objects.get(page_id=page_id)
             facebook_page.name = page_name
+            facebook_page.username = page_username
             facebook_page.token = page_token
             facebook_page.token_update_at = datetime.now()
             facebook_page.image = page_image

@@ -97,10 +97,12 @@ def export_order_job(campaign_id, credential):
         page = 1
         page_count = 1
         while(page_count>=page):
-            success, data = easy_store_service.orders.list_order(credential.get('shop'), credential.get('access_token'), 
+            success, data = easy_store_service.orders.list_order(
+            credential.get('shop'), 
+            credential.get('access_token'), 
             created_at_min=since, 
             page=page)
-            
+
             if not success:
                 raise Exception()
             

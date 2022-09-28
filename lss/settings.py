@@ -16,7 +16,7 @@ from pathlib import Path
 
 from google.oauth2 import service_account
 from corsheaders.defaults import default_headers
-
+import config
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -29,6 +29,8 @@ SECRET_KEY = 'django-insecure-_*%^a_086!sv_#y^t(c0(+%dbqufars4zf8##q!yqjlp#c7m!l
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
+TEST = False            
+MOCK_SERVICE = False           #if true
 
 # ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0',
 #                  "gipassl.algotech.app", '104.199.211.63']
@@ -166,10 +168,11 @@ WSGI_APPLICATION = 'lss.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
+
 DATABASES = {
     'default': {
         'ENGINE': 'djongo',
-        'NAME': 'lss',
+        'NAME': config.MONGO_DB_DATABASE_NAME,
         'ENFORCE_SCHEMA': False,
         'CLIENT': {
             # Production internal
@@ -177,9 +180,9 @@ DATABASES = {
             # Production external
             'host': 'mongodb://34.126.92.142:27017, 35.240.200.4:27017, 34.126.155.150:27017',
             'replicaSet': 'rs0',
-            'username': 'lss',
-            'password': 'algo83111T%%',
-            'authSource': 'admin',
+            'username': config.MONGO_DB_USERNAME,
+            'password': config.MONGO_DB_PASSWORD,
+            'authSource': config.MONGO_DB_DATABASE_NAME,
             'authMechanism': 'SCRAM-SHA-1',
             'readPreference': 'secondaryPreferred',
             'ssl': False,
@@ -202,10 +205,14 @@ DATABASES = {
     #     }
     # }
 }
-MONGODB_CONNECTION_STRING = 'mongodb://lss:algo83111T%%@34.126.92.142:27017,35.240.200.4:27017,34.126.155.150:27017'
+MONGODB_CONNECTION_STRING = \
+    'mongodb://'+config.MONGO_DB_USERNAME+':'+config.MONGO_DB_PASSWORD+\
+    '@34.126.92.142:27017,35.240.200.4:27017,34.126.155.150:27017/'+\
+    '?authSource='+config.MONGO_DB_DATABASE_NAME
+    
 # for social lab
 # MONGODB_CONNECTION_STRING = 'mongodb://admin:admin@52.221.239.166:27017,13.215.51.14:27017,18.142.57.3:27017'
-MONGODB_DATABASE_NAME = 'lss'
+MONGODB_DATABASE_NAME = config.MONGO_DB_DATABASE_NAME
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 
@@ -292,7 +299,7 @@ LOCAL_API_SERVER = "http://localhost:8001"
 TEST_API_SERVER = "http://192.168.74.114/lss-backend"
 
 # Live Show Seller info
-WEB_SERVER_URL = "https://v1login.liveshowseller.com"
+WEB_SERVER_URL = "https://v2login.liveshowseller.com"
 # for social lab
 # WEB_SERVER_URL = "https://plusone.sociallab.ph/lss/public"
 
@@ -354,7 +361,7 @@ TWITCH_API_URL="https://api.twitch.tv"
 TWITCH_OAUTH_URL = "https://id.twitch.tv"
 
 TWITCH_CLIENT_ID = "drsl6rugh7wf23ombongnhfec210gp"
-TWITCH_CLIENT_SECRET = "po5bdm4ktrbrxy0eh9qa2rbkgt1h5k"
+TWITCH_CLIENT_SECRET = "a0i3kpoz7jzk4v48bsmt9vieriqg8j"
 TWITCH_FROM_USER_ID = "788983065"
 
 # Google API credentials
@@ -380,6 +387,10 @@ FACEBOOK_COMMENT_CAPTURING = {
 CHAT_BOT_FACEBOOK = {
     'VERIFY_TOKEN': 'ALGOTECHLSSMESSENGER'
 }
+#FTP
+FTP_STORAGE_LOCATION = "ftp://lssimages@tig.algotech.app:_TqUPZc*CMdG@74.124.210.137:21" #FTP server: ftp.tig.algotech.app
+BASE_URL = "https://tig.algotech.app/lssimages/"
+FTP_STORAGE_ENCODING = 'utf-8'
 
 # google storage
 DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
@@ -503,3 +514,4 @@ RECAPTCHA_SECRET_KEY='6LeNPyMhAAAAADlvfRDj_WThJc7pCrFzFFaPgwWz'
 
 # template global value
 LOGO_URL = GOOGLE_STORAGE_STATIC_DIR + "LSSlogo-300-172.png"
+WELCOME_HEADER__URL = GOOGLE_STORAGE_STATIC_DIR + "Welcome-400x150.jpg"

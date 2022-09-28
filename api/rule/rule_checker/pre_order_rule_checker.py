@@ -44,5 +44,5 @@ class PreOrderCheckoutRuleChecker(RuleChecker):
 class OrderProductCheckoutRuleChecker(RuleChecker):
 
     check_list=[
-        OrderProductCheckRule.is_stock_avaliable
+        OrderProductCheckRule.is_stock_avaliable_for_checkout
     ]    

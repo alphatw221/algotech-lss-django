@@ -72,6 +72,8 @@ class UserSubscription(models.Model):
     meta_payment = models.JSONField(null=True, blank=True, default=dict)
     meta_logistic = models.JSONField(null=True, blank=True, default=dict)
     meta_country = models.JSONField(null=True, blank=True, default=dict)
+    meta_reply = models.JSONField(null=False, blank=False, default=dict)
+
     buyer_lang = models.CharField(max_length=255, blank=True,
                             choices=business_policy.subscription.LANGUAGE_CHOICES, default=business_policy.subscription.LANGUAGE_ENGLICH)
     lang = models.CharField(max_length=255, blank=True,
@@ -130,6 +132,7 @@ class UserSubscriptionSerializer(serializers.ModelSerializer):
     meta_payment = serializers.JSONField(default=dict, required=False)
     meta_logistic = serializers.JSONField(default=dict, required=False)
     meta_country = serializers.JSONField(default=dict, required=False)
+    meta_reply = serializers.JSONField(default=dict, required=False)
     user_plan = serializers.JSONField(default=dict, required=False)
 
 class UserSubscriptionSerializerAccountInfo(serializers.ModelSerializer):
@@ -141,6 +144,7 @@ class UserSubscriptionSerializerAccountInfo(serializers.ModelSerializer):
     meta_payment = serializers.JSONField(default=dict, required=False)
     meta_logistic = serializers.JSONField(default=dict, required=False)
     meta_country = serializers.JSONField(default=dict, required=False)
+    meta_reply = serializers.JSONField(default=dict, required=False)
     user_plan = serializers.JSONField(default=dict, required=False)
 
 
@@ -238,3 +242,4 @@ class UserSubscriptionAdmin(admin.ModelAdmin):
 
 
 
+api_user_subscription_template={f.get_attname():f.get_default() if f.has_default() else None for f in UserSubscription._meta.fields}
