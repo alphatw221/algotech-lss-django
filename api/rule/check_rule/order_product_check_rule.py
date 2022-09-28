@@ -11,13 +11,12 @@ class OrderProductCheckRule:
 
         campaign_product = kwargs.get('campaign_product')
         order_product = kwargs.get('order_product')
-
+        
         qty_for_sale = campaign_product.data.get('qty_for_sale')
         qty_sold = campaign_product.data.get('qty_sold')
 
         stock_qty = qty_for_sale - qty_sold
-
-        if not stock_qty :
+        if not stock_qty and campaign_product.get('oversell') ==False:
             raise lib.error_handle.error.pre_order_error.PreOrderErrors.UnderStock('helper.out_of_stock')
         
         original_order_product_qty = order_product.data.get('qty')
