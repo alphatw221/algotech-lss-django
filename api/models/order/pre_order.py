@@ -86,7 +86,8 @@ class PreOrder(models.Model):
 
     discount = models.FloatField(null=False, blank=False, default=0)
     applied_discount = models.JSONField(blank=False, null = False, default = {})
-
+    
+    tax = models.FloatField(null=False, blank=False, default=0)
 
 class PreOrderSerializer(serializers.ModelSerializer):
 
