@@ -10,7 +10,6 @@ from rest_framework.parsers import MultiPartParser
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser
-from backend.i18n.email.subject import i18n_get_notify_wishlist_subject #temp
 
 from automation import jobs
 
@@ -319,7 +318,7 @@ class ProductViewSet(viewsets.ModelViewSet):
             # content = lib.helper.order_helper.OrderHelper.get_checkout_email_content(product,email)
             # jobs.send_email_job.send_email_job(title, email, content=content)
             jobs.send_email_job.send_email_job(
-                i18n_get_notify_wishlist_subject(lang=api_user.lang),
+                lib.i18n.email.notify_wishlist_email.i18n_get_notify_wishlist_subject(lang=api_user.lang),
                 email, 
                 'email_notify_wishlist.html', 
                 parameters={"product_name":product, "seller":api_user, "image_path":image_path}, 
