@@ -29,6 +29,34 @@ def make_discount(before_discount_amount, discount_code):
         return before_discount_amount, 0
     return before_discount_amount, 0
 
+
+
+
+def make_discount_for_pre_order(pre_order):
+    try:
+        discount_code = pre_order.applied_discount
+
+        type = discount_code['type']
+        discount_type = discount_code['discount_type']
+        meta = discount_code['meta']
+
+        if discount_type==models.discount_code.discount_code.DISCOUNT_TYPE_PERCENT_OFF:
+            rate = meta['discount_rate']
+            
+            pre_order.discount = pre_order.subtotal * rate
+            return
+
+        elif discount_type==models.discount_code.discount_code.DISCOUNT_TYPE_DEDUCT:
+            deduct_amount = meta['deduct_amount']
+
+            pre_order.discount = deduct_amount
+            return
+
+    except Exception:
+        pre_order.discount = 0
+        pass
+
+
 def check_limitation(limitation, pre_order):
     try:
 

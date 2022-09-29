@@ -131,6 +131,7 @@ class PreOrderHelper():
         product_data = {
             "id": campaign_product.id,
             'qty_sold': campaign_product.data.get('qty_sold'),
+            'qty_pending_payment':campaign_product.data.get('qty_pending_payment'),
             "qty_add_to_cart":campaign_product.data.get('qty_add_to_cart'),
 
         }
@@ -216,6 +217,7 @@ class PreOrderHelper():
         product_data = {
             "id": campaign_product.id,
             'qty_sold': campaign_product.data.get('qty_sold'),
+            'qty_pending_payment':campaign_product.data.get('qty_pending_payment'),
             "qty_add_to_cart":campaign_product.data.get('qty_add_to_cart'),
 
         }
@@ -282,6 +284,7 @@ class PreOrderHelper():
         product_data = {
             "id": campaign_product.id,
             'qty_sold': campaign_product.data.get('qty_sold'),
+            'qty_pending_payment':campaign_product.data.get('qty_pending_payment'),
             "qty_add_to_cart":campaign_product.data.get('qty_add_to_cart'),
         }
 
@@ -397,64 +400,111 @@ class PreOrderHelper():
     
 
     
+    @classmethod
+    def summarize_pre_order(cls, pre_order, campaign, save=False):
 
+        #compute discount
+        lib.helper.discount_helper.make_discount_for_pre_order(pre_order)
 
+        #compute shipping_cost
+        if pre_order.shipping_method == models.order.order.SHIPPING_METHOD_PICKUP:
+            pre_order.shipping_cost = 0
+        else:
+
+            pre_order.shipping_cost = float(campaign.meta_logistic.get('delivery_charge',0))
+
+            meta_logistic = campaign.meta_logistic
+            delivery_options = meta_logistic.get('additional_delivery_options')
+
+            is_subtotal_over_free_delivery_threshold = pre_order.subtotal >= float(meta_logistic.get('free_delivery_for_order_above_price')) if meta_logistic.get('is_free_delivery_for_order_above_price') else False
+            is_items_over_free_delivery_threshold = len(pre_order.products) >= float(meta_logistic.get('free_delivery_for_how_many_order_minimum')) if meta_logistic.get('is_free_delivery_for_how_many_order_minimum') else False
+
+            if(type(pre_order.shipping_option_index)==int):
+                if pre_order.shipping_option_data.get('type') == '+':
+                    pre_order.shipping_cost += float(pre_order.shipping_option_data.get('price')) 
+
+                elif pre_order.shipping_option_data.get('type') == '=':
+                    pre_order.shipping_cost =  float(pre_order.shipping_option_data.get('price'))
+
+            if is_subtotal_over_free_delivery_threshold:
+                pre_order.meta['subtotal_over_free_delivery_threshold'] = True
+            if is_items_over_free_delivery_threshold:
+                pre_order.meta['items_over_free_delivery_threshold'] = True
+            
+
+        #summarize_total
+        total = 0
+        total += pre_order.subtotal
+        total -= pre_order.discount
+        total = max(total, 0)
+        if pre_order.free_delivery or is_subtotal_over_free_delivery_threshold or is_items_over_free_delivery_threshold:
+            pass
+        else:
+            total += pre_order.shipping_cost
+        total += pre_order.adjust_price
+
+        pre_order.total = max(total, 0)
+
+        if save:
+            pre_order.save()
+
+        return pre_order
 
 
 
     
-    @classmethod
-    def summarize_pre_order(cls, pre_order, campaign, shipping_option=None, save=False):
+    # @classmethod
+    # def summarize_pre_order(cls, pre_order, campaign, shipping_option=None, save=False):
 
-        after_discount_subtotal, discount = lib.helper.discount_helper.make_discount(pre_order.subtotal, pre_order.applied_discount)
-        pre_order.discount = discount
-
-        if pre_order.shipping_method == 'pickup':
-            pre_order.shipping_cost = 0
-            pre_order.total = 0 if (after_discount_subtotal + pre_order.adjust_price) < 0 else (after_discount_subtotal + pre_order.adjust_price)
-            if save:
-                pre_order.save()
-                return pre_order
-            return
-
-
-        delivery_charge = float(campaign.meta_logistic.get('delivery_charge',0))
-        meta_logistic = campaign.meta_logistic
-        delivery_options = meta_logistic.get('additional_delivery_options')
-
-        is_subtotal_over_free_delivery_threshold = pre_order.subtotal >= float(meta_logistic.get('free_delivery_for_order_above_price')) if meta_logistic.get('is_free_delivery_for_order_above_price') else False
-        is_items_over_free_delivery_threshold = len(pre_order.products) >= float(meta_logistic.get('free_delivery_for_how_many_order_minimum')) if meta_logistic.get('is_free_delivery_for_how_many_order_minimum') else False
-
-
-        if (pre_order.shipping_option_index != None and delivery_options[pre_order.shipping_option_index] ):
-            option = delivery_options[pre_order.shipping_option_index]
-
-            if option.get('type') == '+':
-                delivery_charge += float(option.get('price')) 
-
-            elif option.get('type') == '=':
-                delivery_charge =  float(option.get('price'))
-
-        if pre_order.free_delivery :
-            delivery_charge = 0
-        if is_subtotal_over_free_delivery_threshold:
-            delivery_charge = 0
-            pre_order.meta['subtotal_over_free_delivery_threshold'] = True
-        if is_items_over_free_delivery_threshold:
-            delivery_charge = 0
-            pre_order.meta['items_over_free_delivery_threshold'] = True
+    #     after_discount_subtotal, discount = lib.helper.discount_helper.make_discount(pre_order.subtotal, pre_order.applied_discount)
+    #     pre_order.discount = discount
         
-        pre_order.shipping_cost = delivery_charge
-        total = after_discount_subtotal + pre_order.adjust_price + delivery_charge
-        if total < 0:
-            pre_order.total  = 0
-            pre_order.discount -= -total
-        else:
-            pre_order.total = total
+    #     if pre_order.shipping_method == models.order.order.SHIPPING_METHOD_PICKUP:
+    #         pre_order.shipping_cost = 0
+    #         pre_order.total = 0 if (after_discount_subtotal + pre_order.adjust_price) < 0 else (after_discount_subtotal + pre_order.adjust_price)
+    #         if save:
+    #             pre_order.save()
+    #             return pre_order
+    #         return
+
+
+    #     delivery_charge = float(campaign.meta_logistic.get('delivery_charge',0))
+    #     meta_logistic = campaign.meta_logistic
+    #     delivery_options = meta_logistic.get('additional_delivery_options')
+
+    #     is_subtotal_over_free_delivery_threshold = pre_order.subtotal >= float(meta_logistic.get('free_delivery_for_order_above_price')) if meta_logistic.get('is_free_delivery_for_order_above_price') else False
+    #     is_items_over_free_delivery_threshold = len(pre_order.products) >= float(meta_logistic.get('free_delivery_for_how_many_order_minimum')) if meta_logistic.get('is_free_delivery_for_how_many_order_minimum') else False
+
+
+    #     if (pre_order.shipping_option_index != None and delivery_options[pre_order.shipping_option_index] ):
+    #         option = delivery_options[pre_order.shipping_option_index]
+
+    #         if option.get('type') == '+':
+    #             delivery_charge += float(option.get('price')) 
+
+    #         elif option.get('type') == '=':
+    #             delivery_charge =  float(option.get('price'))
+
+    #     if pre_order.free_delivery :
+    #         delivery_charge = 0
+    #     if is_subtotal_over_free_delivery_threshold:
+    #         delivery_charge = 0
+    #         pre_order.meta['subtotal_over_free_delivery_threshold'] = True
+    #     if is_items_over_free_delivery_threshold:
+    #         delivery_charge = 0
+    #         pre_order.meta['items_over_free_delivery_threshold'] = True
         
-        if save:
-            pre_order.save()
-            return pre_order
+    #     pre_order.shipping_cost = delivery_charge
+    #     total = after_discount_subtotal + pre_order.adjust_price + delivery_charge
+    #     if total < 0:
+    #         pre_order.total  = 0
+    #         pre_order.discount -= -total
+    #     else:
+    #         pre_order.total = total
+        
+    #     if save:
+    #         pre_order.save()
+    #         return pre_order
 
 
 class OrderHelper():

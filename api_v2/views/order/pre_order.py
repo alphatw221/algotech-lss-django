@@ -356,7 +356,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         campaign = lib.util.verify.Verify.get_campaign_from_pre_order(pre_order)
 
         pre_order.applied_discount = {}
-        pre_order.save()
+        # pre_order.save()
         pre_order = lib.helper.order_helper.PreOrderHelper.summarize_pre_order(pre_order, campaign, save=True)
 
         return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
@@ -422,37 +422,46 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     def seller_adjust(self, request, pk=None):
 
         adjust_price, adjust_title, free_delivery = lib.util.getter.getdata(request, ('adjust_price', 'adjust_title', 'free_delivery'))
-        if type(free_delivery) != bool or type(adjust_price) not in [int, float]:
+        if type(adjust_price) not in [int, float, None]:
             raise lib.error_handle.error.api_error.ApiVerifyError("request_data_error")
-        adjust_price = float(adjust_price)
+
+
         api_user = lib.util.verify.Verify.get_seller_user(request)
         pre_order = lib.util.verify.Verify.get_pre_order(pk)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, pre_order.campaign.id)
 
-        original_total = pre_order.total
-        original_free_delivery = pre_order.free_delivery
-
-        if free_delivery:
-            pre_order.shipping_cost = 0
-        pre_order.total = pre_order.subtotal - pre_order.discount + pre_order.shipping_cost
-        pre_order.free_delivery = free_delivery
+        pre_order.free_delivery = bool(free_delivery)
         pre_order.adjust_title = adjust_title
-        pre_order.adjust_price = 0 if pre_order.total + adjust_price < 0 else adjust_price
+
+        adjust_price = 0 if not adjust_price else adjust_price
+        pre_order.adjust_price = float(adjust_price)
+
+        # original_total = pre_order.total
+        # original_free_delivery = pre_order.free_delivery
+
+        # if free_delivery:
+        #     pre_order.shipping_cost = 0
+        # pre_order.total = pre_order.subtotal - pre_order.discount + pre_order.shipping_cost
+        # pre_order.free_delivery = free_delivery
+        # pre_order.adjust_title = adjust_title
+        # pre_order.adjust_price = 0 if pre_order.total + adjust_price < 0 else adjust_price
 
 
-        seller_adjust_history = pre_order.history.get('seller_adjust', [])
-        seller_adjust_history.append(
-            {"original_total": original_total,
-             "adjusted_total": pre_order.total,
-             "original_free_delivery_status": original_free_delivery,
-             "adjusted_free_delivery_status": pre_order.free_delivery,
-             "adjusted_at": datetime.utcnow(),
-             "adjusted_by": api_user.id
-             }
-        )
-        pre_order.history['seller_adjust_history'] = seller_adjust_history
+        # seller_adjust_history = pre_order.history.get('seller_adjust', [])
+        # seller_adjust_history.append(
+        #     {"original_total": original_total,
+        #      "adjusted_total": pre_order.total,
+        #      "original_free_delivery_status": original_free_delivery,
+        #      "adjusted_free_delivery_status": pre_order.free_delivery,
+        #      "adjusted_at": datetime.utcnow(),
+        #      "adjusted_by": api_user.id
+        #      }
+        # )
+        # pre_order.history['seller_adjust_history'] = seller_adjust_history
         pre_order = lib.helper.order_helper.PreOrderHelper.summarize_pre_order(pre_order, pre_order.campaign, save=True)
+
+
         return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['PUT'], url_path=r'(?P<pre_order_id>[^/.]+)/seller/add', permission_classes=(IsAuthenticated,))
