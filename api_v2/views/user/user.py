@@ -23,7 +23,7 @@ import database
 import service
 import lib
 import business_policy
-from backend.i18n.email.subject import i18n_get_reset_password_success_mail_subject, i18n_get_reset_password_mail_subject, i18n_get_verify_code_subject #temp
+from backend.i18n.email.subject import i18n_get_reset_password_success_mail_subject, i18n_get_reset_password_mail_subject #temp
 
 from datetime import datetime, timedelta
 import pytz
@@ -111,7 +111,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
         api_user = models.user.user.User.objects.get(email=email,type='user')
 
-        jobs.send_email_job.send_email_job(i18n_get_verify_code_subject(lang=api_user.lang),email, 'email_verification_code.html', parameters={"verify_code":code}, lang=api_user.lang)
+        jobs.send_email_job.send_email_job( lib.i18n.veification_code_email.i18n_get_notify_wishlist_subject(lang=api_user.lang),email, 'email_verification_code.html', parameters={"verify_code":code}, lang=api_user.lang)
 
         return Response({'token':token,'verify_code':code} , status=status.HTTP_200_OK)
 

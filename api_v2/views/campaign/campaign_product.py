@@ -266,3 +266,19 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
 
         serializer = models.campaign.campaign_product.CampaignProductSerializer(campaign_product)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['PUT'], url_path=r'seller/toggle/overbook', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def toggle_campaign_product_overbook(self, request, pk=None):
+
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        campaign_product = lib.util.verify.Verify.get_campaign_product(pk)
+        campaign = campaign_product.campaign
+        lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign.id)
+
+        campaign_product.overbook = not campaign_product.overbook
+        campaign_product.save()
+
+        serializer = models.campaign.campaign_product.CampaignProductSerializer(campaign_product)
+        return Response(serializer.data, status=status.HTTP_200_OK)
