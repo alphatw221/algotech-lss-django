@@ -131,6 +131,7 @@ class PreOrderHelper():
         product_data = {
             "id": campaign_product.id,
             'qty_sold': campaign_product.data.get('qty_sold'),
+            'qty_pending_payment':campaign_product.data.get('qty_pending_payment'),
             "qty_add_to_cart":campaign_product.data.get('qty_add_to_cart'),
 
         }
@@ -216,6 +217,7 @@ class PreOrderHelper():
         product_data = {
             "id": campaign_product.id,
             'qty_sold': campaign_product.data.get('qty_sold'),
+            'qty_pending_payment':campaign_product.data.get('qty_pending_payment'),
             "qty_add_to_cart":campaign_product.data.get('qty_add_to_cart'),
 
         }
@@ -282,6 +284,7 @@ class PreOrderHelper():
         product_data = {
             "id": campaign_product.id,
             'qty_sold': campaign_product.data.get('qty_sold'),
+            'qty_pending_payment':campaign_product.data.get('qty_pending_payment'),
             "qty_add_to_cart":campaign_product.data.get('qty_add_to_cart'),
         }
 
