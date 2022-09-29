@@ -37,13 +37,12 @@ class CampaignViewSet(viewsets.ModelViewSet):
         if campaign_status == 'history':
             campaigns = campaigns.filter(end_at__lt=datetime.utcnow())
         elif campaign_status == 'scheduled':
-            campaigns = campaigns.filter(end_at__gte=datetime.utcnow())
-            campaigns = campaigns.filter(start_at__gte=datetime.utcnow())
+            campaigns = campaigns.filter(start_at__gte=datetime.utcnow(), end_at__gte=datetime.utcnow())
         elif campaign_status == 'ongoing':
-            campaigns = campaigns.filter(end_at__gte=datetime.utcnow())
-            campaigns = campaigns.filter(start_at__lte=datetime.utcnow())
+            campaigns = campaigns.filter(start_at__lte=datetime.utcnow(), end_at__gte=datetime.utcnow())
         if order_by:
             campaigns = campaigns.order_by("-"+order_by)
+        campaigns.update(status=campaign_status)
         
         kwargs = {}
         if (search_column in ["", None]) and (keyword not in [None, ""]):
