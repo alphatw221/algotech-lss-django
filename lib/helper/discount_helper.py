@@ -53,6 +53,7 @@ def make_discount_for_pre_order(pre_order):
             return
 
     except Exception:
+        pre_order.discount = 0
         pass
 
 

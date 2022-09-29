@@ -410,7 +410,9 @@ class PreOrderHelper():
         if pre_order.shipping_method == models.order.order.SHIPPING_METHOD_PICKUP:
             pre_order.shipping_cost = 0
         else:
-            delivery_charge = float(campaign.meta_logistic.get('delivery_charge',0))
+
+            pre_order.shipping_cost = float(campaign.meta_logistic.get('delivery_charge',0))
+
             meta_logistic = campaign.meta_logistic
             delivery_options = meta_logistic.get('additional_delivery_options')
 
@@ -419,29 +421,25 @@ class PreOrderHelper():
 
             if(type(pre_order.shipping_option_index)==int):
                 if pre_order.shipping_option_data.get('type') == '+':
-                    delivery_charge += float(pre_order.shipping_option_data.get('price')) 
+                    pre_order.shipping_cost += float(pre_order.shipping_option_data.get('price')) 
 
                 elif pre_order.shipping_option_data.get('type') == '=':
-                    delivery_charge =  float(pre_order.shipping_option_data.get('price'))
+                    pre_order.shipping_cost =  float(pre_order.shipping_option_data.get('price'))
 
-
-            if pre_order.free_delivery :
-                delivery_charge = 0
             if is_subtotal_over_free_delivery_threshold:
-                delivery_charge = 0
                 pre_order.meta['subtotal_over_free_delivery_threshold'] = True
             if is_items_over_free_delivery_threshold:
-                delivery_charge = 0
                 pre_order.meta['items_over_free_delivery_threshold'] = True
             
-            pre_order.shipping_cost = delivery_charge
 
         #summarize_total
         total = 0
         total += pre_order.subtotal
         total -= pre_order.discount
         total = max(total, 0)
-        if not pre_order.free_delivery:
+        if pre_order.free_delivery or is_subtotal_over_free_delivery_threshold or is_items_over_free_delivery_threshold:
+            pass
+        else:
             total += pre_order.shipping_cost
         total += pre_order.adjust_price
 
