@@ -414,15 +414,13 @@ class PreOrderHelper():
             is_subtotal_over_free_delivery_threshold = pre_order.subtotal >= float(meta_logistic.get('free_delivery_for_order_above_price')) if meta_logistic.get('is_free_delivery_for_order_above_price') else False
             is_items_over_free_delivery_threshold = len(pre_order.products) >= float(meta_logistic.get('free_delivery_for_how_many_order_minimum')) if meta_logistic.get('is_free_delivery_for_how_many_order_minimum') else False
 
+            if(type(pre_order.shipping_option_index)==int):
+                if pre_order.shipping_option_data.get('type') == '+':
+                    delivery_charge += float(pre_order.shipping_option_data.get('price')) 
 
-            if (pre_order.shipping_option_index != None and delivery_options[pre_order.shipping_option_index] ):
-                option = delivery_options[pre_order.shipping_option_index]
+                elif pre_order.shipping_option_data.get('type') == '=':
+                    delivery_charge =  float(pre_order.shipping_option_data.get('price'))
 
-                if option.get('type') == '+':
-                    delivery_charge += float(option.get('price')) 
-
-                elif option.get('type') == '=':
-                    delivery_charge =  float(option.get('price'))
 
             if pre_order.free_delivery :
                 delivery_charge = 0
@@ -440,7 +438,7 @@ class PreOrderHelper():
         total += pre_order.subtotal
         total -= pre_order.discount
         total = max(total, 0)
-        if pre_order.free_delivery:
+        if not pre_order.free_delivery:
             total += pre_order.shipping_cost
         total += pre_order.adjust_price
 

@@ -421,18 +421,21 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def seller_adjust(self, request, pk=None):
 
-        adjust_price, adjust_title, free_delivery = lib.util.getter.getdata(request, ('adjust_price', 'adjust_title', 'free_delivery'), required=True)
-        if type(free_delivery) != bool or type(adjust_price) not in [int, float]:
+        adjust_price, adjust_title, free_delivery = lib.util.getter.getdata(request, ('adjust_price', 'adjust_title', 'free_delivery'))
+        if type(adjust_price) not in [int, float, None]:
             raise lib.error_handle.error.api_error.ApiVerifyError("request_data_error")
-        adjust_price = float(adjust_price)
+
+
         api_user = lib.util.verify.Verify.get_seller_user(request)
         pre_order = lib.util.verify.Verify.get_pre_order(pk)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, pre_order.campaign.id)
 
-        pre_order.free_delivery = free_delivery
+        pre_order.free_delivery = bool(free_delivery)
         pre_order.adjust_title = adjust_title
-        pre_order.adjust_price = adjust_price
+
+        adjust_price = 0 if not adjust_price else adjust_price
+        pre_order.adjust_price = float(adjust_price)
 
         # original_total = pre_order.total
         # original_free_delivery = pre_order.free_delivery
