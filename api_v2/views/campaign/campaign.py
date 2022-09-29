@@ -320,7 +320,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
         # return Response(models.campaign.campaign.CampaignSerializerRetreive(campaign).data, status=status.HTTP_200_OK)
         return Response(models.campaign.campaign.CampaignSerializer(campaign).data, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['PUT'], url_path=r'live/delete/(?P<platform>[^/.]+)', permission_classes=(IsAuthenticated,))
+    @action(detail=True, methods=['DELETE'], url_path=r'live/delete/(?P<platform>[^/.]+)', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def delete_campaign_live_data(self, request, pk,platform):
         # platform = \
