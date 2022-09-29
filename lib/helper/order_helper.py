@@ -439,7 +439,9 @@ class PreOrderHelper():
         total = 0
         total += pre_order.subtotal
         total -= pre_order.discount
-        total += pre_order.shipping_cost
+        total = max(total, 0)
+        if pre_order.free_delivery:
+            total += pre_order.shipping_cost
         total += pre_order.adjust_price
 
         pre_order.total = max(total, 0)
