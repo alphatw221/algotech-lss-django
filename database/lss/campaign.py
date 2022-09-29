@@ -20,7 +20,7 @@ class Campaign(Collection):
 
 
 
-def get_merge_order_list_pagination(campaign_id, search:str, status:str, filter_payment:list, filter_delivery:list, filter_platform:list, page:int=1, page_size:int=25, sort_by:dict={}):
+def get_merge_order_list_pagination(campaign_id, search:str, status:str, filter_payment:list, filter_delivery:list, filter_platform:list, page:int=1, page_size:int=25, sort_by:str='created_at'):
 
     filter_query = {'$expr': { '$eq': ["$$id", "$campaign_id"] },"id":{"$ne":None} ,"products":{"$ne":{}}}
 
@@ -46,10 +46,15 @@ def get_merge_order_list_pagination(campaign_id, search:str, status:str, filter_
         else:
             filter_query['status']={"$in": filter_delivery}
             
-    if sort_by == {}:
+    if not sort_by :
         sort_query = { "created_at" : -1 }
-    else:
-        sort_query = sort_by
+    # else:
+    #     sort_query = {sort_by:-1}
+
+    # if sort_by == {}:
+    #     sort_query = { "created_at" : -1 }
+    # else:
+    #     sort_query = sort_by
     query = [
         {"$match":{"id":campaign_id}},
         {

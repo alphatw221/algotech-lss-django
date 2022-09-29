@@ -18,7 +18,7 @@ def send_order_data(campaign_id, data):
         del data['updated_at']
         del data['lock_at']
 
-        print(data)
+        # print(data)
         async_to_sync(get_channel_layer().group_send)(f"campaign_{campaign_id}", {"type": "order_data","data":data})
     except Exception:
         print(traceback.format_exc())
