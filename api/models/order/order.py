@@ -108,6 +108,7 @@ class Order(models.Model):
     discount = models.FloatField(null=True, blank=True, default=0)
     applied_discount = models.JSONField(blank=False, null = False, default = {})
 
+    tax = models.FloatField(null=False, blank=False, default=0)
 
 class OrderSerializer(serializers.ModelSerializer):
 
