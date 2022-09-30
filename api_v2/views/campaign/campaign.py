@@ -42,7 +42,6 @@ class CampaignViewSet(viewsets.ModelViewSet):
             campaigns = campaigns.filter(start_at__lte=datetime.utcnow(), end_at__gte=datetime.utcnow())
         if order_by:
             campaigns = campaigns.order_by("-"+order_by)
-        campaigns.update(status=campaign_status)
         
         kwargs = {}
         if (search_column in ["", None]) and (keyword not in [None, ""]):

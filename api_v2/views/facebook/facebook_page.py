@@ -44,3 +44,15 @@ class FacebookPageViewSet(viewsets.ModelViewSet):
         if code !=200:
             return Response({"error_response": response}, status=status.HTTP_200_OK)
         return Response({"success_response": response}, status=status.HTTP_200_OK)
+    
+    @action(detail=True, methods=['POST'], url_path=r'create/live_object', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def create_live_object(self, request, pk):
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        facebook_page = lib.util.verify.Verify.get_facebook_page_from_user_subscription(user_subscription, pk)
+        code, response = service.facebook.post.post_get_live_video_object(facebook_page.token, facebook_page.page_id)
+        print(response)
+        if code !=200:
+            return Response({"error_response": response}, status=status.HTTP_200_OK)
+        return Response(response, status=status.HTTP_200_OK)
