@@ -98,7 +98,7 @@ class DiscountCodeViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         discount_code = serializer.save()
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(models.discount_code.discount_code.DiscountCodeSerializer(discount_code).data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['DELETE'], url_path=r'delete', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
