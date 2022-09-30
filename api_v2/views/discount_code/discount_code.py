@@ -82,7 +82,7 @@ class DiscountCodeViewSet(viewsets.ModelViewSet):
             
             discount_code.save()
         except Exception :      
-            raise lib.error_handle.error.api_error.ApiVerifyError('code_duplicate')
+            raise lib.error_handle.error.api_error.ApiVerifyError('duplicate_discount_code')
 
         return Response(models.discount_code.discount_code.DiscountCodeSerializer(discount_code).data, status=status.HTTP_200_OK)
 
@@ -105,7 +105,7 @@ class DiscountCodeViewSet(viewsets.ModelViewSet):
         try:
             discount_code = serializer.save()
         except Exception :
-            raise lib.error_handle.error.api_error.ApiVerifyError('code_duplicate')
+            raise lib.error_handle.error.api_error.ApiVerifyError('duplicate_discount_code')
         
 
         return Response(models.discount_code.discount_code.DiscountCodeSerializer(discount_code).data, status=status.HTTP_200_OK)

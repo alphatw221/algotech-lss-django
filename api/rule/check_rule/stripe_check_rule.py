@@ -80,7 +80,8 @@ class StripeCheckRule():
             'trial':['lite','standard','premium'],
             'lite':['lite','standard','premium'],
             'standard':['standard','premium'],
-            'premium':['premium']
+            'premium':['premium'],
+            'dealer':[]
         }
 
         api_user_subscription = kwargs.get('api_user_subscription')
