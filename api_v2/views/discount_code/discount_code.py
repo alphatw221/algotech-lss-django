@@ -74,10 +74,15 @@ class DiscountCodeViewSet(viewsets.ModelViewSet):
         serializer = models.discount_code.discount_code.DiscountCodeSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        discount_code = serializer.save()
-        
-        discount_code.user_subscription = user_subscription
-        discount_code.save()
+
+        try:
+            discount_code = serializer.save()
+            
+            discount_code.user_subscription = user_subscription
+            
+            discount_code.save()
+        except Exception :      
+            raise lib.error_handle.error.api_error.ApiVerifyError('code_duplicate')
 
         return Response(models.discount_code.discount_code.DiscountCodeSerializer(discount_code).data, status=status.HTTP_200_OK)
 
@@ -96,7 +101,12 @@ class DiscountCodeViewSet(viewsets.ModelViewSet):
         serializer = models.discount_code.discount_code.DiscountCodeSerializer(discount_code, data=request.data, partial=True)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        discount_code = serializer.save()
+        
+        try:
+            discount_code = serializer.save()
+        except Exception :
+            raise lib.error_handle.error.api_error.ApiVerifyError('code_duplicate')
+        
 
         return Response(models.discount_code.discount_code.DiscountCodeSerializer(discount_code).data, status=status.HTTP_200_OK)
 
