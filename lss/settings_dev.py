@@ -1,7 +1,7 @@
 from lss.settings import *
 DEBUG = True
-GCP_API_LOADBALANCER_URL = "http://localhost:8000"
-WEB_SERVER_URL = "http://localhost:3000"
+# Live Show Seller info
+WEB_SERVER_URL = "https://staginglss.accoladeglobal.net"
 
 SHOPPING_CART_URL = f"{WEB_SERVER_URL}/buyer/cart"
 # HITPAY_API_URL = 'https://api.sandbox.hit-pay.com/v1/payment-requests' # for test mode

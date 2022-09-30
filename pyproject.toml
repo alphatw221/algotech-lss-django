@@ -49,6 +49,7 @@ TikTokLive = "^4.3.5"
 protobuf = "3.19.4"
 pottery = "^3.0.0"
 pytest-django = "^4.5.2"
+selenium = "^4.5.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
