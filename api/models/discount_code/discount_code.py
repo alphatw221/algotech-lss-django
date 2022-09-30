@@ -21,8 +21,8 @@ LIMITATION_PRODUCT_OVER_NUMBER = 'product_over_specific_number'
 class DiscountCode(models.Model):
     class Meta:
         db_table = 'api_discount_code'
+        unique_together=('user_subscription','code')
 
-    # unique together ('user_subscription','code') 
 
     user_subscription = models.ForeignKey(
         UserSubscription,  null=True, on_delete=models.SET_NULL, related_name='discount_codes')

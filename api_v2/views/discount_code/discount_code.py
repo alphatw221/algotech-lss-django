@@ -70,7 +70,7 @@ class DiscountCodeViewSet(viewsets.ModelViewSet):
 
 
         #TODO validation type and limitations
-        print(request.data)
+        # print(request.data)
         serializer = models.discount_code.discount_code.DiscountCodeSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
