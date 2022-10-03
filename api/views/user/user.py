@@ -761,7 +761,7 @@ class UserViewSet(viewsets.ModelViewSet):
         return response
 
 
-    @action(detail=False, methods=['POST'], url_path=r'password/change', permission_classes=(IsAuthenticated))
+    @action(detail=False, methods=['POST'], url_path=r'password/change', permission_classes=(IsAuthenticated,))
     @api_error_handler
     def change_password(self, request):
 

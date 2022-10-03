@@ -224,7 +224,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         return Response(oid, status=status.HTTP_200_OK)
     
-    @action(detail=False, methods=['POST'], url_path=r'seller/order_list')
+    @action(detail=False, methods=['POST'], url_path=r'seller/order_list', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def get_merge_order_list(self, request):
 

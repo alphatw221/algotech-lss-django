@@ -161,7 +161,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         return Response(pre_order.platform, status=status.HTTP_200_OK)
 
 
-    @action(detail=False, methods=['GET'], url_path=r'(?P<campaign_id>[^/.]+)/(?P<login_with>[^/.]+)/buyer/create', permission_classes=(IsAuthenticated))
+    @action(detail=False, methods=['GET'], url_path=r'(?P<campaign_id>[^/.]+)/(?P<login_with>[^/.]+)/buyer/create', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def buyer_create_pre_order(self, request, campaign_id, login_with):
 
@@ -273,7 +273,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
 
 
-    @action(detail=False, methods=['PUT'], url_path=r'(?P<pre_order_oid>[^/.]+)/buyer/discount',  permission_classes=(IsAuthenticated))
+    @action(detail=False, methods=['PUT'], url_path=r'(?P<pre_order_oid>[^/.]+)/buyer/discount',  permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def buyer_apply_discount_code(self, request, pre_order_oid):
 
