@@ -43,7 +43,7 @@ def make_discount_for_pre_order(pre_order):
         if discount_type==models.discount_code.discount_code.DISCOUNT_TYPE_PERCENT_OFF:
             rate = meta['discount_rate']
             
-            pre_order.discount = pre_order.subtotal * rate
+            pre_order.discount = pre_order.subtotal * (rate/100)
             return
 
         elif discount_type==models.discount_code.discount_code.DISCOUNT_TYPE_DEDUCT:
