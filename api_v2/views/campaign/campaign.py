@@ -4,7 +4,7 @@ from django.conf import settings
 
 from rest_framework import status, viewsets
 from rest_framework.parsers import MultiPartParser
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -24,6 +24,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
     queryset = models.campaign.campaign.Campaign.objects.all().order_by('id')
     serializer_class = models.campaign.campaign.CampaignSerializer
     pagination_class = CampaignPagination
+    permission_classes = (IsAdminUser,)
 
     @action(detail=False, methods=['GET'], url_path=r'list', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler

@@ -5,7 +5,7 @@ from django.db.models import Q
 from rest_framework import viewsets, status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.decorators import action
 
 
@@ -31,7 +31,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     serializer_class = models.order.pre_order.PreOrderSerializer
     filterset_fields = []
     pagination_class = PreOrderPagination
-
+    permission_classes = (IsAdminUser,)
 # ---------------------------------------------- guest ------------------------------------------------------
     # @action(detail=False, methods=['GET'], url_path=r'guest/retrieve/(?P<pre_order_oid>[^/.]+)/platform', permission_classes=(), authentication_classes=[])
     # @lib.error_handle.error_handler.api_error_handler.api_error_handler

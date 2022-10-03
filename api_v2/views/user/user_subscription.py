@@ -30,7 +30,8 @@ class UserSubscriptionPagination(PageNumberPagination):
 
 
 class UserSubscriptionViewSet(viewsets.ModelViewSet):
-    permission_classes = ()
+    permission_classes = (IsAdminUser,)
+    
     queryset = models.user.user_subscription.UserSubscription.objects.all().order_by('id')
     pagination_class = UserSubscriptionPagination
 

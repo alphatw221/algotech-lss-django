@@ -1,5 +1,5 @@
 from rest_framework import viewsets, status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from api import models
@@ -7,7 +7,7 @@ import lib
 import service
 
 class FacebookPageViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAdminUser,)
     queryset = models.facebook.facebook_page.FacebookPage.objects.all().order_by('id')
     serializer_class = models.facebook.facebook_page.FacebookPageSerializer
     filterset_fields = []

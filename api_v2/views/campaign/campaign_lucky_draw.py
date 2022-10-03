@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.core.files.base import ContentFile
 from rest_framework import viewsets, status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser
@@ -12,7 +12,7 @@ import lib, json
 
 
 class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAdminUser,)
     queryset = models.campaign.campaign_lucky_draw.CampaignLuckyDraw.objects.all().order_by('id')
 
     @action(detail=False, methods=['GET'], url_path=r'(?P<campaign_id>[^/.]+)/winners', permission_classes=(IsAuthenticated,))

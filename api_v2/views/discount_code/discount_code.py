@@ -1,6 +1,6 @@
 from functools import partial
 from rest_framework import status, viewsets
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -17,10 +17,28 @@ class DiscountCodePagination(PageNumberPagination):
     page_size_query_param = 'page_size'
 
 class DiscountCodeViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAdminUser,)
     queryset = models.discount_code.discount_code.DiscountCode.objects.none()
     pagination_class = DiscountCodePagination
     
+
+    #-----------------------------------------------buyer----------------------------------
+    @action(detail=False, methods=['GET'], url_path=r'search/(?P<pre_order_oid>[^/.]+)', permission_classes=(), authentication_classes=[])
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def search_discount_code(self, request, pre_order_oid):
+        
+        _type, = lib.util.getter.getparams(request,('type',),with_user=False)
+
+        pre_order = lib.util.verify.Verify.get_pre_order_with_oid(pre_order_oid)
+        campaign = pre_order.campaign
+        user_subscription = campaign.user_subscription
+
+        discount_codes = user_subscription.discount_codes.filter(type=_type, start_at__lte=datetime.utcnow(), end_at__gte=datetime.utcnow())
+        data = models.discount_code.discount_code.DiscountCodeSerializer(discount_codes, many=True).data
+        # print(data)
+        return Response(data, status=status.HTTP_200_OK)
+
+    #-----------------------------------------------seller----------------------------------
     @action(detail=True, methods=['GET'], url_path=r'retrieve', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def retrieve_discount_code(self, request, pk=None):
@@ -45,20 +63,7 @@ class DiscountCodeViewSet(viewsets.ModelViewSet):
         return Response(self.get_paginated_response(serializer.data).data, status=status.HTTP_200_OK)
 
 
-    @action(detail=False, methods=['GET'], url_path=r'search/(?P<pre_order_oid>[^/.]+)', permission_classes=(), authentication_classes=[])
-    @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def search_discount_code(self, request, pre_order_oid):
-        
-        _type, = lib.util.getter.getparams(request,('type',),with_user=False)
-
-        pre_order = lib.util.verify.Verify.get_pre_order_with_oid(pre_order_oid)
-        campaign = pre_order.campaign
-        user_subscription = campaign.user_subscription
-
-        discount_codes = user_subscription.discount_codes.filter(type=_type, start_at__lte=datetime.utcnow(), end_at__gte=datetime.utcnow())
-        data = models.discount_code.discount_code.DiscountCodeSerializer(discount_codes, many=True).data
-        print(data)
-        return Response(data, status=status.HTTP_200_OK)
+    
 
     @action(detail=False, methods=['POST'], url_path=r'create', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
