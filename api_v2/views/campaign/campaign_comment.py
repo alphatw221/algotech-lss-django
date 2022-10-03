@@ -1,5 +1,5 @@
 from rest_framework import viewsets,status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.pagination import CursorPagination
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -12,7 +12,7 @@ class CampaignCommentPagination(CursorPagination):
     ordering = '-created_time'
     page_size=25
 class CampaignCommentViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAdminUser,)
     queryset = models.campaign.campaign_comment.CampaignComment.objects.all().order_by('id')
     pagination_class = CampaignCommentPagination
 

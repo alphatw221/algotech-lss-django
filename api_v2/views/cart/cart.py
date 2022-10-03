@@ -4,7 +4,7 @@ from django.db.models import Q
 from rest_framework import viewsets, status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.decorators import action
 
 from api import models
@@ -29,7 +29,7 @@ class CartViewSet(viewsets.ModelViewSet):
     serializer_class = models.cart.cart.CartSerializer
     filterset_fields = []
     pagination_class = CartPagination
-
+    permission_classes = (IsAdminUser,)
 # ---------------------------------------------- guest ------------------------------------------------------
     @action(detail=False, methods=['GET'], url_path=r'guest/retrieve/(?P<cart_oid>[^/.]+)/platform', permission_classes=(), authentication_classes=[])
     @lib.error_handle.error_handler.api_error_handler.api_error_handler

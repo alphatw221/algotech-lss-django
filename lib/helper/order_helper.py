@@ -426,10 +426,10 @@ class PreOrderHelper():
                 elif pre_order.shipping_option_data.get('type') == '=':
                     pre_order.shipping_cost =  float(pre_order.shipping_option_data.get('price'))
 
-            if is_subtotal_over_free_delivery_threshold:
-                pre_order.meta['subtotal_over_free_delivery_threshold'] = True
-            if is_items_over_free_delivery_threshold:
-                pre_order.meta['items_over_free_delivery_threshold'] = True
+
+            pre_order.meta['subtotal_over_free_delivery_threshold'] = True if is_subtotal_over_free_delivery_threshold else False
+
+            pre_order.meta['items_over_free_delivery_threshold'] = True if is_items_over_free_delivery_threshold else False
             
 
         #summarize_total

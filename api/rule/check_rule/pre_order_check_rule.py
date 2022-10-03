@@ -56,7 +56,7 @@ class PreOrderCheckRule():
             able_to_purchase = api_campaign_product["qty_for_sale"]-api_campaign_product['qty_sold'] >= qty_difference
 
         if not able_to_add_to_cart or not able_to_purchase:
-            raise lib.error_handle.error.pre_order_error.PreOrderErrors.UnderStock("helper.out_of_stock")
+            raise lib.error_handle.error.pre_order_error.PreOrderErrors.UnderStock("out_of_stock")
         return {"qty_difference" : qty_difference}
 
     @staticmethod
@@ -70,7 +70,7 @@ class PreOrderCheckRule():
         if api_user.type=="user":
             return
         if not api_campaign_product['customer_removable']:
-            raise lib.error_handle.error.pre_order_error.PreOrderErrors.RemoveNotAllowed("helper.not_removable")
+            raise lib.error_handle.error.pre_order_error.PreOrderErrors.RemoveNotAllowed("not_removable")
 
     @staticmethod
     def is_order_product_editable(**kwargs):
@@ -84,9 +84,9 @@ class PreOrderCheckRule():
         if api_user.type=="user":
             return
         if not api_campaign_product.get('customer_editable',False):
-            raise lib.error_handle.error.pre_order_error.PreOrderErrors.EditNotAllowed("helper.not_editable")
+            raise lib.error_handle.error.pre_order_error.PreOrderErrors.EditNotAllowed("not_editable")
         if api_campaign_product.get('type') == "lucky_draw":
-            raise lib.error_handle.error.pre_order_error.PreOrderErrors.EditNotAllowed("helper.not_editable")
+            raise lib.error_handle.error.pre_order_error.PreOrderErrors.EditNotAllowed("not_editable")
 
 
     @staticmethod
@@ -96,7 +96,7 @@ class PreOrderCheckRule():
         api_campaign_product = kwargs.get('api_campaign_product')
         if str(api_campaign_product["id"]) in api_pre_order["products"]:
             raise lib.error_handle.error.pre_order_error.PreOrderErrors.PreOrderException(
-                "helper.product_already_in_pre_order")
+                "product_already_in_pre_order")
 
     @staticmethod
     def is_under_max_limit(**kwargs):
@@ -110,7 +110,7 @@ class PreOrderCheckRule():
             return
         if api_campaign_product.get('max_order_amount') and qty > api_campaign_product.get('max_order_amount'):
             raise lib.error_handle.error.pre_order_error.PreOrderErrors.PreOrderException(
-                "helper.exceeds_max_order_amount")
+                "exceeds_max_order_amount")
 
     @staticmethod
     def is_order_empty(**kwargs):

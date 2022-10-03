@@ -1,6 +1,6 @@
 from rest_framework.response import Response
 from rest_framework import viewsets,status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.decorators import action, permission_classes
 
 from api import models
@@ -8,7 +8,7 @@ from api import models
 import lib
 
 class OrderProductViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAdminUser,)
     queryset = models.order.order_product.OrderProduct.objects.all().order_by('id')
 
     #------------------------------------------------- guest -------------------------------------------------------

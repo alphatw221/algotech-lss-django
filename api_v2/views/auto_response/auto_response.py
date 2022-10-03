@@ -1,5 +1,5 @@
 from rest_framework import status, viewsets
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -13,7 +13,7 @@ class AutoResponsePagination(PageNumberPagination):
     page_size_query_param = 'page_size'
 
 class AutoResponseViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAdminUser,)
     queryset = models.auto_response.auto_response.AutoResponse.objects.all().order_by('id')
     serializer_class = models.auto_response.auto_response.AutoResponseSerializer
 

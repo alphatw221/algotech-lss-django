@@ -4,7 +4,7 @@ from django.core.files.base import ContentFile
 from django.conf import settings
 
 from rest_framework import status, viewsets
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.parsers import MultiPartParser
 from rest_framework.decorators import action
@@ -24,7 +24,7 @@ class ProductPagination(PageNumberPagination):
 
 
 class ProductViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAdminUser,)
     queryset = models.product.product.Product.objects.all()
     serializer_class = models.product.product.ProductSerializer
     pagination_class = ProductPagination

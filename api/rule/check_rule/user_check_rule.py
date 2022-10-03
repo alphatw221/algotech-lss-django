@@ -34,7 +34,7 @@ class UserCheckRule():
     def is_timezone_valid(**kwargs):
         timezone = kwargs.get('timezone')
         if ((timezone != "") and (timezone not in pytz.all_timezones)):
-            raise ApiVerifyError("helper.time_zone_not_valid_format")
+            raise ApiVerifyError("time_zone_not_valid_format")
     @staticmethod
     def has_email_been_registered(**kwargs):
         email = kwargs.get('email')

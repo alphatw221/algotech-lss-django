@@ -47,7 +47,7 @@ class FacebookLogin():
     def get_token(cls, token, user_type):
         status_code, response = api_fb_get_me_login(token)
         if status_code / 100 != 2:
-            raise ApiVerifyError("helper.fb_user_token_invalid")
+            raise ApiVerifyError("fb_user_token_invalid")
             
         facebook_id = response.get('id')
         facebook_name = response.get('name')
@@ -55,7 +55,7 @@ class FacebookLogin():
         email = response.get('email')
 
         if not email:
-            raise ApiVerifyError("helper.unable_get_fb_email")
+            raise ApiVerifyError("unable_get_fb_email")
 
         api_user_exists = models.user.user.User.objects.filter(
             email=email, type=user_type).exists()

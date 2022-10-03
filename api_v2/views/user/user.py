@@ -32,7 +32,7 @@ import string
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    # permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAdminUser,)
     queryset = models.user.user.User.objects.all().order_by('id')
     serializer_class = models.user.user.UserSerializer
     filterset_fields = []
