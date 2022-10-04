@@ -641,101 +641,101 @@ msgstr ""
 "Nếu bạn không yêu cầu thay đổi này, vui lòng liên hệ với bộ phận hỗ trợ ngay "
 "lập tức."
 
-#~ msgid "EMAIL/DELIVERY_CONFIRM/TAX"
-#~ msgstr "Thuế"
+msgid "EMAIL/DELIVERY_CONFIRM/TAX"
+msgstr "Thuế"
 
-#~ msgid "REPORT/COLUMN_TITLE/ID"
-#~ msgstr "ID"
+msgid "REPORT/COLUMN_TITLE/ID"
+msgstr "ID"
 
-#~ msgid "REPORT/COLUMN_TITLE/ORDER_DATE"
-#~ msgstr "Ngày đặt hàng"
+msgid "REPORT/COLUMN_TITLE/ORDER_DATE"
+msgstr "Ngày đặt hàng"
 
-#~ msgid "REPORT/COLUMN_TITLE/PLATFORM"
-#~ msgstr "Nền tảng"
+msgid "REPORT/COLUMN_TITLE/PLATFORM"
+msgstr "Nền tảng"
 
-#~ msgid "REPORT/COLUMN_TITLE/CUSTOMER_NAME"
-#~ msgstr "Tên khách hàng"
+msgid "REPORT/COLUMN_TITLE/CUSTOMER_NAME"
+msgstr "Tên khách hàng"
 
-#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_NAME"
-#~ msgstr "Tên tài khoản"
+msgid "REPORT/COLUMN_TITLE/SHIPPING_NAME"
+msgstr "Tên tài khoản"
 
-#~ msgid "REPORT/COLUMN_TITLE/EMAIL"
-#~ msgstr "E-mail"
+msgid "REPORT/COLUMN_TITLE/EMAIL"
+msgstr "E-mail"
 
-#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_METHOD"
-#~ msgstr "Phương thức giao hàng"
+msgid "REPORT/COLUMN_TITLE/SHIPPING_METHOD"
+msgstr "Phương thức giao hàng"
 
-#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_OPTION"
-#~ msgstr "Tùy chọn giao hàng"
+msgid "REPORT/COLUMN_TITLE/SHIPPING_OPTION"
+msgstr "Tùy chọn giao hàng"
 
-#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_ADDRESS_1"
-#~ msgstr "Địa chỉ giao hàng"
+msgid "REPORT/COLUMN_TITLE/SHIPPING_ADDRESS_1"
+msgstr "Địa chỉ giao hàng"
 
-#~ msgid "REPORT/COLUMN_TITLE/LOCATION"
-#~ msgstr "Địa điểm "
+msgid "REPORT/COLUMN_TITLE/LOCATION"
+msgstr "Địa điểm "
 
-#~ msgid "REPORT/COLUMN_TITLE/REGION"
-#~ msgstr "Khu vực"
+msgid "REPORT/COLUMN_TITLE/REGION"
+msgstr "Khu vực"
 
-#~ msgid "REPORT/COLUMN_TITLE/POSTCODE"
-#~ msgstr "Mã bưu điện"
+msgid "REPORT/COLUMN_TITLE/POSTCODE"
+msgstr "Mã bưu điện"
 
-#~ msgid "REPORT/COLUMN_TITLE/PICK_UP_ADDRESS"
-#~ msgstr "Địa chỉ cửa hàng"
+msgid "REPORT/COLUMN_TITLE/PICK_UP_ADDRESS"
+msgstr "Địa chỉ cửa hàng"
 
-#~ msgid "REPORT/COLUMN_TITLE/REMARK"
-#~ msgstr "Nhận xét"
+msgid "REPORT/COLUMN_TITLE/REMARK"
+msgstr "Nhận xét"
 
-#~ msgid "REPORT/COLUMN_TITLE/PAYMENT_STATUS"
-#~ msgstr "Tình trạng thanh toán"
+msgid "REPORT/COLUMN_TITLE/PAYMENT_STATUS"
+msgstr "Tình trạng thanh toán"
 
-#~ msgid "REPORT/COLUMN_TITLE/PAYMENT_RECORD"
-#~ msgstr "Hóa đơn thanh toán"
+msgid "REPORT/COLUMN_TITLE/PAYMENT_RECORD"
+msgstr "Hóa đơn thanh toán"
 
-#~ msgid "REPORT/COLUMN_TITLE/TOTAL"
-#~ msgstr "Tổng thanh toán"
+msgid "REPORT/COLUMN_TITLE/TOTAL"
+msgstr "Tổng thanh toán"
 
-#~ msgid "EMAIL/DELIVERY_CONFIRM/SHIPPING_INFO"
-#~ msgstr "Thông tin vận chuyển"
+msgid "EMAIL/DELIVERY_CONFIRM/SHIPPING_INFO"
+msgstr "Thông tin vận chuyển"
 
-#~ msgid "EMAIL/DELIVERY_CONFIRM/SHIPPING_DATE"
-#~ msgstr "Ngày giao hàng"
+msgid "EMAIL/DELIVERY_CONFIRM/SHIPPING_DATE"
+msgstr "Ngày giao hàng"
 
-#~ msgid "EMAIL/DELIVERY_CONFIRM/REMARK"
-#~ msgstr "Nhận xét"
+msgid "EMAIL/DELIVERY_CONFIRM/REMARK"
+msgstr "Nhận xét"
 
-#~ msgid "DETAIL{link}"
-#~ msgstr "Tìm hiểu chi tiết: {link}\n"
+msgid "DETAIL{link}"
+msgstr "Tìm hiểu chi tiết: {link}\n"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/ORDER"
-#~ msgstr "Đặt hàng"
+msgid "EMAIL/ORDER_CONFIRM/ORDER"
+msgstr "Đặt hàng"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/CUSTOMER_NAME"
-#~ msgstr "Tên khách hàng"
+msgid "EMAIL/ORDER_CONFIRM/CUSTOMER_NAME"
+msgstr "Tên khách hàng"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_TO"
-#~ msgstr "Giao hàng tới"
+msgid "EMAIL/ORDER_CONFIRM/DELIVERY_TO"
+msgstr "Giao hàng tới"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_WAY"
-#~ msgstr "Cách giao hàng"
+msgid "EMAIL/ORDER_CONFIRM/DELIVERY_WAY"
+msgstr "Cách giao hàng"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/PICK_UP_STORE"
-#~ msgstr "Nhận hàng tại cửa hàng"
+msgid "EMAIL/ORDER_CONFIRM/PICK_UP_STORE"
+msgstr "Nhận hàng tại cửa hàng"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/PICK_UP_DATE"
-#~ msgstr "Ngày đón"
+msgid "EMAIL/ORDER_CONFIRM/PICK_UP_DATE"
+msgstr "Ngày đón"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_ADDRESS"
-#~ msgstr "Địa chỉ giao hàng"
+msgid "EMAIL/ORDER_CONFIRM/DELIVERY_ADDRESS"
+msgstr "Địa chỉ giao hàng"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/PAYMENT_METHOD"
-#~ msgstr "Phương thức thanh toán"
+msgid "EMAIL/ORDER_CONFIRM/PAYMENT_METHOD"
+msgstr "Phương thức thanh toán"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_CHARGE"
-#~ msgstr "Phí giao hàng"
+msgid "EMAIL/ORDER_CONFIRM/DELIVERY_CHARGE"
+msgstr "Phí giao hàng"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_DATE"
-#~ msgstr "Ngày giao hàng"
+msgid "EMAIL/ORDER_CONFIRM/DELIVERY_DATE"
+msgstr "Ngày giao hàng"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/TOTAL"
-#~ msgstr "Tổng số"
+msgid "EMAIL/ORDER_CONFIRM/TOTAL"
+msgstr "Tổng số"

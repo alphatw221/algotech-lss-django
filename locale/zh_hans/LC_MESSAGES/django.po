@@ -615,92 +615,92 @@ msgid "EMAIL/PASSWORD_RESET_SUCCESS/CONTENT2"
 msgstr ""
 "我們收到重設Live Show Seller 密碼的要求。請點擊下方連結, 即可重新設定。"
 
-#~ msgid "EMAIL/DELIVERY_CONFIRM/TAX"
-#~ msgstr "稅額"
+msgid "EMAIL/DELIVERY_CONFIRM/TAX"
+msgstr "稅額"
 
-#~ msgid "REPORT/COLUMN_TITLE/ID"
-#~ msgstr "编号"
+msgid "REPORT/COLUMN_TITLE/ID"
+msgstr "编号"
 
-#~ msgid "REPORT/COLUMN_TITLE/ORDER_DATE"
-#~ msgstr "订单日期"
+msgid "REPORT/COLUMN_TITLE/ORDER_DATE"
+msgstr "订单日期"
 
-#~ msgid "REPORT/COLUMN_TITLE/PLATFORM"
-#~ msgstr "使用平台"
+msgid "REPORT/COLUMN_TITLE/PLATFORM"
+msgstr "使用平台"
 
-#~ msgid "REPORT/COLUMN_TITLE/CUSTOMER_NAME"
-#~ msgstr "帐户名称"
+msgid "REPORT/COLUMN_TITLE/CUSTOMER_NAME"
+msgstr "帐户名称"
 
-#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_NAME"
-#~ msgstr "客户名称"
+msgid "REPORT/COLUMN_TITLE/SHIPPING_NAME"
+msgstr "客户名称"
 
-#~ msgid "REPORT/COLUMN_TITLE/EMAIL"
-#~ msgstr "E-mail"
+msgid "REPORT/COLUMN_TITLE/EMAIL"
+msgstr "E-mail"
 
-#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_METHOD"
-#~ msgstr "运送方式"
+msgid "REPORT/COLUMN_TITLE/SHIPPING_METHOD"
+msgstr "运送方式"
 
-#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_OPTION"
-#~ msgstr "运送选项"
+msgid "REPORT/COLUMN_TITLE/SHIPPING_OPTION"
+msgstr "运送选项"
 
-#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_ADDRESS_1"
-#~ msgstr "收件住址"
+msgid "REPORT/COLUMN_TITLE/SHIPPING_ADDRESS_1"
+msgstr "收件住址"
 
-#~ msgid "REPORT/COLUMN_TITLE/LOCATION"
-#~ msgstr "地点"
+msgid "REPORT/COLUMN_TITLE/LOCATION"
+msgstr "地点"
 
-#~ msgid "REPORT/COLUMN_TITLE/REGION"
-#~ msgstr "区域"
+msgid "REPORT/COLUMN_TITLE/REGION"
+msgstr "区域"
 
-#~ msgid "REPORT/COLUMN_TITLE/POSTCODE"
-#~ msgstr "邮递区号"
+msgid "REPORT/COLUMN_TITLE/POSTCODE"
+msgstr "邮递区号"
 
-#~ msgid "REPORT/COLUMN_TITLE/PICK_UP_ADDRESS"
-#~ msgstr "自取地址"
+msgid "REPORT/COLUMN_TITLE/PICK_UP_ADDRESS"
+msgstr "自取地址"
 
-#~ msgid "REPORT/COLUMN_TITLE/REMARK"
-#~ msgstr "注记"
+msgid "REPORT/COLUMN_TITLE/REMARK"
+msgstr "注记"
 
-#~ msgid "REPORT/COLUMN_TITLE/PAYMENT_STATUS"
-#~ msgstr "付款状态"
+msgid "REPORT/COLUMN_TITLE/PAYMENT_STATUS"
+msgstr "付款状态"
 
-#~ msgid "REPORT/COLUMN_TITLE/PAYMENT_RECORD"
-#~ msgstr "付款证明"
+msgid "REPORT/COLUMN_TITLE/PAYMENT_RECORD"
+msgstr "付款证明"
 
-#~ msgid "REPORT/COLUMN_TITLE/TOTAL"
-#~ msgstr "总金额"
+msgid "REPORT/COLUMN_TITLE/TOTAL"
+msgstr "总金额"
 
-#~ msgid "EMAIL/DELIVERY_CONFIRM/SHIPPING_INFO"
-#~ msgstr "发货信息"
+msgid "EMAIL/DELIVERY_CONFIRM/SHIPPING_INFO"
+msgstr "发货信息"
 
-#~ msgid "EMAIL/DELIVERY_CONFIRM/SHIPPING_DATE"
-#~ msgstr "发货日期"
+msgid "EMAIL/DELIVERY_CONFIRM/SHIPPING_DATE"
+msgstr "发货日期"
 
-#~ msgid "EMAIL/DELIVERY_CONFIRM/REMARK"
-#~ msgstr "备注"
+msgid "EMAIL/DELIVERY_CONFIRM/REMARK"
+msgstr "备注"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/PAYMENT_METHOD"
-#~ msgstr "支付方式"
+msgid "EMAIL/ORDER_CONFIRM/PAYMENT_METHOD"
+msgstr "支付方式"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/ORDER"
-#~ msgstr "订单"
+msgid "EMAIL/ORDER_CONFIRM/ORDER"
+msgstr "订单"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/CUSTOMER_NAME"
-#~ msgstr "客户名称"
+msgid "EMAIL/ORDER_CONFIRM/CUSTOMER_NAME"
+msgstr "客户名称"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_TO"
-#~ msgstr "送货到"
+msgid "EMAIL/ORDER_CONFIRM/DELIVERY_TO"
+msgstr "送货到"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_WAY"
-#~ msgstr "发货方式"
+msgid "EMAIL/ORDER_CONFIRM/DELIVERY_WAY"
+msgstr "发货方式"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/PICK_UP_STORE"
-#~ msgstr "取货店"
+msgid "EMAIL/ORDER_CONFIRM/PICK_UP_STORE"
+msgstr "取货店"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/PICK_UP_DATE"
-#~ msgstr "取货日期"
+msgid "EMAIL/ORDER_CONFIRM/PICK_UP_DATE"
+msgstr "取货日期"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_ADDRESS"
-#~ msgstr "收货地址"
+msgid "EMAIL/ORDER_CONFIRM/DELIVERY_ADDRESS"
+msgstr "收货地址"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_CHARGE"
-#~ msgstr "运费"
+msgid "EMAIL/ORDER_CONFIRM/DELIVERY_CHARGE"
+msgstr "运费"

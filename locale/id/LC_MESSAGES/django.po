@@ -636,95 +636,95 @@ msgstr ""
 "Nakuha na namin ang inyong request para i-reset ang inyong Live Show Seller "
 "password. I-click ang link sa ibaba para gumawa ng panibago:"
 
-#~ msgid "EMAIL/DELIVERY_CONFIRM/TAX"
-#~ msgstr "Tax"
+msgid "EMAIL/DELIVERY_CONFIRM/TAX"
+msgstr "Tax"
 
-#~ msgid "REPORT/COLUMN_TITLE/ID"
-#~ msgstr "ID"
+msgid "REPORT/COLUMN_TITLE/ID"
+msgstr "ID"
 
-#~ msgid "REPORT/COLUMN_TITLE/ORDER_DATE"
-#~ msgstr "Order Date"
+msgid "REPORT/COLUMN_TITLE/ORDER_DATE"
+msgstr "Order Date"
 
-#~ msgid "REPORT/COLUMN_TITLE/PLATFORM"
-#~ msgstr "Platform"
+msgid "REPORT/COLUMN_TITLE/PLATFORM"
+msgstr "Platform"
 
-#~ msgid "REPORT/COLUMN_TITLE/CUSTOMER_NAME"
-#~ msgstr "Account Name"
+msgid "REPORT/COLUMN_TITLE/CUSTOMER_NAME"
+msgstr "Account Name"
 
-#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_NAME"
-#~ msgstr "Customer Name"
+msgid "REPORT/COLUMN_TITLE/SHIPPING_NAME"
+msgstr "Customer Name"
 
-#~ msgid "REPORT/COLUMN_TITLE/EMAIL"
-#~ msgstr "E-mail"
+msgid "REPORT/COLUMN_TITLE/EMAIL"
+msgstr "E-mail"
 
-#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_METHOD"
-#~ msgstr "Shipping_Method"
+msgid "REPORT/COLUMN_TITLE/SHIPPING_METHOD"
+msgstr "Shipping_Method"
 
-#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_OPTION"
-#~ msgstr "Shipping Option"
+msgid "REPORT/COLUMN_TITLE/SHIPPING_OPTION"
+msgstr "Shipping Option"
 
-#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_ADDRESS_1"
-#~ msgstr "Shipping Address_1"
+msgid "REPORT/COLUMN_TITLE/SHIPPING_ADDRESS_1"
+msgstr "Shipping Address_1"
 
-#~ msgid "REPORT/COLUMN_TITLE/LOCATION"
-#~ msgstr "Location"
+msgid "REPORT/COLUMN_TITLE/LOCATION"
+msgstr "Location"
 
-#~ msgid "REPORT/COLUMN_TITLE/REGION"
-#~ msgstr "Region"
+msgid "REPORT/COLUMN_TITLE/REGION"
+msgstr "Region"
 
-#~ msgid "REPORT/COLUMN_TITLE/POSTCODE"
-#~ msgstr "Postcode"
+msgid "REPORT/COLUMN_TITLE/POSTCODE"
+msgstr "Postcode"
 
-#~ msgid "REPORT/COLUMN_TITLE/PICK_UP_ADDRESS"
-#~ msgstr "Pick Up Addrwess"
+msgid "REPORT/COLUMN_TITLE/PICK_UP_ADDRESS"
+msgstr "Pick Up Addrwess"
 
-#~ msgid "REPORT/COLUMN_TITLE/REMARK"
-#~ msgstr "Remark"
+msgid "REPORT/COLUMN_TITLE/REMARK"
+msgstr "Remark"
 
-#~ msgid "REPORT/COLUMN_TITLE/PAYMENT_STATUS"
-#~ msgstr "Payment Status"
+msgid "REPORT/COLUMN_TITLE/PAYMENT_STATUS"
+msgstr "Payment Status"
 
-#~ msgid "REPORT/COLUMN_TITLE/PAYMENT_RECORD"
-#~ msgstr "Payment Record"
+msgid "REPORT/COLUMN_TITLE/PAYMENT_RECORD"
+msgstr "Payment Record"
 
-#~ msgid "REPORT/COLUMN_TITLE/TOTAL"
-#~ msgstr "Total"
+msgid "REPORT/COLUMN_TITLE/TOTAL"
+msgstr "Total"
 
-#~ msgid "EMAIL/DELIVERY_CONFIRM/SHIPPING_INFO"
-#~ msgstr "Shipping information"
+msgid "EMAIL/DELIVERY_CONFIRM/SHIPPING_INFO"
+msgstr "Shipping information"
 
-#~ msgid "EMAIL/DELIVERY_CONFIRM/SHIPPING_DATE"
-#~ msgstr "Shipping Date"
+msgid "EMAIL/DELIVERY_CONFIRM/SHIPPING_DATE"
+msgstr "Shipping Date"
 
-#~ msgid "EMAIL/DELIVERY_CONFIRM/REMARK"
-#~ msgstr "Remark"
+msgid "EMAIL/DELIVERY_CONFIRM/REMARK"
+msgstr "Remark"
 
-#~ msgid "DETAIL{link}"
-#~ msgstr "Pelajari lebih lanjut: {link}\n"
+msgid "DETAIL{link}"
+msgstr "Pelajari lebih lanjut: {link}\n"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/ORDER"
-#~ msgstr "Order"
+msgid "EMAIL/ORDER_CONFIRM/ORDER"
+msgstr "Order"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/CUSTOMER_NAME"
-#~ msgstr "Customer Name"
+msgid "EMAIL/ORDER_CONFIRM/CUSTOMER_NAME"
+msgstr "Customer Name"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_TO"
-#~ msgstr "Delivery To"
+msgid "EMAIL/ORDER_CONFIRM/DELIVERY_TO"
+msgstr "Delivery To"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_WAY"
-#~ msgstr "Delivery way"
+msgid "EMAIL/ORDER_CONFIRM/DELIVERY_WAY"
+msgstr "Delivery way"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/PICK_UP_STORE"
-#~ msgstr "Pick up store"
+msgid "EMAIL/ORDER_CONFIRM/PICK_UP_STORE"
+msgstr "Pick up store"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/PICK_UP_DATE"
-#~ msgstr "Pick up Date"
+msgid "EMAIL/ORDER_CONFIRM/PICK_UP_DATE"
+msgstr "Pick up Date"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_ADDRESS"
-#~ msgstr "Delivery address"
+msgid "EMAIL/ORDER_CONFIRM/DELIVERY_ADDRESS"
+msgstr "Delivery address"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_CHARGE"
-#~ msgstr "Delivery Charge"
+msgid "EMAIL/ORDER_CONFIRM/DELIVERY_CHARGE"
+msgstr "Delivery Charge"
 
-#~ msgid "MESSAGE_HEADER"
-#~ msgstr "Pesanan anda:"
+msgid "MESSAGE_HEADER"
+msgstr "Pesanan anda:"
