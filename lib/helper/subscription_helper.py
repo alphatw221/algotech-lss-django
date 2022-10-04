@@ -180,7 +180,7 @@ def bind_youtube_channels(request, user_subscription):
         if youtube_channel not in user_subscription.youtube_channels.all():
             user_subscription.youtube_channels.add(youtube_channel)
 
-def bind_twitch_channels(request, user_subscription, channel_name):
+def bind_twitch_channels(request, user_subscription):
 
     code, channel_name = lib.util.getter.getdata(request,("code", "channel_name"), required=True)
 
