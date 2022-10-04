@@ -1,11 +1,26 @@
 from typing import OrderedDict
+import functools, logging, traceback
 from api import models
 import service
-
+from django.conf import settings
+import os
 import random
 import lib
 from api import models
 from collections import OrderedDict
+import json
+import arrow
+from selenium import webdriver
+from selenium.webdriver.chrome.webdriver import WebDriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver import ActionChains, Keys
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.color import Color
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import NoSuchElementException
 
 
 class LuckyDrawCandidate():
@@ -241,64 +256,26 @@ class SharedPostCandidateSetGenerator(CandidateSetGenerator):
         if not shares_count:
             return candidate_set
         
+        
+        fb_crawler = FacebookSharedListCrawler(facebook_page.username, post_id)
+        print("----------")
+        shared_user_name_set = fb_crawler.start()
+        print(shared_user_name_set)
+        if not shared_user_name_set:
+            return candidate_set
+        
         like_data = response.get("likes",{}).get("data",[])
         # print(like_data)
         like_user_id_set = set([i["id"] for i in like_data])
         
         comments_data = models.campaign.campaign_comment.CampaignComment.objects.filter(
             campaign=campaign, platform="facebook")
-        campaign_comments_user_id_set = set(comments_data.values_list("customer_id", flat=True))
+        # campaign_comments_user_id_set = set(comments_data.values_list("customer_id", flat=True))
+        campaign_comments_user_name_set = set(comments_data.values_list("customer_name", flat=True))
         
-        
-        
-        if len(like_user_id_set) and len(campaign_comments_user_id_set):
-            users_like_and_comment_set = like_user_id_set.intersection(campaign_comments_user_id_set)
-            data = []
-            for i in like_data:
-                if i["id"] in users_like_and_comment_set and i["id"] not in data:
-                    data.append(i)
-            for user in data:
-                candidate = LuckyDrawCandidate(
-                    platform='facebook', 
-                    customer_id=user.get('id'),     #ASID over here!! might have some issues 
-                    customer_name=user.get('name'),
-                    customer_image=user.get('pic_large'),
-                    draw_type=lucky_draw.type,
-                    prize=lucky_draw.prize.name)
-
-                if not lucky_draw.repeatable and candidate in winner_list:
-                    continue
-                
-                candidate_set.add(candidate)
-                
-        elif not len(like_user_id_set) and not len(campaign_comments_user_id_set):
-            return candidate_set
-        
-        elif len(like_user_id_set):
-            users_like_and_comment_set = like_user_id_set
-            data = []
-            for i in like_data:
-                if i["id"] in users_like_and_comment_set and i["id"] not in data:
-                    data.append(i)
-            for user in data:
-                candidate = LuckyDrawCandidate(
-                    platform='facebook', 
-                    customer_id=user.get('id'),     #ASID over here!! might have some issues 
-                    customer_name=user.get('name'),
-                    customer_image=user.get('pic_large'),
-                    draw_type=lucky_draw.type,
-                    prize=lucky_draw.prize.name)
-
-                if not lucky_draw.repeatable and candidate in winner_list:
-                    continue
-                candidate_set.add(candidate)
-                
-        elif len(campaign_comments_user_id_set):
-            users_like_and_comment_set = campaign_comments_user_id_set
-            campaign_comments = []
-            for i in comments_data:
-                if i.id in users_like_and_comment_set and i.id not in campaign_comments:
-                    campaign_comments.append(i)
+        if len(campaign_comments_user_name_set):
+            users_shared_and_comment_set = shared_user_name_set.intersection(campaign_comments_user_name_set)
+            campaign_comments = comments_data.filter(customer_name__in=list(users_shared_and_comment_set))
             for campaign_comment in campaign_comments:
 
                 candidate = LuckyDrawCandidate(
@@ -314,6 +291,70 @@ class SharedPostCandidateSetGenerator(CandidateSetGenerator):
                     continue
 
                 candidate_set.add(candidate)
+        
+        # if len(like_user_id_set) and len(campaign_comments_user_id_set):
+        #     users_like_and_comment_set = like_user_id_set.intersection(campaign_comments_user_id_set)
+        #     data = []
+        #     for i in like_data:
+        #         if i["id"] in users_like_and_comment_set and i["id"] not in data:
+        #             data.append(i)
+        #     for user in data:
+        #         candidate = LuckyDrawCandidate(
+        #             platform='facebook', 
+        #             customer_id=user.get('id'),     #ASID over here!! might have some issues 
+        #             customer_name=user.get('name'),
+        #             customer_image=user.get('pic_large'),
+        #             draw_type=lucky_draw.type,
+        #             prize=lucky_draw.prize.name)
+
+        #         if not lucky_draw.repeatable and candidate in winner_list:
+        #             continue
+                
+        #         candidate_set.add(candidate)
+                
+        # elif not len(like_user_id_set) and not len(campaign_comments_user_id_set):
+        #     return candidate_set
+        
+        # elif len(like_user_id_set):
+        #     users_like_and_comment_set = like_user_id_set
+        #     data = []
+        #     for i in like_data:
+        #         if i["id"] in users_like_and_comment_set and i["id"] not in data:
+        #             data.append(i)
+        #     for user in data:
+        #         candidate = LuckyDrawCandidate(
+        #             platform='facebook', 
+        #             customer_id=user.get('id'),     #ASID over here!! might have some issues 
+        #             customer_name=user.get('name'),
+        #             customer_image=user.get('pic_large'),
+        #             draw_type=lucky_draw.type,
+        #             prize=lucky_draw.prize.name)
+
+        #         if not lucky_draw.repeatable and candidate in winner_list:
+        #             continue
+        #         candidate_set.add(candidate)
+                
+        # elif len(campaign_comments_user_id_set):
+        #     users_like_and_comment_set = campaign_comments_user_id_set
+        #     campaign_comments = []
+        #     for i in comments_data:
+        #         if i.id in users_like_and_comment_set and i.id not in campaign_comments:
+        #             campaign_comments.append(i)
+        #     for campaign_comment in campaign_comments:
+
+        #         candidate = LuckyDrawCandidate(
+        #             platform=campaign_comment.platform, 
+        #             customer_id=campaign_comment.customer_id, 
+        #             comment_id = campaign_comment.id,
+        #             customer_name=campaign_comment.customer_name,
+        #             customer_image=campaign_comment.image,
+        #             draw_type=lucky_draw.type,
+        #             prize=lucky_draw.prize.name)
+
+        #         if not lucky_draw.repeatable and candidate in winner_list:
+        #             continue
+
+        #         candidate_set.add(candidate)
         
         num_of_candidate = len(candidate_set) if shares_count > len(candidate_set) else shares_count
         candidates = random.sample(list(candidate_set), num_of_candidate)
@@ -447,4 +488,147 @@ def draw(campaign, lucky_draw):
     else:
         return []
     return lib.helper.lucky_draw_helper.LuckyDraw.draw_from_candidate(campaign, lucky_draw.prize,  candidate_set=candidate_set, num_of_winner=lucky_draw.num_of_winner)
+
+
+class FacebookSharedListCrawler():
+    def __init__(self, page_username, target_post_id, chrome_driver_path=os.path.join(settings.BASE_DIR, 'chromedriver.exe')):
+        self.chrome_options = Options() 
+        # self.chrome_options.add_argument('--headless')  # 啟動Headless 無頭
+        self.chrome_options.add_argument('--disable-gpu')
+        
+        self.chromeService = Service(executable_path=chrome_driver_path)
+
+        self.driver = None #套用設定
+        self.wait = None
+        self.actions = None
+        
+        self.login_url = "https://m.facebook.com/"
+        self.page_url = f'https://m.facebook.com/{page_username}/'
+        self.target_post_id = target_post_id
+        
+        self.post_reference_id = ""
+        self.post_shared_list_url = "https://m.facebook.com/browse/shares?id="
+        
+        self.email = "twadmin@algotech.app"
+        self.password = "algoFB2021"
+        self.loop_count = 0
+        self.save_login = False
+        self.is_login = False
+        
+    def create_driver(self):
+        self.driver = webdriver.Chrome(options=self.chrome_options, service= self.chromeService)
+        return self.driver
+    
+    def create_action_object(self):
+        if self.driver:
+            self.actions = ActionChains(self.driver)
+        return self.actions
+    
+    def create_wait_object(self):
+        if self.driver:
+            self.wait = WebDriverWait(self.driver, 5)
+        return self.wait
+    
+    def get_driver(self):
+        return self.driver
+    
+    def login(self, validate=False):
+        count = 0
+        while not self.is_login and count <= 4:
+            if not validate:
+                self.driver.get(self.login_url)
+            email_input = self.driver.find_element(By.ID, "m_login_email")
+            pass_input = self.driver.find_element(By.ID, "m_login_password")
+            login_button = self.driver.find_element(By.NAME, "login")
+            self.actions.send_keys_to_element(email_input, self.email)
+            self.actions.send_keys_to_element(pass_input, self.password)
+            self.actions.click(login_button)
+            self.actions.perform()
+            count += 1
+            self.is_login = True
+        self.validate_user()
+        
+    def validate_user(self):
+        print("validate_user")
+        try:
+            # check if page pops up log in with one tap
+            self.driver.find_element(By.CSS_SELECTOR, "input[value='regular_login']")
+            ok_button = self.driver.find_element(By.CSS_SELECTOR, "button[value='OK']")
+            self.actions.click(login_button).perform()
+            self.save_login = True
+        except NoSuchElementException:
+            print("Element is not present")
+            
+        try:
+            my_profile = self.driver.find_element(By.CSS_SELECTOR, f"div[role='button']")
+            self.actions.click(my_profile).perform()
+
+            pass_input = self.wait.until(
+                EC.presence_of_element_located((By.NAME, "pass"))
+            )
+            self.actions.send_keys_to_element(pass_input, self.password)
+            login_button = self.driver.find_element(By.CSS_SELECTOR , "button[type='submit']")
+            self.actions.click(login_button).perform()
+        except NoSuchElementException:
+            pass
+    def expand_all(self):
+        try:
+            while True:
+                see_more_button = self.driver.find_element(By.ID, "m_more_item")
+                if see_more_button:
+                    self.actions.click(see_more_button).perform()
+        except NoSuchElementException:
+            print("Element is not present")
+            
+    def collect_names(self):
+        names = set([el.text for el in self.driver.find_elements(By.TAG_NAME, "strong")])
+        return names
+    
+    def start(self):
+        start = arrow.now()
+        try:
+            self.create_driver()
+            self.create_wait_object()
+            self.create_action_object()
+            self.login()
+            self.driver.get(self.page_url)
+        
+            while self.loop_count <= 3:
+                self.loop_count += 1
+                self.driver.execute_script("window.scrollTo(100,document.body.scrollHeight);")
+
+                article = self.wait.until(
+                        EC.presence_of_element_located((By.TAG_NAME, "article"))
+                    )
+                if article:
+                    articles = self.driver.find_elements(By.XPATH, "//article")
+                    for article in articles:
+                        if self.post_reference_id:
+                            break
+                        post_data = json.loads(article.get_attribute("data-store"))
+                        for key,value in post_data.items():
+                            if key == "share_id":
+                                post_id = value.split(":")[1]
+                                if post_id != self.target_post_id:
+                                    break
+
+                            if key == "feedback_target":
+                                self.post_reference_id = value
+                                break
+
+                self.loop_count += 1
+            self.driver.get(self.post_shared_list_url + self.post_reference_id)
+            if not self.save_login:
+                self.validate_user()
+            self.expand_all()
+            name_list = self.collect_names()
+            end = arrow.now()
+            print(f"Spent: {end - start}")
+            self.driver.quit()
+            return name_list
+        except Exception as e:
+            print(traceback.format_exc())
+            if self.driver:
+                self.driver.quit()
+            return None
 
