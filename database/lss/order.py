@@ -12,3 +12,21 @@ class Order(Collection):
     _collection = db.api_order
     collection_name='api_order'
     template = models.order.order.api_order_template
+
+
+def get_complete_sales_of_campaign(campaign_id):
+
+    cursor=__collection.aggregate([
+        {"$match":{"campaign_id":campaign_id,"status":{"$in":["complete", "shipping out"]} }},
+        {
+            "$group":
+                {
+                "_id":None,
+                "campaign_sales": { "$sum": "$total" },
+                }
+        },
+        {"$project":{"_id":0,"campaign_sales":1}},
+    ])
+
+    l = list(cursor)
+    return l[0].get('campaign_sales',0) if l else 0

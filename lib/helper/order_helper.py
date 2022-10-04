@@ -412,7 +412,7 @@ class PreOrderHelper():
         else:
             pre_order.shipping_cost = float(campaign.meta_logistic.get('delivery_charge',0))
 
-            delivery_options = meta_logistic.get('additional_delivery_options')
+            # delivery_options = meta_logistic.get('additional_delivery_options')
 
             if(type(pre_order.shipping_option_index)==int):
                 if pre_order.shipping_option_data.get('type') == '+':

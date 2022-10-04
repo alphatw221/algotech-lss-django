@@ -43,3 +43,5 @@ class CampaignCommentViewSet(viewsets.ModelViewSet):
         serializer = models.campaign.campaign_comment.CampaignCommentSerializer(page, many=True)
 
         return Response(self.get_paginated_response(serializer.data).data, status=status.HTTP_200_OK)
+
+    
