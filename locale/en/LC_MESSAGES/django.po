@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-04 02:34+0000\n"
+"POT-Creation-Date: 2022-10-04 03:45+0000\n"
 "PO-Revision-Date: 2021-12-13 15:51+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -302,6 +302,7 @@ msgid "REPORT/COLUMN_TITLE/PICK_UP_STORE"
 msgstr "Pick Up Store"
 
 #: lib/helper/order_helper.py:567 lib/helper/order_helper.py:721
+#: lib/i18n/email/delivery_comfirm_mail.py:140
 #: lib/i18n/email/order_comfirm_mail.py:66
 msgid "EMAIL/DELIVERY_CONFIRM/DELIVERY_ADDRESS"
 msgstr "Delivery Address"
@@ -312,6 +313,7 @@ msgid "REPORT/COLUMN_TITLE/PAYMENT_METHOD"
 msgstr "Payment Method"
 
 #: lib/helper/order_helper.py:622 lib/helper/order_helper.py:784
+#: lib/i18n/email/delivery_comfirm_mail.py:98
 #: lib/i18n/email/order_comfirm_mail.py:185
 msgid "EMAIL/DELIVERY_CONFIRM/SUBTOTAL"
 msgstr "Subtotal"
@@ -322,16 +324,19 @@ msgid "EMAIL/DELIVERY_CONFIRM/DISCOUNT"
 msgstr "Discount"
 
 #: lib/helper/order_helper.py:634 lib/helper/order_helper.py:796
+#: lib/i18n/email/delivery_comfirm_mail.py:107
 #: lib/i18n/email/order_comfirm_mail.py:197
 msgid "EMAIL/DELIVERY_CONFIRM/DELIVERY_CHARGE"
 msgstr "Delivery Charge"
 
 #: lib/helper/order_helper.py:640 lib/helper/order_helper.py:802
+#: lib/i18n/email/delivery_comfirm_mail.py:117
 #: lib/i18n/email/order_comfirm_mail.py:203
 msgid "EMAIL/DELIVERY_CONFIRM/TOTAL"
 msgstr "Total"
 
 #: lib/helper/order_helper.py:653 lib/helper/order_helper.py:814
+#: lib/i18n/email/delivery_comfirm_mail.py:156
 #: lib/i18n/email/order_comfirm_mail.py:215
 #: templates/email_notify_wishlist.html:33
 #: templates/email_verification_code.html:16
@@ -341,6 +346,7 @@ msgstr ""
 "will not receive a response."
 
 #: lib/helper/order_helper.py:654 lib/helper/order_helper.py:815
+#: lib/i18n/email/delivery_comfirm_mail.py:157
 #: lib/i18n/email/order_comfirm_mail.py:216
 msgid "EMAIL/DELIVERY_CONFIRM/DO_NOT_REPLY_2"
 msgstr ""
@@ -481,6 +487,22 @@ msgstr "Your Order Has Been Shipped !"
 #: lib/i18n/email/delivery_comfirm_mail.py:43
 msgid "EMAIL/DELIVERY_CONFIRM/SELLER"
 msgstr "Seller"
+
+#: lib/i18n/email/delivery_comfirm_mail.py:85
+msgid "EMAIL/DELIVERY_CONFIRM/TAX"
+msgstr "Tax"
+
+#: lib/i18n/email/delivery_comfirm_mail.py:129
+msgid "EMAIL/DELIVERY_CONFIRM/SHIPPING_INFO"
+msgstr "Shipping information"
+
+#: lib/i18n/email/delivery_comfirm_mail.py:135
+msgid "EMAIL/DELIVERY_CONFIRM/SHIPPING_DATE"
+msgstr "Shipping Date"
+
+#: lib/i18n/email/delivery_comfirm_mail.py:145
+msgid "EMAIL/DELIVERY_CONFIRM/REMARK"
+msgstr "Remark"
 
 #: lib/i18n/email/notify_wishlist_email.py:6
 msgid "EMAIL/WISHLIST/SUBJECT"
@@ -707,18 +729,6 @@ msgid "EMAIL/PASSWORD_RESET_SUCCESS/CONTENT2"
 msgstr ""
 "has been successfully changedIf you did not request this change, please "
 "contact support immediately."
-
-#~ msgid "EMAIL/DELIVERY_CONFIRM/TAX"
-#~ msgstr "Tax"
-
-#~ msgid "EMAIL/DELIVERY_CONFIRM/SHIPPING_INFO"
-#~ msgstr "Shipping information"
-
-#~ msgid "EMAIL/DELIVERY_CONFIRM/SHIPPING_DATE"
-#~ msgstr "Shipping Date"
-
-#~ msgid "EMAIL/DELIVERY_CONFIRM/REMARK"
-#~ msgstr "Remark"
 
 #~ msgid "EMAIL/ORDER_CONFIRM/CUSTOMER_NAME"
 #~ msgstr "Customer Name"

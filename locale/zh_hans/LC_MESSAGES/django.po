@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-04 02:34+0000\n"
+"POT-Creation-Date: 2022-10-04 03:45+0000\n"
 "PO-Revision-Date: 2021-12-13 15:50+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -298,6 +298,7 @@ msgid "REPORT/COLUMN_TITLE/PICK_UP_STORE"
 msgstr "自取店家"
 
 #: lib/helper/order_helper.py:567 lib/helper/order_helper.py:721
+#: lib/i18n/email/delivery_comfirm_mail.py:140
 #: lib/i18n/email/order_comfirm_mail.py:66
 msgid "EMAIL/DELIVERY_CONFIRM/DELIVERY_ADDRESS"
 msgstr "收货地址"
@@ -308,6 +309,7 @@ msgid "REPORT/COLUMN_TITLE/PAYMENT_METHOD"
 msgstr "付款方式"
 
 #: lib/helper/order_helper.py:622 lib/helper/order_helper.py:784
+#: lib/i18n/email/delivery_comfirm_mail.py:98
 #: lib/i18n/email/order_comfirm_mail.py:185
 msgid "EMAIL/DELIVERY_CONFIRM/SUBTOTAL"
 msgstr "小计"
@@ -318,16 +320,19 @@ msgid "EMAIL/DELIVERY_CONFIRM/DISCOUNT"
 msgstr "优惠代码"
 
 #: lib/helper/order_helper.py:634 lib/helper/order_helper.py:796
+#: lib/i18n/email/delivery_comfirm_mail.py:107
 #: lib/i18n/email/order_comfirm_mail.py:197
 msgid "EMAIL/DELIVERY_CONFIRM/DELIVERY_CHARGE"
 msgstr "运费"
 
 #: lib/helper/order_helper.py:640 lib/helper/order_helper.py:802
+#: lib/i18n/email/delivery_comfirm_mail.py:117
 #: lib/i18n/email/order_comfirm_mail.py:203
 msgid "EMAIL/DELIVERY_CONFIRM/TOTAL"
 msgstr "总计"
 
 #: lib/helper/order_helper.py:653 lib/helper/order_helper.py:814
+#: lib/i18n/email/delivery_comfirm_mail.py:156
 #: lib/i18n/email/order_comfirm_mail.py:215
 #: templates/email_notify_wishlist.html:33
 #: templates/email_verification_code.html:16
@@ -335,6 +340,7 @@ msgid "EMAIL/DELIVERY_CONFIRM/DO_NOT_REPLY_1"
 msgstr "此邮件为系统自动发送。请勿回覆。"
 
 #: lib/helper/order_helper.py:654 lib/helper/order_helper.py:815
+#: lib/i18n/email/delivery_comfirm_mail.py:157
 #: lib/i18n/email/order_comfirm_mail.py:216
 msgid "EMAIL/DELIVERY_CONFIRM/DO_NOT_REPLY_2"
 msgstr "如有订单相关问题或意见，请联系卖家的电子邮件，谢谢!"
@@ -468,6 +474,22 @@ msgstr "您的訂單已經寄出"
 #: lib/i18n/email/delivery_comfirm_mail.py:43
 msgid "EMAIL/DELIVERY_CONFIRM/SELLER"
 msgstr "卖家"
+
+#: lib/i18n/email/delivery_comfirm_mail.py:85
+msgid "EMAIL/DELIVERY_CONFIRM/TAX"
+msgstr "稅額"
+
+#: lib/i18n/email/delivery_comfirm_mail.py:129
+msgid "EMAIL/DELIVERY_CONFIRM/SHIPPING_INFO"
+msgstr "发货信息"
+
+#: lib/i18n/email/delivery_comfirm_mail.py:135
+msgid "EMAIL/DELIVERY_CONFIRM/SHIPPING_DATE"
+msgstr "发货日期"
+
+#: lib/i18n/email/delivery_comfirm_mail.py:145
+msgid "EMAIL/DELIVERY_CONFIRM/REMARK"
+msgstr "备注"
 
 #: lib/i18n/email/notify_wishlist_email.py:6
 msgid "EMAIL/WISHLIST/SUBJECT"
@@ -681,18 +703,6 @@ msgstr "您好 "
 msgid "EMAIL/PASSWORD_RESET_SUCCESS/CONTENT2"
 msgstr ""
 "我們收到重設Live Show Seller 密碼的要求。請點擊下方連結, 即可重新設定。"
-
-#~ msgid "EMAIL/DELIVERY_CONFIRM/TAX"
-#~ msgstr "稅額"
-
-#~ msgid "EMAIL/DELIVERY_CONFIRM/SHIPPING_INFO"
-#~ msgstr "发货信息"
-
-#~ msgid "EMAIL/DELIVERY_CONFIRM/SHIPPING_DATE"
-#~ msgstr "发货日期"
-
-#~ msgid "EMAIL/DELIVERY_CONFIRM/REMARK"
-#~ msgstr "备注"
 
 #~ msgid "EMAIL/ORDER_CONFIRM/PAYMENT_METHOD"
 #~ msgstr "支付方式"
