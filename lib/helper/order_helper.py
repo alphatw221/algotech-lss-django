@@ -410,14 +410,9 @@ class PreOrderHelper():
         if pre_order.shipping_method == models.order.order.SHIPPING_METHOD_PICKUP:
             pre_order.shipping_cost = 0
         else:
-
             pre_order.shipping_cost = float(campaign.meta_logistic.get('delivery_charge',0))
 
-            meta_logistic = campaign.meta_logistic
             delivery_options = meta_logistic.get('additional_delivery_options')
-
-            is_subtotal_over_free_delivery_threshold = pre_order.subtotal >= float(meta_logistic.get('free_delivery_for_order_above_price')) if meta_logistic.get('is_free_delivery_for_order_above_price') else False
-            is_items_over_free_delivery_threshold = len(pre_order.products) >= float(meta_logistic.get('free_delivery_for_how_many_order_minimum')) if meta_logistic.get('is_free_delivery_for_how_many_order_minimum') else False
 
             if(type(pre_order.shipping_option_index)==int):
                 if pre_order.shipping_option_data.get('type') == '+':
@@ -426,10 +421,12 @@ class PreOrderHelper():
                 elif pre_order.shipping_option_data.get('type') == '=':
                     pre_order.shipping_cost =  float(pre_order.shipping_option_data.get('price'))
 
-
-            pre_order.meta['subtotal_over_free_delivery_threshold'] = True if is_subtotal_over_free_delivery_threshold else False
-
-            pre_order.meta['items_over_free_delivery_threshold'] = True if is_items_over_free_delivery_threshold else False
+        #compute free_delivery
+        meta_logistic = campaign.meta_logistic
+        is_subtotal_over_free_delivery_threshold = pre_order.subtotal >= float(meta_logistic.get('free_delivery_for_order_above_price')) if meta_logistic.get('is_free_delivery_for_order_above_price') else False
+        is_items_over_free_delivery_threshold = len(pre_order.products) >= float(meta_logistic.get('free_delivery_for_how_many_order_minimum')) if meta_logistic.get('is_free_delivery_for_how_many_order_minimum') else False
+        pre_order.meta['subtotal_over_free_delivery_threshold'] = True if is_subtotal_over_free_delivery_threshold else False
+        pre_order.meta['items_over_free_delivery_threshold'] = True if is_items_over_free_delivery_threshold else False
             
 
         #summarize_total
