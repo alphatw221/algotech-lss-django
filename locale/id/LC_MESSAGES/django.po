@@ -540,8 +540,6 @@ msgid "EMAIL/WISHLIST/TEXT_2_1"
 msgstr "’s fan pages"
 
 #: templates/email_notify_wishlist.html:14
-#, fuzzy
-#| msgid "EMAIL/WISHLIST/TEXT_2_1"
 msgid "EMAIL/WISHLIST/TEXT_2_2"
 msgstr "’s fan pages"
 

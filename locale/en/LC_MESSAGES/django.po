@@ -431,8 +431,6 @@ msgid "REPORT/COLUMN_TITLE/PAYMENT_RECORD"
 msgstr "Payment Record"
 
 #: lib/helper/xlsx_helper.py:134
-#, fuzzy
-#| msgid "REPORT/COLUMN_TITLE/EMAIL"
 msgid "REPORT/COLUMN_TITLE/TOTAL"
 msgstr "E-mail"
 
@@ -541,8 +539,6 @@ msgid "EMAIL/WISHLIST/TEXT_2_1"
 msgstr "’s fan pages"
 
 #: templates/email_notify_wishlist.html:14
-#, fuzzy
-#| msgid "EMAIL/WISHLIST/TEXT_2_1"
 msgid "EMAIL/WISHLIST/TEXT_2_2"
 msgstr "’s fan pages"
 
