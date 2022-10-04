@@ -182,7 +182,7 @@ def bind_youtube_channels(request, user_subscription):
 
 def bind_twitch_channels(request, user_subscription, channel_name):
 
-    code, = lib.util.getter.getdata(request,("code",), required=True)
+    code, channel_name = lib.util.getter.getdata(request,("code", "channel_name"), required=True)
 
     response_code, response = service.twitch.twitch.get_token(code)
     if not response_code / 100 == 2:

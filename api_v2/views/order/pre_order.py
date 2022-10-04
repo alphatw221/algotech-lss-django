@@ -344,6 +344,21 @@ class PreOrderViewSet(viewsets.ModelViewSet):
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def seller_list_pre_order(self, request):
 
+        api_user, campaign_id = lib.util.getter.getparams(request, ('campaign_id',), with_user=True, seller=True)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
+        queryset = campaign.pre_orders.exclude(subtotal=0).order_by('id')
+
+        serializer = models.order.pre_order.PreOrderSerializer(queryset, many=True)
+        data = serializer.data
+
+        return Response(data, status=status.HTTP_200_OK)
+    
+
+    @action(detail=False, methods=['GET'], url_path=r'seller/search', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def seller_search_pre_order(self, request):
+
         api_user, campaign_id, search = lib.util.getter.getparams(request, ('campaign_id', 'search'), with_user=True, seller=True)
 
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
@@ -352,7 +367,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
         queryset = campaign.pre_orders.exclude(subtotal=0).order_by('id')
 
-        if search:
+        if search not in [None, '' 'undefined', 'null']:
             if search.isnumeric():
                 queryset = queryset.filter(
                     Q(id=int(search)) | Q(customer_name__icontains=search) | Q(phone__icontains=search))
@@ -370,7 +385,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
             data = serializer.data
 
         return Response(data, status=status.HTTP_200_OK)
-    
+
     @action(detail=True, methods=['GET'], url_path=r'seller/retrieve', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def seller_retrieve_pre_order(self, request, pk=None):

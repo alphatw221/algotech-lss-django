@@ -31,7 +31,7 @@ class ProductViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['GET'], url_path=r'search', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def list_product(self, request):
+    def search_product(self, request):
         api_user, search_column, keyword, product_status, product_type, category, exclude_products, sort_by = \
             lib.util.getter.getparams(request, ("search_column", "keyword", "product_status", "product_type", "category", "exclude", "sort_by"), with_user=True, seller=True)
         

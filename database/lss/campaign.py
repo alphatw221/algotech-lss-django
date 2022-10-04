@@ -141,3 +141,40 @@ def get_ongoing_campaign_disallow_overbook_campaign_product():
 
     l = list(cursor)
     return l
+
+
+
+
+
+
+
+
+def get_order_complete_proceed_count(campaign_id):
+
+    cursor=__collection.aggregate([
+        {"$match":{"id":campaign_id}},
+        {
+            "$lookup": {
+                "from": "api_order","as": "orders", # "localField": "id","foreignField": "campaign_id",
+                'let': {'id': "$id" },
+                "pipeline":[
+                    {"$match":{
+                        '$expr': { '$eq': ["$$id", "$campaign_id"] },
+                        "id":{"$ne":None}}
+                     },
+                    {"$project":{"_id":0,
+                    "complete": {  "$cond": [ { "$in":["$status", ["complete", "shipping out"] ] }, 1, 0]},
+                    "review": { "$cond": [ { "$eq": [ "$status", "review" ] }, 1, 0]}
+                    }},
+                ]
+            },
+        },
+        {"$project":{"_id":0,
+        "orders":1,
+        "complete_count":{"$sum":"$orders.complete"},
+        "review_count":{"$sum":"$orders.review"}
+        }}
+    ])
+    l = list(cursor)
+    return l[0].get('complete_count',0) if l else 0,\
+        l[0].get('review_count',0) if l else 0

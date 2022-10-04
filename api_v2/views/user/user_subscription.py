@@ -174,8 +174,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             lib.helper.subscription_helper.bind_youtube_channels(request, user_subscription) 
         
         elif platform_name == models.user.user_subscription.PLATFORM_TWITCH:
-            channel_name, = lib.util.getter.getparams(request, ('channel_name',), with_user=False)
-            lib.helper.subscription_helper.bind_twitch_channels(request, user_subscription, channel_name)
+            lib.helper.subscription_helper.bind_twitch_channels(request, user_subscription)
         elif platform_name == models.user.user_subscription.PLATFORM_TIKTOK:
             lib.helper.subscription_helper.bind_tiktok_accounts(request, user_subscription)
                    

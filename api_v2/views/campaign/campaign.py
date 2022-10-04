@@ -12,6 +12,7 @@ from rest_framework.decorators import action
 from datetime import datetime
 from api import models, rule
 import api
+import database
 import lib
 import json
 import service
@@ -183,20 +184,17 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         return Response(models.campaign.campaign.CampaignSerializer(campaign).data, status=status.HTTP_200_OK)
     
-    @action(detail=False, methods=['DELETE'], url_path=r'delete', permission_classes = (IsAuthenticated, ))
+    @action(detail=True, methods=['DELETE'], url_path=r'delete', permission_classes = (IsAuthenticated, ))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def delete_campaign(self, request):
+    def delete_campaign(self, request, pk):
 
-        api_user, campaign_id = lib.util.getter.getparams(request,("campaign_id", ), with_user=True, seller=True)
+
+        api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
-        campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription,campaign_id)
+        campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription,pk)
 
-        print(campaign.user_subscription)
         campaign.user_subscription = None
-        print(campaign.user_subscription)
-        # campaign.facebook_page = None
-        # campaign.youtube_page = None
-        # campaign.instagram_profile = None
+        campaign.end_at = datetime.utcnow()
         campaign.save()
 
         return Response({"message": "delete success"}, status=status.HTTP_200_OK)
@@ -408,7 +406,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         return Response(data, status=status.HTTP_200_OK)
     
-    @action(detail=False, methods=['GET'], url_path=r'stop_checkout/toggle')
+    @action(detail=False, methods=['GET'], url_path=r'stop_checkout/toggle', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def toggle_stop_checkout_status(self, request):
 
@@ -471,3 +469,98 @@ class CampaignViewSet(viewsets.ModelViewSet):
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, pk)
 
         return Response({str(product.order_code).lower():True for product in campaign.products.all()}, status=status.HTTP_200_OK)
+
+    
+    @action(detail=True, methods=['GET'], url_path=r'statistics', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def get_campaign_statistics(self, request, pk):
+        
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, pk)
+        campaign_id = int(pk)
+
+
+        campaign_pre_order_count = database.lss.pre_order.get_count_in_campaign(campaign_id)
+
+        campaign_order_complete_count,campaign_order_proceed_count = database.lss.campaign.get_order_complete_proceed_count(campaign_id)
+        campaign_comment_count = database.lss.campaign_comment.get_count_in_campaign(campaign_id)
+        
+        campaign_complete_sales = database.lss.order.get_complete_sales_of_campaign(campaign_id)
+
+
+        campaign_uncheckout_rate = (campaign_pre_order_count+campaign_order_proceed_count) / (campaign_order_complete_count + campaign_order_proceed_count + campaign_pre_order_count) * 100\
+                if (campaign_order_complete_count + campaign_order_proceed_count + campaign_pre_order_count) else 0
+
+        campaign_close_rate = (campaign_order_complete_count) / (campaign_order_complete_count + campaign_order_proceed_count + campaign_pre_order_count) * 100\
+                if (campaign_order_complete_count + campaign_order_proceed_count + campaign_pre_order_count) else 0
+
+        
+        total_order_complete_count, total_order_proceed_count = database.lss.user_subscription.get_order_complete_proceed_count(user_subscription.id)
+        total_pre_order_count = database.lss.user_subscription.get_pre_order_count(user_subscription.id)
+
+        total_average_sales = database.lss.user_subscription.get_average_sales(user_subscription.id)
+        total_average_comment_count = database.lss.user_subscription.get_average_comment_count(user_subscription.id)
+
+        average_order_uncheck_rate = total_pre_order_count / (total_order_complete_count + total_order_proceed_count + total_pre_order_count) * 100 \
+            if (total_order_complete_count + total_order_proceed_count + total_pre_order_count) else 0
+        average_order_close_rate = (total_order_complete_count + total_order_proceed_count) / (total_order_complete_count + total_order_proceed_count + total_pre_order_count) * 100 \
+            if (total_order_complete_count + total_order_proceed_count + total_pre_order_count) else 0
+
+        manage_order = {
+            "order_qty":(campaign_order_complete_count + campaign_order_proceed_count),
+            "cart_qty":campaign_pre_order_count,
+
+            "comment_count":campaign_comment_count,
+            "complete_sales":campaign_complete_sales,
+            "close_rate":campaign_close_rate,
+            "uncheckout_rate":campaign_uncheckout_rate,
+            
+            "comment_count_raise":campaign_comment_count / total_average_comment_count if total_average_comment_count else 0,
+            "campaign_sales_raise":campaign_complete_sales / total_average_sales if total_average_sales else 0,
+            "close_rate_raise":campaign_close_rate - average_order_close_rate,
+            "uncheckout_rate_raise":campaign_uncheckout_rate - average_order_uncheck_rate,
+        }
+
+        return Response(manage_order, status=status.HTTP_200_OK)
+
+
+    @action(detail=True, methods=['GET'], url_path=r'setup/status', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def get_campaign_setup_status(self, request, pk):
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, pk)
+        
+        ig_media_url = None
+        try:
+            
+            status_code, response = service.instagram.post.get_post_media_url(campaign.instagram_profile.token, campaign.instagram_campaign.get("live_media_id", ""))
+            if status_code == 200:
+                print(response)
+                ig_media_url = response["media_url"]
+        except Exception:
+            pass
+        res = {
+            "all": {
+                "fully_setup": True
+            },
+            "facebook": {
+                # "comments":CampaignCommentSerializer(fb_comments, many=True).data,
+                "fully_setup": True if (campaign.facebook_campaign.get("post_id", None) and campaign.facebook_page) else False,
+                "page_id": campaign.facebook_page.page_id if campaign.facebook_page else None,
+                "post_id": campaign.facebook_campaign.get("post_id", None),
+            },
+            "instagram": {
+                # "comments":CampaignCommentSerializer(ig_comments, many=True).data,
+                "fully_setup": True if (campaign.instagram_campaign.get("live_media_id", None) and campaign.instagram_profile and ig_media_url) else False,
+                "media_url": ig_media_url
+            },
+            "youtube": {
+                # "comments":CampaignCommentSerializer(yt_comments, many=True).data,
+                "fully_setup": True if (campaign.youtube_campaign.get("live_video_id", None) and campaign.youtube_channel) else False,
+                "live_video_id": campaign.youtube_campaign.get("live_video_id", None) 
+            },
+            
+        }
+        return Response(res, status=status.HTTP_200_OK) 
