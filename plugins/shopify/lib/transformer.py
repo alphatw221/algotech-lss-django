@@ -60,6 +60,7 @@ def to_lss_order(lss_pre_order, shopify_order_data, campaign_product_external_in
         
         "products" : lss_products,
         "total" : float(shopify_order_data['total_price']),
+        "tax": float(shopify_order_data['total_tax']),
 
 
         "meta" : {'shopify':shopify_order_data},
