@@ -135,6 +135,38 @@ def create_checkout_session(secret, currency, order, decimal_places, price_unit,
         print(traceback.format_exc())
         return False
 
+def create_checkout_session_for_james(secret, currency, amount):
+    try:
+        stripe.api_key = secret
+        items = []
+        stripe_product = stripe.Product.create(
+            name='lss_seller_account',
+        )
+        
+        price = stripe.Price.create(
+            product=stripe_product.id,
+            unit_amount=__transform_payment_amount(amount, decimal_places = 2, price_unit='1', currency=currency),
+            currency=currency,
+        )
+        
+        items.append(
+            {
+                'price': price.id,
+                "quantity": 1
+            },
+        )
+
+       
+        checkout_session = stripe.checkout.Session.create(
+            line_items=items,
+            mode='payment',
+        )
+        
+
+        return checkout_session
+    except Exception:
+        print(traceback.format_exc())
+        return False
 
 def is_payment_successful(secret, session_id):
     try:

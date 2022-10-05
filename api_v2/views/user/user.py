@@ -138,6 +138,7 @@ class UserViewSet(viewsets.ModelViewSet):
     def admin_import_account(self, request):
 
         print(request.data)
+        service.rq.queue.enqueue_test_queue(jobs.import_account_job.imoprt_account_job,file=request.data.get('file'), room_id = request.data.get('room_id'))
         return Response('ok', status=status.HTTP_200_OK) 
 #-----------------------------------------seller----------------------------------------------------------------------------------------------
     
