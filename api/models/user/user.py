@@ -127,6 +127,13 @@ class UserSubscriptionSerializerDealerList(serializers.ModelSerializer):
 
     user_plan = serializers.JSONField(default=dict, required=False)
     users = UserSerializerForDealerList(many=True, read_only=True, default=list)
+
+class AuthUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AuthUser
+        fields = [ 'username', 'first_name', 'last_name', 'email', 'is_staff', 'is_superuser', 'is_active']
+        read_only_fields = [ 'username', 'first_name', 'last_name', 'email', 'is_staff', 'is_superuser', 'is_active']
+
 class UserAdmin(admin.ModelAdmin):
     model = User
     list_display = [field.name for field in User._meta.fields]
