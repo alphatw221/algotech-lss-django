@@ -1,3 +1,5 @@
+import pickle
+import time
 from typing import OrderedDict
 import functools, logging, traceback
 from api import models
@@ -260,7 +262,7 @@ class SharedPostCandidateSetGenerator(CandidateSetGenerator):
         fb_crawler = FacebookSharedListCrawler(facebook_page.username, post_id)
         print("----------")
         shared_user_name_set = fb_crawler.start()
-        print(shared_user_name_set)
+        print("shared_user_name_set", shared_user_name_set)
         if not shared_user_name_set:
             return candidate_set
         
@@ -272,6 +274,7 @@ class SharedPostCandidateSetGenerator(CandidateSetGenerator):
             campaign=campaign, platform="facebook")
         # campaign_comments_user_id_set = set(comments_data.values_list("customer_id", flat=True))
         campaign_comments_user_name_set = set(comments_data.values_list("customer_name", flat=True))
+        print("campaign_comments_user_name_set", campaign_comments_user_name_set)
         
         if len(campaign_comments_user_name_set):
             users_shared_and_comment_set = shared_user_name_set.intersection(campaign_comments_user_name_set)
@@ -493,8 +496,9 @@ def draw(campaign, lucky_draw):
 class FacebookSharedListCrawler():
     def __init__(self, page_username, target_post_id, chrome_driver_path=os.path.join(settings.BASE_DIR, 'chromedriver.exe')):
         self.chrome_options = Options() 
-        # self.chrome_options.add_argument('--headless')  # 啟動Headless 無頭
+        self.chrome_options.add_argument('--headless')  # 啟動Headless 無頭
         self.chrome_options.add_argument('--disable-gpu')
+        self.chrome_options.add_experimental_option('excludeSwitches', ['enable-logging'])
         
         self.chromeService = Service(executable_path=chrome_driver_path)
 
@@ -514,6 +518,8 @@ class FacebookSharedListCrawler():
         self.loop_count = 0
         self.save_login = False
         self.is_login = False
+        self.cookies = None
+        self.cookies_path = os.path.join(settings.BASE_DIR, "cookies/facebook_cookie.pkl")
         
     def create_driver(self):
         self.driver = webdriver.Chrome(options=self.chrome_options, service= self.chromeService)
@@ -526,13 +532,29 @@ class FacebookSharedListCrawler():
     
     def create_wait_object(self):
         if self.driver:
-            self.wait = WebDriverWait(self.driver, 5)
+            self.wait = WebDriverWait(self.driver, 3)
         return self.wait
     
     def get_driver(self):
         return self.driver
     
+    def find_cookies(self):
+        if os.path.exists(self.cookies_path):
+            cookies = pickle.load(open(self.cookies_path, "rb"))
+            return cookies
+        else:
+            return None
+    
+    def login_with_cookies(self, cookies):
+        print("login with cookies")
+        for c in cookies:
+            self.driver.add_cookie(c)
+        self.is_login = True
+        self.driver.refresh()
+        # self.validate_user()
+        
     def login(self, validate=False):
+        print("login")
         count = 0
         while not self.is_login and count <= 4:
             if not validate:
@@ -546,31 +568,82 @@ class FacebookSharedListCrawler():
             self.actions.perform()
             count += 1
             self.is_login = True
+        time.sleep(2)
         self.validate_user()
-        
+        pickle.dump(self.driver.get_cookies(), open(self.cookies_path, "wb"))
+    
     def validate_user(self):
         print("validate_user")
+        # check if page pops up log in with one tap
         try:
-            # check if page pops up log in with one tap
             self.driver.find_element(By.CSS_SELECTOR, "input[value='regular_login']")
             ok_button = self.driver.find_element(By.CSS_SELECTOR, "button[value='OK']")
-            self.actions.click(login_button).perform()
+            self.actions.click(ok_button).perform()
             self.save_login = True
-        except NoSuchElementException:
-            print("Element is not present")
+        except:
+            print(traceback.format_exc())
             
-        try:
-            my_profile = self.driver.find_element(By.CSS_SELECTOR, f"div[role='button']")
-            self.actions.click(my_profile).perform()
+        if not self.save_login:
+            # check new page identity double check
+            try:
+                my_profile = self.driver.find_element(By.CSS_SELECTOR, f"div[role='button']")
+                self.actions.click(my_profile).perform()
 
-            pass_input = self.wait.until(
-                EC.presence_of_element_located((By.NAME, "pass"))
-            )
-            self.actions.send_keys_to_element(pass_input, self.password)
-            login_button = self.driver.find_element(By.CSS_SELECTOR , "button[type='submit']")
-            self.actions.click(login_button).perform()
-        except NoSuchElementException:
-            pass
+                pass_input = self.wait.until(
+                    EC.presence_of_element_located((By.NAME, "pass"))
+                )
+                self.actions.send_keys_to_element(pass_input, self.password)
+                login_button = self.driver.find_element(By.CSS_SELECTOR , "button[type='submit']")
+                self.actions.click(login_button).perform()
+                self.save_login = True
+            except:
+                print(traceback.format_exc())
+            
+        if not self.save_login:
+            # check header identity double check
+            try:
+                login_button = self.driver.find_element(By.CSS_SELECTOR , "button[type='submit']")
+                self.actions.click(login_button).perform()
+                pass_input = self.wait.until(
+                    EC.presence_of_element_located((By.NAME, "pass"))
+                )
+                self.actions.send_keys_to_element(pass_input, self.password)
+                login_button = self.driver.find_element(By.CSS_SELECTOR , "button[type='submit']")
+                self.actions.click(login_button).perform()
+                self.save_login = True
+            except:
+                print(traceback.format_exc())
+    def get_post_shared_list_url(self):
+        while self.loop_count <= 3:
+            self.loop_count += 1
+            self.driver.execute_script("window.scrollTo(100,document.body.scrollHeight);")
+
+            article = self.wait.until(
+                    EC.presence_of_element_located((By.TAG_NAME, "article"))
+                )
+            if article:
+                articles = self.driver.find_elements(By.XPATH, "//article")
+                for article in articles:
+                    if self.post_reference_id:
+                        break
+                    post_data = json.loads(article.get_attribute("data-store"))
+                    for key,value in post_data.items():
+                        if key == "share_id":
+                            if type(value) == int:
+                                post_id = str(value)
+                            else:
+                                post_id = value.split(":")[1]
+                            if post_id != self.target_post_id:
+                                break
+
+                        if key == "feedback_target":
+                            self.post_reference_id = str(value)
+                            break
+
+            self.loop_count += 1
+        print(self.post_shared_list_url + self.post_reference_id)
+        return self.post_shared_list_url + self.post_reference_id
+        
     def expand_all(self):
         try:
             while True:
@@ -590,34 +663,18 @@ class FacebookSharedListCrawler():
             self.create_driver()
             self.create_wait_object()
             self.create_action_object()
-            self.login()
-            self.driver.get(self.page_url)
-        
-            while self.loop_count <= 3:
-                self.loop_count += 1
-                self.driver.execute_script("window.scrollTo(100,document.body.scrollHeight);")
-
-                article = self.wait.until(
-                        EC.presence_of_element_located((By.TAG_NAME, "article"))
-                    )
-                if article:
-                    articles = self.driver.find_elements(By.XPATH, "//article")
-                    for article in articles:
-                        if self.post_reference_id:
-                            break
-                        post_data = json.loads(article.get_attribute("data-store"))
-                        for key,value in post_data.items():
-                            if key == "share_id":
-                                post_id = value.split(":")[1]
-                                if post_id != self.target_post_id:
-                                    break
-
-                            if key == "feedback_target":
-                                self.post_reference_id = value
-                                break
-
-                self.loop_count += 1
-            self.driver.get(self.post_shared_list_url + self.post_reference_id)
+            
+            cookies = self.find_cookies()
+            if cookies:
+                self.driver.get(self.page_url)
+                self.login_with_cookies(cookies)
+            else:    
+                self.login()
+                self.driver.get(self.page_url)
+                
+            post_shared_list_url = self.get_post_shared_list_url()
+            self.driver.get(post_shared_list_url)
+            
             if not self.save_login:
                 self.validate_user()
             self.expand_all()
