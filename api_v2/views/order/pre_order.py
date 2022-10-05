@@ -321,6 +321,8 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         del discount_code_data['_state']
         pre_order.applied_discount = discount_code_data
 
+        valid_discount_code.applied_count+=1
+        valid_discount_code.save()
         pre_order = lib.helper.order_helper.PreOrderHelper.summarize_pre_order(pre_order, campaign, save=True)
 
         return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
@@ -331,7 +333,8 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
         pre_order = lib.util.verify.Verify.get_pre_order_with_oid(pre_order_oid)
         campaign = lib.util.verify.Verify.get_campaign_from_pre_order(pre_order)
-
+        
+        pre_order.applied_discount.get('id')
         pre_order.applied_discount = {}
         # pre_order.save()
         pre_order = lib.helper.order_helper.PreOrderHelper.summarize_pre_order(pre_order, campaign, save=True)
