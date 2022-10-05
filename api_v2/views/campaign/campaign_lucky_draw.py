@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.core.files.base import ContentFile
+from lib.helper.lucky_draw_helper import FacebookSharedListCrawler
 from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.decorators import action
@@ -190,7 +191,7 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
             'type': lucky_draw.type, 'prize': lucky_draw.prize, 'campaign': campaign
         })
 
-        return Response("success", status=status.HTTP_200_OK)
+        return Response(models.campaign.campaign_lucky_draw.CampaignLuckyDrawSerializer(lucky_draw).data, status=status.HTTP_200_OK)
 
 
     @action(detail=False, methods=['GET'], url_path=r'list/animation', permission_classes=(IsAuthenticated,))
@@ -203,7 +204,25 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
         
         return Response(models.user.static_assets.StaticAssetsSerializer(static_assets, many=True).data, status=status.HTTP_200_OK)
 
+    @action(detail=True, methods=['GET'], url_path=r'draw/start_sharedpost_crawler', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def start_sharedpost_crawler(self, request, pk):
 
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        lucky_draw = lib.util.verify.Verify.get_lucky_draw(pk)
+        campaign = lucky_draw.campaign
+        facebook_page = campaign.facebook_page
+        post_id = campaign.facebook_campaign.get("post_id", "")
+        lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign.id)
+
+        fb_crawler = FacebookSharedListCrawler(facebook_page.username, post_id)
+        shared_user_name_set = fb_crawler.start()
+        meta = lucky_draw.meta
+        meta["shared_post_data"] = shared_user_name_set
+        lucky_draw.save()
+        
+        return Response("success", status=status.HTTP_200_OK)
     # @action(detail=False, methods=['POST'], url_path=r'(?P<campaign_id>[^/.]+)/likes', permission_classes=(IsAuthenticated,))
     # @lib.error_handle.error_handler.api_error_handler.api_error_handler
     # def lucky_draw_likes(self, request, campaign_id):

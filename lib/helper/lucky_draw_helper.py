@@ -259,9 +259,7 @@ class SharedPostCandidateSetGenerator(CandidateSetGenerator):
             return candidate_set
         
         
-        fb_crawler = FacebookSharedListCrawler(facebook_page.username, post_id)
-        print("----------")
-        shared_user_name_set = fb_crawler.start()
+        shared_user_name_set = lucky_draw.meta.get("shared_post_data", {})
         print("shared_user_name_set", shared_user_name_set)
         if not shared_user_name_set:
             return candidate_set
