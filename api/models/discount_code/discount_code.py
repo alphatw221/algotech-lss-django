@@ -16,7 +16,7 @@ DISCOUNT_TYPE_DEDUCT = 'deduct'
 LIMITATION_SPECIFIC_CAMPAIGN = 'specific_campaign'
 LIMITATION_SUBTOTAL_OVER_AMOUNT = 'subtotal_over_specific_amount'
 LIMITATION_PRODUCT_OVER_NUMBER = 'product_over_specific_number'
-
+LIMITATION_DISCOUNT_CODE_USABLE_TIME = 'discount_code_usable_time'
 
 class DiscountCode(models.Model):
     class Meta:
