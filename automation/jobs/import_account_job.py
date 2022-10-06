@@ -55,8 +55,10 @@ def imoprt_account_job(file, room_id):
             except Exception:
                 print(traceback.format_exc())
                 service.channels.account_import.send_error_data(room_id,{'detail':'error'})
+
+        service.channels.account_import.send_complete_data(room_id,{'detail':'complete'})
     except Exception:
         print(traceback.format_exc())
-        service.channels.account_import.send_complete_data(room_id,{'detail':'ok'})
+        service.channels.account_import.send_complete_data(room_id,{'detail':'error'})
 
   

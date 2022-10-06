@@ -183,30 +183,37 @@ def create_new_account_for_james(country_code, usbscription_plan, username, emai
 
     expired_at = signup_date+timedelta(days=365) 
     
-    auth_user = AuthUser.objects.create_user(
-        username=username, email=email, password=password)
-
-    user_subscription = models.user.user_subscription.UserSubscription.objects.create(
-        name=username, 
-        status=models.user.user_subscription.STATUS_VALID, 
-        started_at=signup_date,
-        expired_at=expired_at, 
-        user_plan= {"activated_platform" : [
-            models.user.user_subscription.PLATFORM_FACEBOOK,
-            models.user.user_subscription.PLATFORM_YOUTUBE,
-            models.user.user_subscription.PLATFORM_INSTAGRAM,
-            models.user.user_subscription.PLATFORM_TWITCH
-            ]}, 
-        meta_country={ 'activated_country': [country_code] },
-        type=usbscription_plan,
-        lang=country_plan.language,
-        country = country_code,
-        purchase_price = amount,
-        **business_policy.subscription_plan.SubscriptionPlan.get_plan_limit(usbscription_plan)
-        )
+    if AuthUser.objects.filter(email=email).exists():
+        auth_user = AuthUser.objects.get(email=email)
+    else:
+        auth_user = AuthUser.objects.create_user(
+            username=username, email=email, password=password)
+    if models.user.user.User.objects.filter(email=email, type=models.user.user.TYPE_SELLER).exists():
+        api_user = models.user.user.User.objects.get(email=email, type=models.user.user.TYPE_SELLER)
+        user_subscription = api_user.user_subscription
+    else:
+        user_subscription = models.user.user_subscription.UserSubscription.objects.create(
+            name=username, 
+            status=models.user.user_subscription.STATUS_VALID, 
+            started_at=signup_date,
+            expired_at=expired_at, 
+            user_plan= {"activated_platform" : [
+                models.user.user_subscription.PLATFORM_FACEBOOK,
+                models.user.user_subscription.PLATFORM_YOUTUBE,
+                models.user.user_subscription.PLATFORM_INSTAGRAM,
+                models.user.user_subscription.PLATFORM_TWITCH
+                ]}, 
+            meta_country={ 'activated_country': [country_code] },
+            type=usbscription_plan,
+            lang=country_plan.language,
+            country = country_code,
+            purchase_price = amount,
+            **business_policy.subscription_plan.SubscriptionPlan.get_plan_limit(usbscription_plan)
+            )
         
-    api_user = models.user.user.User.objects.create(
-        name=username, email=email, type=models.user.user.TYPE_SELLER, status=models.user.user.STATUS_VALID, phone=contactNumber, auth_user=auth_user, user_subscription=user_subscription)
+        
+        api_user = models.user.user.User.objects.create(
+            name=username, email=email, type=models.user.user.TYPE_SELLER, status=models.user.user.STATUS_VALID, phone=contactNumber, auth_user=auth_user, user_subscription=user_subscription)
     
     models.user.deal.Deal.objects.create(
         user_subscription=user_subscription,
@@ -236,8 +243,8 @@ def create_new_account_for_james(country_code, usbscription_plan, username, emai
 
     service.stripe.stripe.create_checkout_session_for_james(settings.STRIPE_API_KEY, 'USD', amount)
     return {
-        "Customer Name":username,
-        "Email":email,
-        "Password":password,
-        "Target Country":country_code, 
+        "username":username,
+        "email":email,
+        "password":password,
+        "country_code":country_code, 
     }

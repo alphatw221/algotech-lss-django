@@ -136,9 +136,9 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['POST'], url_path=r'admin/import', permission_classes=(IsAdminUser,), parser_classes=(MultiPartParser,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def admin_import_account(self, request):
+        # service.rq.queue.enqueue_test_queue(jobs.import_account_job.imoprt_account_job, file=request.data.get('file'), room_id = request.data.get('room_id'))
 
-        print(request.data)
-        service.rq.queue.enqueue_test_queue(jobs.import_account_job.imoprt_account_job,file=request.data.get('file'), room_id = request.data.get('room_id'))
+        service.rq.queue.enqueue_general_queue(jobs.import_account_job.imoprt_account_job,file=request.data.get('file'), room_id = request.data.get('room_id'))
         return Response('ok', status=status.HTTP_200_OK) 
 #-----------------------------------------seller----------------------------------------------------------------------------------------------
     
