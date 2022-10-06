@@ -10,8 +10,9 @@ class FieldMapper():
     title=''
     i18n_key=None
     _width=None
+    i18n_text=None
     
-    def __init__(self, field_name=None, title=None, i18n_key=None, width=None):
+    def __init__(self, field_name=None, title=None, i18n_key=None, width=None, i18n_text=None):
         if field_name!=None:
             self.field_name = field_name
         if title!=None:
@@ -112,26 +113,26 @@ class XlsxHelper():
 class OrderReport(XlsxHelper):
 
     columns=[
-            FieldMapper('id','ID', i18n_key='REPORT/COLUMN_TITLE/ID'),
-            DateTimeMapper('created_at', 'Order Date', i18n_key='REPORT/COLUMN_TITLE/ORDER_DATE'),
-            FieldMapper('platform', 'Platform', i18n_key='REPORT/COLUMN_TITLE/PLATFORM'),
-            CustomerNameMapper('customer_name', 'Customer Name', i18n_key='REPORT/COLUMN_TITLE/CUSTOMER_NAME'),
-            ShippingNameMapper('shipping_name', 'Shipping Name', i18n_key='REPORT/COLUMN_TITLE/SHIPPING_NAME'),
-            FieldMapper('shipping_phone', 'Shipping Phone', i18n_key='REPORT/COLUMN_TITLE/SHIPPING_PHONE'),
-            FieldMapper('shipping_email', 'E-mail', i18n_key='REPORT/COLUMN_TITLE/EMAIL'),
-            ShippingMethodMapper('shipping_method', 'Shipping Method', i18n_key='REPORT/COLUMN_TITLE/SHIPPING_METHOD'),
-            ShippingOptionMapper('shipping_option', 'Shipping Option', i18n_key='REPORT/COLUMN_TITLE/SHIPPING_OPTION'),
-            DeliveryInfonMapper('shipping_address_1', 'Shipping Address 1', i18n_key='REPORT/COLUMN_TITLE/SHIPPING_ADDRESS_1'),
-            DeliveryInfonMapper('shipping_location', 'Location', i18n_key='REPORT/COLUMN_TITLE/LOCATION'),
-            DeliveryInfonMapper('shipping_region', 'Region', i18n_key='REPORT/COLUMN_TITLE/REGION'),
-            DeliveryInfonMapper('shipping_postcode', 'Postcode', i18n_key='REPORT/COLUMN_TITLE/POSTCODE'),
-            PickupStoreMapper('pick_up_store', 'Pick up Store', i18n_key='REPORT/COLUMN_TITLE/PICK_UP_STORE'),
-            PickupAddressMapper('pickup_address', 'Pick up Address', i18n_key='REPORT/COLUMN_TITLE/PICK_UP_ADDRESS'),
-            FieldMapper('shipping_remark', 'Remark', i18n_key='REPORT/COLUMN_TITLE/REMARK'),
-            PaymentMethodMapper('payment_method', 'Payment Method', i18n_key='REPORT/COLUMN_TITLE/PAYMENT_METHOD'),
-            FieldMapper('status', 'Payment Status', i18n_key='REPORT/COLUMN_TITLE/PAYMENT_STATUS'),
-            LastFiveDigitMapper('last_five_digit', 'Payment Record', i18n_key='REPORT/COLUMN_TITLE/PAYMENT_RECORD'),
-            TotalMapper('total', 'Total', i18n_key='REPORT/COLUMN_TITLE/TOTAL'),
+            FieldMapper('id','ID', i18n_key='REPORT/COLUMN_TITLE/ID', i18n_text=_('REPORT/COLUMN_TITLE/ID')),
+            DateTimeMapper('created_at', 'Order Date', i18n_key='REPORT/COLUMN_TITLE/ORDER_DATE', i18n_text=_('REPORT/COLUMN_TITLE/ORDER_DATE')),
+            FieldMapper('platform', 'Platform', i18n_key='REPORT/COLUMN_TITLE/PLATFORM', i18n_text=_('REPORT/COLUMN_TITLE/PLATFORM')),
+            CustomerNameMapper('customer_name', 'Customer Name', i18n_key='REPORT/COLUMN_TITLE/CUSTOMER_NAME', i18n_text=_('REPORT/COLUMN_TITLE/CUSTOMER_NAME')),
+            ShippingNameMapper('shipping_name', 'Shipping Name', i18n_key='REPORT/COLUMN_TITLE/SHIPPING_NAME', i18n_text=_('REPORT/COLUMN_TITLE/SHIPPING_NAME')),
+            FieldMapper('shipping_phone', 'Shipping Phone', i18n_key='REPORT/COLUMN_TITLE/SHIPPING_PHONE', i18n_text=_('REPORT/COLUMN_TITLE/SHIPPING_PHONE')),
+            FieldMapper('shipping_email', 'E-mail', i18n_key='REPORT/COLUMN_TITLE/EMAIL', i18n_text=_('REPORT/COLUMN_TITLE/EMAIL')),
+            ShippingMethodMapper('shipping_method', 'Shipping Method', i18n_key='REPORT/COLUMN_TITLE/SHIPPING_METHOD', i18n_text=_('REPORT/COLUMN_TITLE/SHIPPING_METHOD')),
+            ShippingOptionMapper('shipping_option', 'Shipping Option', i18n_key='REPORT/COLUMN_TITLE/SHIPPING_OPTION', i18n_text=_('REPORT/COLUMN_TITLE/SHIPPING_OPTION')),
+            DeliveryInfonMapper('shipping_address_1', 'Shipping Address 1', i18n_key='REPORT/COLUMN_TITLE/SHIPPING_ADDRESS_1', i18n_text=_('REPORT/COLUMN_TITLE/SHIPPING_ADDRESS_1')),
+            DeliveryInfonMapper('shipping_location', 'Location', i18n_key='REPORT/COLUMN_TITLE/LOCATION', i18n_text=_('REPORT/COLUMN_TITLE/LOCATION')),
+            DeliveryInfonMapper('shipping_region', 'Region', i18n_key='REPORT/COLUMN_TITLE/REGION', i18n_text=_('REPORT/COLUMN_TITLE/REGION')),
+            DeliveryInfonMapper('shipping_postcode', 'Postcode', i18n_key='REPORT/COLUMN_TITLE/POSTCODE', i18n_text=_('REPORT/COLUMN_TITLE/POSTCODE')),
+            PickupStoreMapper('pick_up_store', 'Pick up Store', i18n_key='REPORT/COLUMN_TITLE/PICK_UP_STORE', i18n_text=_('REPORT/COLUMN_TITLE/PICK_UP_STORE')),
+            PickupAddressMapper('pickup_address', 'Pick up Address', i18n_key='REPORT/COLUMN_TITLE/PICK_UP_ADDRESS', i18n_text=_('REPORT/COLUMN_TITLE/PICK_UP_ADDRESS')),
+            FieldMapper('shipping_remark', 'Remark', i18n_key='REPORT/COLUMN_TITLE/REMARK', i18n_text=_('REPORT/COLUMN_TITLE/REMARK')),
+            PaymentMethodMapper('payment_method', 'Payment Method', i18n_key='REPORT/COLUMN_TITLE/PAYMENT_METHOD', i18n_text=_('REPORT/COLUMN_TITLE/PAYMENT_METHOD')),
+            FieldMapper('status', 'Payment Status', i18n_key='REPORT/COLUMN_TITLE/PAYMENT_STATUS', i18n_text=_('REPORT/COLUMN_TITLE/PAYMENT_STATUS')),
+            LastFiveDigitMapper('last_five_digit', 'Payment Record', i18n_key='REPORT/COLUMN_TITLE/PAYMENT_RECORD', i18n_text=_('REPORT/COLUMN_TITLE/PAYMENT_RECORD')),
+            TotalMapper('total', 'Total', i18n_key='REPORT/COLUMN_TITLE/TOTAL', i18n_text=_('REPORT/COLUMN_TITLE/TOTAL')),
         ]
 
     @classmethod
@@ -175,6 +176,9 @@ class OrderReport(XlsxHelper):
         
         for column in cls.columns:
             with translation.override(lang):
+                print(lang)
+                print(column.i18n_key)
+                print(_(column.i18n_key))
                 worksheet.write(cls.row, cls.col, _(column.i18n_key), header_format)
             worksheet.set_column(cls.col, cls.col, column.width)
             cls._next_column()
