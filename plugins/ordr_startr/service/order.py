@@ -8,7 +8,7 @@ def __get_url():
     # return 'https://api.liveorder.ordrstartr.com/api/Orders/FbPage/669953996431156/createNewOrder'  #temp
 
 
-def create_order(key, cart_oid, user_id, comment_id, user_name, platform, product_items):
+def create_order(key, cart_oid, user_id, user_name, platform, product_items):
 
     data = {
         "User":{
