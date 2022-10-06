@@ -57,8 +57,8 @@ class CartViewSet(viewsets.GenericViewSet):
         print(data)
 
         # print(data)
-        # if not success:
-        #     raise lib.error_handle.error.api_error.ApiCallerError('please place your order again')
+        if not success:
+            raise lib.error_handle.error.api_error.ApiCallerError('please place your order again')
 
         # print(data)
         
