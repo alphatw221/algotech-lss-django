@@ -58,7 +58,7 @@ urlpatterns = [
 
 
     #-------------------------plugin---------------------------------------------------
-    path('api/plugin/easy_store/', include('plugins.easy_store.urls')),
-    path('api/plugin/ordr_startr/', include('plugins.ordr_startr.urls')),
-    path('api/plugin/shopify/', include('plugins.shopify.urls'))
+    path('api/plugin/easy_store/', include(('plugins.easy_store.urls','easy_store'), namespace='easy_store')),
+    path('api/plugin/ordr_startr/', include(('plugins.ordr_startr.urls','ordr_startr'), namespace='ordr_startr')),
+    path('api/plugin/shopify/', include(('plugins.shopify.urls','shopify'), namespace='shopify'))
 ]

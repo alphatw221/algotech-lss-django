@@ -61,6 +61,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
         lib.helper.order_helper.PreOrderHelper.add_product(None,pre_order.id, campaign_product.id, qty)
         pre_order = lib.util.verify.Verify.get_pre_order(pre_order.id)
+        pre_order = lib.helper.order_helper.PreOrderHelper.summarize_pre_order(pre_order, pre_order.campaign, save=True)
         return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['PUT'], url_path=r'(?P<pre_order_oid>[^/.]+)/guest/delivery', permission_classes=(), authentication_classes=[])
@@ -291,6 +292,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
         lib.helper.order_helper.PreOrderHelper.add_product(api_user, pre_order.id, campaign_product.id, qty)
         pre_order = lib.util.verify.Verify.get_pre_order(pre_order.id)
+        pre_order = lib.helper.order_helper.PreOrderHelper.summarize_pre_order(pre_order, pre_order.campaign, save=True)
         return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
 
 
@@ -400,7 +402,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         pre_order = lib.util.verify.Verify.get_pre_order(pk)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, pre_order.campaign.id)
-
+        pre_order = lib.helper.order_helper.PreOrderHelper.summarize_pre_order(pre_order, pre_order.campaign, save=True)
         serializer = models.order.pre_order.PreOrderSerializer(pre_order)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -432,14 +434,11 @@ class PreOrderViewSet(viewsets.ModelViewSet):
         original_free_delivery = pre_order.free_delivery
 
         if free_delivery:
-            pre_order.total = pre_order.subtotal - pre_order.discount 
-        else:
-            pre_order.total = pre_order.subtotal - pre_order.discount + pre_order.shipping_cost
-
+            pre_order.shipping_cost = 0
+        pre_order.total = pre_order.subtotal - pre_order.discount + pre_order.shipping_cost
         pre_order.free_delivery = free_delivery
         pre_order.adjust_title = adjust_title
-        pre_order.adjust_price = -pre_order.total if pre_order.total + adjust_price < 0 else adjust_price
-        pre_order.total+=pre_order.adjust_price
+        pre_order.adjust_price = 0 if pre_order.total + adjust_price < 0 else adjust_price
 
 
         seller_adjust_history = pre_order.history.get('seller_adjust', [])
@@ -453,8 +452,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
              }
         )
         pre_order.history['seller_adjust_history'] = seller_adjust_history
-
-        pre_order.save()
+        pre_order = lib.helper.order_helper.PreOrderHelper.summarize_pre_order(pre_order, pre_order.campaign, save=True)
         return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['PUT'], url_path=r'(?P<pre_order_id>[^/.]+)/seller/add', permission_classes=(IsAuthenticated,))
@@ -468,5 +466,6 @@ class PreOrderViewSet(viewsets.ModelViewSet):
 
         lib.helper.order_helper.PreOrderHelper.add_product(api_user, pre_order.id, campaign_product.id, qty)
         pre_order = lib.util.verify.Verify.get_pre_order(pre_order.id)
+        pre_order = lib.helper.order_helper.PreOrderHelper.summarize_pre_order(pre_order, pre_order.campaign, save=True)
         return Response(models.order.pre_order.PreOrderSerializer(pre_order).data, status=status.HTTP_200_OK)
         

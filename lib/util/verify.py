@@ -512,6 +512,12 @@ class Verify():
             raise ApiVerifyError(f'user register not found by {user_register_email}')
         return models.user.user_register.UserRegister.objects.filter(email=user_register_email).order_by('-created_at')[0]
     
+    @staticmethod
+    def get_product_by_id(product_id):
+        if not models.product.product.Product.objects.filter(id=product_id).exists():
+            raise ApiVerifyError(f'product not found by {product_id}')
+        return models.product.product.Product.objects.get(id=product_id)
+    
 
         
 

@@ -1,1 +1,1 @@
-from . import page,post,user,chat_bot
+from . import page,post,user,chat_bot, message

@@ -47,11 +47,21 @@ class PreOrderHelper():
                 pre_order = database.lss.pre_order.PreOrder.get_object(id=pre_order_id,session=session)
                 campaign_product = database.lss.campaign_product.CampaignProduct.get_object(id=campaign_product_id,session=session)
 
-                ret = rule.rule_checker.pre_order_rule_checker.PreOrderAddProductRuleChecker.check(**{
-                    'api_user':api_user,
-                    'api_pre_order':pre_order.data,
-                    'api_campaign_product':campaign_product.data,
-                    'qty':qty,
+                ret = rule.rule_checker.pre_order_rule_checker.RuleChecker.check(
+                    check_list=[
+                        rule.check_rule.pre_order_check_rule.PreOrderCheckRule.is_campaign_product_exist,
+                        rule.check_rule.pre_order_check_rule.PreOrderCheckRule.is_order_lock,
+                        rule.check_rule.pre_order_check_rule.PreOrderCheckRule.is_qty_valid,
+                        rule.check_rule.pre_order_check_rule.PreOrderCheckRule.is_order_product_addable,
+                        rule.check_rule.pre_order_check_rule.PreOrderCheckRule.campaign_product_type,
+                        rule.check_rule.pre_order_check_rule.PreOrderCheckRule.is_stock_avaliable,
+                        rule.check_rule.pre_order_check_rule.PreOrderCheckRule.is_under_max_limit,
+                    ],
+                    **{
+                        'api_user':api_user,
+                        'api_pre_order':pre_order.data,
+                        'api_campaign_product':campaign_product.data,
+                        'qty':qty,
                     })
 
                 qty = ret.get('qty')
@@ -140,7 +150,15 @@ class PreOrderHelper():
                 order_product = database.lss.order_product.OrderProduct.get_object(id=order_product_id,session=session)
                 campaign_product = database.lss.campaign_product.CampaignProduct.get_object(id=order_product.data.get('campaign_product_id'),session=session)
 
-                ret = rule.rule_checker.pre_order_rule_checker.PreOrderUpdateProductRuleChecker.check(**{
+                ret = rule.rule_checker.pre_order_rule_checker.RuleChecker.check(check_list=[
+                    rule.check_rule.pre_order_check_rule.PreOrderCheckRule.is_campaign_product_exist,
+                    rule.check_rule.pre_order_check_rule.PreOrderCheckRule.is_order_lock,
+                    rule.check_rule.pre_order_check_rule.PreOrderCheckRule.is_qty_valid,
+                    rule.check_rule.pre_order_check_rule.PreOrderCheckRule.campaign_product_type,
+                    rule.check_rule.pre_order_check_rule.PreOrderCheckRule.is_order_product_editable,
+                    rule.check_rule.pre_order_check_rule.PreOrderCheckRule.is_stock_avaliable,
+                    rule.check_rule.pre_order_check_rule.PreOrderCheckRule.is_under_max_limit,
+                    ],**{
                     'api_user':api_user,
                     'api_pre_order':pre_order.data,
                     'api_order_product':order_product.data,
@@ -216,7 +234,11 @@ class PreOrderHelper():
                 order_product = database.lss.order_product.OrderProduct.get_object(id=order_product_id,session=session)
                 campaign_product = database.lss.campaign_product.CampaignProduct.get_object(id=order_product.data.get('campaign_product_id'),session=session)
 
-                rule.rule_checker.pre_order_rule_checker.PreOrderDeleteProductRuleChecker.check(**{
+                rule.rule_checker.pre_order_rule_checker.RuleChecker.check(
+                    check_list=[
+                        rule.check_rule.pre_order_check_rule.PreOrderCheckRule.is_order_lock,
+                        rule.check_rule.pre_order_check_rule.PreOrderCheckRule.is_order_product_removeable
+                    ],**{
                     'api_user':api_user,
                     'api_pre_order':pre_order.data,
                     'api_order_product':order_product.data,
@@ -270,41 +292,57 @@ class PreOrderHelper():
     @classmethod
     @lib.error_handle.error_handler.pymongo_error_handler.pymongo_error_handler
     def checkout(cls, api_user, campaign_id, pre_order_id):
+
         with database.lss.util.start_session() as session:
             with session.start_transaction():
+
                 success = True
                 campaign = database.lss.campaign.Campaign.get_object(id=campaign_id,session=session)
                 pre_order = database.lss.pre_order.PreOrder.get_object(id=pre_order_id,session=session)
 
-                rule.rule_checker.pre_order_rule_checker.PreOrderCheckoutRuleChecker.check(**{
-                    'api_user':api_user,
-                    'api_pre_order':pre_order.data,
-                    'campaign':campaign
+                rule.rule_checker.pre_order_rule_checker.RuleChecker.check(
+                    check_list=[
+                        rule.check_rule.pre_order_check_rule.PreOrderCheckRule.allow_checkout,
+                        rule.check_rule.pre_order_check_rule.PreOrderCheckRule.is_order_lock,
+                        rule.check_rule.pre_order_check_rule.PreOrderCheckRule.is_order_empty
+                    ],**{
+                        'api_user':api_user,
+                        'api_pre_order':pre_order.data,
+                        'campaign':campaign
                     })
 
-                for campaign_product_id_str in pre_order.data.get('products',{}).keys():
+                campaign_product_qty_tuples = []
+                for campaign_product_id_str, order_product_info in pre_order.data.get('products',{}).items():            
                     order_product_data = pre_order.data.get('products',{}).get(campaign_product_id_str)
                     order_product = database.lss.order_product.OrderProduct.get_object(id=order_product_data.get('order_product_id'), session=session)
                     campaign_product = database.lss.campaign_product.CampaignProduct.get_object(id=int(campaign_product_id_str), session=session)
+                    campaign_product_qty_tuples.append((campaign_product,order_product_info.get('qty')))
 
                     try:
-                        ret = rule.rule_checker.pre_order_rule_checker.OrderProductCheckoutRuleChecker.check(**{
+                        ret = rule.rule_checker.pre_order_rule_checker.OrderProductCheckoutRuleChecker.check(
+                            check_list=[
+                                rule.check_rule.order_product_check_rule.OrderProductCheckRule.is_stock_avaliable_for_checkout   
+                            ] , **{
                             'campaign_product':campaign_product,
                             'order_product':order_product,
                         })
                     except Exception:
-                        cls._delete_product(pre_order, campaign_product, order_product, api_user, session)
+                        cls._delete_product(pre_order, campaign_product, order_product, api_user, session)  #product sold out
                         print(traceback.format_exc())
                         success = False
                         continue
 
-                    if qty_difference := ret.get('qty_difference'):
+                    if qty_difference := ret.get('qty_difference'):                                         #product qty not enough 
                         qty = ret.get('qty')
                         cls._update_product(pre_order, order_product, campaign_product, qty, qty_difference, api_user, session)
                         success = False
 
                 if not success:
                     return False, pre_order
+
+                for campaign_product, qty in campaign_product_qty_tuples:    #second loop update qty_add_to_cart -> qty_pending_payment
+                    campaign_product.checkout( qty, sync=False, session = session)
+
 
                 order_data = pre_order.data.copy()
 
@@ -367,14 +405,13 @@ class PreOrderHelper():
     
     @classmethod
     def summarize_pre_order(cls, pre_order, campaign, shipping_option=None, save=False):
-        
 
         after_discount_subtotal, discount = lib.helper.discount_helper.make_discount(pre_order.subtotal, pre_order.applied_discount)
         pre_order.discount = discount
 
         if pre_order.shipping_method == 'pickup':
             pre_order.shipping_cost = 0
-            pre_order.total = pre_order.subtotal - pre_order.discount + pre_order.adjust_price
+            pre_order.total = 0 if (after_discount_subtotal + pre_order.adjust_price) < 0 else (after_discount_subtotal + pre_order.adjust_price)
             if save:
                 pre_order.save()
                 return pre_order
@@ -389,7 +426,7 @@ class PreOrderHelper():
         is_items_over_free_delivery_threshold = len(pre_order.products) >= float(meta_logistic.get('free_delivery_for_how_many_order_minimum')) if meta_logistic.get('is_free_delivery_for_how_many_order_minimum') else False
 
 
-        if (pre_order.shipping_option_index and delivery_options[pre_order.shipping_option_index] ):
+        if (pre_order.shipping_option_index != None and delivery_options[pre_order.shipping_option_index] ):
             option = delivery_options[pre_order.shipping_option_index]
 
             if option.get('type') == '+':
@@ -406,10 +443,14 @@ class PreOrderHelper():
         if is_items_over_free_delivery_threshold:
             delivery_charge = 0
             pre_order.meta['items_over_free_delivery_threshold'] = True
-
-        total = pre_order.subtotal - pre_order.discount + pre_order.adjust_price + delivery_charge
-        pre_order.total  = 0 if total<0 else total
+        
         pre_order.shipping_cost = delivery_charge
+        total = after_discount_subtotal + pre_order.adjust_price + delivery_charge
+        if total < 0:
+            pre_order.total  = 0
+            pre_order.discount -= -total
+        else:
+            pre_order.total = total
         
         if save:
             pre_order.save()
@@ -426,6 +467,11 @@ class OrderHelper():
             "1000000":"M"
         }
         date_time = order.created_at.strftime("%b %d %Y")
+
+        if 'code' not in order.applied_discount:
+            discount_code = ''
+        else:
+            discount_code = str(order.applied_discount['code'])
 
         mail_content = f'<div style="width:100%; background: #eaeaea; font-family: \'Open Sans\', sans-serif;"><div style="margin: auto; padding:1%; max-width:900px; background: #ffffff;">'
         mail_content += f'<h1 data-key="1468266_heading" style="text-align:center; font-family: Georgia,serif,\'Playfair Display\'; font-size: 28px; line-height: 46px; font-weight: 700; color: #4b4b4b; text-transform: none; background-color: #ffffff; margin: 0;">Thanks for Ordering:</h1>'
@@ -491,7 +537,7 @@ class OrderHelper():
         for key, product in order.products.items():
             mail_content += f'<tr>'
             mail_content += f'<td width="1" style="mso-line-height-rule: exactly; padding: 13px 13px 13px 0;" bgcolor="#ffffff" valign="middle">\
-                                <img width="140" src="{settings.GS_URL+product["image"]}" alt="Product Image" style="vertical-align: middle; text-align: center; width: 140px; max-width: 140px; height: auto !important; border-radius: 1px; padding: 0px;">\
+                                <img width="140" src="{product["image"]}" alt="Product Image" style="vertical-align: middle; text-align: center; width: 140px; max-width: 140px; height: auto !important; border-radius: 1px; padding: 0px;">\
                             </td>'
             mail_content += f'<tr style="mso-line-height-rule: exactly; padding-top: 13px; padding-bottom: 13px; border-bottom-width: 2px; border-bottom-color: #dadada; border-bottom-style: solid;" bgcolor="#ffffff" valign="middle">'
             mail_content += f'<table cellspacing="0" cellpadding="0" border="0" width="100%" style="min-width: 100%; border-bottom: 1px solid #a5a5a5;" role="presentation">\
@@ -521,27 +567,33 @@ class OrderHelper():
         # mail_content+= '</table>'
 
         mail_content += f'<table cellspacing="0" cellpadding="0" border="0" width="100%" style="min-width: 100%;" role="presentation">\
-                            <tbody>\
-                            <tr>\
-                                <td data-key="1468271_subtotal" style="font-size: 15px; padding-top:13px; color: #4b4b4b; font-weight: 600; width: 35%; text-align:right;" align="right" bgcolor="#ffffff" valign="top">' + _('EMAIL/DELIVERY_CONFIRM/SUBTOTAL') + f'\
-                                <span style="width:120px; display:inline-block;">{order.campaign.currency}\
-                                {adjust_decimal_places(order.subtotal,order.campaign.decimal_places)}\
-                                {price_unit[order.campaign.price_unit]}</span></td>\
-                            </tr>\
-                            <tr>\
-                                <td style="font-size: 15px; color: #4b4b4b; font-weight: 600; width: 35%; text-align:right; padding-bottom: 13px;" align="right" bgcolor="#ffffff" valign="top">' + _('EMAIL/DELIVERY_CONFIRM/DELIVERY_CHARGE') + f'\
-                                <span style="width:120px; display:inline-block;">{order.campaign.currency}\
-                                {adjust_decimal_places(order.shipping_cost,order.campaign.decimal_places)}\
-                                {price_unit[order.campaign.price_unit]}</span></td>\
-                            </tr>\
-                            <tr>\
-                                <td data-key="1468271_total" style="font-size: 15px; line-height: 26px; font-weight: bold; text-align:right; color: #666363; width: 65%; padding: 4px 0; border-top: 1px solid #666363;" align="left" bgcolor="#ffffff"  valign="top">' + _('EMAIL/DELIVERY_CONFIRM/TOTAL') + f'\
-                                <span style="width:120px; display:inline-block;">{order.campaign.currency}\
-                                {adjust_decimal_places(order.total,order.campaign.decimal_places)}\
-                                {price_unit[order.campaign.price_unit]}</span></td>\
-                            </tr>\
-                            </tbody>\
-                        </table>'
+                        <tbody>\
+                        <tr>\
+                            <td data-key="1468271_subtotal" style="font-size: 15px; padding-top:13px; color: #4b4b4b; font-weight: 600; width: 35%; text-align:right;" align="right" bgcolor="#ffffff" valign="top">' + _('EMAIL/DELIVERY_CONFIRM/SUBTOTAL') + f'\
+                            <span style="width:120px; display:inline-block;">{order.campaign.currency}\
+                            {adjust_decimal_places(order.subtotal,order.campaign.decimal_places)}\
+                            {price_unit[order.campaign.price_unit]}</span></td>\
+                        </tr>\
+                        <tr>\
+                            <td style="font-size: 15px; color: #4b4b4b; font-weight: 600; width: 35%; text-align:right; padding-bottom: 13px;" align="right" bgcolor="#ffffff" valign="top">' + _('EMAIL/DELIVERY_CONFIRM/DISCOUNT') + f'<span style="color: #b91c1c;"> { discount_code } </span> \
+                            <span style="width:120px; display:inline-block;">{order.campaign.currency}\
+                            -{adjust_decimal_places(order.discount,order.campaign.decimal_places)}\
+                            {price_unit[order.campaign.price_unit]}</span></td>\
+                        </tr>\
+                        <tr>\
+                            <td style="font-size: 15px; color: #4b4b4b; font-weight: 600; width: 35%; text-align:right; padding-bottom: 13px;" align="right" bgcolor="#ffffff" valign="top">' + _('EMAIL/DELIVERY_CONFIRM/DELIVERY_CHARGE') + f'\
+                            <span style="width:120px; display:inline-block;">{order.campaign.currency}\
+                            {adjust_decimal_places(order.shipping_cost,order.campaign.decimal_places)}\
+                            {price_unit[order.campaign.price_unit]}</span></td>\
+                        </tr>\
+                        <tr>\
+                            <td data-key="1468271_total" style="font-size: 15px; line-height: 26px; font-weight: bold; text-align:right; color: #666363; width: 65%; padding: 4px 0; border-top: 1px solid #666363;" align="left" bgcolor="#ffffff"  valign="top">' + _('EMAIL/DELIVERY_CONFIRM/TOTAL') + f'\
+                            <span style="width:120px; display:inline-block;">{order.campaign.currency}\
+                            {adjust_decimal_places(order.total,order.campaign.decimal_places)}\
+                            {price_unit[order.campaign.price_unit]}</span></td>\
+                        </tr>\
+                        </tbody>\
+                    </table>'
         
         # mail_content+= '<br>Delivery Charge: ' 
         # mail_content+= '$'+ str("%.2f" % float(order.shipping_cost))+'<br>'
@@ -567,6 +619,11 @@ class OrderHelper():
         }
         order_detail_link = f"{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}"
         date_time = order.created_at.strftime("%b %d %Y")
+
+        if 'code' not in order.applied_discount:
+            discount_code = ''
+        else:
+            discount_code = str(order.applied_discount['code'])
 
         mail_content = f'<div style="width:100%; background: #eaeaea; font-family: \'Open Sans\', sans-serif;"><div style="margin: auto; padding:1%; max-width:900px; background: #ffffff;">'
         mail_content += '<h1 data-key="1468266_heading" style="text-align:center; font-family: Georgia,serif,\'Playfair Display\'; font-size: 28px; line-height: 46px; font-weight: 700; color: #4b4b4b; text-transform: none; background-color: #ffffff; margin: 0;">' + _('EMAIL/ORDER_PLACED/TITLE') + '</h1>'
@@ -641,7 +698,7 @@ class OrderHelper():
         for key, product in order.products.items():
             mail_content += f'<tr>'
             mail_content += f'<td width="1" style="mso-line-height-rule: exactly; padding: 13px 13px 13px 0;" bgcolor="#ffffff" valign="middle">\
-                                <img width="140" src="{settings.GS_URL+product["image"]}" alt="Product Image" style="vertical-align: middle; text-align: center; width: 140px; max-width: 140px; height: auto !important; border-radius: 1px; padding: 0px;">\
+                                <img width="140" src="{product["image"]}" alt="Product Image" style="vertical-align: middle; text-align: center; width: 140px; max-width: 140px; height: auto !important; border-radius: 1px; padding: 0px;">\
                             </td>'
             mail_content += f'<tr style="mso-line-height-rule: exactly; padding-top: 13px; padding-bottom: 13px; border-bottom-width: 2px; border-bottom-color: #dadada; border-bottom-style: solid;" bgcolor="#ffffff" valign="middle">'
             mail_content += f'<table cellspacing="0" cellpadding="0" border="0" width="100%" style="min-width: 100%; border-bottom: 1px solid #a5a5a5;" role="presentation">\
@@ -671,28 +728,34 @@ class OrderHelper():
         #     mail_content+= f'<tr><td style="border: 1px solid black;">{product["name"]}</td><td style="border: 1px solid black;">${product["price"]}</td><td style="border: 1px solid black;">{product["qty"]}</td><td style="border: 1px solid black;">{product["subtotal"]}</td></tr>'
         # mail_content+= '</table>'
 
-        mail_content += '<table cellspacing="0" cellpadding="0" border="0" width="100%" style="min-width: 100%;" role="presentation">\
-                            <tbody>\
-                            <tr>\
-                                <td data-key="1468271_subtotal" style="font-size: 15px; padding-top:13px; color: #4b4b4b; font-weight: 600; width: 35%; text-align:right;" align="right" bgcolor="#ffffff" valign="top">' + _('EMAIL/DELIVERY_CONFIRM/SUBTOTAL') + f'\
-                                <span style="width:120px; display:inline-block;">{order.campaign.currency}\
-                                {adjust_decimal_places(order.subtotal,order.campaign.decimal_places)}\
-                                {price_unit[order.campaign.price_unit]}</span></td>\
-                            </tr>\
-                            <tr>\
-                                <td style="font-size: 15px; color: #4b4b4b; font-weight: 600; width: 35%; text-align:right; padding-bottom: 13px;" align="right" bgcolor="#ffffff" valign="top">' + _('EMAIL/DELIVERY_CONFIRM/DELIVERY_CHARGE') + f'\
-                                <span style="width:120px; display:inline-block;">{order.campaign.currency}\
-                                {adjust_decimal_places(order.shipping_cost,order.campaign.decimal_places)}\
-                                {price_unit[order.campaign.price_unit]}</span></td>\
-                            </tr>\
-                            <tr>\
-                                <td data-key="1468271_total" style="font-size: 15px; line-height: 26px; font-weight: bold; text-align:right; color: #666363; width: 65%; padding: 4px 0; border-top: 1px solid #666363;" align="left" bgcolor="#ffffff"  valign="top">' + _('EMAIL/DELIVERY_CONFIRM/TOTAL') + f'\
-                                <span style="width:120px; display:inline-block;">{order.campaign.currency}\
-                                {adjust_decimal_places(order.total,order.campaign.decimal_places)}\
-                                {price_unit[order.campaign.price_unit]}</span></td>\
-                            </tr>\
-                            </tbody>\
-                        </table>'
+        mail_content += f'<table cellspacing="0" cellpadding="0" border="0" width="100%" style="min-width: 100%;" role="presentation">\
+                        <tbody>\
+                        <tr>\
+                            <td data-key="1468271_subtotal" style="font-size: 15px; padding-top:13px; color: #4b4b4b; font-weight: 600; width: 35%; text-align:right;" align="right" bgcolor="#ffffff" valign="top">' + _('EMAIL/DELIVERY_CONFIRM/SUBTOTAL') + f'\
+                            <span style="width:120px; display:inline-block;">{order.campaign.currency}\
+                            {adjust_decimal_places(order.subtotal,order.campaign.decimal_places)}\
+                            {price_unit[order.campaign.price_unit]}</span></td>\
+                        </tr>\
+                        <tr>\
+                            <td style="font-size: 15px; color: #4b4b4b; font-weight: 600; width: 35%; text-align:right; padding-bottom: 13px;" align="right" bgcolor="#ffffff" valign="top">' + _('EMAIL/DELIVERY_CONFIRM/DISCOUNT') + f'<span style="color: #b91c1c;"> { discount_code } </span> \
+                            <span style="width:120px; display:inline-block;">{order.campaign.currency}\
+                            -{adjust_decimal_places(order.discount,order.campaign.decimal_places)}\
+                            {price_unit[order.campaign.price_unit]}</span></td>\
+                        </tr>\
+                        <tr>\
+                            <td style="font-size: 15px; color: #4b4b4b; font-weight: 600; width: 35%; text-align:right; padding-bottom: 13px;" align="right" bgcolor="#ffffff" valign="top">' + _('EMAIL/DELIVERY_CONFIRM/DELIVERY_CHARGE') + f'\
+                            <span style="width:120px; display:inline-block;">{order.campaign.currency}\
+                            {adjust_decimal_places(order.shipping_cost,order.campaign.decimal_places)}\
+                            {price_unit[order.campaign.price_unit]}</span></td>\
+                        </tr>\
+                        <tr>\
+                            <td data-key="1468271_total" style="font-size: 15px; line-height: 26px; font-weight: bold; text-align:right; color: #666363; width: 65%; padding: 4px 0; border-top: 1px solid #666363;" align="left" bgcolor="#ffffff"  valign="top">' + _('EMAIL/DELIVERY_CONFIRM/TOTAL') + f'\
+                            <span style="width:120px; display:inline-block;">{order.campaign.currency}\
+                            {adjust_decimal_places(order.total,order.campaign.decimal_places)}\
+                            {price_unit[order.campaign.price_unit]}</span></td>\
+                        </tr>\
+                        </tbody>\
+                    </table>'
         # mail_content+= '<br>Delivery Charge: ' 
         # mail_content+= '$'+ str("%.2f" % float(order.shipping_cost))+'<br>'
         # mail_content+= 'Total : $' + str("%.2f" % float(order.total))+'<br>'
@@ -703,29 +766,29 @@ class OrderHelper():
 
         return mail_content 
 
-    @classmethod
-    @lib.error_handle.error_handler.pymongo_error_handler.pymongo_error_handler
-    def check_expired(cls, order_id):
-        with database.lss.util.start_session() as session:
-            with session.start_transaction():
+    # @classmethod
+    # @lib.error_handle.error_handler.pymongo_error_handler.pymongo_error_handler
+    # def check_expired(cls, order_id):
+    #     with database.lss.util.start_session() as session:
+    #         with session.start_transaction():
 
-                order = database.lss.order.Order.get_object(id=order_id,session=session)
+    #             order = database.lss.order.Order.get_object(id=order_id,session=session)
 
 
-                for campaign_product_id_str, order_product_data in order.data.get('products',{}).items():
-                    order_product = database.lss.order_product.OrderProduct.get_object(id=order_product_data.get('order_product_id'), session=session)
-                    campaign_product = database.lss.campaign_product.CampaignProduct.get_object(id=int(campaign_product_id_str), session=session)
+    #             for campaign_product_id_str, order_product_data in order.data.get('products',{}).items():
+    #                 order_product = database.lss.order_product.OrderProduct.get_object(id=order_product_data.get('order_product_id'), session=session)
+    #                 campaign_product = database.lss.campaign_product.CampaignProduct.get_object(id=int(campaign_product_id_str), session=session)
 
-                    try:
-                        ret = rule.rule_checker.pre_order_rule_checker.OrderProductCheckoutRuleChecker.check(**{
-                            'campaign_product':campaign_product,
-                            'order_product':order_product,
-                        })
-                    except Exception:
-                        order.update(status=models.order.order.STATUS_EXPIRED,session=session)
-                        return False, order
+    #                 try:
+    #                     ret = rule.rule_checker.pre_order_rule_checker.OrderProductCheckoutRuleChecker.check(**{
+    #                         'campaign_product':campaign_product,
+    #                         'order_product':order_product,
+    #                     })
+    #                 except Exception:
+    #                     order.update(status=models.order.order.STATUS_EXPIRED,session=session)
+    #                     return False, order
 
-        return True, order
+    #     return True, order
 
     
     @classmethod

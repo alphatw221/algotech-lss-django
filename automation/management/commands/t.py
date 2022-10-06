@@ -1,50 +1,9 @@
-import email
-import imp
-from inspect import Parameter
-from os import access
-import pprint
-from grpc import server
-import requests
-from api.models.campaign import campaign_product
-
-
-from api.models.campaign.campaign import Campaign
-from api.models.campaign.campaign_product import CampaignProduct
-from api.models.cart.cart_product import CartProduct
-from api.models.order import pre_order
-from api.models.user import developer
-from api.models.user.user import User
-from api.models.user.user_subscription import UserSubscription
-from api.utils.orm import campaign_comment, cart_product
-import backend
-from backend.api.google.user import api_google_get_userinfo
-from backend.api.youtube.channel import api_youtube_get_list_channel_by_token
-from backend.campaign.campaign.manager import CampaignManager
-# from backend.campaign.campaign_comment.comment_processor import *
-from backend.campaign.campaign_lucky_draw.event import (
-    DrawFromCampaignCommentsEvent, DrawFromCampaignLikesEvent,
-    DrawFromCartProductsEvent)
-from backend.campaign.campaign_lucky_draw.manager import \
-    CampaignLuckyDrawManager
-from backend.campaign.campaign_product.status_processor import \
-    CampaignProductStatusProcessor
-from backend.cart.cart.manager import CartManager
+from tkinter import E
 from django.core.management.base import BaseCommand
-from backend.pymongo.mongodb import db, get_incremented_filed
-# from automation.jobs.campaign_job import campaign_job
 from django.conf import settings
-
-from api.models.campaign.campaign import Campaign
-from api.models.campaign.campaign_product import CampaignProduct
-from api.models.product.product import Product
-from api.models.order.order import Order
-from api.models.order.order_product import OrderProduct
-from datetime import datetime
-from backend.api.instagram.post import api_ig_private_message, api_ig_get_post_comments
-from backend.i18n.register_confirm_mail import i18n_get_register_confirm_mail_content, i18n_get_register_confirm_mail_subject, i18n_get_register_activate_mail_subject
-import service
 from api import models
-import lib
+
+
 class Command(BaseCommand):
     help = ''
 
@@ -52,10 +11,11 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.test_shopify()
-        # self.test_remove_campaign_comment_duplicate()
+        self.test_get_facebook_app_secret_proof()
+
 
     def modify_database(self):
+
         from api.models.user.user_subscription import UserSubscription
         from api.models.user.user import User
         from django.contrib.auth.models import User as AuthUser
@@ -156,7 +116,7 @@ class Command(BaseCommand):
         modify_meta_payment_from_campaign()
         
     def add_user_subscription_user(self):
-        UserSubscription.objects.get(id=1).root_users.add(User.objects.get(id=44))
+        models.user.user_subscription.UserSubscription.objects.get(id=1).root_users.add(models.user.user.User.objects.get(id=44))
 
     def test_text_classifier(self):
         from backend.api.nlp.classify import classify_comment_v1
@@ -217,7 +177,8 @@ class Command(BaseCommand):
         #     lang='en')
     
     def test_user_plan(self):
-
+        from datetime import datetime
+        from api import models
         api_user_subscription = models.user.user_subscription.UserSubscription.objects.get(id=1)
         
         if datetime.timestamp(datetime.now())>datetime.timestamp(api_user_subscription.expired_at):
@@ -236,7 +197,7 @@ class Command(BaseCommand):
     def test_sendinblue(self):
         
         import service
-
+        from database.lss._config import db
         sib_service = service.sendinblue
 
         # sib.transaction_email.ResetPasswordLinkEmail(url="url",code="code",username="username",to="alphatw22193@gmail.com").send()
@@ -348,7 +309,7 @@ class Command(BaseCommand):
 
         from datetime import datetime
         from dateutil import parser
-
+        from database.lss._config import db
         ig_datas = db.api_campaign_comment.find({'platform': 'instagram'})
         for ig_data in ig_datas:
             _id = ig_data['_id']
@@ -524,7 +485,7 @@ class Command(BaseCommand):
         import json, base64
         from django.conf import settings
         from datetime import datetime, timedelta
-
+        from api import models
 
         header_data = {
             'alg':'sha256',
@@ -557,7 +518,7 @@ class Command(BaseCommand):
         print(token)
 
     def test_discripting_token(self):
-        
+        from api import models
         import hashlib, hmac
         import json, base64
         from django.conf import settings
@@ -579,77 +540,93 @@ class Command(BaseCommand):
         else:
             print('error')
 
-    def test_tiktok(self):
+    async def test_tiktok(self):
+        # import service
+        # room_id = 7145677881782455067
+        # success, data = service.tiktok.live.send_message('testing',room_id, session_id = '48916791f979823f6aea8806a980110a')
+        # print(success)
+        # print(data)
 
+
+        # return
         from TikTokLive import TikTokLiveClient
         from TikTokLive.types.events import CommentEvent, ConnectEvent
+        client: TikTokLiveClient = TikTokLiveClient(unique_id="@handsome1105")
 
+        await client.send_message('hi how are you',session_id='48916791f979823f6aea8806a980110a')
+        print('done')
         # Instantiate the client with the user's username
-        client: TikTokLiveClient = TikTokLiveClient(unique_id="@caishangkun",**(
-        {
+    #     client: TikTokLiveClient = TikTokLiveClient(unique_id="@caishangkun",**(
+    #     {
 
-            # Custom Asyncio event loop
-            "loop": None,
+    #         # Custom Asyncio event loop
+    #         "loop": None,
 
-            # Custom Client params
-            "client_params": {},
+    #         # Custom Client params
+    #         "client_params": {},
 
-            # Custom request headers
-            "headers": {},
+    #         # Custom request headers
+    #         "headers": {},
 
-            # Custom timeout for Webcast API requests
-            "timeout_ms": 1000,
+    #         # Custom timeout for Webcast API requests
+    #         "timeout_ms": 20000,
 
-            # How frequently to make requests the webcast API when long polling
-            "ping_interval_ms": 1000,
+    #         # How frequently to make requests the webcast API when long polling
+    #         "ping_interval_ms": 1000,
 
-            # Whether to process initial data (cached chats, etc.)
-            "process_initial_data": True,
+    #         # Whether to process initial data (cached chats, etc.)
+    #         "process_initial_data": True,
 
-            # Whether to get extended gift info (Image URLs, etc.)
-            "enable_extended_gift_info": True,
+    #         # Whether to get extended gift info (Image URLs, etc.)
+    #         "enable_extended_gift_info": True,
 
-            # Whether to trust environment variables that provide proxies to be used in http requests
-            "trust_env": False,
+    #         # Whether to trust environment variables that provide proxies to be used in http requests
+    #         "trust_env": False,
 
-            # A dict object for proxies requests
-            # "proxies": {
-            #     "http://": "http://username:password@localhost:8030",
-            #     "https://": "http://420.69.420:8031",
-            # },
+    #         # A dict object for proxies requests
+    #         # "proxies": {
+    #         #     "http://": "http://username:password@localhost:8030",
+    #         #     "https://": "http://420.69.420:8031",
+    #         # },
 
-            # Set the language for Webcast responses (Changes extended_gift's language)
-            "lang": "en-US",
+    #         # Set the language for Webcast responses (Changes extended_gift's language)
+    #         "lang": "en-US",
 
-            # Connect info (viewers, stream status, etc.)
-            "fetch_room_info_on_connect": True,
+    #         # Connect info (viewers, stream status, etc.)
+    #         "fetch_room_info_on_connect": True,
 
-            # Whether to allow Websocket connections
-            "websocket_enabled": False,
+    #         # Whether to allow Websocket connections
+    #         "websocket_enabled": False,
             
-            # Parameter to increase the amount of connections made per minute via a Sign Server API key. 
-            # If you need this, contact the project maintainer.
-            "sign_api_key": None
+    #         # Parameter to increase the amount of connections made per minute via a Sign Server API key. 
+    #         # If you need this, contact the project maintainer.
+    #         "sign_api_key": None
 
-        }
-    ))
-
-
-        # Define how you want to handle specific events via decorator
-        @client.on("connect")
-        async def on_connect(_: ConnectEvent):
-            print("Connected to Room ID:", client.room_id)
+    #     }
+    # ))
 
 
-        # # Notice no decorator?
-        # async def on_comment(event: CommentEvent):
-        #     print(f"{event.user.nickname} -> {event.comment}")
+    #     # Define how you want to handle specific events via decorator
+        # @client.on("connect")
+        # async def on_connect(_: ConnectEvent):
+        #     print("Connected to Room ID:", client.room_id)
 
 
-        # # Define handling an event via "callback"
-        # client.add_listener("comment", on_comment)
+    #     # # Notice no decorator?
+    #     # async def on_comment(event: CommentEvent):
+    #     #     print(f"{event.user.nickname} -> {event.comment}")
 
-        client.run(session_id='c07dd598131dc2bb7b0eac8dcd09ee93')
+
+    #     # # Define handling an event via "callback"
+    #     # client.add_listener("comment", on_comment)
+        # try:
+        # client.run(session_id='48916791f979823f6aea8806a980110a')
+        # except Exception:
+        #     import traceback
+        #     print(traceback.format_exc())
+        # client.run()
+        # data = client.send_message('1234', session_id='48916791f979823f6aea8806a980110a')
+        # print(data)
 
     def test_temp(self):
         from database.lss._config import db
@@ -668,18 +645,45 @@ class Command(BaseCommand):
 
         
     def test_cache_redis(self):
+        import pottery
         import database
+        from pprint import pprint
 
+        # database.lss_cache.redis.delete('default')
+        campaign_products = database.lss_cache.campaign_product.get_products_all(1211, bypass=True)
+        print(campaign_products)
+        # @pottery.redis_cache(redis=database.lss_cache.redis, key='default')
+        # def test(key=None):
+        #     print('in')
+        #     return 1
+
+        # print(test(key='b'))
+        # print(test.cache_info())
+    # return collection.filter(**kwargs)
         # database.lss_cache.campaign_product.invalidate(1162,'ordr_startr','external_internal_map')
-        success, data, lock = database.lss_cache.campaign_product.leash_get_external_internal_map(1165,'ordr_startr')
-        print(success)
-        if not success:
-            with lock:
-                data = {'a':1}
-                database.lss_cache.campaign_product.set_external_internal_map(1165, 'ordr_startr', data)
+        # success, data, lock = database.lss_cache.campaign_product.leash_get_external_internal_map(1165,'ordr_startr')
+        # print(success)
+        # if not success:
+        #     with lock:
+        #         data = {'a':1}
+        #         database.lss_cache.campaign_product.set_external_internal_map(1165, 'ordr_startr', data)
 
         
-        print(data)
+        # print(data)
+        # data = database.lss_cache.campaign_product.get_products_all(1211)
+        # pprint(data)
+        # success, data, lock = database.lss_cache.campaign_product.leash_get_products_for_sell(1211)
+        # print(success)
+        # print(data)
+
+
+        # if not success and lock:
+        #     with lock:
+        #         data = [json.loads({'a':1})]
+        #         database.lss_cache.campaign_product.set_products_for_sell(1211, data)
+        # print(success)
+        # print(data)
+
 
     def test_shopify(self):
         from api import models
@@ -718,3 +722,34 @@ class Command(BaseCommand):
         jobs.easy_store.export_order_job(campaign_id, c)
 
 
+    def test_facebook_messenger(self):
+
+        import service
+        token = 'EAANwBngXqOABAG2i9ZAsCqFZCMz9Wykmd43JbZAzEIgnZCYszZCcxhnSkw4rTvTO8KCdMbXt3P1IIiF7KmvIBbgLGR4N8QwiXO9AOCzfumh3v95yfFJgOBNhqo3O71MkwZAl2ZAJJoxTi3MoBs0JMdFVTTuKD0LqZCPmdPPOiWvlLFZAhZBXsvvlPTdbPkIDJEDAEZD'
+
+        psid = "4422762234485468" 
+
+        attachment={
+            "type":"template",
+            "payload":{
+                "template_type":"button",
+                "text":"What do you want to do next?",
+                "buttons":[
+                {
+                    "type":"web_url",
+                    "url":"https://www.messenger.com",
+                    "title":"Visit Messenger"
+                }]
+            }
+        }
+        a,b = service.facebook.message.send_private_message(token,psid,'hi', attachment = attachment)
+        print(a)
+        print(b)
+    
+    def test_get_facebook_app_secret_proof(self):
+        import hashlib, hmac
+
+        page_token = 'EAANwBngXqOABAAOHBdSPAZAWckuo6imoCtBHH8c26aAhZASsIGv9VBvaMuy7pb1lrpieSZASIkC5fQAQoxgPsnpeVRkG4KF5bsSvzmVJimvhxfVIGgcXEA3JdHkyYyZCenGYYeChEaZCWSeL9TK7e60uRU7GdxZAYtRTl4FTftSRvBf3Yg3Mr129Dc0ZA4MnMqlegX0oiAkKWUWriE1Ifzs1XUQUJeUxNkZD'
+        app_secret='e36ab1560c8d85cbc413e07fb7232f99'
+        app_secret_proof = hmac.new(app_secret.encode(), msg=page_token.encode(), digestmod=hashlib.sha256).hexdigest()
+        print(app_secret_proof)

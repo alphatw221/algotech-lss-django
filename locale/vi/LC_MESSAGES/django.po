@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-13 10:25+0000\n"
+"POT-Creation-Date: 2022-09-27 09:30+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -174,7 +174,7 @@ msgstr "Tùy chọn: {dollar_sign}{option}\n"
 msgid "ITEM_INFO{name}{qty}{dollar_sign}{total}\n"
 msgstr "{name} Số lượng:{qty} {dollar_sign}{total}\n"
 
-#: backend/i18n/email/subject.py:8 templates/email_reset_password_link.html:7
+#: backend/i18n/email/subject.py:8 templates/email_reset_password_link.html:8
 #: templates/reset_password_success_email.html:7
 msgid "EMAIL/PASSWORD_RESET_LINK/SUBJECT"
 msgstr "Live Show Seller Xin chào"
@@ -186,6 +186,10 @@ msgstr "Mật khẩu Live Show Seller của bạn đã được thay đổi thà
 #: backend/i18n/email/subject.py:16
 msgid "EMAIL/VERIFY/SUBJECT"
 msgstr "Your LSS login verification code"
+
+#: backend/i18n/email/subject.py:20
+msgid "EMAIL/WISHLIST/SUBJECT"
+msgstr "Your item is back in stock!"
 
 #: backend/i18n/payment_comfirm_mail.py:52
 msgid "EMAIL/DELIVERY_CONFIRM/ORDER_CONFIRMATION"
@@ -260,181 +264,112 @@ msgstr "Chìa khóa bí mật"
 msgid "PAYMENT/FIRST_DATA/TIME_ZONE"
 msgstr "Múi giờ"
 
-#: lib/helper/order_helper.py:432 lib/helper/order_helper.py:573
-#: lib/i18n/email/delivery_comfirm_mail.py:26
-#: lib/i18n/email/order_comfirm_mail.py:24
+#: lib/helper/order_helper.py:440 lib/helper/order_helper.py:592
+#: lib/i18n/email/delivery_comfirm_mail.py:28
+#: lib/i18n/email/order_comfirm_mail.py:30
 msgid "EMAIL/DELIVERY_CONFIRM/ORDER_NO"
 msgstr "Số đơn hàng."
 
-#: lib/helper/order_helper.py:436 lib/helper/order_helper.py:577
-#: lib/i18n/email/delivery_comfirm_mail.py:29
-#: lib/i18n/email/order_comfirm_mail.py:28
+#: lib/helper/order_helper.py:444 lib/helper/order_helper.py:596
+#: lib/i18n/email/delivery_comfirm_mail.py:31
+#: lib/i18n/email/order_comfirm_mail.py:34
 msgid "EMAIL/DELIVERY_CONFIRM/ORDER_INFO"
 msgstr "Thông tin đặt hàng"
 
-#: lib/helper/order_helper.py:442 lib/helper/order_helper.py:583
-#: lib/i18n/email/order_comfirm_mail.py:34
+#: lib/helper/order_helper.py:450 lib/helper/order_helper.py:602
+#: lib/i18n/email/order_comfirm_mail.py:40
 msgid "EMAIL/DELIVERY_CONFIRM/CAMPAIGN_TITLE"
 msgstr "Tiêu đề chiến dịch"
 
-#: lib/helper/order_helper.py:447 lib/helper/order_helper.py:588
-#: lib/i18n/email/delivery_comfirm_mail.py:35
-#: lib/i18n/email/order_comfirm_mail.py:37
+#: lib/helper/order_helper.py:455 lib/helper/order_helper.py:607
+#: lib/i18n/email/delivery_comfirm_mail.py:37
+#: lib/i18n/email/order_comfirm_mail.py:43
 msgid "EMAIL/DELIVERY_CONFIRM/ORDER_DATE"
 msgstr "Ngày đặt hàng"
 
-#: lib/helper/order_helper.py:452 lib/i18n/email/order_comfirm_mail.py:42
+#: lib/helper/order_helper.py:460 lib/i18n/email/order_comfirm_mail.py:48
 msgid "EMAIL/DELIVERY_CONFIRM/BUYER"
 msgstr "người mua"
 
-#: lib/helper/order_helper.py:457 lib/helper/order_helper.py:591
-#: lib/i18n/email/order_comfirm_mail.py:47
+#: lib/helper/order_helper.py:465 lib/helper/order_helper.py:610
+#: lib/i18n/email/order_comfirm_mail.py:53
 msgid "EMAIL/DELIVERY_CONFIRM/RECEIVER"
 msgstr "Người nhận"
 
-#: lib/helper/order_helper.py:460 lib/helper/order_helper.py:594
-#: lib/helper/xlsx_helper.py:120 lib/i18n/email/order_comfirm_mail.py:50
+#: lib/helper/order_helper.py:468 lib/helper/order_helper.py:613
+#: lib/i18n/email/order_comfirm_mail.py:56
 msgid "REPORT/COLUMN_TITLE/SHIPPING_PHONE"
 msgstr "Số điện thoại"
 
-#: lib/helper/order_helper.py:466 lib/helper/order_helper.py:610
-#: lib/helper/xlsx_helper.py:128 lib/i18n/email/order_comfirm_mail.py:55
+#: lib/helper/order_helper.py:474 lib/helper/order_helper.py:629
+#: lib/i18n/email/order_comfirm_mail.py:61
 msgid "REPORT/COLUMN_TITLE/PICK_UP_STORE"
 msgstr "Tên cửa hàng"
 
-#: lib/helper/order_helper.py:471 lib/helper/order_helper.py:614
-#: lib/i18n/email/delivery_comfirm_mail.py:111
-#: lib/i18n/email/order_comfirm_mail.py:60
+#: lib/helper/order_helper.py:479 lib/helper/order_helper.py:633
+#: lib/i18n/email/order_comfirm_mail.py:66
 msgid "EMAIL/DELIVERY_CONFIRM/DELIVERY_ADDRESS"
 msgstr "Địa chỉ giao hàng"
 
-#: lib/helper/order_helper.py:478 lib/helper/xlsx_helper.py:131
-#: lib/i18n/email/order_comfirm_mail.py:78
+#: lib/helper/order_helper.py:486 lib/i18n/email/order_comfirm_mail.py:84
 msgid "REPORT/COLUMN_TITLE/PAYMENT_METHOD"
 msgstr "Phương thức thanh toán"
 
-#: lib/helper/order_helper.py:526 lib/helper/order_helper.py:677
-#: lib/i18n/email/delivery_comfirm_mail.py:82
-#: lib/i18n/email/order_comfirm_mail.py:179
+#: lib/helper/order_helper.py:534 lib/helper/order_helper.py:696
+#: lib/i18n/email/order_comfirm_mail.py:185
 msgid "EMAIL/DELIVERY_CONFIRM/SUBTOTAL"
 msgstr "Tổng phụ"
 
-#: lib/helper/order_helper.py:532 lib/helper/order_helper.py:683
-#: lib/i18n/email/delivery_comfirm_mail.py:88
-#: lib/i18n/email/order_comfirm_mail.py:185
+#: lib/helper/order_helper.py:540 lib/helper/order_helper.py:702
+#: lib/i18n/email/order_comfirm_mail.py:191
+msgid "EMAIL/DELIVERY_CONFIRM/DISCOUNT"
+msgstr "Discount"
+
+#: lib/helper/order_helper.py:546 lib/helper/order_helper.py:708
+#: lib/i18n/email/order_comfirm_mail.py:197
 msgid "EMAIL/DELIVERY_CONFIRM/DELIVERY_CHARGE"
 msgstr "Phí giao hàng"
 
-#: lib/helper/order_helper.py:538 lib/helper/order_helper.py:689
-#: lib/i18n/email/delivery_comfirm_mail.py:94
-#: lib/i18n/email/order_comfirm_mail.py:191
+#: lib/helper/order_helper.py:552 lib/helper/order_helper.py:714
+#: lib/i18n/email/order_comfirm_mail.py:203
 msgid "EMAIL/DELIVERY_CONFIRM/TOTAL"
 msgstr "Tổng số"
 
-#: lib/helper/order_helper.py:551 lib/helper/order_helper.py:701
-#: lib/i18n/email/delivery_comfirm_mail.py:121
-#: lib/i18n/email/order_comfirm_mail.py:203
-#: templates/email_verification_code.html:15
+#: lib/helper/order_helper.py:565 lib/helper/order_helper.py:726
+#: lib/i18n/email/order_comfirm_mail.py:215
+#: templates/email_notify_wishlist.html:33
+#: templates/email_verification_code.html:16
 msgid "EMAIL/DELIVERY_CONFIRM/DO_NOT_REPLY_1"
 msgstr ""
 "Vui lòng không trả lời e-mail này. Hộp thư này không được theo dõi và bạn sẽ "
 "không nhận được phản hồi."
 
-#: lib/helper/order_helper.py:552 lib/helper/order_helper.py:702
-#: lib/i18n/email/delivery_comfirm_mail.py:122
-#: lib/i18n/email/order_comfirm_mail.py:204
+#: lib/helper/order_helper.py:566 lib/helper/order_helper.py:727
+#: lib/i18n/email/order_comfirm_mail.py:216
 msgid "EMAIL/DELIVERY_CONFIRM/DO_NOT_REPLY_2"
 msgstr ""
 "Đối với các câu hỏi về đơn đặt hàng, các câu hỏi hoặc nhận xét khác, vui "
 "lòng liên hệ với email hoặc số điện thoại của Nhà bán hàng. Bạn sẽ được hỗ "
 "trợ và phục vụ nhanh hơn so với yêu cầu qua thư."
 
-#: lib/helper/order_helper.py:558
+#: lib/helper/order_helper.py:572
 #, python-brace-format
 msgid "EMAIL/ORDER_PLACED/SUBJECT{order_id}{campaign_title}"
 msgstr ""
 "Cảm ơn đơn đặt hàng của bạn! Đơn đặt hàng # {order_id} của bạn từ "
 "{campaign_title} đã được đặt!"
 
-#: lib/helper/order_helper.py:572
+#: lib/helper/order_helper.py:591
 msgid "EMAIL/ORDER_PLACED/TITLE"
 msgstr "đơn đặt hàng của bạn đã được đặt!"
 
-#: lib/helper/order_helper.py:597
+#: lib/helper/order_helper.py:616
 msgid "EMAIL/ORDER_CONFIRM/SHIPPING_METHOD"
 msgstr "Phương pháp vận chuyển"
 
-#: lib/helper/order_helper.py:629
+#: lib/helper/order_helper.py:648
 msgid "EMAIL/ORDER_CONFIRM/PROCESS_PAYMENT"
 msgstr "Quá trình thanh toán"
-
-#: lib/helper/xlsx_helper.py:115
-msgid "REPORT/COLUMN_TITLE/ID"
-msgstr "ID"
-
-#: lib/helper/xlsx_helper.py:116
-msgid "REPORT/COLUMN_TITLE/ORDER_DATE"
-msgstr "Ngày đặt hàng"
-
-#: lib/helper/xlsx_helper.py:117
-msgid "REPORT/COLUMN_TITLE/PLATFORM"
-msgstr "Nền tảng"
-
-#: lib/helper/xlsx_helper.py:118
-msgid "REPORT/COLUMN_TITLE/CUSTOMER_NAME"
-msgstr "Tên khách hàng"
-
-#: lib/helper/xlsx_helper.py:119
-msgid "REPORT/COLUMN_TITLE/SHIPPING_NAME"
-msgstr "Tên tài khoản"
-
-#: lib/helper/xlsx_helper.py:121
-msgid "REPORT/COLUMN_TITLE/EMAIL"
-msgstr "E-mail"
-
-#: lib/helper/xlsx_helper.py:122
-msgid "REPORT/COLUMN_TITLE/SHIPPING_METHOD"
-msgstr "Phương thức giao hàng"
-
-#: lib/helper/xlsx_helper.py:123
-msgid "REPORT/COLUMN_TITLE/SHIPPING_OPTION"
-msgstr "Tùy chọn giao hàng"
-
-#: lib/helper/xlsx_helper.py:124
-msgid "REPORT/COLUMN_TITLE/SHIPPING_ADDRESS_1"
-msgstr "Địa chỉ giao hàng"
-
-#: lib/helper/xlsx_helper.py:125
-msgid "REPORT/COLUMN_TITLE/LOCATION"
-msgstr "Địa điểm "
-
-#: lib/helper/xlsx_helper.py:126
-msgid "REPORT/COLUMN_TITLE/REGION"
-msgstr "Khu vực"
-
-#: lib/helper/xlsx_helper.py:127
-msgid "REPORT/COLUMN_TITLE/POSTCODE"
-msgstr "Mã bưu điện"
-
-#: lib/helper/xlsx_helper.py:129
-msgid "REPORT/COLUMN_TITLE/PICK_UP_ADDRESS"
-msgstr "Địa chỉ cửa hàng"
-
-#: lib/helper/xlsx_helper.py:130
-msgid "REPORT/COLUMN_TITLE/REMARK"
-msgstr "Nhận xét"
-
-#: lib/helper/xlsx_helper.py:132
-msgid "REPORT/COLUMN_TITLE/PAYMENT_STATUS"
-msgstr "Tình trạng thanh toán"
-
-#: lib/helper/xlsx_helper.py:133
-msgid "REPORT/COLUMN_TITLE/PAYMENT_RECORD"
-msgstr "Hóa đơn thanh toán"
-
-#: lib/helper/xlsx_helper.py:134
-msgid "REPORT/COLUMN_TITLE/TOTAL"
-msgstr "Tổng thanh toán"
 
 #: lib/helper/xlsx_helper.py:166
 msgid "REPORT/SECTION_TITLE/TITLE"
@@ -448,7 +383,7 @@ msgstr "Thông tin liên lạc"
 msgid "REPORT/SECTION_TITLE/DELIVERY_INFO"
 msgstr "Thông tin giao hàng"
 
-#: lib/helper/xlsx_helper.py:171 lib/i18n/email/order_comfirm_mail.py:74
+#: lib/helper/xlsx_helper.py:171 lib/i18n/email/order_comfirm_mail.py:80
 msgid "REPORT/SECTION_TITLE/PAYMENT_INFO"
 msgstr "Thông tin thanh toán"
 
@@ -475,117 +410,133 @@ msgstr ""
 "Cảm ơn đơn đặt hàng của bạn! Đơn đặt hàng # {order_id} của bạn từ "
 "{campaign_title} đã được xác nhận!"
 
-#: lib/i18n/email/delivery_comfirm_mail.py:25
+#: lib/i18n/email/delivery_comfirm_mail.py:27
 msgid "EMAIL/DELIVERY_CONFIRM/TITLE"
-msgstr "Tổng số"
+msgstr "Your Order Has Been Shipped !"
 
-#: lib/i18n/email/delivery_comfirm_mail.py:38
-#: lib/i18n/email/delivery_comfirm_mail.py:41
+#: lib/i18n/email/delivery_comfirm_mail.py:40
+#: lib/i18n/email/delivery_comfirm_mail.py:43
 msgid "EMAIL/DELIVERY_CONFIRM/SELLER"
 msgstr "Người bán"
 
-#: lib/i18n/email/delivery_comfirm_mail.py:103
-msgid "EMAIL/DELIVERY_CONFIRM/SHIPPING_INFO"
-msgstr "Thông tin vận chuyển"
-
-#: lib/i18n/email/delivery_comfirm_mail.py:108
-msgid "EMAIL/DELIVERY_CONFIRM/SHIPPING_DATE"
-msgstr "Ngày giao hàng"
-
-#: lib/i18n/email/delivery_comfirm_mail.py:114
-msgid "EMAIL/DELIVERY_CONFIRM/REMARK"
-msgstr "Nhận xét"
-
-#: lib/i18n/email/order_comfirm_mail.py:9
+#: lib/i18n/email/order_comfirm_mail.py:10
 #, python-brace-format
 msgid "EMAIL/ORDER_CONFIRM/SUBJECT{order_id}{campaign_title}"
 msgstr ""
 "Cảm ơn đơn đặt hàng của bạn! Đơn đặt hàng # {order_id} của bạn từ "
 "{campaign_title} đã được xác nhận!"
 
-#: lib/i18n/email/order_comfirm_mail.py:23
+#: lib/i18n/email/order_comfirm_mail.py:29
 msgid "EMAIL/ORDER_CONFIRM/TITLE"
 msgstr "Đơn đặt hàng của bạn đã được xác nhận!"
 
-#: lib/i18n/email/order_comfirm_mail.py:68
+#: lib/i18n/email/order_comfirm_mail.py:74
 msgid "EMAIL/ORDER_CONFIRM/DIRECT_PAYMENT"
 msgstr "Thanh toán trực tiếp"
 
-#: lib/i18n/email/order_comfirm_mail.py:81
+#: lib/i18n/email/order_comfirm_mail.py:87
 msgid "EMAIL/ORDER_CONFIRM/ACCOUNT_MODE"
 msgstr "Ngân hàng / Dịch vụ tài chính"
 
-#: lib/i18n/email/order_comfirm_mail.py:84
+#: lib/i18n/email/order_comfirm_mail.py:90
 msgid "EMAIL/ORDER_CONFIRM/SELLER_ACCOUNT"
 msgstr "Của người bán số tài khoản"
 
-#: lib/i18n/email/order_comfirm_mail.py:89
+#: lib/i18n/email/order_comfirm_mail.py:95
 msgid "EMAIL/ORDER_CONFIRM/LAST_FIVE_DIGIT"
 msgstr "Tài khoản thanh toán Năm chữ số cuối cùng"
 
-#: lib/i18n/email/order_comfirm_mail.py:101
+#: lib/i18n/email/order_comfirm_mail.py:107
 msgid "EMAIL/ORDER_CONFIRM/SELLER_CONTACT"
 msgstr "Liên hệ với người bán"
 
-#: templates/email_reset_password_link.html:12
+#: templates/email_notify_wishlist.html:10
+#: templates/email_notify_wishlist.html:11
+msgid "EMAIL/WISHLIST/TITLE"
+msgstr "is now back in stock!"
+
+#: templates/email_notify_wishlist.html:12
+#: templates/email_notify_wishlist.html:16
+msgid "EMAIL/WISHLIST/TEXT_1"
+msgstr ""
+"We are pleased to announce your wish-list item of interest is available "
+"again in limited quantities."
+
+#: templates/email_notify_wishlist.html:13
+#: templates/email_notify_wishlist.html:18
+msgid "EMAIL/WISHLIST/TEXT_2_1"
+msgstr "’s fan pages"
+
+#: templates/email_notify_wishlist.html:14
+#, fuzzy
+#| msgid "EMAIL/WISHLIST/TEXT_2_1"
+msgid "EMAIL/WISHLIST/TEXT_2_2"
+msgstr "’s fan pages"
+
+#: templates/email_notify_wishlist.html:14
+#: templates/email_verification_code.html:14
+msgid "EMAIL/VERIFY/TEXT_2_3"
+msgstr "to secure your account."
+
+#: templates/email_notify_wishlist.html:18
+msgid "EMAIL/WISHLIST/TEXT_2"
+msgstr "Please follow up more information from "
+
+#: templates/email_reset_password_link.html:13
 #: templates/reset_password_success_email.html:12
 msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT1"
 msgstr "Xin chào bạn"
 
-#: templates/email_reset_password_link.html:15
+#: templates/email_reset_password_link.html:16
 msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT2"
 msgstr ""
 "Chúng tôi đã nhận được yêu cầu đặt lại mật khẩu tài khoản Live Show Seller "
 "của bạn.Nhấp vào liên kết bên dưới để đặt lại mật khẩu của bạn:"
 
-#: templates/email_reset_password_link.html:18
+#: templates/email_reset_password_link.html:19
 msgid "EMAIL/PASSWORD_RESET_LINK/BUTTON"
 msgstr "Thay đổi mật khẩu"
 
-#: templates/email_reset_password_link.html:21
+#: templates/email_reset_password_link.html:22
 msgid "EMAIL/IF_YOU_CAN_NOT_CLICK"
 msgstr ""
 "Nếu bạn gặp sự cố khi đặt lại mật khẩu, vui lòng nhập URLvào trình duyệt của "
 "bạn."
 
-#: templates/email_reset_password_link.html:23
+#: templates/email_reset_password_link.html:24
 msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT3"
 msgstr ""
 "Nếu bạn bỏ qua thông báo này, mật khẩu của bạn sẽ không được thay đổi. Nếu "
 "bạn không yêu cầu đặt lại mật khẩu, vui lòng cho chúng tôi biết "
 
-#: templates/email_reset_password_link.html:25
+#: templates/email_reset_password_link.html:26
 #: templates/reset_password_success_email.html:17
 msgid "CONTACT_INFO/EMAIL"
 msgstr "Email: app@algotech.app"
 
-#: templates/email_reset_password_link.html:26
+#: templates/email_reset_password_link.html:27
 msgid "CONTACT_INFO/PHONE"
 msgstr "Contact Number: +65 9489 2086"
 
-#: templates/email_reset_password_link.html:27
+#: templates/email_reset_password_link.html:28
 msgid "CONTACT_INFO/ADDRESS"
 msgstr "Address: 8 Burn Road #15-13, Singapore 369977"
 
-#: templates/email_verification_code.html:9
+#: templates/email_verification_code.html:10
 msgid "EMAIL/VERIFY/TITLE"
 msgstr "Hi, Someone tried to log in to your LSS account."
 
-#: templates/email_verification_code.html:10
+#: templates/email_verification_code.html:11
 msgid "EMAIL/VERIFY/TEXT_1"
 msgstr "If this was you, please use the following code to log in:"
 
-#: templates/email_verification_code.html:12
+#: templates/email_verification_code.html:13
 msgid "EMAIL/VERIFY/TEXT_2_1"
 msgstr "If this wasn't you, please"
 
-#: templates/email_verification_code.html:13
+#: templates/email_verification_code.html:14
 msgid "EMAIL/VERIFY/TEXT_2_2"
 msgstr "reset your password"
-
-#: templates/email_verification_code.html:13
-msgid "EMAIL/VERIFY/TEXT_2_3"
-msgstr "to secure your account."
 
 #: templates/register_activation.html:10
 msgid "TITLE_ACTIVATION"
@@ -689,6 +640,69 @@ msgstr ""
 "has been successfully changed.\n"
 "Nếu bạn không yêu cầu thay đổi này, vui lòng liên hệ với bộ phận hỗ trợ ngay "
 "lập tức."
+
+#~ msgid "EMAIL/DELIVERY_CONFIRM/TAX"
+#~ msgstr "Thuế"
+
+#~ msgid "REPORT/COLUMN_TITLE/ID"
+#~ msgstr "ID"
+
+#~ msgid "REPORT/COLUMN_TITLE/ORDER_DATE"
+#~ msgstr "Ngày đặt hàng"
+
+#~ msgid "REPORT/COLUMN_TITLE/PLATFORM"
+#~ msgstr "Nền tảng"
+
+#~ msgid "REPORT/COLUMN_TITLE/CUSTOMER_NAME"
+#~ msgstr "Tên khách hàng"
+
+#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_NAME"
+#~ msgstr "Tên tài khoản"
+
+#~ msgid "REPORT/COLUMN_TITLE/EMAIL"
+#~ msgstr "E-mail"
+
+#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_METHOD"
+#~ msgstr "Phương thức giao hàng"
+
+#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_OPTION"
+#~ msgstr "Tùy chọn giao hàng"
+
+#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_ADDRESS_1"
+#~ msgstr "Địa chỉ giao hàng"
+
+#~ msgid "REPORT/COLUMN_TITLE/LOCATION"
+#~ msgstr "Địa điểm "
+
+#~ msgid "REPORT/COLUMN_TITLE/REGION"
+#~ msgstr "Khu vực"
+
+#~ msgid "REPORT/COLUMN_TITLE/POSTCODE"
+#~ msgstr "Mã bưu điện"
+
+#~ msgid "REPORT/COLUMN_TITLE/PICK_UP_ADDRESS"
+#~ msgstr "Địa chỉ cửa hàng"
+
+#~ msgid "REPORT/COLUMN_TITLE/REMARK"
+#~ msgstr "Nhận xét"
+
+#~ msgid "REPORT/COLUMN_TITLE/PAYMENT_STATUS"
+#~ msgstr "Tình trạng thanh toán"
+
+#~ msgid "REPORT/COLUMN_TITLE/PAYMENT_RECORD"
+#~ msgstr "Hóa đơn thanh toán"
+
+#~ msgid "REPORT/COLUMN_TITLE/TOTAL"
+#~ msgstr "Tổng thanh toán"
+
+#~ msgid "EMAIL/DELIVERY_CONFIRM/SHIPPING_INFO"
+#~ msgstr "Thông tin vận chuyển"
+
+#~ msgid "EMAIL/DELIVERY_CONFIRM/SHIPPING_DATE"
+#~ msgstr "Ngày giao hàng"
+
+#~ msgid "EMAIL/DELIVERY_CONFIRM/REMARK"
+#~ msgstr "Nhận xét"
 
 #~ msgid "DETAIL{link}"
 #~ msgstr "Tìm hiểu chi tiết: {link}\n"

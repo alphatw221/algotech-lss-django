@@ -6,9 +6,9 @@ from rest_framework.response import Response
 from api import models
 import lib
 
-
+from rest_framework.permissions import IsAuthenticated
 from lib.authentication_class.v1_token_authentication import V1PermanentTokenAuthentication
-from lib.permission_class.v1_token_permission import IsAuthenticated, IsAuthorizedByUserSubscription
+from lib.permission_class.v1_token_permission import IsAuthorizedByUserSubscription
 
 from .. import lib as ordr_startr_lib
 import database
@@ -18,7 +18,10 @@ from bson.objectid import ObjectId
 class OrderViewSet(viewsets.GenericViewSet):
     queryset = models.order.order.Order.objects.none()
 
-    @action(detail=False, methods=['PUT'], url_path=r'callback/(?P<user_subscription_id>[^/.]+)/payment/complete', permission_classes=(IsAuthenticated,IsAuthorizedByUserSubscription), authentication_classes=[V1PermanentTokenAuthentication,])
+    @action(detail=False, methods=['PUT'], url_path=r'callback/(?P<user_subscription_id>[^/.]+)/payment/complete', 
+    url_name='payment_complete_callback', 
+    permission_classes=(IsAuthenticated,IsAuthorizedByUserSubscription), 
+    authentication_classes=[V1PermanentTokenAuthentication,])
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def order_payment_complete_callback(self, request, user_subscription_id):
 

@@ -7,7 +7,6 @@ from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser
 
 
-from django.core.files.storage import default_storage
 from django.conf import settings
 from django.core.files.base import ContentFile
 
@@ -53,7 +52,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         order = lib.util.verify.Verify.get_order_with_oid(order_oid)
         return Response(models.order.order.OrderSerializer(order).data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['PUT'], url_path=r'(?P<order_oid>[^/.]+)/guest/receipt/upload', parser_classes=(MultiPartParser,), permission_classes=(), authentication_classes=[])
+    @action(detail=False, methods=['PUT'], url_path=r'(?P<order_oid>[^/.]+)/guest/receipt/upload', url_name='guest_upload_receipt', parser_classes=(MultiPartParser,), permission_classes=(), authentication_classes=[])
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def guest_upload_receipt(self, request, order_oid):
 
@@ -69,12 +68,14 @@ class OrderViewSet(viewsets.ModelViewSet):
         elif image.content_type not in models.order.order.IMAGE_SUPPORTED_TYPE:
             raise lib.error_handle.error.api_error.ApiVerifyError('not_support_this_image_type')
         else:
-            image_name = image.name.replace(" ","")
-            image_path = default_storage.save(
-                f'campaign/{order.campaign.id}/order/{order.id}/receipt/{image_name}', 
-                ContentFile(image.read())
-            )
-            order.meta["receipt_image"] = settings.GS_URL + image_path
+            try:
+                image_name = image.name.replace(" ","")
+                image_dir = f'campaign/{order.campaign.id}/order/{order.id}/receipt'
+                image_url = lib.util.storage.upload_image(image_dir, image_name, image)
+                order.meta["receipt_image"] = image_url
+            except Exception as e:
+                history = order.history
+                history["receipt_image_error"] = str(e)
 
         order.meta["last_five_digit"] = last_five_digit
         order.meta['account_name'] = account_name
@@ -119,10 +120,8 @@ class OrderViewSet(viewsets.ModelViewSet):
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def buyer_retrieve_latest_order_shipping(self, request):
         api_user = lib.util.verify.Verify.get_customer_user(request)
-        print('testing')
         order = api_user.orders.last()
         data = models.order.order.OrderSerializerUpdateShipping(order).data
-        print(data)
         return Response(data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['PUT'], url_path=r'(?P<order_oid>[^/.]+)/buyer/receipt/upload', parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated,))
@@ -133,15 +132,17 @@ class OrderViewSet(viewsets.ModelViewSet):
         order = lib.util.verify.Verify.get_order_with_oid(order_oid)
         campaign = lib.util.verify.Verify.get_campaign_from_order(order)
         last_five_digit, image, account_name, account_mode = lib.util.getter.getdata(request,('last_five_digit', 'image', 'account_name', 'account_mode'), required=False)
-
+        print(image)
         if image not in [None, '', "undefined", 'null']:
-            image_name = image.name.replace(" ","")
-            image_path = default_storage.save(
-                f'campaign/{order.campaign.id}/order/{order.id}/receipt/{image_name}', 
-                ContentFile(image.read())
-            )
-            order.meta["receipt_image"] = settings.GS_URL + image_path
-
+            try:
+                image_name = image.name.replace(" ","")
+                image_dir = f'campaign/{order.campaign.id}/order/{order.id}/receipt'
+                image_url = lib.util.storage.upload_image(image_dir, image_name, image)
+                order.meta["receipt_image"] = image_url
+            except Exception as e:
+                history = order.history
+                history["receipt_image_error"] = str(e)
+                
         order.meta["last_five_digit"] = last_five_digit
         order.meta['account_name'] = account_name
         order.meta['account_mode'] = account_mode
@@ -220,12 +221,13 @@ class OrderViewSet(viewsets.ModelViewSet):
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def get_merge_order_list(self, request):
 
-        api_user, campaign_id, search, page, page_size, order_status= lib.util.getter.getparams(request, ( 'campaign_id', 'search', 'page', 'page_size','status'),with_user=True, seller=True)
-        payment_list, delivery_list, platform_list = lib.util.getter.getdata(request,('payment','delivery','platform'))
+        api_user, campaign_id, search, page, page_size, order_status, = lib.util.getter.getparams(request, ( 'campaign_id', 'search', 'page', 'page_size','status'),with_user=True, seller=True)
+        
+        payment_list, delivery_list, platform_list, sort_by = lib.util.getter.getdata(request,('payment','delivery','platform', 'sort_by'))
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription,campaign_id)
 
-        json_data, total_count = database.lss.campaign.get_merge_order_list_pagination(campaign.id, search, order_status, payment_list, delivery_list, platform_list , int(page), int(page_size))
+        json_data, total_count = database.lss.campaign.get_merge_order_list_pagination(campaign.id, search, order_status, payment_list, delivery_list, platform_list , int(page), int(page_size), sort_by)
 
         return Response({'count':total_count,'data':json_data}, status=status.HTTP_200_OK)
     
