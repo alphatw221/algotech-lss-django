@@ -5,9 +5,23 @@ from channels.layers import get_channel_layer
 
 
 
-def send_result_data(room_id, data):
+def send_success_data(room_id, data):
     try:
-        async_to_sync(get_channel_layer().group_send)(room_id, {"type": "result_data", "data": data})
+        async_to_sync(get_channel_layer().group_send)(room_id, {"type": "success_data", **data})
+    
+    except Exception:
+        print(traceback.format_exc())
+
+def send_error_data(room_id, data):
+    try:
+        async_to_sync(get_channel_layer().group_send)(room_id, {"type": "error_data", **data})
+    
+    except Exception:
+        print(traceback.format_exc())
+
+def send_complete_data(room_id, data):
+    try:
+        async_to_sync(get_channel_layer().group_send)(room_id, {"type": "complete_data", **data})
     
     except Exception:
         print(traceback.format_exc())

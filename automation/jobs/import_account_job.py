@@ -7,6 +7,7 @@ try:
 except Exception as e:
     pass
 
+from django.conf import settings
 from api import models
 
 import traceback
@@ -15,8 +16,8 @@ import service
 from openpyxl import load_workbook
 from io import BytesIO
 import lib
-
-
+from datetime import datetime
+import business_policy
 
 def imoprt_account_job(file, room_id):
     try:
@@ -25,63 +26,37 @@ def imoprt_account_job(file, room_id):
         worksheet = workbook.worksheets[0]
 
         for row in worksheet.iter_rows(min_row=2, max_row=worksheet.max_row):
-            cols = list(row)
-
-            country = cols[0].value
-            subscription_plan = cols[1].value
-            name = cols[2].value
-            email = cols[3].value
-            password = cols[4].value
-            signup_date = cols[5].value
-            contact = cols[6].value
-
-
-
-
-            country_code = business_policy.subscription.COUNTRY_SG if country_code in ['', 'undefined', 'null', None] else country_code
-
-            # last_five_digit, image, bank_name, account_name, email, password, plan, period = lib.util.getter.getdata(request,("last_five_digit", "image", "bank_name", "account_name", "email", "password", "plan", "period"), required=True)
-            # firstName, lastName, contactNumber, country, promoCode, timezone = lib.util.getter.getdata(request, ("firstName", "lastName", "contactNumber", "country", "promoCode", "timezone"), required=False)
-
             try:
-                country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(country_code)
-                subscription_plan = country_plan.get_plan(plan)
+                cols = list(row)
 
-                # kwargs={'email':email,'plan':plan,'period':period, 'promoCode':promoCode, 'country_plan':country_plan, 'subscription_plan':subscription_plan}
+                country_code = cols[0].value
+                if country_code not in business_policy.subscription_plan.SubscriptionPlan.support_country:
+                    raise ''
+                subscription_plan = cols[1].value
+                if subscription_plan not in business_policy.subscription_plan.SubscriptionPlan.support_plan:
+                    raise ''
+                username = cols[2].value
+                email = cols[3].value
+                password = str(cols[4].value)
+                signup_date = cols[5].value if type(cols[5].value) == datetime else datetime.strptime(str(cols[5].value), '%Y-%m-%d')
+                contactNumber = cols[6].value
 
-                # kwargs=rule.rule_checker.user_rule_checker.RegistrationRequireRefundChecker.check(**kwargs)
+                ret = lib.helper.register_helper.create_new_account_for_james(
+                    country_code=country_code, 
+                    usbscription_plan=subscription_plan, 
+                    username=username, 
+                    email=email, 
+                    password=password, 
+                    signup_date=signup_date, 
+                    contactNumber=contactNumber
+                    )
+
+                service.channels.account_import.send_success_data(room_id,ret)
             except Exception:
-                raise lib.error_handle.error.api_error.ApiVerifyError('support_for_refunding')
-            # email = kwargs.get('email')
-            # amount = kwargs.get('amount')
-
-            # if image:
-            #     image_name = image.name.replace(" ","")
-            #     image_dir = f'register/receipt/{datetime.now().strftime("%Y/%m/%d,%H:%M:%S")}'
-            #     image_url = lib.util.storage.upload_image(image_dir, image_name, image)
-
-            # subscription_meta = {"last_five_digit":last_five_digit, 'bank_name':bank_name, "account_name": account_name, "receipt":image_url}
-
-            ret = lib.helper.register_helper.create_new_register_account(plan, country_plan, subscription_plan, timezone, period, firstName, lastName, email, password, country, country_code,  contactNumber,  amount, subscription_meta=subscription_meta)
-
-
-
-
-
-
-
-
-
-
-
-
-            print(country)
-            print(subscription_plan)
-
-
-        service.channels.account_import.send_result_data(room_id,{'result':'test'})
+                print(traceback.format_exc())
+                service.channels.account_import.send_error_data(room_id,{'detail':'error'})
     except Exception:
         print(traceback.format_exc())
-        service.channels.account_import.send_result_data(room_id,{'result':'test'})
+        service.channels.account_import.send_complete_data(room_id,{'detail':'ok'})
 
   

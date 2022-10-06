@@ -160,6 +160,8 @@ def create_checkout_session_for_james(secret, currency, amount):
         checkout_session = stripe.checkout.Session.create(
             line_items=items,
             mode='payment',
+            success_url='https://liveshowseller.com/',
+            cancel_url='https://liveshowseller.com/'
         )
         
 

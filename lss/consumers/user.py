@@ -53,7 +53,7 @@ class AdminImportAccountConsumer(WebsocketConsumer):
             self.channel_name
         )
         self.accept()
-        self.send(text_data=json.dumps({'type':'response_data','room_id':room_group_name}))
+        self.send(text_data=json.dumps({'type':'room_data','room_id':room_group_name}))
 
     def disconnect(self, close_code):
 
@@ -63,5 +63,11 @@ class AdminImportAccountConsumer(WebsocketConsumer):
         )
 
 
-    def result_data(self, event):
+    def success_data(self, event):
+        self.send(text_data=json.dumps(event))
+
+    def error_data(self, event):
+        self.send(text_data=json.dumps(event))
+
+    def complete_data(self, event):
         self.send(text_data=json.dumps(event))

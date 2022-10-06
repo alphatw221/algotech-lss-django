@@ -175,12 +175,11 @@ def create_user_register(plan, timezone, period, firstName, lastName, email, pas
 
 
 
-def create_new_account_for_james(country_code, plan, username, email, password, signup_date, contactNumber):
+def create_new_account_for_james(country_code, usbscription_plan, username, email, password, signup_date, contactNumber):
 
     amount = 22*12
 
     country_plan:business_policy.subscription_plan.CountryPlan = business_policy.subscription_plan.SubscriptionPlan.get_country(country_code)
-    country_plan.get_plan(plan)
 
     expired_at = signup_date+timedelta(days=365) 
     
@@ -199,11 +198,11 @@ def create_new_account_for_james(country_code, plan, username, email, password, 
             models.user.user_subscription.PLATFORM_TWITCH
             ]}, 
         meta_country={ 'activated_country': [country_code] },
-        type=plan,
+        type=usbscription_plan,
         lang=country_plan.language,
         country = country_code,
         purchase_price = amount,
-        **business_policy.subscription_plan.SubscriptionPlan.get_plan_limit(plan)
+        **business_policy.subscription_plan.SubscriptionPlan.get_plan_limit(usbscription_plan)
         )
         
     api_user = models.user.user.User.objects.create(
@@ -211,7 +210,7 @@ def create_new_account_for_james(country_code, plan, username, email, password, 
     
     models.user.deal.Deal.objects.create(
         user_subscription=user_subscription,
-        purchased_plan=plan, 
+        purchased_plan=usbscription_plan, 
         total=amount, 
         status=models.user.deal.STATUS_SUCCESS, 
         payer=api_user, 
@@ -222,23 +221,23 @@ def create_new_account_for_james(country_code, plan, username, email, password, 
     lib.util.marking_tool.NewUserMark.mark(api_user, save = True)
     
 
-    service.sendinblue.contact.create(email=email,first_name=username, last_name=username)
-    service.hubspot.contact.create(email=email, 
-        first_name=username, 
-        last_name=username,
-        subscription_type=plan, 
-        subscription_status="new",
-        country=country_code,
-        expiry_date=int(expired_at.replace(hour=0,minute=0,second=0,microsecond=0).timestamp()*1000)
-    )
+    # service.sendinblue.contact.create(email=email,first_name=username, last_name=username)
+    # service.hubspot.contact.create(email=email, 
+    #     first_name=username, 
+    #     last_name=username,
+    #     subscription_type=usbscription_plan, 
+    #     subscription_status="new",
+    #     country=country_code,
+    #     expiry_date=int(expired_at.replace(hour=0,minute=0,second=0,microsecond=0).timestamp()*1000)
+    # )
     
-    service.sendinblue.transaction_email.AccountActivationEmail(username, plan, email, password, to=[email], cc=country_plan.cc, country=country_code).send()
-    
+    # service.sendinblue.transaction_email.AccountActivationEmail(username, usbscription_plan, email, password, to=[email], cc=country_plan.cc, country=country_code).send()
+    # os.environ["OBJC_DISABLE_INITIALIZE_FORK_SAFETY"] = "YES"
+
     service.stripe.stripe.create_checkout_session_for_james(settings.STRIPE_API_KEY, 'USD', amount)
     return {
         "Customer Name":username,
         "Email":email,
-        "Password":password[:4]+"*"*(len(password)-4),
+        "Password":password,
         "Target Country":country_code, 
-        "Subscription End Date":expired_at.strftime("%d %B %Y %H:%M"),
     }
