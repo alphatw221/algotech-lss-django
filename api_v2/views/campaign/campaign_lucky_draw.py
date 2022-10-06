@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.core.files.base import ContentFile
 from automation import jobs
+from automation.jobs.crawler_job import crawler_shared_post_job
 from lib.helper.lucky_draw_helper import FacebookSharedListCrawler
 from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
@@ -217,7 +218,7 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
         post_id = campaign.facebook_campaign.get("post_id", "")
         lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign.id)
 
-        service.rq.queue.enqueue_crawler_queue(jobs.crawler_job.crawler_shared_post_job, lucky_draw_id=lucky_draw.id, facebook_page_username=facebook_page.username, post_id=post_id)
+        service.rq.queue.enqueue_crawler_queue(job=crawler_shared_post_job, lucky_draw_id=lucky_draw.id, facebook_page_username=facebook_page.username, post_id=post_id)
         
         return Response("success", status=status.HTTP_200_OK)
     # @action(detail=False, methods=['POST'], url_path=r'(?P<campaign_id>[^/.]+)/likes', permission_classes=(IsAuthenticated,))
