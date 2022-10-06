@@ -1,4 +1,5 @@
 import pickle
+import platform
 import time
 from typing import OrderedDict
 import functools, logging, traceback
@@ -23,6 +24,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException
+
 
 
 class LuckyDrawCandidate():
@@ -259,7 +261,7 @@ class SharedPostCandidateSetGenerator(CandidateSetGenerator):
             return candidate_set
         
         
-        shared_user_name_set = lucky_draw.meta.get("shared_post_data", {})
+        shared_user_name_set = set(lucky_draw.meta.get("shared_post_data", {}))
         print("shared_user_name_set", shared_user_name_set)
         if not shared_user_name_set:
             return candidate_set
@@ -492,12 +494,13 @@ def draw(campaign, lucky_draw):
 
 
 class FacebookSharedListCrawler():
-    def __init__(self, page_username, target_post_id, chrome_driver_path=os.path.join(settings.BASE_DIR, 'chromedriver.exe')):
+    def __init__(self, page_username, target_post_id, lang="en", chrome_driver_path=os.path.join(settings.BASE_DIR, 'chromedriver.exe')):
         self.chrome_options = Options() 
         self.chrome_options.add_argument('--headless')  # 啟動Headless 無頭
         self.chrome_options.add_argument('--disable-gpu')
         self.chrome_options.add_experimental_option('excludeSwitches', ['enable-logging'])
-        
+        if "Linux" in platform.platform():
+            chrome_driver_path = os.path.join(settings.BASE_DIR, 'chromedriver')
         self.chromeService = Service(executable_path=chrome_driver_path)
 
         self.driver = None #套用設定
@@ -507,7 +510,7 @@ class FacebookSharedListCrawler():
         self.login_url = "https://m.facebook.com/"
         self.page_url = f'https://m.facebook.com/{page_username}/'
         self.target_post_id = target_post_id
-        
+        os.path.join(settings.BASE_DIR, 'chromedriver.exe')
         self.post_reference_id = ""
         self.post_shared_list_url = "https://m.facebook.com/browse/shares?id="
         
@@ -518,6 +521,13 @@ class FacebookSharedListCrawler():
         self.is_login = False
         self.cookies = None
         self.cookies_path = os.path.join(settings.BASE_DIR, "cookies/facebook_cookie.pkl")
+        self.lang_map = {
+            "zh_hant": "中文(台灣)",
+            "en": "English (US)",
+            "zh_hans": "中文(简体)",
+            "vi": "Tiếng Việt"
+        }
+        self.lang = self.lang_map.get(lang)
         
     def create_driver(self):
         self.driver = webdriver.Chrome(options=self.chrome_options, service= self.chromeService)
@@ -530,7 +540,7 @@ class FacebookSharedListCrawler():
     
     def create_wait_object(self):
         if self.driver:
-            self.wait = WebDriverWait(self.driver, 3)
+            self.wait = WebDriverWait(self.driver, 5)
         return self.wait
     
     def get_driver(self):
@@ -549,7 +559,7 @@ class FacebookSharedListCrawler():
             self.driver.add_cookie(c)
         self.is_login = True
         self.driver.refresh()
-        # self.validate_user()
+#         self.validate_user()
         
     def login(self, validate=False):
         print("login")
@@ -579,7 +589,7 @@ class FacebookSharedListCrawler():
             self.actions.click(ok_button).perform()
             self.save_login = True
         except:
-            print(traceback.format_exc())
+            pass
             
         if not self.save_login:
             # check new page identity double check
@@ -595,7 +605,7 @@ class FacebookSharedListCrawler():
                 self.actions.click(login_button).perform()
                 self.save_login = True
             except:
-                print(traceback.format_exc())
+                pass
             
         if not self.save_login:
             # check header identity double check
@@ -610,35 +620,54 @@ class FacebookSharedListCrawler():
                 self.actions.click(login_button).perform()
                 self.save_login = True
             except:
-                print(traceback.format_exc())
+                pass
+            
+    def switch_language(self):
+        self.driver.get("https://m.facebook.com/language/")
+        current_language = self.driver.find_element(By.CLASS_NAME, "_5551")
+        
     def get_post_shared_list_url(self):
-        while self.loop_count <= 3:
-            self.loop_count += 1
-            self.driver.execute_script("window.scrollTo(100,document.body.scrollHeight);")
-
+        found = False
+        count = 0
+        while not found:
+            print(self.loop_count)
+            self.driver.execute_script("window.scrollTo(0,document.body.scrollHeight);")
             article = self.wait.until(
-                    EC.presence_of_element_located((By.TAG_NAME, "article"))
+                    EC.visibility_of_element_located((By.TAG_NAME, "article"))
                 )
             if article:
+                print(8888)
                 articles = self.driver.find_elements(By.XPATH, "//article")
+               
                 for article in articles:
                     if self.post_reference_id:
                         break
+                    video_data = json.loads(article.get_attribute("data-ft"))
+                    if video_data.get('video_id', None) != self.target_post_id:
+                        continue
+                    print(video_data)
                     post_data = json.loads(article.get_attribute("data-store"))
-                    for key,value in post_data.items():
-                        if key == "share_id":
-                            if type(value) == int:
-                                post_id = str(value)
-                            else:
-                                post_id = value.split(":")[1]
-                            if post_id != self.target_post_id:
-                                break
+                    self.post_reference_id = str(post_data.get("feedback_target",""))
+                    found = True
+#                     for key,value in post_data.items():
+#                         if key == "share_id":
+# #                             print(key)
+# #                             print(value)
+#                             if ":" not in str(value):
+#                                 post_id = str(value)
+#                             else:
+#                                 post_id = value.split(":")[1]
+#                             if post_id != self.target_post_id:
+#                                 break
 
-                        if key == "feedback_target":
-                            self.post_reference_id = str(value)
-                            break
-
-            self.loop_count += 1
+#                         if key == "feedback_target":
+# #                             print(key)
+# #                             print(value)
+#                             self.post_reference_id = str(value)
+#                             break
+            if count == 20:
+                found = True
+            count += 1
         print(self.post_shared_list_url + self.post_reference_id)
         return self.post_shared_list_url + self.post_reference_id
         
