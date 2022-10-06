@@ -1,10 +1,11 @@
 import json
 
 def load_response(response):
+    data = json.loads(response.text)
     print(response.status_code)
     if not int(response.status_code / 100 )== 2 :
-        return False, None
-    return True, json.loads(response.text)
+        return False, data
+    return True, data
 
 def get_header(key):
     return {

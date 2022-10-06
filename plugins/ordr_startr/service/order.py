@@ -13,7 +13,7 @@ def create_order(key, cart_oid, user_id, comment_id, user_name, platform, produc
     data = {
         "User":{
             "Id":user_id,
-            "CommentId":comment_id,
+            # "CommentId":comment_id,
             "SourceType":platform_source_type_map.get(platform,platform),
             "Name": user_name
         },
