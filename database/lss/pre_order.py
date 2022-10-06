@@ -65,3 +65,6 @@ def get_abandon_pre_order_which_contain_campaign_product(campaign_product_id, ha
 
     l = list(cursor)
     return l
+
+def get_count_in_campaign(campaign_id):
+    return __collection.find({'campaign_id': campaign_id, 'subtotal': {'$ne': 0}}).count()

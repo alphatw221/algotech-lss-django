@@ -178,7 +178,27 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['GET'], url_path=r'seller/list', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def seller_retrieve_campaign_products(self, request):
+    def seller_list_campaign_products(self, request):
+        api_user, campaign_id, type = lib.util.getter.getparams(request, ("campaign_id", "type"), with_user=True, seller=True)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
+
+        kwargs = {}
+        if type == models.campaign.campaign_product.TYPE_LUCKY_DRAW:
+            kwargs['type']=models.campaign.campaign_product.TYPE_LUCKY_DRAW
+        elif type ==models.campaign.campaign_product.TYPE_PRODUCT:
+            kwargs['type']=models.campaign.campaign_product.TYPE_PRODUCT
+        queryset = campaign.products.filter(**kwargs)
+
+        serializer = models.campaign.campaign_product.CampaignProductSerializer(queryset, many=True)
+        data = serializer.data
+
+        return Response(data, status=status.HTTP_200_OK)
+
+    
+    @action(detail=False, methods=['GET'], url_path=r'seller/search', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def seller_search_campaign_products(self, request):
         api_user, campaign_id, category, type = lib.util.getter.getparams(request, ("campaign_id", "category", "type"), with_user=True, seller=True)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
@@ -197,7 +217,6 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
 
         return Response(data, status=status.HTTP_200_OK)
 
-    
     @action(detail=True, methods=['DELETE'], url_path=r'seller/delete', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def delete_campaign_product(self, request, pk=None):

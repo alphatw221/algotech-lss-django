@@ -16,3 +16,6 @@ class CampaignComment(Collection):
             {'platform':platform_name, 'campaign_id': campaign_id}, sort=[('created_time', -1)])
         if data:
             return cls(data.get('id'), data.get('_id'), data)
+
+def get_count_in_campaign(campaign_id):
+    return __collection.find({'campaign_id': campaign_id}).count()

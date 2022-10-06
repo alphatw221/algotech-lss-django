@@ -57,29 +57,37 @@ def make_discount_for_pre_order(pre_order):
         pass
 
 
-def check_limitation(limitation, pre_order):
+def check_limitation(limitation, **kwargs):
     try:
 
         if limitation['key']==models.discount_code.discount_code.LIMITATION_SPECIFIC_CAMPAIGN:
             campaign_id = int(limitation['campaign_id'])
+            pre_order = kwargs['pre_order']
             if pre_order.campaign.id != campaign_id:
                 return False
         elif limitation['key']==models.discount_code.discount_code.LIMITATION_PRODUCT_OVER_NUMBER:
             number = limitation['number']
+            pre_order = kwargs['pre_order']
             if len(pre_order.products) < number:
                 return False
         elif limitation['key']==models.discount_code.discount_code.LIMITATION_SUBTOTAL_OVER_AMOUNT:
             amount = limitation['amount']
+            pre_order = kwargs['pre_order']
             if pre_order.subtotal < amount:
+                return False
+        elif limitation['key']==models.discount_code.discount_code.LIMITATION_DISCOUNT_CODE_USABLE_TIME:
+            times = limitation['times']
+            discount_code = kwargs['discount_code']
+            if discount_code.used_count>=times:
                 return False
     except Exception:
         return False
     return True
 
-def check_limitations(limitations, pre_order):
+def check_limitations(limitations, **kwargs):
     try:
         for limitation in limitations:
-            if not check_limitation(limitation, pre_order):
+            if not check_limitation(limitation, **kwargs):
                 return False
     except Exception:
         return False
