@@ -397,7 +397,12 @@ class LuckyDraw():
     winner: LuckyDrawCandidate, 
     campaign_product:models.campaign.campaign_product.CampaignProduct):
         
-        text = lib.i18n.campaign_announcement.get_campaign_announcement_lucky_draw_winner(campaign_product.name, winner.customer_name, lang=campaign.lang)
+        if lucky_draw_announce:=campaign.meta_reply.get('lucky_draw_announce'):
+            lucky_draw_announce = lucky_draw_announce.replace('[CUSTOMER_NAME]', winner.customer_name)
+            lucky_draw_announce = lucky_draw_announce.replace('[PRIZE_NAME]', campaign_product.name)
+            text = lucky_draw_announce
+        else:
+            text = lib.i18n.campaign_announcement.get_campaign_announcement_lucky_draw_winner(campaign_product.name, winner.customer_name, lang=campaign.lang)
 
 
         if (facebook_page := campaign.facebook_page):
@@ -413,12 +418,19 @@ class LuckyDraw():
     winner: LuckyDrawCandidate, 
     campaign_product:models.campaign.campaign_product.CampaignProduct):
 
-        text = lib.i18n.campaign_announcement.get_campaign_announcement_lucky_draw_winner(campaign_product.name, winner.customer_name, lang=campaign.lang)  #temp
+
+        if lucky_draw_announce:=campaign.meta_reply.get('lucky_draw_private_message'):
+            lucky_draw_announce = lucky_draw_announce.replace('[CUSTOMER_NAME]', winner.customer_name)
+            lucky_draw_announce = lucky_draw_announce.replace('[PRIZE_NAME]', campaign_product.name)
+            text = lucky_draw_announce
+        else:
+            text = lib.i18n.campaign_announcement.get_campaign_announcement_lucky_draw_winner(campaign_product.name, winner.customer_name, lang=campaign.lang)  #temp
 
         if (campaign.instagram_profile and winner.platform=='instagram'):
             service.instagram.chat_bot.post_page_message_chat_bot(campaign.instagram_profile.connected_facebook_page_id, campaign.instagram_profile.token, winner.customer_id, text)
 
-
+        if (facebook_page := campaign.facebook_page and winner.platform=='facebook' and winner.comment_id):
+            service.facebook.post.post_page_message_on_comment(facebook_page.token, winner.comment_id, text)
     
     @classmethod
     def __get_image(cls, winner:LuckyDrawCandidate):
