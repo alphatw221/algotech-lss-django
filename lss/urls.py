@@ -28,7 +28,7 @@ from lss.views.email import test
 from lss.views.chat import index,room
 from api_v2.views.facebook.facebook import facebook_messenger_webhook
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    # path('admin/', admin.site.urls),
     path('api/', include('api.urls')),
     path('api/v2/', include('api_v2.urls')),
     # path('chat_bot/', include('chat_bot.urls')),
