@@ -73,16 +73,17 @@ def create_checkout_session(secret, currency, order, decimal_places, price_unit,
             amount_off-=__transform_payment_amount(order.adjust_price, decimal_places, price_unit, currency=currency)
         if order.discount:
             amount_off+=__transform_payment_amount(order.discount, decimal_places, price_unit, currency=currency)
-
-        discount = stripe.Coupon.create(
-            amount_off=amount_off,
-            currency=currency
-        )
-        discounts.append(
-            {
-                'coupon': discount.id,
-            }
-        )
+        
+        if amount_off:
+            discount = stripe.Coupon.create(
+                amount_off=amount_off,
+                currency=currency
+            )
+            discounts.append(
+                {
+                    'coupon': discount.id,
+                }
+            )
         # print('discount+adjust')
         # print(amount_off)
 
