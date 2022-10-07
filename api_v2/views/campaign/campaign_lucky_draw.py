@@ -2,7 +2,6 @@ from django.conf import settings
 from django.core.files.base import ContentFile
 from automation import jobs
 from automation.jobs.crawler_job import crawler_shared_post_job
-from lib.helper.lucky_draw_helper import FacebookSharedListCrawler
 from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.decorators import action
@@ -190,7 +189,7 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
         lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign.id)
         
         ret = rule.rule_checker.lucky_draw_rule_checker.LuckyDrawStartRuleChecker.check(**{
-            'type': lucky_draw.type, 'prize': lucky_draw.prize, 'campaign': campaign
+            'lucky_draw': lucky_draw, 'campaign': campaign
         })
 
         return Response(models.campaign.campaign_lucky_draw.CampaignLuckyDrawSerializer(lucky_draw).data, status=status.HTTP_200_OK)
@@ -206,21 +205,6 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
         
         return Response(models.user.static_assets.StaticAssetsSerializer(static_assets, many=True).data, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['GET'], url_path=r'draw/start_sharedpost_crawler', permission_classes=(IsAuthenticated,))
-    @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def start_sharedpost_crawler(self, request, pk):
-
-        api_user = lib.util.verify.Verify.get_seller_user(request)
-        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
-        lucky_draw = lib.util.verify.Verify.get_lucky_draw(pk)
-        campaign = lucky_draw.campaign
-        facebook_page = campaign.facebook_page
-        post_id = campaign.facebook_campaign.get("post_id", "")
-        lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign.id)
-
-        service.rq.queue.enqueue_crawler_queue(job=crawler_shared_post_job, lucky_draw_id=lucky_draw.id, facebook_page_username=facebook_page.username, post_id=post_id)
-        
-        return Response("success", status=status.HTTP_200_OK)
     # @action(detail=False, methods=['POST'], url_path=r'(?P<campaign_id>[^/.]+)/likes', permission_classes=(IsAuthenticated,))
     # @lib.error_handle.error_handler.api_error_handler.api_error_handler
     # def lucky_draw_likes(self, request, campaign_id):
