@@ -14,6 +14,7 @@ git pull http://lin:a334596412@algotech-git.ap.ngrok.io/nicklien/liveshowseller.
 poetry install
 
 poetry run python manage.py collectstatic
+yes
 service supervisor stop
 service supervisor start
 supervisorctl reread
