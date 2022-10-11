@@ -17,5 +17,5 @@ poetry run python manage.py collectstatic
 service supervisor stop
 service supervisor start
 supervisorctl reread
-supervisorctl restart
+supervisorctl reload
 service apache2 restart
