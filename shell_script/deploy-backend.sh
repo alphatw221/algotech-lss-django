@@ -9,5 +9,5 @@ poetry install
 service supervisor stop
 service supervisor start
 supervisorctl reread
-supervisorctl restart
+supervisorctl reload
 service apache2 restart
