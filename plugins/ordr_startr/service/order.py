@@ -4,8 +4,8 @@ from requests import request
 import json
 
 def __get_url():
-    return 'https://dev.liveorder.thevelocitee.com:9000/api/Orders/FbPage/110577918484495/createNewOrder' #temp
-    # return 'https://api.liveorder.ordrstartr.com/api/Orders/FbPage/669953996431156/createNewOrder'  #temp
+    # return 'https://dev.liveorder.thevelocitee.com:9000/api/Orders/FbPage/110577918484495/createNewOrder' #temp
+    return 'https://api.liveorder.ordrstartr.com/api/Orders/FbPage/669953996431156/createNewOrder'  #temp
 
 
 def create_order(key, cart_oid, user_id, user_name, platform, product_items):
