@@ -43,7 +43,7 @@ class FacebookSharedListCrawler(FacebookCrawler):
             self.driver.add_cookie(c)
         self.is_login = True
         self.driver.refresh()
-#         self.validate_user()
+        self.validate_user()
         
     def login(self, validate=False):
         print("login")
@@ -70,13 +70,15 @@ class FacebookSharedListCrawler(FacebookCrawler):
         try:
             self.driver.find_element(By.CSS_SELECTOR, "input[value='regular_login']")
             ok_button = self.driver.find_element(By.CSS_SELECTOR, "button[value='OK']")
-            self.actions.click(ok_button).perform()
-            self.save_login = True
+            if ok_button:
+                self.actions.click(ok_button).perform()
+                self.save_login = True
         except:
             pass
             
         if not self.save_login:
             # check new page identity double check
+            print("new page identity double check")
             try:
                 my_profile = self.driver.find_element(By.CSS_SELECTOR, f"div[role='button']")
                 self.actions.click(my_profile).perform()
@@ -86,13 +88,15 @@ class FacebookSharedListCrawler(FacebookCrawler):
                 )
                 self.actions.send_keys_to_element(pass_input, self.password)
                 login_button = self.driver.find_element(By.CSS_SELECTOR , "button[type='submit']")
-                self.actions.click(login_button).perform()
-                self.save_login = True
+                if login_button:
+                    self.actions.click(login_button).perform()
+                    self.save_login = True
             except:
                 pass
             
         if not self.save_login:
             # check header identity double check
+            print("header identity double check")
             try:
                 login_button = self.driver.find_element(By.CSS_SELECTOR , "button[type='submit']")
                 self.actions.click(login_button).perform()
@@ -101,8 +105,9 @@ class FacebookSharedListCrawler(FacebookCrawler):
                 )
                 self.actions.send_keys_to_element(pass_input, self.password)
                 login_button = self.driver.find_element(By.CSS_SELECTOR , "button[type='submit']")
-                self.actions.click(login_button).perform()
-                self.save_login = True
+                if login_button:
+                    self.actions.click(login_button).perform()
+                    self.save_login = True
             except:
                 pass
             

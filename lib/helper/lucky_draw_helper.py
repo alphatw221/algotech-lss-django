@@ -280,7 +280,6 @@ class SharedPostCandidateSetGenerator(CandidateSetGenerator):
             users_shared_and_comment_set = shared_user_name_set.intersection(campaign_comments_user_name_set)
             campaign_comments = comments_data.filter(customer_name__in=list(users_shared_and_comment_set))
             for campaign_comment in campaign_comments:
-
                 candidate = LuckyDrawCandidate(
                     platform=campaign_comment.platform, 
                     customer_id=campaign_comment.customer_id, 
@@ -361,7 +360,6 @@ class SharedPostCandidateSetGenerator(CandidateSetGenerator):
         
         num_of_candidate = len(candidate_set) if shares_count > len(candidate_set) else shares_count
         candidates = random.sample(list(candidate_set), num_of_candidate)
-        
         return candidates
     
 class LuckyDraw():
@@ -392,8 +390,7 @@ class LuckyDraw():
 
                 winner_list.append(winner_dict)
             except Exception:
-                pass
-            
+                print(traceback.format_exc())
         campaign.meta['winner_list']=campaign_winner_list
         campaign.save()
 
@@ -424,7 +421,6 @@ class LuckyDraw():
                     platform=winner.platform, 
                     platform_id=platform_id_dict.get(winner.platform))
 
-            print ('campaign_product', campaign_product)
 
             if prize_product := pre_order.products.get(str(campaign_product.id), None):
                 qty = prize_product['qty'] + 1
@@ -457,10 +453,12 @@ class LuckyDraw():
             service.youtube.live_chat.post_live_chat_comment(youtube_channel.token, campaign.youtube_campaign.get('live_chat_id'), text)
 
     @classmethod
-    def __send_private_message(cls, 
-    campaign: models.campaign.campaign.Campaign, 
-    winner: LuckyDrawCandidate, 
-    campaign_product:models.campaign.campaign_product.CampaignProduct):
+    def __send_private_message(
+            cls, 
+            campaign: models.campaign.campaign.Campaign, 
+            winner: LuckyDrawCandidate, 
+            campaign_product:models.campaign.campaign_product.CampaignProduct
+        ):
 
 
         if lucky_draw_announce:=campaign.meta_reply.get('lucky_draw_private_message'):
@@ -473,8 +471,8 @@ class LuckyDraw():
         if (campaign.instagram_profile and winner.platform=='instagram'):
             service.instagram.chat_bot.post_page_message_chat_bot(campaign.instagram_profile.connected_facebook_page_id, campaign.instagram_profile.token, winner.customer_id, text)
 
-        if (facebook_page := campaign.facebook_page and winner.platform=='facebook' and winner.comment_id):
-            service.facebook.post.post_page_message_on_comment(facebook_page.token, winner.comment_id, text)
+        if (campaign.facebook_page and winner.platform=='facebook' and winner.comment_id):
+            service.facebook.post.post_page_message_on_comment(campaign.facebook_page.token, winner.comment_id, text)
     
     @classmethod
     def __get_image(cls, winner:LuckyDrawCandidate):

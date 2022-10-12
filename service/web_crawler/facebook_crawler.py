@@ -41,7 +41,7 @@ class FacebookCrawler():
         self.cookies = None
         self.cookies_path = os.path.join(settings.BASE_DIR, "cookies/facebook_cookie.pkl")
         self.is_login = False
-        self.save_login = True
+        self.save_login = False
         
     def create_driver(self):
         print("remote")
