@@ -37,16 +37,16 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = models.user.user.UserSerializer
     filterset_fields = []
 
-#-----------------------------------------admin----------------------------------------------------------------------------------------------
+# #-----------------------------------------admin----------------------------------------------------------------------------------------------
 
-    @action(detail=False, methods=['GET'], url_path=r'dealer/search/list', permission_classes=(IsAuthenticated,))
-    @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def user_list_from_dealer(self, request):
-        api_user = lib.util.verify.Verify.get_seller_user(request)
-        dealer_user_subscription = lib.util.verify.Verify.get_dealer_user_subscription_from_api_user(api_user)
-        data = database.lss.dealer.get_seller_info_from_dealer(dealer_user_subscription.id)
+#     @action(detail=False, methods=['GET'], url_path=r'dealer/search/list', permission_classes=(IsAuthenticated,))
+#     @lib.error_handle.error_handler.api_error_handler.api_error_handler
+#     def user_list_from_dealer(self, request):
+#         api_user = lib.util.verify.Verify.get_seller_user(request)
+#         dealer_user_subscription = lib.util.verify.Verify.get_dealer_user_subscription_from_api_user(api_user)
+#         data = database.lss.dealer.get_seller_info_from_dealer(dealer_user_subscription.id)
 
-        return Response(data, status=status.HTTP_200_OK)
+#         return Response(data, status=status.HTTP_200_OK)
 
 #-----------------------------------------buyer----------------------------------------------------------------------------------------------
 
@@ -72,49 +72,74 @@ class UserViewSet(viewsets.ModelViewSet):
 
 #-----------------------------------------Dealer----------------------------------------------------------------------------------------------
 
-    @action(detail=False, methods=['POST'], url_path=r'dealer/login', permission_classes=(IsAdminUser,))
-    @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def dealer_login(self, request):
-        email, password = lib.util.getter.getdata(request, ("email","password",), required=True)
-        api_user = lib.util.verify.Verify.get_customer_user(request)
-        dealer_user_subscription = lib.util.verify.Verify.get_dealer_user_subscription_from_api_user(api_user)
-        if not dealer_user_subscription:
-            return Response({"message":"not_dealer_account"}, status=status.HTTP_401_UNAUTHORIZED)
-        token = lib.helper.login_helper.GeneralLogin.get_token(email, password)
-        if not token:
-            return Response({"message":"email_or_password_incorrect"}, status=status.HTTP_401_UNAUTHORIZED)
-        return Response(token, status=status.HTTP_200_OK)
+    # @action(detail=False, methods=['POST'], url_path=r'dealer/login', permission_classes=(IsAdminUser,))
+    # @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    # def dealer_login(self, request):
+    #     email, password = lib.util.getter.getdata(request, ("email","password",), required=True)
+    #     api_user = lib.util.verify.Verify.get_customer_user(request)
+    #     dealer_user_subscription = lib.util.verify.Verify.get_dealer_user_subscription_from_api_user(api_user)
+    #     if not dealer_user_subscription:
+    #         return Response({"message":"not_dealer_account"}, status=status.HTTP_401_UNAUTHORIZED)
+    #     token = lib.helper.login_helper.GeneralLogin.get_token(email, password)
+    #     if not token:
+    #         return Response({"message":"email_or_password_incorrect"}, status=status.HTTP_401_UNAUTHORIZED)
+    #     return Response(token, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['POST'], url_path=r'dealer/verify_code')
-    @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def dealer_verify_code(self, request):
-        email, = lib.util.getter.getdata(request, ("user_email",), required=True)
-        api_user = models.user.user.User.objects.get(email=email,type='user')
-        code = string.digits
-        code = ''.join(random.choice(code) for i in range(4))
+    # @action(detail=False, methods=['POST'], url_path=r'dealer/verify_code')
+    # @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    # def dealer_verify_code(self, request):
+    #     email, = lib.util.getter.getdata(request, ("user_email",), required=True)
+    #     api_user = models.user.user.User.objects.get(email=email,type='user')
+    #     code = string.digits
+    #     code = ''.join(random.choice(code) for i in range(4))
 
-        jobs.send_email_job.send_email_job(i18n_get_verify_code_subject(lang=api_user.lang),email, 'email_verification_code.html', parameters={"verify_code":code}, lang=api_user.lang)
+    #     jobs.send_email_job.send_email_job(i18n_get_verify_code_subject(lang=api_user.lang),email, 'email_verification_code.html', parameters={"verify_code":code}, lang=api_user.lang)
 
-        return Response(code, status=status.HTTP_200_OK)
+    #     return Response(code, status=status.HTTP_200_OK)
 
 #-----------------------------------------Admin----------------------------------------------------------------------------------------------
 
     @action(detail=False, methods=['POST'], url_path=r'admin/login', permission_classes=())
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def admin_login(self, request):
+        from lss.views.custom_jwt import CustomTokenObtainPairSerializer
+
         email, password = lib.util.getter.getdata(request, ("email","password",), required=True)
-        token = lib.helper.login_helper.GeneralLogin.get_token(email, password)
-        if not token:
+        # token = lib.helper.login_helper.GeneralLogin.get_token(email, password)
+        # if not token:
+        #     return Response({"message":"email_or_password_incorrect"}, status=status.HTTP_401_UNAUTHORIZED)
+        # code = string.digits
+        # code = ''.join(random.choice(code) for i in range(4))
+
+        # api_user = models.user.user.User.objects.get(email=email,type='user')
+
+        # jobs.send_email_job.send_email_job( lib.i18n.veification_code_email.i18n_get_notify_wishlist_subject(lang=api_user.lang),email, 'email_verification_code.html', parameters={"verify_code":code}, lang=api_user.lang)
+        if not AuthUser.objects.filter(email=email).exists():
             return Response({"message":"email_or_password_incorrect"}, status=status.HTTP_401_UNAUTHORIZED)
-        code = string.digits
-        code = ''.join(random.choice(code) for i in range(4))
+        auth_user = AuthUser.objects.get(email=email)
+        if not auth_user.check_password(password):
+            return Response({"message":"email_or_password_incorrect"}, status=status.HTTP_401_UNAUTHORIZED)
 
-        api_user = models.user.user.User.objects.get(email=email,type='user')
+        refresh = CustomTokenObtainPairSerializer.get_token(auth_user)
 
-        jobs.send_email_job.send_email_job( lib.i18n.veification_code_email.i18n_get_notify_wishlist_subject(lang=api_user.lang),email, 'email_verification_code.html', parameters={"verify_code":code}, lang=api_user.lang)
+        return Response({
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+            'user_email': email
+        } , status=status.HTTP_200_OK)
 
-        return Response({'token':token,'verify_code':code} , status=status.HTTP_200_OK)
+    @action(detail=False, methods=['GET'], url_path=r'admin/account', permission_classes=(IsAdminUser,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def admin_get_account_info(self, request):
+        return Response(models.user.user.AuthUserSerializer(request.user).data, status=status.HTTP_200_OK) 
 
+    @action(detail=False, methods=['POST'], url_path=r'admin/import', permission_classes=(IsAdminUser,), parser_classes=(MultiPartParser,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def admin_import_account(self, request):
+        # service.rq.queue.enqueue_test_queue(jobs.import_account_job.imoprt_account_job, file=request.data.get('file'), room_id = request.data.get('room_id'))
+
+        service.rq.queue.enqueue_general_queue(jobs.import_account_job.imoprt_account_job,file=request.data.get('file'), room_id = request.data.get('room_id'))
+        return Response('ok', status=status.HTTP_200_OK) 
 #-----------------------------------------seller----------------------------------------------------------------------------------------------
     
     @action(detail=False, methods=['POST'], url_path=r'seller/login/facebook', permission_classes=())

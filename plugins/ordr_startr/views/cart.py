@@ -49,7 +49,7 @@ class CartViewSet(viewsets.GenericViewSet):
             key=credential.get('key'), 
             cart_oid=cart_oid, 
             user_id=pre_order.customer_id, 
-            comment_id = pre_order.meta.get('comment',{}).get('id'),
+            # comment_id = pre_order.meta.get('comment',{}).get('id'),
             user_name=pre_order.customer_name, 
             platform=pre_order.platform, 
             product_items=product_items)

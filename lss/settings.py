@@ -279,7 +279,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 # STATIC_ROOT = os.path.join(BASE_DIR.parent,"lss_vue_enigma/static2")
 STATICFILES_DIRS = [
     # os.path.join(BASE_DIR, "static"),
-    os.path.join(BASE_DIR.parent,"lss_vue/static"),
+    # os.path.join(BASE_DIR.parent,"lss_vue/static"),
     os.path.join(BASE_DIR.parent,"lss_vue_enigma/static")
 ]
 

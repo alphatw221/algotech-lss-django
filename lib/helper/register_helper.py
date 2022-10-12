@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.models import User as AuthUser
 
 from api import models
@@ -168,3 +169,82 @@ def create_user_register(plan, timezone, period, firstName, lastName, email, pas
         country=country_code,
         target_country=country
     )
+
+
+
+
+
+
+def create_new_account_for_james(country_code, usbscription_plan, username, email, password, signup_date, contactNumber):
+
+    amount = 22*12
+
+    country_plan:business_policy.subscription_plan.CountryPlan = business_policy.subscription_plan.SubscriptionPlan.get_country(country_code)
+
+    expired_at = signup_date+timedelta(days=365) 
+    
+    if AuthUser.objects.filter(email=email).exists():
+        auth_user = AuthUser.objects.get(email=email)
+    else:
+        auth_user = AuthUser.objects.create_user(
+            username=username, email=email, password=password)
+    if models.user.user.User.objects.filter(email=email, type=models.user.user.TYPE_SELLER).exists():
+        api_user = models.user.user.User.objects.get(email=email, type=models.user.user.TYPE_SELLER)
+        user_subscription = api_user.user_subscription
+    else:
+        user_subscription = models.user.user_subscription.UserSubscription.objects.create(
+            name=username, 
+            status=models.user.user_subscription.STATUS_VALID, 
+            started_at=signup_date,
+            expired_at=expired_at, 
+            user_plan= {"activated_platform" : [
+                models.user.user_subscription.PLATFORM_FACEBOOK,
+                models.user.user_subscription.PLATFORM_YOUTUBE,
+                models.user.user_subscription.PLATFORM_INSTAGRAM,
+                models.user.user_subscription.PLATFORM_TWITCH
+                ]}, 
+            meta_country={ 'activated_country': [country_code] },
+            type=usbscription_plan,
+            lang=country_plan.language,
+            country = country_code,
+            purchase_price = amount,
+            **business_policy.subscription_plan.SubscriptionPlan.get_plan_limit(usbscription_plan)
+            )
+        
+        
+        api_user = models.user.user.User.objects.create(
+            name=username, email=email, type=models.user.user.TYPE_SELLER, status=models.user.user.STATUS_VALID, phone=contactNumber, auth_user=auth_user, user_subscription=user_subscription)
+    
+    models.user.deal.Deal.objects.create(
+        user_subscription=user_subscription,
+        purchased_plan=usbscription_plan, 
+        total=amount, 
+        status=models.user.deal.STATUS_SUCCESS, 
+        payer=api_user, 
+        payment_time=datetime.utcnow()
+    )
+
+    
+    lib.util.marking_tool.NewUserMark.mark(api_user, save = True)
+    
+
+    # service.sendinblue.contact.create(email=email,first_name=username, last_name=username)
+    # service.hubspot.contact.create(email=email, 
+    #     first_name=username, 
+    #     last_name=username,
+    #     subscription_type=usbscription_plan, 
+    #     subscription_status="new",
+    #     country=country_code,
+    #     expiry_date=int(expired_at.replace(hour=0,minute=0,second=0,microsecond=0).timestamp()*1000)
+    # )
+    
+    # service.sendinblue.transaction_email.AccountActivationEmail(username, usbscription_plan, email, password, to=[email], cc=country_plan.cc, country=country_code).send()
+    # os.environ["OBJC_DISABLE_INITIALIZE_FORK_SAFETY"] = "YES"
+
+    service.stripe.stripe.create_checkout_session_for_james(settings.STRIPE_API_KEY, 'USD', amount)
+    return {
+        "username":username,
+        "email":email,
+        "password":password,
+        "country_code":country_code, 
+    }

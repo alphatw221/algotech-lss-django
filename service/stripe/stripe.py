@@ -73,16 +73,17 @@ def create_checkout_session(secret, currency, order, decimal_places, price_unit,
             amount_off-=__transform_payment_amount(order.adjust_price, decimal_places, price_unit, currency=currency)
         if order.discount:
             amount_off+=__transform_payment_amount(order.discount, decimal_places, price_unit, currency=currency)
-
-        discount = stripe.Coupon.create(
-            amount_off=amount_off,
-            currency=currency
-        )
-        discounts.append(
-            {
-                'coupon': discount.id,
-            }
-        )
+        
+        if amount_off:
+            discount = stripe.Coupon.create(
+                amount_off=amount_off,
+                currency=currency
+            )
+            discounts.append(
+                {
+                    'coupon': discount.id,
+                }
+            )
         # print('discount+adjust')
         # print(amount_off)
 
@@ -135,6 +136,40 @@ def create_checkout_session(secret, currency, order, decimal_places, price_unit,
         print(traceback.format_exc())
         return False
 
+def create_checkout_session_for_james(secret, currency, amount):
+    try:
+        stripe.api_key = secret
+        items = []
+        stripe_product = stripe.Product.create(
+            name='lss_seller_account',
+        )
+        
+        price = stripe.Price.create(
+            product=stripe_product.id,
+            unit_amount=__transform_payment_amount(amount, decimal_places = 2, price_unit='1', currency=currency),
+            currency=currency,
+        )
+        
+        items.append(
+            {
+                'price': price.id,
+                "quantity": 1
+            },
+        )
+
+       
+        checkout_session = stripe.checkout.Session.create(
+            line_items=items,
+            mode='payment',
+            success_url='https://liveshowseller.com/',
+            cancel_url='https://liveshowseller.com/'
+        )
+        
+
+        return checkout_session
+    except Exception:
+        print(traceback.format_exc())
+        return False
 
 def is_payment_successful(secret, session_id):
     try:

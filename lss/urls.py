@@ -28,7 +28,7 @@ from lss.views.email import test
 from lss.views.chat import index,room
 from api_v2.views.facebook.facebook import facebook_messenger_webhook
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    # path('admin/', admin.site.urls),
     path('api/', include('api.urls')),
     path('api/v2/', include('api_v2.urls')),
     # path('chat_bot/', include('chat_bot.urls')),
@@ -52,6 +52,7 @@ urlpatterns = [
     re_path(r'^lss/',TemplateView.as_view(template_name="lss_entry.html")),
     re_path(r'^seller/',TemplateView.as_view(template_name="lss_enigma_entry.html")),
     re_path(r'^buyer/',TemplateView.as_view(template_name="lss_enigma_entry.html")),
+    re_path(r'^admin/',TemplateView.as_view(template_name="lss_enigma_entry.html")),
 
     path('test',TemplateView.as_view(template_name="email_reset_password_link.html")),
     path('test2',TemplateView.as_view(template_name="reset_password_success_email.html")),

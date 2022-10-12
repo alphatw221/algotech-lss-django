@@ -2,6 +2,7 @@ import json
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer  
 import lib
+import uuid
 class LoginConsumer(WebsocketConsumer):
 
     @lib.error_handle.error_handler.web_socket_error_handler.web_socket_error_handler
@@ -34,4 +35,39 @@ class LoginConsumer(WebsocketConsumer):
         self.send(text_data=json.dumps(event))
 
     def chat_message(self, event):
+        self.send(text_data=json.dumps(event))
+
+class AdminImportAccountConsumer(WebsocketConsumer):
+
+    @lib.error_handle.error_handler.web_socket_error_handler.web_socket_error_handler
+    def connect(self):
+        auth_user = self.scope.get('user')
+        if not auth_user.is_superuser:
+            raise lib.error_handle.error.api_error.ApiVerifyError('not admin')
+
+        room_group_name = str(uuid.uuid4())
+        self.room_group_name = room_group_name
+        
+        async_to_sync(self.channel_layer.group_add)(
+            self.room_group_name,
+            self.channel_name
+        )
+        self.accept()
+        self.send(text_data=json.dumps({'type':'room_data','room_id':room_group_name}))
+
+    def disconnect(self, close_code):
+
+        async_to_sync(self.channel_layer.group_discard)(
+            self.room_group_name,
+            self.channel_name
+        )
+
+
+    def success_data(self, event):
+        self.send(text_data=json.dumps(event))
+
+    def error_data(self, event):
+        self.send(text_data=json.dumps(event))
+
+    def complete_data(self, event):
         self.send(text_data=json.dumps(event))
