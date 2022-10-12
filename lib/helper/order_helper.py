@@ -126,7 +126,7 @@ class PreOrderHelper():
         }
 
         pre_order.update(**data, session=session, sync=True)
-        campaign_product.add_to_cart(qty_difference, session=session)
+        campaign_product.add_to_cart(qty_difference, session = None)   #No session here
         
         product_data = {
             "id": campaign_product.id,
@@ -211,7 +211,7 @@ class PreOrderHelper():
             "subtotal":subtotal,
             "total":total
         }
-        campaign_product.add_to_cart(qty_difference, session=session)
+        campaign_product.add_to_cart(qty_difference, session=None) #No session here
         pre_order.update(**data, session=session, sync=True)
 
         product_data = {
@@ -277,7 +277,7 @@ class PreOrderHelper():
                     "subtotal":subtotal,
                     "total":total
                 }
-        campaign_product.customer_return(order_product.data.get('qty'), session=session)
+        campaign_product.customer_return(order_product.data.get('qty'), session=None) #No session here
         pre_order.delete_product(campaign_product, session=session, sync=True, **data)
         order_product.delete(session=session)
 
