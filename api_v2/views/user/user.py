@@ -204,7 +204,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
         return Response({"message":"complete"}, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['POST'], url_path=r'seller/password/reset')
+    @action(detail=False, methods=['POST'], url_path=r'seller/password/reset', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def seller_reset_password(self, request):
         
@@ -235,7 +235,7 @@ class UserViewSet(viewsets.ModelViewSet):
         
         return Response(ret, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['POST'], url_path=r'seller/password/forgot')
+    @action(detail=False, methods=['POST'], url_path=r'seller/password/forgot', permission_classes=())
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def seller_forgot_password(self, request):
         email, = lib.util.getter.getdata(request, ("email",), required=True)

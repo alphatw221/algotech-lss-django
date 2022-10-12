@@ -155,7 +155,7 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
                                 customer_editable=bool(request_data.get('customer_editable', True)), 
                                 customer_removable=bool(request_data.get('customer_removable', True)),
                                 oversell = bool(request_data.get('oversell', False)),
-                                overbook = bool(request_data.get('overbook', True)),
+                                overbook = bool(request_data.get('overbook', False)),
                                 tag=list(request_data.get('tag',[])),
                                 type=str(request_data.get('type',models.product.product.TYPE_PRODUCT)),
                                 description = request_data.get('description',''),
