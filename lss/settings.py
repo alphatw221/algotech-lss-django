@@ -338,6 +338,11 @@ FACEBOOK_APP_CREDS = {
     "app_secret": "e36ab1560c8d85cbc413e07fb7232f99",
 }
 
+FACEBOOK_TEST_ACOOUNT = {
+    "EMAIL": "twadmin@algotech.app",
+    "PASSWORD": "algoFB2021"
+}
+
 # Instagram
 INSTAGRAM_API_URL = "https://graph.instagram.com"
 

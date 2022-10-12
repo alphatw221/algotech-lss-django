@@ -35,12 +35,7 @@ class FacebookSharedListCrawler(FacebookCrawler):
         }
         self.lang = self.lang_map.get(lang)
     
-    def find_cookies(self):
-        if os.path.exists(self.cookies_path):
-            cookies = pickle.load(open(self.cookies_path, "rb"))
-            return cookies
-        else:
-            return None
+    
     
     def login_with_cookies(self, cookies):
         print("login with cookies")
@@ -67,7 +62,7 @@ class FacebookSharedListCrawler(FacebookCrawler):
             self.is_login = True
         time.sleep(2)
         self.validate_user()
-        pickle.dump(self.driver.get_cookies(), open(self.cookies_path, "wb"))
+        self.save_cookies()
     
     def validate_user(self):
         print("validate_user")
@@ -124,7 +119,6 @@ class FacebookSharedListCrawler(FacebookCrawler):
                     EC.visibility_of_element_located((By.TAG_NAME, "article"))
                 )
             if article:
-                print(8888)
                 articles = self.driver.find_elements(By.XPATH, "//article")
                
                 for article in articles:

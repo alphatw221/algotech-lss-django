@@ -36,8 +36,8 @@ class FacebookCrawler():
         self.login_url = "https://m.facebook.com/"
         self.page_url = ""
         
-        self.email = "twadmin@algotech.app"
-        self.password = "algoFB2021"
+        self.email = settings.FACEBOOK_TEST_ACOOUNT['EMAIL']
+        self.password = settings.FACEBOOK_TEST_ACOOUNT['PASSWORD']
         self.cookies = None
         self.cookies_path = os.path.join(settings.BASE_DIR, "cookies/facebook_cookie.pkl")
         self.is_login = False
@@ -61,6 +61,16 @@ class FacebookCrawler():
     def get_driver(self):
         return self.driver
     
+    def save_cookies(self):
+        pickle.dump(self.driver.get_cookies(), open(self.cookies_path, "wb"))
+        print(f"save facebook cookies to {self.cookies_path}")
+        
+    def find_cookies(self):
+        if os.path.exists(self.cookies_path):
+            cookies = pickle.load(open(self.cookies_path, "rb"))
+            return cookies
+        else:
+            return None
         
     def login(self, validate=False):
         """

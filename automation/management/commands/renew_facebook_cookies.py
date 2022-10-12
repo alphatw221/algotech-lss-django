@@ -23,3 +23,4 @@ class Command(BaseCommand):
             f'{pendulum.now()} - starting renew_facebook_cookies crawler'))
         crawler = service.web_crawler.renew_facebook_cookies_crawler.RenewFacebookCookiesCrawler()
         crawler.start()
+        

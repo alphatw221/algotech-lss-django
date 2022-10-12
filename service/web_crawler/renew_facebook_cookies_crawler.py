@@ -18,6 +18,7 @@ from selenium.webdriver.common.by import By
 
 
 class RenewFacebookCookiesCrawler(FacebookCrawler):
+    
         
     def login(self, validate=False):
         print("login")
@@ -36,7 +37,8 @@ class RenewFacebookCookiesCrawler(FacebookCrawler):
             self.is_login = True
         time.sleep(2)
         self.validate_user()
-        pickle.dump(self.driver.get_cookies(), open(self.cookies_path, "wb"))
+        self.save_cookies()
+        
         
     def validate_user(self):
         print("validate_user")
