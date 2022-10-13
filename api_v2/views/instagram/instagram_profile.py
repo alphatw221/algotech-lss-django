@@ -50,17 +50,13 @@ class InstagramProfileViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['GET'], url_path=r'picture', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def get_instagram_profile_picture(self, request, pk):
-        try:
-            api_user = lib.util.verify.Verify.get_seller_user(request)
-            user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
-            
-            instagram_profile = models.instagram.instagram_profile.InstagramProfile.objects.get(id=pk)
-            code, response = service.instagram.profile.get_profile_info(page_token=instagram_profile.token, profile_id=instagram_profile.business_id)
-            if code !=200:
-                return Response({"error_response": response}, status=status.HTTP_200_OK)
-            instagram_profile.image = response['profile_picture_url']
-            instagram_profile.save()
-            return Response(instagram_profile.image, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({"error_response": str(e)}, status=status.HTTP_200_OK)
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        instagram_profile = models.instagram.instagram_profile.InstagramProfile.objects.get(id=pk)
+        code, response = service.instagram.profile.get_profile_info(page_token=instagram_profile.token, profile_id=instagram_profile.business_id)
+        if code !=200:
+            return Response({"error_response": response}, status=status.HTTP_400_BAD_REQUEST)
+        instagram_profile.image = response['profile_picture_url']
+        instagram_profile.save()
+        return Response(instagram_profile.image, status=status.HTTP_200_OK)
 

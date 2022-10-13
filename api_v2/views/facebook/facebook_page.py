@@ -59,15 +59,12 @@ class FacebookPageViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['GET'], url_path=r'picture', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def get_profile_picture(self, request, pk):
-        try:
-            api_user = lib.util.verify.Verify.get_seller_user(request)
-            user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
-            facebook_page = models.facebook.facebook_page.FacebookPage.objects.get(id=pk)
-            code, response = service.facebook.page.get_page_picture(page_token=facebook_page.token, page_id=facebook_page.page_id, height=600, width=600)
-            if code !=200:
-                return Response({"error_response": response}, status=status.HTTP_200_OK)
-            facebook_page.image = response['data']['url']
-            facebook_page.save()
-            return Response(facebook_page.image, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({"error_response": str(e)}, status=status.HTTP_200_OK)
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        facebook_page = models.facebook.facebook_page.FacebookPage.objects.get(id=pk)
+        code, response = service.facebook.page.get_page_picture(page_token=facebook_page.token, page_id=facebook_page.page_id, height=600, width=600)
+        if code !=200:
+            return Response({"error_response": response}, status=status.HTTP_400_BAD_REQUEST)
+        facebook_page.image = response['data']['url']
+        facebook_page.save()
+        return Response(facebook_page.image, status=status.HTTP_200_OK)
