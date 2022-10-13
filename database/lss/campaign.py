@@ -20,7 +20,7 @@ class Campaign(Collection):
 
 
 
-def get_merge_order_list_pagination(campaign_id, search:str, status:str, filter_payment:list, filter_delivery:list, filter_platform:list, page:int=1, page_size:int=25, sort_by:str='created_at'):
+def get_merge_order_list_pagination(campaign_id, search:str, status:str, filter_payment:list, filter_delivery:list, filter_platform:list, sort_by:dict, page:int=1, page_size:int=25):
 
     filter_query = {'$expr': { '$eq': ["$$id", "$campaign_id"] },"id":{"$ne":None} ,"products":{"$ne":{}}}
 
@@ -45,16 +45,15 @@ def get_merge_order_list_pagination(campaign_id, search:str, status:str, filter_
             filter_query['status']['$in']+=filter_delivery
         else:
             filter_query['status']={"$in": filter_delivery}
-            
-    if not sort_by :
-        sort_query = { "created_at" : -1 }
-    # else:
-    #     sort_query = {sort_by:-1}
-
-    # if sort_by == {}:
-    #     sort_query = { "created_at" : -1 }
-    # else:
-    #     sort_query = sort_by
+    
+    sort_fields = {"id", "customer_name", "subtotal", "payment_method", "status"}
+    if type(sort_by) != dict or not (sort_by.keys() & sort_fields):
+        sort_by = { "created_at" : -1 }
+    else:
+        for key in list(sort_by.keys()):
+            if key not in sort_fields:
+                del sort_by[key]
+                
     query = [
         {"$match":{"id":campaign_id}},
         {
@@ -98,7 +97,7 @@ def get_merge_order_list_pagination(campaign_id, search:str, status:str, filter_
             "type":{"$first":"$data.type"},
             "created_at":{"$first":"$data.created_at"}
         }},
-        { "$sort" : sort_query},
+        { "$sort" : sort_by},
         {"$project":{"_id":0,}},
     ]
 
