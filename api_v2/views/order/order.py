@@ -233,8 +233,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         payment_list, delivery_list, platform_list, sort_by = lib.util.getter.getdata(request,('payment','delivery','platform', 'sort_by'))
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription,campaign_id)
-
-        json_data, total_count = database.lss.campaign.get_merge_order_list_pagination(campaign.id, search, order_status, payment_list, delivery_list, platform_list , int(page), int(page_size), sort_by)
+        json_data, total_count = database.lss.campaign.get_merge_order_list_pagination(campaign.id, search, order_status, payment_list, delivery_list, platform_list, sort_by, int(page), int(page_size))
 
         return Response({'count':total_count,'data':json_data}, status=status.HTTP_200_OK)
     
