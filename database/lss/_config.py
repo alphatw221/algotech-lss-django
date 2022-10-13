@@ -42,7 +42,7 @@ class Collection():
         template = cls.template.copy()
         template.update(kwargs)
         if auto_inc:
-            template['id'] = cls.__get_incremented_filed(session=session) 
+            template['id'] = cls.__get_incremented_field(session=session) 
         template['created_at'] = datetime.utcnow()
         _id = cls._collection.insert_one(template, session=session).inserted_id
         data = cls._collection.find_one(_id, session=session)
@@ -53,26 +53,30 @@ class Collection():
         template = cls.template.copy()
         template.update(kwargs)
         if auto_inc:
-            template['id'] = cls.__get_incremented_filed(session=session) 
+            template['id'] = cls.__get_incremented_field(session=session) 
         template['created_at'] = datetime.utcnow()
         cls._collection.insert_one(template, session=session)
 
     
     @classmethod
-    def __get_incremented_filed(cls, session=None):
-        if session:
-            doc = db['__schema__'].find_one({"name":cls.collection_name}, session=session)
-            db['__schema__'].update_one({"name":cls.collection_name},{"$inc":{"auto.seq":1}}, session=session)
+    def __get_incremented_field(cls, session=None):
+        # if session:
+        #     doc = db['__schema__'].find_one({"name":cls.collection_name}, session=session)
+        #     db['__schema__'].update_one({"name":cls.collection_name},{"$inc":{"auto.seq":1}}, session=session)
                 
-            return int(doc['auto']['seq']+1)
-
-        with client.start_session() as session:
-            with session.start_transaction():
-                
-                doc = db['__schema__'].find_one({"name":cls.collection_name}, session=session)
-                db['__schema__'].update_one({"name":cls.collection_name},{"$inc":{"auto.seq":1}}, session=session)
-                
-        return int(doc['auto']['seq']+1)
+        #     return int(doc['auto']['seq']+1)
+        while True:
+            try:
+                with client.start_session() as session:
+                    with session.start_transaction():
+                        
+                        doc = db['__schema__'].find_one({"name":cls.collection_name}, session=session)
+                        db['__schema__'].update_one({"name":cls.collection_name},{"$inc":{"auto.seq":1}}, session=session)
+                        
+                return int(doc['auto']['seq']+1)
+            except Exception:
+                pass
+                #retry
 
     def _sync(self, session=None):
         self.data = self._collection.find_one({'id':self.id}, session=session)

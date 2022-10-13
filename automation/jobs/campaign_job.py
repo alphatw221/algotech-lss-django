@@ -23,7 +23,7 @@ class OrderCodesMappingSingleton:
     @classmethod
     def get_mapping(cls, campaign_id):
         if cls.order_codes_mapping == None:
-            database.lss.campaign_product.CampaignProduct.filter(campaign_id=campaign_id)
+            # database.lss.campaign_product.CampaignProduct.filter(campaign_id=campaign_id)
             kwargs = {"campaign_id": campaign_id, "$or": [{"type": "product"}, {"type": "product-fast"}]}
             campaign_products = database.lss.campaign_product.CampaignProduct.filter(**kwargs)
             cls.order_codes_mapping = {campaign_product['order_code'].lower(): campaign_product
