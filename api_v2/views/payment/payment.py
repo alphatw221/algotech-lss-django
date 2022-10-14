@@ -471,7 +471,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         print(result.id)
         return Response(result.redirect_url, status=status.HTTP_200_OK)
     
-     @action(detail=False, methods=['POST'], url_path=r"rapyd/webhook")
+    @action(detail=False, methods=['POST'], url_path=r"rapyd/webhook")
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def get_rapyd_webhook(self, request):
 
