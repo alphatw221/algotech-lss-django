@@ -66,7 +66,7 @@ class CartHelper():
             else:
                 return RequestState.INVALID_NEGATIVE_QTY
 
-        original_qty = pymongo_cart.data.get('products',{}).get(str(campaign_product_data.get('id')),{}).get('qty',0)
+        original_qty = pymongo_cart.data.get('products',{}).get(str(campaign_product_data.get('id')),0)
         qty_difference = qty-original_qty
         rule.check_rule.cart_check_rule.CartCheckRule.is_stock_avaliable(**{
                     "campaign_product_data":campaign_product_data,
