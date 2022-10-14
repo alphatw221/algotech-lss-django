@@ -84,7 +84,7 @@ class CartHelper():
 
         data ={
             "lock_at": datetime.now() if api_user and api_user.type == 'customer' else None,
-            f"products.{str(pymongo_campaign_product.id)}.{'qty'}": qty,
+            f"products.{str(pymongo_campaign_product.id)}": qty,
         }
         
         pymongo_cart.update(**data, sync=True)
