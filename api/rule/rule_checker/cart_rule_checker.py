@@ -4,7 +4,7 @@ from api.rule.rule_checker.rule_checker import RuleChecker
 class CartEditProductRuleChecker(RuleChecker):
 
     check_list=[
-        CartCheckRule.is_campaign_product_exist,
+
         CartCheckRule.is_cart_lock,
         CartCheckRule.is_qty_valid,
         CartCheckRule.is_campaign_product_editable,

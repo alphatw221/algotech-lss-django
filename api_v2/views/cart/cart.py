@@ -225,10 +225,11 @@ class CartViewSet(viewsets.ModelViewSet):
         if cart.buyer and cart.buyer != api_user:
             raise lib.error_handle.error.api_error.ApiVerifyError('invalid_user')
 
-        return Response(models.cart.cart.CartSerializer(cart).data, status=status.HTTP_200_OK)
+        return Response(models.cart.cart.CartSerializerWithUserSubscription(cart).data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['PUT'], url_path=r'(?P<cart_oid>[^/.]+)/buyer/checkout', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    @lib.error_handle.error_handler.cart_operation_error_handler.update_cart_product_error_handler
     def buyer_checkout_cart(self, request, cart_oid):
         
         shipping_data, = \
@@ -238,35 +239,41 @@ class CartViewSet(viewsets.ModelViewSet):
         cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
         campaign = lib.util.verify.Verify.get_campaign_from_cart(cart)
 
-        rule.rule_checker.cart_rule_checker.CartCheckoutRuleChecker.check({'api_user':api_user, 'campaign':campaign, 'cart':cart})
+        rule.rule_checker.cart_rule_checker.RuleChecker.check(
+            check_list=[
+                rule.rule_checker.cart_rule_checker.CartCheckRule.allow_checkout,
+                rule.rule_checker.cart_rule_checker.CartCheckRule.is_cart_lock,
+                rule.rule_checker.cart_rule_checker.CartCheckRule.is_cart_empty
+            ],
+            **{'api_user':api_user, 'campaign':campaign, 'cart':cart}
+        )
+
 
         serializer =models.order.order.OrderSerializerUpdateShipping(data=shipping_data) 
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        success, api_order = lib.helper.cart_helper.CartHelper.checkout(api_user, campaign.id, cart.id)
-
-
+        success, pymongo_order = lib.helper.cart_helper.CartHelper.checkout(api_user, campaign.id, cart.id)
+        
         if not success:
             cart = lib.util.verify.Verify.get_cart(cart.id)
             return Response(models.cart.cart.CartSerializer(cart).data, status=status.HTTP_205_RESET_CONTENT)
-
-        order = lib.util.verify.Verify.get_order(api_order.id)
-
+        
+        order_oid = str(pymongo_order._id)
         serializer = models.order.order.OrderSerializerUpdateShipping(order, data=shipping_data, partial=True) 
         if not serializer.is_valid():
             data = models.order.order.OrderSerializer(order).data
-            data['oid']=str(api_order._id)
+            data['oid']=order_oid
             return Response(data, status=status.HTTP_200_OK)
 
 
         order = serializer.save()
 
-        content = lib.helper.order_helper.OrderHelper.get_checkout_email_content(order,api_order._id)
+        content = lib.helper.order_helper.OrderHelper.get_checkout_email_content(order,order_oid)
         jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)     #queue this to redis if needed
         
         data = models.order.order.OrderSerializer(order).data
-        data['oid']=str(api_order._id)
+        data['oid']=order_oid
         
         # change buyer language
         api_user.lang = campaign.lang
@@ -276,21 +283,18 @@ class CartViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['PUT'], url_path=r'(?P<cart_oid>[^/.]+)/buyer/product/edit', permission_classes=())
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def buyer_add_order_product(self, request, cart_oid):
+    @lib.error_handle.error_handler.cart_operation_error_handler.update_cart_product_error_handler
+    def buyer_edit_cart_product(self, request, cart_oid):
 
         api_user = lib.util.verify.Verify.get_customer_user(request) if request.user.is_authenticated else None
         campaign_product_id, qty = lib.util.getter.getdata(request, ('campaign_product_id', 'qty',), required=True)
 
-        if not qty or type(qty) != int :
-            raise lib.error_handle.error.api_error.ApiVerifyError('qty_invalid')
-
         cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
-
         campaign = lib.util.verify.Verify.get_campaign_from_cart(cart)
-        campaign_product = campaign.products.get(id=campaign_product_id) if campaign.products.filter(id=campaign_product_id).exists() else None
+        campaign_product = lib.util.verify.Verify.get_campaign_product_from_campaign(campaign, campaign_product_id)
+        lib.helper.cart_helper.CartHelper.update_cart_product(api_user, cart, campaign_product, qty)
 
-        lib.helper.cart_helper.CartHelper.update_cart_product(api_user, cart, campaign_product, qty, campaign)
-
+        cart = lib.util.verify.Verify.get_cart(cart.id)
         # ret = rule.rule_checker.cart_rule_checker.CartEditProductRuleChecker.check(
         #     **{'cart':cart,'campaign':campaign, 'campaign_product_id':campaign_product_id, 'api_user':api_user, 'qty':qty})
         # qty_difference = ret.get('qty_difference')
@@ -399,6 +403,30 @@ class CartViewSet(viewsets.ModelViewSet):
 
         return Response(oid, status=status.HTTP_200_OK)
 
+    @action(detail=False, methods=['PUT'], url_path=r'(?P<cart_id>[^/.]+)/seller/product/edit', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    @lib.error_handle.error_handler.cart_operation_error_handler.update_cart_product_error_handler
+    def seller_edit_cart_product(self, request, cart_id):
+
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        campaign_product_id, qty = lib.util.getter.getdata(request, ('campaign_product_id', 'qty',), required=True)
+
+        cart = lib.util.verify.Verify.get_cart(cart_id)
+        campaign = lib.util.verify.Verify.get_campaign_from_cart(cart)
+        campaign_product = lib.util.verify.Verify.get_campaign_product_from_campaign(campaign, campaign_product_id)
+
+        lib.helper.cart_helper.CartHelper.update_cart_product(api_user, cart, campaign_product, qty)
+        cart = lib.util.verify.Verify.get_cart(cart.id)
+        # ret = rule.rule_checker.cart_rule_checker.CartEditProductRuleChecker.check(
+        #     **{'cart':cart,'campaign':campaign, 'campaign_product_id':campaign_product_id, 'api_user':api_user, 'qty':qty})
+        # qty_difference = ret.get('qty_difference')
+
+        # database.lss.campaign_product.CampaignProduct(id=campaign_product.id).add_to_cart(qty_difference, sync=False)
+
+        # cart.products[campaign_product_id]={'qty':qty}
+        # cart.save()
+
+        return Response(models.cart.cart.CartSerializer(cart).data, status=status.HTTP_200_OK)
 
     # @action(detail=True, methods=['PUT'], url_path=r'seller/adjust', permission_classes=(IsAuthenticated,))
     # @lib.error_handle.error_handler.api_error_handler.api_error_handler

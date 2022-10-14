@@ -29,10 +29,35 @@ class CartHelper():
 
 
     @classmethod
-    @lib.error_handle.error_handler.cart_operation_error_handler.update_cart_product_error_handler
-    def update_cart_product(cls, api_user, cart, campaign_product, qty, campaign):
-        pass
+    def update_cart_product(cls, api_user, cart, campaign_product, qty):
 
+        original_qty = cart.products.get(str(campaign_product.id),0)
+        qty_difference = qty-original_qty
+
+        ret = rule.rule_checker.cart_rule_checker.RuleChecker.check(check_list=[
+            rule.check_rule.cart_check_rule.CartCheckRule.is_cart_lock,
+            rule.check_rule.cart_check_rule.CartCheckRule.is_qty_valid,
+            rule.check_rule.cart_check_rule.CartCheckRule.campaign_product_type,
+            rule.check_rule.cart_check_rule.CartCheckRule.is_campaign_product_editable,
+            rule.check_rule.cart_check_rule.CartCheckRule.is_campaign_product_removeable,
+            rule.check_rule.cart_check_rule.CartCheckRule.is_stock_avaliable,
+            rule.check_rule.cart_check_rule.CartCheckRule.is_under_max_limit,
+        ],**{
+            'api_user':api_user,
+            'cart':cart,
+            'qty':qty,
+            'campaign_product':campaign_product,
+            'qty_difference':qty_difference
+        })
+
+        cls.__update_cart_product(
+            api_user, 
+            database.lss.cart.Cart(id=cart.id),
+            campaign_product.__dict__,
+            qty,
+            qty_difference
+        
+        )
     @classmethod
     @lib.error_handle.error_handler.cart_operation_error_handler.update_cart_product_by_comment_error_handler
     def update_cart_product_by_comment(cls, pymongo_cart, campaign_product_data, qty):
@@ -82,12 +107,14 @@ class CartHelper():
         pymongo_campaign_product = database.lss.campaign_product.CampaignProduct(id=campaign_product_data.get('id'))
         pymongo_campaign_product.add_to_cart(qty_difference, sync=True) 
 
-        data ={
-            "lock_at": datetime.now() if api_user and api_user.type == 'customer' else None,
-            f"products.{str(pymongo_campaign_product.id)}": qty,
-        }
-        
-        pymongo_cart.update(**data, sync=True)
+        if qty<=0:
+            pymongo_cart.remove_product(pymongo_campaign_product.id, sync=True)
+        else:
+            data ={
+                "lock_at": datetime.now() if api_user and api_user.type == 'customer' else None,
+                f"products.{str(pymongo_campaign_product.id)}": qty,
+            }
+            pymongo_cart.update(**data, sync=True)
 
         product_data = {
             "id": pymongo_campaign_product.id,
@@ -105,84 +132,45 @@ class CartHelper():
 
     @classmethod
     @lib.error_handle.error_handler.pymongo_error_handler.pymongo_error_handler
-    def checkout(api_user, campaign_id, cart_id):
+    def checkout(cls, api_user, campaign_id, cart_id, attempts=3):
 
-         with database.lss.util.start_session() as session:
-            with session.start_transaction():
-                success = True
+        try:
+            with database.lss.util.start_session() as session:
+                with session.start_transaction():
+                    success = True
 
-                cart = database.lss.cart.Cart.get_object(id=cart_id,session=session)
+                    pymongo_cart = database.lss.cart.Cart.get_object(id=cart_id,session=session)
 
-                campaign_products = database.lss.campaign_product.filter(campaign_id=campaign_id, session=session)  #cache this data in the future
-                campaign_product_dict = {campaign_product.get('id'):campaign_product for campaign_product in campaign_products}
-                
-                order_products = {}
-                subtotal = 0
-                total = 0
-                for campaign_product_id, data in cart.data.get('products',{}).copy().items():
-                    try:
-                        qty = data['qty']
-                        assert type(qty)==int
-                        
-                        campaign_product = campaign_product_dict[campaign_product_id]
-                        campaign_product_price = campaign_product['price']
-                        qty_avaliable = campaign_product['qty_for_sale']-campaign_product['qty_sold']
-                        if qty>qty_avaliable:
-                            qty = qty_avaliable
-                            cart.data.get('products',{}).get(campaign_product_id)['qty']=qty
+                    campaign_products = database.lss.campaign_product.filter(campaign_id=campaign_id, session=session)  #cache this data in the future
+                    campaign_product_dict = {str(campaign_product.get('id')):campaign_product for campaign_product in campaign_products}
+                    
+                    for campaign_product_id, qty in pymongo_cart.data.get('products',{}).copy().items():
+                        try:
+                            campaign_product = campaign_product_dict[campaign_product_id]
+                            qty_avaliable = campaign_product['qty_for_sale']-campaign_product['qty_sold']
+                            if qty>qty_avaliable and not campaign_product.get('oversell'):
+                                qty = qty_avaliable
+                                pymongo_cart.data.get('products',{})[campaign_product_id]=qty
+                                success = False
+                        except Exception:
+                            print(traceback.format_exc())
+                            del pymongo_cart.data.get('products',{})[campaign_product_id]
                             success = False
-                        
 
-                        order_products[campaign_product_id]={
-                            "qty":qty,
-                            "type":campaign_product.get("type"),
-                            "name":campaign_product.get("name"),
-                            "price":campaign_product_price,
-                            "image":campaign_product.get("image"),
-                            "subtotal":float(qty*campaign_product_price),
-                        }
+                    if not success:
+                        pymongo_cart.update(session=session, sync=False, **pymongo_cart.data)
+                        return False, None
 
-                        subtotal+=campaign_product_price*qty
-                    except Exception:
-                        print(traceback.format_exc())
-                        del cart.data.get('products',{})[campaign_product_id]
-                        success = False
-                        continue
-                
-                total = subtotal
-                for index, adjust in enumerate(cart.data.get('seller_adjust',[]).copy()):
-                    try:
-                        title = adjust['title']
-                        _type = adjust['type']
-                        amount = adjust['amount']
+                    
+                    pymongo_order = database.lss.order.Order.create_object(session=session, **pymongo_cart.data)  
 
-                        assert type in models.cart.cart.SELLER_ADJUST_TYPES
-                        assert type(amount) == int
+                    #create order product here     with or without session
 
-                        if _type == models.cart.cart.SELLER_ADJUST_ADD:
-                            total+=amount
-                        elif _type == models.cart.cart.SELLER_ADJUST_DISCOUNT:
-                            total-=amount
-                    except Exception:
-                        print(traceback.format_exc())
-                        del cart.data.get('seller_adjust',[])[index]
-                        success = False
-                        continue
-                
-                if not success:
-                    cart.update(session=session, sync=False, **cart.data)
-                    return False, None
-
-                
-                order_data = cart.data.copy()
-                order_data['products']=order_products
-                order_data['buyer_id'] = api_user.id if api_user else None
-                order_data['subtotal'] = subtotal
-                order_data['total'] = total
-
-                order = database.lss.order.Order.create_object(session=session, **order_data)
-
-                cart.clear(session=session)
-                return True, order
-
-    
+                    pymongo_cart.clear(session=session)
+                    return True, pymongo_order
+        except Exception:
+            if attempts > 0:
+                cls.checkout(api_user, campaign_id, cart_id, attempts=attempts-1)
+            else:
+                raise
+                #server busy , please try again

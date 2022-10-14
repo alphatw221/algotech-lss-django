@@ -16,3 +16,8 @@ class Cart(Collection):
 
     def clear(self, session=None):
         self.update(session=session, sync=False, seller_adjust=[], free_delivery = False, products={}, meta={})
+
+    def remove_product(self, campaign_product_id, sync=False, session=None):
+        self._collection.update_one({"id":self.id},{"$unset":{f"products.{campaign_product_id}":1}})
+        if sync:
+            self._sync()

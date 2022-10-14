@@ -3,7 +3,7 @@ from djongo import models
 
 from rest_framework import serializers
 
-from api.models.campaign.campaign import Campaign
+from api.models.campaign.campaign import Campaign, CampaignSerializer, CampaignSerializerWithUserSubscription
 from api.models.user.user import User
 
 SELLER_ADJUST_ADD = '+'
@@ -57,9 +57,13 @@ class CartSerializer(serializers.ModelSerializer):
         model = Cart
         fields = '__all__'
         read_only_fields = ['created_at', 'modified_at', 'campaign', 'buyer']
-
+    campaign = CampaignSerializer()
     meta = serializers.JSONField(default=dict)
     seller_adjust = serializers.JSONField(default=dict)
     products = serializers.JSONField(default=dict)
+    applied_discount = serializers.JSONField(default=dict)
 
+class CartSerializerWithUserSubscription(CartSerializer):
+    campaign = CampaignSerializerWithUserSubscription()
+    
 api_cart_template={f.get_attname():f.get_default() if f.has_default() else None for f in Cart._meta.fields}
