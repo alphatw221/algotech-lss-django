@@ -474,18 +474,19 @@ class PaymentViewSet(viewsets.GenericViewSet):
     @action(detail=False, methods=['POST'], url_path=r"rapyd/webhook")
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def get_rapyd_webhook(self, request):
-        print(request)
         print("headers", request.headers)
-        body = request.json()
-        print("body", body)
-        signature = request.headers['signature']
-        salt = request.headers['salt']
-        timestamp = request.headers['timestamp']
         
-        print("body", body)
+        signature = request.headers['Signature']
+        salt = request.headers['Salt']
+        timestamp = request.headers['Timestamp']
+        
         print("signature", signature)
         print("salt", salt)
-        print("body['data']", body['data'])
+        print("timestamp", timestamp)
+        
+        body = request.body
+        print("body", body)
+        
         
         rapyd_service = service.rapyd.rapyd.RapydService()
         if not rapyd_service.auth_webhook_request(signature, request.url._url, salt, timestamp, body):
