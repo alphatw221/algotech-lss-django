@@ -1,5 +1,5 @@
 from django.http import JsonResponse
-from django.db.models import Q
+from django.db.models import Q, Value
 
 from rest_framework import viewsets, status
 from rest_framework.pagination import PageNumberPagination
@@ -31,109 +31,109 @@ class CartViewSet(viewsets.ModelViewSet):
     pagination_class = CartPagination
     permission_classes = (IsAdminUser,)
 # ---------------------------------------------- guest ------------------------------------------------------
-    @action(detail=False, methods=['GET'], url_path=r'guest/retrieve/(?P<cart_oid>[^/.]+)/platform', permission_classes=(), authentication_classes=[])
-    @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def guest_retrieve_cart_platform(self, request, cart_oid):
-        cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
-        return Response(cart.platform, status=status.HTTP_200_OK)
+    # @action(detail=False, methods=['GET'], url_path=r'guest/retrieve/(?P<cart_oid>[^/.]+)/platform', permission_classes=(), authentication_classes=[])
+    # @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    # def guest_retrieve_cart_platform(self, request, cart_oid):
+    #     cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
+    #     return Response(cart.platform, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['GET'], url_path=r'guest/retrieve/(?P<cart_oid>[^/.]+)', permission_classes=(), authentication_classes=[])
-    @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def guest_retrieve_cart(self, request, cart_oid):
-        cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
+    # @action(detail=False, methods=['GET'], url_path=r'guest/retrieve/(?P<cart_oid>[^/.]+)', permission_classes=(), authentication_classes=[])
+    # @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    # def guest_retrieve_cart(self, request, cart_oid):
+    #     cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
 
-        return Response(models.cart.cart.CartSerializer(cart).data, status=status.HTTP_200_OK)
+    #     return Response(models.cart.cart.CartSerializer(cart).data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['PUT'], url_path=r'(?P<cart_oid>[^/.]+)/guest/product/edit', permission_classes=(), authentication_classes=[])
-    @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    @lib.error_handle.error_handler.cart_operation_error_handler.order_operation_error_handler
-    def guest_edit_cart_product(self, request, cart_oid):
+    # @action(detail=False, methods=['PUT'], url_path=r'(?P<cart_oid>[^/.]+)/guest/product/edit', permission_classes=(), authentication_classes=[])
+    # @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    # @lib.error_handle.error_handler.cart_operation_error_handler.update_cart_product_error_handler
+    # def guest_edit_cart_product(self, request, cart_oid):
 
-        campaign_product_id, qty = lib.util.getter.getdata(request, ('campaign_product_id', 'qty',), required=True)
+    #     campaign_product_id, qty = lib.util.getter.getdata(request, ('campaign_product_id', 'qty',), required=True)
 
-        cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
-        campaign = lib.util.verify.Verify.get_campaign_from_cart(cart)
-        campaign_product = campaign.products.get(id=campaign_product_id) if campaign.products.filter(id=campaign_product_id).exists() else None
+    #     cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
+    #     campaign = lib.util.verify.Verify.get_campaign_from_cart(cart)
+    #     campaign_product = campaign.products.get(id=campaign_product_id) if campaign.products.filter(id=campaign_product_id).exists() else None
 
-        ret = rule.rule_checker.cart_rule_checker.CartEditProductRuleChecker.check(
-            **{'cart':cart,'campaign':campaign, 'campaign_product_id':campaign_product_id, 'api_user':None, 'qty':qty})
-        qty_difference = ret.get('qty_difference')
+    #     ret = rule.rule_checker.cart_rule_checker.CartEditProductRuleChecker.check(
+    #         **{'cart':cart,'campaign':campaign, 'campaign_product_id':campaign_product_id, 'api_user':None, 'qty':qty})
+    #     qty_difference = ret.get('qty_difference')
 
-        database.lss.campaign_product.CampaignProduct(id=campaign_product.id).add_to_cart(qty_difference, sync=False)
+    #     database.lss.campaign_product.CampaignProduct(id=campaign_product.id).add_to_cart(qty_difference, sync=False)
 
-        cart.products[campaign_product_id]={'qty':qty}
-        cart.save()
+    #     cart.products[campaign_product_id]={'qty':qty}
+    #     cart.save()
 
-        return Response(models.cart.cart.CartSerializer(cart).data, status=status.HTTP_200_OK)
+    #     return Response(models.cart.cart.CartSerializer(cart).data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['DELETE'], url_path=r'(?P<cart_oid>[^/.]+)/guest/product/delete', permission_classes=(), authentication_classes=[])
-    @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    @lib.error_handle.error_handler.cart_operation_error_handler.order_operation_error_handler
-    def guest_delete_cart_product(self, request, cart_oid):
+    # @action(detail=False, methods=['DELETE'], url_path=r'(?P<cart_oid>[^/.]+)/guest/product/delete', permission_classes=(), authentication_classes=[])
+    # @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    # @lib.error_handle.error_handler.cart_operation_error_handler.update_cart_product_error_handler
+    # def guest_delete_cart_product(self, request, cart_oid):
 
-        campaign_product_id, = lib.util.getter.getdata(request, ('campaign_product_id', ), required=True)
+    #     campaign_product_id, = lib.util.getter.getdata(request, ('campaign_product_id', ), required=True)
 
-        cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
-        campaign = lib.util.verify.Verify.get_campaign_from_cart(cart)
-        campaign_product = campaign.products.get(id=campaign_product_id) if campaign.products.filter(id=campaign_product_id).exists() else None
+    #     cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
+    #     campaign = lib.util.verify.Verify.get_campaign_from_cart(cart)
+    #     campaign_product = campaign.products.get(id=campaign_product_id) if campaign.products.filter(id=campaign_product_id).exists() else None
 
 
-        rule.rule_checker.cart_rule_checker.CartDeleteProductRuleChecker.check({'api_user':None,'cart':cart,'campaign_product':campaign_product})
+    #     rule.rule_checker.cart_rule_checker.CartDeleteProductRuleChecker.check({'api_user':None,'cart':cart,'campaign_product':campaign_product})
 
-        if campaign_product_id not in cart.products:
-            raise lib.error_handle.error.api_error.ApiVerifyError('campaign_product_not_found')
+    #     if campaign_product_id not in cart.products:
+    #         raise lib.error_handle.error.api_error.ApiVerifyError('campaign_product_not_found')
         
-        qty = cart.products[campaign_product_id].get('qty',0)
-        database.lss.campaign_product.CampaignProduct(id=campaign_product_id).customer_return(qty=qty, sync=False)
+    #     qty = cart.products[campaign_product_id].get('qty',0)
+    #     database.lss.campaign_product.CampaignProduct(id=campaign_product_id).customer_return(qty=qty, sync=False)
 
-        del cart.products[campaign_product_id]
-        cart.save()
+    #     del cart.products[campaign_product_id]
+    #     cart.save()
 
-        return Response(models.cart.cart.CartSerializer(cart).data, status=status.HTTP_200_OK)
+    #     return Response(models.cart.cart.CartSerializer(cart).data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['PUT'], url_path=r'(?P<cart_oid>[^/.]+)/guest/checkout', permission_classes=(), authentication_classes=[])
-    @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    @lib.error_handle.error_handler.cart_operation_error_handler.order_operation_error_handler
-    def guest_checkout_cart(self, request, cart_oid):
+    # @action(detail=False, methods=['PUT'], url_path=r'(?P<cart_oid>[^/.]+)/guest/checkout', permission_classes=(), authentication_classes=[])
+    # @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    # @lib.error_handle.error_handler.cart_operation_error_handler.update_cart_product_error_handler
+    # def guest_checkout_cart(self, request, cart_oid):
         
-        shipping_data, = \
-            lib.util.getter.getdata(request, ("shipping_data",), required=True)
+    #     shipping_data, = \
+    #         lib.util.getter.getdata(request, ("shipping_data",), required=True)
 
-        cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
-        campaign = lib.util.verify.Verify.get_campaign_from_cart(cart)
+    #     cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
+    #     campaign = lib.util.verify.Verify.get_campaign_from_cart(cart)
 
-        rule.rule_checker.cart_rule_checker.CartCheckoutRuleChecker.check({'api_user':None, 'campaign':campaign, 'cart':cart})
+    #     rule.rule_checker.cart_rule_checker.CartCheckoutRuleChecker.check({'api_user':None, 'campaign':campaign, 'cart':cart})
 
-        serializer = models.order.order.OrderSerializerUpdateShipping(data=shipping_data) 
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    #     serializer = models.order.order.OrderSerializerUpdateShipping(data=shipping_data) 
+    #     if not serializer.is_valid():
+    #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        #checkout
-        success, api_order = lib.helper.cart_helper.CartHelper.checkout(None, campaign.id, cart.id)
+    #     #checkout
+    #     success, api_order = lib.helper.cart_helper.CartHelper.checkout(None, campaign.id, cart.id)
 
 
-        if not success:
-            cart = lib.util.verify.Verify.get_cart(cart.id)
-            return Response(models.cart.cart.CartSerializer(cart).data, status=status.HTTP_205_RESET_CONTENT)
+    #     if not success:
+    #         cart = lib.util.verify.Verify.get_cart(cart.id)
+    #         return Response(models.cart.cart.CartSerializer(cart).data, status=status.HTTP_205_RESET_CONTENT)
 
-        order = lib.util.verify.Verify.get_order(api_order.id)
+    #     order = lib.util.verify.Verify.get_order(api_order.id)
 
-        serializer = models.order.order.OrderSerializerUpdateShipping(order, data=shipping_data, partial=True) 
-        if not serializer.is_valid():
-            data = models.order.order.OrderSerializer(order).data
-            data['oid']=str(api_order._id)
-            return Response(data, status=status.HTTP_200_OK)
+    #     serializer = models.order.order.OrderSerializerUpdateShipping(order, data=shipping_data, partial=True) 
+    #     if not serializer.is_valid():
+    #         data = models.order.order.OrderSerializer(order).data
+    #         data['oid']=str(api_order._id)
+    #         return Response(data, status=status.HTTP_200_OK)
 
-        order = serializer.save()
+    #     order = serializer.save()
 
-        content = lib.helper.order_helper.OrderHelper.get_checkout_email_content(order,api_order._id)
-        jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)     #queue this to redis if needed
+    #     content = lib.helper.order_helper.OrderHelper.get_checkout_email_content(order,api_order._id)
+    #     jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)     #queue this to redis if needed
         
-        data = models.order.order.OrderSerializer(order).data
-        data['oid']=str(api_order._id)
+    #     data = models.order.order.OrderSerializer(order).data
+    #     data['oid']=str(api_order._id)
 
-        #send email to customer over here order detail link
-        return Response(data, status=status.HTTP_200_OK)
+    #     #send email to customer over here order detail link
+    #     return Response(data, status=status.HTTP_200_OK)
 
 
 
@@ -213,11 +213,12 @@ class CartViewSet(viewsets.ModelViewSet):
         cart_oid = database.lss.pre_order.get_oid_by_id(cart.id)
         return Response({ 'cart_oid':cart_oid}, status=status.HTTP_200_OK)
     
-    @action(detail=False, methods=['GET'], url_path=r'buyer/retrieve/(?P<cart_oid>[^/.]+)', permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['GET'], url_path=r'buyer/retrieve/(?P<cart_oid>[^/.]+)', permission_classes=())
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def buyer_retrieve_cart(self, request, cart_oid):
 
-        api_user = lib.util.verify.Verify.get_customer_user(request)
+
+        api_user = lib.util.verify.Verify.get_customer_user(request) if request.user.is_authenticated else None
         cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
         # pre_order = lib.util.verify.Verify.get_pre_order_with_oid(pre_order_oid)
 
@@ -228,13 +229,12 @@ class CartViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['PUT'], url_path=r'(?P<cart_oid>[^/.]+)/buyer/checkout', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    @lib.error_handle.error_handler.cart_operation_error_handler.order_operation_error_handler
     def buyer_checkout_cart(self, request, cart_oid):
         
         shipping_data, = \
             lib.util.getter.getdata(request, ("shipping_data",), required=True)
 
-        api_user = lib.util.verify.Verify.get_customer_user(request)
+        api_user = lib.util.verify.Verify.get_customer_user(request) if request.user.is_authenticated else None
         cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
         campaign = lib.util.verify.Verify.get_campaign_from_cart(cart)
 
@@ -274,12 +274,11 @@ class CartViewSet(viewsets.ModelViewSet):
 
         return Response(data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['PUT'], url_path=r'(?P<cart_oid>[^/.]+)/buyer/product/edit', permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['PUT'], url_path=r'(?P<cart_oid>[^/.]+)/buyer/product/edit', permission_classes=())
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    @lib.error_handle.error_handler.cart_operation_error_handler.order_operation_error_handler
     def buyer_add_order_product(self, request, cart_oid):
 
-        api_user = lib.util.verify.Verify.get_customer_user(request)
+        api_user = lib.util.verify.Verify.get_customer_user(request) if request.user.is_authenticated else None
         campaign_product_id, qty = lib.util.getter.getdata(request, ('campaign_product_id', 'qty',), required=True)
 
         if not qty or type(qty) != int :
@@ -290,49 +289,67 @@ class CartViewSet(viewsets.ModelViewSet):
         campaign = lib.util.verify.Verify.get_campaign_from_cart(cart)
         campaign_product = campaign.products.get(id=campaign_product_id) if campaign.products.filter(id=campaign_product_id).exists() else None
 
-        ret = rule.rule_checker.cart_rule_checker.CartEditProductRuleChecker.check(
-            **{'cart':cart,'campaign':campaign, 'campaign_product_id':campaign_product_id, 'api_user':api_user, 'qty':qty})
-        qty_difference = ret.get('qty_difference')
+        lib.helper.cart_helper.CartHelper.update_cart_product(api_user, cart, campaign_product, qty, campaign)
 
-        database.lss.campaign_product.CampaignProduct(id=campaign_product.id).add_to_cart(qty_difference, sync=False)
+        # ret = rule.rule_checker.cart_rule_checker.CartEditProductRuleChecker.check(
+        #     **{'cart':cart,'campaign':campaign, 'campaign_product_id':campaign_product_id, 'api_user':api_user, 'qty':qty})
+        # qty_difference = ret.get('qty_difference')
 
-        cart.products[campaign_product_id]={'qty':qty}
-        cart.save()
+        # database.lss.campaign_product.CampaignProduct(id=campaign_product.id).add_to_cart(qty_difference, sync=False)
+
+        # cart.products[campaign_product_id]={'qty':qty}
+        # cart.save()
 
         return Response(models.cart.cart.CartSerializer(cart).data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['DELETE'], url_path=r'(?P<cart_oid>[^/.]+)/buyer/product/delete',  permission_classes=(IsAuthenticated,))
-    @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    @lib.error_handle.error_handler.cart_operation_error_handler.order_operation_error_handler
-    def buyer_delete_cart_product(self, request, cart_oid):
+    # @action(detail=False, methods=['DELETE'], url_path=r'(?P<cart_oid>[^/.]+)/buyer/product/delete',  permission_classes=())
+    # @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    # def buyer_delete_cart_product(self, request, cart_oid):
 
 
-        campaign_product_id, = lib.util.getter.getdata(request, ('campaign_product_id', ), required=True)
+    #     campaign_product_id, = lib.util.getter.getdata(request, ('campaign_product_id', ), required=True)
 
-        api_user = lib.util.verify.Verify.get_customer_user(request)
-        cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
-        campaign = lib.util.verify.Verify.get_campaign_from_cart(cart)
-        campaign_product = campaign.products.get(id=campaign_product_id) if campaign.products.filter(id=campaign_product_id).exists() else None
+    #     api_user = lib.util.verify.Verify.get_customer_user(request) if request.user.is_authenticated else None
+    #     cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
+    #     campaign = lib.util.verify.Verify.get_campaign_from_cart(cart)
+    #     campaign_product = campaign.products.get(id=campaign_product_id) if campaign.products.filter(id=campaign_product_id).exists() else None
 
+    #     lib.helper.cart_helper.CartHelper.update_cart_product(api_user, cart, campaign_product, 0, campaign)
+    #     # rule.rule_checker.cart_rule_checker.CartDeleteProductRuleChecker.check({'api_user':api_user,'cart':cart,'campaign_product':campaign_product})
 
-        rule.rule_checker.cart_rule_checker.CartDeleteProductRuleChecker.check({'api_user':api_user,'cart':cart,'campaign_product':campaign_product})
-
-        if campaign_product_id not in cart.products:
-            raise lib.error_handle.error.api_error.ApiVerifyError('campaign_product_not_found')
+    #     # if campaign_product_id not in cart.products:
+    #     #     raise lib.error_handle.error.api_error.ApiVerifyError('campaign_product_not_found')
         
-        qty = cart.products[campaign_product_id].get('qty',0)
-        database.lss.campaign_product.CampaignProduct(id=campaign_product_id).customer_return(qty=qty, sync=False)
+    #     # qty = cart.products[campaign_product_id].get('qty',0)
+    #     # database.lss.campaign_product.CampaignProduct(id=campaign_product_id).customer_return(qty=qty, sync=False)
 
-        del cart.products[campaign_product_id]
-        cart.save()
+    #     # del cart.products[campaign_product_id]
+    #     # cart.save()
 
-        return Response(models.cart.cart.CartSerializer(cart).data, status=status.HTTP_200_OK)
+    #     return Response(models.cart.cart.CartSerializer(cart).data, status=status.HTTP_200_OK)
 
 # ---------------------------------------------- seller ------------------------------------------------------
 
     @action(detail=False, methods=['GET'], url_path=r'seller/list', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def seller_list_cart(self, request):
+        try:
+            api_user, campaign_id = lib.util.getter.getparams(request, ('campaign_id',), with_user=True, seller=True)
+            user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+            campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
+            queryset = campaign.carts.exclude(products=Value('null')).order_by('id')
+
+            serializer = models.cart.cart.CartSerializer(queryset, many=True)
+            data = serializer.data
+
+            return Response(data, status=status.HTTP_200_OK)
+        except Exception:
+            import traceback
+            print(traceback.format_exc())
+            
+    @action(detail=False, methods=['GET'], url_path=r'seller/search', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def seller_search_cart(self, request):
 
         api_user, campaign_id, search = lib.util.getter.getparams(request, ('campaign_id', 'search'), with_user=True, seller=True)
 
@@ -359,7 +376,7 @@ class CartViewSet(viewsets.ModelViewSet):
             data = serializer.data
 
         return Response(data, status=status.HTTP_200_OK)
-    
+
     @action(detail=True, methods=['GET'], url_path=r'seller/retrieve', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def seller_retrieve_cart(self, request, pk=None):
@@ -383,36 +400,60 @@ class CartViewSet(viewsets.ModelViewSet):
         return Response(oid, status=status.HTTP_200_OK)
 
 
+    # @action(detail=True, methods=['PUT'], url_path=r'seller/adjust', permission_classes=(IsAuthenticated,))
+    # @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    # def seller_update_adjust(self, request, pk=None):
+
+    #     api_user = lib.util.verify.Verify.get_seller_user(request)
+    #     adjust_list, = lib.util.getter.getdata(request, ('adjust_list',), required=True)
+    #     cart = lib.util.verify.Verify.get_cart(pk)
+    #     lib.util.verify.Verify.get_campaign_from_user_subscription(api_user.user_subscription, cart.campaign.id)
+        
+    #     cart.seller_adjust = adjust_list
+    #     cart.save()
+        
+    #     return Response(models.cart.cart.CartSerializer(cart).data, status=status.HTTP_200_OK)
+    
+    
+    # @action(detail=True, methods=['PUT'], url_path=r'seller/free/delivery', permission_classes=(IsAuthenticated,))
+    # @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    # def seller_free_delivery(self, request, pk=None):
+
+    #     free_delivery, = lib.util.getter.getdata(request, ('free_delivery',), required=True)
+
+    #     if type(free_delivery) != bool :
+    #         raise lib.error_handle.error.api_error.ApiVerifyError("request_data_error")
+
+    #     api_user = lib.util.verify.Verify.get_seller_user(request)
+    #     cart = lib.util.verify.Verify.get_cart(pk)
+    #     lib.util.verify.Verify.get_campaign_from_user_subscription(api_user.user_subscription, cart.campaign.id)
+
+    #     cart.free_delivery = free_delivery
+    #     cart.save()
+
+    #     return Response(models.cart.cart.CartSerializer(cart).data, status=status.HTTP_200_OK)
+    
+
     @action(detail=True, methods=['PUT'], url_path=r'seller/adjust', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def seller_update_adjust(self, request, pk=None):
+    def seller_adjust(self, request, pk=None):
 
-        api_user = lib.util.verify.Verify.get_seller_user(request)
-        adjust_list, = lib.util.getter.getdata(request, ('adjust_list',), required=True)
-        cart = lib.util.verify.Verify.get_cart(pk)
-        lib.util.verify.Verify.get_campaign_from_user_subscription(api_user.user_subscription, cart.campaign.id)
-        
-        cart.seller_adjust = adjust_list
-        cart.save()
-        
-        return Response(models.cart.cart.CartSerializer(cart).data, status=status.HTTP_200_OK)
-    
-    
-    @action(detail=True, methods=['PUT'], url_path=r'seller/free/delivery', permission_classes=(IsAuthenticated,))
-    @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def seller_free_delivery(self, request, pk=None):
-
-        free_delivery, = lib.util.getter.getdata(request, ('free_delivery',), required=True)
-
-        if type(free_delivery) != bool :
+        adjust_price, adjust_title, free_delivery = lib.util.getter.getdata(request, ('adjust_price', 'adjust_title', 'free_delivery'))
+        if type(adjust_price) not in [int, float, None]:
             raise lib.error_handle.error.api_error.ApiVerifyError("request_data_error")
 
+
         api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         cart = lib.util.verify.Verify.get_cart(pk)
-        lib.util.verify.Verify.get_campaign_from_user_subscription(api_user.user_subscription, cart.campaign.id)
+        lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, cart.campaign.id)
 
-        cart.free_delivery = free_delivery
+        cart.free_delivery = bool(free_delivery)
+        cart.adjust_title = adjust_title
+
+        adjust_price = 0 if not adjust_price else adjust_price
+        cart.adjust_price = float(adjust_price)
+
         cart.save()
-
-        return Response(models.cart.cart.CartSerializer(cart).data, status=status.HTTP_200_OK)
         
+        return Response(models.cart.cart.CartSerializer(cart).data, status=status.HTTP_200_OK)

@@ -1,11 +1,107 @@
 from api import models
-
+from api import rule
 import traceback
 import database
-
+import service
 import lib
 
+from datetime import datetime
+
+class RequestState():
+    INIT = 'init'
+    ADDING = 'adding'
+    ADDED = 'added'
+    UPDATING = 'updating'
+    UPDATED = 'updated'
+    DELETING = 'deleting'
+    DELETED = 'deleted'
+    INSUFFICIENT_INV = 'insufficient_inv'
+    INVALID_PRODUCT_NOT_ACTIVATED = 'invalid_product_not_activated'
+    INVALID_EXCEED_MAX_ORDER_AMOUNT = 'invalid_exceed_max_order_amount'
+    INVALID_REMOVE_NOT_ALLOWED = 'invalid_remove_not_allowed'
+    INVALID_EDIT_NOT_ALLOWED = 'invalid_edit_not_allowed'
+    INVALID_NEGATIVE_QTY = 'invalid_negative_qty'
+    INVALID_ADD_ZERO_QTY = 'invalid_add_zero_qty'
+    INVALID_UNKNOWN_REQUEST = 'invalid_unknown_request'
+
+
 class CartHelper():
+
+
+    @classmethod
+    @lib.error_handle.error_handler.cart_operation_error_handler.update_cart_product_error_handler
+    def update_cart_product(cls, api_user, cart, campaign_product, qty, campaign):
+        pass
+
+    @classmethod
+    @lib.error_handle.error_handler.cart_operation_error_handler.update_cart_product_by_comment_error_handler
+    def update_cart_product_by_comment(cls, pymongo_cart, campaign_product_data, qty):
+
+        state = None
+        if not campaign_product_data.get('active'):
+            return RequestState.INVALID_PRODUCT_NOT_ACTIVATED
+        if campaign_product_data.get('max_order_amount') and \
+                qty > campaign_product_data.get('max_order_amount'):
+            return RequestState.INVALID_EXCEED_MAX_ORDER_AMOUNT
+
+        if str(campaign_product_data.get('id')) not in pymongo_cart.data.get('products',{}):
+            if qty > 0:
+                state =  RequestState.ADDED
+            elif qty == 0:
+                return RequestState.INVALID_ADD_ZERO_QTY
+            else:
+                return RequestState.INVALID_NEGATIVE_QTY
+
+        else:
+            if qty > 0:
+                if not campaign_product_data.get('customer_editable'):
+                    return RequestState.INVALID_EDIT_NOT_ALLOWED
+
+                state =  RequestState.UPDATED
+            elif qty == 0:
+                if not campaign_product_data.get('customer_removable'):
+                    return RequestState.INVALID_REMOVE_NOT_ALLOWED
+                
+                state =  RequestState.DELETED
+            else:
+                return RequestState.INVALID_NEGATIVE_QTY
+
+        original_qty = pymongo_cart.data.get('products',{}).get(str(campaign_product_data.get('id')),{}).get('qty',0)
+        qty_difference = qty-original_qty
+        rule.check_rule.cart_check_rule.CartCheckRule.is_stock_avaliable(**{
+                    "campaign_product_data":campaign_product_data,
+                    'qty_difference':qty_difference,
+                })
+        cls.__update_cart_product(None, pymongo_cart, campaign_product_data, qty, qty_difference)
+        return state
+
+    @staticmethod
+    def __update_cart_product(api_user, pymongo_cart, campaign_product_data, qty, qty_difference):
+    
+        
+        pymongo_campaign_product = database.lss.campaign_product.CampaignProduct(id=campaign_product_data.get('id'))
+        pymongo_campaign_product.add_to_cart(qty_difference, sync=True) 
+
+        data ={
+            "lock_at": datetime.now() if api_user and api_user.type == 'customer' else None,
+            f"products.{str(pymongo_campaign_product.id)}.{'qty'}": qty,
+        }
+        
+        pymongo_cart.update(**data, sync=True)
+
+        product_data = {
+            "id": pymongo_campaign_product.id,
+            'qty_sold': pymongo_campaign_product.data.get('qty_sold'),
+            'qty_pending_payment':pymongo_campaign_product.data.get('qty_pending_payment'),
+            "qty_add_to_cart":pymongo_campaign_product.data.get('qty_add_to_cart'),
+
+        }
+        service.channels.campaign.send_cart_data(campaign_product_data.get("campaign_id"), pymongo_cart.data)
+        service.channels.campaign.send_product_data(campaign_product_data.get("campaign_id"), product_data)
+
+
+
+
 
     @classmethod
     @lib.error_handle.error_handler.pymongo_error_handler.pymongo_error_handler

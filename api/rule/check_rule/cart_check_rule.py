@@ -34,17 +34,34 @@ class CartCheckRule():
         if type(qty) != int or qty <=0:
             raise lib.error_handle.error.cart_error.CartErrors.CartException('helper.qty_invalid')
 
+    
+
     @staticmethod
     def is_stock_avaliable(**kwargs):
-        campaign_product = kwargs.get('campaign_product')
-        cart = kwargs.get('cart')
-        request_qty = kwargs.get('qty')
+        campaign_product_data = kwargs.get('campaign_product_data')
+        qty_difference = kwargs.get('qty_difference')
 
-        original_qty = cart.products[campaign_product.id].get('qty',0)
-        qty_difference = int(request_qty)-original_qty
-        if qty_difference and campaign_product.qty_for_sale-campaign_product.qty_sold < qty_difference:
+
+        if not qty_difference:
+            return {}
+
+        able_to_add_to_cart = True
+        if campaign_product_data.get('overbook'):
+            able_to_add_to_cart = (campaign_product_data["qty_for_sale"]-campaign_product_data['qty_sold'] >= qty_difference) or campaign_product_data.get('oversell')
+        else:
+            able_to_add_to_cart = (campaign_product_data["qty_for_sale"]-campaign_product_data['qty_sold']-campaign_product_data['qty_add_to_cart'] >= qty_difference) or campaign_product_data.get('oversell')
+
+        able_to_purchase = True
+        if campaign_product_data.get('oversell'):
+            pass    #do nothing
+        else:
+            able_to_purchase = campaign_product_data["qty_for_sale"]-campaign_product_data['qty_sold'] >= qty_difference
+
+        if not able_to_add_to_cart or not able_to_purchase:
             raise lib.error_handle.error.cart_error.CartErrors.UnderStock("out_of_stock")
-        return {"qty_difference" : qty_difference}
+        return {}
+
+
 
     @staticmethod
     def is_campaign_product_removeable(**kwargs):
