@@ -2,6 +2,7 @@
 from datetime import datetime
 from http import client
 import json
+import traceback
 from django.core.files.base import ContentFile
 from django.contrib.auth.models import User as AuthUser
 from django.http import HttpResponseRedirect
@@ -468,35 +469,55 @@ class PaymentViewSet(viewsets.GenericViewSet):
             raise lib.error_handle.error.api_error.ApiCallerError(error_message)
         data = api_response.json()
         result = service.rapyd.models.checkout.CheckoutModel(**data["data"])
-        print(result.id)
+        order.history[f'{models.order.order.PAYMENT_METHOD_RAPYD}_{pendulum.now("UTC").to_iso8601_string()}']={
+            "id":result.id,
+            "action": "checkout",
+            "time": pendulum.now("UTC").to_iso8601_string()
+        }
+        order.save()
         return Response(result.redirect_url, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['POST'], url_path=r"rapyd/webhook")
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def get_rapyd_webhook(self, request):
-        print("headers", request.headers)
-        
-        signature = request.headers['Signature']
-        salt = request.headers['Salt']
-        timestamp = request.headers['Timestamp']
-        
-        print("signature", signature)
-        print("salt", salt)
-        print("timestamp", timestamp)
-        
-        body = request.body
-        print("body", body)
-        
-        
-        rapyd_service = service.rapyd.rapyd.RapydService()
-        if not rapyd_service.auth_webhook_request(signature, request.url._url, salt, timestamp, body):
-            raise lib.error_handle.error.api_error.ApiCallerError("signature not valid")
-    
-        id = body['id']
-        type = body['type']
-        data = body['data']
-        
-        obj = service.rapyd.models.webhookEvent.WebhookEvent(id=id, type=type, timestamp=datetime.now(), data=data)
-        
+        order = None
+        try:
+            signature = request.headers['Signature']
+            salt = request.headers['Salt']
+            timestamp = request.headers['Timestamp']
+            
+            body = json.loads(request.body)
+            id = body['id']
+            type = body['type']
+            data = body['data']
+            print("body", body)
+            
+            order_oid, = data.get("metadata", {}).get("order_oid", "")
+            order = lib.util.verify.Verify.get_order_with_oid(order_oid)
+            meta = order.meta
+            meta["webhook"][id] = data
+            
+            campaign = lib.util.verify.Verify.get_campaign_from_order(order)
+            access_key = campaign.meta_payment.get("rapyd",{}).get("access_key")
+            secret_key = campaign.meta_payment.get("rapyd",{}).get("secret_key")
+            
+            rapyd_service = service.rapyd.rapyd.RapydService(access_key=access_key, secret_key=secret_key)
+            if not rapyd_service.auth_webhook_request(signature, request.url._url, salt, timestamp, body):
+                raise lib.error_handle.error.api_error.ApiCallerError("signature not valid")
+            if type == "PAYMENT_FAILED":
+                order_status = models.order.order.STATUS_COMPLETE
+            # obj = service.rapyd.models.webhookEvent.WebhookEvent(id=id, type=type, timestamp=datetime.now(), data=data)
+            order.status = models.order.order.STATUS_COMPLETE
+            order.payment_method = models.order.order.PAYMENT_METHOD_RAPYD
+            # order.checkout_details[models.order.order.PAYMENT_METHOD_RAPYD] = ""
+            # order.history[models.order.order.PAYMENT_METHOD_RAPYD]={
+            #     "action": "pay",
+            #     "time": pendulum.now("UTC").to_iso8601_string()
+            # }
+            order.save()
+        except Exception:
+            if order:
+                order.save()
+            print(traceback.format_exc())
         return Response("OK", status=status.HTTP_200_OK)
         
