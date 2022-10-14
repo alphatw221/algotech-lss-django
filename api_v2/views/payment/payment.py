@@ -447,12 +447,12 @@ class PaymentViewSet(viewsets.GenericViewSet):
             amount = order.total, 
             country = country, 
             currency = currency,
-            requested_currency = "",
+            requested_currency = "TWD",
             custom_elements = {
                 "dynamic_currency_conversion": True
             },
             complete_payment_url = f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}/confirmation',
-            error_payment_url = "TW",
+            error_payment_url = "",
             cancel_checkout_url = f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}/payment',
             payment_method_type_categories = ["bank_transfer", "card"],
             metadata = {
@@ -474,18 +474,20 @@ class PaymentViewSet(viewsets.GenericViewSet):
     @action(detail=False, methods=['POST'], url_path=r"rapyd/webhook")
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def get_rapyd_webhook(self, request):
-
-        rapyd_service = service.rapyd.rapyd.RapydService()
-   
+        print(request)
+        print("headers", request.headers)
         body = request.json()
+        print("body", body)
         signature = request.headers['signature']
         salt = request.headers['salt']
         timestamp = request.headers['timestamp']
-        print("headers", request.headers)
+        
         print("body", body)
         print("signature", signature)
         print("salt", salt)
         print("body['data']", body['data'])
+        
+        rapyd_service = service.rapyd.rapyd.RapydService()
         if not rapyd_service.auth_webhook_request(signature, request.url._url, salt, timestamp, body):
             raise lib.error_handle.error.api_error.ApiCallerError("signature not valid")
     
