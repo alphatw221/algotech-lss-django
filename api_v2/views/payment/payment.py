@@ -1,4 +1,5 @@
 
+from datetime import datetime
 from http import client
 import json
 from django.core.files.base import ContentFile
@@ -429,4 +430,70 @@ class PaymentViewSet(viewsets.GenericViewSet):
         res = '1|OK'
         
         return Response(res)
+    
+    @action(detail=False, methods=['GET'], url_path=r"rapyd/gateway")
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def get_rapyd_gateway(self, request):
+
+        order_oid, = lib.util.getter.getparams(request,('order_oid',),with_user=False) 
+        order = lib.util.verify.Verify.get_order_with_oid(order_oid)
+        campaign = lib.util.verify.Verify.get_campaign_from_order(order)
+
+        access_key = campaign.meta_payment.get("rapyd",{}).get("access_key")
+        secret_key = campaign.meta_payment.get("rapyd",{}).get("secret_key")
+        country = campaign.meta_payment.get("rapyd",{}).get("country")
+        currency = campaign.meta_payment.get("rapyd",{}).get("currency")
+        data = service.rapyd.models.checkout.CreateCheckoutModel(
+            amount = order.total, 
+            country = country, 
+            currency = currency,
+            requested_currency = "",
+            custom_elements = {
+                "dynamic_currency_conversion": True
+            },
+            complete_payment_url = f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}/confirmation',
+            error_payment_url = "TW",
+            cancel_checkout_url = f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}/payment',
+            payment_method_type_categories = ["bank_transfer", "card"],
+            metadata = {
+                "order_oid": order_oid
+            }
+        )
+        rapyd_service = service.rapyd.rapyd.RapydService(access_key=access_key, secret_key=secret_key)
+
+        api_response = rapyd_service.create_checkout(data)
+        
+        if api_response.status_code != 200:
+            error_message = service.rapyd.rapyd.RapydService.get_error_message(api_response)
+            raise lib.error_handle.error.api_error.ApiCallerError(error_message)
+        data = api_response.json()
+        result = service.rapyd.models.checkout.CheckoutModel(**data["data"])
+        print(result.id)
+        return Response(result.redirect_url, status=status.HTTP_200_OK)
+    
+     @action(detail=False, methods=['POST'], url_path=r"rapyd/webhook")
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def get_rapyd_webhook(self, request):
+
+        rapyd_service = service.rapyd.rapyd.RapydService()
+   
+        body = request.json()
+        signature = request.headers['signature']
+        salt = request.headers['salt']
+        timestamp = request.headers['timestamp']
+        print("headers", request.headers)
+        print("body", body)
+        print("signature", signature)
+        print("salt", salt)
+        print("body['data']", body['data'])
+        if not rapyd_service.auth_webhook_request(signature, request.url._url, salt, timestamp, body):
+            raise lib.error_handle.error.api_error.ApiCallerError("signature not valid")
+    
+        id = body['id']
+        type = body['type']
+        data = body['data']
+        
+        obj = service.rapyd.models.webhookEvent.WebhookEvent(id=id, type=type, timestamp=datetime.now(), data=data)
+        
+        return Response("OK", status=status.HTTP_200_OK)
         
