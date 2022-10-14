@@ -24,20 +24,20 @@ def send_order_data(campaign_id, data):
         print(traceback.format_exc())
 
 def send_cart_data(campaign_id, data):
-    try:
-        del data['_id']
-        del data['created_at']
-        del data['updated_at']
-        del data['lock_at']
+    # try:
+    del data['_id']
+    del data['created_at']
+    del data['updated_at']
+    del data['lock_at']
 
-        # print(data)
-        async_to_sync(get_channel_layer().group_send)(f"campaign_{campaign_id}", {"type": "cart_data","data":data})
-    except Exception:
-        print(traceback.format_exc())
+    # print(data)
+    async_to_sync(get_channel_layer().group_send)(f"campaign_{campaign_id}", {"type": "cart_data","data":data})
+    # except Exception:
+    #     print(traceback.format_exc())
     
 def send_product_data(campaign_id, data):
-    try:
-        async_to_sync(get_channel_layer().group_send)(f"campaign_{campaign_id}", {"type": "product_data","data":data})
+    # try:
+    async_to_sync(get_channel_layer().group_send)(f"campaign_{campaign_id}", {"type": "product_data","data":data})
     
-    except Exception:
-        print(traceback.format_exc())
+    # except Exception:
+    #     print(traceback.format_exc())
