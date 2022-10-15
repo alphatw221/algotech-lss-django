@@ -452,9 +452,11 @@ class PaymentViewSet(viewsets.GenericViewSet):
             custom_elements = {
                 "dynamic_currency_conversion": True
             },
-            complete_payment_url = f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}/confirmation',
+            # complete_payment_url = f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}/confirmation',
+            complete_payment_url = f'https://staginglss.accoladeglobal.net/buyer/order/{order_oid}/confirmation',
             error_payment_url = "",
-            cancel_checkout_url = f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}/payment',
+            # cancel_checkout_url = f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}/payment',
+            cancel_checkout_url = f'https://staginglss.accoladeglobal.net/buyer/order/{order_oid}/payment',
             payment_method_type_categories = ["bank_transfer", "card"],
             metadata = {
                 "order_oid": order_oid
