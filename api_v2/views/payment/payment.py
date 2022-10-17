@@ -532,10 +532,12 @@ class PaymentViewSet(viewsets.GenericViewSet):
         }
         
         order.save()
-
-        content = lib.helper.order_helper.OrderHelper.get_confirmation_email_content(order)
-        jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)
-        return HttpResponseRedirect(redirect_to=f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}/confirmation')
+        if payment_status == "CLO":
+            content = lib.helper.order_helper.OrderHelper.get_confirmation_email_content(order)
+            jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)
+            return HttpResponseRedirect(redirect_to=f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}/confirmation')
+        else:
+            return HttpResponseRedirect(redirect_to=f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}')
     
     
     
