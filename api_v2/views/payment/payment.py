@@ -453,8 +453,6 @@ class PaymentViewSet(viewsets.GenericViewSet):
             custom_elements = {
                 "dynamic_currency_conversion": True
             },
-            complete_payment_url = f"{settings.GCP_API_LOADBALANCER_URL}/api/v2/payment/rapyd/callback/success?order_oid={str(order_oid)}&checkout_time={checkout_time}",
-            error_payment_url = "",
             complete_checkout_url = f"{settings.GCP_API_LOADBALANCER_URL}/api/v2/payment/rapyd/callback/success?order_oid={str(order_oid)}&checkout_time={checkout_time}",
             cancel_checkout_url = f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{str(order_oid)}/payment',
             payment_method_type_categories = ["bank_transfer", "card"],
@@ -475,7 +473,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         order.history[f'{models.order.order.PAYMENT_METHOD_RAPYD}_{checkout_time}']={
             "id":result.id,
             "action": "checkout",
-            "time": pendulum.now("UTC").to_iso8601_string()
+            "time": checkout_time
         }
         order.save()
         return Response(result.redirect_url, status=status.HTTP_200_OK)
@@ -487,8 +485,6 @@ class PaymentViewSet(viewsets.GenericViewSet):
         order_oid, checkout_time = lib.util.getter.getparams(request, ('order_oid', 'checkout_time'), with_user=False)
 
         order = lib.util.verify.Verify.get_order_with_oid(order_oid)
-        checkout_id = order.history[f'{models.order.order.PAYMENT_METHOD_RAPYD}_{checkout_time}']['id']
-        print("checkout_id", checkout_id)
         campaign = order.campaign
         
         access_key = campaign.meta_payment.get("rapyd",{}).get("access_key")
@@ -496,25 +492,23 @@ class PaymentViewSet(viewsets.GenericViewSet):
 
         rapyd_service = service.rapyd.rapyd.RapydService(access_key=access_key, secret_key=secret_key)
 
+        checkout_id = order.history[f'{models.order.order.PAYMENT_METHOD_RAPYD}_{checkout_time}']['id']
         api_response = rapyd_service.retrieve_checkout(checkout_id)
-        print("api_response", api_response.json())
+        response_data = api_response.json()
+        payment_data = response_data.get('data',{}).get('payment', {})
+        is_successful = payment_data.get("paid", False)
         
         if not is_successful:
             raise lib.error_handle.error.api_error.ApiVerifyError('payment_failed')
 
-        after_pay_details = {
-            "client_secret": payment_intent.client_secret,
-            "id": payment_intent.id,
-            "object": payment_intent.object,
-            "receipt_email": payment_intent.receipt_email,
-            "receipt_url": payment_intent.charges.data[0].receipt_url,
-        }
+        
         order.status = models.order.order.STATUS_COMPLETE
-        order.payment_method = models.order.order.PAYMENT_METHOD_STRIPE
-        order.checkout_details[models.order.order.PAYMENT_METHOD_STRIPE] = after_pay_details
-        order.history[models.order.order.PAYMENT_METHOD_STRIPE]={
-            "action": "pay",
-            "time": pendulum.now("UTC").to_iso8601_string()
+        order.payment_method = models.order.order.PAYMENT_METHOD_RAPYD
+        order.checkout_details[models.order.order.PAYMENT_METHOD_RAPYD] = response_data
+        callback_time = pendulum.now("UTC").to_iso8601_string()
+        order.history[f"{models.order.order.PAYMENT_METHOD_RAPYD}_{callback_time}"]={
+            "action": "checkout_success_callback",
+            "time": callback_time
         }
         order.save()
 
