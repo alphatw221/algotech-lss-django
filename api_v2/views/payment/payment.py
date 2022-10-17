@@ -515,7 +515,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         if payment_status == "CLO":
             order.status = models.order.order.STATUS_COMPLETE
         elif payment_status == "ACT":
-            order.status = models.order.order.STATUS_PROCEED
+            order.status = models.order.order.STATUS_PENDING_CONFIRMATION
         elif payment_status == "EXP":
             order.status = models.order.order.STATUS_EXPIRED
             
