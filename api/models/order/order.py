@@ -14,6 +14,7 @@ STATUS_REVIEW = 'review'
 STATUS_SHIPPING_OUT = 'shipping out'
 STATUS_EXPIRED = 'expired'
 STATUS_PENDING_REFUND = 'pending_refund'
+STATUS_PENDING_CONFIRMATION = 'pending_confirmation'
 
 PAYMENT_METHOD_STRIPE = 'stripe'
 PAYMENT_METHOD_DIRECT = 'direct_payment'

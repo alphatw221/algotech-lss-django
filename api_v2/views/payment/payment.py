@@ -482,6 +482,15 @@ class PaymentViewSet(viewsets.GenericViewSet):
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def rapyd_success_callback(self, request):
         print("rapyd_success_callback")
+        rapyd_status_map = {
+            "ACT": "Active and awaiting completion of 3DS or capture. Can be updated.",
+            "CAN": "Canceled by the client or the customer's bank.",
+            "CLO": "Closed and paid.",
+            "ERR": "Error. An attempt was made to create or complete a payment, but it failed.",
+            "EXP": "The payment has expired.",
+            "NEW": "Not closed.",
+            "REV": "Reversed by Rapyd. See cancel_reason, above."
+        }
         order_oid, checkout_time = lib.util.getter.getparams(request, ('order_oid', 'checkout_time'), with_user=False)
 
         order = lib.util.verify.Verify.get_order_with_oid(order_oid)
@@ -497,20 +506,31 @@ class PaymentViewSet(viewsets.GenericViewSet):
         response_data = api_response.json()
         print(response_data)
         payment_data = response_data.get('data',{}).get('payment', {})
-        is_successful = payment_data.get("paid", False)
+        payment_status = payment_data.get("status", False)
         
-        if not is_successful:
+        if not payment_status:
             raise lib.error_handle.error.api_error.ApiVerifyError('payment_failed')
 
         
-        order.status = models.order.order.STATUS_COMPLETE
+        if payment_status == "CLO":
+            order.status = models.order.order.STATUS_COMPLETE
+        elif payment_status == "ACT":
+            order.status = models.order.order.STATUS_PROCEED
+        elif payment_status == "EXP":
+            order.status = models.order.order.STATUS_EXPIRED
+            
+        order.meta[models.order.order.PAYMENT_METHOD_RAPYD] = response_data
         order.payment_method = models.order.order.PAYMENT_METHOD_RAPYD
-        order.checkout_details[models.order.order.PAYMENT_METHOD_RAPYD] = response_data
+        order.checkout_details[models.order.order.PAYMENT_METHOD_RAPYD] = {
+            "description": rapyd_status_map[payment_status],
+            **payment_data
+        }
         callback_time = pendulum.now("UTC").to_iso8601_string()
         order.history[f"{models.order.order.PAYMENT_METHOD_RAPYD}_{callback_time}"]={
             "action": "checkout_success_callback",
             "time": callback_time
         }
+        
         order.save()
 
         content = lib.helper.order_helper.OrderHelper.get_confirmation_email_content(order)
@@ -536,8 +556,6 @@ class PaymentViewSet(viewsets.GenericViewSet):
             
             order_oid = data.get("metadata", {}).get("order_oid", "")
             order = lib.util.verify.Verify.get_order_with_oid(order_oid)
-            meta = order.meta
-            meta["webhook"][id] = data
             
             campaign = lib.util.verify.Verify.get_campaign_from_order(order)
             access_key = campaign.meta_payment.get("rapyd",{}).get("access_key")
@@ -550,14 +568,13 @@ class PaymentViewSet(viewsets.GenericViewSet):
                 order_status = models.order.order.STATUS_REVIEW
             elif type == "PAYMENT_COMPLETED":
                 order.status = models.order.order.STATUS_COMPLETE
-            # obj = service.rapyd.models.webhookEvent.WebhookEvent(id=id, type=type, timestamp=datetime.now(), data=data)
             
-            order.payment_method = models.order.order.PAYMENT_METHOD_RAPYD
-            # order.checkout_details[models.order.order.PAYMENT_METHOD_RAPYD] = ""
-            # order.history[models.order.order.PAYMENT_METHOD_RAPYD]={
-            #     "action": "pay",
-            #     "time": pendulum.now("UTC").to_iso8601_string()
-            # }
+            callback_time = pendulum.now("UTC").to_iso8601_string()
+            order.history[f"{models.order.order.PAYMENT_METHOD_RAPYD}_{callback_time}"]={
+                "action": "webhook",
+                "time": callback_time,
+                "data": body
+            }
             order.save()
         except Exception:
             if order:
