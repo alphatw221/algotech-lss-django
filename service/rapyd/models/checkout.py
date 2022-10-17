@@ -11,7 +11,7 @@ class CreateCheckoutModel(BaseModel):
     error_payment_url: Optional[str] = ""
     complete_checkout_url: Optional[str] = ""
     requested_currency: Optional[str] = ""
-    fixed_side: Optional[str] = "buy"
+    fixed_side: Optional[str] = None
     custom_elements: Optional[dict] = {}
     payment_method_type_categories: Optional[list] =[]
     metadata: Optional[dict] = {}

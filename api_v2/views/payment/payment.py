@@ -444,6 +444,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         secret_key = campaign.meta_payment.get("rapyd",{}).get("secret_key")
         country = campaign.meta_payment.get("rapyd",{}).get("country")
         currency = campaign.meta_payment.get("rapyd",{}).get("currency")
+        checkout_time = pendulum.now("UTC").to_iso8601_string()
         data = service.rapyd.models.checkout.CreateCheckoutModel(
             amount = order.total, 
             country = country, 
@@ -452,13 +453,15 @@ class PaymentViewSet(viewsets.GenericViewSet):
             custom_elements = {
                 "dynamic_currency_conversion": True
             },
-            complete_payment_url = f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}/confirmation',
+            complete_payment_url = f"{settings.GCP_API_LOADBALANCER_URL}/api/v2/payment/rapyd/callback/success?order_oid={str(order_oid)}&checkout_time={checkout_time}",
             error_payment_url = "",
-            cancel_checkout_url = f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}/payment',
+            # complete_checkout_url = f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{str(order_oid)}/confirmation',
+            cancel_checkout_url = f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{str(order_oid)}/payment',
             payment_method_type_categories = ["bank_transfer", "card"],
             metadata = {
                 "order_oid": order_oid
-            }
+            },
+            fixed_side = "buy"
         )
         rapyd_service = service.rapyd.rapyd.RapydService(access_key=access_key, secret_key=secret_key)
 
@@ -469,13 +472,57 @@ class PaymentViewSet(viewsets.GenericViewSet):
             raise lib.error_handle.error.api_error.ApiCallerError(error_message)
         data = api_response.json()
         result = service.rapyd.models.checkout.CheckoutModel(**data["data"])
-        order.history[f'{models.order.order.PAYMENT_METHOD_RAPYD}_{pendulum.now("UTC").to_iso8601_string()}']={
+        order.history[f'{models.order.order.PAYMENT_METHOD_RAPYD}_{checkout_time}']={
             "id":result.id,
             "action": "checkout",
             "time": pendulum.now("UTC").to_iso8601_string()
         }
         order.save()
         return Response(result.redirect_url, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['GET'], url_path=r'rapyd/callback/success',)
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def rapyd_success_callback(self, request):
+        print("rapyd_success_callback")
+        order_oid, checkout_time = lib.util.getter.getparams(request, ('order_oid', 'checkout_time'), with_user=False)
+
+        order = lib.util.verify.Verify.get_order_with_oid(order_oid)
+        checkout_id = order.history[f'{models.order.order.PAYMENT_METHOD_RAPYD}_{checkout_time}']['id']
+        print("checkout_id", checkout_id)
+        campaign = order.campaign
+        
+        access_key = campaign.meta_payment.get("rapyd",{}).get("access_key")
+        secret_key = campaign.meta_payment.get("rapyd",{}).get("secret_key")
+
+        rapyd_service = service.rapyd.rapyd.RapydService(access_key=access_key, secret_key=secret_key)
+
+        api_response = rapyd_service.retrieve_checkout(checkout_id)
+        print("api_response", api_response)
+        
+        if not is_successful:
+            raise lib.error_handle.error.api_error.ApiVerifyError('payment_failed')
+
+        after_pay_details = {
+            "client_secret": payment_intent.client_secret,
+            "id": payment_intent.id,
+            "object": payment_intent.object,
+            "receipt_email": payment_intent.receipt_email,
+            "receipt_url": payment_intent.charges.data[0].receipt_url,
+        }
+        order.status = models.order.order.STATUS_COMPLETE
+        order.payment_method = models.order.order.PAYMENT_METHOD_STRIPE
+        order.checkout_details[models.order.order.PAYMENT_METHOD_STRIPE] = after_pay_details
+        order.history[models.order.order.PAYMENT_METHOD_STRIPE]={
+            "action": "pay",
+            "time": pendulum.now("UTC").to_iso8601_string()
+        }
+        order.save()
+
+        content = lib.helper.order_helper.OrderHelper.get_confirmation_email_content(order)
+        jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)
+        return HttpResponseRedirect(redirect_to=f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}/confirmation')
+    
+    
     
     @action(detail=False, methods=['POST'], url_path=r"rapyd/webhook")
     @lib.error_handle.error_handler.api_error_handler.api_error_handler

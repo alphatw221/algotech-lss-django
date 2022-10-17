@@ -82,6 +82,11 @@ class RapydService:
         api_response = requests.post(**self.__prepare_request('post', '/v1/checkout', model))
         
         return api_response
+    
+    def retrieve_checkout(self, checkout_id):
+        api_response = requests.get(**self.__prepare_request('get', f'/v1/checkout/{checkout_id}'))
+        
+        return api_response
 
     def create_payment(self, model: CreatePaymentModel):
         api_response = requests.post(**self.__prepare_request('post', '/v1/payments', model))
