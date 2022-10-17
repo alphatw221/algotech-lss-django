@@ -552,9 +552,11 @@ class PaymentViewSet(viewsets.GenericViewSet):
             if not rapyd_service.auth_webhook_request(signature, request.url._url, salt, timestamp, body):
                 raise lib.error_handle.error.api_error.ApiCallerError("signature not valid")
             if type == "PAYMENT_FAILED":
-                order_status = models.order.order.STATUS_COMPLETE
+                order_status = models.order.order.STATUS_REVIEW
+            elif type == "PAYMENT_COMPLETED":
+                order.status = models.order.order.STATUS_COMPLETE
             # obj = service.rapyd.models.webhookEvent.WebhookEvent(id=id, type=type, timestamp=datetime.now(), data=data)
-            order.status = models.order.order.STATUS_COMPLETE
+            
             order.payment_method = models.order.order.PAYMENT_METHOD_RAPYD
             # order.checkout_details[models.order.order.PAYMENT_METHOD_RAPYD] = ""
             # order.history[models.order.order.PAYMENT_METHOD_RAPYD]={
