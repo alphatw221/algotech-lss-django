@@ -545,6 +545,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         order = None
         try:
             signature = request.headers['Signature']
+            http_uri = settings.GCP_API_LOADBALANCER_URL+request.get_full_path()
             salt = request.headers['Salt']
             timestamp = request.headers['Timestamp']
             
@@ -562,7 +563,8 @@ class PaymentViewSet(viewsets.GenericViewSet):
             secret_key = campaign.meta_payment.get("rapyd",{}).get("secret_key")
             
             rapyd_service = service.rapyd.rapyd.RapydService(access_key=access_key, secret_key=secret_key)
-            if not rapyd_service.auth_webhook_request(signature, request.url._url, salt, timestamp, body):
+            
+            if not rapyd_service.auth_webhook_request(signature, http_uri, salt, timestamp, body):
                 raise lib.error_handle.error.api_error.ApiCallerError("signature not valid")
             if type == "PAYMENT_FAILED":
                 order_status = models.order.order.STATUS_REVIEW
