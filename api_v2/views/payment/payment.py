@@ -455,7 +455,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             },
             complete_payment_url = f"{settings.GCP_API_LOADBALANCER_URL}/api/v2/payment/rapyd/callback/success?order_oid={str(order_oid)}&checkout_time={checkout_time}",
             error_payment_url = "",
-            # complete_checkout_url = f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{str(order_oid)}/confirmation',
+            complete_checkout_url = f"{settings.GCP_API_LOADBALANCER_URL}/api/v2/payment/rapyd/callback/success?order_oid={str(order_oid)}&checkout_time={checkout_time}",
             cancel_checkout_url = f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{str(order_oid)}/payment',
             payment_method_type_categories = ["bank_transfer", "card"],
             metadata = {
@@ -497,7 +497,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         rapyd_service = service.rapyd.rapyd.RapydService(access_key=access_key, secret_key=secret_key)
 
         api_response = rapyd_service.retrieve_checkout(checkout_id)
-        print("api_response", api_response)
+        print("api_response", api_response.json())
         
         if not is_successful:
             raise lib.error_handle.error.api_error.ApiVerifyError('payment_failed')
