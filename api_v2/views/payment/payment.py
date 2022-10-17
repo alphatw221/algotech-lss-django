@@ -522,7 +522,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         order.meta[models.order.order.PAYMENT_METHOD_RAPYD] = response_data
         order.payment_method = models.order.order.PAYMENT_METHOD_RAPYD
         order.checkout_details[models.order.order.PAYMENT_METHOD_RAPYD] = {
-            "description": rapyd_status_map[payment_status],
+            "payment_status_description": rapyd_status_map[payment_status],
             **payment_data
         }
         callback_time = pendulum.now("UTC").to_iso8601_string()
