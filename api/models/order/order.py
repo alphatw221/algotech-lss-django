@@ -86,7 +86,7 @@ class Order(models.Model):
 
     platform_id = models.IntegerField(blank=True, null=True, default=None)
 
-    status = models.CharField(max_length=255, null=True, blank=True, default='proceed')
+    status = models.CharField(max_length=255, null=True, blank=True, default=STATUS_PROCEED)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -125,20 +125,10 @@ class OrderSerializer(serializers.ModelSerializer):
     applied_discount = serializers.JSONField(default=dict)
     shipping_option_data = serializers.JSONField(default=dict)
 
-class OrderSerializerWithUserSubscription(serializers.ModelSerializer):
-
-    class Meta:
-        model = Order
-        fields = '__all__'
-        read_only_fields = ['created_at', 'modified_at']
+class OrderSerializerWithUserSubscription(OrderSerializer):
 
     campaign = CampaignSerializerWithUserSubscription()
-    meta = serializers.JSONField(default=dict)
-    products = serializers.JSONField(default=dict)
-    checkout_details = serializers.JSONField(default=dict)
-    history = serializers.JSONField(default=dict)
-    applied_discount = serializers.JSONField(default=dict)
-    shipping_option_data = serializers.JSONField(default=dict)
+
 class OrderSerializerUpdateShipping(serializers.ModelSerializer):
 
     class Meta:

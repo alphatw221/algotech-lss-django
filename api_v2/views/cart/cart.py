@@ -13,7 +13,7 @@ from api import rule
 from automation import jobs
 
 import lib
-import datetime
+from datetime import datetime
 import uuid
 import service
 import database
@@ -253,12 +253,14 @@ class CartViewSet(viewsets.ModelViewSet):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        success, pymongo_order = lib.helper.cart_helper.CartHelper.checkout(api_user, campaign.id, cart.id)
+        campaign_product_dict = database.lss_cache.campaign_product.get_product_dict(campaign_id=campaign.id, bypass=True)
+        success, pymongo_order = lib.helper.cart_helper.CartHelper.checkout(api_user, campaign.id, cart.id, campaign_product_dict=campaign_product_dict)
         
         if not success:
             cart = lib.util.verify.Verify.get_cart(cart.id)
             return Response(models.cart.cart.CartSerializer(cart).data, status=status.HTTP_205_RESET_CONTENT)
         
+        order = lib.util.verify.Verify.get_order(pymongo_order.id)
         order_oid = str(pymongo_order._id)
         serializer = models.order.order.OrderSerializerUpdateShipping(order, data=shipping_data, partial=True) 
         if not serializer.is_valid():
@@ -268,9 +270,9 @@ class CartViewSet(viewsets.ModelViewSet):
 
 
         order = serializer.save()
-
+        lib.helper.order_helper.OrderHelper.summarize_order(order)
         content = lib.helper.order_helper.OrderHelper.get_checkout_email_content(order,order_oid)
-        jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)     #queue this to redis if needed
+        jobs.send_email_job.send_email_job(campaign.title, order.shipping_email, content=content)    
         
         data = models.order.order.OrderSerializer(order).data
         data['oid']=order_oid
@@ -331,6 +333,81 @@ class CartViewSet(viewsets.ModelViewSet):
     #     # cart.save()
 
     #     return Response(models.cart.cart.CartSerializer(cart).data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['PUT'], url_path=r'(?P<cart_oid>[^/.]+)/buyer/discount',  permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def buyer_apply_discount_code(self, request, cart_oid):
+
+        discount_code, = \
+            lib.util.getter.getdata(request, ("discount_code",), required=True)
+
+        cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
+        campaign = lib.util.verify.Verify.get_campaign_from_cart(cart)
+
+        discount_codes = campaign.user_subscription.discount_codes.filter(start_at__lte=datetime.utcnow(),end_at__gte=datetime.utcnow())
+
+        valid_discount_code = None
+        for _discount_code in discount_codes:
+
+            if _discount_code.type ==models.discount_code.discount_code.TYPE_GENERAL and discount_code == _discount_code.code:
+                valid_discount_code = _discount_code
+                break
+            elif _discount_code.type == models.discount_code.discount_code.TYPE_CART_REFERAL :
+                code_length = len(_discount_code.code)
+                if code_length+1 > len(discount_code) or _discount_code.code!=discount_code[:code_length]:
+                    continue
+                cart_oid = discount_code[code_length+1:]
+                try:
+                    referrer_cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
+                    # referrer_pre_order=lib.util.verify.Verify.get_pre_order_with_oid(pre_order_oid)
+                except Exception:
+                    break
+                if referrer_cart.campaign.user_subscription != campaign.user_subscription or referrer_cart == cart:
+                    continue
+                if not referrer_cart.applied_discount and lib.helper.discount_helper.CartDiscountHelper.check_limitations(_discount_code.limitations, cart = referrer_cart, discount_code = _discount_code) :
+                    discount_code_data = _discount_code.__dict__.copy()
+                    del discount_code_data['_state']
+                    referrer_cart.applied_discount = discount_code_data
+                    referrer_cart.save()
+                valid_discount_code = _discount_code
+                break
+
+        if not valid_discount_code:
+            raise lib.error_handle.error.api_error.ApiVerifyError('invalid_discount_code')
+        
+        for limitation in valid_discount_code.limitations:
+            if not lib.helper.discount_helper.CartDiscountHelper.check_limitation(limitation, cart=cart, discount_code=valid_discount_code):
+                raise lib.error_handle.error.api_error.ApiVerifyError('not_eligible')
+
+        discount_code_data = valid_discount_code.__dict__.copy()
+        del discount_code_data['_state']
+        cart.applied_discount = discount_code_data
+        lib.helper.discount_helper.CartDiscountHelper.make_discount(cart)
+        cart.save()
+
+        valid_discount_code.applied_count+=1
+        valid_discount_code.save()
+
+        return Response(models.cart.cart.CartSerializer(cart).data, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['DELETE'], url_path=r'(?P<cart_oid>[^/.]+)/buyer/discount/cancel',  permission_classes=())
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def buyer_cancel_discount_code(self, request, cart_oid):
+
+        cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
+        campaign = lib.util.verify.Verify.get_campaign_from_cart(cart)
+        
+        if models.discount_code.discount_code.DiscountCode.objects.filter(id=cart.applied_discount.get('id')).exists():
+            discount_code = models.discount_code.discount_code.DiscountCode.objects.get(id=cart.applied_discount.get('id'))
+            discount_code.applied_count-=1
+            discount_code.applied_count = max(discount_code.applied_count,0)
+            discount_code.save()
+
+        cart.applied_discount = {}
+        cart.discount = 0
+        cart.save()
+
+        return Response(models.cart.cart.CartSerializer(cart).data, status=status.HTTP_200_OK)
 
 # ---------------------------------------------- seller ------------------------------------------------------
 

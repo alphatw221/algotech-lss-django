@@ -26,6 +26,7 @@ def send_order_data(campaign_id, data):
 def send_cart_data(campaign_id, data):
     try:
         del data['_id']
+        del data['applied_discount']
         del data['created_at']
         del data['updated_at']
         del data['lock_at']

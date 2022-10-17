@@ -8,7 +8,7 @@ class CartEditProductRuleChecker(RuleChecker):
         CartCheckRule.is_cart_lock,
         CartCheckRule.is_qty_valid,
         CartCheckRule.is_campaign_product_editable,
-        CartCheckRule.is_stock_avaliable,
+        # CartCheckRule.is_stock_avaliable,
         CartCheckRule.is_under_max_limit,
         ]
 

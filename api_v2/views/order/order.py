@@ -114,20 +114,24 @@ class OrderViewSet(viewsets.ModelViewSet):
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def buyer_retrieve_order_with_user_subscription(self, request, order_oid):
         order = lib.util.verify.Verify.get_order_with_oid(order_oid)
-        return Response(models.order.order.OrderSerializerWithUserSubscription(order).data, status=status.HTTP_200_OK)
+        data = models.order.order_product.OrderWithUserSubscriptionWithOrderProductSerializer(order).data
+        # from pprint import pprint
+        # pprint(dict(data))
+        return Response(data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET'], url_path=r'buyer/retrieve/(?P<order_oid>[^/.]+)', permission_classes=())
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def buyer_retrieve_order(self, request, order_oid):
 
         order = lib.util.verify.Verify.get_order_with_oid(order_oid)
-        return Response(models.order.order.OrderSerializer(order).data, status=status.HTTP_200_OK)
+        return Response(models.order.order_product.OrderWithOrderProductSerializer(order).data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET'], url_path=r'buyer/retrieve/latest/shipping', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def buyer_retrieve_latest_order_shipping(self, request):
         api_user = lib.util.verify.Verify.get_customer_user(request)
         order = api_user.orders.last()
+        print(order.id)
         data = models.order.order.OrderSerializerUpdateShipping(order).data
         return Response(data, status=status.HTTP_200_OK)
 
@@ -135,11 +139,11 @@ class OrderViewSet(viewsets.ModelViewSet):
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def buyer_upload_receipt(self, request, order_oid):
 
-        # api_user = lib.util.verify.Verify.get_customer_user(request)
+
         order = lib.util.verify.Verify.get_order_with_oid(order_oid)
         campaign = lib.util.verify.Verify.get_campaign_from_order(order)
         last_five_digit, image, account_name, account_mode = lib.util.getter.getdata(request,('last_five_digit', 'image', 'account_name', 'account_mode'), required=False)
-        # print(image)
+
         if image not in [None, '', "undefined", 'null']:
             try:
                 image_name = image.name.replace(" ","")
@@ -154,15 +158,18 @@ class OrderViewSet(viewsets.ModelViewSet):
         order.meta['account_name'] = account_name
         order.meta['account_mode'] = account_mode
         order.payment_method = models.order.order.PAYMENT_METHOD_DIRECT
-        order.status = "complete"
+        order.status = models.order.order.STATUS_COMPLETE
         order.save()
-        lib.helper.order_helper.OrderHelper.sold_campaign_product(order.id)
-        # content = lib.helper.order_helper.OrderHelper.get_confirmation_email_content(order)
+
+        for campaign_product_id_str, qty in order.products.items():
+            pymongo_campaign_product = database.lss.campaign_product.CampaignProduct(id=int(campaign_product_id_str)).sold(qty, sync=True)
+            lib.helper.cart_helper.CartHelper.send_campaign_product_websocket_data(pymongo_campaign_product.data)
         subject = lib.i18n.email.order_comfirm_mail.i18n_get_mail_subject(order, lang=campaign.lang)
         content = lib.i18n.email.order_comfirm_mail.i18n_get_mail_content(order, campaign, lang=campaign.lang)
+
         jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)     #queue this to redis if needed
 
-        return Response(models.order.order.OrderSerializer(order).data, status=status.HTTP_200_OK)
+        return Response(models.order.order_product.OrderWithOrderProductSerializer(order).data, status=status.HTTP_200_OK)
 
 
     @action(detail=False, methods=['GET'], url_path=r'buyer/history', permission_classes=(IsAuthenticated,))
@@ -176,7 +183,7 @@ class OrderViewSet(viewsets.ModelViewSet):
             serializer = models.order.order.OrderSerializer(page, many=True)
             data = self.get_paginated_response(serializer.data).data
         else:
-            data = models.order.order.OrderSerializer(api_user.orders, many=True).data
+            data = models.order.order_product.OrderWithOrderProductSerializer(api_user.orders, many=True).data
 
         return Response(data, status=status.HTTP_200_OK)
        
@@ -208,7 +215,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         order = lib.util.verify.Verify.get_order(pk)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, order.campaign.id)
-        serializer = models.order.order.OrderSerializer(order)
+        serializer = models.order.order_product.OrderWithOrderProductSerializer(order)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
     
@@ -238,9 +245,9 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         return Response({'count':total_count,'data':json_data}, status=status.HTTP_200_OK)
     
-    @action(detail=True, methods=['POST'], url_path=r'seller/delivery_status', permission_classes=(IsAuthenticated,))
+    @action(detail=True, methods=['PUT'], url_path=r'seller/deliver', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def seller_order_delivery_status(self, request, pk=None):
+    def seller_deliver_order(self, request, pk=None):
 
         api_user = lib.util.verify.Verify.get_seller_user(request)
         order = lib.util.verify.Verify.get_order(pk)
@@ -252,6 +259,6 @@ class OrderViewSet(viewsets.ModelViewSet):
         order.status = models.order.order.STATUS_SHIPPING_OUT
         order.save()
 
-        return Response(order.status, status=status.HTTP_200_OK)
+        return Response(models.order.order_product.OrderWithOrderProductSerializer(order).data, status=status.HTTP_200_OK)
     
     

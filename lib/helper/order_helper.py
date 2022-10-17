@@ -505,6 +505,67 @@ class PreOrderHelper():
 
 
 class OrderHelper():
+
+
+    @staticmethod
+    def __caculate_subtotal(order):
+
+        order.subtotal = 0
+        for order_product in order.order_products.all():
+            order.subtotal+=order_product.qty * order_product.price
+
+
+    @classmethod
+    def summarize_order(cls, order, save=True):
+
+        #compute subtotal
+        cls.__caculate_subtotal(order)
+
+        campaign = order.campaign
+        # #compute discount
+        # lib.helper.discount_helper.make_discount_for_pre_order(pre_order)
+
+        #compute shipping_cost
+        if order.shipping_method == models.order.order.SHIPPING_METHOD_PICKUP:
+            order.shipping_cost = 0
+        else:
+            order.shipping_cost = float(campaign.meta_logistic.get('delivery_charge',0))
+
+            # delivery_options = meta_logistic.get('additional_delivery_options')
+
+            if(type(order.shipping_option_index)==int):
+                if order.shipping_option_data.get('type') == '+':
+                    order.shipping_cost += float(order.shipping_option_data.get('price')) 
+
+                elif order.shipping_option_data.get('type') == '=':
+                    order.shipping_cost =  float(order.shipping_option_data.get('price'))
+
+        #compute free_delivery
+        meta_logistic = campaign.meta_logistic
+        is_subtotal_over_free_delivery_threshold = order.subtotal >= float(meta_logistic.get('free_delivery_for_order_above_price')) if meta_logistic.get('is_free_delivery_for_order_above_price') else False
+        is_items_over_free_delivery_threshold = len(order.products) >= float(meta_logistic.get('free_delivery_for_how_many_order_minimum')) if meta_logistic.get('is_free_delivery_for_how_many_order_minimum') else False
+        order.meta['subtotal_over_free_delivery_threshold'] = True if is_subtotal_over_free_delivery_threshold else False
+        order.meta['items_over_free_delivery_threshold'] = True if is_items_over_free_delivery_threshold else False
+            
+
+        #summarize_total
+        total = 0
+        total += order.subtotal
+        total -= order.discount
+        total = max(total, 0)
+        if order.free_delivery or is_subtotal_over_free_delivery_threshold or is_items_over_free_delivery_threshold:
+            pass
+        else:
+            total += order.shipping_cost
+        total += order.adjust_price
+
+        order.total = max(total, 0)
+
+        if save:
+            order.save()
+
+        return order
+
     @classmethod
     @lang_translate_default_en
     def get_confirmation_email_content(cls, order, lang=None):
@@ -742,10 +803,10 @@ class OrderHelper():
                         </table>'
 
         mail_content += f'<table cellspacing="0" cellpadding="0" border="0" width="100%" style="min-width: 100%;" role="presentation"><tbody>'
-        for key, product in order.products.items():
+        for order_product in order.order_products.all():
             mail_content += f'<tr>'
             mail_content += f'<td width="1" style="mso-line-height-rule: exactly; padding: 13px 13px 13px 0;" bgcolor="#ffffff" valign="middle">\
-                                <img width="140" src="{product["image"]}" alt="Product Image" style="vertical-align: middle; text-align: center; width: 140px; max-width: 140px; height: auto !important; border-radius: 1px; padding: 0px;">\
+                                <img width="140" src="{order_product.image}" alt="Product Image" style="vertical-align: middle; text-align: center; width: 140px; max-width: 140px; height: auto !important; border-radius: 1px; padding: 0px;">\
                             </td>'
             mail_content += f'<tr style="mso-line-height-rule: exactly; padding-top: 13px; padding-bottom: 13px; border-bottom-width: 2px; border-bottom-color: #dadada; border-bottom-style: solid;" bgcolor="#ffffff" valign="middle">'
             mail_content += f'<table cellspacing="0" cellpadding="0" border="0" width="100%" style="min-width: 100%; border-bottom: 1px solid #a5a5a5;" role="presentation">\
@@ -754,18 +815,18 @@ class OrderHelper():
                                 <td style="font-size: 16px; line-height: 26px; font-weight: 400; color: #666363; padding: 13px 6px 13px 0;" align="left" bgcolor="#ffffff" valign="top">\
                                     <p style="font-size: 16px; line-height: 26px; font-weight: 400; color: #666363; margin: 0;" align="left">\
                                     <a target="_blank" style="color: #666363; text-decoration: none !important; text-underline: none; word-wrap: break-word; text-align: left !important; font-weight: bold;">\
-                                        {product["name"]}\
+                                        {order_product.name}\
                                     </a></p></td>'
             mail_content += f'<td style="bgcolor="#ffffff" valign="top"></td>\
                             <td width="1" style="white-space: nowrap; padding: 13px 0 13px 13px;" align="right" bgcolor="#ffffff" valign="top">\
                                 <p style="font-size: 16px; line-height: 26px; font-weight: 400; color: #666363; margin: 0;" align="right">\
-                                x &nbsp;{product["qty"]}\
+                                x &nbsp;{order_product.qty}\
                                 </p>\
                             </td>'
             mail_content += f'<td width="1" style="white-space: nowrap; padding: 13px 0 13px 26px;" align="right" bgcolor="#ffffff" valign="top">\
                                     <p style="font-size: 16px; line-height: 26px; font-weight: 400; color: #666363; margin: 0;" align="right">\
                                     {order.campaign.currency}\
-                                    {adjust_decimal_places(product["subtotal"],order.campaign.decimal_places)}\
+                                    {adjust_decimal_places(order_product.subtotal,order.campaign.decimal_places)}\
                                     {price_unit[order.campaign.price_unit]}\
                                     </p></td></tr></tbody></table></tr>'
             mail_content += f'</tr>'

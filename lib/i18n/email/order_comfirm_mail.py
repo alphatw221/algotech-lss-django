@@ -146,10 +146,10 @@ def i18n_get_mail_content(order, campaign, lang=None):
     # mail_content+= f'<b>Delivery way : </b>{order.shipping_method}<br>'
 
     mail_content += f'<table cellspacing="0" cellpadding="0" border="0" width="100%" style="min-width: 100%;" role="presentation"><tbody>'
-    for key, product in order.products.items():
+    for order_product in order.order_products.all():
         mail_content += f'<tr>'
         mail_content += f'<td width="1" style="mso-line-height-rule: exactly; padding: 13px 13px 13px 0;" bgcolor="#ffffff" valign="middle">\
-                            <img width="140" src="{product["image"]}" alt="Product Image" style="vertical-align: middle; text-align: center; width: 140px; max-width: 140px; height: auto !important; border-radius: 1px; padding: 0px;">\
+                            <img width="140" src="{order_product.image}" alt="Product Image" style="vertical-align: middle; text-align: center; width: 140px; max-width: 140px; height: auto !important; border-radius: 1px; padding: 0px;">\
                         </td>'
         mail_content += f'<tr style="mso-line-height-rule: exactly; padding-top: 13px; padding-bottom: 13px; border-bottom-width: 2px; border-bottom-color: #dadada; border-bottom-style: solid;" bgcolor="#ffffff" valign="middle">'
         mail_content += f'<table cellspacing="0" cellpadding="0" border="0" width="100%" style="min-width: 100%; border-bottom: 1px solid #a5a5a5;" role="presentation">\
@@ -158,18 +158,18 @@ def i18n_get_mail_content(order, campaign, lang=None):
                             <td style="font-size: 16px; line-height: 26px; font-weight: 400; color: #666363; padding: 13px 6px 13px 0;" align="left" bgcolor="#ffffff" valign="top">\
                                 <p style="font-size: 16px; line-height: 26px; font-weight: 400; color: #666363; margin: 0;" align="left">\
                                 <a target="_blank" style="color: #666363; text-decoration: none !important; text-underline: none; word-wrap: break-word; text-align: left !important; font-weight: bold;">\
-                                    {product["name"]}\
+                                    {order_product.name}\
                                 </a></p></td>'
         mail_content += f'<td style="bgcolor="#ffffff" valign="top"></td>\
                         <td width="1" style="white-space: nowrap; padding: 13px 0 13px 13px;" align="right" bgcolor="#ffffff" valign="top">\
                             <p style="font-size: 16px; line-height: 26px; font-weight: 400; color: #666363; margin: 0;" align="right">\
-                            x &nbsp;{product["qty"]}\
+                            x &nbsp;{order_product.qty}\
                             </p>\
                         </td>'
         mail_content += f'<td width="1" style="white-space: nowrap; padding: 13px 0 13px 26px;" align="right" bgcolor="#ffffff" valign="top">\
                                 <p style="font-size: 16px; line-height: 26px; font-weight: 400; color: #666363; margin: 0;" align="right">\
                                 {order.campaign.currency}\
-                                {adjust_decimal_places(product["subtotal"],order.campaign.decimal_places)}\
+                                {adjust_decimal_places(order_product.subtotal,order.campaign.decimal_places)}\
                                 {price_unit[order.campaign.price_unit]}\
                                 </p></td></tr></tbody></table></tr>'
         mail_content += f'</tr>'

@@ -3,7 +3,7 @@ from datetime import datetime
 from api import models
 from api.models import campaign
 import lib
-
+import database
 
 class CartCheckRule():
 
@@ -27,33 +27,52 @@ class CartCheckRule():
 
     
 
-    @staticmethod
-    def is_stock_avaliable(**kwargs):
-        campaign_product = kwargs.get('campaign_product')
-        campaign_product_data = kwargs.get('campaign_product_data')
-        qty_difference = kwargs.get('qty_difference')
+    # @staticmethod
+    # def is_stock_avaliable(**kwargs):
 
 
-        if not qty_difference:
-            return 
 
-        if not campaign_product_data:
-            campaign_product_data = campaign_product.__dict__
+    #     try:
+    #         with database.lss.util.start_session() as session:
+    #             with session.start_transaction():
+                    
 
-        able_to_add_to_cart = True
-        if campaign_product_data.get('overbook'):
-            able_to_add_to_cart = (campaign_product_data["qty_for_sale"]-campaign_product_data['qty_sold'] >= qty_difference) or campaign_product_data.get('oversell')
-        else:
-            able_to_add_to_cart = (campaign_product_data["qty_for_sale"]-campaign_product_data['qty_sold']-campaign_product_data['qty_add_to_cart'] >= qty_difference) or campaign_product_data.get('oversell')
 
-        able_to_purchase = True
-        if campaign_product_data.get('oversell'):
-            pass    #do nothing
-        else:
-            able_to_purchase = campaign_product_data["qty_for_sale"]-campaign_product_data['qty_sold'] >= qty_difference
 
-        if not able_to_add_to_cart or not able_to_purchase:
-            raise lib.error_handle.error.cart_error.CartErrors.UnderStock("out_of_stock")
+
+    #     except Exception:
+    #         if attempts > 0:
+    #             cls.__get_incremented_field(attempts=attempts-1)
+    #         else:
+    #             raise
+
+
+
+    #     campaign_product = kwargs.get('campaign_product')
+    #     campaign_product_data = kwargs.get('campaign_product_data')
+    #     qty_difference = kwargs.get('qty_difference')
+
+
+    #     if not qty_difference:
+    #         return 
+
+    #     if not campaign_product_data:
+    #         campaign_product_data = campaign_product.__dict__
+
+    #     able_to_add_to_cart = True
+    #     if campaign_product_data.get('overbook'):
+    #         able_to_add_to_cart = (campaign_product_data["qty_for_sale"]-campaign_product_data['qty_sold'] >= qty_difference) or campaign_product_data.get('oversell')
+    #     else:
+    #         able_to_add_to_cart = (campaign_product_data["qty_for_sale"]-campaign_product_data['qty_sold']-campaign_product_data['qty_add_to_cart'] >= qty_difference) or campaign_product_data.get('oversell')
+
+    #     able_to_purchase = True
+    #     if campaign_product_data.get('oversell'):
+    #         pass    #do nothing
+    #     else:
+    #         able_to_purchase = campaign_product_data["qty_for_sale"]-campaign_product_data['qty_sold'] >= qty_difference
+
+    #     if not able_to_add_to_cart or not able_to_purchase:
+    #         raise lib.error_handle.error.cart_error.CartErrors.UnderStock("out_of_stock")
         
 
 
