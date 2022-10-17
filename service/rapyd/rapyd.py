@@ -24,7 +24,12 @@ class RapydService:
         self.__access_key = access_key
         self.__secret_key = secret_key
         self.__base_rapid_api_key = settings.BASERAPYDAPIURL
-
+    
+    def get_country(self, country_code):
+        api_response = requests.get(**self.__prepare_request('get', f'/v1/data/countries?currency_code={country_code}'))
+        
+        return api_response
+    
     def get_customers(self):
         api_response = requests.get(**self.__prepare_request('get', '/v1/customers'))
         if api_response.status_code != 200:

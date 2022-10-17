@@ -449,17 +449,17 @@ class PaymentViewSet(viewsets.GenericViewSet):
             amount = order.total, 
             country = country, 
             currency = currency,
-            requested_currency = "TWD",
-            custom_elements = {
-                "dynamic_currency_conversion": True
-            },
+            # requested_currency = "TWD",
+            # custom_elements = {
+            #     "dynamic_currency_conversion": True
+            # },
             complete_checkout_url = f"{settings.GCP_API_LOADBALANCER_URL}/api/v2/payment/rapyd/callback/success?order_oid={str(order_oid)}&checkout_time={checkout_time}",
             cancel_checkout_url = f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{str(order_oid)}/payment',
-            payment_method_type_categories = ["bank_transfer", "card"],
+            # payment_method_type_categories = ["bank_transfer", "card"],
             metadata = {
                 "order_oid": order_oid
             },
-            fixed_side = "buy"
+            # fixed_side = "buy"
         )
         rapyd_service = service.rapyd.rapyd.RapydService(access_key=access_key, secret_key=secret_key)
 
@@ -495,6 +495,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         checkout_id = order.history[f'{models.order.order.PAYMENT_METHOD_RAPYD}_{checkout_time}']['id']
         api_response = rapyd_service.retrieve_checkout(checkout_id)
         response_data = api_response.json()
+        print(response_data)
         payment_data = response_data.get('data',{}).get('payment', {})
         is_successful = payment_data.get("paid", False)
         
@@ -533,7 +534,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             data = body['data']
             print("body", body)
             
-            order_oid, = data.get("metadata", {}).get("order_oid", "")
+            order_oid = data.get("metadata", {}).get("order_oid", "")
             order = lib.util.verify.Verify.get_order_with_oid(order_oid)
             meta = order.meta
             meta["webhook"][id] = data
