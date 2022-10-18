@@ -1,3 +1,4 @@
+from re import S
 from django.http import JsonResponse
 from django.db.models import Q, Value
 
@@ -270,7 +271,10 @@ class CartViewSet(viewsets.ModelViewSet):
 
 
         order = serializer.save()
-        lib.helper.order_helper.OrderHelper.summarize_order(order)
+        lib.helper.order_helper.OrderHelper.summarize_order(order, save=False)
+        order.buyer = api_user
+        order.save()
+        
         content = lib.helper.order_helper.OrderHelper.get_checkout_email_content(order,order_oid)
         jobs.send_email_job.send_email_job(campaign.title, order.shipping_email, content=content)    
         
@@ -278,8 +282,9 @@ class CartViewSet(viewsets.ModelViewSet):
         data['oid']=order_oid
         
         # change buyer language
-        api_user.lang = campaign.lang
-        api_user.save()
+        if request.user.is_authenticated:
+            api_user.lang = campaign.lang
+            api_user.save()
 
         return Response(data, status=status.HTTP_200_OK)
 
