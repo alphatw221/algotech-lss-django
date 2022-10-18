@@ -3,7 +3,7 @@ from djongo import models
 
 from rest_framework import serializers
 
-from api.models.campaign.campaign import Campaign
+from api.models.campaign.campaign import Campaign, CampaignSerializer, CampaignSerializerWithUserSubscription
 from api.models.user.user import User
 
 SELLER_ADJUST_ADD = '+'
@@ -29,13 +29,21 @@ class Cart(models.Model):
 
     lock_at = models.DateTimeField(null=True, blank=True, default=None)
 
-    seller_adjust = models.JSONField(default=[], null=True, blank=True)
+    adjust_title = models.CharField(
+        max_length=255, null=True, blank=True, default=None)
+    adjust_price = models.FloatField(null=True, blank=True, default=0)
     
     free_delivery = models.BooleanField(
         blank=False, null=True, default=False)
 
     buyer = models.ForeignKey(
         User, null=True, default=None, blank=True, on_delete=models.SET_NULL, related_name='carts')
+
+    discount = models.FloatField(null=False, blank=False, default=0)
+    applied_discount = models.JSONField(blank=False, null = False, default = {})
+    
+    tax = models.FloatField(null=False, blank=False, default=0)
+
 
     meta = models.JSONField(default=dict, null=True, blank=True)
 
@@ -49,9 +57,13 @@ class CartSerializer(serializers.ModelSerializer):
         model = Cart
         fields = '__all__'
         read_only_fields = ['created_at', 'modified_at', 'campaign', 'buyer']
-
+    campaign = CampaignSerializer()
     meta = serializers.JSONField(default=dict)
     seller_adjust = serializers.JSONField(default=dict)
     products = serializers.JSONField(default=dict)
+    applied_discount = serializers.JSONField(default=dict)
 
+class CartSerializerWithUserSubscription(CartSerializer):
+    campaign = CampaignSerializerWithUserSubscription()
+    
 api_cart_template={f.get_attname():f.get_default() if f.has_default() else None for f in Cart._meta.fields}

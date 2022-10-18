@@ -114,7 +114,7 @@ def capture_facebook(campaign, user_subscription_data, logs):
             except Exception: #duplicate key error might happen here
                 continue
             service.channels.campaign.send_comment_data(campaign.id, uni_format_comment)
-            service.rq.queue.enqueue_comment_queue(jobs.comment_job.comment_job, campaign.data, user_subscription_data, 'facebook', facebook_page.data, uni_format_comment, order_codes_mapping)
+            service.rq.queue.enqueue_comment_queue(jobs.comment_job_v2.comment_job, campaign.data, user_subscription_data, 'facebook', facebook_page.data, uni_format_comment, order_codes_mapping)
             comment_capture_since = comment['created_time']
     except Exception as e:
         print(traceback.format_exc())

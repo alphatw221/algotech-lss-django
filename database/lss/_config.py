@@ -60,23 +60,23 @@ class Collection():
     
     @classmethod
     def __get_incremented_field(cls, session=None):
-        # if session:
-        #     doc = db['__schema__'].find_one({"name":cls.collection_name}, session=session)
-        #     db['__schema__'].update_one({"name":cls.collection_name},{"$inc":{"auto.seq":1}}, session=session)
-                
+
+        doc = db['__schema__'].find_and_modify(query={"name":cls.collection_name}, update={"$inc":{"auto.seq":1}})
+        return int(doc['auto']['seq']+1)
+        # try:
+        #     with client.start_session() as session:
+        #         with session.start_transaction():
+                    
+        #             doc = db['__schema__'].find_one({"name":cls.collection_name}, session=session)
+        #             db['__schema__'].update_one({"name":cls.collection_name},{"$inc":{"auto.seq":1}}, session=session)
+                    
         #     return int(doc['auto']['seq']+1)
-        while True:
-            try:
-                with client.start_session() as session:
-                    with session.start_transaction():
-                        
-                        doc = db['__schema__'].find_one({"name":cls.collection_name}, session=session)
-                        db['__schema__'].update_one({"name":cls.collection_name},{"$inc":{"auto.seq":1}}, session=session)
-                        
-                return int(doc['auto']['seq']+1)
-            except Exception:
-                pass
-                #retry
+        # except Exception:
+        #     if attempts > 0:
+        #         cls.__get_incremented_field(attempts=attempts-1)
+        #     else:
+        #         raise
+
 
     def _sync(self, session=None):
         self.data = self._collection.find_one({'id':self.id}, session=session)

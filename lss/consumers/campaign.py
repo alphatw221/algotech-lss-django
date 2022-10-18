@@ -34,6 +34,9 @@ class CampaignLiveConsumer(WebsocketConsumer):
     #     message = text_data_json.get('message')
     #     #integrate with io platform
 
+    def cart_data(self, event):
+        self.send(text_data=json.dumps(event))
+
     def comment_data(self, event):
         self.send(text_data=json.dumps(event))
 
