@@ -52,15 +52,10 @@ class InstagramProfileViewSet(viewsets.ModelViewSet):
     def get_instagram_profile_picture(self, request, pk):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
-        
-        if 'instagram' not in user_subscription.user_plan.get('activated_platform'):
-            raise lib.error_handle.error.api_error.ApiVerifyError('instagram_not_activated')
-        
-        instagram_profile = lib.util.verify.Verify.get_instagram_profile_from_user_subscription(user_subscription, pk)
+        instagram_profile = models.instagram.instagram_profile.InstagramProfile.objects.get(id=pk)
         code, response = service.instagram.profile.get_profile_info(page_token=instagram_profile.token, profile_id=instagram_profile.business_id)
-        print(response)
         if code !=200:
-            return Response({"error_response": response}, status=status.HTTP_200_OK)
+            return Response({"error_response": response}, status=status.HTTP_400_BAD_REQUEST)
         instagram_profile.image = response['profile_picture_url']
         instagram_profile.save()
         return Response(instagram_profile.image, status=status.HTTP_200_OK)
