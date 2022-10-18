@@ -175,12 +175,12 @@ class CampaignViewSet(viewsets.ModelViewSet):
         return Response(models.campaign.campaign.CampaignSerializer(campaign).data, status=status.HTTP_200_OK)
 
     
-    @action(detail=False, methods=['GET'], url_path=r'retrieve', permission_classes=(IsAuthenticated, ))
+    @action(detail=True, methods=['GET'], url_path=r'retrieve', permission_classes=(IsAuthenticated, ))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def retrieve_campaign(self, request):
-        api_user, campaign_id = lib.util.getter.getparams(request,("campaign_id", ), with_user=True, seller=True)
+    def retrieve_campaign(self, request, pk):
+        api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
-        campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
+        campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, pk)
 
         return Response(models.campaign.campaign.CampaignSerializer(campaign).data, status=status.HTTP_200_OK)
     

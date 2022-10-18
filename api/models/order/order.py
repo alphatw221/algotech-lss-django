@@ -110,20 +110,24 @@ class Order(models.Model):
 
     tax = models.FloatField(null=False, blank=False, default=0)
 
+
 class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
         fields = '__all__'
-        read_only_fields = ['created_at', 'modified_at']
+        read_only_fields = ['created_at', 'updated_at']
 
-    campaign = CampaignSerializerRetreive()
     meta = serializers.JSONField(default=dict)
     products = serializers.JSONField(default=dict)
     checkout_details = serializers.JSONField(default=dict)
     history = serializers.JSONField(default=dict)
     applied_discount = serializers.JSONField(default=dict)
     shipping_option_data = serializers.JSONField(default=dict)
+
+class OrderWithCampaignSerializer(OrderSerializer):
+
+    campaign = CampaignSerializerRetreive()
 
 class OrderSerializerWithUserSubscription(OrderSerializer):
 

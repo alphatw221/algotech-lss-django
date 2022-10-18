@@ -253,7 +253,7 @@ class PreOrderViewSet(viewsets.ModelViewSet):
             discount_code.used_count+=1
             discount_code.save()
 
-        data = models.order.order.OrderSerializer(order).data
+        data = models.order.order.OrderWithCampaignSerializer(order).data
         data['oid']=str(api_order._id)
         
         # change buyer language

@@ -5,7 +5,7 @@ from django.conf import settings
 from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
-from api.models.order.order import Order, OrderSerializerWithUserSubscription, OrderSerializer
+from api.models.order.order import Order, OrderSerializerWithUserSubscription, OrderSerializer, OrderWithCampaignSerializer
 from api.models.order.pre_order import PreOrder
 
 

@@ -264,7 +264,7 @@ class CartViewSet(viewsets.ModelViewSet):
         order_oid = str(pymongo_order._id)
         serializer = models.order.order.OrderSerializerUpdateShipping(order, data=shipping_data, partial=True) 
         if not serializer.is_valid():
-            data = models.order.order.OrderSerializer(order).data
+            data = models.order.order.OrderWithCampaignSerializer(order).data
             data['oid']=order_oid
             return Response(data, status=status.HTTP_200_OK)
 
@@ -274,7 +274,7 @@ class CartViewSet(viewsets.ModelViewSet):
         content = lib.helper.order_helper.OrderHelper.get_checkout_email_content(order,order_oid)
         jobs.send_email_job.send_email_job(campaign.title, order.shipping_email, content=content)    
         
-        data = models.order.order.OrderSerializer(order).data
+        data = models.order.order.OrderWithCampaignSerializer(order).data
         data['oid']=order_oid
         
         # change buyer language

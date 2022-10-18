@@ -9,7 +9,7 @@ from rest_framework.parsers import MultiPartParser
 
 from django.conf import settings
 from django.core.files.base import ContentFile
-
+from django.db.models import Q, Value
 
 
 from api import models
@@ -162,7 +162,8 @@ class OrderViewSet(viewsets.ModelViewSet):
         order.save()
 
         for campaign_product_id_str, qty in order.products.items():
-            pymongo_campaign_product = database.lss.campaign_product.CampaignProduct(id=int(campaign_product_id_str)).sold(qty, sync=True)
+            pymongo_campaign_product = database.lss.campaign_product.CampaignProduct(id=int(campaign_product_id_str))
+            pymongo_campaign_product.sold(qty, sync=True)
             lib.helper.cart_helper.CartHelper.send_campaign_product_websocket_data(pymongo_campaign_product.data)
         subject = lib.i18n.email.order_comfirm_mail.i18n_get_mail_subject(order, lang=campaign.lang)
         content = lib.i18n.email.order_comfirm_mail.i18n_get_mail_content(order, campaign, lang=campaign.lang)
@@ -180,7 +181,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         page = self.paginate_queryset(api_user.orders.all().order_by('-created_at'))
         if page is not None:
-            serializer = models.order.order.OrderSerializer(page, many=True)
+            serializer = models.order.order.OrderWithCampaignSerializer(page, many=True)
             data = self.get_paginated_response(serializer.data).data
         else:
             data = models.order.order_product.OrderWithOrderProductSerializer(api_user.orders, many=True).data
@@ -237,13 +238,47 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         api_user, campaign_id, search, page, page_size, order_status, = lib.util.getter.getparams(request, ( 'campaign_id', 'search', 'page', 'page_size','status'),with_user=True, seller=True)
         
-        payment_list, delivery_list, platform_list, sort_by = lib.util.getter.getdata(request,('payment','delivery','platform', 'sort_by'))
+        payment_dict, delivery_dict, platform_dict, sort_by_dict = lib.util.getter.getdata(request,('payment','delivery','platform', 'sort_by'))
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription,campaign_id)
+        queryset = campaign.orders.all()
 
-        json_data, total_count = database.lss.campaign.get_merge_order_list_pagination(campaign.id, search, order_status, payment_list, delivery_list, platform_list , int(page), int(page_size), sort_by)
+        if search not in ["",None,'undefined'] and search.isnumeric():
+            queryset=queryset.filter(Q(id=int(search))|Q(customer_name__contains=search))
+        elif search not in ["",None,'undefined']:
+            queryset=queryset.filter(customer_name__contains=search)
 
-        return Response({'count':total_count,'data':json_data}, status=status.HTTP_200_OK)
+        if order_status == models.order.order.STATUS_REVIEW:
+            queryset=queryset.filter(status=order_status)
+        elif order_status == models.order.order.STATUS_PROCEED:
+            queryset=queryset.filter(status=order_status)
+        elif order_status == models.order.order.STATUS_COMPLETE:
+            queryset=queryset.filter(status__in=[models.order.order.STATUS_COMPLETE,models.order.order.STATUS_SHIPPING_OUT])
+
+        if payment_dict:
+            queryset=queryset.filter(payment_method__in=payment_dict)
+        # if delivery_dict:
+        #     queryset=queryset.filter(status__in=delivery_dict)
+        if platform_dict:
+            print(platform_dict)
+            queryset=queryset.filter(platform__in=platform_dict)
+
+        for order_by, asc in sort_by_dict.items():
+            if order_by not in ["id","subtotal","total",'payment_method', 'status']:
+                continue
+            order_by = order_by if asc==1 else f"-{order_by}"
+            queryset = queryset.order_by(order_by)
+
+        page = self.paginate_queryset(queryset)
+        serializer = models.order.order.OrderSerializer(page, many=True)
+        result = self.get_paginated_response(serializer.data)
+        data = result.data
+
+        return Response(data, status=status.HTTP_200_OK)
+
+        # json_data, total_count = database.lss.campaign.get_merge_order_list_pagination(campaign.id, search, order_status, payment_list, delivery_list, platform_list , int(page), int(page_size), sort_by)
+
+        # return Response({'count':total_count,'data':json_data}, status=status.HTTP_200_OK)
     
     @action(detail=True, methods=['PUT'], url_path=r'seller/deliver', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler

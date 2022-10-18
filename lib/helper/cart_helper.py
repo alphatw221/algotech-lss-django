@@ -32,6 +32,12 @@ class CartHelper():
     @classmethod
     def update_cart_product(cls, api_user, cart, campaign_product, qty):
 
+        ret = rule.rule_checker.cart_rule_checker.RuleChecker.check(check_list=[
+            rule.check_rule.cart_check_rule.CartCheckRule.is_qty_valid,
+        ],**{
+            'qty':qty,
+        })
+
         original_qty = cart.products.get(str(campaign_product.id),0)
         qty_difference = qty-original_qty
 
