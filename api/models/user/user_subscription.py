@@ -190,7 +190,7 @@ class UserSubscriptionSerializerUpgrade(serializers.ModelSerializer):
 class UserSubscriptionSerializerUpdate(serializers.ModelSerializer):
     class Meta:
         model = UserSubscription
-        fields = ['currency','lang','buyer_lang','decimal_places']
+        fields = ['currency','lang','buyer_lang','decimal_places', 'status']
 
 
 class UserSubscriptionSerializerSimplify(serializers.ModelSerializer):
