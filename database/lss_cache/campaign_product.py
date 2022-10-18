@@ -10,7 +10,6 @@ DATA_EXTERNAL_INTERNAL_MAP = 'external_internal_map'
 DATA_INTERNAL_EXTERNAL_MAP = 'internal_external_map'
 DATA_FOR_SELL = 'for_sale'
 DATA_ALL = 'all'
-
 AUTO_RELEASE_TIME = 2
 
 def leash_get_external_internal_map(campaign_id, plugin):
@@ -94,6 +93,9 @@ def get_products_all(campaign_id, bypass=False):
     return f()
 
 
+def get_product_dict(campaign_id, bypass=False):
+    campaign_product_list = get_products_all(campaign_id=campaign_id, bypass=bypass)
+    return {str(campaign_product.get('id')):campaign_product for campaign_product in campaign_product_list}
 # def get(campaign_id):
 #     if not redis.exists(get_key(KEY,campaign_id)):
 #         return None

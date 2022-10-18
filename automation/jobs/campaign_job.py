@@ -23,7 +23,7 @@ class OrderCodesMappingSingleton:
     @classmethod
     def get_mapping(cls, campaign_id):
         if cls.order_codes_mapping == None:
-            database.lss.campaign_product.CampaignProduct.filter(campaign_id=campaign_id)
+            # database.lss.campaign_product.CampaignProduct.filter(campaign_id=campaign_id)
             kwargs = {"campaign_id": campaign_id, "$or": [{"type": "product"}, {"type": "product-fast"}]}
             campaign_products = database.lss.campaign_product.CampaignProduct.filter(**kwargs)
             cls.order_codes_mapping = {campaign_product['order_code'].lower(): campaign_product
@@ -114,7 +114,7 @@ def capture_facebook(campaign, user_subscription_data, logs):
             except Exception: #duplicate key error might happen here
                 continue
             service.channels.campaign.send_comment_data(campaign.id, uni_format_comment)
-            service.rq.queue.enqueue_comment_queue(jobs.comment_job.comment_job, campaign.data, user_subscription_data, 'facebook', facebook_page.data, uni_format_comment, order_codes_mapping)
+            service.rq.queue.enqueue_comment_queue(jobs.comment_job_v2.comment_job, campaign.data, user_subscription_data, 'facebook', facebook_page.data, uni_format_comment, order_codes_mapping)
             comment_capture_since = comment['created_time']
     except Exception as e:
         print(traceback.format_exc())

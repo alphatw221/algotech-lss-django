@@ -23,18 +23,20 @@ class DiscountCodeViewSet(viewsets.ModelViewSet):
     
 
     #-----------------------------------------------buyer----------------------------------
-    @action(detail=False, methods=['GET'], url_path=r'search/(?P<pre_order_oid>[^/.]+)', permission_classes=(), authentication_classes=[])
+    @action(detail=False, methods=['GET'], url_path=r'list/(?P<cart_oid>[^/.]+)', permission_classes=(), authentication_classes=[])
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def search_discount_code(self, request, pre_order_oid):
+    def buyer_list_discount_code(self, request, cart_oid):
         
         _type, = lib.util.getter.getparams(request,('type',),with_user=False)
 
-        pre_order = lib.util.verify.Verify.get_pre_order_with_oid(pre_order_oid)
-        campaign = pre_order.campaign
+        cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
+        campaign = cart.campaign
         user_subscription = campaign.user_subscription
 
-        discount_codes = user_subscription.discount_codes.filter(type=_type, start_at__lte=datetime.utcnow(), end_at__gte=datetime.utcnow())
-        data = models.discount_code.discount_code.DiscountCodeSerializer(discount_codes, many=True).data
+        queryset = user_subscription.discount_codes.filter(start_at__lte=datetime.utcnow(), end_at__gte=datetime.utcnow())
+        if _type in models.discount_code.discount_code.TYPE_CHOICES:
+            queryset.filter(type=_type)
+        data = models.discount_code.discount_code.DiscountCodeSerializer(queryset, many=True).data
         # print(data)
         return Response(data, status=status.HTTP_200_OK)
 
