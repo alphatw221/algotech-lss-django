@@ -11,7 +11,7 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.test_get_facebook_app_secret_proof()
+        self.test_websocket()
 
 
     def modify_database(self):
@@ -248,17 +248,20 @@ class Command(BaseCommand):
         pprint(l)
 
     def test_websocket(self):
-
-        from asgiref.sync import async_to_sync
-        from channels.layers import get_channel_layer
+        import service
+        import database
+        # from asgiref.sync import async_to_sync
+        # from channels.layers import get_channel_layer
         
-        channel_layer = get_channel_layer()
-        # async_to_sync(channel_layer.send)("channel_name", {"type": "chat.force_disconnect"})
-        # async_to_sync(channel_layer.group_send)("user_subscription_1", {"type": "notification_message","data":{"message":"testmessage"}})
+        # channel_layer = get_channel_layer()
+        # # async_to_sync(channel_layer.send)("channel_name", {"type": "chat.force_disconnect"})
+        # # async_to_sync(channel_layer.group_send)("user_subscription_1", {"type": "notification_message","data":{"message":"testmessage"}})
 
-        async_to_sync(channel_layer.group_send)("campaign_443", {"type": "comment_data","data":{"message":"testmessage"}})
+        # async_to_sync(channel_layer.group_send)("campaign_1356", {"type": "cart_data","data":{"message":"123"}})
         # async_to_sync(channel_layer.group_send)("campaign_440", {"type": "order_data","data":{"message":"testmessage"}})
         # async_to_sync(channel_layer.group_send)("campaign_440", {"type": "product_data","data":{"message":"testmessage"}})
+        pymongo_cart = database.lss.cart.Cart.get_object(id=2)
+        service.channels.campaign.send_cart_data(1356, pymongo_cart.data)
 
     def test_lucky_draw(self):
 

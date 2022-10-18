@@ -47,15 +47,15 @@ def create_checkout_session(secret, currency, order, decimal_places, price_unit,
     try:
         stripe.api_key = secret
         items = []
-        for key, product in order.products.items():
+        for order_product in order.order_products.all():
             stripe_product = stripe.Product.create(
-                name=product.get('name',''),
-                images=[urllib.parse.quote(f"{product.get('image','')}").replace("%3A", ":")]
+                name=order_product.name,
+                images=[urllib.parse.quote(f"{order_product.image}").replace("%3A", ":")]
             )
             
             price = stripe.Price.create(
                 product=stripe_product.id,
-                unit_amount=__transform_payment_amount(product.get('price'), decimal_places, price_unit, currency=currency),
+                unit_amount=__transform_payment_amount(order_product.price, decimal_places, price_unit, currency=currency),
                 currency=currency,
             )
             # print('product')
@@ -63,16 +63,18 @@ def create_checkout_session(secret, currency, order, decimal_places, price_unit,
             items.append(
                 {
                     'price': price.id,
-                    "quantity": product.get('qty',0)
+                    "quantity": order_product.qty
                 },
             )
 
         discounts = []
         amount_off = 0
-        if order.adjust_price:
-            amount_off-=__transform_payment_amount(order.adjust_price, decimal_places, price_unit, currency=currency)
+
         if order.discount:
             amount_off+=__transform_payment_amount(order.discount, decimal_places, price_unit, currency=currency)
+        
+        if order.adjust_price:
+            amount_off-=__transform_payment_amount(order.adjust_price, decimal_places, price_unit, currency=currency)
         
         if amount_off:
             discount = stripe.Coupon.create(
