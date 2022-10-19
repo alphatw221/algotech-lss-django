@@ -48,7 +48,7 @@ def to_lss_order(easy_store_order, lss_pre_order, campaign_product_external_inte
         "customer_name" : lss_pre_order.customer_name,
         "customer_img" : lss_pre_order.customer_img,
         "platform" : lss_pre_order.platform,
-        "status" : models.order.order.STATUS_COMPLETE if easy_store_order.get('financial_status')=='paid' else models.order.order.STATUS_REVIEW,
+        "status" : models.order.order.STATUS_COMPLETE if easy_store_order.get('financial_status')=='paid' else models.order.order.STATUS_AWAITING_PAYMENT,
         "discount" : float(easy_store_order.get('total_discount',0)),
         "subtotal" : float(easy_store_order.get('subtotal_price',0)),
         "shipping_cost" : float(easy_store_order.get('total_shipping',0)),

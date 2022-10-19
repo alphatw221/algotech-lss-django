@@ -57,7 +57,7 @@ def to_lss_order(ordr_startr_order_data, pre_order, campaign_product_external_in
         "shipping_postcode":ordr_startr_order_data.get('ShippingPostalCode'),
         "shipping_address_1":ordr_startr_order_data.get('ShippingAddress1'),
 
-        "status":models.order.order.STATUS_COMPLETE if ordr_startr_order_data.get('PaymentStatus')=='paid' else models.order.order.STATUS_REVIEW,
+        "status":models.order.order.STATUS_COMPLETE if ordr_startr_order_data.get('PaymentStatus')=='paid' else models.order.order.STATUS_AWAITING_PAYMENT,
         "meta":{
             'ordr_startr':{
                 'id':ordr_startr_order_data.get('_id')

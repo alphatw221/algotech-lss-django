@@ -12,17 +12,20 @@ STATUS_AWAITING_PAYMENT = 'awaiting_payment'
 STATUS_AWAITING_FULFILLMENT = 'awaiting_fulfillment'
 STATUS_AWAITING_SHIPMENT = 'awaiting_shipment'
 STATUS_AWAITING_PICKUP = 'awaiting_pickup'
+STATUS_PARTIALLY_SHIPPED = 'partially_shipped'
+STATUS_SHIPPED = 'shipped'
 STATUS_DISPUTED = 'disputed'
 STATUS_PARTIALLY_REFUNDED = 'partially_refunded'
 STATUS_REFUNDED = 'refunded'
 STATUS_COMPLETE = 'complete'
+STATUS_CANCELLED = 'cancelled'
 
 #TODO update history data
-STATUS_PROCEED = 'proceed'
-STATUS_REVIEW = 'review'
-STATUS_SHIPPING_OUT = 'shipping out'
-STATUS_EXPIRED = 'expired'
-STATUS_PENDING_REFUND = 'pending_refund'
+STATUS_PROCEED = 'proceed' # this represent status other than complete
+# STATUS_REVIEW = 'review'
+# STATUS_SHIPPING_OUT = 'shipping out'
+# STATUS_EXPIRED = 'expired'
+# STATUS_PENDING_REFUND = 'pending_refund'
 
 STATUS_CHOICES=[
     STATUS_PENDING ,
@@ -30,16 +33,13 @@ STATUS_CHOICES=[
     STATUS_AWAITING_FULFILLMENT ,
     STATUS_AWAITING_SHIPMENT ,
     STATUS_AWAITING_PICKUP ,
+    STATUS_PARTIALLY_SHIPPED ,
+    STATUS_SHIPPED ,
     STATUS_DISPUTED ,
     STATUS_PARTIALLY_REFUNDED ,
     STATUS_REFUNDED ,
     STATUS_COMPLETE ,
-    #TODO update history data
-    STATUS_PROCEED ,
-    STATUS_REVIEW ,
-    STATUS_SHIPPING_OUT ,
-    STATUS_EXPIRED ,
-    STATUS_PENDING_REFUND ,
+    STATUS_CANCELLED ,
 ]
 
 
