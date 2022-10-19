@@ -1,6 +1,8 @@
 
+from datetime import datetime
 from http import client
 import json
+import traceback
 from django.core.files.base import ContentFile
 from django.contrib.auth.models import User as AuthUser
 from django.http import HttpResponseRedirect
@@ -429,4 +431,158 @@ class PaymentViewSet(viewsets.GenericViewSet):
         res = '1|OK'
         
         return Response(res)
+    
+    @action(detail=False, methods=['GET'], url_path=r"rapyd/gateway")
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def get_rapyd_gateway(self, request):
+
+        order_oid, = lib.util.getter.getparams(request,('order_oid',),with_user=False) 
+        order = lib.util.verify.Verify.get_order_with_oid(order_oid)
+        campaign = lib.util.verify.Verify.get_campaign_from_order(order)
+
+        access_key = campaign.meta_payment.get("rapyd",{}).get("access_key")
+        secret_key = campaign.meta_payment.get("rapyd",{}).get("secret_key")
+        country = campaign.meta_payment.get("rapyd",{}).get("country")
+        currency = campaign.meta_payment.get("rapyd",{}).get("currency")
+        checkout_time = pendulum.now("UTC").to_iso8601_string()
+        data = service.rapyd.models.checkout.CreateCheckoutModel(
+            amount = order.total, 
+            country = country, 
+            currency = currency,
+            # requested_currency = "TWD",
+            # custom_elements = {
+            #     "dynamic_currency_conversion": True
+            # },
+            complete_checkout_url = f"{settings.GCP_API_LOADBALANCER_URL}/api/v2/payment/rapyd/callback/success?order_oid={str(order_oid)}&checkout_time={checkout_time}",
+            cancel_checkout_url = f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{str(order_oid)}/payment',
+            payment_method_type_categories = ["bank_transfer", "card"],
+            metadata = {
+                "order_oid": order_oid
+            },
+            # fixed_side = "buy"
+        )
+        rapyd_service = service.rapyd.rapyd.RapydService(access_key=access_key, secret_key=secret_key)
+
+        api_response = rapyd_service.create_checkout(data)
+        
+        if api_response.status_code != 200:
+            error_message = service.rapyd.rapyd.RapydService.get_error_message(api_response)
+            raise lib.error_handle.error.api_error.ApiCallerError(error_message)
+        data = api_response.json()
+        result = service.rapyd.models.checkout.CheckoutModel(**data["data"])
+        order.history[f'{models.order.order.PAYMENT_METHOD_RAPYD}_{checkout_time}']={
+            "id":result.id,
+            "action": "checkout",
+            "time": checkout_time
+        }
+        order.save()
+        return Response(result.redirect_url, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['GET'], url_path=r'rapyd/callback/success',)
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def rapyd_success_callback(self, request):
+        print("rapyd_success_callback")
+        rapyd_status_map = {
+            "ACT": "Active and awaiting completion of 3DS or capture. Can be updated.",
+            "CAN": "Canceled by the client or the customer's bank.",
+            "CLO": "Closed and paid.",
+            "ERR": "Error. An attempt was made to create or complete a payment, but it failed.",
+            "EXP": "The payment has expired.",
+            "NEW": "Not closed.",
+            "REV": "Reversed by Rapyd. See cancel_reason, above."
+        }
+        order_oid, checkout_time = lib.util.getter.getparams(request, ('order_oid', 'checkout_time'), with_user=False)
+
+        order = lib.util.verify.Verify.get_order_with_oid(order_oid)
+        campaign = order.campaign
+        
+        access_key = campaign.meta_payment.get("rapyd",{}).get("access_key")
+        secret_key = campaign.meta_payment.get("rapyd",{}).get("secret_key")
+
+        rapyd_service = service.rapyd.rapyd.RapydService(access_key=access_key, secret_key=secret_key)
+
+        checkout_id = order.history[f'{models.order.order.PAYMENT_METHOD_RAPYD}_{checkout_time}']['id']
+        api_response = rapyd_service.retrieve_checkout(checkout_id)
+        response_data = api_response.json()
+        print(response_data)
+        payment_data = response_data.get('data',{}).get('payment', {})
+        payment_status = payment_data.get("status", False)
+        
+        if not payment_status:
+            raise lib.error_handle.error.api_error.ApiVerifyError('payment_failed')
+
+        
+        if payment_status == "CLO":
+            order.status = models.order.order.STATUS_COMPLETE
+        elif payment_status == "ACT":
+            order.status = models.order.order.STATUS_PENDING_CONFIRMATION
+        elif payment_status == "EXP":
+            order.status = models.order.order.STATUS_EXPIRED
+            
+        order.meta[models.order.order.PAYMENT_METHOD_RAPYD] = response_data
+        order.payment_method = models.order.order.PAYMENT_METHOD_RAPYD
+        order.checkout_details[models.order.order.PAYMENT_METHOD_RAPYD] = {
+            "payment_status_description": rapyd_status_map[payment_status],
+            **payment_data
+        }
+        callback_time = pendulum.now("UTC").to_iso8601_string()
+        order.history[f"{models.order.order.PAYMENT_METHOD_RAPYD}_{callback_time}"]={
+            "action": "checkout_success_callback",
+            "time": callback_time
+        }
+        
+        order.save()
+        if payment_status == "CLO":
+            content = lib.helper.order_helper.OrderHelper.get_confirmation_email_content(order)
+            jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)
+            return HttpResponseRedirect(redirect_to=f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}/confirmation')
+        else:
+            return HttpResponseRedirect(redirect_to=f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}')
+    
+    
+    
+    @action(detail=False, methods=['POST'], url_path=r"rapyd/webhook")
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def get_rapyd_webhook(self, request):
+        order = None
+        try:
+            signature = request.headers['Signature']
+            http_uri = settings.GCP_API_LOADBALANCER_URL+request.get_full_path()
+            salt = request.headers['Salt']
+            timestamp = request.headers['Timestamp']
+            
+            body = json.loads(request.body)
+            id = body['id']
+            type = body['type']
+            data = body['data']
+            print("body", body)
+            
+            order_oid = data.get("metadata", {}).get("order_oid", "")
+            order = lib.util.verify.Verify.get_order_with_oid(order_oid)
+            
+            campaign = lib.util.verify.Verify.get_campaign_from_order(order)
+            access_key = campaign.meta_payment.get("rapyd",{}).get("access_key")
+            secret_key = campaign.meta_payment.get("rapyd",{}).get("secret_key")
+            
+            rapyd_service = service.rapyd.rapyd.RapydService(access_key=access_key, secret_key=secret_key)
+            
+            if not rapyd_service.auth_webhook_request(signature, http_uri, salt, timestamp, body):
+                raise lib.error_handle.error.api_error.ApiCallerError("signature not valid")
+            if type == "PAYMENT_FAILED":
+                order_status = models.order.order.STATUS_REVIEW
+            elif type == "PAYMENT_COMPLETED":
+                order.status = models.order.order.STATUS_COMPLETE
+            
+            callback_time = pendulum.now("UTC").to_iso8601_string()
+            order.history[f"{models.order.order.PAYMENT_METHOD_RAPYD}_{callback_time}"]={
+                "action": "webhook",
+                "time": callback_time,
+                "data": body
+            }
+            order.save()
+        except Exception:
+            if order:
+                order.save()
+            print(traceback.format_exc())
+        return Response("OK", status=status.HTTP_200_OK)
         
