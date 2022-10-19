@@ -139,6 +139,11 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         campaignData, = lib.util.getter.getdata(request, ('data',), required=True)
         campaignData = json.loads(campaignData)
+        
+        end_at = campaignData['end_at']
+        ret = rule.rule_checker.user_subscription_rule_checker.UpdateCampaignRuleChecker.check(**{
+            'api_user': api_user, 'user_subscription': user_subscription, 'end_at': end_at
+        })
 
         serializer = models.campaign.campaign.CampaignSerializerUpdate(campaign, data=campaignData, partial=True)
         if not serializer.is_valid():
