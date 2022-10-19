@@ -17,6 +17,8 @@ from pathlib import Path
 from google.oauth2 import service_account
 from corsheaders.defaults import default_headers
 import config
+import urllib 
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -206,7 +208,7 @@ DATABASES = {
     # }
 }
 MONGODB_CONNECTION_STRING = \
-    'mongodb://'+config.MONGO_DB_USERNAME+':'+config.MONGO_DB_PASSWORD+\
+    'mongodb://'+config.MONGO_DB_USERNAME+':'+urllib.parse.quote_plus(config.MONGO_DB_PASSWORD)+\
     '@34.126.92.142:27017,35.240.200.4:27017,34.126.155.150:27017/'+\
     '?authSource='+config.MONGO_DB_DATABASE_NAME
     
