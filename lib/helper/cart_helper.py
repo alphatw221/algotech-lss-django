@@ -57,7 +57,7 @@ class CartHelper():
         })
 
 
-        if not cls.__check_stock_avaliable_and_add_to_cart(campaign_product.__dict__, qty_difference):
+        if not cls.__check_stock_avaliable_and_add_to_cart_by_api(campaign_product.__dict__, qty_difference):
             raise lib.error_handle.error.cart_error.CartErrors.UnderStock('out_of_stock') 
 
         pymongo_cart = database.lss.cart.Cart(id=cart.id)
@@ -106,12 +106,7 @@ class CartHelper():
                 return RequestState.INVALID_NEGATIVE_QTY
 
 
-        # transaction required here
-
-        original_qty = pymongo_cart.data.get('products',{}).get(str(campaign_product_data.get('id')),0)
-        qty_difference = qty-original_qty
-
-        if not cls.__check_stock_avaliable_and_add_to_cart(campaign_product_data, qty_difference):
+        if not cls.__check_stock_avaliable_and_add_to_cart_by_comment(campaign_product_data, pymongo_cart, qty):
             return RequestState.INSUFFICIENT_INV
 
         cls.__update_cart_product(None, pymongo_cart, campaign_product_data, qty)
@@ -193,7 +188,7 @@ class CartHelper():
 
 
     @classmethod
-    def __check_stock_avaliable_and_add_to_cart(cls, campaign_product_data, qty_difference, attempts=10):
+    def __check_stock_avaliable_and_add_to_cart_by_api(cls, campaign_product_data, qty_difference, attempts=10):
 
         if not qty_difference:
             return True
@@ -205,29 +200,57 @@ class CartHelper():
         try:
             with database.lss.util.start_session() as session:
                 with session.start_transaction():
-
-                    pymongo_campaign_product = database.lss.campaign_product.CampaignProduct.get_object(id=campaign_product_data.get('id'), session=session)
-
-                    able_to_add_to_cart = True
-                    if campaign_product_data.get('overbook'):
-                        able_to_add_to_cart = (pymongo_campaign_product.data.get("qty_for_sale")-pymongo_campaign_product.data.get('qty_sold') >= qty_difference) 
-                    else:
-                        able_to_add_to_cart = (pymongo_campaign_product.data.get("qty_for_sale")-pymongo_campaign_product.data.get('qty_sold')-pymongo_campaign_product.data.get('qty_add_to_cart') >= qty_difference) 
-
-                    able_to_purchase = pymongo_campaign_product.data.get("qty_for_sale")-pymongo_campaign_product.data.get('qty_sold') >= qty_difference
-
-                    if not able_to_add_to_cart or not able_to_purchase:
-                        return False
-
-                    pymongo_campaign_product.add_to_cart(qty_difference, sync=False, session=session)
-                    return True
-                    
+                    return cls.__check_stock_avaliable_and_add_to_cart(campaign_product_data, qty_difference, session)
         except Exception:
             if attempts > 0:
-                cls.__check_stock_avaliable_and_add_to_cart(campaign_product_data, qty_difference, attempts=attempts-1)
+                cls.__check_stock_avaliable_and_add_to_cart_by_api(campaign_product_data, qty_difference, attempts=attempts-1)
             else:
                 raise lib.error_handle.error.cart_error.CartErrors.ServerBusy('server_busy')
 
+    @classmethod
+    def __check_stock_avaliable_and_add_to_cart_by_comment(cls, campaign_product_data, pymongo_cart:database.lss.cart.Cart, qty, attempts=10):
+        try:
+            with database.lss.util.start_session() as session:
+                with session.start_transaction():
+
+                    pymongo_cart._sync(session)
+                    original_qty = pymongo_cart.data.get('products',{}).get(str(campaign_product_data.get('id')),0)
+                    qty_difference = qty-original_qty
+
+                    if not qty_difference:
+                        return True
+
+                    if campaign_product_data.get('oversell'):
+                        database.lss.campaign_product.CampaignProduct(id=campaign_product_data.get('id')).add_to_cart(qty=qty_difference, sync=False)
+                        return True
+
+
+                    return cls.__check_stock_avaliable_and_add_to_cart(campaign_product_data, qty_difference, session)
+                    
+        except Exception:
+            if attempts > 0:
+                cls.__check_stock_avaliable_and_add_to_cart_by_comment(campaign_product_data, qty_difference, attempts=attempts-1)
+            else:
+                raise lib.error_handle.error.cart_error.CartErrors.ServerBusy('server_busy')
+
+    @staticmethod
+    def __check_stock_avaliable_and_add_to_cart(campaign_product_data, qty_difference, session):
+
+        pymongo_campaign_product = database.lss.campaign_product.CampaignProduct.get_object(id=campaign_product_data.get('id'), session=session)
+
+        able_to_add_to_cart = True
+        if campaign_product_data.get('overbook'):
+            able_to_add_to_cart = (pymongo_campaign_product.data.get("qty_for_sale")-pymongo_campaign_product.data.get('qty_sold') >= qty_difference) 
+        else:
+            able_to_add_to_cart = (pymongo_campaign_product.data.get("qty_for_sale")-pymongo_campaign_product.data.get('qty_sold')-pymongo_campaign_product.data.get('qty_add_to_cart') >= qty_difference) 
+
+        able_to_purchase = pymongo_campaign_product.data.get("qty_for_sale")-pymongo_campaign_product.data.get('qty_sold') >= qty_difference
+
+        if not able_to_add_to_cart or not able_to_purchase:
+            return False
+
+        pymongo_campaign_product.add_to_cart(qty_difference, sync=False, session=session)
+        return True
 
     @staticmethod
     def __update_cart_product(api_user, pymongo_cart, campaign_product_data, qty):
