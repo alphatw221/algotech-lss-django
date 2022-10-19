@@ -7,14 +7,42 @@ from djongo import models
 from rest_framework import serializers
 from api.models.user.user import User
 
-
-STATUS_PROCEED = 'proceed'
+STATUS_PENDING = 'pending'
+STATUS_AWAITING_PAYMENT = 'awaiting_payment'
+STATUS_AWAITING_FULFILLMENT = 'awaiting_fulfillment'
+STATUS_AWAITING_SHIPMENT = 'awaiting_shipment'
+STATUS_AWAITING_PICKUP = 'awaiting_pickup'
+STATUS_DISPUTED = 'disputed'
+STATUS_PARTIALLY_REFUNDED = 'partially_refunded'
+STATUS_REFUNDED = 'refunded'
 STATUS_COMPLETE = 'complete'
+
+#TODO update history data
+STATUS_PROCEED = 'proceed'
 STATUS_REVIEW = 'review'
 STATUS_SHIPPING_OUT = 'shipping out'
 STATUS_EXPIRED = 'expired'
 STATUS_PENDING_REFUND = 'pending_refund'
 STATUS_PENDING_CONFIRMATION = 'pending_confirmation'
+
+STATUS_CHOICES=[
+    STATUS_PENDING ,
+    STATUS_AWAITING_PAYMENT ,
+    STATUS_AWAITING_FULFILLMENT ,
+    STATUS_AWAITING_SHIPMENT ,
+    STATUS_AWAITING_PICKUP ,
+    STATUS_DISPUTED ,
+    STATUS_PARTIALLY_REFUNDED ,
+    STATUS_REFUNDED ,
+    STATUS_COMPLETE ,
+    #TODO update history data
+    STATUS_PROCEED ,
+    STATUS_REVIEW ,
+    STATUS_SHIPPING_OUT ,
+    STATUS_EXPIRED ,
+    STATUS_PENDING_REFUND ,
+]
+
 
 PAYMENT_METHOD_STRIPE = 'stripe'
 PAYMENT_METHOD_DIRECT = 'direct_payment'
@@ -88,7 +116,7 @@ class Order(models.Model):
 
     platform_id = models.IntegerField(blank=True, null=True, default=None)
 
-    status = models.CharField(max_length=255, null=True, blank=True, default=STATUS_PROCEED)
+    status = models.CharField(max_length=255, null=True, blank=True, default=STATUS_AWAITING_PAYMENT)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

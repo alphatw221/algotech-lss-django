@@ -16,8 +16,16 @@ class Order(Collection):
 
 def get_complete_sales_of_campaign(campaign_id):
 
+
+    payment_complete_status = [
+        models.order.order.STATUS_COMPLETE,
+        models.order.order.STATUS_AWAITING_FULFILLMENT ,
+        models.order.order.STATUS_AWAITING_SHIPMENT ,
+        models.order.order.STATUS_AWAITING_PICKUP ,
+    ]
+
     cursor=__collection.aggregate([
-        {"$match":{"campaign_id":campaign_id,"status":{"$in":["complete", "shipping out"]} }},
+        {"$match":{"campaign_id":campaign_id,"status":{"$in":payment_complete_status} }},
         {
             "$group":
                 {

@@ -485,20 +485,18 @@ class CampaignViewSet(viewsets.ModelViewSet):
         lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, pk)
         campaign_id = int(pk)
 
-
-        campaign_pre_order_count = database.lss.pre_order.get_count_in_campaign(campaign_id)
-
-        campaign_order_complete_count,campaign_order_proceed_count = database.lss.campaign.get_order_complete_proceed_count(campaign_id)
+        campaign_cart_count = database.lss.cart.get_count_in_campaign(campaign_id)
+        campaign_order_complete_count,campaign_order_proceed_count = database.lss.campaign.get_order_complete_proceed_count(campaign_id) 
         campaign_comment_count = database.lss.campaign_comment.get_count_in_campaign(campaign_id)
         
         campaign_complete_sales = database.lss.order.get_complete_sales_of_campaign(campaign_id)
 
 
-        campaign_uncheckout_rate = (campaign_pre_order_count+campaign_order_proceed_count) / (campaign_order_complete_count + campaign_order_proceed_count + campaign_pre_order_count) * 100\
-                if (campaign_order_complete_count + campaign_order_proceed_count + campaign_pre_order_count) else 0
+        campaign_uncheckout_rate = (campaign_cart_count) / (campaign_order_complete_count + campaign_order_proceed_count + campaign_cart_count) * 100\
+                if (campaign_order_complete_count + campaign_order_proceed_count + campaign_cart_count) else 0
 
-        campaign_close_rate = (campaign_order_complete_count) / (campaign_order_complete_count + campaign_order_proceed_count + campaign_pre_order_count) * 100\
-                if (campaign_order_complete_count + campaign_order_proceed_count + campaign_pre_order_count) else 0
+        campaign_close_rate = (campaign_order_complete_count) / (campaign_order_complete_count + campaign_order_proceed_count + campaign_cart_count) * 100\
+                if (campaign_order_complete_count + campaign_order_proceed_count + campaign_cart_count) else 0
 
         
         total_order_complete_count, total_order_proceed_count = database.lss.user_subscription.get_order_complete_proceed_count(user_subscription.id)
@@ -514,7 +512,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         manage_order = {
             "order_qty":(campaign_order_complete_count + campaign_order_proceed_count),
-            "cart_qty":campaign_pre_order_count,
+            "cart_qty":campaign_cart_count,
 
             "comment_count":campaign_comment_count,
             "complete_sales":campaign_complete_sales,

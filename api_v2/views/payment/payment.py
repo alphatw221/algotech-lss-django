@@ -455,7 +455,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             # },
             complete_checkout_url = f"{settings.GCP_API_LOADBALANCER_URL}/api/v2/payment/rapyd/callback/success?order_oid={str(order_oid)}&checkout_time={checkout_time}",
             cancel_checkout_url = f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{str(order_oid)}/payment',
-            # payment_method_type_categories = ["bank_transfer", "card"],
+            payment_method_type_categories = ["bank_transfer", "card"],
             metadata = {
                 "order_oid": order_oid
             },
