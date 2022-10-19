@@ -20,98 +20,98 @@ class Campaign(Collection):
 
 
 
-def get_merge_order_list_pagination(campaign_id, search:str, status:str, filter_payment:list, filter_delivery:list, filter_platform:list, sort_by:dict, page:int=1, page_size:int=25):
+# def get_merge_order_list_pagination(campaign_id, search:str, status:str, filter_payment:list, filter_delivery:list, filter_platform:list, sort_by:dict, page:int=1, page_size:int=25):
 
-    filter_query = {'$expr': { '$eq': ["$$id", "$campaign_id"] },"id":{"$ne":None} ,"products":{"$ne":{}}}
+#     filter_query = {'$expr': { '$eq': ["$$id", "$campaign_id"] },"id":{"$ne":None} ,"products":{"$ne":{}}}
 
-    if search not in ["",None,'undefined'] and search.isnumeric():
-        filter_query["$or"]=[{"id":{"$eq":int(search)}}, {"customer_name":{"$regex":str(search),"$options": 'i'}}]
-    elif search not in ["",None,'undefined']:
-        filter_query["customer_name"]={"$regex":str(search),"$options": 'i'}
+#     if search not in ["",None,'undefined'] and search.isnumeric():
+#         filter_query["$or"]=[{"id":{"$eq":int(search)}}, {"customer_name":{"$regex":str(search),"$options": 'i'}}]
+#     elif search not in ["",None,'undefined']:
+#         filter_query["customer_name"]={"$regex":str(search),"$options": 'i'}
         
-    if status == models.order.order.STATUS_REVIEW:
-        filter_query['status']={"$in":[models.order.order.STATUS_REVIEW]} 
-    elif status == models.order.order.STATUS_COMPLETE:
-        filter_query['status']={"$in":[models.order.order.STATUS_COMPLETE,models.order.order.STATUS_SHIPPING_OUT]}
+#     if status == models.order.order.STATUS_REVIEW:
+#         filter_query['status']={"$in":[models.order.order.STATUS_REVIEW]} 
+#     elif status == models.order.order.STATUS_COMPLETE:
+#         filter_query['status']={"$in":[models.order.order.STATUS_COMPLETE,models.order.order.STATUS_SHIPPING_OUT]}
         
-    if filter_payment not in [[],None]:
-        filter_query['payment_method']={"$in": filter_payment}
+#     if filter_payment not in [[],None]:
+#         filter_query['payment_method']={"$in": filter_payment}
         
-    if filter_platform not in [[],None]:
-        filter_query['platform']={"$in": filter_platform}
+#     if filter_platform not in [[],None]:
+#         filter_query['platform']={"$in": filter_platform}
         
-    if filter_delivery not in [[],None]:
-        if filter_query.get('status',{}).get('$in'):
-            filter_query['status']['$in']+=filter_delivery
-        else:
-            filter_query['status']={"$in": filter_delivery}
+#     if filter_delivery not in [[],None]:
+#         if filter_query.get('status',{}).get('$in'):
+#             filter_query['status']['$in']+=filter_delivery
+#         else:
+#             filter_query['status']={"$in": filter_delivery}
     
-    sort_fields = {"id", "customer_name", "subtotal", "payment_method", "status"}
-    if type(sort_by) != dict or not (sort_by.keys() & sort_fields):
-        sort_by = { "created_at" : -1 }
-    else:
-        for key in list(sort_by.keys()):
-            if key not in sort_fields:
-                del sort_by[key]
+#     sort_fields = {"id", "customer_name", "subtotal", "payment_method", "status"}
+#     if type(sort_by) != dict or not (sort_by.keys() & sort_fields):
+#         sort_by = { "created_at" : -1 }
+#     else:
+#         for key in list(sort_by.keys()):
+#             if key not in sort_fields:
+#                 del sort_by[key]
                 
-    query = [
-        {"$match":{"id":campaign_id}},
-        {
-            "$lookup": {
-                "from": "api_order","as": "orders",
-                'let': {'id': "$id" },
-                "pipeline":[
-                    {"$match":filter_query},
-                    {"$addFields": { "type": "order","total_item": {"$size": { "$objectToArray": "$products"}}}},
-                ]
-            },
-        },
-        {
-            "$lookup": {
-                "from": "api_pre_order","as": "pre_orders",
-                'let': {'id': "$id" },
-                "pipeline":[
-                    {"$match":filter_query},
-                    {"$addFields": { "type": "pre_order","total_item": {"$size": { "$objectToArray": "$products"}}}},
-                ]
-            },
-        },
-        {"$project":{"_id":0,"data":{"$concatArrays":["$orders","$pre_orders"]}} },
-        { "$unwind": "$data" },
-        {"$group":{
-            "_id": {
-                "id": "$data.id",
-                "type": "$data.type"
-            },
-            "id":{"$first":"$data.id"},
-            "platform":{"$first":"$data.platform"},
-            "customer_name":{"$first":"$data.customer_name"},
-            "customer_img":{"$first":"$data.customer_img"},
-            "total_item":{"$first":"$data.total_item"},
-            "subtotal":{"$first":"$data.subtotal"},
-            "total":{"$first":"$data.total"},
-            "payment_method":{"$first":"$data.payment_method"},
-            "shipping_method":{"$first":"$data.shipping_method"},
-            "meta":{"$first":"$data.meta"},
-            "status":{"$first":"$data.status"},
-            "type":{"$first":"$data.type"},
-            "created_at":{"$first":"$data.created_at"}
-        }},
-        { "$sort" : sort_by},
-        {"$project":{"_id":0,}},
-    ]
+#     query = [
+#         {"$match":{"id":campaign_id}},
+#         {
+#             "$lookup": {
+#                 "from": "api_order","as": "orders",
+#                 'let': {'id': "$id" },
+#                 "pipeline":[
+#                     {"$match":filter_query},
+#                     {"$addFields": { "type": "order","total_item": {"$size": { "$objectToArray": "$products"}}}},
+#                 ]
+#             },
+#         },
+#         {
+#             "$lookup": {
+#                 "from": "api_pre_order","as": "pre_orders",
+#                 'let': {'id': "$id" },
+#                 "pipeline":[
+#                     {"$match":filter_query},
+#                     {"$addFields": { "type": "pre_order","total_item": {"$size": { "$objectToArray": "$products"}}}},
+#                 ]
+#             },
+#         },
+#         {"$project":{"_id":0,"data":{"$concatArrays":["$orders","$pre_orders"]}} },
+#         { "$unwind": "$data" },
+#         {"$group":{
+#             "_id": {
+#                 "id": "$data.id",
+#                 "type": "$data.type"
+#             },
+#             "id":{"$first":"$data.id"},
+#             "platform":{"$first":"$data.platform"},
+#             "customer_name":{"$first":"$data.customer_name"},
+#             "customer_img":{"$first":"$data.customer_img"},
+#             "total_item":{"$first":"$data.total_item"},
+#             "subtotal":{"$first":"$data.subtotal"},
+#             "total":{"$first":"$data.total"},
+#             "payment_method":{"$first":"$data.payment_method"},
+#             "shipping_method":{"$first":"$data.shipping_method"},
+#             "meta":{"$first":"$data.meta"},
+#             "status":{"$first":"$data.status"},
+#             "type":{"$first":"$data.type"},
+#             "created_at":{"$first":"$data.created_at"}
+#         }},
+#         { "$sort" : sort_by},
+#         {"$project":{"_id":0,}},
+#     ]
 
-    cursor=db.api_campaign.aggregate(query)
+#     cursor=db.api_campaign.aggregate(query)
 
-    skip = (page-1)*page_size
+#     skip = (page-1)*page_size
     
-    bson = list(cursor)
-    total_count = len(bson)
-    bson = bson[skip:skip+page_size]
-    data_str = dumps(bson)
-    data_json = loads(data_str)    #TODO optimize # use skip limit  sum
+#     bson = list(cursor)
+#     total_count = len(bson)
+#     bson = bson[skip:skip+page_size]
+#     data_str = dumps(bson)
+#     data_json = loads(data_str)    #TODO optimize # use skip limit  sum
 
-    return data_json, total_count
+#     return data_json, total_count
 
 
 

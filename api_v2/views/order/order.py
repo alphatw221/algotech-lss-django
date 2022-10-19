@@ -248,12 +248,23 @@ class OrderViewSet(viewsets.ModelViewSet):
         elif search not in ["",None,'undefined']:
             queryset=queryset.filter(customer_name__contains=search)
 
-        if order_status == models.order.order.STATUS_REVIEW:
-            queryset=queryset.filter(status=order_status)
+        # if order_status == models.order.order.STATUS_REVIEW:
+        #     queryset=queryset.filter(status=order_status)
         elif order_status == models.order.order.STATUS_PROCEED:
-            queryset=queryset.filter(status=order_status)
+            queryset=queryset.filter(status__in=[
+                models.order.order.STATUS_PENDING ,
+                models.order.order.STATUS_AWAITING_PAYMENT ,
+                models.order.order.STATUS_AWAITING_FULFILLMENT ,
+                models.order.order.STATUS_AWAITING_SHIPMENT ,
+                models.order.order.STATUS_AWAITING_PICKUP ,
+                models.order.order.STATUS_PARTIALLY_SHIPPED ,
+                models.order.order.STATUS_SHIPPED ,
+                models.order.order.STATUS_DISPUTED ,
+                models.order.order.STATUS_PARTIALLY_REFUNDED ,
+                models.order.order.STATUS_REFUNDED ,
+            ])
         elif order_status == models.order.order.STATUS_COMPLETE:
-            queryset=queryset.filter(status__in=[models.order.order.STATUS_COMPLETE,models.order.order.STATUS_SHIPPING_OUT])
+            queryset=queryset.filter(status__in=[models.order.order.STATUS_COMPLETE])
 
         if payment_dict:
             queryset=queryset.filter(payment_method__in=payment_dict)
@@ -291,7 +302,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         subject = lib.i18n.email.delivery_comfirm_mail.i18n_get_mail_subject(order=order, lang=order.campaign.lang) 
         content = lib.i18n.email.delivery_comfirm_mail.i18n_get_mail_content(order=order, user=api_user, lang=order.campaign.lang) 
         jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)
-        order.status = models.order.order.STATUS_SHIPPING_OUT
+        order.status = models.order.order.STATUS_SHIPPED
         order.save()
 
         return Response(models.order.order_product.OrderWithOrderProductSerializer(order).data, status=status.HTTP_200_OK)

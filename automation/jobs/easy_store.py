@@ -80,12 +80,12 @@ def export_product_job(user_subscription_id, credential):
         easy_store_service.channels.export_product.send_result_data(user_subscription_id,{'result':'fail'})
 
 
-STATUS_PROCEED = 'proceed'
-STATUS_COMPLETE = 'complete'
-STATUS_REVIEW = 'review'
-STATUS_SHIPPING_OUT = 'shipping out'
-STATUS_EXPIRED = 'expired'
-STATUS_PENDING_REFUND = 'pending_refund'
+# STATUS_PROCEED = 'proceed'
+# STATUS_COMPLETE = 'complete'
+# STATUS_REVIEW = 'review'
+# STATUS_SHIPPING_OUT = 'shipping out'
+# STATUS_EXPIRED = 'expired'
+# STATUS_PENDING_REFUND = 'pending_refund'
 
 def export_order_job(campaign_id, credential):
     try:
