@@ -267,12 +267,12 @@ class OrderViewSet(viewsets.ModelViewSet):
             queryset=queryset.filter(status__in=[models.order.order.STATUS_COMPLETE])
 
         if payment_dict:
-            queryset=queryset.filter(payment_method__in=payment_dict)
+            queryset=queryset.filter(payment_method__in=[key for key,value in payment_dict.items() if value])
         # if delivery_dict:
         #     queryset=queryset.filter(status__in=delivery_dict)
         if platform_dict:
             print(platform_dict)
-            queryset=queryset.filter(platform__in=platform_dict)
+            queryset=queryset.filter(platform__in=[key for key,value in platform_dict.items() if value])
 
         for order_by, asc in sort_by_dict.items():
             if order_by not in ["id","subtotal","total",'payment_method', 'status']:

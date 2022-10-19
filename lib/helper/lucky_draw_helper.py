@@ -362,9 +362,9 @@ class LuckyDraw():
         winner:LuckyDrawCandidate, 
         campaign_product:models.campaign.campaign_product.CampaignProduct ):
 
-            if models.order.pre_order.PreOrder.objects.filter(
+            if models.cart.cart.Cart.objects.filter(
                 campaign=campaign, platform=winner.platform, customer_id=winner.customer_id, customer_name=winner.customer_name).exists():
-                pre_order = models.order.pre_order.PreOrder.objects.get(
+                cart = models.cart.cart.Cart.objects.get(
                     campaign=campaign, platform=winner.platform, customer_id=winner.customer_id, customer_name=winner.customer_name)
             else:
                 platform_id_dict = {
@@ -372,7 +372,7 @@ class LuckyDraw():
                     'youtube': campaign.youtube_channel.id if campaign.youtube_channel else None,
                     'instagram': campaign.instagram_profile.id if campaign.instagram_profile else None
                 }
-                pre_order = models.order.pre_order.PreOrder.objects.create(
+                cart = models.cart.cart.Cart.objects.create(
                     customer_id=winner.customer_id, 
                     customer_name=winner.customer_name, 
                     customer_img=winner.customer_image, 
@@ -382,12 +382,17 @@ class LuckyDraw():
 
             print ('campaign_product', campaign_product)
 
-            if prize_product := pre_order.products.get(str(campaign_product.id), None):
-                qty = prize_product['qty'] + 1
-                lib.helper.order_helper.PreOrderHelper.update_product(api_user=None, pre_order_id=pre_order.id, 
-                    order_product_id=prize_product.get('order_product_id'),qty=qty)
-            else:
-                lib.helper.order_helper.PreOrderHelper.add_product(api_user=None, pre_order_id=pre_order.id, campaign_product_id=campaign_product.id,qty=1)
+            if  str(campaign_product.id) in cart.products:
+                qty = cart.products.get(str(campaign_product.id),0)+1
+            else :
+                qty = 1
+            lib.helper.cart_helper.CartHelper.update_cart_product(api_user=None, cart=cart, campaign_product=campaign_product, qty=qty)
+            # if prize_product := pre_order.products.get(str(campaign_product.id), None):
+            #     qty = prize_product['qty'] + 1
+            #     lib.helper.order_helper.PreOrderHelper.update_product(api_user=None, pre_order_id=pre_order.id, 
+            #         order_product_id=prize_product.get('order_product_id'),qty=qty)
+            # else:
+            #     lib.helper.order_helper.PreOrderHelper.add_product(api_user=None, pre_order_id=pre_order.id, campaign_product_id=campaign_product.id,qty=1)
             
     
 
