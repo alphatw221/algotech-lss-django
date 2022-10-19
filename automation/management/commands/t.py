@@ -11,7 +11,7 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.test_websocket()
+        self.create_cart_base_on_pre_order()
 
 
     def modify_database(self):
@@ -756,3 +756,50 @@ class Command(BaseCommand):
         app_secret='e36ab1560c8d85cbc413e07fb7232f99'
         app_secret_proof = hmac.new(app_secret.encode(), msg=page_token.encode(), digestmod=hashlib.sha256).hexdigest()
         print(app_secret_proof)
+
+    def create_cart_base_on_pre_order(self):
+        import database
+        from api import models
+
+
+        pre_orders = models.order.pre_order.PreOrder.objects.all()
+
+
+        for pre_order in pre_orders:
+            try:
+                models.cart.cart.Cart.objects.create(
+                    campaign = pre_order.campaign if hasattr(pre_order, 'campaign') else None,
+                    customer_id = pre_order.customer_id if hasattr(pre_order, 'customer_id') else None,
+                    customer_name = pre_order.customer_name if hasattr(pre_order, 'customer_name') else "",
+                    customer_img = pre_order.customer_img if hasattr(pre_order, 'customer_img') else None,
+
+                    platform = pre_order.platform if hasattr(pre_order, 'platform') else "",
+                    platform_id = pre_order.platform_id if hasattr(pre_order, 'platform_id') else None,
+                    
+                    products = {key:value.get('qty',0)for key, value in pre_order.products.items()},
+
+                    lock_at = pre_order.lock_at if hasattr(pre_order, 'lock_at') else None,
+
+                    adjust_title = pre_order.adjust_title if hasattr(pre_order, 'adjust_title') else "",
+                    adjust_price = pre_order.adjust_price if hasattr(pre_order, 'adjust_price') else 0,
+                    
+                    free_delivery = pre_order.free_delivery if hasattr(pre_order, 'free_delivery') else False,
+
+                    buyer = pre_order.buyer if hasattr(pre_order, 'buyer') else None,
+
+                    discount = pre_order.discount if hasattr(pre_order, 'discount') else 0,
+                    applied_discount = pre_order.applied_discount if hasattr(pre_order, 'applied_discount') else {},
+                    
+                    tax = pre_order.tax if hasattr(pre_order, 'tax') else 0,
+
+                    meta = pre_order.meta if hasattr(pre_order, 'meta') else {},
+                )
+            except Exception:
+                continue
+
+
+
+
+
+
+           

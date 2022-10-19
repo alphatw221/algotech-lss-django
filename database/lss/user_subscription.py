@@ -61,6 +61,22 @@ def get_campaign_count():
 
 def get_order_complete_proceed_count(user_subscription_id):
 
+
+    complete_status = [
+        models.order.order.STATUS_COMPLETE
+    ]
+    proceed_status = [
+        models.order.order.STATUS_PENDING ,
+        models.order.order.STATUS_AWAITING_PAYMENT ,
+        models.order.order.STATUS_AWAITING_FULFILLMENT ,
+        models.order.order.STATUS_AWAITING_SHIPMENT ,
+        models.order.order.STATUS_AWAITING_PICKUP ,
+        models.order.order.STATUS_DISPUTED ,
+        models.order.order.STATUS_PARTIALLY_REFUNDED ,
+        models.order.order.STATUS_REFUNDED ,
+
+    ]
+
     cursor=__collection.aggregate([
         {"$match":{"id":user_subscription_id}},
         {
@@ -82,25 +98,25 @@ def get_order_complete_proceed_count(user_subscription_id):
                                     "id":{"$ne":None}}
                                  },
                                 {"$project":{"_id":0,
-                                "complete": {  "$cond": [ { "$in":["$status", ["complete", "shipping out"] ] }, 1, 0]},
-                                "review": { "$cond": [ { "$eq": [ "$status", "review" ] }, 1, 0]}
+                                "complete": {  "$cond": [ { "$in":["$status", complete_status ] }, 1, 0]},
+                                "proceed": { "$cond": [ { "$in":["$status", proceed_status ] }, 1, 0]}
                                 }},
                             ]
                         },
                     },
-                    {"$project":{"_id":0,"id":1,"orders":1,"campaign_complete_count":{"$sum":"$orders.complete"},"campaign_review_count":{"$sum":"$orders.review"}}}
+                    {"$project":{"_id":0,"id":1,"orders":1,"campaign_complete_count":{"$sum":"$orders.complete"},"campaign_proceed_count":{"$sum":"$orders.proceed"}}}
                 ]
             },
         },
         {"$project":{"_id":0,
         # "campaigns":1,
         "total_complete_count":{"$sum":"$campaigns.campaign_complete_count"},
-        "total_review_count":{"$sum":"$campaigns.campaign_review_count"}
+        "total_proceed_count":{"$sum":"$campaigns.campaign_proceed_count"}
         }}
     ])
     l = list(cursor)
     return l[0].get('total_complete_count',0) if l else 0,\
-        l[0].get('total_review_count',0) if l else 0
+        l[0].get('total_proceed_count',0) if l else 0
 
     
 
@@ -145,6 +161,15 @@ def get_pre_order_count(user_subscription_id):
 
 
 def get_average_sales(user_subscription_id):
+
+    payment_complete_status = [
+        models.order.order.STATUS_COMPLETE,
+        models.order.order.STATUS_AWAITING_FULFILLMENT ,
+        models.order.order.STATUS_AWAITING_SHIPMENT ,
+        models.order.order.STATUS_AWAITING_PICKUP ,
+    ]
+
+
     cursor=db.api_user_subscription.aggregate([
         {"$match":{"id":user_subscription_id}},
         {
@@ -163,14 +188,19 @@ def get_average_sales(user_subscription_id):
                             "pipeline":[
                                 {"$match":{
                                     '$expr': { '$eq': ["$$id", "$campaign_id"] },
-                                    "id":{"$ne":None}}
+                                    "id":{"$ne":None},
+                                    "status":{"$in":payment_complete_status}
+                                    
+                                    },
+                                    
+
                                  },
-                                {"$project":{"_id":0,"id":1,"subtotal":1}},
+                                {"$project":{"_id":0,"id":1,"total":1}},
                             ]
                         },
                     },
                     {"$project":{"_id":0,"id":1,
-                    "campaign_sales":{"$sum":"$orders.subtotal"},
+                    "campaign_sales":{"$sum":"$orders.total"},
                     "orders":1}}
                 ]
             },

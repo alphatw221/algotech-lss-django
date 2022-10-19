@@ -21,3 +21,6 @@ class Cart(Collection):
         self._collection.update_one({"id":self.id},{"$unset":{f"products.{campaign_product_id}":1}})
         if sync:
             self._sync()
+
+def get_count_in_campaign(campaign_id):
+    return __collection.find({'campaign_id': campaign_id, 'products': {'$ne': {}}}).count()
