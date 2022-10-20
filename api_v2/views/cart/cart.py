@@ -254,26 +254,25 @@ class CartViewSet(viewsets.ModelViewSet):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        campaign_product_dict = database.lss_cache.campaign_product.get_product_dict(campaign_id=campaign.id, bypass=True)
-        success, pymongo_order = lib.helper.cart_helper.CartHelper.checkout(api_user, campaign.id, cart.id, campaign_product_dict=campaign_product_dict)
+        success, pymongo_order = lib.helper.cart_helper.CartHelper.checkout(api_user, campaign.id, cart.id, shipping_data=shipping_data)
         
         if not success:
             cart = lib.util.verify.Verify.get_cart(cart.id)
-            return Response(models.cart.cart.CartSerializer(cart).data, status=status.HTTP_205_RESET_CONTENT)
+            return Response(models.cart.cart.CartSerializer(cart).data, status=status.HTTP_200_OK)
         
         order = lib.util.verify.Verify.get_order(pymongo_order.id)
         order_oid = str(pymongo_order._id)
-        serializer = models.order.order.OrderSerializerUpdateShipping(order, data=shipping_data, partial=True) 
-        if not serializer.is_valid():
-            data = models.order.order.OrderWithCampaignSerializer(order).data
-            data['oid']=order_oid
-            return Response(data, status=status.HTTP_200_OK)
+        # serializer = models.order.order.OrderSerializerUpdateShipping(order, data=shipping_data, partial=True) 
+        # if not serializer.is_valid():
+        #     data = models.order.order.OrderWithCampaignSerializer(order).data
+        #     data['oid']=order_oid
+        #     return Response(data, status=status.HTTP_200_OK)
 
 
-        order = serializer.save()
-        lib.helper.order_helper.OrderHelper.summarize_order(order, save=False)
-        order.buyer = api_user
-        order.save()
+        # order = serializer.save()
+        lib.helper.order_helper.OrderHelper.summarize_order(order, save=True)
+        # order.buyer = api_user
+        # order.save()
         
         
         subject = lib.i18n.email.cart_checkout_mail.i18n_get_mail_subject(order=order, lang=order.campaign.lang) 

@@ -277,20 +277,47 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         # return Response({'count':total_count,'data':json_data}, status=status.HTTP_200_OK)
     
-    @action(detail=True, methods=['PUT'], url_path=r'seller/deliver', permission_classes=(IsAuthenticated,))
+    @action(detail=True, methods=['PUT'], url_path=r'seller/delivery', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def seller_deliver_order(self, request, pk=None):
+    def seller_update_delivery_status(self, request, pk=None):
 
+        delivery_status, = lib.util.getter.getdata(request, ('delivery_status',), required=True)
         api_user = lib.util.verify.Verify.get_seller_user(request)
         order = lib.util.verify.Verify.get_order(pk)
         lib.util.verify.Verify.get_campaign_from_user_subscription(api_user.user_subscription, order.campaign.id)
         
-        subject = lib.i18n.email.delivery_comfirm_mail.i18n_get_mail_subject(order=order, lang=order.campaign.lang) 
-        content = lib.i18n.email.delivery_comfirm_mail.i18n_get_mail_content(order=order, user=api_user, lang=order.campaign.lang) 
-        jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)
-        order.status = models.order.order.STATUS_SHIPPED
-        order.save()
+        if delivery_status not in models.order.order.DELIVERY_STATUS_CHOICES:
+            raise lib.error_handle.error.api_error.ApiVerifyError('invalid')
 
+        order.delivery_status = delivery_status
+        lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
+
+        # subject = lib.i18n.email.delivery_comfirm_mail.i18n_get_mail_subject(order=order, lang=order.campaign.lang) 
+        # content = lib.i18n.email.delivery_comfirm_mail.i18n_get_mail_content(order=order, user=api_user, lang=order.campaign.lang) 
+        # jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)
+        
         return Response(models.order.order_product.OrderWithOrderProductSerializer(order).data, status=status.HTTP_200_OK)
     
+    
+    @action(detail=True, methods=['PUT'], url_path=r'seller/payment', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def seller_update_payment_status(self, request, pk=None):
+
+        payment_status, = lib.util.getter.getdata(request, ('payment_status',), required=True)
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        order = lib.util.verify.Verify.get_order(pk)
+        lib.util.verify.Verify.get_campaign_from_user_subscription(api_user.user_subscription, order.campaign.id)
+        
+        if payment_status not in models.order.order.PAYMENT_STATUS_CHOICES:
+            raise lib.error_handle.error.api_error.ApiVerifyError('invalid')
+
+        order.payment_status = payment_status
+        order.save()
+        # lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
+
+        # subject = lib.i18n.email.delivery_comfirm_mail.i18n_get_mail_subject(order=order, lang=order.campaign.lang) 
+        # content = lib.i18n.email.delivery_comfirm_mail.i18n_get_mail_content(order=order, user=api_user, lang=order.campaign.lang) 
+        # jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)
+        
+        return Response(models.order.order_product.OrderWithOrderProductSerializer(order).data, status=status.HTTP_200_OK)
     
