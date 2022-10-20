@@ -254,7 +254,9 @@ def capture_youtube(campaign, user_subscription_data, logs):
             except Exception:
                 continue
             service.channels.campaign.send_comment_data(campaign.id, uni_format_comment)
-            service.rq.queue.enqueue_comment_queue(jobs.comment_job.comment_job, campaign.data, user_subscription_data, 'youtube', youtube_channel.data, uni_format_comment, order_codes_mapping)
+            service.rq.queue.enqueue_comment_queue(jobs.comment_job_v2.comment_job, campaign.data, user_subscription_data, 'youtube', youtube_channel.data, uni_format_comment, order_codes_mapping)
+
+            # service.rq.queue.enqueue_comment_queue(jobs.comment_job.comment_job, campaign.data, user_subscription_data, 'youtube', youtube_channel.data, uni_format_comment, order_codes_mapping)
         youtube_campaign['next_page_token'] = data.get('nextPageToken', "")
         youtube_campaign['latest_comment_time'] = parser.parse(
             comments[-1]['snippet']['publishedAt']).timestamp()
@@ -362,7 +364,7 @@ def capture_instagram(campaign, user_subscription_data, logs):
             except Exception:
                 continue
             service.channels.campaign.send_comment_data(campaign.id, uni_format_comment)
-            service.rq.queue.enqueue_comment_queue(jobs.comment_job.comment_job, campaign.data, user_subscription_data, 'instagram', instagram_profile.data, uni_format_comment, order_codes_mapping)
+            service.rq.queue.enqueue_comment_queue(jobs.comment_job_v2.comment_job, campaign.data, user_subscription_data, 'instagram', instagram_profile.data, uni_format_comment, order_codes_mapping)
             
 
         if keep_capturing:
