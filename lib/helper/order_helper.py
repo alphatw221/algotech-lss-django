@@ -1,4 +1,5 @@
 import os
+from pyexpat import model
 import config
 import django
 from math import prod,floor
@@ -930,3 +931,72 @@ def adjust_decimal_places(num,decimal_places):
     return floor((num * (10 ** decimal_places))) // (10 ** decimal_places)
   else:
     return floor((num * (10 ** decimal_places))) / (10 ** decimal_places)
+
+
+
+
+
+class OrderStatusHelper():
+
+    payment_final_status=[models.order.order.PAYMENT_STATUS_PAID,models.order.order.PAYMENT_STATUS_REFUNDED]
+    delivery_final_status=[models.order.order.DELIVERY_STATUS_COLLECTED,models.order.order.DELIVERY_STATUS_RETURNED]
+
+    payment_status_graph={
+        models.order.order.PAYMENT_STATUS_AWAITING_PAYMENT:[
+            models.order.order.PAYMENT_STATUS_FAILED ,
+            models.order.order.PAYMENT_STATUS_EXPIRED ,
+            models.order.order.PAYMENT_STATUS_PAID ,
+        ],
+        models.order.order.PAYMENT_STATUS_FAILED:[
+            models.order.order.PAYMENT_STATUS_AWAITING_PAYMENT ,
+            models.order.order.PAYMENT_STATUS_EXPIRED ,
+            models.order.order.PAYMENT_STATUS_PAID ,
+        ],
+        models.order.order.PAYMENT_STATUS_EXPIRED:[
+            models.order.order.PAYMENT_STATUS_AWAITING_PAYMENT ,
+            models.order.order.PAYMENT_STATUS_FAILED ,
+        ],
+        models.order.order.PAYMENT_STATUS_PAID:[
+            models.order.order.PAYMENT_STATUS_AWAITING_REFUND ,
+            models.order.order.PAYMENT_STATUS_REFUNDED ,
+        ],
+        models.order.order.PAYMENT_STATUS_AWAITING_REFUND:[
+            models.order.order.PAYMENT_STATUS_REFUNDED ,
+        ],
+    }
+
+    delivery_status_graph={
+        models.order.order.DELIVERY_STATUS_AWAITING_FULFILLMENT:[
+            models.order.order.DELIVERY_STATUS_AWAITING_SHIPMENT ,
+            models.order.order.DELIVERY_STATUS_AWAITING_PICKUP ,
+        ],
+        models.order.order.DELIVERY_STATUS_AWAITING_SHIPMENT:[
+            models.order.order.DELIVERY_STATUS_PARTIALLY_SHIPPED ,
+            models.order.order.DELIVERY_STATUS_SHIPPED ,
+        ],
+        models.order.order.DELIVERY_STATUS_AWAITING_PICKUP:[
+            models.order.order.DELIVERY_STATUS_COLLECTED ,
+        ],
+        models.order.order.DELIVERY_STATUS_PARTIALLY_SHIPPED:[
+            models.order.order.DELIVERY_STATUS_SHIPPED ,
+        ],
+        models.order.order.DELIVERY_STATUS_SHIPPED:[
+            models.order.order.DELIVERY_STATUS_COLLECTED ,
+        ],
+        models.order.order.DELIVERY_STATUS_COLLECTED:[
+            models.order.order.DELIVERY_STATUS_AWAITING_RETURN ,
+        ],
+        models.order.order.DELIVERY_STATUS_AWAITING_RETURN:[
+            models.order.order.DELIVERY_STATUS_RETURNED ,
+        ],
+    }
+
+    @classmethod
+    def update_order_status(cls, order:models.order.order.Order, save=False):
+        if order.delivery_status in cls.delivery_final_status and order.payment_status in cls.payment_final_status:
+            order.status = models.order.order.STATUS_COMPLETE
+        else:
+            order.status = models.order.order.STATUS_PROCEED
+        
+        if save:
+            order.save()

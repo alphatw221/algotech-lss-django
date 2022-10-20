@@ -158,8 +158,9 @@ class OrderViewSet(viewsets.ModelViewSet):
         order.meta['account_name'] = account_name
         order.meta['account_mode'] = account_mode
         order.payment_method = models.order.order.PAYMENT_METHOD_DIRECT
-        order.status = models.order.order.STATUS_COMPLETE
-        order.save()
+        order.payment_status = models.order.order.PAYMENT_STATUS_AWAITING_CONFIRM
+        lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
+
 
         for campaign_product_id_str, qty in order.products.items():
             pymongo_campaign_product = database.lss.campaign_product.CampaignProduct(id=int(campaign_product_id_str))

@@ -91,14 +91,16 @@ class PaymentViewSet(viewsets.GenericViewSet):
             "receipt_email": payment_intent.receipt_email,
             "receipt_url": payment_intent.charges.data[0].receipt_url,
         }
-        order.status = models.order.order.STATUS_COMPLETE
+
         order.payment_method = models.order.order.PAYMENT_METHOD_STRIPE
         order.checkout_details[models.order.order.PAYMENT_METHOD_STRIPE] = after_pay_details
         order.history[models.order.order.PAYMENT_METHOD_STRIPE]={
             "action": "pay",
             "time": pendulum.now("UTC").to_iso8601_string()
         }
-        order.save()
+        order.payment_status = models.order.order.PAYMENT_STATUS_PAID
+        lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
+
 
         content = lib.helper.order_helper.OrderHelper.get_confirmation_email_content(order)
         jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)
@@ -155,15 +157,14 @@ class PaymentViewSet(viewsets.GenericViewSet):
             raise lib.error_handle.error.api_error.ApiCallerError('invalid')
 
         if status == 'completed' :
-
-            order.status = models.order.order.STATUS_COMPLETE
             order.payment_method = models.order.order.PAYMENT_METHOD_HITPAY
             order.checkout_details[models.order.order.PAYMENT_METHOD_HITPAY] = request.data.dict()
             order.history[models.order.order.PAYMENT_METHOD_HITPAY]={
                 "action": "pay",
                 "time": pendulum.now("UTC").to_iso8601_string()
             }
-            order.save()
+            order.payment_status = models.order.order.PAYMENT_STATUS_PAID
+            lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
 
             content = lib.helper.order_helper.OrderHelper.get_confirmation_email_content(order)
             jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)
@@ -217,14 +218,15 @@ class PaymentViewSet(viewsets.GenericViewSet):
         if not payment or not payment.execute({"payer_id": PayerID}):
             return Response(payment.error)
 
-        order.status = models.order.order.STATUS_COMPLETE
         order.payment_method = models.order.order.PAYMENT_METHOD_PAYPAL
         order.checkout_details[models.order.order.PAYMENT_METHOD_PAYPAL] = request.data
         order.history[models.order.order.PAYMENT_METHOD_PAYPAL]={
             "action": "pay",
             "time": pendulum.now("UTC").to_iso8601_string()
         }
-        order.save()
+        order.payment_status = models.order.order.PAYMENT_STATUS_PAID
+        lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
+
 
         content = lib.helper.order_helper.OrderHelper.get_confirmation_email_content(order)
         jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)
@@ -306,14 +308,15 @@ class PaymentViewSet(viewsets.GenericViewSet):
         order = lib.util.verify.Verify.get_order(order_id)
         if (request.data['data']['attributes']['data']['attributes']['status'] == 'paid'):
             
-            order.status = models.order.order.STATUS_COMPLETE
             order.payment_method = models.order.order.PAYMENT_METHOD_PAYMONGO
             order.checkout_details[models.order.order.PAYMENT_METHOD_PAYMONGO] = request.data
             order.history[models.order.order.PAYMENT_METHOD_PAYMONGO]={
                 "action": "pay",
                 "time": pendulum.now("UTC").to_iso8601_string()
             }
-            order.save()
+            order.payment_status = models.order.order.PAYMENT_STATUS_PAID
+            lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
+
             content = lib.helper.order_helper.OrderHelper.get_confirmation_email_content(order)
             jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)
         return Response('response', status=status.HTTP_200_OK)
@@ -416,14 +419,15 @@ class PaymentViewSet(viewsets.GenericViewSet):
             invoice = service.ecpay.ecpay.order_create_invoice(merchant_id, hash_key, hash_iv, order,int(payment_res['amount']))
             order.meta['InvoiceNumber'] = invoice['InvoiceNumber']
         
-        order.status = models.order.order.STATUS_COMPLETE
         order.payment_method = models.order.order.PAYMENT_METHOD_ECPAY
         order.checkout_details[models.order.order.PAYMENT_METHOD_ECPAY] = payment_res
         order.history[models.order.order.PAYMENT_METHOD_ECPAY]={
             "action": "pay",
             "time": pendulum.now("UTC").to_iso8601_string()
         }
-        order.save()
+        order.payment_status = models.order.order.PAYMENT_STATUS_PAID
+        lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
+
 
         content = lib.helper.order_helper.OrderHelper.get_confirmation_email_content(order)
         jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)
@@ -511,13 +515,14 @@ class PaymentViewSet(viewsets.GenericViewSet):
         if not payment_status:
             raise lib.error_handle.error.api_error.ApiVerifyError('payment_failed')
 
-        
+
+        lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
         if payment_status == "CLO":
-            order.status = models.order.order.STATUS_COMPLETE
+            order.payment_status = models.order.order.PAYMENT_STATUS_PAID
         elif payment_status == "ACT":
-            order.status = models.order.order.STATUS_PENDING_CONFIRMATION
+            order.payment_status = models.order.order.PAYMENT_STATUS_AWAITING_CONFIRM
         elif payment_status == "EXP":
-            order.status = models.order.order.STATUS_EXPIRED
+            order.payment_status = models.order.order.PAYMENT_STATUS_EXPIRED
             
         order.meta[models.order.order.PAYMENT_METHOD_RAPYD] = response_data
         order.payment_method = models.order.order.PAYMENT_METHOD_RAPYD
@@ -531,7 +536,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             "time": callback_time
         }
         
-        order.save()
+        lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
         if payment_status == "CLO":
             content = lib.helper.order_helper.OrderHelper.get_confirmation_email_content(order)
             jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)
