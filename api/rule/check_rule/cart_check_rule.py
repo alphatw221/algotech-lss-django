@@ -98,12 +98,13 @@ class CartCheckRule():
 
         api_user = kwargs.get('api_user')
         campaign_product = kwargs.get('campaign_product')
+        cart = kwargs.get('cart')
 
         if not api_user or not campaign_product:
             return
         if api_user.type=="user":
             return
-        if not campaign_product.customer_editable:
+        if not campaign_product.customer_editable and str(campaign_product.id) in cart.products:
             raise lib.error_handle.error.cart_error.CartErrors.EditNotAllowed("not_editable")
         if campaign_product.type == models.campaign.campaign_product.TYPE_LUCKY_DRAW:
             raise lib.error_handle.error.cart_error.CartErrors.EditNotAllowed("not_editable")
@@ -153,7 +154,7 @@ class CartCheckRule():
         if api_user and api_user.type == models.user.user.TYPE_SELLER:
             return
         else :
-            raise lib.error_handle.error.pre_order_error.PreOrderErrors.UnderStock('helper.out_of_stock')
+            raise lib.error_handle.error.cart_error.CartErrors.CartException('product_type_invalid')
     
 
     # @staticmethod

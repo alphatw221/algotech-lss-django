@@ -169,7 +169,7 @@ class CartViewSet(viewsets.ModelViewSet):
                 platform = None,
                 platform_id = None)
 
-        cart_oid = database.lss.pre_order.get_oid_by_id(cart.id)
+        cart_oid = database.lss.cart.get_oid_by_id(cart.id)
         
         response = JsonResponse({'client_uuid':client_uuid, 'cart_oid':cart_oid})
         response.set_cookie('client_uuid', client_uuid, path="/")
@@ -211,7 +211,7 @@ class CartViewSet(viewsets.ModelViewSet):
                 platform = None,
                 platform_id = None)
 
-        cart_oid = database.lss.pre_order.get_oid_by_id(cart.id)
+        cart_oid = database.lss.cart.get_oid_by_id(cart.id)
         return Response({ 'cart_oid':cart_oid}, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['GET'], url_path=r'buyer/retrieve/(?P<cart_oid>[^/.]+)', permission_classes=())
@@ -299,6 +299,14 @@ class CartViewSet(viewsets.ModelViewSet):
         cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
         campaign = lib.util.verify.Verify.get_campaign_from_cart(cart)
         campaign_product = lib.util.verify.Verify.get_campaign_product_from_campaign(campaign, campaign_product_id)
+
+        rule.rule_checker.cart_rule_checker.RuleChecker.check(check_list=[
+            rule.check_rule.cart_check_rule.CartCheckRule.campaign_product_type,
+        ],**{
+            'api_user':api_user,
+            'campaign_product':campaign_product,
+        })
+
         lib.helper.cart_helper.CartHelper.update_cart_product(api_user, cart, campaign_product, qty)
 
         cart = lib.util.verify.Verify.get_cart(cart.id)

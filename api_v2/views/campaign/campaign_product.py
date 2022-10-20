@@ -159,7 +159,7 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
                                 order_code=str(request_data.get('order_code', '')), 
                                 qty_for_sale=qty_for_sale, 
                                 max_order_amount=int(request_data.get('max_order_amount')) if request_data.get('max_order_amount') else 0, 
-                                price=float(request_data.get('price', 0)) if request_data.get('price') else 0, 
+                                price=float(request_data.get('price', 0)) if request_data.get('type')==models.product.product.TYPE_PRODUCT else 0, 
                                 customer_editable=bool(request_data.get('customer_editable', True)), 
                                 customer_removable=bool(request_data.get('customer_removable', True)),
                                 oversell = bool(request_data.get('oversell', False)),
