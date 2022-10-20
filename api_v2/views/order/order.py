@@ -288,7 +288,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         subject = lib.i18n.email.delivery_comfirm_mail.i18n_get_mail_subject(order=order, lang=order.campaign.lang) 
         content = lib.i18n.email.delivery_comfirm_mail.i18n_get_mail_content(order=order, user=api_user, lang=order.campaign.lang) 
         jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)
-        order.status = models.order.order.STATUS_SHIPPED
+        order.delivery_status = models.order.order.DELIVERY_STATUS_SHIPPED
         order.save()
 
         return Response(models.order.order_product.OrderWithOrderProductSerializer(order).data, status=status.HTTP_200_OK)
