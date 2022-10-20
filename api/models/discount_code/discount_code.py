@@ -5,12 +5,11 @@ from rest_framework import serializers
 from api.models.user.user_subscription import UserSubscription
 
 
-TYPE_PERCENT_OFF = 'percent_off'
-TYPE_DEDUCT = 'deduct'
+
 TYPE_CART_REFERAL = 'cart_referal'
 TYPE_GENERAL = 'general'
 
-TYPE_CHOICES = [TYPE_PERCENT_OFF, TYPE_DEDUCT, TYPE_CART_REFERAL, TYPE_GENERAL]
+TYPE_CHOICES = [TYPE_CART_REFERAL, TYPE_GENERAL]
 DISCOUNT_TYPE_PERCENT_OFF = 'percent_off'
 DISCOUNT_TYPE_DEDUCT = 'deduct'
 

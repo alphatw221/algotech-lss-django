@@ -34,8 +34,9 @@ class DiscountCodeViewSet(viewsets.ModelViewSet):
         user_subscription = campaign.user_subscription
 
         queryset = user_subscription.discount_codes.filter(start_at__lte=datetime.utcnow(), end_at__gte=datetime.utcnow())
+
         if _type in models.discount_code.discount_code.TYPE_CHOICES:
-            queryset.filter(type=_type)
+            queryset = queryset.filter(type=_type)
         data = models.discount_code.discount_code.DiscountCodeSerializer(queryset, many=True).data
         # print(data)
         return Response(data, status=status.HTTP_200_OK)
