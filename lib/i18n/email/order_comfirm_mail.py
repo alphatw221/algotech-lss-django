@@ -69,39 +69,52 @@ def i18n_get_mail_content(order, campaign, lang=None):
     except:
         pass
 
+    #payment
+    
     payment_method = ''
     if order.payment_method == 'direct_payment':
         payment_method = _('EMAIL/ORDER_CONFIRM/DIRECT_PAYMENT')
-    else:
-        payment_method = order.payment_method.upper()
-
-    #payment
-    mail_content += '<div style="margin-top: 1%; font-size: 0.9rem; line-height: 2; sm:padding: 13px 30px;">\
+        account_mode = order.meta.get("account_mode","")
+        account_name = order.meta.get("account_name","")
+        last_five_digit = order.meta.get("last_five_digit","")
+        receipt_image = order.meta.get("receipt_image","")
+        
+        mail_content += '<div style="margin-top: 1%; font-size: 0.9rem; line-height: 2; sm:padding: 13px 30px;">\
                 <p style="text-align: left; font-weight: 700; font-size: 1rem; line-height: 2;">' + _('REPORT/SECTION_TITLE/PAYMENT_INFO') + '</p>\
                     <div style="border-bottom: 3px solid #ffd000; width: 20%; margin-bottom: 3%;"></div>'
 
-    mail_content+=  f'<tr>\
-                        <td style="color: #4b4b4b; font-weight: 600; width: 35%; text-align:left;" valign="top">' + _('REPORT/COLUMN_TITLE/PAYMENT_METHOD') + f' : {payment_method}</td>\
-                    </tr>\
-                    <tr>\
-                        <td style="color: #4b4b4b; font-weight: 600; width: 35%; text-align:left;" valign="top">' + _('EMAIL/ORDER_CONFIRM/ACCOUNT_MODE') + f' : {order.meta["account_mode"]} </td>\
-                    </tr>\
-                    <tr>\
-                        <td style="color: #4b4b4b; font-weight: 600; width: 35%; text-align:left;" valign="top">' + _('EMAIL/ORDER_CONFIRM/SELLER_ACCOUNT') + f' : {order.meta["account_name"]} </td>\
-                    </tr>'
-    try:
-        if order.meta["last_five_digit"] not in [None, '', "undefined", 'null']:
-            mail_content+= f'<tr>\
-                                <td style="color: #4b4b4b; font-weight: 600; width: 35%; text-align:left;" valign="top">' + _('EMAIL/ORDER_CONFIRM/LAST_FIVE_DIGIT') + f' : {order.meta["last_five_digit"]}</td>\
-                            </tr>'
-        if order.meta["receipt_image"] not in [None, '', "undefined", 'null']:
-            mail_content+=  f'<tr>\
-                                <td style="color: #4b4b4b; font-weight: 600; text-align:left;" valign="top">\
-                                    <img width="200" src="{order.meta["receipt_image"]}" alt="Product Image" style="vertical-align: middle; text-align: center; width: 200px; max-width: 200px; height: auto !important; border-radius: 1px; padding: 0px;">\
-                                </td>\
-                            </tr>'
-    except:
-        pass
+        mail_content+=  f'<tr>\
+                            <td style="color: #4b4b4b; font-weight: 600; width: 35%; text-align:left;" valign="top">' + _('REPORT/COLUMN_TITLE/PAYMENT_METHOD') + f' : {payment_method}</td>\
+                        </tr>\
+                        <tr>\
+                            <td style="color: #4b4b4b; font-weight: 600; width: 35%; text-align:left;" valign="top">' + _('EMAIL/ORDER_CONFIRM/ACCOUNT_MODE') + f' : {account_mode} </td>\
+                        </tr>\
+                        <tr>\
+                            <td style="color: #4b4b4b; font-weight: 600; width: 35%; text-align:left;" valign="top">' + _('EMAIL/ORDER_CONFIRM/SELLER_ACCOUNT') + f' : {account_name} </td>\
+                        </tr>'
+        try:
+            if last_five_digit not in [None, '', "undefined", 'null']:
+                mail_content+= f'<tr>\
+                                    <td style="color: #4b4b4b; font-weight: 600; width: 35%; text-align:left;" valign="top">' + _('EMAIL/ORDER_CONFIRM/LAST_FIVE_DIGIT') + f' : {last_five_digit}</td>\
+                                </tr>'
+            if receipt_image not in [None, '', "undefined", 'null']:
+                mail_content+=  f'<tr>\
+                                    <td style="color: #4b4b4b; font-weight: 600; text-align:left;" valign="top">\
+                                        <img width="200" src="{receipt_image}" alt="Product Image" style="vertical-align: middle; text-align: center; width: 200px; max-width: 200px; height: auto !important; border-radius: 1px; padding: 0px;">\
+                                    </td>\
+                                </tr>'
+        except:
+            pass
+    else:
+        payment_method = order.payment_method.upper()
+        mail_content+= f'<tr>\
+                            <td style="color: #4b4b4b; font-weight: 600; width: 35%; text-align:left;" valign="top">' + _('REPORT/COLUMN_TITLE/PAYMENT_METHOD') + f' : {order.payment_method}</td>\
+                        </tr>'
+
+        mail_content +=     '</tbody>\
+                        </table>'
+
+    
     #contact
     mail_content += '<div style="margin-top: 1%; font-size: 0.9rem; line-height: 2; sm:padding: 13px 30px;">\
             <p style="text-align: left; font-weight: 700; font-size: 1rem; line-height: 2;">' + _('EMAIL/ORDER_CONFIRM/SELLER_CONTACT') + '</p>\
