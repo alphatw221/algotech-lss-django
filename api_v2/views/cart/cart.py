@@ -281,6 +281,12 @@ class CartViewSet(viewsets.ModelViewSet):
         data = models.order.order.OrderWithCampaignSerializer(order).data
         data['oid']=order_oid
         
+        #discount used
+        if type(order.applied_discount.get('id'))==int and models.discount_code.discount_code.DiscountCode.objects.filter(id=order.applied_discount.get('id')).exists():
+            discount_code = models.discount_code.discount_code.DiscountCode.objects.get(id=order.applied_discount.get('id'))
+            discount_code.used_count+=1
+            discount_code.save()
+            
         # change buyer language
         if request.user.is_authenticated:
             api_user.lang = campaign.lang
