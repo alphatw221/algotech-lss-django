@@ -275,8 +275,10 @@ class CartViewSet(viewsets.ModelViewSet):
         order.buyer = api_user
         order.save()
         
-        content = lib.helper.order_helper.OrderHelper.get_checkout_email_content(order,order_oid)
-        jobs.send_email_job.send_email_job(campaign.title, order.shipping_email, content=content)    
+        
+        subject = lib.i18n.email.cart_checkout_mail.i18n_get_mail_subject(order=order, lang=order.campaign.lang) 
+        content = lib.i18n.email.cart_checkout_mail.i18n_get_mail_content(order, order_oid, lang=order.campaign.lang) 
+        jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)  
         
         data = models.order.order.OrderWithCampaignSerializer(order).data
         data['oid']=order_oid
