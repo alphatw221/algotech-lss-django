@@ -500,15 +500,15 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         
         total_order_complete_count, total_order_proceed_count = database.lss.user_subscription.get_order_complete_proceed_count(user_subscription.id)
-        total_pre_order_count = database.lss.user_subscription.get_pre_order_count(user_subscription.id)
+        total_cart_count = database.lss.user_subscription.get_cart_count(user_subscription.id)
 
         total_average_sales = database.lss.user_subscription.get_average_sales(user_subscription.id)
         total_average_comment_count = database.lss.user_subscription.get_average_comment_count(user_subscription.id)
 
-        average_order_uncheck_rate = total_pre_order_count / (total_order_complete_count + total_order_proceed_count + total_pre_order_count) * 100 \
-            if (total_order_complete_count + total_order_proceed_count + total_pre_order_count) else 0
-        average_order_close_rate = (total_order_complete_count + total_order_proceed_count) / (total_order_complete_count + total_order_proceed_count + total_pre_order_count) * 100 \
-            if (total_order_complete_count + total_order_proceed_count + total_pre_order_count) else 0
+        average_order_uncheck_rate = total_cart_count / (total_order_complete_count + total_order_proceed_count + total_cart_count) * 100 \
+            if (total_order_complete_count + total_order_proceed_count + total_cart_count) else 0
+        average_order_close_rate = (total_order_complete_count + total_order_proceed_count) / (total_order_complete_count + total_order_proceed_count + total_cart_count) * 100 \
+            if (total_order_complete_count + total_order_proceed_count + total_cart_count) else 0
 
         manage_order = {
             "order_qty":(campaign_order_complete_count + campaign_order_proceed_count),

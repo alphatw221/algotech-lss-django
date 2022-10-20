@@ -61,22 +61,6 @@ def get_campaign_count():
 
 def get_order_complete_proceed_count(user_subscription_id):
 
-
-    complete_status = [
-        models.order.order.STATUS_COMPLETE
-    ]
-    proceed_status = [
-        models.order.order.STATUS_PENDING ,
-        models.order.order.STATUS_AWAITING_PAYMENT ,
-        models.order.order.STATUS_AWAITING_FULFILLMENT ,
-        models.order.order.STATUS_AWAITING_SHIPMENT ,
-        models.order.order.STATUS_AWAITING_PICKUP ,
-        models.order.order.STATUS_DISPUTED ,
-        models.order.order.STATUS_PARTIALLY_REFUNDED ,
-        models.order.order.STATUS_REFUNDED ,
-
-    ]
-
     cursor=__collection.aggregate([
         {"$match":{"id":user_subscription_id}},
         {
@@ -98,8 +82,8 @@ def get_order_complete_proceed_count(user_subscription_id):
                                     "id":{"$ne":None}}
                                  },
                                 {"$project":{"_id":0,
-                                "complete": {  "$cond": [ { "$in":["$status", complete_status ] }, 1, 0]},
-                                "proceed": { "$cond": [ { "$in":["$status", proceed_status ] }, 1, 0]}
+                                "complete": {  "$cond": [ { "$eq":["$status", models.order.order.STATUS_COMPLETE ] }, 1, 0]},
+                                "proceed": { "$cond": [ { "$eq":["$status", models.order.order.STATUS_PROCEED ] }, 1, 0]}
                                 }},
                             ]
                         },
@@ -120,7 +104,7 @@ def get_order_complete_proceed_count(user_subscription_id):
 
     
 
-def get_pre_order_count(user_subscription_id):
+def get_cart_count(user_subscription_id):
 
     cursor=db.api_user_subscription.aggregate([
         {"$match":{"id":user_subscription_id}},
@@ -135,19 +119,19 @@ def get_pre_order_count(user_subscription_id):
                      },
                     {
                         "$lookup": {
-                            "from": "api_pre_order","as": "pre_orders", # "localField": "id","foreignField": "campaign_id",
+                            "from": "api_cart","as": "carts", # "localField": "id","foreignField": "campaign_id",
                             'let': {'id': "$id" },
                             "pipeline":[
                                 {"$match":{
                                     '$expr': { '$eq': ["$$id", "$campaign_id"] },
                                     "id":{"$ne":None},
-                                    "subtotal":{"$ne":0}}
+                                    "products":{"$ne":{}}}
                                  },
                                 {"$project":{"_id":0, "count":{"$sum":1}}}
                             ]
                         },
                     },
-                    {"$project":{"_id":0, "id":1,"pre_orders":1, "campaign_count":{"$sum":"$pre_orders.count"}}}
+                    {"$project":{"_id":0, "id":1,"carts":1, "campaign_count":{"$sum":"$carts.count"}}}
                 ]
             },
         },
@@ -161,13 +145,6 @@ def get_pre_order_count(user_subscription_id):
 
 
 def get_average_sales(user_subscription_id):
-
-    payment_complete_status = [
-        models.order.order.STATUS_COMPLETE,
-        models.order.order.STATUS_AWAITING_FULFILLMENT ,
-        models.order.order.STATUS_AWAITING_SHIPMENT ,
-        models.order.order.STATUS_AWAITING_PICKUP ,
-    ]
 
 
     cursor=db.api_user_subscription.aggregate([
@@ -189,7 +166,7 @@ def get_average_sales(user_subscription_id):
                                 {"$match":{
                                     '$expr': { '$eq': ["$$id", "$campaign_id"] },
                                     "id":{"$ne":None},
-                                    "status":{"$in":payment_complete_status}
+                                    "status":models.order.order.STATUS_COMPLETE
                                     
                                     },
                                     

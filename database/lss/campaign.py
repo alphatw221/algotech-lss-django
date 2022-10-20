@@ -150,20 +150,7 @@ def get_ongoing_campaign_disallow_overbook_campaign_product():
 
 def get_order_complete_proceed_count(campaign_id):
 
-    complete_status = [
-        models.order.order.STATUS_COMPLETE
-    ]
-    proceed_status = [
-        models.order.order.STATUS_PENDING ,
-        models.order.order.STATUS_AWAITING_PAYMENT ,
-        models.order.order.STATUS_AWAITING_FULFILLMENT ,
-        models.order.order.STATUS_AWAITING_SHIPMENT ,
-        models.order.order.STATUS_AWAITING_PICKUP ,
-        models.order.order.STATUS_DISPUTED ,
-        models.order.order.STATUS_PARTIALLY_REFUNDED ,
-        models.order.order.STATUS_REFUNDED ,
-
-    ]
+    
     cursor=__collection.aggregate([
         {"$match":{"id":campaign_id}},
         {
@@ -176,8 +163,8 @@ def get_order_complete_proceed_count(campaign_id):
                         "id":{"$ne":None}}
                      },
                     {"$project":{"_id":0,
-                    "complete": {  "$cond": [ { "$in":["$status", complete_status ] }, 1, 0]},
-                    "proceed":{  "$cond": [ { "$in":["$status", proceed_status ] }, 1, 0]}
+                    "complete": {  "$cond": [ { "$eq":["$status", models.order.order.STATUS_COMPLETE ] }, 1, 0]},
+                    "proceed":{  "$cond": [ { "$eq":["$status", models.order.order.STATUS_PROCEED ] }, 1, 0]}
                     }},
                 ]
             },

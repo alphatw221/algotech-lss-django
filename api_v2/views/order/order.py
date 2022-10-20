@@ -238,7 +238,8 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         api_user, campaign_id, search, page, page_size, order_status, = lib.util.getter.getparams(request, ( 'campaign_id', 'search', 'page', 'page_size','status'),with_user=True, seller=True)
         
-        payment_dict, delivery_dict, platform_dict, sort_by_dict = lib.util.getter.getdata(request,('payment','delivery','platform', 'sort_by'))
+        payment_dict, delivery_dict, platform_dict, sort_by_dict = lib.util.getter.getdata(request,('payment','delivery','platform', 'sort_by'), required=False)
+
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription,campaign_id)
         queryset = campaign.orders.all()
@@ -248,30 +249,14 @@ class OrderViewSet(viewsets.ModelViewSet):
         elif search not in ["",None,'undefined']:
             queryset=queryset.filter(customer_name__contains=search)
 
-        # if order_status == models.order.order.STATUS_REVIEW:
-        #     queryset=queryset.filter(status=order_status)
-        elif order_status == models.order.order.STATUS_PROCEED:
-            queryset=queryset.filter(status__in=[
-                models.order.order.STATUS_PENDING ,
-                models.order.order.STATUS_AWAITING_PAYMENT ,
-                models.order.order.STATUS_AWAITING_FULFILLMENT ,
-                models.order.order.STATUS_AWAITING_SHIPMENT ,
-                models.order.order.STATUS_AWAITING_PICKUP ,
-                models.order.order.STATUS_PARTIALLY_SHIPPED ,
-                models.order.order.STATUS_SHIPPED ,
-                models.order.order.STATUS_DISPUTED ,
-                models.order.order.STATUS_PARTIALLY_REFUNDED ,
-                models.order.order.STATUS_REFUNDED ,
-            ])
-        elif order_status == models.order.order.STATUS_COMPLETE:
-            queryset=queryset.filter(status__in=[models.order.order.STATUS_COMPLETE])
+        elif order_status in models.order.order.STATUS_CHOICES:
+            queryset=queryset.filter(status=order_status)
 
         if payment_dict:
             queryset=queryset.filter(payment_method__in=[key for key,value in payment_dict.items() if value])
-        # if delivery_dict:
-        #     queryset=queryset.filter(status__in=delivery_dict)
+        if delivery_dict:
+            queryset=queryset.filter(delivery_status__in=[key for key,value in delivery_dict.items() if value])
         if platform_dict:
-            print(platform_dict)
             queryset=queryset.filter(platform__in=[key for key,value in platform_dict.items() if value])
 
         for order_by, asc in sort_by_dict.items():
