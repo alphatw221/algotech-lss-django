@@ -102,8 +102,9 @@ class PaymentViewSet(viewsets.GenericViewSet):
         lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
 
 
-        content = lib.helper.order_helper.OrderHelper.get_confirmation_email_content(order)
-        jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)
+        subject = lib.i18n.email.order_comfirm_mail.i18n_get_mail_subject(order, lang=campaign.lang)
+        content = lib.i18n.email.order_comfirm_mail.i18n_get_mail_content(order, campaign, lang=campaign.lang)
+        jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)
         return HttpResponseRedirect(redirect_to=f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}/confirmation')
 
     # @action(detail=False, methods=['GET'], url_path=r'strip/callback/cancel', )
@@ -166,8 +167,9 @@ class PaymentViewSet(viewsets.GenericViewSet):
             order.payment_status = models.order.order.PAYMENT_STATUS_PAID
             lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
 
-            content = lib.helper.order_helper.OrderHelper.get_confirmation_email_content(order)
-            jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)
+            subject = lib.i18n.email.order_comfirm_mail.i18n_get_mail_subject(order, lang=campaign.lang)
+            content = lib.i18n.email.order_comfirm_mail.i18n_get_mail_content(order, campaign, lang=campaign.lang)
+            jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)
         return Response('ok')
 
 
@@ -228,8 +230,9 @@ class PaymentViewSet(viewsets.GenericViewSet):
         lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
 
 
-        content = lib.helper.order_helper.OrderHelper.get_confirmation_email_content(order)
-        jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)
+        subject = lib.i18n.email.order_comfirm_mail.i18n_get_mail_subject(order, lang=campaign.lang)
+        content = lib.i18n.email.order_comfirm_mail.i18n_get_mail_content(order, campaign, lang=campaign.lang)
+        jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)
         return HttpResponseRedirect(redirect_to=f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}/confirmation')
 
     # @action(detail=False, methods=['GET'], url_path=r"paypal_cancel")
@@ -316,9 +319,9 @@ class PaymentViewSet(viewsets.GenericViewSet):
             }
             order.payment_status = models.order.order.PAYMENT_STATUS_PAID
             lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
-
-            content = lib.helper.order_helper.OrderHelper.get_confirmation_email_content(order)
-            jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)
+            subject = lib.i18n.email.order_comfirm_mail.i18n_get_mail_subject(order, lang=order.campaign.lang)
+            content = lib.i18n.email.order_comfirm_mail.i18n_get_mail_content(order, order.campaign, lang=order.campaign.lang)
+            jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)
         return Response('response', status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['GET'], url_path=r"ecpay/credential")
@@ -429,8 +432,9 @@ class PaymentViewSet(viewsets.GenericViewSet):
         lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
 
 
-        content = lib.helper.order_helper.OrderHelper.get_confirmation_email_content(order)
-        jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)
+        subject = lib.i18n.email.order_comfirm_mail.i18n_get_mail_subject(order, lang=campaign.lang)
+        content = lib.i18n.email.order_comfirm_mail.i18n_get_mail_content(order, campaign, lang=campaign.lang)
+        jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)
         # return HttpResponseRedirect(redirect_to=f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}/confirmation')
         res = '1|OK'
         
@@ -538,8 +542,9 @@ class PaymentViewSet(viewsets.GenericViewSet):
         
         lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
         if payment_status == "CLO":
-            content = lib.helper.order_helper.OrderHelper.get_confirmation_email_content(order)
-            jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)
+            subject = lib.i18n.email.order_comfirm_mail.i18n_get_mail_subject(order, lang=campaign.lang)
+            content = lib.i18n.email.order_comfirm_mail.i18n_get_mail_content(order, campaign, lang=campaign.lang)
+            jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)
             return HttpResponseRedirect(redirect_to=f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}/confirmation')
         else:
             return HttpResponseRedirect(redirect_to=f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}')
