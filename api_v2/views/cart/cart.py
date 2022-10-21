@@ -233,8 +233,7 @@ class CartViewSet(viewsets.ModelViewSet):
     @lib.error_handle.error_handler.cart_operation_error_handler.update_cart_product_error_handler
     def buyer_checkout_cart(self, request, cart_oid):
         
-        shipping_data, = \
-            lib.util.getter.getdata(request, ("shipping_data",), required=True)
+        shipping_data, = lib.util.getter.getdata(request, ("shipping_data",), required=True)
 
         api_user = lib.util.verify.Verify.get_customer_user(request) if request.user.is_authenticated else None
         cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
@@ -249,31 +248,18 @@ class CartViewSet(viewsets.ModelViewSet):
             **{'api_user':api_user, 'campaign':campaign, 'cart':cart}
         )
 
-
         serializer =models.order.order.OrderSerializerUpdateShipping(data=shipping_data) 
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        success, pymongo_order = lib.helper.cart_helper.CartHelper.checkout(api_user, campaign.id, cart.id, shipping_data=shipping_data)
+        success, pymongo_order = lib.helper.cart_helper.CartHelper.checkout(api_user, campaign, cart.id, shipping_data=shipping_data)
         
         if not success:
             cart = lib.util.verify.Verify.get_cart(cart.id)
             return Response(models.cart.cart.CartSerializer(cart).data, status=status.HTTP_200_OK)
         
         order = lib.util.verify.Verify.get_order(pymongo_order.id)
-        order_oid = str(pymongo_order._id)
-        # serializer = models.order.order.OrderSerializerUpdateShipping(order, data=shipping_data, partial=True) 
-        # if not serializer.is_valid():
-        #     data = models.order.order.OrderWithCampaignSerializer(order).data
-        #     data['oid']=order_oid
-        #     return Response(data, status=status.HTTP_200_OK)
-
-
-        # order = serializer.save()
-        lib.helper.order_helper.OrderHelper.summarize_order(order, save=True)
-        # order.buyer = api_user
-        # order.save()
-        
+        order_oid = str(pymongo_order._id)   
         
         subject = lib.i18n.email.cart_checkout_mail.i18n_get_mail_subject(order=order, lang=order.campaign.lang) 
         content = lib.i18n.email.cart_checkout_mail.i18n_get_mail_content(order, order_oid, lang=order.campaign.lang) 
