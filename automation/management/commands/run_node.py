@@ -67,7 +67,7 @@ class Command(BaseCommand):
                 return
 
 
-    @lib.util.timeloop.time_loop(10)
+    @lib.util.timeloop.time_loop(5)
     def leader_loop(self):
         # print('i am leader')
         if self.__new_leader_exist():
