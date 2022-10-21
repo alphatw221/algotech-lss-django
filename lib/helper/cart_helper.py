@@ -240,16 +240,21 @@ class CartHelper():
 
     @staticmethod
     def __check_stock_avaliable_and_add_to_cart(campaign_product_data, qty_difference, session):
-
+        
+        
         pymongo_campaign_product = database.lss.campaign_product.CampaignProduct.get_object(id=campaign_product_data.get('id'), session=session)
 
-        able_to_add_to_cart = True
+        if qty_difference < 0:
+            pymongo_campaign_product.add_to_cart(qty_difference, sync=False, session=session)
+            return True
+            
+        avaliable_qty = 0
         if campaign_product_data.get('overbook'):
-            able_to_add_to_cart = (pymongo_campaign_product.data.get("qty_for_sale")-pymongo_campaign_product.data.get('qty_sold')-pymongo_campaign_product.data.get('qty_pending_payment') >= qty_difference) 
+            avaliable_qty = pymongo_campaign_product.data.get("qty_for_sale")-pymongo_campaign_product.data.get('qty_sold')-pymongo_campaign_product.data.get('qty_pending_payment')
         else:
-            able_to_add_to_cart = (pymongo_campaign_product.data.get("qty_for_sale")-pymongo_campaign_product.data.get('qty_sold')-pymongo_campaign_product.data.get('qty_pending_payment')-pymongo_campaign_product.data.get('qty_add_to_cart') >= qty_difference) 
+            avaliable_qty = pymongo_campaign_product.data.get("qty_for_sale")-pymongo_campaign_product.data.get('qty_sold')-pymongo_campaign_product.data.get('qty_pending_payment')-pymongo_campaign_product.data.get('qty_add_to_cart') 
 
-        if not able_to_add_to_cart :
+        if avaliable_qty < qty_difference:
             return False
 
         pymongo_campaign_product.add_to_cart(qty_difference, sync=False, session=session)
