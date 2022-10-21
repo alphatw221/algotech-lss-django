@@ -103,8 +103,9 @@ class CartHelper():
             else:
                 return RequestState.INVALID_NEGATIVE_QTY
 
-
-        if not cls.__check_stock_avaliable_and_add_to_cart_by_comment(campaign_product_data, pymongo_cart, qty):
+        if campaign_product_data.get('oversell'):
+            pass
+        elif not cls.__check_stock_avaliable_and_add_to_cart_by_comment(campaign_product_data, pymongo_cart, qty):
             return RequestState.INSUFFICIENT_INV
 
         cls.__update_cart_product(None, pymongo_cart, campaign_product_data, qty)
@@ -195,7 +196,7 @@ class CartHelper():
     @classmethod
     def __check_stock_avaliable_and_add_to_cart_by_api(cls, campaign_product_data, qty_difference, attempts=10):
 
-        if not qty_difference:
+        if qty_difference == 0:
             return True
 
         if campaign_product_data.get('oversell'):
@@ -222,13 +223,12 @@ class CartHelper():
                     original_qty = pymongo_cart.data.get('products',{}).get(str(campaign_product_data.get('id')),0)
                     qty_difference = qty-original_qty
 
-                    if not qty_difference:
+                    if qty_difference == 0:
                         return True
 
                     if campaign_product_data.get('oversell'):
-                        database.lss.campaign_product.CampaignProduct(id=campaign_product_data.get('id')).add_to_cart(qty=qty_difference, sync=False)
+                        database.lss.campaign_product.CampaignProduct(id=campaign_product_data.get('id')).add_to_cart(qty=qty_difference, sync=False, session=session)
                         return True
-
 
                     return cls.__check_stock_avaliable_and_add_to_cart(campaign_product_data, qty_difference, session)
                     
@@ -249,9 +249,7 @@ class CartHelper():
         else:
             able_to_add_to_cart = (pymongo_campaign_product.data.get("qty_for_sale")-pymongo_campaign_product.data.get('qty_sold')-pymongo_campaign_product.data.get('qty_pending_payment')-pymongo_campaign_product.data.get('qty_add_to_cart') >= qty_difference) 
 
-        able_to_purchase = pymongo_campaign_product.data.get("qty_for_sale")-pymongo_campaign_product.data.get('qty_sold')-pymongo_campaign_product.data.get('qty_pending_payment') >= qty_difference
-
-        if not able_to_add_to_cart or not able_to_purchase:
+        if not able_to_add_to_cart :
             return False
 
         pymongo_campaign_product.add_to_cart(qty_difference, sync=False, session=session)
