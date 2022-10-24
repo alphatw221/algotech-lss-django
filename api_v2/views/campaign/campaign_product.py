@@ -43,9 +43,9 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
         cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
         queryset = cart.campaign.products.all()
         if type == models.campaign.campaign_product.TYPE_PRODUCT:
-            queryset.filter(type=models.campaign.campaign_product.TYPE_PRODUCT)
+            queryset = queryset.filter(type=models.campaign.campaign_product.TYPE_PRODUCT)
         elif type == models.campaign.campaign_product.TYPE_LUCKY_DRAW:
-            queryset.filter(type=models.campaign.campaign_product.TYPE_LUCKY_DRAW)
+            queryset = queryset.filter(type=models.campaign.campaign_product.TYPE_LUCKY_DRAW)
 
         # campaign_products = pre_order.campaign.products.filter(Q(type='product') | Q(type="product-fast"))
         
