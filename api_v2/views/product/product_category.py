@@ -16,6 +16,7 @@ from automation import jobs
 
 from api import models
 from api import rule
+import database
 
 import lib, json
 
@@ -91,6 +92,10 @@ class ProductCatoegoryViewSet(viewsets.ModelViewSet):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         product_category = lib.util.verify.Verify.get_product_category_from_user_subscription(user_subscription, pk)
+        
+
+        #unset all product and campaign product categories key
+        database.lss.product.remove_categories(user_subscription.id, product_category.id)
         product_category.delete()
         return Response({"message": "delete success"}, status=status.HTTP_200_OK)
 

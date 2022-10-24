@@ -50,4 +50,15 @@ class CampaignProduct(Collection):
 
 
 def remove_categories(product_category_id, session=None):
-    __collection.update_one({f"categories.{str(product_category_id)}":{"$exists":True}},{"$unset":{f"categories.{str(product_category_id)}":1}}, session=session)
+    __collection.update_many({f"categories.{str(product_category_id)}":{"$exists":True}},{"$unset":{f"categories.{str(product_category_id)}":1}}, session=session)
+
+
+
+# def remove_categories(user_subscription_id, product_category_id, session=None):
+#     __collection.update_one(
+#         {
+#             "user_subscription_id":user_subscription_id,
+#             "categories":str(product_category_id)
+#         },
+#         {"$pull":{"categories":str(product_category_id)}}, 
+#         session=session)
