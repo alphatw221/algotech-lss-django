@@ -88,6 +88,7 @@ class CampaignProduct(models.Model):
     meta = models.JSONField(default=dict, null=True, blank=True)
     meta_logistic = models.JSONField(default=dict, null=True, blank=True)
     tag = models.JSONField(default=dict, null=True, blank=True)
+    categories = models.JSONField(default=list, null=True, blank=True)
 
 
 class CampaignProductSerializer(serializers.ModelSerializer):
@@ -100,7 +101,7 @@ class CampaignProductSerializer(serializers.ModelSerializer):
     meta = serializers.JSONField(default=dict)
     meta_logistic = serializers.JSONField(default=dict)
     tag = serializers.JSONField(default=list)
-
+    categories = serializers.JSONField(default=list)
 
 class CampaignProductSerializerAssign(serializers.ModelSerializer):
     class Meta:

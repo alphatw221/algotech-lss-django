@@ -2,7 +2,7 @@ import imp
 from django.conf.urls import url, include
 from rest_framework import routers
 
-from api_v2.views.product import product
+from api_v2.views.product import product, product_category
 from api_v2.views.campaign import campaign, campaign_product, campaign_comment, campaign_lucky_draw, campaign_quiz_game
 from api_v2.views.user import user, user_subscription
 from api_v2.views.order import pre_order, order_product, order
@@ -19,6 +19,7 @@ from api_v2.views.tiktok import tiktok_live
 
 router = routers.DefaultRouter()
 router.register(r'product', product.ProductViewSet)
+router.register(r'product-category', product_category.ProductCatoegoryViewSet)
 router.register(r'campaign',campaign.CampaignViewSet)
 router.register(r'campaign-product',campaign_product.CampaignProductViewSet)
 router.register(r'user', user.UserViewSet)

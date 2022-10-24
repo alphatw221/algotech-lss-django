@@ -47,3 +47,7 @@ class CampaignProduct(Collection):
         self._collection.update_one({'id':self.id},{"$inc": {'qty_sold': qty, 'qty_pending_payment': -qty},"$set":{'updated_at':datetime.utcnow()}}, session=session)
         if sync:
             self._sync(session=session)
+
+
+def remove_categories(product_category_id, session=None):
+    __collection.update_one({f"categories.{str(product_category_id)}":{"$exists":True}},{"$unset":{f"categories.{str(product_category_id)}":1}}, session=session)

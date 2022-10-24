@@ -31,6 +31,11 @@ import random
 import string
 
 
+class UserSubscriptionAccountInfo(models.user.user_subscription.UserSubscriptionSerializer):
+    product_categories = models.product.product_category.ProductCategorySerializer(
+        many=True, read_only=True, default=list)
+class UserSerializerAccountInfo(models.user.user.UserSerializer):
+    user_subscription = UserSubscriptionAccountInfo(read_only=True, default=dict)
 class UserViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAdminUser,)
     queryset = models.user.user.User.objects.all().order_by('id')
@@ -168,7 +173,7 @@ class UserViewSet(viewsets.ModelViewSet):
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def seller_get_account_info(self, request):
         api_user = lib.util.verify.Verify.get_seller_user(request)
-        return Response(models.user.user.UserSerializerAccountInfo(api_user).data, status=status.HTTP_200_OK) 
+        return Response(UserSerializerAccountInfo(api_user).data, status=status.HTTP_200_OK) 
 
     
     # not use for now

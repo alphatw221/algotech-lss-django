@@ -433,20 +433,22 @@ class CampaignViewSet(viewsets.ModelViewSet):
         save_to_stock, name, order_code, price, qty = lib.util.getter.getdata(request,("save_to_stock", "name", "order_code", "price", "qty"), required=True)
         
         category, = lib.util.getter.getdata(request,("category",), required=False)
-        if category in ["", "null", None, 'undefined']:
-            category = []
-        else:
-            category = [category]
+        
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, pk)
         
+        if user_subscription.product_categories.filter(id=int(category)).exists():
+            category = [category]
+        else:
+            category = []
+
         product=None
         
         if save_to_stock:
-            product = models.product.product.Product.objects.create(user_subscription=user_subscription, created_by=api_user, name=name, order_code=order_code, tag=category, price=price, qty=0, type=models.product.product.TYPE_PRODUCT)
+            product = models.product.product.Product.objects.create(user_subscription=user_subscription, created_by=api_user, name=name, order_code=order_code, categories=category, price=price, qty=0, type=models.product.product.TYPE_PRODUCT, image=settings.GOOGLE_STORAGE_STATIC_DIR+models.product.product.IMAGE_NULL)
 
-        campaign_product = models.campaign.campaign_product.CampaignProduct.objects.create(campaign=campaign, created_by=api_user, product=product, status=True, type=models.product.product.TYPE_PRODUCT, name=name, order_code=order_code, price=float(price), qty_for_sale=int(qty), image=models.campaign.campaign_product.IMAGE_NULL)
+        campaign_product = models.campaign.campaign_product.CampaignProduct.objects.create(campaign=campaign, created_by=api_user, product=product, status=True, categories=category, type=models.product.product.TYPE_PRODUCT, name=name, order_code=order_code, price=float(price), qty_for_sale=int(qty), image=settings.GOOGLE_STORAGE_STATIC_DIR+models.campaign.campaign_product.IMAGE_NULL)
 
         return Response(models.campaign.campaign_product.CampaignProductSerializer(campaign_product).data, status=status.HTTP_200_OK)
 

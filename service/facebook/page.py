@@ -67,6 +67,14 @@ def post_setup_webhook(page_token: str, page_id: str, subscribed_fields="message
                             params=params).post()
     return ret
 
+def subscribe_webhook(page_token: str, page_id: str, subscribed_fields=["messages", "messaging_postbacks"]):
+    params = {
+        'subscribed_fields': ','.join(subscribed_fields),
+    }
+    ret = FacebookApiCaller(f'{page_id}/subscribed_apps', bearer_token=page_token,
+                            params=params).post()
+    return ret
+
 def delete_page_webhook(page_token: str, page_id: str):
     ret = FacebookApiCaller(f'{page_id}/subscribed_apps', bearer_token=page_token).delete()
     return ret

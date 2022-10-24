@@ -361,6 +361,12 @@ class Verify():
         if not user_subscription.products.filter(id=product_id).exists():
             raise ApiVerifyError("util.no_product_found")
         return user_subscription.products.get(id=product_id)
+    
+    @staticmethod
+    def get_product_category_from_user_subscription(user_subscription, product_category_id):
+        if not user_subscription.product_categories.filter(id=product_category_id).exists():
+            raise ApiVerifyError("util.no_product_category_found")
+        return user_subscription.product_categories.get(id=product_category_id)
 
     @staticmethod
     def get_campaign_product_from_campaign(campaign, campaign_product_id):

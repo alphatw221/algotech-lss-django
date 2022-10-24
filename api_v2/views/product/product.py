@@ -32,8 +32,8 @@ class ProductViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'], url_path=r'search', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def search_product(self, request):
-        api_user, search_column, keyword, product_status, product_type, category, exclude_products, sort_by = \
-            lib.util.getter.getparams(request, ("search_column", "keyword", "product_status", "product_type", "category", "exclude", "sort_by"), with_user=True, seller=True)
+        api_user, search_column, keyword, product_status, product_type, category_id, exclude_products, sort_by = \
+            lib.util.getter.getparams(request, ("search_column", "keyword", "product_status", "product_type", "category_id", "exclude", "sort_by"), with_user=True, seller=True)
         
         user_subscription = \
             lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
@@ -45,8 +45,8 @@ class ProductViewSet(viewsets.ModelViewSet):
             kwargs[search_column + '__icontains'] = keyword
         if ( product_type in [models.product.product.TYPE_PRODUCT, models.product.product.TYPE_LUCY_DRAW]):
             kwargs['type'] = product_type
-        if category not in ['undefined', '', None]:
-            kwargs['tag__icontains'] = category 
+        if category_id not in ['undefined', '', None]:
+            kwargs['categories__icontains'] = category_id 
         
         if(sort_by in ['undefined', '', None]):
             queryset = user_subscription.products.filter(**kwargs).order_by("-updated_at")
@@ -165,14 +165,20 @@ class ProductViewSet(viewsets.ModelViewSet):
     def bulk_update_product(self, request, pk=None):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
-        categories, product_status, stock_id_list = lib.util.getter.getdata(request,('categories', 'status', 'stockIdList'), required=False)
+        
+        categories, product_status, stock_id_list = lib.util.getter.getdata(request,('categories', 'status', 'stock_id_list'), required=False)
 
+        product_category_dict = {str(product_category.id):product_category for product_category in user_subscription.product_categories.all()}
         for stock_id in stock_id_list:
-            stock = models.product.product.Product.objects.get(id=stock_id)
-            stock.status = product_status
-            stock.tag = categories
-            stock.save()
-
+            try:
+                stock = models.product.product.Product.objects.get(id=stock_id)
+                if product_status in models.product.product.STATUS_CHOICES:
+                    stock.status = product_status 
+                if categories == [] or all(category in product_category_dict for category in categories):
+                    stock.categories = categories
+                stock.save()
+            except Exception:
+                continue
         return Response({'message': 'success'}, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['DELETE'], url_path=r'delete', permission_classes=(IsAuthenticated,))

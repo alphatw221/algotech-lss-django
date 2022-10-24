@@ -121,14 +121,14 @@ class UserSubscriptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserSubscription
         fields = '__all__'
-        read_only_fields = ['created_at', 'modified_at']
+        read_only_fields = ['created_at', 'updated_at','facebook_pages','instagram_profiles','youtube_channels']
 
-    facebook_pages = FacebookPageInfoSerializer(
-        many=True, read_only=True, default=list)
-    instagram_profiles = InstagramProfileInfoSerializer(
-        many=True, read_only=True, default=list)
-    youtube_channels = YoutubeChannelInfoSerializer(
-        many=True, read_only=True, default=list)
+    # facebook_pages = FacebookPageInfoSerializer(
+    #     many=True, read_only=True, default=list)
+    # instagram_profiles = InstagramProfileInfoSerializer(
+    #     many=True, read_only=True, default=list)
+    # youtube_channels = YoutubeChannelInfoSerializer(
+    #     many=True, read_only=True, default=list)
 
     meta = serializers.JSONField(default=dict, required=False)
     meta_payment = serializers.JSONField(default=dict, required=False)

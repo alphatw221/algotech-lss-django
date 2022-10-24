@@ -1,0 +1,41 @@
+from api.models.user.user_subscription import UserSubscription
+from djongo import models
+from rest_framework import serializers
+
+
+class ProductCategory(models.Model):
+
+    class Meta:
+        db_table = 'api_product_category'
+        unique_together = ['user_subscription', 'name']
+
+    user_subscription = models.ForeignKey(
+        UserSubscription, null=True, on_delete=models.CASCADE, related_name='product_categories')
+
+
+    name = models.CharField(
+        max_length=255, null=True, blank=True, default=None)
+        
+    description = models.TextField(null=True, blank=True, default=None)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    meta_logistic = models.JSONField(default=dict, null=True, blank=True)
+    meta = models.JSONField(default=dict, null=True, blank=True)
+    
+
+    def __str__(self):
+        return self.name
+
+
+class ProductCategorySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ProductCategory
+        fields = '__all__'
+        read_only_fields = ['user_subscription','created_at', 'updated_at']
+    
+    meta_logistic = serializers.JSONField(default=dict)
+    meta = serializers.JSONField(default=dict)
+    

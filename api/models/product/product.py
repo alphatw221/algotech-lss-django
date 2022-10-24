@@ -21,6 +21,7 @@ IMAGE_MAXIMUM_SIZE = 10*1024*1024
 
 STATUS_ENABLED = 'enabled'
 STATUS_DISABLED = 'disabled'
+STATUS_CHOICES=[STATUS_ENABLED, STATUS_DISABLED]
 class Product(models.Model):
     STATUS_CHOICES = [
         ('enabled', 'Enabled'),
@@ -80,7 +81,7 @@ class Product(models.Model):
     meta = models.JSONField(default=dict, null=True, blank=True)
     meta_logistic = models.JSONField(default=dict, null=True, blank=True)
     tag = models.JSONField(default=list, null=True, blank=True)
-
+    categories = models.JSONField(default=list, null=True, blank=True)
     def __str__(self):
         return self.name
 
@@ -116,6 +117,7 @@ class ProductSerializer(serializers.ModelSerializer):
     meta = serializers.JSONField(default=dict)
     meta_logistic = serializers.JSONField(default=dict)
     tag = serializers.JSONField(default=dict)
+    categories = serializers.JSONField(default=list)
 
 
 class ProductSerializerDropdown(ProductSerializer):
