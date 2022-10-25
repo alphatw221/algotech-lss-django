@@ -21,7 +21,7 @@ class Product(Collection):
             self._sync(session=session)
 
 def remove_categories(user_subscription_id, product_category_id, session=None):
-    __collection.update_one(
+    __collection.update_many(
         {
             "user_subscription_id":user_subscription_id,
             "categories":str(product_category_id)

@@ -53,16 +53,12 @@ class ProductCatoegoryViewSet(viewsets.ModelViewSet):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
 
+        request.data['user_subscription'] = user_subscription.id
         serializer = models.product.product_category.ProductCategorySerializer(data = request.data)
         if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
-        try:
-            product_category = serializer.save()
-        except Exception:
             raise lib.error_handle.error.api_error.ApiVerifyError('duplicate_product_category_name')
-        product_category.user_subscription = user_subscription
-        product_category.save()
+
+        product_category = serializer.save()
         data = models.product.product_category.ProductCategorySerializer(product_category).data
         return Response(data, status=status.HTTP_200_OK)
 
@@ -74,15 +70,12 @@ class ProductCatoegoryViewSet(viewsets.ModelViewSet):
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         product_category = lib.util.verify.Verify.get_product_category_from_user_subscription(user_subscription, pk)
 
-        serializer = models.product.product_category.ProductCategorySerializer(product_category, data=request.data, partial=True)
+        serializer = models.product.product_category.ProductCategorySerializerUpdate(product_category, data=request.data, partial=True)
         if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        try:
-            product_category = serializer.save()
-        except Exception:
             raise lib.error_handle.error.api_error.ApiVerifyError('duplicate_product_category_name')
-        data = models.product.product_category.ProductCategorySerializer(product_category).data
 
+        product_category = serializer.save()
+        data = models.product.product_category.ProductCategorySerializer(product_category).data
         
         return Response(data, status=status.HTTP_200_OK)
     

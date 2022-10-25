@@ -34,8 +34,15 @@ class ProductCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductCategory
         fields = '__all__'
-        read_only_fields = ['user_subscription','created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
     
     meta_logistic = serializers.JSONField(default=dict)
     meta = serializers.JSONField(default=dict)
+    
+
+class ProductCategorySerializerUpdate(ProductCategorySerializer):
+    class Meta:
+        model = ProductCategory
+        exclude = ['user_subscription']    #exclude all foreign key
+        read_only_fields = ['created_at', 'updated_at']
     

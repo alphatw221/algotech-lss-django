@@ -253,12 +253,12 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
         campaign_product = lib.util.verify.Verify.get_campaign_product(pk)
         campaign = campaign_product.campaign
         lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign.id)
-
+        print(request.data)
         serializer = models.campaign.campaign_product.CampaignProductSerializerUpdate(
             campaign_product, data=request.data, partial=True)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        serializer.save()
+        campaign_product = serializer.save()
         serializer = models.campaign.campaign_product.CampaignProductSerializer(campaign_product)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
