@@ -144,6 +144,7 @@ class CartHelper():
 
                     pymongo_cart = database.lss.cart.Cart.get_object(id=cart_id,session=session)
                     campaign_product_data_dict={}
+
                     for campaign_product_id_str, qty in pymongo_cart.data.get('products',{}).copy().items():
                         campaign_product_data = database.lss.campaign_product.CampaignProduct.get(id=int(campaign_product_id_str), session=session)
                         campaign_product_data_dict[campaign_product_id_str]=campaign_product_data
@@ -204,28 +205,27 @@ class CartHelper():
 
 
 
-    @staticmethod
-    def __summarize_order(campaign:models.campaign.campaign.Campaign, pymongo_order:database.lss.order.Order, campaign_product_data_dict):
+    @classmethod
+    def __summarize_order(cls, campaign:models.campaign.campaign.Campaign, pymongo_order:database.lss.order.Order, campaign_product_data_dict):
 
         subtotal = 0
         shipping_cost = 0
         total = 0
         meta = {}
+
+        product_category_data_dict={}
+
         for campaign_prodcut_id_str, qty in pymongo_order.data.get('products',{}).items():
-            subtotal += campaign_product_data_dict.get(campaign_prodcut_id_str,{}).get('price',0)*qty
+            campaign_product_data = campaign_product_data_dict.get(campaign_prodcut_id_str,{})
 
-        #compute shipping_cost
-        if pymongo_order.data.get('shipping_method') == models.order.order.SHIPPING_METHOD_PICKUP:
-            shipping_cost = 0
-        else:
-            shipping_cost = float(campaign.meta_logistic.get('delivery_charge',0))
-
-            if(type(pymongo_order.data.get('shipping_option_index'))==int):
-                if pymongo_order.data.get('shipping_option_data',{}).get('type') == '+':
-                    shipping_cost += float(pymongo_order.data.get('shipping_option_data',{}).get('price',0)) 
-
-                elif pymongo_order.data.get('shipping_option_data',{}).get('type') == '=':
-                    shipping_cost =  float(pymongo_order.data.get('shipping_option_data',{}).get('price',0))
+            if len(campaign_product_data.get('categories',[])) == 1 and campaign_product_data.get('categories',[])[0] not in product_category_data_dict:
+                product_category_data = database.lss.product_category.ProductCategory.get(id=int(campaign_product_data.get('categories',[])[0]))
+                if product_category_data:
+                    product_category_data_dict[campaign_product_data.get('categories',[])[0]] = product_category_data
+            
+            subtotal += campaign_product_data.get('price',0)*qty
+        shipping_cost, category_logistic_applied = cls.__compute_shipping_cost(pymongo_order, product_category_data_dict)
+        
 
         #compute free_delivery
         meta_logistic = campaign.meta_logistic
@@ -254,6 +254,31 @@ class CartHelper():
             sync=True)
 
 
+    @classmethod 
+    def __compute_shipping_cost(cls, pymongo_order, product_category_data_dict:dict):
+        if pymongo_order.data.get('shipping_method') == models.order.order.SHIPPING_METHOD_PICKUP:
+            return 0, False
+
+        shipping_cost = 0
+        category_logistic_applied = False
+        for product_category_data in product_category_data_dict.values():
+            if product_category_data.get('meta_logistic',{}).get('enable_flat_rate')==True:
+                category_logistic_applied = True
+                shipping_cost+=product_category_data.get('meta_logistic').get('flat_rate',0)
+        
+        if category_logistic_applied:
+            return shipping_cost, True
+
+        shipping_cost = float(campaign.meta_logistic.get('delivery_charge',0))
+
+        if(type(pymongo_order.data.get('shipping_option_index'))==int):
+            if pymongo_order.data.get('shipping_option_data',{}).get('type') == '+':
+                shipping_cost += float(pymongo_order.data.get('shipping_option_data',{}).get('price',0)) 
+
+            elif pymongo_order.data.get('shipping_option_data',{}).get('type') == '=':
+                shipping_cost =  float(pymongo_order.data.get('shipping_option_data',{}).get('price',0))
+
+        return shipping_cost, False
 
     @classmethod
     def __check_stock_avaliable_and_add_to_cart_by_api(cls, campaign_product_data, qty_difference, attempts=10):

@@ -46,3 +46,4 @@ class ProductCategorySerializerUpdate(ProductCategorySerializer):
         exclude = ['user_subscription']    #exclude all foreign key
         read_only_fields = ['created_at', 'updated_at']
     
+api_product_category_template={f.get_attname():f.get_default() if f.has_default() else None for f in ProductCategory._meta.fields}
