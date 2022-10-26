@@ -52,18 +52,17 @@ class Cart(models.Model):
 
 
 class CartSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Cart
         fields = '__all__'
         read_only_fields = ['created_at', 'modified_at', 'campaign', 'buyer']
-    campaign = CampaignSerializer()
+    
     meta = serializers.JSONField(default=dict)
     seller_adjust = serializers.JSONField(default=dict)
     products = serializers.JSONField(default=dict)
     applied_discount = serializers.JSONField(default=dict)
 
-class CartSerializerWithUserSubscription(CartSerializer):
-    campaign = CampaignSerializerWithUserSubscription()
+class CartSerializerWithCampaign(CartSerializer):
+    campaign = CampaignSerializer()
     
 api_cart_template={f.get_attname():f.get_default() if f.has_default() else None for f in Cart._meta.fields}
