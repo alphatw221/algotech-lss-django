@@ -372,7 +372,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         current_connected_social_media = get_current_connected_socail_media(user_subscription)
         return Response({"binded_platform": current_connected_social_media}, status=status.HTTP_200_OK)
     
-    @action(detail=False, methods=['GET'], url_path=r'report_of_campaigns_in_period', permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['GET'], url_path=r'sales_report', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def report_of_campaigns_in_period(self, request):
         api_user, start_time, end_time = lib.util.getter.getparams(request, ('start_time', 'end_time'), seller=True)
