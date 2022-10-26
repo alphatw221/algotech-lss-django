@@ -3,6 +3,12 @@ import traceback
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 
+def send_comments_data(campaign_id, data):
+
+    try:
+        async_to_sync(get_channel_layer().group_send)(f"campaign_{campaign_id}", {"type": "comments_data","data":data})    
+    except Exception:
+        print(traceback.format_exc())
 
 def send_comment_data(campaign_id, data):
 

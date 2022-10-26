@@ -40,6 +40,9 @@ class CampaignLiveConsumer(WebsocketConsumer):
     def comment_data(self, event):
         self.send(text_data=json.dumps(event))
 
+    def comments_data(self, event):
+        self.send(text_data=json.dumps(event))
+
     def order_data(self, event):
         self.send(text_data=json.dumps(event))
 

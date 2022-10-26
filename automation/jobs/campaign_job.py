@@ -481,3 +481,95 @@ def refresh_youtube_channel_token(youtube_channel, logs):
     youtube_channel.update(token=refresh_token_response.get('access_token'),sync=False)
 
     return refresh_token_response.get('access_token')
+
+
+
+# @lib.error_handle.error_handler.capture_platform_error_handler.capture_platform_error_handler
+# def capture_facebook_v2(campaign, user_subscription_data, logs):
+#     logs.append(["facebook",""])
+#     if not campaign.data.get('facebook_page_id'):
+#         return
+#     facebook_page = database.lss.facebook_page.FacebookPage.get_object(id=campaign.data.get('facebook_page_id'))
+
+#     if not facebook_page:
+#         logs.append(["error","no facebook_page found"])
+#         return
+
+#     page_token = facebook_page.data.get('token')
+#     facebook_campaign = campaign.data.get('facebook_campaign',{})
+#     post_id = facebook_campaign.get('post_id', '')
+#     since = facebook_campaign.get('comment_capture_since', 1)
+
+#     if not page_token or not post_id:
+#         return
+    
+#     order_codes_mapping = OrderCodesMappingSingleton.get_mapping(campaign.id)
+    
+#     code, data = service.facebook.post.get_post_comments(page_token, post_id, since)
+#     logs.append(["post_id",post_id])
+#     logs.append(["since",since])
+#     logs.append(["code",code])
+
+#     if code // 100 != 2 :
+#         print(data)
+#         facebook_campaign['post_id'] = ''
+#         facebook_campaign['remark'] = f'Facebook API error: {data["error"]}'
+#         campaign.update(facebook_campaign=facebook_campaign, sync=False)
+#         return
+
+#     facebook_comments = data.get('data', [])
+
+#     if facebook_comments and int(facebook_comments[-1].get('created_time')) == since:
+#         logs.append(["number of comments",0])
+#         return
+
+#     facebook_campaign['comment_capture_since'] = int(facebook_comments[-1].get('created_time'))
+#     campaign.update(facebook_campaign=facebook_campaign, sync=False)
+
+#     logs.append(["number of comments", len(facebook_comments)])
+
+#     uni_format_comments = []
+#     comment_messages = []
+#     try:
+#         for comment in facebook_comments:
+#             logs.append(["message", comment.get('message')])
+
+#             if not comment.get('from',{}).get('id'):
+#                 logs.append(["error", "can't get user"])
+#                 continue
+
+#             if comment.get('from',{}).get('id') == facebook_page.data.get('page_id'):
+#                 continue
+
+#             uni_format_comment = {
+#                 'platform': 'facebook',
+#                 'id': comment['id'],
+#                 "campaign_id": campaign.id,
+#                 'message': comment['message'],
+#                 "created_time": comment['created_time'],
+#                 "customer_id": comment['from']['id'],
+#                 "customer_name": comment['from']['name'],
+#                 "image": comment['from']['picture']['data']['url'],
+#                 "categories":[],
+#                 }
+#             uni_format_comments.append(uni_format_comment)
+#             comment_messages.append(uni_format_comment.get('message'))
+
+
+#         comment_message_classes = service.nlp.classification.classify_comment_v2(texts=comment_messages)
+
+
+
+
+
+
+#             try:
+#                 database.lss.campaign_comment.CampaignComment.create(**uni_format_comment, auto_inc=False)
+#             except Exception: #duplicate key error might happen here
+#                 continue
+#             service.channels.campaign.send_comment_data(campaign.id, uni_format_comment)
+#             service.rq.queue.enqueue_comment_queue(jobs.comment_job_v2.comment_job, campaign.data, user_subscription_data, 'facebook', facebook_page.data, uni_format_comment, order_codes_mapping)
+#             comment_capture_since = comment['created_time']
+#     except Exception as e:
+#         print(traceback.format_exc())
+        
