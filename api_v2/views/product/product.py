@@ -32,8 +32,8 @@ class ProductViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'], url_path=r'search', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def search_product(self, request):
-        api_user, search_column, keyword, product_status, product_type, category, exclude_products, sort_by = \
-            lib.util.getter.getparams(request, ("search_column", "keyword", "product_status", "product_type", "category", "exclude", "sort_by"), with_user=True, seller=True)
+        api_user, search_column, keyword, product_status, product_type, category_id, exclude_products, sort_by = \
+            lib.util.getter.getparams(request, ("search_column", "keyword", "product_status", "product_type", "category_id", "exclude", "sort_by"), with_user=True, seller=True)
         
         user_subscription = \
             lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
@@ -45,8 +45,8 @@ class ProductViewSet(viewsets.ModelViewSet):
             kwargs[search_column + '__icontains'] = keyword
         if ( product_type in [models.product.product.TYPE_PRODUCT, models.product.product.TYPE_LUCY_DRAW]):
             kwargs['type'] = product_type
-        if category not in ['undefined', '', None]:
-            kwargs['tag__icontains'] = category 
+        if category_id not in ['undefined', '', None]:
+            kwargs['categories__icontains'] = category_id 
         
         if(sort_by in ['undefined', '', None]):
             queryset = user_subscription.products.filter(**kwargs).order_by("-updated_at")
@@ -87,34 +87,30 @@ class ProductViewSet(viewsets.ModelViewSet):
         image, = lib.util.getter.getdata(request,('image', ), required=False)
         data, = lib.util.getter.getdata(request,('data',),required=True)
         data = json.loads(data)
-        categories = data.get('tag', [])
 
-        rule.rule_checker.product_rule_checker.ProductCreateRuleChecker.check(product_data=data, image=image)
+        data['user_subscription'] = user_subscription.id
+        rule.rule_checker.product_rule_checker.RuleChecker.check(check_list=[
+            rule.check_rule.product_check_rule.ProductCheckRule.is_max_order_amount_less_than_qty,
+            rule.check_rule.product_check_rule.ProductCheckRule.is_images_type_supported,
+            rule.check_rule.product_check_rule.ProductCheckRule.is_images_exceed_max_size
+        ],product_data=data, image=image)
 
-        serializer=models.product.product.ProductSerializerCreate(data = data) 
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        product = serializer.save()
-        
         if image in ['null', None, '', 'undefined']:
             pass
         elif image =='._no_image':
-            product.image = settings.GOOGLE_STORAGE_STATIC_DIR+models.product.product.IMAGE_NULL
+            data['image'] = settings.GOOGLE_STORAGE_STATIC_DIR+models.product.product.IMAGE_NULL
         else:
             image_name = image.name.replace(" ","")
             image_dir = f'user_subscription/{user_subscription.id}/product/{product.id}'
             image_url = lib.util.storage.upload_image(image_dir, image_name, image)
-            product.image = image_url
-            
-        product.user_subscription = user_subscription
-        product.save()
+            data['image'] = image_url
 
-        product_categories = user_subscription.meta.get('product_categories', [])
-        for category in categories:
-            if category and category not in product_categories:    
-                product_categories.append(category)
-        user_subscription.meta['product_categories'] = product_categories
-        user_subscription.save()
+        serializer=models.product.product.ProductSerializer(data = data) 
+        if not serializer.is_valid():
+            print(data)
+            print(serializer.errors)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        product = serializer.save()
 
         return Response(models.product.product.ProductSerializer(product).data, status=status.HTTP_200_OK)
 
@@ -129,34 +125,28 @@ class ProductViewSet(viewsets.ModelViewSet):
         image, = lib.util.getter.getdata(request,('image', ), required=False)
         data, = lib.util.getter.getdata(request,('data',),required=True)
         data = json.loads(data)
-        categories = data.get('tag', [])
-        
-        rule.rule_checker.product_rule_checker.ProductUpdateRuleChecker.check(product_data=data, image=image)
+
+        rule.rule_checker.product_rule_checker.RuleChecker.check(check_list=[
+            rule.check_rule.product_check_rule.ProductCheckRule.is_max_order_amount_less_than_qty,
+            rule.check_rule.product_check_rule.ProductCheckRule.is_images_type_supported,
+            rule.check_rule.product_check_rule.ProductCheckRule.is_images_exceed_max_size
+        ],product_data=data, image=image)
+
+        if image in ['null', None, '', 'undefined']:
+            pass
+        elif image =='._no_image':
+            data['image'] = settings.GOOGLE_STORAGE_STATIC_DIR+models.product.product.IMAGE_NULL
+        elif image:
+            image_name = image.name.replace(" ","")
+            image_dir = f'user_subscription/{user_subscription.id}/product/{product.id}'
+            image_url = lib.util.storage.upload_image(image_dir, image_name, image)
+            data['image'] = image_url
 
         serializer=models.product.product.ProductSerializerUpdate(product, data=data, partial=True) 
         
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         product = serializer.save()
-        if image in ['null', None, '', 'undefined']:
-            pass
-        elif image =='._no_image':
-            product.image = settings.GOOGLE_STORAGE_STATIC_DIR+models.product.product.IMAGE_NULL
-        elif image:
-            
-            image_name = image.name.replace(" ","")
-            image_dir = f'user_subscription/{user_subscription.id}/product/{product.id}'
-            image_url = lib.util.storage.upload_image(image_dir, image_name, image)
-            product.image = image_url
-
-        product.save()
-
-        product_categories = user_subscription.meta.get('product_categories', [])
-        for category in categories:
-            if category and category not in product_categories:    
-                product_categories.append(category)
-        user_subscription.meta['product_categories'] = product_categories
-        user_subscription.save()
 
         return Response(models.product.product.ProductSerializer(product).data, status=status.HTTP_200_OK)
     
@@ -165,14 +155,20 @@ class ProductViewSet(viewsets.ModelViewSet):
     def bulk_update_product(self, request, pk=None):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
-        categories, product_status, stock_id_list = lib.util.getter.getdata(request,('categories', 'status', 'stockIdList'), required=False)
+        
+        categories, product_status, stock_id_list = lib.util.getter.getdata(request,('categories', 'status', 'stock_id_list'), required=False)
 
+        product_category_dict = {str(product_category.id):product_category for product_category in user_subscription.product_categories.all()}
         for stock_id in stock_id_list:
-            stock = models.product.product.Product.objects.get(id=stock_id)
-            stock.status = product_status
-            stock.tag = categories
-            stock.save()
-
+            try:
+                stock = models.product.product.Product.objects.get(id=stock_id)
+                if product_status in models.product.product.STATUS_CHOICES:
+                    stock.status = product_status 
+                if categories == [] or all(category in product_category_dict for category in categories):
+                    stock.categories = categories
+                stock.save()
+            except Exception:
+                continue
         return Response({'message': 'success'}, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['DELETE'], url_path=r'delete', permission_classes=(IsAuthenticated,))
@@ -200,94 +196,37 @@ class ProductViewSet(viewsets.ModelViewSet):
             price=product.price,
             image=product.image,
             status=product.status,
-            tag=product.tag            
+            categories = product.categories            
         )
+        data = models.product.product.ProductSerializer(copy_product).data
+        return Response(data, status=status.HTTP_200_OK)
 
-        return Response({"message": copy_product.id}, status=status.HTTP_200_OK)
-
-    @action(detail=False, methods=['GET'], url_path=r'categories', permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['GET'], url_path=r'(?P<product_id>[^/.]+)/wish_list/email/send', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def list_category(self, request):
-        api_user, = lib.util.getter.getparams(request, (), with_user=True, seller=True)
-        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
-
-        product_categories = user_subscription.meta.get('product_categories', [])
-        return Response(product_categories, status=status.HTTP_200_OK)
-    
-
-    @action(detail=False, methods=['POST'], url_path=r'category/create', permission_classes=(IsAuthenticated,))
-    @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def create_category(self, request):
-
-        api_user = lib.util.verify.Verify.get_seller_user(request)
-        category_name, = lib.util.getter.getdata(request, ('category_name',), required=True)
-        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
-        product_categories = user_subscription.meta.get('product_categories',[])
-        
-        if category_name in product_categories:
-            raise lib.error_handle.error.api_error.ApiVerifyError("category_already_exists")
-        product_categories.append(category_name)
-        user_subscription.meta['product_categories'] = product_categories
-        user_subscription.save()
-
-        return Response(product_categories, status=status.HTTP_200_OK)
-    
-
-    @action(detail=False, methods=['PUT'], url_path=r'category/update/(?P<category_name>[^/.]+)', permission_classes=(IsAuthenticated,))
-    @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def update_category(self, request, category_name):
-        
-        api_user = lib.util.verify.Verify.get_seller_user(request)
-        update_name, = lib.util.getter.getdata(request, ('category_name',), required=True)
-        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
-
-        if category_name in ['undefined', '', None] or update_name in ['undefined', '', None]:
-            raise lib.error_handle.error.api_error.ApiVerifyError("invalid_category_name")
-        
-        categories_list = user_subscription.meta.get('product_categories', [])
-
-        if category_name not in categories_list:
-            raise lib.error_handle.error.api_error.ApiVerifyError("category_not_exist")
-
-        categories_list = list(map(lambda x: x.replace(category_name, update_name), categories_list))            
-        user_subscription.meta['product_categories'] = categories_list
-        user_subscription.save()
-
-        query = models.product.product.Product.objects.filter(user_subscription=user_subscription, tag__contains=category_name)
-        for obj in query:
-            obj.tag = list(map(lambda x: x.replace(category_name, update_name), obj.tag))
-            obj.save()
-
-        return Response(categories_list, status=status.HTTP_200_OK)
-    
-
-    @action(detail=False, methods=['DELETE'], url_path=r'category/delete/(?P<category_name>[^/.]+)', permission_classes=(IsAuthenticated,))
-    @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def delete_category(self, request, category_name):
+    def send_email_to_buyer_in_wish_list(self, request, product_id):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        product = lib.util.verify.Verify.get_product_from_user_subscription(user_subscription, product_id)
 
-        if category_name in ['undefined', '', None] :
-            raise lib.error_handle.error.api_error.ApiVerifyError("invalid_category_name")
-
-        categories_list = user_subscription.meta.get('product_categories', [])
-
-        if category_name not in categories_list:
-            raise lib.error_handle.error.api_error.ApiVerifyError("category_not_exist")
+        for email, counter in product.meta.get('wish_list',{}).items():
+            title = ""
+            #send email or do something #TODO
+            # content = lib.helper.order_helper.OrderHelper.get_checkout_email_content(product,email)
+            # jobs.send_email_job.send_email_job(title, email, content=content)
+            jobs.send_email_job.send_email_job(
+                lib.i18n.email.notify_wishlist_email.i18n_get_notify_wishlist_subject(lang=api_user.lang),
+                email, 
+                'email_notify_wishlist.html', 
+                parameters={"product_name":product, "seller":api_user, "image_path":product.image}, 
+                lang=api_user.lang)
             
-        categories_list.remove(category_name)
-        user_subscription.meta['product_categories'] = categories_list
-        user_subscription.save()
+        
+        product.meta['wish_list'] = {} 
+        product.save()
+        
+        return Response("OK", status=status.HTTP_200_OK)
 
-        query = models.product.product.Product.objects.filter(user_subscription=user_subscription, tag__contains=category_name)
-        for obj in query:
-            obj.tag = [x for x in obj.tag if x != category_name]
-            obj.save()
-
-        return Response(categories_list, status=status.HTTP_200_OK)
-    
-
-    #-------for buyer------
+    #----------------------------------------------------------------for buyer-------------------------------------------------------------------------
     @action(detail=False, methods=['POST'], url_path=r'(?P<product_id>[^/.]+)/wish_list/add', permission_classes=(),  authentication_classes=[])
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def wish_list_add(self, request, product_id):
@@ -304,28 +243,4 @@ class ProductViewSet(viewsets.ModelViewSet):
         product.save()
         return Response(models.product.product.ProductSerializer(product).data, status=status.HTTP_200_OK)
     
-    @action(detail=False, methods=['GET'], url_path=r'(?P<product_id>[^/.]+)/wish_list/send/email', permission_classes=(IsAuthenticated,))
-    @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def wish_list_send_email(self, request, product_id):
-        api_user = lib.util.verify.Verify.get_seller_user(request)
-        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
-        product = lib.util.verify.Verify.get_product_from_user_subscription(user_subscription, product_id)
-        image_path = product.image
-
-        for email, counter in product.meta.get('wish_list',{}).items():
-            title = ""
-            #send email or do something #TODO
-            # content = lib.helper.order_helper.OrderHelper.get_checkout_email_content(product,email)
-            # jobs.send_email_job.send_email_job(title, email, content=content)
-            jobs.send_email_job.send_email_job(
-                lib.i18n.email.notify_wishlist_email.i18n_get_notify_wishlist_subject(lang=api_user.lang),
-                email, 
-                'email_notify_wishlist.html', 
-                parameters={"product_name":product, "seller":api_user, "image_path":image_path}, 
-                lang=api_user.lang)
-            
-        
-        product.meta['wish_list'] = {} 
-        product.save()
-        
-        return Response("OK", status=status.HTTP_200_OK)
+    

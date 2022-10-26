@@ -17,7 +17,7 @@ class Order(Collection):
 def get_complete_sales_of_campaign(campaign_id):
 
     cursor=__collection.aggregate([
-        {"$match":{"campaign_id":campaign_id,"status":{"$in":["complete", "shipping out"]} }},
+        {"$match":{"campaign_id":campaign_id,"status":models.order.order.STATUS_COMPLETE }},
         {
             "$group":
                 {

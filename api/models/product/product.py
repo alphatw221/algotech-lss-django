@@ -21,6 +21,7 @@ IMAGE_MAXIMUM_SIZE = 10*1024*1024
 
 STATUS_ENABLED = 'enabled'
 STATUS_DISABLED = 'disabled'
+STATUS_CHOICES=[STATUS_ENABLED, STATUS_DISABLED]
 class Product(models.Model):
     STATUS_CHOICES = [
         ('enabled', 'Enabled'),
@@ -80,27 +81,9 @@ class Product(models.Model):
     meta = models.JSONField(default=dict, null=True, blank=True)
     meta_logistic = models.JSONField(default=dict, null=True, blank=True)
     tag = models.JSONField(default=list, null=True, blank=True)
-
+    categories = models.JSONField(default=list, null=True, blank=True)
     def __str__(self):
         return self.name
-
-
-
-class ProductSerializerCreate(serializers.ModelSerializer):
-
-    class Meta:
-        model = Product
-        exclude=['user_subscription', 'created_by', 'category', 'image']
-        read_only_fields = ['created_at', 'updated_at']
-
-
-
-class ProductSerializerUpdate(serializers.ModelSerializer):
-
-    class Meta:
-        model = Product
-        exclude=['user_subscription', 'created_by', 'category', 'image']
-        read_only_fields = ['created_at', 'updated_at']
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -110,19 +93,25 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['created_at', 'updated_at']
 
-    # user_subscription = UserSubscriptionSerializer(read_only=True)
-    # created_by = UserSerializer(read_only=True)    //check if this line of code is necessary
-
     meta = serializers.JSONField(default=dict)
     meta_logistic = serializers.JSONField(default=dict)
     tag = serializers.JSONField(default=dict)
+    categories = serializers.JSONField(default=list)
+
+
+class ProductSerializerUpdate(ProductSerializer):
+
+    class Meta:
+        model = Product
+        exclude=['user_subscription', 'created_by']
+        read_only_fields = ['created_at', 'updated_at']
 
 
 class ProductSerializerDropdown(ProductSerializer):
     class Meta:
         model = Product
         fields = ['id', 'name', 'image', 'order_code']
-        read_only_fields = ['created_at', 'modified_at']
+        read_only_fields = ['created_at', 'updated_at']
 
 
 class ProductAdmin(admin.ModelAdmin):

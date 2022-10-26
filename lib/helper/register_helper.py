@@ -27,7 +27,7 @@ def create_account_with_user_register(user_register):
 
     user_subscription = models.user.user_subscription.UserSubscription.objects.create(
         name=user_register.name, 
-        status=models.user.user_subscription.STATUS_VALID, 
+        status=models.user.user_subscription.STATUS_TEST, 
         started_at=now,
         expired_at=expired_at, 
         user_plan= {"activated_platform" : [models.user.user_subscription.PLATFORM_FACEBOOK,models.user.user_subscription.PLATFORM_YOUTUBE,models.user.user_subscription.PLATFORM_INSTAGRAM]}, 
@@ -194,7 +194,7 @@ def create_new_account_for_james(country_code, usbscription_plan, username, emai
     else:
         user_subscription = models.user.user_subscription.UserSubscription.objects.create(
             name=username, 
-            status=models.user.user_subscription.STATUS_VALID, 
+            status=models.user.user_subscription.STATUS_TEST, 
             started_at=signup_date,
             expired_at=expired_at, 
             user_plan= {"activated_platform" : [

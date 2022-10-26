@@ -1,3 +1,4 @@
+from api import models
 import lib
 from backend.pymongo.mongodb import db
 from django.conf import settings
@@ -18,6 +19,8 @@ class UserSubscriptionCheckRule():
     def max_concurrent_live(**kwargs):
 
         user_subscription = kwargs.get('user_subscription')
+        if user_subscription.status == models.user.user_subscription.STATUS_TEST:
+            return 
         now = arrow.utcnow().datetime
         live_count = user_subscription.campaigns.filter(start_at__lte=now, end_at__gte=now).count()
         if not user_subscription.campaign_live_limit:
@@ -29,6 +32,8 @@ class UserSubscriptionCheckRule():
     def campaign_limit(**kwargs):
 
         user_subscription = kwargs.get('user_subscription')
+        if user_subscription.status == models.user.user_subscription.STATUS_TEST:
+            return 
         campaigns_count = user_subscription.campaigns.filter(created_at__gte=user_subscription.started_at).count() 
         if not user_subscription.campaign_limit:
             return

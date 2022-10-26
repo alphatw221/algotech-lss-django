@@ -67,7 +67,7 @@ class Command(BaseCommand):
                 return
 
 
-    @lib.util.timeloop.time_loop(10)
+    @lib.util.timeloop.time_loop(5)
     def leader_loop(self):
         # print('i am leader')
         if self.__new_leader_exist():
@@ -95,7 +95,7 @@ class Command(BaseCommand):
             rows.append([campaign.id, job_status])
             if job_status == 'queued':
                 count = service.redis.redis.get_count(campaign.id)
-                if count >5:
+                if count >10:
                     job.delete()
                     service.redis.redis.delete(campaign.id)
                 else:

@@ -74,6 +74,7 @@ def bind_facebook_pages(request, user_subscription):
 
         if facebook_page not in user_subscription.facebook_pages.all():
             user_subscription.facebook_pages.add(facebook_page)
+            service.facebook.page.subscribe_webhook(page_token, page_id)
 
 def bind_instagram_profiles(request, user_subscription):
     

@@ -42,6 +42,8 @@ PLATFORM_ATTR={
 
 STATUS_VALID='valid'
 STATUS_INVALID='invalid'
+STATUS_TEST='test'
+STATUS_PRODUCTION='production'
 class UserSubscription(models.Model):
 
     class Meta:
@@ -64,7 +66,7 @@ class UserSubscription(models.Model):
 
     type = models.CharField(max_length=255, null=True, blank=True, 
         choices=business_policy.subscription.TYPE_CHOICES, default=business_policy.subscription.TYPE_TRIAL)
-    status = models.CharField(max_length=255, null=True, blank=True)
+    status = models.CharField(max_length=255, default="test")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -119,14 +121,14 @@ class UserSubscriptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserSubscription
         fields = '__all__'
-        read_only_fields = ['created_at', 'modified_at']
+        read_only_fields = ['created_at', 'updated_at','facebook_pages','instagram_profiles','youtube_channels']
 
-    facebook_pages = FacebookPageInfoSerializer(
-        many=True, read_only=True, default=list)
-    instagram_profiles = InstagramProfileInfoSerializer(
-        many=True, read_only=True, default=list)
-    youtube_channels = YoutubeChannelInfoSerializer(
-        many=True, read_only=True, default=list)
+    # facebook_pages = FacebookPageInfoSerializer(
+    #     many=True, read_only=True, default=list)
+    # instagram_profiles = InstagramProfileInfoSerializer(
+    #     many=True, read_only=True, default=list)
+    # youtube_channels = YoutubeChannelInfoSerializer(
+    #     many=True, read_only=True, default=list)
 
     meta = serializers.JSONField(default=dict, required=False)
     meta_payment = serializers.JSONField(default=dict, required=False)
@@ -188,7 +190,7 @@ class UserSubscriptionSerializerUpgrade(serializers.ModelSerializer):
 class UserSubscriptionSerializerUpdate(serializers.ModelSerializer):
     class Meta:
         model = UserSubscription
-        fields = ['currency','lang','buyer_lang','decimal_places']
+        fields = ['currency','lang','buyer_lang','decimal_places', 'status']
 
 
 class UserSubscriptionSerializerSimplify(serializers.ModelSerializer):

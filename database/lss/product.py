@@ -19,3 +19,12 @@ class Product(Collection):
         self._collection.update_one({'id':self.id},{"$inc": {'qty': qty},"$set":{'updated_at':datetime.utcnow()}}, session=session)
         if sync:
             self._sync(session=session)
+
+def remove_categories(user_subscription_id, product_category_id, session=None):
+    __collection.update_many(
+        {
+            "user_subscription_id":user_subscription_id,
+            "categories":str(product_category_id)
+        },
+        {"$pull":{"categories":str(product_category_id)}}, 
+        session=session)

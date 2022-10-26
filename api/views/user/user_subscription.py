@@ -919,30 +919,5 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         return Response(ret, status=status.HTTP_200_OK)
     
     
-    @action(detail=False, methods=['get'], url_path=r'check_activated_platform')
-    @api_error_handler
-    def check_activated_platform(self, request):
-        def get_current_connected_socail_media(user_subscription):
-            platform = []
-            if user_subscription.facebook_pages.all().exists():
-                platform.append("facebook")
-            if user_subscription.instagram_profiles.all().exists():
-                platform.append("instagram")
-            if user_subscription.youtube_channels.all().exists():
-                platform.append("youtube")
-            if user_subscription.twitch_channels.all().exists():
-                platform.append("twitch")
-            return platform
-        api_user = Verify.get_seller_user(request)    
-        user_subscription = Verify.get_user_subscription_from_api_user(api_user)
-        user_plan = user_subscription.user_plan
-        activated_platform = user_plan.get("activated_platform", [])
-        type = user_subscription.type
-
-        social_meida_connect_limit = globals()[type]['social_meida_connect']
-        current_connected_social_media = get_current_connected_socail_media(user_subscription)
-        if social_meida_connect_limit == len(current_connected_social_media):
-            return Response({"can_bind": False, "activated_platform_amount": len(current_connected_social_media)}, status=status.HTTP_200_OK)
-        return Response({"can_bind": True, "activated_platform_amount": 3}, status=status.HTTP_200_OK)
     
     

@@ -191,11 +191,11 @@ class OrderReport(XlsxHelper):
         cls._next_row()
         cls._reset_column()
 
-        orders = campaign.orders.order_by('status').all()
-        pre_orders = campaign.pre_orders.exclude(products__in={}).all()
+        # orders = campaign.orders.order_by('status').all()
+        # # pre_orders = campaign.pre_orders.exclude(products__in={}).all()
 
-        all_orders = list(orders)+list(pre_orders)
-        for order in all_orders:
+        # all_orders = list(orders)+list(pre_orders)
+        for order in campaign.orders.order_by('status').all():
             for column in cls.columns:
                 if column.field_name == 'total':
                     worksheet.write(cls.row, cls.col, column.mapping(order, campaign.decimal_places))    
@@ -203,8 +203,9 @@ class OrderReport(XlsxHelper):
                     worksheet.write(cls.row, cls.col, column.mapping(order))
                 cls._next_column()
 
-            for campaing_product_id_str, order_product in order.products.items():
-                worksheet.write(cls.row, product_column_dict[campaing_product_id_str], order_product.get('qty', 0))
+            for campaing_product_id_str, qty in order.products.items():
+                print(qty)
+                worksheet.write(cls.row, product_column_dict[campaing_product_id_str], qty)
             cls._next_row()
             cls._reset_column()
         cls._reset_row()

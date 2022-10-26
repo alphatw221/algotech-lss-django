@@ -20,18 +20,20 @@ DATABASES = {
 }
 
 MONGODB_CONNECTION_STRING = 'mongodb://admin:social=lab$2022%%@13.215.51.14:27017,18.142.57.3:27017'
-WEB_SERVER_URL = "https://plusone.sociallab.ph"
+WEB_SERVER_URL = "https://plusoneapp.sociallab.ph"
 # GCP_API_LOADBALANCER_URL = "https://sb.liveshowseller.ph"
-GCP_API_LOADBALANCER_URL = "https://plusone.sociallab.ph"
-SHOPPING_CART_URL = f"{WEB_SERVER_URL}/buyer/cart"
+GCP_API_LOADBALANCER_URL = "https://plusoneapp.sociallab.ph"
+SHOPPING_CART_URL = f"{GCP_API_LOADBALANCER_URL}/buyer/cart"
 REDIS_SERVER = {
     "host": "52.76.83.75",
+    # "host": "127.0.0.1",
     "port": "6379",
     "username": None,
     "password": r"1234"
 }
 CHANNEL_LAYERS = {
     'default': {
+        # 'BACKEND': 'channels.layers.InMemoryChannelLayer',
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': 
         {
@@ -67,4 +69,4 @@ WORDPRESS_WEBHOOK_SECRET = '}:`o1k$UoF767:RQO^+mW(9D7!O*Hst*?#<X&bLOINz[ro#F6k'
 
 # template global value
 LOGO_URL = GOOGLE_STORAGE_STATIC_DIR + "LSSlogo-300-172.png"
-NOTIFICATION_EMAIL = 'lss@algotech.app'
+NOTIFICATION_EMAIL = 'support@sociallab.ph'

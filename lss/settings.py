@@ -17,6 +17,8 @@ from pathlib import Path
 from google.oauth2 import service_account
 from corsheaders.defaults import default_headers
 import config
+import urllib 
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -206,7 +208,7 @@ DATABASES = {
     # }
 }
 MONGODB_CONNECTION_STRING = \
-    'mongodb://'+config.MONGO_DB_USERNAME+':'+config.MONGO_DB_PASSWORD+\
+    'mongodb://'+config.MONGO_DB_USERNAME+':'+urllib.parse.quote_plus(config.MONGO_DB_PASSWORD)+\
     '@34.126.92.142:27017,35.240.200.4:27017,34.126.155.150:27017/'+\
     '?authSource='+config.MONGO_DB_DATABASE_NAME
     
@@ -326,8 +328,13 @@ HITPAY_SECRET_SALT = '9ntt8RQoPtP9NXlO36aZTpP5wK10vFWbsw45KjaBGNzfYiU75cUJ3LLCEq
 PAYMONGO_SECRET_KEY = 'sk_test_kXkD4NBMYZixy8dJ8GV6br4u'
 PAYMONGO_API_URL = 'https://api.paymongo.com'
 
+# Rapyd
+RAPYD_ACCESS_KEY="6C1EC9E97851F0675225" # for test
+RAPYD_SECRET_KEY="117af5b965d9f0bf7b9aa9b80b3c7c7f6275d4710861478943312241ba7486f5ec87445b9503d8b6" # for test
+BASERAPYDAPIURL="https://sandboxapi.rapyd.net" # sand box
+
 #NLP
-NLP_COMPUTING_MACHINE_URL = "http://192.168.74.105:8501"
+NLP_COMPUTING_MACHINE_URL = "http://127.0.0.1:8501"
 
 # Facebook
 FACEBOOK_API_URL = "https://graph.facebook.com"

@@ -139,6 +139,11 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         campaignData, = lib.util.getter.getdata(request, ('data',), required=True)
         campaignData = json.loads(campaignData)
+        
+        end_at = campaignData['end_at']
+        ret = rule.rule_checker.user_subscription_rule_checker.UpdateCampaignRuleChecker.check(**{
+            'api_user': api_user, 'user_subscription': user_subscription, 'end_at': end_at
+        })
 
         serializer = models.campaign.campaign.CampaignSerializerUpdate(campaign, data=campaignData, partial=True)
         if not serializer.is_valid():
@@ -175,12 +180,12 @@ class CampaignViewSet(viewsets.ModelViewSet):
         return Response(models.campaign.campaign.CampaignSerializer(campaign).data, status=status.HTTP_200_OK)
 
     
-    @action(detail=False, methods=['GET'], url_path=r'retrieve', permission_classes=(IsAuthenticated, ))
+    @action(detail=True, methods=['GET'], url_path=r'retrieve', permission_classes=(IsAuthenticated, ))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def retrieve_campaign(self, request):
-        api_user, campaign_id = lib.util.getter.getparams(request,("campaign_id", ), with_user=True, seller=True)
+    def retrieve_campaign(self, request, pk):
+        api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
-        campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
+        campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, pk)
 
         return Response(models.campaign.campaign.CampaignSerializer(campaign).data, status=status.HTTP_200_OK)
     
@@ -428,20 +433,22 @@ class CampaignViewSet(viewsets.ModelViewSet):
         save_to_stock, name, order_code, price, qty = lib.util.getter.getdata(request,("save_to_stock", "name", "order_code", "price", "qty"), required=True)
         
         category, = lib.util.getter.getdata(request,("category",), required=False)
-        if category in ["", "null", None, 'undefined']:
-            category = []
-        else:
-            category = [category]
+        
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, pk)
         
+        if user_subscription.product_categories.filter(id=int(category)).exists():
+            category = [category]
+        else:
+            category = []
+
         product=None
         
         if save_to_stock:
-            product = models.product.product.Product.objects.create(user_subscription=user_subscription, created_by=api_user, name=name, order_code=order_code, tag=category, price=price, qty=0, type=models.product.product.TYPE_PRODUCT)
+            product = models.product.product.Product.objects.create(user_subscription=user_subscription, created_by=api_user, name=name, order_code=order_code, categories=category, price=price, qty=0, type=models.product.product.TYPE_PRODUCT, image=settings.GOOGLE_STORAGE_STATIC_DIR+models.product.product.IMAGE_NULL)
 
-        campaign_product = models.campaign.campaign_product.CampaignProduct.objects.create(campaign=campaign, created_by=api_user, product=product, status=True, type=models.product.product.TYPE_PRODUCT, name=name, order_code=order_code, price=float(price), qty_for_sale=int(qty), image=models.campaign.campaign_product.IMAGE_NULL)
+        campaign_product = models.campaign.campaign_product.CampaignProduct.objects.create(campaign=campaign, created_by=api_user, product=product, status=True, categories=category, type=models.product.product.TYPE_PRODUCT, name=name, order_code=order_code, price=float(price), qty_for_sale=int(qty), image=settings.GOOGLE_STORAGE_STATIC_DIR+models.campaign.campaign_product.IMAGE_NULL)
 
         return Response(models.campaign.campaign_product.CampaignProductSerializer(campaign_product).data, status=status.HTTP_200_OK)
 
@@ -480,36 +487,34 @@ class CampaignViewSet(viewsets.ModelViewSet):
         lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, pk)
         campaign_id = int(pk)
 
-
-        campaign_pre_order_count = database.lss.pre_order.get_count_in_campaign(campaign_id)
-
-        campaign_order_complete_count,campaign_order_proceed_count = database.lss.campaign.get_order_complete_proceed_count(campaign_id)
+        campaign_cart_count = database.lss.cart.get_count_in_campaign(campaign_id)
+        campaign_order_complete_count,campaign_order_proceed_count = database.lss.campaign.get_order_complete_proceed_count(campaign_id) 
         campaign_comment_count = database.lss.campaign_comment.get_count_in_campaign(campaign_id)
         
         campaign_complete_sales = database.lss.order.get_complete_sales_of_campaign(campaign_id)
 
 
-        campaign_uncheckout_rate = (campaign_pre_order_count+campaign_order_proceed_count) / (campaign_order_complete_count + campaign_order_proceed_count + campaign_pre_order_count) * 100\
-                if (campaign_order_complete_count + campaign_order_proceed_count + campaign_pre_order_count) else 0
+        campaign_uncheckout_rate = (campaign_cart_count) / (campaign_order_complete_count + campaign_order_proceed_count + campaign_cart_count) * 100\
+                if (campaign_order_complete_count + campaign_order_proceed_count + campaign_cart_count) else 0
 
-        campaign_close_rate = (campaign_order_complete_count) / (campaign_order_complete_count + campaign_order_proceed_count + campaign_pre_order_count) * 100\
-                if (campaign_order_complete_count + campaign_order_proceed_count + campaign_pre_order_count) else 0
+        campaign_close_rate = (campaign_order_complete_count) / (campaign_order_complete_count + campaign_order_proceed_count + campaign_cart_count) * 100\
+                if (campaign_order_complete_count + campaign_order_proceed_count + campaign_cart_count) else 0
 
         
         total_order_complete_count, total_order_proceed_count = database.lss.user_subscription.get_order_complete_proceed_count(user_subscription.id)
-        total_pre_order_count = database.lss.user_subscription.get_pre_order_count(user_subscription.id)
+        total_cart_count = database.lss.user_subscription.get_cart_count(user_subscription.id)
 
         total_average_sales = database.lss.user_subscription.get_average_sales(user_subscription.id)
         total_average_comment_count = database.lss.user_subscription.get_average_comment_count(user_subscription.id)
 
-        average_order_uncheck_rate = total_pre_order_count / (total_order_complete_count + total_order_proceed_count + total_pre_order_count) * 100 \
-            if (total_order_complete_count + total_order_proceed_count + total_pre_order_count) else 0
-        average_order_close_rate = (total_order_complete_count + total_order_proceed_count) / (total_order_complete_count + total_order_proceed_count + total_pre_order_count) * 100 \
-            if (total_order_complete_count + total_order_proceed_count + total_pre_order_count) else 0
+        average_order_uncheck_rate = total_cart_count / (total_order_complete_count + total_order_proceed_count + total_cart_count) * 100 \
+            if (total_order_complete_count + total_order_proceed_count + total_cart_count) else 0
+        average_order_close_rate = (total_order_complete_count + total_order_proceed_count) / (total_order_complete_count + total_order_proceed_count + total_cart_count) * 100 \
+            if (total_order_complete_count + total_order_proceed_count + total_cart_count) else 0
 
         manage_order = {
             "order_qty":(campaign_order_complete_count + campaign_order_proceed_count),
-            "cart_qty":campaign_pre_order_count,
+            "cart_qty":campaign_cart_count,
 
             "comment_count":campaign_comment_count,
             "complete_sales":campaign_complete_sales,

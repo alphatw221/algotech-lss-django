@@ -42,7 +42,9 @@ class CampaignProduct(models.Model):
         blank=False, null=False, default=False)
     overbook = models.BooleanField(
         blank=False, null=False, default=True)
-
+    active = models.BooleanField(blank=False, null=False, default=True)
+    allow_add_on = models.BooleanField(blank=False, null=False, default=True)
+    
     name = models.CharField(max_length=255, null=True,
                             blank=True, default=None)
     excerpt = models.TextField(null=True, blank=True, default=None)
@@ -86,6 +88,7 @@ class CampaignProduct(models.Model):
     meta = models.JSONField(default=dict, null=True, blank=True)
     meta_logistic = models.JSONField(default=dict, null=True, blank=True)
     tag = models.JSONField(default=dict, null=True, blank=True)
+    categories = models.JSONField(default=list, null=True, blank=True)
 
 
 class CampaignProductSerializer(serializers.ModelSerializer):
@@ -98,7 +101,7 @@ class CampaignProductSerializer(serializers.ModelSerializer):
     meta = serializers.JSONField(default=dict)
     meta_logistic = serializers.JSONField(default=dict)
     tag = serializers.JSONField(default=list)
-
+    categories = serializers.JSONField(default=list)
 
 class CampaignProductSerializerAssign(serializers.ModelSerializer):
     class Meta:
@@ -133,7 +136,8 @@ class CampaignProductSerializerUpdate(CampaignProductSerializer):
             'type', 
             'order_code', 
             'oversell', 
-            'overbook'
+            'overbook',
+            'categories'
         ]
 
 

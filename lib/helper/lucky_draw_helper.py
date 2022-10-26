@@ -11,21 +11,7 @@ import random
 import lib
 from api import models
 from collections import OrderedDict
-import json
-import arrow
-from selenium import webdriver
-from selenium.webdriver.chrome.webdriver import WebDriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver import ActionChains, Keys
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.color import Color
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import NoSuchElementException
-
-
+from django.db.models import Q, Value
 
 class LuckyDrawCandidate():
 
@@ -176,15 +162,28 @@ class ProductCandidateSetGenerator(CandidateSetGenerator):
         winner_list = campaign.meta.get('winner_list',[])
         candidate_set = set()
 
-        order_products = models.order.order_product.OrderProduct.objects.filter(campaign=campaign, campaign_product=lucky_draw.campaign_product, platform__isnull=False)
-        for order_product in order_products:
-            img_url = models.order.pre_order.PreOrder.objects.get(customer_id=order_product.customer_id, campaign=campaign.id).customer_img
+        orders = models.order.order.Order.objects.filter(campaign=campaign, platform__isnull=False, products__has_key=str(lucky_draw.campaign_product.id))
+        carts = models.cart.cart.Cart.objects.filter(campaign=campaign, platform__isnull=False, products__has_key=str(lucky_draw.campaign_product.id))
+        for order in orders:
             candidate = LuckyDrawCandidate(
+                platform=order.platform, 
+                customer_id=order.customer_id, 
+                customer_name=order.customer_name,
+                customer_image=order.customer_img,
+                draw_type=lucky_draw.type,
+                prize=lucky_draw.prize.name)
 
-                platform=order_product.platform, 
-                customer_id=order_product.customer_id, 
-                customer_name=order_product.customer_name,
-                customer_image=img_url,
+            if not lucky_draw.repeatable and candidate in winner_list:
+                continue
+
+            candidate_set.add(candidate)
+        
+        for cart in carts:
+            candidate = LuckyDrawCandidate(
+                platform=cart.platform, 
+                customer_id=cart.customer_id, 
+                customer_name=cart.customer_name,
+                customer_image=cart.customer_img,
                 draw_type=lucky_draw.type,
                 prize=lucky_draw.prize.name)
 
@@ -205,7 +204,8 @@ class PurchaseCandidateSetGenerator(CandidateSetGenerator):
         candidate_set = set()
 
         orders = models.order.order.Order.objects.filter(campaign=campaign, platform__isnull=False)
-        pre_orders = models.order.pre_order.PreOrder.objects.filter(campaign=campaign,subtotal__gt=0, platform__isnull=False)
+        carts = models.cart.cart.Cart.objects.filter(campaign=campaign, platform__isnull=False).exclude(products=Value('null'))
+
         for order in orders:
             candidate = LuckyDrawCandidate(
                 platform=order.platform, 
@@ -220,12 +220,12 @@ class PurchaseCandidateSetGenerator(CandidateSetGenerator):
 
             candidate_set.add(candidate)
         
-        for pre_order in pre_orders:
+        for cart in carts:
             candidate = LuckyDrawCandidate(
-                platform=pre_order.platform, 
-                customer_id=pre_order.customer_id, 
-                customer_name=pre_order.customer_name,
-                customer_image=pre_order.customer_img,
+                platform=cart.platform, 
+                customer_id=cart.customer_id, 
+                customer_name=cart.customer_name,
+                customer_image=cart.customer_img,
                 draw_type=lucky_draw.type,
                 prize=lucky_draw.prize.name)
 
@@ -233,7 +233,7 @@ class PurchaseCandidateSetGenerator(CandidateSetGenerator):
                 continue
 
             candidate_set.add(candidate)
-
+        print(candidate_set)
         return candidate_set
 
 class SharedPostCandidateSetGenerator(CandidateSetGenerator):
@@ -390,7 +390,10 @@ class LuckyDraw():
 
                 winner_list.append(winner_dict)
             except Exception:
+                import traceback
                 print(traceback.format_exc())
+                pass
+            
         campaign.meta['winner_list']=campaign_winner_list
         campaign.save()
 
@@ -403,9 +406,9 @@ class LuckyDraw():
         winner:LuckyDrawCandidate, 
         campaign_product:models.campaign.campaign_product.CampaignProduct ):
 
-            if models.order.pre_order.PreOrder.objects.filter(
+            if models.cart.cart.Cart.objects.filter(
                 campaign=campaign, platform=winner.platform, customer_id=winner.customer_id, customer_name=winner.customer_name).exists():
-                pre_order = models.order.pre_order.PreOrder.objects.get(
+                cart = models.cart.cart.Cart.objects.get(
                     campaign=campaign, platform=winner.platform, customer_id=winner.customer_id, customer_name=winner.customer_name)
             else:
                 platform_id_dict = {
@@ -413,7 +416,7 @@ class LuckyDraw():
                     'youtube': campaign.youtube_channel.id if campaign.youtube_channel else None,
                     'instagram': campaign.instagram_profile.id if campaign.instagram_profile else None
                 }
-                pre_order = models.order.pre_order.PreOrder.objects.create(
+                cart = models.cart.cart.Cart.objects.create(
                     customer_id=winner.customer_id, 
                     customer_name=winner.customer_name, 
                     customer_img=winner.customer_image, 
@@ -422,12 +425,17 @@ class LuckyDraw():
                     platform_id=platform_id_dict.get(winner.platform))
 
 
-            if prize_product := pre_order.products.get(str(campaign_product.id), None):
-                qty = prize_product['qty'] + 1
-                lib.helper.order_helper.PreOrderHelper.update_product(api_user=None, pre_order_id=pre_order.id, 
-                    order_product_id=prize_product.get('order_product_id'),qty=qty)
-            else:
-                lib.helper.order_helper.PreOrderHelper.add_product(api_user=None, pre_order_id=pre_order.id, campaign_product_id=campaign_product.id,qty=1)
+            if  str(campaign_product.id) in cart.products:
+                qty = cart.products.get(str(campaign_product.id),0)+1
+            else :
+                qty = 1
+            lib.helper.cart_helper.CartHelper.update_cart_product(api_user=None, cart=cart, campaign_product=campaign_product, qty=qty)
+            # if prize_product := pre_order.products.get(str(campaign_product.id), None):
+            #     qty = prize_product['qty'] + 1
+            #     lib.helper.order_helper.PreOrderHelper.update_product(api_user=None, pre_order_id=pre_order.id, 
+            #         order_product_id=prize_product.get('order_product_id'),qty=qty)
+            # else:
+            #     lib.helper.order_helper.PreOrderHelper.add_product(api_user=None, pre_order_id=pre_order.id, campaign_product_id=campaign_product.id,qty=1)
             
     
 

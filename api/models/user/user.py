@@ -88,7 +88,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserSerializerAccountInfo(UserSerializer):
-    user_subscription = UserSubscriptionSerializerAccountInfo(read_only=True, default=list)
+    user_subscription = UserSubscriptionSerializerAccountInfo(read_only=True, default=dict)
 
 class UserSerializerForDealerList(serializers.ModelSerializer):
     class Meta:

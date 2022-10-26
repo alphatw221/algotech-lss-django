@@ -37,19 +37,27 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'], url_path=r'buyer/list', permission_classes=())
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def buyer_list(self, request):
-        pre_order_oid = request.query_params.get('pre_order_oid')
-        pre_order = lib.util.verify.Verify.get_pre_order_with_oid(pre_order_oid)
-        campaign_products = pre_order.campaign.products.filter(Q(type='product') | Q(type="product-fast"))
+
+        cart_oid, type = lib.util.getter.getparams(request, ('cart_oid','type'), with_user=False)
+        # pre_order = lib.util.verify.Verify.get_pre_order_with_oid(pre_order_oid)
+        cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
+        queryset = cart.campaign.products.all()
+        if type == models.campaign.campaign_product.TYPE_PRODUCT:
+            queryset = queryset.filter(type=models.campaign.campaign_product.TYPE_PRODUCT)
+        elif type == models.campaign.campaign_product.TYPE_LUCKY_DRAW:
+            queryset = queryset.filter(type=models.campaign.campaign_product.TYPE_LUCKY_DRAW)
+
+        # campaign_products = pre_order.campaign.products.filter(Q(type='product') | Q(type="product-fast"))
         
-        return Response(models.campaign.campaign_product.CampaignProductSerializer(campaign_products, many=True).data, status=status.HTTP_200_OK)
+        return Response(models.campaign.campaign_product.CampaignProductSerializer(queryset, many=True).data, status=status.HTTP_200_OK)
     
-    @action(detail=False, methods=['GET'], url_path=r'buyer/cart/list', permission_classes=())
-    @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def buyer_prodcut_list(self, request):
-        pre_order_oid = request.query_params.get('pre_order_oid')
-        pre_order = lib.util.verify.Verify.get_pre_order_with_oid(pre_order_oid)
+    # @action(detail=False, methods=['GET'], url_path=r'buyer/cart/list', permission_classes=())
+    # @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    # def buyer_prodcut_list(self, request):
+    #     pre_order_oid = request.query_params.get('pre_order_oid')
+    #     pre_order = lib.util.verify.Verify.get_pre_order_with_oid(pre_order_oid)
         
-        return Response(models.campaign.campaign_product.CampaignProductSerializer(pre_order.campaign.products, many=True).data, status=status.HTTP_200_OK)
+    #     return Response(models.campaign.campaign_product.CampaignProductSerializer(pre_order.campaign.products, many=True).data, status=status.HTTP_200_OK)
 
 
 #----------------------------------------------seller--------------------------------------------------
@@ -151,16 +159,17 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
                                 order_code=str(request_data.get('order_code', '')), 
                                 qty_for_sale=qty_for_sale, 
                                 max_order_amount=int(request_data.get('max_order_amount')) if request_data.get('max_order_amount') else 0, 
-                                price=float(request_data.get('price', 0)) if request_data.get('price') else 0, 
+                                price=float(request_data.get('price', 0)) if request_data.get('type')==models.product.product.TYPE_PRODUCT else 0, 
                                 customer_editable=bool(request_data.get('customer_editable', True)), 
                                 customer_removable=bool(request_data.get('customer_removable', True)),
                                 oversell = bool(request_data.get('oversell', False)),
-                                overbook = bool(request_data.get('overbook', True)),
+                                overbook = bool(request_data.get('overbook', False)),
                                 tag=list(request_data.get('tag',[])),
                                 type=str(request_data.get('type',models.product.product.TYPE_PRODUCT)),
                                 description = request_data.get('description',''),
                                 product_id = int(request_data.get('id')) if request_data.get('id') else None,
                                 campaign_id=campaign.id,
+                                categories = list(request_data.get('categories',[])),
                                 meta = api_product.data.get('meta',{}),      
                                 session=session)
 
@@ -203,7 +212,7 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
 
-        kwargs = {'tag__icontains':category} if category not in ['undefined', '', None, 'null'] else {}
+        kwargs = {'categories__icontains':category} if category not in ['undefined', '', None, 'null'] else {}
         kwargs = {'type__in':['product','product-fast']} if type not in ['undefined', '', None, 'null'] and type=='product' else kwargs
         queryset = campaign.products.filter(**kwargs)
         page = self.paginate_queryset(queryset)
@@ -245,16 +254,16 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
         campaign_product = lib.util.verify.Verify.get_campaign_product(pk)
         campaign = campaign_product.campaign
         lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign.id)
-
+        print(request.data)
         serializer = models.campaign.campaign_product.CampaignProductSerializerUpdate(
             campaign_product, data=request.data, partial=True)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        serializer.save()
+        campaign_product = serializer.save()
         serializer = models.campaign.campaign_product.CampaignProductSerializer(campaign_product)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
-    @action(detail=True, methods=['PUT'], url_path=r'seller/toggle/status', permission_classes=(IsAuthenticated,))
+    @action(detail=True, methods=['PUT'], url_path=r'seller/toggle/active', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def toggle_campaign_product_status(self, request, pk=None):
 
@@ -264,7 +273,7 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
         campaign = campaign_product.campaign
         lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign.id)
 
-        campaign_product.status = not campaign_product.status
+        campaign_product.active = not campaign_product.active
         campaign_product.save()
 
         serializer = models.campaign.campaign_product.CampaignProductSerializer(campaign_product)

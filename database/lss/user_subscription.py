@@ -82,29 +82,29 @@ def get_order_complete_proceed_count(user_subscription_id):
                                     "id":{"$ne":None}}
                                  },
                                 {"$project":{"_id":0,
-                                "complete": {  "$cond": [ { "$in":["$status", ["complete", "shipping out"] ] }, 1, 0]},
-                                "review": { "$cond": [ { "$eq": [ "$status", "review" ] }, 1, 0]}
+                                "complete": {  "$cond": [ { "$eq":["$status", models.order.order.STATUS_COMPLETE ] }, 1, 0]},
+                                "proceed": { "$cond": [ { "$eq":["$status", models.order.order.STATUS_PROCEED ] }, 1, 0]}
                                 }},
                             ]
                         },
                     },
-                    {"$project":{"_id":0,"id":1,"orders":1,"campaign_complete_count":{"$sum":"$orders.complete"},"campaign_review_count":{"$sum":"$orders.review"}}}
+                    {"$project":{"_id":0,"id":1,"orders":1,"campaign_complete_count":{"$sum":"$orders.complete"},"campaign_proceed_count":{"$sum":"$orders.proceed"}}}
                 ]
             },
         },
         {"$project":{"_id":0,
         # "campaigns":1,
         "total_complete_count":{"$sum":"$campaigns.campaign_complete_count"},
-        "total_review_count":{"$sum":"$campaigns.campaign_review_count"}
+        "total_proceed_count":{"$sum":"$campaigns.campaign_proceed_count"}
         }}
     ])
     l = list(cursor)
     return l[0].get('total_complete_count',0) if l else 0,\
-        l[0].get('total_review_count',0) if l else 0
+        l[0].get('total_proceed_count',0) if l else 0
 
     
 
-def get_pre_order_count(user_subscription_id):
+def get_cart_count(user_subscription_id):
 
     cursor=db.api_user_subscription.aggregate([
         {"$match":{"id":user_subscription_id}},
@@ -119,19 +119,19 @@ def get_pre_order_count(user_subscription_id):
                      },
                     {
                         "$lookup": {
-                            "from": "api_pre_order","as": "pre_orders", # "localField": "id","foreignField": "campaign_id",
+                            "from": "api_cart","as": "carts", # "localField": "id","foreignField": "campaign_id",
                             'let': {'id': "$id" },
                             "pipeline":[
                                 {"$match":{
                                     '$expr': { '$eq': ["$$id", "$campaign_id"] },
                                     "id":{"$ne":None},
-                                    "subtotal":{"$ne":0}}
+                                    "products":{"$ne":{}}}
                                  },
                                 {"$project":{"_id":0, "count":{"$sum":1}}}
                             ]
                         },
                     },
-                    {"$project":{"_id":0, "id":1,"pre_orders":1, "campaign_count":{"$sum":"$pre_orders.count"}}}
+                    {"$project":{"_id":0, "id":1,"carts":1, "campaign_count":{"$sum":"$carts.count"}}}
                 ]
             },
         },
@@ -145,6 +145,8 @@ def get_pre_order_count(user_subscription_id):
 
 
 def get_average_sales(user_subscription_id):
+
+
     cursor=db.api_user_subscription.aggregate([
         {"$match":{"id":user_subscription_id}},
         {
@@ -163,14 +165,19 @@ def get_average_sales(user_subscription_id):
                             "pipeline":[
                                 {"$match":{
                                     '$expr': { '$eq': ["$$id", "$campaign_id"] },
-                                    "id":{"$ne":None}}
+                                    "id":{"$ne":None},
+                                    "status":models.order.order.STATUS_COMPLETE
+                                    
+                                    },
+                                    
+
                                  },
-                                {"$project":{"_id":0,"id":1,"subtotal":1}},
+                                {"$project":{"_id":0,"id":1,"total":1}},
                             ]
                         },
                     },
                     {"$project":{"_id":0,"id":1,
-                    "campaign_sales":{"$sum":"$orders.subtotal"},
+                    "campaign_sales":{"$sum":"$orders.total"},
                     "orders":1}}
                 ]
             },

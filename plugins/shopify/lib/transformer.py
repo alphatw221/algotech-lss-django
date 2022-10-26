@@ -44,7 +44,7 @@ def to_lss_order(lss_pre_order, shopify_order_data, campaign_product_external_in
         "customer_name" : lss_pre_order.customer_name,
         "customer_img" : lss_pre_order.customer_img,
         "platform" : lss_pre_order.platform,
-        "status" : models.order.order.STATUS_COMPLETE if shopify_order_data.get('financial_status')=='paid' else models.order.order.STATUS_REVIEW,
+        "status" : models.order.order.STATUS_COMPLETE if shopify_order_data.get('financial_status')=='paid' else models.order.order.STATUS_AWAITING_PAYMENT,
         "discount" : float(shopify_order_data.get('total_discounts')),
         "subtotal" : float(shopify_order_data.get('subtotal_price')),
         "shipping_cost" : float(shopify_order_data.get('total_shipping_price_set',{}).get('shop_money',{}).get('amount')),

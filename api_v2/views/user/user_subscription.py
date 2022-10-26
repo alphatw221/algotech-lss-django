@@ -349,6 +349,46 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         }
         return Response(ret, status=status.HTTP_200_OK)
 
+    @action(detail=False, methods=['get'], url_path=r'check_binded_platform', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def check_binded_platform(self, request):
+        def get_current_connected_socail_media(user_subscription):
+            platform = []
+            if user_subscription.facebook_pages.all().exists():
+                platform.append("facebook")
+            if user_subscription.instagram_profiles.all().exists():
+                platform.append("instagram")
+            if user_subscription.youtube_channels.all().exists():
+                platform.append("youtube")
+            if user_subscription.twitch_channels.all().exists():
+                platform.append("twitch")
+            if user_subscription.tiktok_accounts.all().exists():
+                platform.append("tiktok")
+            return platform
+        api_user = lib.util.verify.Verify.get_seller_user(request)    
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+
+        # social_meida_connect_limit = globals()[type]['social_meida_connect']
+        current_connected_social_media = get_current_connected_socail_media(user_subscription)
+        return Response({"binded_platform": current_connected_social_media}, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['GET'], url_path=r'sales_report', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def report_of_campaigns_in_period(self, request):
+        api_user, start_time, end_time = lib.util.getter.getparams(request, ('start_time', 'end_time'), seller=True)
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        user_subscription_id = user_subscription.id
+        start_time = lib.helper.report_helper.SalesReport.normalize_start_time(start_time)
+        end_time = lib.helper.report_helper.SalesReport.normalize_end_time(end_time)
+        basic_info = lib.helper.report_helper.SalesReport.get_basic_info(start_time, end_time, user_subscription_id)
+        if len(basic_info) == 0:
+            raise lib.error_handle.error.api_error.ApiCallerError("No any campaigns in period.")
+        top_10_itmes = lib.helper.report_helper.SalesReport.get_top_10_itmes(start_time, end_time, user_subscription_id)
+        order_analysis = lib.helper.report_helper.SalesReport.get_order_analysis(start_time, end_time, user_subscription_id)
+        report = lib.helper.report_helper.SalesReport.merge_data(basic_info, top_10_itmes, order_analysis)
+        return Response(report, status=status.HTTP_200_OK)
+    
 # --------------------------------- dealer ---------------------------------
     
 
