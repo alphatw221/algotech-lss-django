@@ -178,3 +178,302 @@ def get_order_complete_proceed_count(campaign_id):
     l = list(cursor)
     return l[0].get('complete_count',0) if l else 0,\
         l[0].get('proceed_count',0) if l else 0
+        
+def sales_basic_info(start_time, end_time, user_subscription_id):
+    query=db.api_campaign.aggregate([
+        {
+            "$match":{
+                "start_at":{
+                    "$gte": start_time
+                },
+                "end_at": {
+                    "$lte": end_time
+                },
+                'user_subscription_id': {
+                    "$eq": user_subscription_id
+                }
+            }
+        },
+        {
+            "$lookup": {
+                "from": "api_campaign_comment",
+                "as": "campaign_comment",
+                'let': {'id': "$id" },
+                "pipeline":[
+                    {"$match":{
+                        '$expr': { '$eq': ["$$id", "$campaign_id"] },
+                        "id":{"$ne":None}}
+                    }
+                ]
+            },
+        },
+        {
+            "$lookup": {
+                "from": "api_campaign_product",
+                "as": "campaign_product_sold", 
+                'let': {'id': "$id" },
+                "pipeline":[
+                    {
+                        "$match":{
+                            '$expr': { '$eq': ["$$id", "$campaign_id"] },
+                            "id":{"$ne":None},
+                            "qty_sold": {
+                                "$gt": 0
+                            }
+                        }
+                    }
+                ]
+            },
+        },
+        {
+            "$lookup": {
+                "from": "api_campaign_product",
+                "as": "campaign_product_unsold", 
+                'let': {'id': "$id" },
+                "pipeline":[
+                    {
+                        "$match":{
+                            '$expr': { '$eq': ["$$id", "$campaign_id"] },
+                            "id":{"$ne":None},
+                            "qty_sold": {
+                                "$eq": 0
+                            }
+                        }
+                    }
+                ]
+            },
+        },
+        {
+            "$lookup": {
+                "from": "api_campaign_product",
+                "as": "campaign_product_total_item", 
+                'let': {'id': "$id" },
+                "pipeline":[
+                    {
+                        "$match":{
+                            '$expr': { '$eq': ["$$id", "$campaign_id"] },
+                            "id":{"$ne":None},
+                        }
+                    }
+                ]
+            },
+        },
+        {
+            "$lookup": {
+                "from": "api_order",
+                "as": "orders", 
+                'let': {'id': "$id" },
+                "pipeline":[
+                    {
+                        "$match":{
+                            '$expr': { '$eq': ["$$id", "$campaign_id"] },
+                            "id":{"$ne":None},
+                        }
+                    },
+                    {
+                        "$project":{
+                            "_id":0,
+                            "id":1,
+                            "total":1
+                        }
+                    }
+                ]
+            },
+        },
+        {
+            "$lookup": {
+                "from": "api_pre_order",
+                "as": "pre_orders", 
+                'let': {'id': "$id" },
+                "pipeline":[
+                    {
+                        "$match":{
+                            '$expr': { '$eq': ["$$id", "$campaign_id"] },
+                            "id":{"$ne":None},
+                            "subtotal":{"$gt":0},
+                        }
+                    },
+                    {
+                        "$project":{
+                            "_id":0,
+                            "id":1,
+                            "total":1
+                        }
+                    }
+                ]
+            },
+        },
+        {
+            "$project":{
+                "_id":0,
+                "post_comment":{"$size":"$campaign_comment.id"},
+                "no_of_items_sold":{"$size": "$campaign_product_sold.id"},
+                "no_of_items_unsold":{"$size": "$campaign_product_unsold.id"},
+                "total_no_of_items":{"$size": "$campaign_product_total_item.id"},
+                "total_inventories":{"$sum": "$campaign_product_total_item.qty_for_sale"},
+                "total_no_of_orders": {"$add":[{"$size": "$pre_orders.id"},{"$size": "$orders.id"}]},
+                "total_amount": {"$add":[{"$sum": "$pre_orders.total"},{"$sum": "$orders.total"}]},
+            }
+        },
+        {
+            "$project":{
+                "post_comment":"$post_comment",
+                "no_of_items_sold":"$no_of_items_sold",
+                "no_of_items_unsold":"$no_of_items_unsold",
+                "total_no_of_items":"$total_no_of_items",
+                "total_inventories":"$total_inventories",
+                "total_no_of_orders": "$total_no_of_orders",
+                "total_amount": "$total_amount",
+                "average_order_value":{ "$cond": [{ "$eq": [ "$total_no_of_orders", 0 ] }, 0, {"$round": [{"$divide":["$total_amount", "$total_no_of_orders"]}, 2]}] }
+            }
+        }
+    ])
+    return list(query)
+
+def query_top_10_itmes_data(start_time, end_time, user_subscription_id):
+    query=db.api_campaign.aggregate([
+        {
+            "$match":{
+                "start_at":{
+                    "$gte": start_time
+                },
+                "end_at": {
+                    "$lte": end_time
+                },
+                'user_subscription_id': {
+                    "$eq": user_subscription_id
+                }
+            }
+        },
+        {
+            "$lookup": {
+                "from": "api_campaign_product",
+                "as": "campaign_product", 
+                'let': {'id': "$id" },
+                "pipeline":[
+                    {
+                        "$match":{
+                            '$expr': { '$eq': ["$$id", "$campaign_id"] },
+                            "id":{"$ne":None},
+                        }
+                    },
+                    {
+                        "$lookup": {
+                            "from": "api_order_product",
+                            "as": "order_product", 
+                            'let': {'id': "$id" },
+                            "pipeline":[
+                                {
+                                    "$match":{
+
+                                        '$expr': {"$eq": ["$$id", "$campaign_product_id"]},
+                                        "id":{"$ne":None},
+                                    }
+                                },
+                                {
+                                    "$project":{
+                                        "_id":0,
+                                        "qty":1,
+                                    }
+                                }
+                            ]
+                        },
+                    },
+                    {
+                        "$project":{
+                            "_id":0,
+                            "campaign_id":1,
+                            "name":1,
+                            "order_product_qty":{"$sum":"$order_product.qty"},
+                            "qty_for_sale":1,
+                            "product_id": 1
+                        }
+                    },
+                    
+                ]
+            },
+        },
+        {
+            "$project":{
+                "_id":0,
+                "item": "$campaign_product.name",
+                "qty_for_sale": "$campaign_product.qty_for_sale",
+                "stock_product_id": "$campaign_product.product_id",
+                "order_product_qty": "$campaign_product.order_product_qty",
+
+            }
+        },
+        {"$sort": {"order_product_qty":-1}},
+        { "$limit": 10 }
+
+    ])
+    return list(query)
+
+def get_order_sales_data(start_time, end_time, user_subscription_id):
+
+    cursor=db.api_campaign.aggregate([
+        {
+            "$match":{
+                "start_at":{
+                    "$gte": start_time
+                },
+                "end_at": {
+                    "$lte": end_time
+                },
+                'user_subscription_id': {
+                    "$eq": user_subscription_id
+                }
+            }
+        },
+        {
+            "$lookup": {
+                "from": "api_order",
+                "as": "orders", 
+                'let': {'id': "$id" },
+                "pipeline":[
+                    {
+                        "$match":{
+                            '$expr': { '$eq': ["$$id", "$campaign_id"] },
+                            "id":{"$ne":None},
+                        }
+                    },
+                    {"$addFields": { "new_type": "$status"}}
+                ]
+            },
+        },
+        {
+            "$lookup": {
+                "from": "api_pre_order",
+                "as": "pre_orders", 
+                'let': {'id': "$id" },
+                "pipeline":[
+                    {
+                        "$match":{
+                            '$expr': { '$eq': ["$$id", "$campaign_id"] },
+                            "id":{"$ne":None},
+                            "subtotal": {"$ne" : 0}
+                        }
+                    },
+                    {"$addFields": { "new_type": "cart"}}
+                ]
+            },
+        },
+        {"$project":{"_id":0,"data":{"$concatArrays":["$orders","$pre_orders"]}}},
+        { "$unwind": "$data" },
+        { "$group": {
+                "_id": {
+                    "status": "$data.new_type"
+                },
+                "status": {"$first": "$data.new_type"},
+                "qty": {"$sum": 1},
+                "total": {"$sum": "$data.total"}
+            }
+        },
+        {
+            "$project":{
+                "_id":0,
+
+            }
+        },
+    ])
+    return list(cursor)
