@@ -1,7 +1,7 @@
 from lss.settings import *
 DEBUG = True
-GCP_API_LOADBALANCER_URL = "http://localhost:8000"
-WEB_SERVER_URL = "http://localhost:3000"
+# Live Show Seller info
+WEB_SERVER_URL = "https://staginglss.accoladeglobal.net"
 
 SHOPPING_CART_URL = f"{WEB_SERVER_URL}/buyer/cart"
 # HITPAY_API_URL = 'https://api.sandbox.hit-pay.com/v1/payment-requests' # for test mode
@@ -16,3 +16,9 @@ GOOGLE_OAUTH_CLIENT_SECRET_FOR_LIVESHOWSELLER = "GOCSPX-eBlnf5ZN4tPveGcNxg4Slkup
 STRIPE_API_KEY = "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"
 #Recaptcha V2
 RECAPTCHA_SECRET_KEY='6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer'
+    },
+}

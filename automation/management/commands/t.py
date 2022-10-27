@@ -1,8 +1,30 @@
-from tkinter import E
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from api import models
+from api.models.user.user import AuthUserSerializer
+from django.conf import settings
+from django.contrib.auth.models import User as AuthUser
 
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from api.models.user.promotion_code import PromotionCode
+
+
+from api.utils.common.verify import Verify
+from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
+from api.utils.common.verify import ApiVerifyError
+from api import models
+from api import rule
+from api.utils.orm.deal import record_subscription_for_trial_user
+from business_policy.marketing_plan import MarketingPlan
+
+import service
+import business_policy
+import lib
+
+from datetime import datetime, timedelta
+import string, random
 
 class Command(BaseCommand):
     help = ''
@@ -11,7 +33,8 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.create_cart_base_on_pre_order()
+        # self.handle_new_registeration_from_hubspot()
+        pass
 
 
     def modify_database(self):
@@ -796,6 +819,77 @@ class Command(BaseCommand):
                 )
             except Exception:
                 continue
+            
+    def handle_new_registeration_from_hubspot(self):
+
+        # Verify.is_hubspot_signature_valid(request)
+        # vid, = lib.util.getter.getdata(request,('vid',)) 
+        # first_name, last_name, email, subscription_type, country_code, phone = \
+        #     lib.util.getter.getproperties(request.data.get('properties'),('firstname','lastname','email','subscription_type','country_code','phone'), nest_property='value')
+
+        # country = lib.util.country_mapping.country_code_to_country.get(country_code,'SG')
+        password = ''.join(random.choice(string.ascii_letters+string.digits) for _ in range(8))
+        
+
+        # rule.check_rule.user_check_rule.UserCheckRule.has_email_been_registered_as_seller(email=email)
+
+        # now = datetime.now() 
+        # expired_at = now+datetime.timedelta(days=90)
+        email = "dermaskinshop.my@gmail.com"
+        if AuthUser.objects.filter(email=email).exists():
+            auth_user = AuthUser.objects.get(email=email)
+            # set new password
+            auth_user.set_password(password)
+            auth_user.save()
+
+        # else:
+        #     auth_user = AuthUser.objects.create_user(
+        #         username=f'{first_name} {last_name}', email=email, password=password)
+        
+
+        # user_subscription = models.user.user_subscription.UserSubscription.objects.create(
+        #     name=f'{first_name} {last_name}', 
+        #     status='new', 
+        #     started_at=now,
+        #     expired_at=expired_at, 
+        #     user_plan= {"activated_platform" : ["facebook", "instagram", "youtube"]}, 
+        #     meta_country={ 'activated_country': [country] },
+        #     type=business_policy.subscription.TYPE_TRIAL,
+
+        #     lang=country_plan.language ,
+        #     country = country
+        #     )
+        api_user = models.user.user.User.objects.get(email=email)
+        first_name = "Dermaskinshop"
+        user_subscription = api_user.user_subscription
+        subscription_type = user_subscription.type
+        country = user_subscription.country
+        country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(country)
+        # api_user = models.user.user.User.objects.create(name=f'{first_name} {last_name}', 
+        #     email=email, type='user', 
+        #     status='valid', 
+        #     phone=country_code+phone, 
+        #     auth_user=auth_user, 
+        #     user_subscription=user_subscription)
+        
+        # record_subscription_for_trial_user(user_subscription, api_user)
+        
+        # lib.util.marking_tool.NewUserMark.mark(api_user, save = True)
+        # marketing_plans = MarketingPlan.get_plans("current_plans")
+        # for key, val in marketing_plans.items():
+        #     if key == "welcome_gift":
+        #         lib.util.marking_tool.WelcomeGiftUsedMark.mark(api_user, save = True, mark_value=False)
+        #         PromotionCode.objects.create(
+        #             name=key,
+        #             api_user=api_user,
+        #             user_subscription=user_subscription,
+        #         )
+        
+        # service.hubspot.contact.update(vid,expiry_date=int(expired_at.replace(hour=0,minute=0,second=0,microsecond=0).timestamp()*1000))
+        service.sendinblue.contact.create(email=email,first_name=first_name, last_name=last_name)
+        service.sendinblue.transaction_email.AccountActivationEmail(first_name, subscription_type, email, password, to=[email], cc=country_plan.cc).send()
+        print("ok")
+        return Response("ok", status=status.HTTP_200_OK)
 
 
 

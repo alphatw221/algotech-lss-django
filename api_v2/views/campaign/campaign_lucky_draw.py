@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.core.files.base import ContentFile
+from automation import jobs
 from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.decorators import action
@@ -9,7 +10,7 @@ from rest_framework.parsers import MultiPartParser
 
 from api import models, rule
 import lib, json
-
+import service
 
 class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAdminUser,)
@@ -187,10 +188,10 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
         lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign.id)
         
         ret = rule.rule_checker.lucky_draw_rule_checker.LuckyDrawStartRuleChecker.check(**{
-            'type': lucky_draw.type, 'prize': lucky_draw.prize, 'campaign': campaign
+            'lucky_draw': lucky_draw, 'campaign': campaign
         })
 
-        return Response("success", status=status.HTTP_200_OK)
+        return Response(models.campaign.campaign_lucky_draw.CampaignLuckyDrawSerializer(lucky_draw).data, status=status.HTTP_200_OK)
 
 
     @action(detail=False, methods=['GET'], url_path=r'list/animation', permission_classes=(IsAuthenticated,))
@@ -202,7 +203,6 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
         static_assets = user_subscription.assets.filter(type=models.user.static_assets.TYPE_ANIMATION)
         
         return Response(models.user.static_assets.StaticAssetsSerializer(static_assets, many=True).data, status=status.HTTP_200_OK)
-
 
     # @action(detail=False, methods=['POST'], url_path=r'(?P<campaign_id>[^/.]+)/likes', permission_classes=(IsAuthenticated,))
     # @lib.error_handle.error_handler.api_error_handler.api_error_handler
