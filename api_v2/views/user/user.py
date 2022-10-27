@@ -73,7 +73,7 @@ class UserViewSet(viewsets.ModelViewSet):
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def buyer_get_account_info(self, request):
         api_user = lib.util.verify.Verify.get_customer_user(request)
-        return Response(models.user.user.UserSerializerAccountInfo(api_user).data, status=status.HTTP_200_OK)    
+        return Response(UserSerializerAccountInfo(api_user).data, status=status.HTTP_200_OK)    
 
 #-----------------------------------------Dealer----------------------------------------------------------------------------------------------
 
@@ -191,7 +191,7 @@ class UserViewSet(viewsets.ModelViewSet):
         api_user.lang = language
         api_user.save()
 
-        return Response( models.user.user.UserSerializerAccountInfo(api_user).data, status=status.HTTP_200_OK)
+        return Response(UserSerializerAccountInfo(api_user).data, status=status.HTTP_200_OK)
 
 
     @action(detail=False, methods=['POST'], url_path=r'seller/password/change', permission_classes=(IsAuthenticated, ))

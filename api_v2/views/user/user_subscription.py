@@ -15,6 +15,7 @@ from rest_framework import status
 from rest_framework.parsers import MultiPartParser, JSONParser, FormParser
 
 from api import rule, models, utils
+from api_v2.views.user.user import UserSerializerAccountInfo
 import stripe, pytz, lib, service, business_policy, json
 from backend.pymongo.mongodb import db
 
@@ -54,7 +55,24 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         serializer.save()
 
-        return Response(models.user.user.UserSerializerAccountInfo(api_user).data, status=status.HTTP_200_OK)
+        return Response(UserSerializerAccountInfo(api_user).data, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['PUT'], url_path=r'seller/switch_mode', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def seller_switch_subscription_mode(self, request):
+
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        subscripton_status, = lib.util.getter.getdata(request,('status',))
+        if subscripton_status not in [models.user.user_subscription.STATUS_TEST, models.user.user_subscription.STATUS_PRODUCTION]:
+            raise lib.error_handle.error.api_error.ApiVerifyError('invalid_subscription_status')
+        serializer = models.user.user_subscription.UserSubscriptionSerializerUpdate(user_subscription, data=request.data, partial=True)
+
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
+
+        return Response(UserSerializerAccountInfo(api_user).data, status=status.HTTP_200_OK)
 
 
     @action(detail=False, methods=['POST'], url_path=r'seller/upload/animation', parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated,))
@@ -110,7 +128,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
         user_subscription.save()
 
-        return Response(models.user.user.UserSerializerAccountInfo(api_user).data, status=status.HTTP_200_OK)
+        return Response(UserSerializerAccountInfo(api_user).data, status=status.HTTP_200_OK)
 
 
     @action(detail=False, methods=['PUT'], url_path=r'delivery', permission_classes=(IsAuthenticated,))
@@ -122,7 +140,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         user_subscription.meta_logistic.update(request.data)
         user_subscription.save()
 
-        return Response(models.user.user.UserSerializerAccountInfo(api_user).data, status=status.HTTP_200_OK)
+        return Response(UserSerializerAccountInfo(api_user).data, status=status.HTTP_200_OK)
 
 
     @action(detail=False, methods=['GET'], url_path=r'platform/(?P<platform_name>[^/.]+)', permission_classes=(IsAuthenticated,))
@@ -233,7 +251,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
         user_subscription.save()
 
-        return Response(models.user.user.UserSerializerAccountInfo(api_user).data, status=status.HTTP_200_OK)
+        return Response(UserSerializerAccountInfo(api_user).data, status=status.HTTP_200_OK)
     
         
     @action(detail=False, methods=['POST'], url_path=r'upgrade/intent')
