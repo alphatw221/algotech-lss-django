@@ -2,6 +2,7 @@ import os
 import config
 import django
 import database
+import service
 from service.web_crawler.facebook_shared_list_crawler import FacebookSharedListCrawler
 
 try:
@@ -17,7 +18,7 @@ import traceback
 
 
 @lib.error_handle.error_handler.crawler_job_error_handler.crawler_job_error_handler
-def crawler_shared_post_job(lucky_draw_id, facebook_page_username, post_id):
+def crawler_shared_post_job(room_id, lucky_draw_id, facebook_page_username, post_id):
     print("start crawler")
     fb_crawler = FacebookSharedListCrawler(facebook_page_username, post_id)
     shared_user_name_set = fb_crawler.start()
@@ -26,3 +27,4 @@ def crawler_shared_post_job(lucky_draw_id, facebook_page_username, post_id):
     meta = lucky_draw.data.get('meta', {})
     meta["shared_post_data"] = list(shared_user_name_set)
     lucky_draw.update(meta=meta)
+    service.channels.lucky_draw.send_success_data(room_id,{})

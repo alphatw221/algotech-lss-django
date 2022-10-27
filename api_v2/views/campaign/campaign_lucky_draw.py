@@ -1,7 +1,6 @@
 from django.conf import settings
 from django.core.files.base import ContentFile
 from automation import jobs
-from automation.jobs.crawler_job import crawler_shared_post_job
 from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.decorators import action
