@@ -10,7 +10,7 @@ websocket_urlpatterns = [
     re_path(r'ws/campaign/(?P<campaign_id>\w+)/$', consumers.campaign.CampaignLiveConsumer.as_asgi()),
     re_path(r'ws/login/', consumers.user.LoginConsumer.as_asgi()),
     re_path(r'ws/admin/account/import/', consumers.user.AdminImportAccountConsumer.as_asgi()),
-    re_path(r'ws/lucky-draw/(?P<campaign_lucky_draw_id>\w+)/share-post/crawler/', consumers.lucky_draw.SharedPostCrawlerConsumer.as_asgi()),
+    re_path(r'ws/lucky-draw/share-post/crawler/(?P<campaign_lucky_draw_id>\w+)/$', consumers.lucky_draw.SharedPostCrawlerConsumer.as_asgi()),
     #------------------------------------------plugins--------------------------------------------
     re_path(r'ws/plugin/easy_store/product/export', easy_store_consumers.export_product.ExportProductConsumer.as_asgi()),
     re_path(r'ws/plugin/easy_store/order/export/(?P<campaign_id>\w+)/$', easy_store_consumers.export_order.ExportOrderConsumer.as_asgi()),
