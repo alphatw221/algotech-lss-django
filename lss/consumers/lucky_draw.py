@@ -36,7 +36,7 @@ class SharedPostCrawlerConsumer(WebsocketConsumer):
             lucky_draw = lib.util.verify.Verify.get_lucky_draw(campaign_lucky_draw_id)
             username = lucky_draw.campaign.facebook_page.username
             post_id = lucky_draw.campaign.facebook_campaign.get("post_id", "")
-            service.rq.queue.enqueue_crawler_queue(job=crawler_shared_post_job, room_id=self.room_group_name, lucky_draw_id=lucky_draw.id, facebook_page_username=username, post_id=post_id)
+            service.rq.queue.enqueue_general_queue(job=crawler_shared_post_job, room_id=self.room_group_name, lucky_draw_id=lucky_draw.id, facebook_page_username=username, post_id=post_id)
     def success_data(self, event):
         self.send(text_data=json.dumps(event))
 

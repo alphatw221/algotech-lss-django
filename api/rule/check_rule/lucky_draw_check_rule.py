@@ -53,4 +53,4 @@ class LuckyDrawCheckRule():
         
         if lucky_draw.type in [models.campaign.campaign_lucky_draw.TYPE_POST]:
             print("start crawler")
-            service.rq.queue.enqueue_crawler_queue(job=crawler_shared_post_job, lucky_draw_id=lucky_draw.id, facebook_page_username=username, post_id=post_id)
+            service.rq.queue.enqueue_general_queue(job=crawler_shared_post_job, lucky_draw_id=lucky_draw.id, facebook_page_username=username, post_id=post_id)
