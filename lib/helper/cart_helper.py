@@ -103,9 +103,7 @@ class CartHelper():
             else:
                 return RequestState.INVALID_NEGATIVE_QTY
 
-        if campaign_product_data.get('oversell'):
-            pass
-        elif not cls.__check_stock_avaliable_and_add_to_cart_by_comment(campaign_product_data, pymongo_cart, qty):
+        if not cls.__check_stock_avaliable_and_add_to_cart_by_comment(campaign_product_data, pymongo_cart, qty):
             return RequestState.INSUFFICIENT_INV
 
         cls.__update_cart_product(None, pymongo_cart, campaign_product_data, qty)
@@ -286,7 +284,7 @@ class CartHelper():
         if qty_difference == 0:
             return True
 
-        if campaign_product_data.get('oversell'):
+        if campaign_product_data.get('oversell') == True:
             database.lss.campaign_product.CampaignProduct(id=campaign_product_data.get('id')).add_to_cart(qty=qty_difference, sync=False)
             return True
             
@@ -313,7 +311,7 @@ class CartHelper():
                     if qty_difference == 0:
                         return True
 
-                    if campaign_product_data.get('oversell'):
+                    if campaign_product_data.get('oversell') == True:
                         database.lss.campaign_product.CampaignProduct(id=campaign_product_data.get('id')).add_to_cart(qty=qty_difference, sync=False, session=session)
                         return True
 
