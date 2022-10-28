@@ -525,6 +525,10 @@ def capture_facebook_v2(campaign, user_subscription_data, logs, attempts=2):
             logs.append(["number of comments",0])
             return
 
+        if not facebook_comments:
+            logs.append(["number of comments",0])
+            return
+            
         facebook_campaign['comment_capture_since'] = int(facebook_comments[-1].get('created_time'))
         campaign.update(facebook_campaign=facebook_campaign, sync=False)
 
