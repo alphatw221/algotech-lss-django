@@ -66,7 +66,7 @@ class UserSubscription(models.Model):
 
     type = models.CharField(max_length=255, null=True, blank=True, 
         choices=business_policy.subscription.TYPE_CHOICES, default=business_policy.subscription.TYPE_TRIAL)
-    status = models.CharField(max_length=255, default="test")
+    status = models.CharField(max_length=255, default=STATUS_TEST)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

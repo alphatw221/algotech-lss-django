@@ -263,7 +263,7 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
         serializer = models.campaign.campaign_product.CampaignProductSerializer(campaign_product)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
-    @action(detail=True, methods=['PUT'], url_path=r'seller/toggle/status', permission_classes=(IsAuthenticated,))
+    @action(detail=True, methods=['PUT'], url_path=r'seller/toggle/active', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def toggle_campaign_product_status(self, request, pk=None):
 
@@ -273,7 +273,7 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
         campaign = campaign_product.campaign
         lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign.id)
 
-        campaign_product.status = not campaign_product.status
+        campaign_product.active = not campaign_product.active
         campaign_product.save()
 
         serializer = models.campaign.campaign_product.CampaignProductSerializer(campaign_product)

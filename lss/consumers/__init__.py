@@ -1,1 +1,1 @@
-from . import campaign,user
+from . import campaign,user, lucky_draw
