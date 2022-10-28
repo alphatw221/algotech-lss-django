@@ -87,26 +87,28 @@ class Command(BaseCommand):
                 rows.append([campaign.id, "invalid"])
                 continue
             if not service.rq.job.exists(campaign.id):
-                service.rq.queue.enqueue_unique_job_to_campaign_queue(jobs.campaign_job.campaign_job, campaign_id = campaign.id)
+                service.rq.queue.enqueue_campaign_queue(jobs.campaign_job.campaign_job, campaign_id = campaign.id)
                 rows.append([campaign.id, ""])
                 continue
 
             job, job_status = service.rq.job.get_job_status(campaign.id)
             rows.append([campaign.id, job_status])
-            if job_status == 'queued':
-                count = service.redis.redis.get_count(campaign.id)
-                if count >10:
-                    job.delete()
-                    service.redis.redis.delete(campaign.id)
-                else:
-                    service.redis.redis.increment(campaign.id)
-            elif job_status in ('started', 'deferred'):
-                # job.delete()
-                continue
-            elif job_status in ('finished', 'failed', 'canceled'):  #
-                job.delete()
-                service.redis.redis.delete(campaign.id)
-                service.rq.queue.enqueue_unique_job_to_campaign_queue(jobs.campaign_job.campaign_job, campaign_id = campaign.id)
+            service.rq.queue.enqueue_campaign_queue(jobs.campaign_job.campaign_job, campaign_id = campaign.id)
+
+            # if job_status == 'queued':
+            #     count = service.redis.redis.get_count(campaign.id)
+            #     if count >10:
+            #         job.delete()
+            #         service.redis.redis.delete(campaign.id)
+            #     else:
+            #         service.redis.redis.increment(campaign.id)
+            # elif job_status in ('started', 'deferred'):
+            #     # job.delete()
+            #     continue
+            # elif job_status in ('finished', 'failed', 'canceled'):  #
+            #     job.delete()
+            #     service.redis.redis.delete(campaign.id)
+            #     service.rq.queue.enqueue_unique_job_to_campaign_queue(jobs.campaign_job.campaign_job, campaign_id = campaign.id)
 
         lib.util.logger.print_table(["Campaign ID", "Status"],rows)
 

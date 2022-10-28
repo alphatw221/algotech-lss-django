@@ -7,7 +7,7 @@ def enqueue_unique_job_to_campaign_queue(job, **kwargs):
 
 
 def enqueue_campaign_queue(job, **kwargs):
-    campaign_queue.enqueue(job, kwargs=kwargs, result_ttl=10, failure_ttl=10)
+    campaign_queue.enqueue(job, kwargs=kwargs, result_ttl=10, failure_ttl=10, ttl=3000, job_timeout=3000)
 
 
 def enqueue_comment_queue(job,campaign_data, user_subscription_data,  platform_name, platform_instance_data, uni_format_comment, order_codes_mapping):
