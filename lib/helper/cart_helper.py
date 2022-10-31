@@ -119,7 +119,16 @@ class CartHelper():
 
         success, data = cls.__transfer_cart_to_order(api_user, cart_id, shipping_data)
         if not success:
+            error_products_data = data.get('error_products_data', [])
+            pymongo_cart = data.get('pymongo_cart')
+            
+            for error_product_data in error_products_data:
+                cls.send_campaign_product_websocket_data(error_product_data)
+            cls.send_cart_websocket_data(pymongo_cart)
+            
             return False, None
+
+
         pymongo_order = data.get('pymongo_order')
         pymongo_cart = data.get('pymongo_cart')
         campaign_product_data_dict = data.get('campaign_product_data_dict')
@@ -143,6 +152,7 @@ class CartHelper():
                     pymongo_cart = database.lss.cart.Cart.get_object(id=cart_id,session=session)
                     campaign_product_data_dict={}
 
+                    error_products_data = []
                     for campaign_product_id_str, qty in pymongo_cart.data.get('products',{}).copy().items():
                         campaign_product_data = database.lss.campaign_product.CampaignProduct.get(id=int(campaign_product_id_str), session=session)
                         campaign_product_data_dict[campaign_product_id_str]=campaign_product_data
@@ -150,21 +160,29 @@ class CartHelper():
                             qty_avaliable = campaign_product_data.get('qty_for_sale')-campaign_product_data.get('qty_sold')-campaign_product_data.get('qty_pending_payment')
 
                             if qty_avaliable < 1 or qty < 1:
-                                del pymongo_cart.data.get('products',{})[campaign_product_id_str]     
+                                del pymongo_cart.data.get('products',{})[campaign_product_id_str] 
+                                database.lss.campaign_product.CampaignProduct(id=campaign_product_data.get('id')).customer_return(qty, sync=False, session=session)
+                                error_products_data.append({'id':campaign_product_data.get('id')})
                                 success = False
 
+
                             elif qty>qty_avaliable and not campaign_product_data.get('oversell'):
+                                return_qty = qty - qty_avaliable
                                 pymongo_cart.data.get('products',{})[campaign_product_id_str] = qty_avaliable
+                                database.lss.campaign_product.CampaignProduct(id=campaign_product_data.get('id')).customer_return(return_qty, sync=False, session=session)
+                                error_products_data.append({'id':campaign_product_data.get('id')})
                                 success = False
                             
                         except Exception:
                             print(traceback.format_exc())
                             del pymongo_cart.data.get('products',{})[campaign_product_id_str]
+                            database.lss.campaign_product.CampaignProduct(id=campaign_product_data.get('id')).customer_return(qty, sync=False, session=session)
+                            error_products_data.append({'id':campaign_product_data.get('id')})
                             success = False
 
                     if not success:
-                        pymongo_cart.update(session=session, sync=False, **pymongo_cart.data)
-                        return False, None
+                        pymongo_cart.update(session=session, sync=True, **pymongo_cart.data)
+                        return False, {'pymongo_cart':pymongo_cart, 'error_products_data':error_products_data, }
 
                     
                     pymongo_order = database.lss.order.Order.create_object(
