@@ -27,4 +27,4 @@ def crawler_shared_post_job(room_id, lucky_draw_id, facebook_page_username, post
     meta = lucky_draw.data.get('meta', {})
     meta["shared_post_data"] = list(shared_user_name_set)
     lucky_draw.update(meta=meta)
-    service.channels.lucky_draw.send_success_data(room_id,{})
+    service.channels.lucky_draw.send_success_data(room_id, {"message": "success"})

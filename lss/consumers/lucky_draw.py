@@ -11,10 +11,12 @@ class SharedPostCrawlerConsumer(WebsocketConsumer):
 
     @lib.error_handle.error_handler.web_socket_error_handler.web_socket_error_handler
     def connect(self):
+        print("lucky draw websocket connect")
         campaign_lucky_draw_id = self.scope['url_route']['kwargs']['campaign_lucky_draw_id']
         api_user = lib.util.verify.Verify.get_seller_user_from_scope(self.scope)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         self.room_group_name = 'campaign_lucky_draw_%s' % campaign_lucky_draw_id
+        print(self.room_group_name)
         
         async_to_sync(self.channel_layer.group_add)(
             self.room_group_name,
