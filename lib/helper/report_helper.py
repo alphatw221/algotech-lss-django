@@ -454,7 +454,7 @@ class SalesReport:
         top_10_itmes = df.loc[df['stock_product_id'].str.len() != 0,:]
         top_10_itmes = top_10_itmes.explode(['item', 'qty_for_sale', 'stock_product_id', 'order_product_qty'])
         top_10_itmes = top_10_itmes.groupby(['stock_product_id', 'item']).agg({"qty_for_sale": sum, 'order_product_qty': sum}).reset_index()
-        top_10_itmes.loc[:,'status'] = top_10_itmes.apply(lambda x: 'Sold out' if x['qty_for_sale'] == x['order_product_qty'] else '', axis=1)
+        top_10_itmes.loc[:,'status'] = top_10_itmes.apply(lambda x: 'Sold out' if x['qty_for_sale'] == x['order_product_qty'] else 'Not sold out', axis=1)
         top_10_itmes = top_10_itmes.sort_values("order_product_qty", ascending=False).iloc[:10].rename(columns={'item': 'Best selling items - Top 10', 'order_product_qty': 'Qty', 'status': 'Status'})
         top_10_itmes = top_10_itmes[['Best selling items - Top 10', 'Qty', 'Status']]
         top_10_itmes = json.loads(top_10_itmes.to_json(orient = 'records'))
