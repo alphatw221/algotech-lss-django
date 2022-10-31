@@ -39,7 +39,7 @@ class FacebookCrawler():
         self.email = settings.FACEBOOK_TEST_ACOOUNT['EMAIL']
         self.password = settings.FACEBOOK_TEST_ACOOUNT['PASSWORD']
         self.cookies = None
-        self.cookies_path = os.path.join(settings.BASE_DIR, "cookies/facebook_cookie.pkl")
+        self.cookies_path = os.path.join(settings.BASE_DIR, "pkl/cookies/facebook_cookie.pkl")
         self.is_login = False
         self.save_login = False
         

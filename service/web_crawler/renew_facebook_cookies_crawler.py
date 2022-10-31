@@ -14,6 +14,7 @@ from collections import OrderedDict
 import json
 import arrow
 from service.web_crawler.facebook_crawler import FacebookCrawler
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
 

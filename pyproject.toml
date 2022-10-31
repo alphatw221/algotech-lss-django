@@ -51,6 +51,7 @@ pottery = "^3.0.0"
 pytest-django = "^4.5.2"
 pydantic = "^1.10.2"
 setuptools = "^65.4.1"
+selenium = "^4.5.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
