@@ -20,9 +20,10 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 
 class FacebookCrawler():
-    def __init__(self):
+    def __init__(self, open_browser=False):
         self.chrome_options = webdriver.ChromeOptions()
-        self.chrome_options.add_argument('--headless')  # 啟動Headless 無頭
+        if not open_browser:
+            self.chrome_options.add_argument('--headless')  # 啟動Headless 無頭
         self.chrome_options.add_argument('--disable-gpu')
         self.chrome_options.add_experimental_option('excludeSwitches', ['enable-logging'])
         # if "Linux" in platform.platform():
@@ -61,6 +62,9 @@ class FacebookCrawler():
     def get_driver(self):
         return self.driver
     
+    def quit_driver(self):
+        self.driver.quit()
+        
     def save_cookies(self):
         pickle.dump(self.driver.get_cookies(), open(self.cookies_path, "wb"))
         print(f"save facebook cookies to {self.cookies_path}")
