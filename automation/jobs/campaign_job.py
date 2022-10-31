@@ -556,8 +556,10 @@ def capture_facebook_v2(campaign, user_subscription_data, logs, attempts=2):
                     "image": comment['from']['picture']['data']['url'],
                     "categories":service.nlp.classification.classify_comment_v2(texts=[comment['message']]),
                 }
-
-                database.lss.campaign_comment.CampaignComment.create(**uni_format_comment, auto_inc=False)
+                try:
+                    database.lss.campaign_comment.CampaignComment.create(**uni_format_comment, auto_inc=False)
+                except Exception:
+                    continue
 
                 service.channels.campaign.send_comment_data(campaign.id, uni_format_comment)
                 service.rq.queue.enqueue_comment_queue(jobs.comment_job_v2.comment_job, campaign.data, user_subscription_data, models.user.user_subscription.PLATFORM_FACEBOOK, facebook_page.data, uni_format_comment, order_codes_mapping)
@@ -662,8 +664,12 @@ def capture_instagram_v2(campaign, user_subscription_data, logs, attempts=2):
                         "categories":service.nlp.classification.classify_comment_v2(texts=[comment['text']])
                         }   #
                     
-                    database.lss.campaign_comment.CampaignComment.create(**uni_format_comment, auto_inc=False)
                     
+                    try:
+                        database.lss.campaign_comment.CampaignComment.create(**uni_format_comment, auto_inc=False)
+                    except Exception:
+                        continue
+
                     service.channels.campaign.send_comment_data(campaign.id, uni_format_comment)
                     service.rq.queue.enqueue_comment_queue(jobs.comment_job_v2.comment_job, campaign.data, user_subscription_data, 'instagram', instagram_profile.data, uni_format_comment, order_codes_mapping)
                 
