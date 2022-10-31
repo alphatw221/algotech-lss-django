@@ -20,8 +20,8 @@ from selenium.webdriver.support import expected_conditions as EC
 
 
 class FacebookSharedListCrawler(FacebookCrawler):
-    def __init__(self, page_username, target_post_id, lang="en", chrome_driver_path=os.path.join(settings.BASE_DIR, 'chromedriver.exe')):
-        super().__init__()
+    def __init__(self, page_username, target_post_id, lang="en", chrome_driver_path=os.path.join(settings.BASE_DIR, 'chromedriver.exe'), open_browser=False):
+        super().__init__(open_browser)
         self.page_url = f'https://m.facebook.com/{page_username}/'
         self.target_post_id = target_post_id
         self.post_reference_id = ""
@@ -68,13 +68,23 @@ class FacebookSharedListCrawler(FacebookCrawler):
         print("validate_user")
         # check if page pops up log in with one tap
         try:
-            self.driver.find_element(By.CSS_SELECTOR, "input[value='regular_login']")
-            ok_button = self.driver.find_element(By.CSS_SELECTOR, "button[value='OK']")
-            if ok_button:
-                self.actions.click(ok_button).perform()
+            print("check if Go to App button shows up")
+            # check if Go to App button shows up, if yes, pass validation
+            go_to_app_button = self.driver.find_element(By.CSS_SELECTOR, "button[value='Go to App']")
+            if go_to_app_button:
                 self.save_login = True
         except:
-            pass
+            print(traceback.format_exc())
+        
+        if not self.save_login:
+            try:
+                self.driver.find_element(By.CSS_SELECTOR, "input[value='regular_login']")
+                ok_button = self.driver.find_element(By.CSS_SELECTOR, "button[value='OK']")
+                if ok_button:
+                    self.actions.click(ok_button).perform()
+                    self.save_login = True
+            except:
+                print(traceback.format_exc())
             
         if not self.save_login:
             # check new page identity double check
@@ -92,7 +102,7 @@ class FacebookSharedListCrawler(FacebookCrawler):
                     self.actions.click(login_button).perform()
                     self.save_login = True
             except:
-                pass
+                print(traceback.format_exc())
             
         if not self.save_login:
             # check header identity double check
@@ -109,7 +119,7 @@ class FacebookSharedListCrawler(FacebookCrawler):
                     self.actions.click(login_button).perform()
                     self.save_login = True
             except:
-                pass
+                print(traceback.format_exc())
             
     def switch_language(self):
         self.driver.get("https://m.facebook.com/language/")
@@ -198,7 +208,7 @@ class FacebookSharedListCrawler(FacebookCrawler):
             self.driver.quit()
             return name_list
         except Exception as e:
-            print(traceback.format_exc())
-            if self.driver:
-                self.driver.quit()
+            # print(traceback.format_exc())
+            # if self.driver:
+            #     self.driver.quit()
             return {}
