@@ -5,8 +5,7 @@ from channels.layers import get_channel_layer
 
 
 
-def send_success_data(room_id, data={}):
-    print("send_success_data")
+def send_success_data(room_id, data):
     try:
         async_to_sync(get_channel_layer().group_send)(room_id, {"type": "success_data", "data": data})
     
