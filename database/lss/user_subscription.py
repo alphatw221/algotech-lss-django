@@ -82,8 +82,8 @@ def get_order_complete_proceed_count(user_subscription_id):
                                     "id":{"$ne":None}}
                                  },
                                 {"$project":{"_id":0,
-                                "complete": {  "$cond": [ { "$eq":["$status", models.order.order.STATUS_COMPLETE ] }, 1, 0]},
-                                "proceed": { "$cond": [ { "$eq":["$status", models.order.order.STATUS_PROCEED ] }, 1, 0]}
+                                "complete": {  "$cond": [ { "$eq":["$payment_status", models.order.order.PAYMENT_STATUS_PAID ] }, 1, 0]},
+                                "proceed": { "$cond": [ { "$ne":["$payment_status", models.order.order.PAYMENT_STATUS_PAID ] }, 1, 0]}
                                 }},
                             ]
                         },
@@ -166,7 +166,7 @@ def get_average_sales(user_subscription_id):
                                 {"$match":{
                                     '$expr': { '$eq': ["$$id", "$campaign_id"] },
                                     "id":{"$ne":None},
-                                    "status":models.order.order.STATUS_COMPLETE
+                                    "payment_status":models.order.order.PAYMENT_STATUS_PAID
                                     
                                     },
                                     
@@ -229,3 +229,4 @@ def get_average_comment_count(user_subscription_id):
     ])
     l = list(cursor)
     return l[0].get('average_comment_count',0) if l else 0
+
