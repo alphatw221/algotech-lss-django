@@ -495,7 +495,17 @@ class SalesReport:
         df = df.rename(columns={'new_status': 'status'})
         df = df[["status", "qty", "percentage_of_qty", "total", "percentage_of_total"]]
         order_data = json.loads(df.to_json(orient = 'records'))
-        return order_data
+        new_form_data = {}
+        for type in ["qty", "total"]:
+            type_data = []
+            for row in order_data:
+                type_data.append({
+                    "status": row["status"],
+                    type: row[type],
+                    f"percentage_of_{type}": row[f"percentage_of_{type}"]
+                })
+            new_form_data[type] = type_data
+        return new_form_data
    
     @classmethod
     def get_order_analysis(cls, start_time, end_time, user_subscription_id):
@@ -505,10 +515,7 @@ class SalesReport:
     
     @classmethod
     def merge_data(cls, basic_info, top_10_itmes, order_analysis):
-        campaign_number =  basic_info["campaign_number"]
-        del basic_info["campaign_number"]
         return {
-            "campaign_number": campaign_number,
             "basic_info": basic_info,
             "top_10_itmes": top_10_itmes,
             "order_analysis": order_analysis
