@@ -163,8 +163,8 @@ def get_order_complete_proceed_count(campaign_id):
                         "id":{"$ne":None}}
                      },
                     {"$project":{"_id":0,
-                    "complete": {  "$cond": [ { "$eq":["$status", models.order.order.STATUS_COMPLETE ] }, 1, 0]},
-                    "proceed":{  "$cond": [ { "$eq":["$status", models.order.order.STATUS_PROCEED ] }, 1, 0]}
+                    "complete": {  "$cond": [ { "$eq":["$payment_status", models.order.order.PAYMENT_STATUS_PAID ] }, 1, 0]},
+                    "proceed":{  "$cond": [ { "$ne":["$payment_status", models.order.order.PAYMENT_STATUS_PAID ] }, 1, 0]}
                     }},
                 ]
             },
@@ -477,3 +477,8 @@ def get_order_sales_data(start_time, end_time, user_subscription_id):
         },
     ])
     return list(cursor)
+
+def get_previous_campaign_data(campaign_id, user_subscription_id):
+    cursor = __collection.find({"user_subscription_id":user_subscription_id, "id":{"$lt":campaign_id}}).sort('id',-1).limit(1)
+    l = list(cursor)
+    return l[0] if len(l) else None

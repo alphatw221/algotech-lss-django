@@ -239,7 +239,8 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         api_user, campaign_id, search, page, page_size, order_status, = lib.util.getter.getparams(request, ( 'campaign_id', 'search', 'page', 'page_size','status'),with_user=True, seller=True)
         
-        payment_dict, delivery_dict, platform_dict, sort_by_dict = lib.util.getter.getdata(request,('payment','delivery','platform', 'sort_by'), required=False)
+        payment_methods_dict, delivery_status_options_dict, payment_status_options_dict,  platform_dict, sort_by_dict = \
+            lib.util.getter.getdata(request, ('payment_method_options','delivery_status_options', 'payment_status_options', 'platform_options', 'sort_by'), required=False)
 
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription,campaign_id)
@@ -253,11 +254,13 @@ class OrderViewSet(viewsets.ModelViewSet):
         elif order_status in models.order.order.STATUS_CHOICES:
             queryset=queryset.filter(status=order_status)
 
-        if payment_dict:
-            queryset=queryset.filter(payment_method__in=[key for key,value in payment_dict.items() if value])
-        if delivery_dict:
-            queryset=queryset.filter(delivery_status__in=[key for key,value in delivery_dict.items() if value])
-        if platform_dict:
+        if payment_methods_dict and[key for key,value in payment_methods_dict.items() if value]:
+            queryset=queryset.filter(payment_method__in=[key for key,value in payment_methods_dict.items() if value])
+        if delivery_status_options_dict and [key for key,value in delivery_status_options_dict.items() if value]:
+            queryset=queryset.filter(delivery_status__in=[key for key,value in delivery_status_options_dict.items() if value])
+        if payment_status_options_dict and [key for key,value in payment_status_options_dict.items() if value]:
+            queryset=queryset.filter(payment_status__in=[key for key,value in payment_status_options_dict.items() if value])
+        if platform_dict and [key for key,value in platform_dict.items() if value]:
             queryset=queryset.filter(platform__in=[key for key,value in platform_dict.items() if value])
 
         for order_by, asc in sort_by_dict.items():

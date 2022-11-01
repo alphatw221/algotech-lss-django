@@ -32,6 +32,14 @@ import string
 
 
 class UserSubscriptionAccountInfo(models.user.user_subscription.UserSubscriptionSerializer):
+
+    facebook_pages = models.facebook.facebook_page.FacebookPageInfoSerializer(
+        many=True, read_only=True, default=list)
+    instagram_profiles = models.instagram.instagram_profile.InstagramProfileInfoSerializer(
+        many=True, read_only=True, default=list)
+    youtube_channels = models.youtube.youtube_channel.YoutubeChannelInfoSerializer(
+        many=True, read_only=True, default=list)
+
     product_categories = models.product.product_category.ProductCategorySerializer(
         many=True, read_only=True, default=list)
 class UserSerializerAccountInfo(models.user.user.UserSerializer):
@@ -209,7 +217,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
         return Response({"message":"complete"}, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['POST'], url_path=r'seller/password/reset', permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['POST'], url_path=r'seller/password/reset', permission_classes=())
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def seller_reset_password(self, request):
         
@@ -228,15 +236,21 @@ class UserViewSet(viewsets.ModelViewSet):
         
         api_user = models.user.user.User.objects.get(email=email,type='user')
         # user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
-
-        service.email.email_service.EmailService.send_email_template(
-            jobs.send_email_job.send_email_job,
+        jobs.send_email_job.send_email_job(
             i18n_get_reset_password_success_mail_subject(lang=api_user.lang),
             email,
             "reset_password_success_email.html",
             {"email":email,"username":auth_user.username},
             lang=api_user.lang
         )
+        # service.email.email_service.EmailService.send_email_template(
+        #     jobs.send_email_job.send_email_job,
+        #     i18n_get_reset_password_success_mail_subject(lang=api_user.lang),
+        #     email,
+        #     "reset_password_success_email.html",
+        #     {"email":email,"username":auth_user.username},
+        #     lang=api_user.lang
+        # )
         
         return Response(ret, status=status.HTTP_200_OK)
 
@@ -254,13 +268,21 @@ class UserViewSet(viewsets.ModelViewSet):
         api_user = models.user.user.User.objects.get(email=email,type='user')
         # user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         code = lib.code_manager.password_code_manager.PasswordResetCodeManager.generate(auth_user.id,api_user.lang)
-        service.email.email_service.EmailService.send_email_template(
-            jobs.send_email_job.send_email_job,
-            i18n_get_reset_password_mail_subject(lang=api_user.lang),
-            email,
-            "email_reset_password_link.html",
-            {"url":settings.GCP_API_LOADBALANCER_URL +"/seller/web/password/reset","code":code,"username":auth_user.username},
-            lang=api_user.lang)
+        
+        jobs.send_email_job.send_email_job(
+            subject=i18n_get_reset_password_mail_subject(lang=api_user.lang),
+            email=email,
+            template="email_reset_password_link.html",
+            parameters={"url":settings.GCP_API_LOADBALANCER_URL +"/seller/web/password/reset","code":code,"username":auth_user.username},
+            lang=api_user.lang,
+            )
+        # service.email.email_service.EmailService.send_email_template(
+        #     jobs.send_email_job.send_email_job,
+        #     i18n_get_reset_password_mail_subject(lang=api_user.lang),
+        #     email,
+        #     "email_reset_password_link.html",
+        #     {"url":settings.GCP_API_LOADBALANCER_URL +"/seller/web/password/reset","code":code,"username":auth_user.username},
+        #     lang=api_user.lang)
 
         return Response({"message":"The email has been sent. If you haven't received the email after a few minutes, please check your spam folder. "}, status=status.HTTP_200_OK)
 
