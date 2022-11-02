@@ -137,15 +137,20 @@ class CampaignViewSet(viewsets.ModelViewSet):
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, pk)
 
-        campaignData, = lib.util.getter.getdata(request, ('data',), required=True)
-        campaignData = json.loads(campaignData)
+        campaign_data, = lib.util.getter.getdata(request, ('data',), required=True)
+        campaign_data = json.loads(campaign_data)
         
-        end_at = campaignData['end_at']
-        ret = rule.rule_checker.user_subscription_rule_checker.UpdateCampaignRuleChecker.check(**{
-            'api_user': api_user, 'user_subscription': user_subscription, 'end_at': end_at
-        })
+        ret = rule.rule_checker.user_subscription_rule_checker.RuleChecker.check(
+            check_list=[
+                rule.check_rule.user_subscription_check_rule.UserSubscriptionCheckRule.is_expired,
+                rule.check_rule.user_subscription_check_rule.UserSubscriptionCheckRule.campaign_end_time_over_subscription_period,
+                rule.check_rule.user_subscription_check_rule.UserSubscriptionCheckRule.max_concurrent_live,
+                rule.check_rule.user_subscription_check_rule.UserSubscriptionCheckRule.campaign_limit,
+            ],**{
+                'api_user': api_user, 'user_subscription': user_subscription, 'campaign_data': campaign_data
+            })
 
-        serializer = models.campaign.campaign.CampaignSerializerUpdate(campaign, data=campaignData, partial=True)
+        serializer = models.campaign.campaign.CampaignSerializerUpdate(campaign, data=campaign_data, partial=True)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         campaign = serializer.save()

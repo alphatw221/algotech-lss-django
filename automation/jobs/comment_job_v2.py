@@ -22,6 +22,8 @@ def comment_job(campaign_data, user_subscription_data, platform_name, platform_i
     logs.append(["message",comment['message']])
 
     order_placement = None
+    match_keyword = False
+
     for order_code, campaign_product in order_codes_mapping.items():
         qty = lib.util.text_processor.OrderCodeTextProcessor.process(comment['message'], order_code)
         if qty is not None:
@@ -32,9 +34,21 @@ def comment_job(campaign_data, user_subscription_data, platform_name, platform_i
 
     if not order_placement:
         logs.append(["action",'no order_placement'])
-        lib.util.logger.print_table(["Campaign ID", campaign_data.get('id')],logs)
-        return
 
+        comment_auto_reply = campaign_data.get('meta',{}).get('comment_auto_reply',{})
+        if comment_auto_reply and comment_auto_reply.get('input_msg'):
+            for keyword in comment_auto_reply.get('input_msg').split(','):
+                if keyword in comment['message']:
+                    match_keyword = True
+                    break
+        
+        if match_keyword:
+            __demo_responding(platform_name, platform_instance_data, campaign_data, user_subscription_data, comment)
+        else:
+            logs.append(["action",'no matched keyword'])
+            lib.util.logger.print_table(["Campaign ID", campaign_data.get('id')],logs)
+            return
+        
     pymongo_cart = database.lss.cart.Cart.get_object(customer_id= comment['customer_id'], campaign_id= campaign_data['id'], platform= comment['platform'])
 
     if not pymongo_cart:
@@ -90,6 +104,51 @@ def __comment_responding(platform_name, platform_instance_data, campaign_data, u
             if code!=200:
                 print("response", ret)
             return
+
+        code, ret = service.facebook.post.post_page_message_on_comment(platform_instance_data.get('token'), comment['id'], private_message)
+        if code!=200:
+            print("response", ret)
+        
+    elif platform_name == 'youtube':
+
+        customer_name =comment['customer_name']
+        text = f"@{customer_name}"+ private_message
+        live_chat_id = comment.get("live_chat_id")
+        
+        if not live_chat_id:
+            return
+
+        access_token = platform_instance_data.get('token')
+        if not access_token :
+            print("no access token")
+            return
+        code, ret = service.youtube.live_chat.post_live_chat_comment(access_token, live_chat_id, text)
+        if code!=200:
+            print("response", ret)
+
+    elif platform_name == 'instagram':
+
+        code, ret =service.instagram.post.private_message( platform_instance_data.get('token'), comment['id'], private_message)
+        if code!=200:
+            print("response", ret)
+    
+    elif platform_name == 'twitch':
+        
+        code, ret = service.twitch.twitch.whisper_to_user(platform_instance_data.get('token'), platform_instance_data.get('user_name'), comment['customer_id'], private_message)
+        if code!=200:
+            print("response", ret)
+
+    elif platform_name == 'tiktok':
+        pass
+
+
+
+
+
+def __demo_responding(platform_name, platform_instance_data, campaign_data, user_subscription_data, comment):
+    
+    private_message = campaign_data.get('meta',{}).get('comment_auto_reply',{}).get('output_msg','')
+    if platform_name == 'facebook':
 
         code, ret = service.facebook.post.post_page_message_on_comment(platform_instance_data.get('token'), comment['id'], private_message)
         if code!=200:
