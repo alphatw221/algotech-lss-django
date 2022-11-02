@@ -50,7 +50,7 @@ class RenewFacebookCookiesCrawler(FacebookCrawler):
             self.actions.click(ok_button).perform()
             self.save_login = True
         except:
-            pass
+            print(traceback.format_exc())
             
         if not self.save_login:
             # check new page identity double check
@@ -66,7 +66,7 @@ class RenewFacebookCookiesCrawler(FacebookCrawler):
                 self.actions.click(login_button).perform()
                 self.save_login = True
             except:
-                pass
+                print(traceback.format_exc())
             
         if not self.save_login:
             # check header identity double check
@@ -81,7 +81,7 @@ class RenewFacebookCookiesCrawler(FacebookCrawler):
                 self.actions.click(login_button).perform()
                 self.save_login = True
             except:
-                pass
+                print(traceback.format_exc())
     
     def start(self):
         try:

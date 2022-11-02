@@ -347,7 +347,7 @@ FACEBOOK_APP_CREDS = {
 
 FACEBOOK_TEST_ACOOUNT = {
     "EMAIL": "twadmin@algotech.app",
-    "PASSWORD": "algoFB2021"
+    "PASSWORD": "algoFB2022"
 }
 
 # Instagram
