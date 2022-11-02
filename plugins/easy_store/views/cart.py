@@ -28,8 +28,9 @@ class CartViewSet(viewsets.GenericViewSet):
         if code!=200 or not response.get('success'):
             raise lib.error_handle.error.api_error.ApiVerifyError('Please Refresh The Page And Retry Again')
 
-        pre_order = lib.util.verify.Verify.get_pre_order_with_oid(cart_oid)    #temp
-        campaign = pre_order.campaign
+        # pre_order = lib.util.verify.Verify.get_pre_order_with_oid(cart_oid)    #temp
+        cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
+        campaign = cart.campaign
         user_subscription = campaign.user_subscription
 
         credential = user_subscription.user_plan.get('plugins',{}).get('easy_store',{})
@@ -40,11 +41,11 @@ class CartViewSet(viewsets.GenericViewSet):
         internal_external_map = easy_store_lib.mapping_helper.CampaignProduct.get_internal_external_map(campaign)
 
         line_items = []
-        for campaign_product_id_str,product in pre_order.products.items():
+        for campaign_product_id_str,qty in cart.products.items():
           if campaign_product_id_str not in internal_external_map:
               continue
           variant_id = internal_external_map[campaign_product_id_str]
-          line_items.append({'variant_id':variant_id, 'quantity':product.get('qty')})
+          line_items.append({'variant_id':variant_id, 'quantity':qty})
         
         success, data = easy_store_service.checkouts.create_checkout(credential.get('shop'), credential.get('access_token'), line_items)
         if not success:
@@ -62,9 +63,9 @@ class CartViewSet(viewsets.GenericViewSet):
                             "cart_token":cart_token,
                             "checkout_url":checkout_url,
                         }}
-        campaign.meta[cart_token]=pre_order.id
+        campaign.meta[cart_token]=cart.id
         campaign.save()
-        pre_order.meta.update(meta_data)
-        pre_order.save()
+        cart.meta.update(meta_data)
+        cart.save()
 
         return Response(checkout_url, status=status.HTTP_200_OK)
