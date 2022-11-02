@@ -17,8 +17,25 @@ class Campaign(Collection):
     collection_name='api_campaign'
     template = models.campaign.campaign.api_campaign_template
 
+    def increment_silent_count(self, sync=False, session=None):
+        self._collection.update_one({'id':self.id},{"$inc": {'silent_count': 1},"$set":{'updated_at':datetime.utcnow()}}, session=session)
+        if sync:
+            self._sync(session=session)
 
+    def reset_silent_count(self, sync=False, session=None):
+        self._collection.update_one({'id':self.id},{"$set":{'silent_count': 0, 'updated_at':datetime.utcnow()}}, session=session)
+        if sync:
+            self._sync(session=session)
 
+    def deprioritize(self, sync=False, session=None):
+        self._collection.update_one({'id':self.id},{"$inc": {'priority': 1},"$set":{'silent_count': 0, 'updated_at':datetime.utcnow()}}, session=session)
+        if sync:
+            self._sync(session=session)
+    
+    def reset_priority(self, sync=False, session=None):
+        self._collection.update_one({'id':self.id},{"$set":{'silent_count': 0,'priority': 1, 'updated_at':datetime.utcnow()}}, session=session)
+        if sync:
+            self._sync(session=session)
 
 # def get_merge_order_list_pagination(campaign_id, search:str, status:str, filter_payment:list, filter_delivery:list, filter_platform:list, sort_by:dict, page:int=1, page_size:int=25):
 

@@ -138,12 +138,12 @@ def create_checkout_session(secret, currency, order, decimal_places, price_unit,
         print(traceback.format_exc())
         return False
 
-def create_checkout_session_for_james(secret, currency, amount):
+def create_checkout_session_for_james(secret, currency, email, application, subscription_plan_name, unit, month_name, year, amount):
     try:
         stripe.api_key = secret
         items = []
         stripe_product = stripe.Product.create(
-            name='lss_seller_account',
+            name=f'{email} {application} {subscription_plan_name} {unit} {month_name} {year}',
         )
         
         price = stripe.Price.create(
@@ -158,7 +158,6 @@ def create_checkout_session_for_james(secret, currency, amount):
                 "quantity": 1
             },
         )
-
        
         checkout_session = stripe.checkout.Session.create(
             line_items=items,
@@ -166,7 +165,6 @@ def create_checkout_session_for_james(secret, currency, amount):
             success_url='https://liveshowseller.com/',
             cancel_url='https://liveshowseller.com/'
         )
-        
 
         return checkout_session
     except Exception:

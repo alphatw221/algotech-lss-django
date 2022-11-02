@@ -17,6 +17,9 @@ from dateutil import parser
 from datetime import datetime
 import database
 from api import models
+
+C_VALUE = 10
+LOWEST_PRIORITY = 3
 class OrderCodesMappingSingleton:
 
     order_codes_mapping = None
@@ -40,7 +43,7 @@ def campaign_job(campaign_id):
     user_subscription_data = database.lss.user_subscription.UserSubscription.get(id=campaign.data.get('user_subscription_id'))
 
     capture_facebook_v2(campaign, user_subscription_data, logs)
-    capture_youtube(campaign, user_subscription_data, logs)
+    capture_youtube_v2(campaign, user_subscription_data, logs)
     capture_instagram_v2(campaign, user_subscription_data, logs)
     lib.util.logger.print_table(["Campaign ID", campaign_id],logs)
 
@@ -523,14 +526,20 @@ def capture_facebook_v2(campaign, user_subscription_data, logs, attempts=2):
 
         if facebook_comments and int(facebook_comments[-1].get('created_time')) == facebook_comment_capture_since:
             logs.append(["number of comments",0])
+            __update_campaign_silent_count(campaign)
             return
 
         if not facebook_comments:
             logs.append(["number of comments",0])
+            __update_campaign_silent_count(campaign)
             return
             
         facebook_campaign['comment_capture_since'] = int(facebook_comments[-1].get('created_time'))
-        campaign.update(facebook_campaign=facebook_campaign, sync=False)
+        campaign.update(
+            facebook_campaign=facebook_campaign,
+            priority=1,
+            silent_count=0,
+            sync=True)
 
         logs.append(["number of comments", len(facebook_comments)])
 
@@ -609,10 +618,6 @@ def capture_instagram_v2(campaign, user_subscription_data, logs, attempts=2):
         
         order_codes_mapping = OrderCodesMappingSingleton.get_mapping(campaign.id)
 
-        instagram_latest_message_id = instagram_comments[0]['id']
-        instagram_campaign['last_create_message_id'] = instagram_latest_message_id
-        campaign.update(instagram_campaign=instagram_campaign, sync=False)
-
         after_page =     None
         keep_capturing = True
 
@@ -632,8 +637,18 @@ def capture_instagram_v2(campaign, user_subscription_data, logs, attempts=2):
             instagram_comments = ig_comments_response.get('data', [])
 
             if not instagram_comments:
+                __update_campaign_silent_count(campaign)
                 return 
             
+            if not after_page:   #first run in the loop
+                instagram_latest_message_id = instagram_comments[0]['id']
+                instagram_campaign['last_create_message_id'] = instagram_latest_message_id
+                campaign.update(
+                    instagram_campaign=instagram_campaign,
+                    priority=1,
+                    silent_count=0,
+                    sync=False)
+
             logs.append(["number of comments", len(instagram_comments)])
 
             for comment in instagram_comments:
@@ -688,3 +703,168 @@ def capture_instagram_v2(campaign, user_subscription_data, logs, attempts=2):
         if attempts>0:
             capture_instagram_v2(campaign, user_subscription_data, logs, attempts=attempts-1)
         print(traceback.format_exc())
+
+
+
+@lib.error_handle.error_handler.capture_platform_error_handler.capture_platform_error_handler
+def capture_youtube_v2(campaign, user_subscription_data, logs, attempts=2):
+    logs.append(["youtube",""])
+
+    if not campaign.data.get('youtube_channel_id'):
+        return
+
+    youtube_channel = database.lss.youtube_channel.YoutubeChannel.get_object(id=campaign.data.get('youtube_channel_id'))
+    if not youtube_channel:
+        logs.append(["error", "no youtube_channel found"])
+        return
+        
+    access_token = youtube_channel.data.get('token')
+    refresh_token = youtube_channel.data.get('refresh_token')
+
+    if not access_token or not refresh_token:
+        logs.append(["error", "need both access_token and refresh_token"])
+        return
+
+    youtube_campaign = campaign.data.get('youtube_campaign')
+
+    next_page_token = youtube_campaign.get('next_page_token', '')
+    
+    
+
+    
+    if youtube_campaign.get('live_chat_ended',False):
+        capture_youtube_video(campaign, user_subscription_data, youtube_channel, logs)
+        return
+
+    live_chat_id = youtube_campaign.get('live_chat_id')
+    if not live_chat_id:
+        live_video_id = youtube_campaign.get('live_video_id')
+        if not live_video_id:
+            logs.append(["error", "no live_video_id"])
+            return
+        
+        code, data = service.youtube.viedo.get_video_info_with_access_token(access_token, live_video_id)
+        if code // 100 != 2:
+            print(data)
+            if code == 401:
+                refresh_youtube_channel_token(youtube_channel, logs)
+            logs.append(["error", "video info error"])
+            return
+        items = data.get("items")
+        if not items:
+            logs.append(["error", "no items"])
+            return
+
+        liveStreamingDetails = items[0].get('liveStreamingDetails')
+
+        if not liveStreamingDetails:
+            logs.append(["error", "no liveStreamingDetails"])
+            return
+
+        if 'actualEndTime' in liveStreamingDetails.keys():
+            youtube_campaign['live_chat_ended'] = True
+            campaign.update(youtube_campaign=youtube_campaign, sync=False)
+            return
+            
+        live_chat_id = liveStreamingDetails.get('activeLiveChatId')
+        if not live_chat_id:
+            logs.append(["error", "can't get live_chat_id"])
+            return
+
+        #start of every youtube live chat:
+        youtube_campaign['live_chat_id'] = live_chat_id
+        campaign.update(youtube_campaign=youtube_campaign, sync=False)
+        access_token = refresh_youtube_channel_token(youtube_channel, logs)
+
+    
+    code, data = service.youtube.live_chat.get_live_chat_comment_with_access_token(access_token, next_page_token, live_chat_id, 100)
+
+    logs.append(["live_chat_id", live_chat_id])
+    logs.append(["next_page_token", next_page_token])
+    logs.append(["code", code])
+
+    if code // 100 != 2 and 'error' in data:
+        print(data)
+        if code == 401:
+            access_token = refresh_youtube_channel_token(youtube_channel, logs)
+            return
+
+        youtube_campaign['live_chat_id'] = ''
+        youtube_campaign['next_page_token'] = ''
+        youtube_campaign['remark'] = 'youtube API error'
+        campaign.update(youtube_campaign=youtube_campaign, sync=False)
+        return
+
+    next_page_token = data['nextPageToken']
+    comments = data.get('items', [])
+    logs.append(["number of comments", len(comments)])
+
+    if not comments:
+        __update_campaign_silent_count(campaign)
+        return
+
+
+    # latest_comment_time = youtube_campaign.get('latest_comment_time', 1)
+
+    order_codes_mapping = OrderCodesMappingSingleton.get_mapping(campaign.id)
+
+
+    youtube_campaign['next_page_token'] = data.get('nextPageToken', "")
+    # youtube_campaign['latest_comment_time'] = parser.parse(
+    #     comments[-1]['snippet']['publishedAt']).timestamp()
+    
+    campaign.update(
+        youtube_campaign=youtube_campaign,
+        priority=1,
+        silent_count=0,
+        sync=False)
+
+    try:
+        for comment in comments:
+            logs.append(["message", comment['snippet']['displayMessage']])
+
+            comment_time_stamp = parser.parse(
+                comment['snippet']['publishedAt']).timestamp()
+
+            if comment['authorDetails']['channelId'] == youtube_channel.data.get('channel_id'):
+                continue
+
+            uni_format_comment = {
+                'platform': 'youtube',
+                'id': comment['id'],
+                "campaign_id": campaign.id,
+                'message': comment['snippet']['displayMessage'],
+                "created_time": comment_time_stamp,
+                "customer_id": comment['authorDetails']['channelId'],
+                "customer_name": comment['authorDetails']['displayName'],
+                "image": comment['authorDetails']['profileImageUrl'],
+                "live_chat_id": live_chat_id,
+                "categories":service.nlp.classification.classify_comment_v2(texts=[comment['snippet']['displayMessage']])
+            }
+            try:
+                database.lss.campaign_comment.CampaignComment.create(**uni_format_comment, auto_inc=False)
+            except Exception:
+                continue
+            service.channels.campaign.send_comment_data(campaign.id, uni_format_comment)
+            service.rq.queue.enqueue_comment_queue(jobs.comment_job_v2.comment_job, campaign.data, user_subscription_data, 'youtube', youtube_channel.data, uni_format_comment, order_codes_mapping)
+
+         
+
+    except Exception :
+
+        if attempts>0:
+            capture_youtube_v2(campaign, user_subscription_data, logs, attempts=attempts-1)
+        print(traceback.format_exc())
+
+
+def __update_campaign_silent_count(pymongo_campaign:database.lss.campaign.Campaign):
+    
+    if pymongo_campaign.data.get('priority',0) >= LOWEST_PRIORITY:
+        pymongo_campaign.increment_silent_count(sync=False)
+        return
+
+    if pymongo_campaign.data.get('silent_count',0) >= C_VALUE:
+        pymongo_campaign.deprioritize(sync=False)
+    else:
+        pymongo_campaign.increment_silent_count(sync=False)
+

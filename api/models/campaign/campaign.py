@@ -102,7 +102,8 @@ class Campaign(models.Model):
         blank=False, null=False, default=False)
     
     # discounts = models.ArrayField(model_container=Discount, blank=False, null = False, default = [])
-
+    priority = models.IntegerField( blank=False, null=False, default=1)
+    silent_count = models.IntegerField( blank=False, null=False, default=0)
     def __str__(self):
         return str(self.title)
 
