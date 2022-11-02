@@ -163,7 +163,8 @@ def create_checkout_session_for_james(secret, currency, email, application, subs
             line_items=items,
             mode='payment',
             success_url='https://liveshowseller.com/',
-            cancel_url='https://liveshowseller.com/'
+            cancel_url='https://liveshowseller.com/',
+            metadata={'name':f'{email} {application} {subscription_plan_name} {unit} {month_name} {year}'}
         )
 
         return checkout_session

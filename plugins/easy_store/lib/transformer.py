@@ -2,7 +2,7 @@ from api import models
 from django.conf import settings
 import database
 
-def to_lss_product(easy_store_product, easy_store_variant_product, user_subscription, tags):
+def to_lss_product(easy_store_product, easy_store_variant_product, user_subscription, categories):
     product_image = easy_store_product.get('images')[0].get('url') if easy_store_product.get('images') else  settings.GOOGLE_STORAGE_STATIC_DIR+models.product.product.IMAGE_NULL
     image_url_dict = {str(image.get('id')):image.get('url') for image in easy_store_product.get('images')}
     image_id_str = str(easy_store_variant_product.get('image_id'))
@@ -14,7 +14,7 @@ def to_lss_product(easy_store_product, easy_store_variant_product, user_subscrip
         'sku':easy_store_variant_product.get('sku'),
         'price':easy_store_variant_product.get('price'),
         'qty':easy_store_variant_product.get('inventory_quantity'),
-        'tag':tags,
+        'categories':categories,
         'description':easy_store_product.get('description'),
         'user_subscription':user_subscription,
         'status':models.product.product.STATUS_ENABLED

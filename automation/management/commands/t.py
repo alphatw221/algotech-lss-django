@@ -34,6 +34,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # self.handle_new_registeration_from_hubspot()
+        self.test_import_account()
         pass
 
 
@@ -894,6 +895,10 @@ class Command(BaseCommand):
 
 
 
+    def test_import_account(self):
 
+        from automation import jobs
+
+        jobs.import_account_job.imoprt_account_job('Till End OCT2022.xlsx','1')
 
            

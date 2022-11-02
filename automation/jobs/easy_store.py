@@ -23,11 +23,9 @@ def export_product_job(user_subscription_id, credential):
 
         user_subscription = models.user.user_subscription.UserSubscription.objects.get(id=user_subscription_id)
         product_categories:list = user_subscription.meta.get('product_categories',[])
-
+        product_categories_dict = {product_category.name:product_category.id for product_category in user_subscription.product_categories.all()}
 
         product_dict = {product.meta.get(PLUGIN_EASY_STORE,{}).get('variant_id') : product.id for product in user_subscription.products.all() if product.meta.get(PLUGIN_EASY_STORE,{}).get('variant_id')}
-        tag_set:set = set(product_categories) 
-        
 
         page = 1
         page_count = 1
@@ -39,23 +37,30 @@ def export_product_job(user_subscription_id, credential):
             
             page_count = data.get('page_count')
 
-
             for product in data.get('products'):
                 product_id = product.get('id')
 
-                tags = []
+                categories = []
                 for collection in product.get('collections'):
                     collection_name = collection.get('name')
                     if not collection_name:
                         continue
-                    if collection_name not in tag_set:
-                        product_categories.append(collection_name)
-                        tag_set.add(collection_name)
-                    tags.append(collection_name)
+                    if collection_name not in product_categories_dict:
+                        try: 
+                            product_category = models.product.product_category.ProductCategory.objects.create(
+                                user_subscription=user_subscription,
+                                name = collection_name
+                            )
+                            product_categories_dict[product_category.name] = product_category.id
+                            categories.append(str(product_category.id))
+                        except Exception:
+                            pass #duplicate key 
+                    else:
+                        categories.append(str(product_categories_dict.get('collection_name')))
 
                 for variant in product.get('variants'):
 
-                    lss_product_data = easy_store_lib.transformer.to_lss_product(product,variant, user_subscription, tags)
+                    lss_product_data = easy_store_lib.transformer.to_lss_product(product,variant, user_subscription, categories)
                     variant_id = variant.get('id')
                     variant_name = variant.get('name')
 
@@ -71,8 +76,6 @@ def export_product_job(user_subscription_id, credential):
                         models.product.product.Product.objects.create(**lss_product_data,meta = meta_data)
 
             page+=1
-
-        user_subscription.save()
         
         easy_store_service.channels.export_product.send_result_data(user_subscription.id,{'result':'complete'})
     except Exception:

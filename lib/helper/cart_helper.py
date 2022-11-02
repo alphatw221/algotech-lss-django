@@ -187,7 +187,7 @@ class CartHelper():
                     
                     pymongo_order = database.lss.order.Order.create_object(
                         session=session,
-                        buyer=api_user.id if api_user else None, 
+                        buyer_id=api_user.id if api_user else None, 
                         **pymongo_cart.data, 
                         **shipping_data)  
 
