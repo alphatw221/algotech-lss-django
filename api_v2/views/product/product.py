@@ -95,22 +95,26 @@ class ProductViewSet(viewsets.ModelViewSet):
             rule.check_rule.product_check_rule.ProductCheckRule.is_images_exceed_max_size
         ],product_data=data, image=image)
 
-        if image in ['null', None, '', 'undefined']:
-            pass
-        elif image =='._no_image':
-            data['image'] = settings.GOOGLE_STORAGE_STATIC_DIR+models.product.product.IMAGE_NULL
-        else:
-            image_name = image.name.replace(" ","")
-            image_dir = f'user_subscription/{user_subscription.id}/product/{product.id}'
-            image_url = lib.util.storage.upload_image(image_dir, image_name, image)
-            data['image'] = image_url
-
         serializer=models.product.product.ProductSerializer(data = data) 
         if not serializer.is_valid():
             print(data)
             print(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         product = serializer.save()
+
+        if image in ['null', None, '', 'undefined']:
+            pass
+        elif image =='._no_image':
+            product.image = settings.GOOGLE_STORAGE_STATIC_DIR+models.product.product.IMAGE_NULL
+            product.save()
+        else:
+            image_name = image.name.replace(" ","")
+            image_dir = f'user_subscription/{user_subscription.id}/product/{product.id}'
+            image_url = lib.util.storage.upload_image(image_dir, image_name, image)
+            product.image = image_url
+            product.save()
+
+ 
 
         return Response(models.product.product.ProductSerializer(product).data, status=status.HTTP_200_OK)
 
