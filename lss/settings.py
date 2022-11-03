@@ -369,12 +369,11 @@ YOUTUBE_API_CONFIG = {
     }
 }
 
+# twitch
 TWITCH_API_URL="https://api.twitch.tv"
 TWITCH_OAUTH_URL = "https://id.twitch.tv"
-
-TWITCH_CLIENT_ID = "drsl6rugh7wf23ombongnhfec210gp"
-TWITCH_CLIENT_SECRET = "a0i3kpoz7jzk4v48bsmt9vieriqg8j"
-TWITCH_FROM_USER_ID = "788983065"
+TWITCH_CLIENT_ID = "yh5jhlahkvxz1k4070q6f4zfpvx3oq"
+TWITCH_CLIENT_SECRET = "i2q6fe0x6zetvd5fl4r39hsspni77g"
 
 # Google API credentials
 GOOGLE_OAUTH_CLIENT_ID_FOR_LIVESHOWSELLER = "536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com"

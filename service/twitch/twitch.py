@@ -18,7 +18,7 @@ def whisper_to_user(access_token: str, from_user_id: str, to_user_id: str, messa
 
     return ret
 
-def get_token(code: str):
+def get_token(code: str, redirect_uri:str):
     headers = { 
         'Content-Type': 'application/x-www-form-urlencoded' 
     }
@@ -27,7 +27,7 @@ def get_token(code: str):
         'client_secret': settings.TWITCH_CLIENT_SECRET,
         'code': code,
         'grant_type': 'authorization_code',
-        'redirect_uri': settings.GCP_API_LOADBALANCER_URL,
+        'redirect_uri': redirect_uri,
     }
     ret = TwitchOauthCaller('oauth2/token', headers=headers, data=data).post()
 

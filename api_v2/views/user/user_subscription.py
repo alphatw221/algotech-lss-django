@@ -19,7 +19,7 @@ from api_v2.views.user.user import UserSerializerAccountInfo
 import stripe, pytz, lib, service, business_policy, json
 from backend.pymongo.mongodb import db
 
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
 import database
 
@@ -165,6 +165,9 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         platform_instance = lib.util.verify.Verify.get_platform_from_user_subscription(user_subscription,platform_name,platform_instance_id)
 
+        campaigns_connected_to_the_platform = user_subscription.campaigns.exclude(end_at__lte=datetime.utcnow())
+        campaigns_connected_to_the_platform.update(**{models.user.user_subscription.PLATFORM_ATTR[platform_name]['attr'][:-1]:None, f'{platform_name}_campaign':{}})
+        
         getattr(user_subscription, models.user.user_subscription.PLATFORM_ATTR[platform_name]['attr']).remove(platform_instance)
         
         if not platform_instance.user_subscriptions.all().exists():

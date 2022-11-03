@@ -39,7 +39,10 @@ class UserSubscriptionAccountInfo(models.user.user_subscription.UserSubscription
         many=True, read_only=True, default=list)
     youtube_channels = models.youtube.youtube_channel.YoutubeChannelInfoSerializer(
         many=True, read_only=True, default=list)
-
+    twitch_channels = models.twitch.twitch_channel.TwitchChannelInfoSerializer(
+        many=True, read_only=True, default=list)
+    tiktok_accounts = models.tiktok.tiktok_account.TikTokAccountInfoSerializer(
+        many=True, read_only=True, default=list)
     product_categories = models.product.product_category.ProductCategorySerializer(
         many=True, read_only=True, default=list)
 class UserSerializerAccountInfo(models.user.user.UserSerializer):
