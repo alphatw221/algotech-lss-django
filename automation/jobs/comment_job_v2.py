@@ -148,6 +148,7 @@ def __comment_responding(platform_name, platform_instance_data, campaign_data, u
 def __demo_responding(platform_name, platform_instance_data, campaign_data, user_subscription_data, comment):
     
     private_message = campaign_data.get('meta',{}).get('comment_auto_reply',{}).get('output_msg','')
+    private_message.replace('[NAME]', comment['customer_name'])
     if platform_name == 'facebook':
 
         code, ret = service.facebook.post.post_page_message_on_comment(platform_instance_data.get('token'), comment['id'], private_message)
