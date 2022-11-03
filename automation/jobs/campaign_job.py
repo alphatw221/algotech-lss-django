@@ -18,7 +18,7 @@ from datetime import datetime
 import database
 from api import models
 
-C_VALUE = 10
+C_VALUE = 60
 LOWEST_PRIORITY = 3
 class OrderCodesMappingSingleton:
 
