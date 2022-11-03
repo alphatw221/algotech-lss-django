@@ -23,7 +23,15 @@ def to_lss_product(easy_store_product, easy_store_variant_product, user_subscrip
     return data
 
 
-def to_lss_order(easy_store_order, lss_cart):
+def to_lss_order(easy_store_order, lss_cart, campaign_product_external_internal_map):
+
+    products_data = {}
+    for item in easy_store_order.get('line_items'):
+        if item.get('variant_id') not in campaign_product_external_internal_map:
+            continue
+        campaign_product_data = campaign_product_external_internal_map[item.get('variant_id')]
+        products_data[str(campaign_product_data.get('id'))] = int(item.get('quantity'))
+
 
     order_data = {
         "campaign":lss_cart.campaign,
@@ -31,7 +39,7 @@ def to_lss_order(easy_store_order, lss_cart):
         "customer_name" : lss_cart.customer_name,
         "customer_img" : lss_cart.customer_img,
         "platform" : lss_cart.platform,
-        "products":lss_cart.products,
+        "products":products_data,
 
         "payment_status" : models.order.order.PAYMENT_STATUS_PAID if easy_store_order.get('financial_status')=='paid' else models.order.order.PAYMENT_STATUS_AWAITING_PAYMENT,
         "status":models.order.order.STATUS_PROCEED,
@@ -46,26 +54,29 @@ def to_lss_order(easy_store_order, lss_cart):
     # lss_order = models.order.order.Order.objects.create(**order_data)
 
     # lss_products = {}
-    # order_products_data = []
-    # for item in easy_store_order.get('line_items'):
-    #     if item.get('variant_id') not in campaign_product_external_internal_map:
-    #         continue
-    #     campaign_product_data = campaign_product_external_internal_map[item.get('variant_id')]
-        
-    #     order_product_data={
-    #         "name":campaign_product_data.get('name'),
-    #         "price":float(item.get('price')),
-    #         "image":campaign_product_data.get('image'),
-    #         "qty":float(item.get('quantity')),
-    #         "type":campaign_product_data.get('type'),
-    #         "subtotal":float(item.get('price'))*float(item.get('quantity')),
-    #         #relation:
-    #         # "order_id":lss_order.id,
-    #         "campaign_product_id":int(campaign_product_data.get('id'))
-    #     }
+    order_products_data = {}
+    for item in easy_store_order.get('line_items'):
+        if item.get('variant_id') not in campaign_product_external_internal_map:
+            continue
+        campaign_product_data = campaign_product_external_internal_map[item.get('variant_id')]
+        order_products_data[str(campaign_product_data.get('id'))] = item.get('quantity')
 
-    #     order_products_data.append(order_product_data)
-    #     # database.lss.order_product.OrderProduct.create(**order_product_data)
+
+
+        # order_product_data={
+        #     "name":campaign_product_data.get('name'),
+        #     "price":float(item.get('price')),
+        #     "image":campaign_product_data.get('image'),
+        #     "qty":float(item.get('quantity')),
+        #     "type":campaign_product_data.get('type'),
+        #     "subtotal":float(item.get('price'))*float(item.get('quantity')),
+        #     #relation:
+        #     # "order_id":lss_order.id,
+        #     "campaign_product_id":int(campaign_product_data.get('id'))
+        # }
+
+        # order_products_data.append(order_product_data)
+        # database.lss.order_product.OrderProduct.create(**order_product_data)
 
     # return lss_order
 

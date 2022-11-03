@@ -124,7 +124,7 @@ def export_order_job(campaign_id, credential):
 
                     lss_cart = models.cart.cart.Cart.objects.get(id = lss_cart_id)
                     
-                    lss_order_data = easy_store_lib.transformer.to_lss_order(easy_store_order, lss_cart)
+                    lss_order_data = easy_store_lib.transformer.to_lss_order(easy_store_order, lss_cart, campaign_product_external_internal_map)
                     lss_order = models.order.order.Order.objects.create(**lss_order_data)
 
                     order_products_data = easy_store_lib.transformer.to_lss_order_products(easy_store_order, lss_order, campaign_product_external_internal_map)
