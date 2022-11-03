@@ -159,6 +159,7 @@ def __demo_responding(platform_name, platform_instance_data, campaign_data, user
 
         customer_name =comment['customer_name']
         text = f"@{customer_name}"+ private_message
+        text = private_message
         live_chat_id = comment.get("live_chat_id")
         
         if not live_chat_id:
