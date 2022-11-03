@@ -22,9 +22,9 @@ def export_product_job(user_subscription_id, credential):
     try:
 
         user_subscription = models.user.user_subscription.UserSubscription.objects.get(id=user_subscription_id)
-        product_categories:list = user_subscription.meta.get('product_categories',[])
         product_categories_dict = {product_category.name:product_category.id for product_category in user_subscription.product_categories.all()}
 
+        models.product.product.Product.objects.filter(user_subscription=user_subscription).delete()
         product_dict = {product.meta.get(PLUGIN_EASY_STORE,{}).get('variant_id') : product.id for product in user_subscription.products.all() if product.meta.get(PLUGIN_EASY_STORE,{}).get('variant_id')}
 
         page = 1
@@ -56,7 +56,7 @@ def export_product_job(user_subscription_id, credential):
                         except Exception:
                             pass #duplicate key 
                     else:
-                        categories.append(str(product_categories_dict.get('collection_name')))
+                        categories.append(str(product_categories_dict.get(collection_name)))
 
                 for variant in product.get('variants'):
 
