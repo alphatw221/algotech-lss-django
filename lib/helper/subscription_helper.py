@@ -182,10 +182,9 @@ def bind_youtube_channels(request, user_subscription):
             user_subscription.youtube_channels.add(youtube_channel)
 
 def bind_twitch_channels(request, user_subscription):
+    code, channel_name, redirect_uri = lib.util.getter.getdata(request,("code", "channel_name", "redirect_uri"), required=True)
 
-    code, channel_name = lib.util.getter.getdata(request,("code", "channel_name"), required=True)
-
-    response_code, response = service.twitch.twitch.get_token(code)
+    response_code, response = service.twitch.twitch.get_token(code, redirect_uri)
     if not response_code / 100 == 2:
         lib.error_handle.error.api_error.ApiCallerError('get twitch token fail')
     print ('response1', response)
