@@ -184,10 +184,9 @@ class CartHelper():
                         pymongo_cart.update(session=session, sync=True, **pymongo_cart.data)
                         return False, {'pymongo_cart':pymongo_cart, 'error_products_data':error_products_data, }
 
-                    
+                    pymongo_cart.data['buyer_id']=api_user.id if api_user else None
                     pymongo_order = database.lss.order.Order.create_object(
                         session=session,
-                        buyer_id=api_user.id if api_user else None, 
                         **pymongo_cart.data, 
                         **shipping_data)  
 
@@ -215,8 +214,9 @@ class CartHelper():
 
         except Exception:
             if attempts > 0:
-                cls.checkout(api_user, cart_id, shipping_data, attempts=attempts-1)
+                cls.__transfer_cart_to_order(api_user, cart_id, shipping_data, attempts=attempts-1)
             else:
+                print(traceback.format_exc())
                 raise lib.error_handle.error.cart_error.CartErrors.ServerBusy('server_busy')
 
 

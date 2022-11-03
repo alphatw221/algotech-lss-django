@@ -437,19 +437,22 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         save_to_stock, name, order_code, price, qty = lib.util.getter.getdata(request,("save_to_stock", "name", "order_code", "price", "qty"), required=True)
         
-        category, = lib.util.getter.getdata(request,("category",), required=False)
+        category_id, = lib.util.getter.getdata(request,("category_id",), required=False)
         
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, pk)
         
-        if user_subscription.product_categories.filter(id=int(category)).exists():
-            category = [category]
+        if category_id and user_subscription.product_categories.filter(id=int(category_id)).exists():
+            category = [category_id]
         else:
             category = []
 
         product=None
         
+        if campaign.products.filter(order_code=order_code).exists():
+            raise lib.error_handle.error.api_error.ApiVerifyError('duplicate_order_code')
+
         if save_to_stock:
             product = models.product.product.Product.objects.create(user_subscription=user_subscription, created_by=api_user, name=name, order_code=order_code, categories=category, price=price, qty=0, type=models.product.product.TYPE_PRODUCT, image=settings.GOOGLE_STORAGE_STATIC_DIR+models.product.product.IMAGE_NULL)
 
