@@ -42,4 +42,5 @@ def list_order(shop, access_token, created_at_min, page):
         # json = data,
         timeout=10
     )
+    print(response.text)
     return load_response(response)
