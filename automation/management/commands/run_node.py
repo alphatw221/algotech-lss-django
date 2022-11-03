@@ -113,7 +113,7 @@ class Command(BaseCommand):
         self.__heart_beating()
 
         rows=[]
-        for campaign in models.campaign.campaign.Campaign.objects.filter(user_subscription__isnull=False, start_at__lt=datetime.utcnow(),end_at__gt=datetime.utcnow(), priority=3):
+        for campaign in models.campaign.campaign.Campaign.objects.filter(user_subscription__isnull=False, start_at__lt=datetime.utcnow(),end_at__gt=datetime.utcnow(), priority__gte=3):
             self.__capture_campaign(campaign, rows)
         lib.util.logger.print_table(["Level 3 Campaign ID", "Status"],rows)
 
