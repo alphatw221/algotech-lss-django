@@ -20,16 +20,18 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 
 class FacebookCrawler():
-    def __init__(self, open_browser=False):
+    def __init__(self, open_browser=False, chromedriver_path=None):
         self.chrome_options = webdriver.ChromeOptions()
         if not open_browser:
             self.chrome_options.add_argument('--headless')  # 啟動Headless 無頭
         self.chrome_options.add_argument('--disable-gpu')
+        self.chrome_options.add_argument('--no-sandbox')
+        self.chrome_options.add_argument('--disable-dev-shm-usage')
         self.chrome_options.add_experimental_option('excludeSwitches', ['enable-logging'])
         # if "Linux" in platform.platform():
         #     chrome_driver_path = os.path.join(settings.BASE_DIR, 'chromedriver')
         # self.chromeService = Service(executable_path=chrome_driver_path)
-
+        self.chromedriver_path = chromedriver_path
         self.driver = None #套用設定
         self.wait = None
         self.actions = None
@@ -46,6 +48,10 @@ class FacebookCrawler():
         
     def create_driver(self):
         print("remote")
+        if self.chromedriver_path:
+            print(self.chromedriver_path)
+            service = Service(executable_path=self.chromedriver_path)
+            self.driver = webdriver.Chrome(service=service, options=self.chrome_options)
         self.driver = webdriver.Remote(command_executor='http://localhost:4444', options=self.chrome_options)
         return self.driver
     
