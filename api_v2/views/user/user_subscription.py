@@ -142,7 +142,15 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
         return Response(UserSerializerAccountInfo(api_user).data, status=status.HTTP_200_OK)
 
+    @action(detail=False, methods=['GET'], url_path=r'platform/(?P<platform_name>)/(?P<platform_id>)', permission_classes=())
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def get_single_platform_instance(self, request, platform_name, platform_id):
 
+        instance = models.user.user_subscription.PLATFORM_ATTR[platform_name]['model'].objects.get(id=platform_id)
+        serializer = models.user.user_subscription.PLATFORM_ATTR[platform_name]['serializer']
+        return Response(serializer(data=instance).data, status=status.HTTP_200_OK)
+    
+    
     @action(detail=False, methods=['GET'], url_path=r'platform/(?P<platform_name>[^/.]+)', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def get_platform_instances(self, request, platform_name):
