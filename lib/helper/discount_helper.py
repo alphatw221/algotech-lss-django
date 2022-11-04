@@ -123,10 +123,10 @@ class CartDiscountHelper:
     @classmethod
     def check_limitation(cls, limitation, **kwargs):
         try:
-
             if limitation['key']==models.discount_code.discount_code.LIMITATION_SPECIFIC_CAMPAIGN:
+
                 campaign_id = int(limitation['campaign_id'])
-                pre_order = kwargs['cart']
+                cart = kwargs['cart']
                 if cart.campaign.id != campaign_id:
                     return False
             elif limitation['key']==models.discount_code.discount_code.LIMITATION_PRODUCT_OVER_NUMBER:

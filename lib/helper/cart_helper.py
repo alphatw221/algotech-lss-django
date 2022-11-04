@@ -1,7 +1,6 @@
 from api import models
 from api import rule
 import traceback
-from api.views import campaign
 import database
 import service
 import lib
@@ -37,7 +36,8 @@ class CartHelper():
         ],**{
             'qty':qty,
         })
-
+        qty = ret.get('qty')
+        
         original_qty = cart.products.get(str(campaign_product.id),0)
         qty_difference = qty-original_qty
 
@@ -240,7 +240,7 @@ class CartHelper():
                     product_category_data_dict[campaign_product_data.get('categories',[])[0]] = product_category_data
             
             subtotal += campaign_product_data.get('price',0)*qty
-        shipping_cost, category_logistic_applied = cls.__compute_shipping_cost(pymongo_order, product_category_data_dict)
+        shipping_cost, category_logistic_applied = cls.__compute_shipping_cost(campaign, pymongo_order, product_category_data_dict)
         
 
         #compute free_delivery
@@ -271,7 +271,7 @@ class CartHelper():
 
 
     @classmethod 
-    def __compute_shipping_cost(cls, pymongo_order, product_category_data_dict:dict):
+    def __compute_shipping_cost(cls, campaign, pymongo_order, product_category_data_dict:dict):
         if pymongo_order.data.get('shipping_method') == models.order.order.SHIPPING_METHOD_PICKUP:
             return 0, False
 
