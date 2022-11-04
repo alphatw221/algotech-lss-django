@@ -22,9 +22,13 @@ class CartCheckRule():
     @staticmethod
     def is_qty_valid(**kwargs):
         qty = kwargs.get('qty')
-        if type(qty) != int or qty <0:
+        try:
+            qty = int(qty)
+            if  qty <0:
+                raise lib.error_handle.error.cart_error.CartErrors.CartException('helper.qty_invalid')
+            return {'qty':qty}
+        except Exception:
             raise lib.error_handle.error.cart_error.CartErrors.CartException('helper.qty_invalid')
-
     
 
     # @staticmethod

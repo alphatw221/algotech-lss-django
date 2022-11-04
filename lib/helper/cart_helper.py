@@ -36,7 +36,8 @@ class CartHelper():
         ],**{
             'qty':qty,
         })
-
+        qty = ret.get('qty')
+        
         original_qty = cart.products.get(str(campaign_product.id),0)
         qty_difference = qty-original_qty
 
