@@ -12,5 +12,5 @@ __pycache__
 .vs
 config.py
 /static
-/pkl/cookies
+/pkl/cookies/*
 chromedriver*

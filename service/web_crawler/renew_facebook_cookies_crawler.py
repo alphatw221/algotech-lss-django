@@ -14,12 +14,12 @@ from collections import OrderedDict
 import json
 import arrow
 from service.web_crawler.facebook_crawler import FacebookCrawler
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
 
 class RenewFacebookCookiesCrawler(FacebookCrawler):
-    
+    def __init__(self, open_browser=False, chromedriver_path=None):
+        super().__init__(open_browser, chromedriver_path)
         
     def login(self, validate=False):
         print("login")
@@ -39,49 +39,6 @@ class RenewFacebookCookiesCrawler(FacebookCrawler):
         time.sleep(2)
         self.validate_user()
         self.save_cookies()
-        
-        
-    def validate_user(self):
-        print("validate_user")
-        # check if page pops up log in with one tap
-        try:
-            self.driver.find_element(By.CSS_SELECTOR, "input[value='regular_login']")
-            ok_button = self.driver.find_element(By.CSS_SELECTOR, "button[value='OK']")
-            self.actions.click(ok_button).perform()
-            self.save_login = True
-        except:
-            print(traceback.format_exc())
-            
-        if not self.save_login:
-            # check new page identity double check
-            try:
-                my_profile = self.driver.find_element(By.CSS_SELECTOR, f"div[role='button']")
-                self.actions.click(my_profile).perform()
-
-                pass_input = self.wait.until(
-                    EC.presence_of_element_located((By.NAME, "pass"))
-                )
-                self.actions.send_keys_to_element(pass_input, self.password)
-                login_button = self.driver.find_element(By.CSS_SELECTOR , "button[type='submit']")
-                self.actions.click(login_button).perform()
-                self.save_login = True
-            except:
-                print(traceback.format_exc())
-            
-        if not self.save_login:
-            # check header identity double check
-            try:
-                login_button = self.driver.find_element(By.CSS_SELECTOR , "button[type='submit']")
-                self.actions.click(login_button).perform()
-                pass_input = self.wait.until(
-                    EC.presence_of_element_located((By.NAME, "pass"))
-                )
-                self.actions.send_keys_to_element(pass_input, self.password)
-                login_button = self.driver.find_element(By.CSS_SELECTOR , "button[type='submit']")
-                self.actions.click(login_button).perform()
-                self.save_login = True
-            except:
-                print(traceback.format_exc())
     
     def start(self):
         try:
