@@ -17,19 +17,20 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.color import Color
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 
 class FacebookCrawler():
-    def __init__(self, open_browser=False):
+    def __init__(self, open_browser=False, chromedriver_path=None):
         self.chrome_options = webdriver.ChromeOptions()
         if not open_browser:
             self.chrome_options.add_argument('--headless')  # 啟動Headless 無頭
         self.chrome_options.add_argument('--disable-gpu')
+        self.chrome_options.add_argument('--no-sandbox')
+        self.chrome_options.add_argument('--disable-dev-shm-usage')
         self.chrome_options.add_experimental_option('excludeSwitches', ['enable-logging'])
-        # if "Linux" in platform.platform():
-        #     chrome_driver_path = os.path.join(settings.BASE_DIR, 'chromedriver')
-        # self.chromeService = Service(executable_path=chrome_driver_path)
-
+        self.chromeService = Service(executable_path=chromedriver_path)
+        self.chromedriver_path = chromedriver_path
         self.driver = None #套用設定
         self.wait = None
         self.actions = None
@@ -45,8 +46,15 @@ class FacebookCrawler():
         self.save_login = False
         
     def create_driver(self):
-        print("remote")
-        self.driver = webdriver.Remote(command_executor='http://localhost:4444', options=self.chrome_options)
+        
+        if self.chromedriver_path:
+            print("local")
+            print(self.chromedriver_path)
+            service = Service(executable_path=self.chromedriver_path)
+            self.driver = webdriver.Chrome(service=service, options=self.chrome_options)
+        else:
+            print("remote")
+            self.driver = webdriver.Remote(command_executor='http://localhost:4444', options=self.chrome_options)
         return self.driver
     
     def create_action_object(self):
@@ -82,9 +90,66 @@ class FacebookCrawler():
         pass
         
     def validate_user(self):
-        """
-        """
-        pass
+        print("validate_user")
+        try:
+            print("check if Go to App button shows up")
+            # check if Go to App button shows up, if yes, pass validation
+            go_to_app_button = self.driver.find_element(By.CSS_SELECTOR, "button[value='Go to App']")
+            if go_to_app_button:
+                self.save_login = True
+        except:
+            print(traceback.format_exc())
+            
+        if not self.save_login:
+            print("regular login check")
+            try:
+                self.driver.find_element(By.CSS_SELECTOR, "input[value='regular_login']")
+                ok_button = self.driver.find_element(By.CSS_SELECTOR, "button[value='OK']")
+                if ok_button:
+                    self.actions.click(ok_button).perform()
+                    self.save_login = True
+            except:
+                print(traceback.format_exc())
+            
+        if not self.save_login:
+            print("enter check point")
+            try:
+                check_point_button = self.driver.find_element(By.ID, "checkpointSubmitButton-actual-button")
+                if check_point_button:
+                    self.actions.click(check_point_button).perform()
+            except:
+                print(traceback.format_exc())
+                
+        if not self.save_login:
+            print("new page identity double check")
+            try:
+                my_profile = self.driver.find_element(By.CSS_SELECTOR, f"div[role='button']")
+                self.actions.click(my_profile).perform()
+
+                pass_input = self.wait.until(
+                    EC.presence_of_element_located((By.NAME, "pass"))
+                )
+                self.actions.send_keys_to_element(pass_input, self.password)
+                login_button = self.driver.find_element(By.CSS_SELECTOR , "button[type='submit']")
+                self.actions.click(login_button).perform()
+                self.save_login = True
+            except:
+                print(traceback.format_exc())
+            
+        if not self.save_login:
+            print("header identity double check")
+            try:
+                login_button = self.driver.find_element(By.CSS_SELECTOR , "button[type='submit']")
+                self.actions.click(login_button).perform()
+                pass_input = self.wait.until(
+                    EC.presence_of_element_located((By.NAME, "pass"))
+                )
+                self.actions.send_keys_to_element(pass_input, self.password)
+                login_button = self.driver.find_element(By.CSS_SELECTOR , "button[type='submit']")
+                self.actions.click(login_button).perform()
+                self.save_login = True
+            except:
+                print(traceback.format_exc())
         
     def start(self):
         """

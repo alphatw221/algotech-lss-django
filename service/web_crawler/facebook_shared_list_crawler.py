@@ -20,8 +20,8 @@ from selenium.webdriver.support import expected_conditions as EC
 
 
 class FacebookSharedListCrawler(FacebookCrawler):
-    def __init__(self, page_username, target_post_id, lang="en", chrome_driver_path=os.path.join(settings.BASE_DIR, 'chromedriver.exe'), open_browser=False):
-        super().__init__(open_browser)
+    def __init__(self, page_username, target_post_id, lang="en", open_browser=False, chromedriver_path=None):
+        super().__init__(open_browser, chromedriver_path)
         self.page_url = f'https://m.facebook.com/{page_username}/'
         self.target_post_id = target_post_id
         self.post_reference_id = ""
@@ -63,63 +63,6 @@ class FacebookSharedListCrawler(FacebookCrawler):
         time.sleep(2)
         self.validate_user()
         self.save_cookies()
-    
-    def validate_user(self):
-        print("validate_user")
-        # check if page pops up log in with one tap
-        try:
-            print("check if Go to App button shows up")
-            # check if Go to App button shows up, if yes, pass validation
-            go_to_app_button = self.driver.find_element(By.CSS_SELECTOR, "button[value='Go to App']")
-            if go_to_app_button:
-                self.save_login = True
-        except:
-            print(traceback.format_exc())
-        
-        if not self.save_login:
-            try:
-                self.driver.find_element(By.CSS_SELECTOR, "input[value='regular_login']")
-                ok_button = self.driver.find_element(By.CSS_SELECTOR, "button[value='OK']")
-                if ok_button:
-                    self.actions.click(ok_button).perform()
-                    self.save_login = True
-            except:
-                print(traceback.format_exc())
-            
-        if not self.save_login:
-            # check new page identity double check
-            print("new page identity double check")
-            try:
-                my_profile = self.driver.find_element(By.CSS_SELECTOR, f"div[role='button']")
-                self.actions.click(my_profile).perform()
-
-                pass_input = self.wait.until(
-                    EC.presence_of_element_located((By.NAME, "pass"))
-                )
-                self.actions.send_keys_to_element(pass_input, self.password)
-                login_button = self.driver.find_element(By.CSS_SELECTOR , "button[type='submit']")
-                if login_button:
-                    self.actions.click(login_button).perform()
-                    self.save_login = True
-            except:
-                print(traceback.format_exc())
-            
-        if not self.save_login:
-            # check header identity double check
-            print("header identity double check")
-            try:
-                login_button = self.driver.find_element(By.CSS_SELECTOR , "button[type='submit']")
-                self.actions.click(login_button).perform()
-                pass_input = self.wait.until(
-                    EC.presence_of_element_located((By.NAME, "pass"))
-                )
-                self.actions.send_keys_to_element(pass_input, self.password)
-                login_button = self.driver.find_element(By.CSS_SELECTOR , "button[type='submit']")
-                if login_button:
-                    self.actions.click(login_button).perform()
-                    self.save_login = True
-            except:
-                print(traceback.format_exc())
             
     def switch_language(self):
         self.driver.get("https://m.facebook.com/language/")
