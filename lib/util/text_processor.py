@@ -1,3 +1,4 @@
+import string
 
 class OrderCodeTextProcessor():
     ordering_chars = set('+*Xx')
@@ -65,3 +66,13 @@ class OrderCodeTextProcessor():
     @staticmethod
     def __text_has_chars(text: str, chars_set: set):
         return any([c in text for c in chars_set])
+
+def remove_punctuation(text:str):
+    return text.translate(str.maketrans('','',string.punctuation))
+
+def get_bi_grams(text:str):
+    return [ _tuple[0]+" "+_tuple[1] for _tuple in zip(text.split(" ")[:-1], text.split(" ")[1:])]
+
+
+def get_tri_grams(text:str):
+    return [ _tuple[0]+" "+_tuple[1]+" "+_tuple[2] for _tuple in zip(text.split(" ")[:-2], text.split(" ")[1:-1], text.split(" ")[2:])]
