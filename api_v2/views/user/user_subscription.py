@@ -410,6 +410,16 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         report = lib.helper.report_helper.SalesReport.merge_data(basic_info, top_10_itmes, order_analysis)
         return Response(report, status=status.HTTP_200_OK)
     
+
+    @action(detail=False, methods=['GET'], url_path=r'list/animation', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def list_animation(self, request):
+
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        static_assets = user_subscription.assets.filter(type=models.user.static_assets.TYPE_ANIMATION)
+        
+        return Response(models.user.static_assets.StaticAssetsSerializer(static_assets, many=True).data, status=status.HTTP_200_OK)
 # --------------------------------- dealer ---------------------------------
     
 

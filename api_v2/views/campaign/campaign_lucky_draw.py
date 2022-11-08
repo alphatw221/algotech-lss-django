@@ -78,7 +78,7 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
         
         lucky_draw.campaign = campaign
         if type == models.campaign.campaign_lucky_draw.TYPE_PRODUCT:
-            campaign_product = lib.util.verify.Verify.get_campaign_product_from_campaign(campaign, int(data.get('campaign_product')))
+            campaign_product = lib.util.verify.Verify.get_campaign_product_from_campaign(campaign, int(data.get('campaign_product_id')))
             lucky_draw.campaign_product = campaign_product
         lucky_draw.prize = prize
         lucky_draw.type = type
@@ -125,7 +125,7 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
         
         lucky_draw.campaign = campaign
         if type == models.campaign.campaign_lucky_draw.TYPE_PRODUCT:
-            campaign_product = lib.util.verify.Verify.get_campaign_product_from_campaign(campaign, int(data.get('campaign_product')))
+            campaign_product = lib.util.verify.Verify.get_campaign_product_from_campaign(campaign, int(data.get('campaign_product_id')))
             lucky_draw.campaign_product = campaign_product
         lucky_draw.prize = prize
         lucky_draw.type = type
@@ -187,7 +187,12 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
         campaign = lucky_draw.campaign
         lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign.id)
         
-        ret = rule.rule_checker.lucky_draw_rule_checker.LuckyDrawStartRuleChecker.check(**{
+        ret = rule.rule_checker.lucky_draw_rule_checker.LuckyDrawStartRuleChecker.check(
+            check_list=[
+            rule.check_rule.lucky_draw_check_rule.LuckyDrawCheckRule.is_draw_type_valid,
+            rule.check_rule.lucky_draw_check_rule.LuckyDrawCheckRule.is_draw_prize_valid,
+            rule.check_rule.lucky_draw_check_rule.LuckyDrawCheckRule.is_connected_to_any_platform,
+        ],**{
             'lucky_draw': lucky_draw, 'campaign': campaign
         })
 
