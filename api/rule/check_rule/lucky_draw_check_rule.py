@@ -25,16 +25,19 @@ class LuckyDrawCheckRule():
     @staticmethod
     def is_connected_to_any_platform(**kwargs):
         campaign = kwargs.get('campaign')
-        connected_platform = []
+        # connected_platform = []
         if campaign.facebook_campaign.get("post_id"):
-            connected_platform.append("facebook")
+            return
+            # connected_platform.append("facebook")
         elif campaign.instagram_campaign.get("live_media_id"):
-            connected_platform.append("instagram")
+            return
+            # connected_platform.append("instagram")
         elif campaign.youtube_campaign.get("live_video_id"):
-            connected_platform.append("youtube")
+            return
+            # connected_platform.append("youtube")
 
-        if len(connected_platform) == 0:
-            raise lib.error_handle.error.api_error.ApiVerifyError('no_any_connected_platforms')
+        # if len(connected_platform) == 0:
+        raise lib.error_handle.error.api_error.ApiVerifyError('no_any_connected_platforms')
         
         
         # if type not in models.campaign.campaign_lucky_draw.TYPE_CHOICES:
