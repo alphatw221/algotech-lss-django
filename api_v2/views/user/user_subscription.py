@@ -82,13 +82,15 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
 
         animation, = lib.util.getter.getdata(request, ("animation", ), required=True)
-        if animation:
-            animation_name=animation.name.replace(" ","")
-            animation_path = f'user_subscription/{user_subscription.id}/luckydraw'
-            animation_url = lib.util.storage.upload_image(animation_path, animation_name, animation)
-            models.user.static_assets.StaticAssets.objects.create(user_subscription=user_subscription, name=animation.name, path=animation_url, type=models.user.static_assets.TYPE_ANIMATION)
-        
-        return Response({'message': 'success'}, status=status.HTTP_200_OK)
+        if not animation:
+            raise lib.error_handle.error.api_error.ApiVerifyError('no_animation')
+
+        animation_name=str(datetime.utcnow().timestamp())+animation.name.replace(" ","")
+        animation_path = f'user_subscription/{user_subscription.id}/animations'
+        animation_url = lib.util.storage.upload_image(animation_path, animation_name, animation)
+        static_asset = models.user.static_assets.StaticAssets.objects.create(user_subscription=user_subscription, name=animation.name, path=animation_url, type=models.user.static_assets.TYPE_ANIMATION)
+        data = models.user.static_assets.StaticAssetsSerializer(static_asset).data
+        return Response(data, status=status.HTTP_200_OK)
 
 
     @action(detail=False, methods=['PUT'], url_path=r'payment/(?P<payment_key>[^/.]+)', parser_classes=(MultiPartParser, JSONParser, FormParser), permission_classes=(IsAuthenticated,))

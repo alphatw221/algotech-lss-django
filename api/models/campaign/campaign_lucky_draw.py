@@ -60,7 +60,7 @@ class CampaignLuckyDrawSerializer(serializers.ModelSerializer):
 class CampaignLuckyDrawSerializerCreate(serializers.ModelSerializer):
     class Meta:
         model = CampaignLuckyDraw
-        fields = ["title", "comment", "num_of_winner", "repeatable", "spin_time", "animation", "meta"]
+        fields = ["title", "comment", "num_of_winner", "repeatable", "spin_time", "animation", "meta", "campaign_product", "prize", "campaign", "type"]
         read_only_fields = ['created_at', 'updated_at']
 
     meta = serializers.JSONField(default=dict)
@@ -69,7 +69,7 @@ class CampaignLuckyDrawSerializerCreate(serializers.ModelSerializer):
 class CampaignLuckyDrawSerializerUpdate(serializers.ModelSerializer):
     class Meta:
         model = CampaignLuckyDraw
-        fields = ["title", "comment", "num_of_winner", "repeatable", "spin_time", "animation", "meta"]
+        fields = ["title", "comment", "num_of_winner", "repeatable", "spin_time", "animation", "meta", "campaign_product", "prize", "type"]
         read_only_fields = ['created_at', 'updated_at']
 
     meta = serializers.JSONField(default=dict)
