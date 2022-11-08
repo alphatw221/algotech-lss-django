@@ -34,6 +34,10 @@ class LuckyDrawCheckRule():
             # connected_platform.append("instagram")
         elif campaign.youtube_campaign.get("live_video_id"):
             return
+        elif campaign.twitch_campaign.get("channel_name"):
+            return
+        elif campaign.tiktok_campaign.get("username"):
+            return
             # connected_platform.append("youtube")
 
         # if len(connected_platform) == 0:
