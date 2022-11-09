@@ -110,6 +110,13 @@ class Order(models.Model):
     
     meta = models.JSONField(default=dict, null=True, blank=True)
 
+    #point system
+    meta_point = models.JSONField(default=dict, null=True, blank=True)
+    points_earned = models.IntegerField(blank=True, null=True, default=0)
+    points_used = models.IntegerField(blank=True, null=True, default=0)
+    point_discount = models.FloatField(null=True, blank=True, default=0)
+    point_expired_at = models.DateTimeField(auto_now=False, null=True, default=None)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

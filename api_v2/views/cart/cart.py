@@ -131,26 +131,31 @@ class CartViewSet(viewsets.ModelViewSet):
     @lib.error_handle.error_handler.cart_operation_error_handler.update_cart_product_error_handler
     def buyer_checkout_cart(self, request, cart_oid):
         
-        shipping_data, = lib.util.getter.getdata(request, ("shipping_data",), required=True)
+        shipping_data, points_used = lib.util.getter.getdata(request, ("shipping_data", "points_used"), required=True)
 
         api_user = lib.util.verify.Verify.get_customer_user(request) if request.user.is_authenticated else None
         cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
         campaign = lib.util.verify.Verify.get_campaign_from_cart(cart)
-
-        rule.rule_checker.cart_rule_checker.RuleChecker.check(
+        user_subscription = campaign.user_subscription
+        ret = rule.rule_checker.cart_rule_checker.RuleChecker.check(
             check_list=[
                 rule.rule_checker.cart_rule_checker.CartCheckRule.allow_checkout,
                 rule.rule_checker.cart_rule_checker.CartCheckRule.is_cart_lock,
-                rule.rule_checker.cart_rule_checker.CartCheckRule.is_cart_empty
+                rule.rule_checker.cart_rule_checker.CartCheckRule.is_cart_empty,
+                rule.rule_checker.cart_rule_checker.CartCheckRule.wallet_enough_points,
+                rule.rule_checker.cart_rule_checker.CartCheckRule.is_point_discount_enable
             ],
-            **{'api_user':api_user, 'campaign':campaign, 'cart':cart}
+            **{'api_user':api_user, 'campaign':campaign, 'cart':cart, 'points_used':points_used, 'user_subscription':user_subscription}
         )
+        buyer_wallet = ret.get('buyer_wallet')
 
         serializer =models.order.order.OrderSerializerUpdateShipping(data=shipping_data) 
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        success, pymongo_order = lib.helper.cart_helper.CartHelper.checkout(api_user, campaign, cart.id, shipping_data=shipping_data)
+        point_discount_processor_class:lib.helper.discount_helper.PointDiscountProcessor = lib.helper.discount_helper.get_point_discount_processor_class(user_subscription)
+        point_discount_processor = point_discount_processor_class(api_user, user_subscription, buyer_wallet, campaign.meta_point, points_used)
+        success, pymongo_order = lib.helper.cart_helper.CartHelper.checkout(api_user, campaign, cart.id, point_discount_processor, shipping_data=shipping_data )
         
         if not success:
             cart = lib.util.verify.Verify.get_cart(cart.id)
@@ -159,12 +164,13 @@ class CartViewSet(viewsets.ModelViewSet):
         order = lib.util.verify.Verify.get_order(pymongo_order.id)
         order_oid = str(pymongo_order._id)   
         
+        data = models.order.order.OrderWithCampaignSerializer(order).data
+        data['oid']=order_oid
+
+        #send email
         subject = lib.i18n.email.cart_checkout_mail.i18n_get_mail_subject(order=order, lang=order.campaign.lang) 
         content = lib.i18n.email.cart_checkout_mail.i18n_get_mail_content(order, order_oid, lang=order.campaign.lang) 
         jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)  
-        
-        data = models.order.order.OrderWithCampaignSerializer(order).data
-        data['oid']=order_oid
         
         #discount used
         if type(order.applied_discount.get('id'))==int and models.discount_code.discount_code.DiscountCode.objects.filter(id=order.applied_discount.get('id')).exists():
@@ -201,42 +207,8 @@ class CartViewSet(viewsets.ModelViewSet):
         lib.helper.cart_helper.CartHelper.update_cart_product(api_user, cart, campaign_product, qty)
 
         cart = lib.util.verify.Verify.get_cart(cart.id)
-        # ret = rule.rule_checker.cart_rule_checker.CartEditProductRuleChecker.check(
-        #     **{'cart':cart,'campaign':campaign, 'campaign_product_id':campaign_product_id, 'api_user':api_user, 'qty':qty})
-        # qty_difference = ret.get('qty_difference')
-
-        # database.lss.campaign_product.CampaignProduct(id=campaign_product.id).add_to_cart(qty_difference, sync=False)
-
-        # cart.products[campaign_product_id]={'qty':qty}
-        # cart.save()
-
         return Response(models.cart.cart.CartSerializerWithCampaign(cart).data, status=status.HTTP_200_OK)
 
-    # @action(detail=False, methods=['DELETE'], url_path=r'(?P<cart_oid>[^/.]+)/buyer/product/delete',  permission_classes=())
-    # @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    # def buyer_delete_cart_product(self, request, cart_oid):
-
-
-    #     campaign_product_id, = lib.util.getter.getdata(request, ('campaign_product_id', ), required=True)
-
-    #     api_user = lib.util.verify.Verify.get_customer_user(request) if request.user.is_authenticated else None
-    #     cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
-    #     campaign = lib.util.verify.Verify.get_campaign_from_cart(cart)
-    #     campaign_product = campaign.products.get(id=campaign_product_id) if campaign.products.filter(id=campaign_product_id).exists() else None
-
-    #     lib.helper.cart_helper.CartHelper.update_cart_product(api_user, cart, campaign_product, 0, campaign)
-    #     # rule.rule_checker.cart_rule_checker.CartDeleteProductRuleChecker.check({'api_user':api_user,'cart':cart,'campaign_product':campaign_product})
-
-    #     # if campaign_product_id not in cart.products:
-    #     #     raise lib.error_handle.error.api_error.ApiVerifyError('campaign_product_not_found')
-        
-    #     # qty = cart.products[campaign_product_id].get('qty',0)
-    #     # database.lss.campaign_product.CampaignProduct(id=campaign_product_id).customer_return(qty=qty, sync=False)
-
-    #     # del cart.products[campaign_product_id]
-    #     # cart.save()
-
-    #     return Response(models.cart.cart.CartSerializer(cart).data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['PUT'], url_path=r'(?P<cart_oid>[^/.]+)/buyer/discount',  permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
@@ -294,6 +266,8 @@ class CartViewSet(viewsets.ModelViewSet):
 
         return Response(models.cart.cart.CartSerializerWithCampaign(cart).data, status=status.HTTP_200_OK)
     
+
+    
     @action(detail=False, methods=['DELETE'], url_path=r'(?P<cart_oid>[^/.]+)/buyer/discount/cancel',  permission_classes=())
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def buyer_cancel_discount_code(self, request, cart_oid):
@@ -312,6 +286,22 @@ class CartViewSet(viewsets.ModelViewSet):
         cart.save()
 
         return Response(models.cart.cart.CartSerializerWithCampaign(cart).data, status=status.HTTP_200_OK)
+
+
+    @action(detail=False, methods=['GET'], url_path=r'(?P<cart_oid>[^/.]+)/buyer/wallet',  permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def buyer_get_cart_relative_wallet(self, request, cart_oid):
+
+        api_user = lib.util.verify.Verify.get_customer_user(request)
+        cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
+        campaign = lib.util.verify.Verify.get_campaign_from_cart(cart)
+        
+        if not models.user.buyer_wallet.BuyerWallet.objects.filter(buyer=api_user,user_subscription = campaign.user_subscription).exists():
+            return Response(None, status=status.HTTP_200_OK)
+
+        buyer_wallet = models.user.buyer_wallet.BuyerWallet.objects.get(buyer=api_user, user_subscription = campaign.user_subscription)
+
+        return Response(models.user.buyer_wallet.BuyerWalletSerializer(buyer_wallet).data, status=status.HTTP_200_OK)
 
 # ---------------------------------------------- seller ------------------------------------------------------
 

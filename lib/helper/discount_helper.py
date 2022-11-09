@@ -2,6 +2,9 @@ import traceback
 from api import models
 import database
 import lib
+import math
+from datetime import datetime, timedelta
+
 def make_discount(before_discount_amount, discount_code):
     try:
         type = discount_code['type']
@@ -94,6 +97,11 @@ def check_limitations(limitations, **kwargs):
         return False
     return True
 
+
+
+
+
+
 class CartDiscountHelper:
 
     @classmethod
@@ -171,3 +179,65 @@ class CartDiscountHelper:
         for campaign_product_id_str, qty in cart.products.items():
             subtotal+=campaign_product_dict.get(campaign_product_id_str,{}).get('price',0)*qty
         return subtotal
+
+
+
+
+class PointDiscountProcessor:
+
+    def __init__(self, api_user, user_subscription, buyer_wallet, meta_point, points_used) -> None:
+        self.api_user = api_user
+        self.user_subscription = user_subscription
+        self.buyer_wallet = buyer_wallet
+        self.meta_point = meta_point
+        self.points_used = points_used
+        self.points_earned = 0
+
+    def compute_point_discount(self):
+        return math.floor( (self.points_used/self.meta_point.get('redemption_rate_point',1)))*self.meta_point.get('redemption_rate_cash',0)
+        
+    
+
+    def compute_points_earned(self, subtotal_after_discount=0):
+        
+        point_redemption_rate = self.meta_point.get('default_point_redemption_rate',0)
+        for tier in self.meta_point.get('reward_table',[]):
+            if subtotal_after_discount < tier.get('upper_bound',0):
+                point_redemption_rate = tier.get('point_redemption_rate',0)
+                break
+        self.points_earned = math.floor(subtotal_after_discount * point_redemption_rate)
+        return self.points_earned
+
+    def compute_expired_date(self):
+        point_validity = self.meta_point.get('point_validity',None)
+        if not point_validity:
+            return None
+        return datetime.utcnow()+timedelta(days=30*point_validity)
+
+
+    def update_wallet(self):
+        if not self.api_user:
+            return
+
+        if self.points_earned <= 0:
+            return 
+
+        if not self.buyer_wallet:
+            if models.user.buyer_wallet.BuyerWallet.objects.filter(buyer = self.api_user, user_subscription=self.user_subscription).exists():
+                self.buyer_wallet = models.user.buyer_wallet.BuyerWallet.objects.get(buyer = self.api_user, user_subscription=self.user_subscription)
+            else:
+                self.buyer_wallet = models.user.buyer_wallet.BuyerWallet.objects.create(buyer = self.api_user, user_subscription=self.user_subscription)
+
+        self.buyer_wallet.points-=self.points_used if self.points_used else 0
+        self.buyer_wallet.points+=self.points_earned if self.points_earned else 0
+        self.buyer_wallet.save()
+
+    
+
+class SHCPointDiscountProcessor(PointDiscountProcessor):
+    pass
+   
+
+point_discount_processor_map = {"617":SHCPointDiscountProcessor}
+def get_point_discount_processor_class(user_subscription):
+    return point_discount_processor_map.get(str(user_subscription.id),PointDiscountProcessor)

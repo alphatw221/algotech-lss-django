@@ -115,8 +115,9 @@ class CartHelper():
 
 
     @classmethod
-    def checkout(cls, api_user, campaign, cart_id, shipping_data={}):
+    def checkout(cls, api_user, campaign, cart_id, point_discount_processor, shipping_data={}):
 
+        
         success, data = cls.__transfer_cart_to_order(api_user, cart_id, shipping_data)
         if not success:
             error_products_data = data.get('error_products_data', [])
@@ -128,12 +129,11 @@ class CartHelper():
             
             return False, None
 
-
         pymongo_order = data.get('pymongo_order')
         pymongo_cart = data.get('pymongo_cart')
         campaign_product_data_dict = data.get('campaign_product_data_dict')
 
-        cls.__summarize_order(campaign, pymongo_order, campaign_product_data_dict)
+        cls.__summarize_order(campaign, pymongo_order, campaign_product_data_dict, point_discount_processor)
 
         for campaign_product_id_str, qty in pymongo_order.data.get('products',{}).copy().items():
             campaign_product_data = campaign_product_data_dict[campaign_product_id_str]
@@ -188,7 +188,9 @@ class CartHelper():
                     pymongo_order = database.lss.order.Order.create_object(
                         session=session,
                         **pymongo_cart.data, 
-                        **shipping_data)  
+                        **shipping_data,
+                        
+                        )  
 
                     for campaign_product_id_str, qty in pymongo_order.data.get('products',{}).copy().items():
                         campaign_product_data = campaign_product_data_dict[campaign_product_id_str]
@@ -222,7 +224,7 @@ class CartHelper():
 
 
     @classmethod
-    def __summarize_order(cls, campaign:models.campaign.campaign.Campaign, pymongo_order:database.lss.order.Order, campaign_product_data_dict):
+    def __summarize_order(cls, campaign:models.campaign.campaign.Campaign, pymongo_order:database.lss.order.Order, campaign_product_data_dict, point_discount_processor):
 
         subtotal = 0
         shipping_cost = 0
@@ -254,7 +256,8 @@ class CartHelper():
         #summarize_total
         total += subtotal
         total -= pymongo_order.data.get('discount',0)
-        total = max(total, 0)
+        total -= pymongo_order.data.get('point_discount',0)
+        total = subtotal_after_discount = max(total, 0)
         if pymongo_order.data.get('free_delivery') or is_subtotal_over_free_delivery_threshold or is_items_over_free_delivery_threshold:
             pass
         else:
@@ -262,13 +265,25 @@ class CartHelper():
         total += pymongo_order.data.get('adjust_price',0)
         total = max(total, 0)
 
+
+        #compute points 
+        point_discount = point_discount_processor.compute_point_discount()
+        points_earned = point_discount_processor.compute_points_earned(subtotal_after_discount)
+        point_expired_at = point_discount_processor.compute_expired_date()
+        
         pymongo_order.update(
             subtotal = subtotal,
             shipping_cost = shipping_cost,
             total = total,
             meta = meta,
+            points_used = point_discount_processor.points_used,
+            point_discount = point_discount,
+            points_earned = points_earned,
+            point_expired_at = point_expired_at,
+            meta_point = campaign.meta_point,
             sync=True)
 
+        point_discount_processor.update_wallet()
 
     @classmethod 
     def __compute_shipping_cost(cls, campaign, pymongo_order, product_category_data_dict:dict):
@@ -397,4 +412,10 @@ class CartHelper():
 
 
 
-    
+    @staticmethod
+    def __compute_point_discount(campaign, points_used):
+        return 0  #TODO
+
+    @staticmethod
+    def __compute_points_earned(campaign, subtotal):
+        return 0 #TODO
