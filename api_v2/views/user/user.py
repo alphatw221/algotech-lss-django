@@ -51,7 +51,7 @@ class UserSerializerSellerAccountInfo(models.user.user.UserSerializer):
 class UserSubscriptionSerializerName(models.user.user_subscription.UserSubscriptionSerializer):
     class Meta:
         model = models.user.user_subscription.UserSubscription
-        fields = ['name']
+        fields = ['name','id']
 class WalletSerializerWithSellerInfo(models.user.buyer_wallet.BuyerWalletSerializer):
     user_subscription = UserSubscriptionSerializerName(read_only=True, default=dict)
 class UserSerializerBuyerAccountInfo(models.user.user.UserSerializer):
