@@ -185,13 +185,13 @@ class CartDiscountHelper:
 
 class PointDiscountProcessor:
 
-    def __init__(self, api_user, user_subscription, buyer_wallet, meta_point, points_used) -> None:
+    def __init__(self, api_user, user_subscription, buyer_wallet, meta_point, points_used = 0, points_earned = 0) -> None:
         self.api_user = api_user
         self.user_subscription = user_subscription
         self.buyer_wallet = buyer_wallet
         self.meta_point = meta_point
         self.points_used = points_used
-        self.points_earned = 0
+        self.points_earned = points_earned
 
     def compute_point_discount(self):
         return math.floor( (self.points_used/self.meta_point.get('redemption_rate_point',1)))*self.meta_point.get('redemption_rate_cash',0)
@@ -205,7 +205,7 @@ class PointDiscountProcessor:
             if subtotal_after_discount < tier.get('upper_bound',0):
                 point_redemption_rate = tier.get('point_redemption_rate',0)
                 break
-        self.points_earned = math.floor(subtotal_after_discount * point_redemption_rate)
+
         return self.points_earned
 
     def compute_expired_date(self):
@@ -219,7 +219,7 @@ class PointDiscountProcessor:
         if not self.api_user:
             return
 
-        if self.points_earned <= 0:
+        if self.points_used<=0 and self.points_earned <= 0 :
             return 
 
         if not self.buyer_wallet:

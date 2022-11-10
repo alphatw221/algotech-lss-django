@@ -101,10 +101,14 @@ class PaymentViewSet(viewsets.GenericViewSet):
         order.payment_status = models.order.order.PAYMENT_STATUS_PAID
         lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
 
+        #wallet
+        update_wallet(order)
 
+        #send email
         subject = lib.i18n.email.order_comfirm_mail.i18n_get_mail_subject(order, lang=campaign.lang)
         content = lib.i18n.email.order_comfirm_mail.i18n_get_mail_content(order, campaign, lang=campaign.lang)
         jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)
+
         return HttpResponseRedirect(redirect_to=f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}/confirmation')
 
     # @action(detail=False, methods=['GET'], url_path=r'strip/callback/cancel', )
@@ -167,6 +171,10 @@ class PaymentViewSet(viewsets.GenericViewSet):
             order.payment_status = models.order.order.PAYMENT_STATUS_PAID
             lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
 
+            #wallet
+            update_wallet(order)
+
+            #wallet
             subject = lib.i18n.email.order_comfirm_mail.i18n_get_mail_subject(order, lang=campaign.lang)
             content = lib.i18n.email.order_comfirm_mail.i18n_get_mail_content(order, campaign, lang=campaign.lang)
             jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)
@@ -229,6 +237,8 @@ class PaymentViewSet(viewsets.GenericViewSet):
         order.payment_status = models.order.order.PAYMENT_STATUS_PAID
         lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
 
+        #wallet
+        update_wallet(order)
 
         subject = lib.i18n.email.order_comfirm_mail.i18n_get_mail_subject(order, lang=campaign.lang)
         content = lib.i18n.email.order_comfirm_mail.i18n_get_mail_content(order, campaign, lang=campaign.lang)
@@ -319,6 +329,10 @@ class PaymentViewSet(viewsets.GenericViewSet):
             }
             order.payment_status = models.order.order.PAYMENT_STATUS_PAID
             lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
+
+            #wallet
+            update_wallet(order)
+
             subject = lib.i18n.email.order_comfirm_mail.i18n_get_mail_subject(order, lang=order.campaign.lang)
             content = lib.i18n.email.order_comfirm_mail.i18n_get_mail_content(order, order.campaign, lang=order.campaign.lang)
             jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)
@@ -431,6 +445,8 @@ class PaymentViewSet(viewsets.GenericViewSet):
         order.payment_status = models.order.order.PAYMENT_STATUS_PAID
         lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
 
+        #wallet
+        update_wallet(order)
 
         subject = lib.i18n.email.order_comfirm_mail.i18n_get_mail_subject(order, lang=campaign.lang)
         content = lib.i18n.email.order_comfirm_mail.i18n_get_mail_content(order, campaign, lang=campaign.lang)
@@ -542,6 +558,10 @@ class PaymentViewSet(viewsets.GenericViewSet):
         
         lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
         if payment_status == "CLO":
+
+            #wallet
+            update_wallet(order)
+
             subject = lib.i18n.email.order_comfirm_mail.i18n_get_mail_subject(order, lang=campaign.lang)
             content = lib.i18n.email.order_comfirm_mail.i18n_get_mail_content(order, campaign, lang=campaign.lang)
             jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)
@@ -596,3 +616,8 @@ class PaymentViewSet(viewsets.GenericViewSet):
             print(traceback.format_exc())
         return Response("OK", status=status.HTTP_200_OK)
         
+
+def update_wallet(order):
+    point_discount_processor_class:lib.helper.discount_helper.PointDiscountProcessor = lib.helper.discount_helper.get_point_discount_processor_class(order.campaign.user_subscription)
+    point_discount_processor = point_discount_processor_class(order.buyer, order.campaign.user_subscription, None, order.campaign.meta_point, points_earnd = order.points_earned)
+    point_discount_processor.update_wallet()

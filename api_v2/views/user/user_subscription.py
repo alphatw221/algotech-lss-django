@@ -15,7 +15,7 @@ from rest_framework import status
 from rest_framework.parsers import MultiPartParser, JSONParser, FormParser
 
 from api import rule, models, utils
-from api_v2.views.user.user import UserSerializerAccountInfo
+
 import stripe, pytz, lib, service, business_policy, json
 from backend.pymongo.mongodb import db
 
@@ -23,6 +23,22 @@ from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
 import database
 
+class UserSubscriptionAccountInfo(models.user.user_subscription.UserSubscriptionSerializer):
+
+    facebook_pages = models.facebook.facebook_page.FacebookPageInfoSerializer(
+        many=True, read_only=True, default=list)
+    instagram_profiles = models.instagram.instagram_profile.InstagramProfileInfoSerializer(
+        many=True, read_only=True, default=list)
+    youtube_channels = models.youtube.youtube_channel.YoutubeChannelInfoSerializer(
+        many=True, read_only=True, default=list)
+    twitch_channels = models.twitch.twitch_channel.TwitchChannelInfoSerializer(
+        many=True, read_only=True, default=list)
+    tiktok_accounts = models.tiktok.tiktok_account.TikTokAccountInfoSerializer(
+        many=True, read_only=True, default=list)
+    product_categories = models.product.product_category.ProductCategorySerializer(
+        many=True, read_only=True, default=list)
+class UserSerializerSellerAccountInfo(models.user.user.UserSerializer):
+    user_subscription = UserSubscriptionAccountInfo(read_only=True, default=dict)
 
 class UserSubscriptionPagination(PageNumberPagination):
 
@@ -55,7 +71,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         serializer.save()
 
-        return Response(UserSerializerAccountInfo(api_user).data, status=status.HTTP_200_OK)
+        return Response(UserSerializerSellerAccountInfo(api_user).data, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['PUT'], url_path=r'seller/switch_mode', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
@@ -72,7 +88,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         serializer.save()
 
-        return Response(UserSerializerAccountInfo(api_user).data, status=status.HTTP_200_OK)
+        return Response(UserSerializerSellerAccountInfo(api_user).data, status=status.HTTP_200_OK)
 
 
     @action(detail=False, methods=['POST'], url_path=r'seller/upload/animation', parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated,))
@@ -130,7 +146,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
         user_subscription.save()
 
-        return Response(UserSerializerAccountInfo(api_user).data, status=status.HTTP_200_OK)
+        return Response(UserSerializerSellerAccountInfo(api_user).data, status=status.HTTP_200_OK)
 
 
     @action(detail=False, methods=['PUT'], url_path=r'delivery', permission_classes=(IsAuthenticated,))
@@ -142,7 +158,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         user_subscription.meta_logistic.update(request.data)
         user_subscription.save()
 
-        return Response(UserSerializerAccountInfo(api_user).data, status=status.HTTP_200_OK)
+        return Response(UserSerializerSellerAccountInfo(api_user).data, status=status.HTTP_200_OK)
 
 
     @action(detail=False, methods=['GET'], url_path=r'platform/(?P<platform_name>[^/.]+)', permission_classes=(IsAuthenticated,))
@@ -257,7 +273,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         user_subscription.meta_point = meta_point
         user_subscription.save()
 
-        return Response(UserSerializerAccountInfo(api_user).data, status=status.HTTP_200_OK)
+        return Response(UserSerializerSellerAccountInfo(api_user).data, status=status.HTTP_200_OK)
     
         
     @action(detail=False, methods=['POST'], url_path=r'upgrade/intent')

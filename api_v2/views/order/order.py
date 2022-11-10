@@ -314,6 +314,12 @@ class OrderViewSet(viewsets.ModelViewSet):
         if payment_status not in models.order.order.PAYMENT_STATUS_CHOICES:
             raise lib.error_handle.error.api_error.ApiVerifyError('invalid')
 
+        if payment_status == models.order.order.PAYMENT_STATUS_PAID and order.payment_status != models.order.order.PAYMENT_STATUS_PAID:
+
+            point_discount_processor_class:lib.helper.discount_helper.PointDiscountProcessor = lib.helper.discount_helper.get_point_discount_processor_class(order.campaign.user_subscription)
+            point_discount_processor = point_discount_processor_class(order.buyer, order.campaign.user_subscription, None, order.campaign.meta_point, points_earnd = order.points_earned)
+            point_discount_processor.update_wallet()
+
         order.payment_status = payment_status
         order.save()
         # lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
