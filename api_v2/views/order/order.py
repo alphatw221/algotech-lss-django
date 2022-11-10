@@ -16,12 +16,21 @@ from api import models
 import database
 import lib
 import factory
-# import xlsxwriter
+
 
 
 from automation import jobs
 from api.utils.error_handle.error_handler.email_error_handler import email_error_handler
-from api.utils.error_handle.error.api_error import ApiCallerError
+
+
+class OrderSerializerWithCampaign(models.order.order.OrderSerializer):
+    campaign = models.campaign.campaign.CampaignSerializer(read_only=True, default=dict)
+
+class OrderSerializerWithOrderProduct(models.order.order.OrderSerializer):
+    order_products = models.order.order_product.OrderProductSerializer(many=True, read_only=True, default=list)
+    
+class OrderSerializerWithOrderProductWithCampaign(OrderSerializerWithOrderProduct):
+    campaign = models.campaign.campaign.CampaignSerializer(read_only=True, default=dict)
 
 
 class OrderPagination(PageNumberPagination):
@@ -125,7 +134,7 @@ class OrderViewSet(viewsets.ModelViewSet):
     def buyer_retrieve_order(self, request, order_oid):
 
         order = lib.util.verify.Verify.get_order_with_oid(order_oid)
-        return Response(models.order.order_product.OrderWithOrderProductSerializer(order).data, status=status.HTTP_200_OK)
+        return Response(OrderSerializerWithOrderProductWithCampaign(order).data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET'], url_path=r'buyer/retrieve/latest/shipping', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
@@ -172,7 +181,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)     #queue this to redis if needed
 
-        return Response(models.order.order_product.OrderWithOrderProductSerializer(order).data, status=status.HTTP_200_OK)
+        return Response(OrderSerializerWithOrderProductWithCampaign(order).data, status=status.HTTP_200_OK)
 
 
     @action(detail=False, methods=['GET'], url_path=r'buyer/history', permission_classes=(IsAuthenticated,))
@@ -180,19 +189,20 @@ class OrderViewSet(viewsets.ModelViewSet):
     def list_buyer_order_history(self, request):
 
         api_user = lib.util.verify.Verify.get_customer_user(request)
-        user_subscription_id, = lib.util.getter.getparams(request, (user_subscription_id,), with_user=False)
+        user_subscription_id, = lib.util.getter.getparams(request, ('user_subscription_id',), with_user=False)
 
         queryset = api_user.orders.all()
-        if user_subscription_id not in ["",None,'undefined'] and user_subscription_id.isnumeric():
+        if user_subscription_id not in ["",None,'undefined','null'] and user_subscription_id.isnumeric():
             queryset=queryset.filter(user_subscription_id = int(user_subscription_id))
 
         queryset = queryset.order_by('-created_at')
         page = self.paginate_queryset(queryset)
         if page is not None:
-            serializer = models.order.order.OrderWithCampaignSerializer(page, many=True)
+            serializer = OrderSerializerWithCampaign(page, many=True)
             data = self.get_paginated_response(serializer.data).data
         else:
-            data = models.order.order_product.OrderWithOrderProductSerializer(api_user.orders, many=True).data
+            
+            data = OrderSerializerWithCampaign(api_user.orders, many=True).data
 
         return Response(data, status=status.HTTP_200_OK)
        
@@ -224,7 +234,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         order = lib.util.verify.Verify.get_order(pk)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, order.campaign.id)
-        serializer = models.order.order_product.OrderWithOrderProductSerializer(order)
+        serializer = OrderSerializerWithOrderProductWithCampaign(order)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
     
@@ -282,7 +292,7 @@ class OrderViewSet(viewsets.ModelViewSet):
             queryset = queryset.order_by(order_by)
 
         page = self.paginate_queryset(queryset)
-        serializer = models.order.order.OrderSerializer(page, many=True)
+        serializer = OrderSerializerWithCampaign(page, many=True)
         result = self.get_paginated_response(serializer.data)
         data = result.data
 
@@ -311,7 +321,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         # content = lib.i18n.email.delivery_comfirm_mail.i18n_get_mail_content(order=order, user=api_user, lang=order.campaign.lang) 
         # jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)
         
-        return Response(models.order.order_product.OrderWithOrderProductSerializer(order).data, status=status.HTTP_200_OK)
+        return Response(OrderSerializerWithOrderProductWithCampaign(order).data, status=status.HTTP_200_OK)
     
     
     @action(detail=True, methods=['PUT'], url_path=r'seller/payment', permission_classes=(IsAuthenticated,))
@@ -340,7 +350,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         # content = lib.i18n.email.delivery_comfirm_mail.i18n_get_mail_content(order=order, user=api_user, lang=order.campaign.lang) 
         # jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)
         
-        return Response(models.order.order_product.OrderWithOrderProductSerializer(order).data, status=status.HTTP_200_OK)
+        return Response(OrderSerializerWithOrderProductWithCampaign(order).data, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['GET'], url_path=r'report', permission_classes=(IsAuthenticated, ))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
