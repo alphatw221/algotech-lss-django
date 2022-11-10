@@ -205,8 +205,8 @@ class PointDiscountProcessor:
             if subtotal_after_discount < tier.get('upper_bound',0):
                 point_redemption_rate = tier.get('point_redemption_rate',0)
                 break
+        return math.floor(point_redemption_rate * subtotal_after_discount)
 
-        return self.points_earned
 
     def compute_expired_date(self):
         point_validity = self.meta_point.get('point_validity',None)
