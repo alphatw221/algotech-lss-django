@@ -15,6 +15,7 @@ from django.db.models import Q, Value
 from api import models
 import database
 import lib
+import factory
 # import xlsxwriter
 
 
@@ -179,8 +180,14 @@ class OrderViewSet(viewsets.ModelViewSet):
     def list_buyer_order_history(self, request):
 
         api_user = lib.util.verify.Verify.get_customer_user(request)
+        user_subscription_id, = lib.util.getter.getparams(request, (user_subscription_id,), with_user=False)
 
-        page = self.paginate_queryset(api_user.orders.all().order_by('-created_at'))
+        queryset = api_user.orders.all()
+        if user_subscription_id not in ["",None,'undefined'] and user_subscription_id.isnumeric():
+            queryset=queryset.filter(user_subscription_id = int(user_subscription_id))
+
+        queryset = queryset.order_by('-created_at')
+        page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = models.order.order.OrderWithCampaignSerializer(page, many=True)
             data = self.get_paginated_response(serializer.data).data
@@ -243,8 +250,11 @@ class OrderViewSet(viewsets.ModelViewSet):
             lib.util.getter.getdata(request, ('payment_method_options','delivery_status_options', 'payment_status_options', 'platform_options', 'sort_by'), required=False)
 
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
-        campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription,campaign_id)
-        queryset = campaign.orders.all()
+        # campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription,campaign_id)
+        queryset = user_subscription.orders.all()
+
+        if campaign_id not in ["",None,'undefined'] and campaign_id.isnumeric():
+            queryset=queryset.filter(campaign_id = int(campaign_id))
 
         if search not in ["",None,'undefined'] and search.isnumeric():
             queryset=queryset.filter(Q(id=int(search))|Q(customer_name__contains=search))
@@ -262,7 +272,9 @@ class OrderViewSet(viewsets.ModelViewSet):
             queryset=queryset.filter(payment_status__in=[key for key,value in payment_status_options_dict.items() if value])
         if platform_dict and [key for key,value in platform_dict.items() if value]:
             queryset=queryset.filter(platform__in=[key for key,value in platform_dict.items() if value])
-
+        
+        queryset = queryset.order_by('-created_at')
+        
         for order_by, asc in sort_by_dict.items():
             if order_by not in ["id","subtotal","total",'payment_method', 'status']:
                 continue
@@ -330,3 +342,14 @@ class OrderViewSet(viewsets.ModelViewSet):
         
         return Response(models.order.order_product.OrderWithOrderProductSerializer(order).data, status=status.HTTP_200_OK)
     
+    @action(detail=False, methods=['GET'], url_path=r'report', permission_classes=(IsAuthenticated, ))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def get_order_report(self, request, pk=None):
+
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+
+        order_export_processor_class:factory.order_export.OrderExportProcessor = factory.order_export.get_order_export_processor_class(user_subscription)
+        order_export_processor = order_export_processor_class(user_subscription, **request.query_params)
+        
+        return order_export_processor.export_order()

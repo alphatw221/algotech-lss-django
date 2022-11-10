@@ -1,6 +1,7 @@
 
 # TODO: WIP
 from api.models.campaign.campaign import Campaign, CampaignSerializerRetreive, CampaignSerializerWithUserSubscription
+from api.models.user.user_subscription import UserSubscription
 from django.conf import settings
 from django.contrib import admin
 from djongo import models
@@ -49,6 +50,10 @@ IMAGE_SUPPORTED_TYPE = [IMAGE_JPEG, IMAGE_JPG, IMAGE_PNG]
 IMAGE_MAXIMUM_SIZE = 10*1024*1024
 
 class Order(models.Model):
+
+    user_subscription = models.ForeignKey(
+        UserSubscription, null=True, on_delete=models.SET_NULL, related_name='orders')
+
     campaign = models.ForeignKey(
         Campaign, null=True, on_delete=models.SET_NULL, related_name='orders')
 

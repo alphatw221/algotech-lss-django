@@ -15,6 +15,7 @@ from api.models.product import product_category
 
 from automation import jobs
 
+import factory
 import lib
 from datetime import datetime
 import uuid
@@ -66,6 +67,7 @@ class CartViewSet(viewsets.ModelViewSet):
                 customer_id = customer_id,
                 customer_name = customer_name,
                 campaign = campaign,
+                user_subscription = campaign.user_subscription,
                 platform = None,
                 platform_id = None)
 
@@ -108,6 +110,7 @@ class CartViewSet(viewsets.ModelViewSet):
                 customer_id = customer_id,
                 customer_name = customer_name,
                 campaign = campaign,
+                user_subscription = campaign.user_subscription,
                 platform = None,
                 platform_id = None)
 
@@ -153,7 +156,7 @@ class CartViewSet(viewsets.ModelViewSet):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        point_discount_processor_class:lib.helper.discount_helper.PointDiscountProcessor = lib.helper.discount_helper.get_point_discount_processor_class(user_subscription)
+        point_discount_processor_class:factory.point_discount.PointDiscountProcessor = factory.point_discount.get_point_discount_processor_class(user_subscription)
         point_discount_processor = point_discount_processor_class(api_user, user_subscription, buyer_wallet, campaign.meta_point, points_used)
         success, pymongo_order = lib.helper.cart_helper.CartHelper.checkout(api_user, campaign, cart.id, point_discount_processor, shipping_data=shipping_data )
         
