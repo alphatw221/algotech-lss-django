@@ -286,7 +286,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         queryset = queryset.order_by('-created_at')
         
         for order_by, asc in sort_by_dict.items():
-            if order_by not in ["id","subtotal","total",'payment_method', 'status']:
+            if order_by not in ["id", "customer_name", "subtotal","total", 'payment_method', 'delivery_status', 'payment_status']:
                 continue
             order_by = order_by if asc==1 else f"-{order_by}"
             queryset = queryset.order_by(order_by)
