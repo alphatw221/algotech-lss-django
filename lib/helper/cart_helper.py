@@ -253,10 +253,14 @@ class CartHelper():
         meta['items_over_free_delivery_threshold'] = True if is_items_over_free_delivery_threshold else False
             
 
+        #compute point discount
+        point_discount = point_discount_processor.compute_point_discount()
+        
+
         #summarize_total
         total += subtotal
         total -= pymongo_order.data.get('discount',0)
-        total -= pymongo_order.data.get('point_discount',0)
+        total -= point_discount
         total = subtotal_after_discount = max(total, 0)
         if pymongo_order.data.get('free_delivery') or is_subtotal_over_free_delivery_threshold or is_items_over_free_delivery_threshold:
             pass
@@ -264,13 +268,11 @@ class CartHelper():
             total += shipping_cost
         total += pymongo_order.data.get('adjust_price',0)
         total = max(total, 0)
-
-
-        #compute points 
-        point_discount = point_discount_processor.compute_point_discount()
+        
+        #compute points earned
         points_earned = point_discount_processor.compute_points_earned(subtotal_after_discount)
         point_expired_at = point_discount_processor.compute_expired_date()
-        
+
         pymongo_order.update(
 
             price_unit = campaign.price_unit,
