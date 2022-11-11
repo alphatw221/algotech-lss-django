@@ -12,16 +12,13 @@ class FieldMapper():
     _width=None
     i18n_text=None
     
-    def __init__(self, field_name=None, title=None, i18n_key=None, width=None, i18n_text=None):
-        if field_name!=None:
-            self.field_name = field_name
-        if title!=None:
-            self.title = title
-        if width!=None:
-            self._width = width
-        if i18n_key!=None:
-            self.i18n_key = i18n_key
-            
+    def __init__(self, field_name='', title='', i18n_key=None, width=None, i18n_text=None):
+        self.field_name = field_name
+        self.title = title
+        self._width = width
+        self.i18n_key = i18n_key
+        i18n_text = i18n_text
+
     def mapping(self,object):
         return getattr(object,self.field_name)
 
@@ -38,10 +35,6 @@ class DateTimeMapper(FieldMapper):
 class ShippingNameMapper(FieldMapper):
     def mapping(self, object):
         return  f'{object.shipping_last_name} {object.shipping_first_name}'
-
-class CustomerNameMapper(FieldMapper):
-    def mapping(self, object):
-        return getattr(object, 'customer_name')
 
 class ShippingMethodMapper(FieldMapper):
     def mapping(self, object):
@@ -116,7 +109,7 @@ class OrderReport(XlsxHelper):
             FieldMapper('id','ID', i18n_key='REPORT/COLUMN_TITLE/ID', i18n_text=_('REPORT/COLUMN_TITLE/ID')),
             DateTimeMapper('created_at', 'Order Date', i18n_key='REPORT/COLUMN_TITLE/ORDER_DATE', i18n_text=_('REPORT/COLUMN_TITLE/ORDER_DATE')),
             FieldMapper('platform', 'Platform', i18n_key='REPORT/COLUMN_TITLE/PLATFORM', i18n_text=_('REPORT/COLUMN_TITLE/PLATFORM')),
-            CustomerNameMapper('customer_name', 'Customer Name', i18n_key='REPORT/COLUMN_TITLE/CUSTOMER_NAME', i18n_text=_('REPORT/COLUMN_TITLE/CUSTOMER_NAME')),
+            FieldMapper('customer_name', 'Customer Name', i18n_key='REPORT/COLUMN_TITLE/CUSTOMER_NAME', i18n_text=_('REPORT/COLUMN_TITLE/CUSTOMER_NAME')),
             ShippingNameMapper('shipping_name', 'Shipping Name', i18n_key='REPORT/COLUMN_TITLE/SHIPPING_NAME', i18n_text=_('REPORT/COLUMN_TITLE/SHIPPING_NAME')),
             FieldMapper('shipping_phone', 'Shipping Phone', i18n_key='REPORT/COLUMN_TITLE/SHIPPING_PHONE', i18n_text=_('REPORT/COLUMN_TITLE/SHIPPING_PHONE')),
             FieldMapper('shipping_email', 'E-mail', i18n_key='REPORT/COLUMN_TITLE/EMAIL', i18n_text=_('REPORT/COLUMN_TITLE/EMAIL')),

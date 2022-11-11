@@ -8,6 +8,8 @@ from djongo import models
 from rest_framework import serializers
 from api.models.user.user import User
 
+import business_policy
+
 STATUS_PROCEED = 'proceed'
 STATUS_COMPLETE = 'complete'
 STATUS_CHOICES=[ STATUS_PROCEED,STATUS_COMPLETE ]
@@ -81,6 +83,10 @@ class Order(models.Model):
     remark = models.TextField(null=True, blank=True, default=None)
 
     status = models.CharField(max_length=255, null=True, blank=True, default=STATUS_PROCEED)
+
+    # price_unit =   models.CharField(max_length=255, null=False, blank=True, default=business_policy.subscription.PRICE_UNIT_UNIT)
+    # decimal_places = models.IntegerField( blank=False, null=False, default=business_policy.subscription.DECIMAL_001)
+    # currency = models.CharField(max_length=255, null=True, blank=True)
 
     # payment info
     payment_status = models.CharField(max_length=255, null=True, blank=True, default=PAYMENT_STATUS_AWAITING_PAYMENT)

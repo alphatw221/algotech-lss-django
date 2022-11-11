@@ -9,17 +9,12 @@ class OrderExportProcessor:
         self.user_subscription = user_subscription
         self.query_params = kwargs
 
-    def export_order(self):
+    def export_order_data(self):
 
         if self.query_params.get('campaign_id'):
-            campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(self.user_subscription, self.query_params.get('campaign_id'))
-            buffer = lib.helper.xlsx_helper.OrderReport.create(campaign, self.user_subscription.lang)
-
-            response = HttpResponse(buffer, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-            response['Content-Disposition'] = f'attachment; filename=orders.xlsx'
-            return response
+            return [{'name':'test','role':'test'}]
         else:
-            pass
+            return [{'name':'test','role':'test'}]
 
 class SHCOrderExportProcessor(OrderExportProcessor):
     pass

@@ -189,11 +189,18 @@ class OrderViewSet(viewsets.ModelViewSet):
     def list_buyer_order_history(self, request):
 
         api_user = lib.util.verify.Verify.get_customer_user(request)
-        user_subscription_id, = lib.util.getter.getparams(request, ('user_subscription_id',), with_user=False)
+        user_subscription_id, points_earned, points_used, point_discount = lib.util.getter.getparams(request, ('user_subscription_id', 'points_earned', 'points_used', 'point_discount'), with_user=False)
 
         queryset = api_user.orders.all()
-        if user_subscription_id not in ["",None,'undefined','null'] and user_subscription_id.isnumeric():
+        if user_subscription_id not in ["", None,'undefined','null'] and user_subscription_id.isnumeric():
             queryset=queryset.filter(user_subscription_id = int(user_subscription_id))
+
+        if points_earned:
+            queryset=queryset.filter(points_earned__gt = 0)
+        if points_used:
+            queryset=queryset.filter(points_used__gt = 0)
+        if point_discount:
+            queryset=queryset.filter(point_discount__gt = 0)
 
         queryset = queryset.order_by('-created_at')
         page = self.paginate_queryset(queryset)
@@ -362,4 +369,5 @@ class OrderViewSet(viewsets.ModelViewSet):
         order_export_processor_class:factory.order_export.OrderExportProcessor = factory.order_export.get_order_export_processor_class(user_subscription)
         order_export_processor = order_export_processor_class(user_subscription, **request.query_params)
         
-        return order_export_processor.export_order()
+        order_data = order_export_processor.export_order_data()
+        return Response(order_data, status=status.HTTP_200_OK)
