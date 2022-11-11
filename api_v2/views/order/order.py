@@ -202,11 +202,11 @@ class OrderViewSet(viewsets.ModelViewSet):
         queryset = queryset.order_by('-created_at')
         page = self.paginate_queryset(queryset)
         if page is not None:
-            serializer = OrderSerializerWithCampaign(page, many=True)
+            serializer = models.order.order.OrderSerializer(page, many=True)
             data = self.get_paginated_response(serializer.data).data
         else:
             
-            data = OrderSerializerWithCampaign(api_user.orders, many=True).data
+            data = models.order.order.OrderSerializer(api_user.orders, many=True).data
 
         return Response(data, status=status.HTTP_200_OK)
        
@@ -238,7 +238,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         order = lib.util.verify.Verify.get_order(pk)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, order.campaign.id)
-        serializer = OrderSerializerWithOrderProductWithCampaign(order)
+        serializer = OrderSerializerWithOrderProduct(order)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
     
@@ -254,17 +254,13 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         return Response(oid, status=status.HTTP_200_OK)
     
-    @action(detail=False, methods=['POST'], url_path=r'seller/search', permission_classes=(IsAuthenticated,))
-    @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def get_merge_order_list(self, request):
 
-        api_user, campaign_id, search, page, page_size, order_status, = lib.util.getter.getparams(request, ( 'campaign_id', 'search', 'page', 'page_size','status'),with_user=True, seller=True)
+    def __search_order(self, user_subscription, request):
         
+        campaign_id, search, page, page_size, order_status, = lib.util.getter.getparams(request, ( 'campaign_id', 'search', 'page', 'page_size','status'),with_user=False)
         payment_methods_dict, delivery_status_options_dict, payment_status_options_dict,  platform_dict, sort_by_dict = \
             lib.util.getter.getdata(request, ('payment_method_options','delivery_status_options', 'payment_status_options', 'platform_options', 'sort_by'), required=False)
 
-        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
-        # campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription,campaign_id)
         queryset = user_subscription.orders.all()
 
         if campaign_id not in ["",None,'undefined'] and campaign_id.isnumeric():
@@ -294,18 +290,23 @@ class OrderViewSet(viewsets.ModelViewSet):
                 continue
             order_by = order_by if asc==1 else f"-{order_by}"
             queryset = queryset.order_by(order_by)
+        return queryset
 
+    @action(detail=False, methods=['POST'], url_path=r'seller/search', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def seller_search_order(self, request):
+
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+
+        queryset = self.__search_order(user_subscription, request)
         page = self.paginate_queryset(queryset)
-        serializer = OrderSerializerWithCampaign(page, many=True)
+        serializer = models.order.order.OrderSerializer(page, many=True)
         result = self.get_paginated_response(serializer.data)
         data = result.data
 
         return Response(data, status=status.HTTP_200_OK)
 
-        # json_data, total_count = database.lss.campaign.get_merge_order_list_pagination(campaign.id, search, order_status, payment_list, delivery_list, platform_list , int(page), int(page_size), sort_by)
-
-        # return Response({'count':total_count,'data':json_data}, status=status.HTTP_200_OK)
-    
     @action(detail=True, methods=['PUT'], url_path=r'seller/delivery', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def seller_update_delivery_status(self, request, pk=None):
@@ -348,23 +349,21 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         order.payment_status = payment_status
         order.save()
-        # lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
 
-        # subject = lib.i18n.email.delivery_comfirm_mail.i18n_get_mail_subject(order=order, lang=order.campaign.lang) 
-        # content = lib.i18n.email.delivery_comfirm_mail.i18n_get_mail_content(order=order, user=api_user, lang=order.campaign.lang) 
-        # jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)
-        
         return Response(OrderSerializerWithOrderProductWithCampaign(order).data, status=status.HTTP_200_OK)
     
-    @action(detail=False, methods=['GET'], url_path=r'report', permission_classes=(IsAuthenticated, ))
+    @action(detail=False, methods=['POST'], url_path=r'report', permission_classes=(IsAuthenticated, ))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def get_order_report(self, request, pk=None):
 
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
 
-        order_export_processor_class:factory.order_export.OrderExportProcessor = factory.order_export.get_order_export_processor_class(user_subscription)
-        order_export_processor = order_export_processor_class(user_subscription, **request.query_params)
+        queryset = self.__search_order(user_subscription, request)
+
+        order_export_processor_class:factory.order_export.default.DefaultOrderExportProcessor =\
+             factory.order_export.get_order_export_processor_class(user_subscription)
+        order_export_processor = order_export_processor_class(queryset, user_subscription)
         
         order_data = order_export_processor.export_order_data()
         return Response(order_data, status=status.HTTP_200_OK)

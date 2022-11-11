@@ -911,10 +911,16 @@ class Command(BaseCommand):
         #         cart.save()       
         #     except Exception:
         #         print(traceback.format_exc())
-        for order in models.order.order.Order.objects.filter(user_subscription=None)[:8000]:
+        offset = 16000
+        for i, order in enumerate(models.order.order.Order.objects.all()[offset:offset+8000]):
+        # for order in models.order.order.Order.objects.filter(user_subscription=None)[:8000]:
             try:
-                print(order.id)
-                order.user_subscription = order.campaign.user_subscription
+                print(offset+i)
+
+                order.price_unit = order.campaign.price_unit
+                order.decimal_places = order.campaign.decimal_places
+                order.currency = order.campaign.currency
+
                 order.save()       
             except Exception:
                 print(traceback.format_exc())

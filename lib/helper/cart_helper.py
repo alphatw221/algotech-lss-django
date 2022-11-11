@@ -272,6 +272,11 @@ class CartHelper():
         point_expired_at = point_discount_processor.compute_expired_date()
         
         pymongo_order.update(
+
+            price_unit = campaign.price_unit,
+            decimal_places = campaign.decimal_places,
+            currency = campaign.currency,
+            
             subtotal = subtotal,
             shipping_cost = shipping_cost,
             total = total,

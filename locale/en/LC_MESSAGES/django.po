@@ -438,7 +438,7 @@ msgstr "Payment Record"
 
 #: lib/helper/xlsx_helper.py:134
 msgid "REPORT/COLUMN_TITLE/TOTAL"
-msgstr "E-mail"
+msgstr "Total"
 
 #: lib/helper/xlsx_helper.py:166
 msgid "REPORT/SECTION_TITLE/TITLE"

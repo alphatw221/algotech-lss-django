@@ -84,9 +84,9 @@ class Order(models.Model):
 
     status = models.CharField(max_length=255, null=True, blank=True, default=STATUS_PROCEED)
 
-    # price_unit =   models.CharField(max_length=255, null=False, blank=True, default=business_policy.subscription.PRICE_UNIT_UNIT)
-    # decimal_places = models.IntegerField( blank=False, null=False, default=business_policy.subscription.DECIMAL_001)
-    # currency = models.CharField(max_length=255, null=True, blank=True)
+    price_unit =   models.CharField(max_length=255, null=False, blank=True, default=business_policy.subscription.PRICE_UNIT_UNIT)
+    decimal_places = models.IntegerField( blank=False, null=False, default=business_policy.subscription.DECIMAL_001)
+    currency = models.CharField(max_length=255, null=True, blank=True, default=business_policy.subscription.CURRENCY_USD)
 
     # payment info
     payment_status = models.CharField(max_length=255, null=True, blank=True, default=PAYMENT_STATUS_AWAITING_PAYMENT)
