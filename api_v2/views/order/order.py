@@ -20,7 +20,8 @@ import factory
 
 
 from automation import jobs
-from api.utils.error_handle.error_handler.email_error_handler import email_error_handler
+
+from datetime import datetime
 
 
 class OrderSerializerWithCampaign(models.order.order.OrderSerializer):
@@ -169,6 +170,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         order.meta['account_mode'] = account_mode
         order.payment_method = models.order.order.PAYMENT_METHOD_DIRECT
         order.payment_status = models.order.order.PAYMENT_STATUS_AWAITING_CONFIRM
+        order.paid_at = datetime.utcnow()
         lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
 
 
