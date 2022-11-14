@@ -461,19 +461,19 @@ class CampaignViewSet(viewsets.ModelViewSet):
         return Response(models.campaign.campaign_product.CampaignProductSerializer(campaign_product).data, status=status.HTTP_200_OK)
 
     
-    @action(detail=True, methods=['GET'], url_path=r'report', permission_classes=(IsAuthenticated, ))
-    @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def generate_campaign_order_report(self, request, pk):
+    # @action(detail=True, methods=['GET'], url_path=r'report', permission_classes=(IsAuthenticated, ))
+    # @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    # def generate_campaign_order_report(self, request, pk):
 
-        api_user = lib.util.verify.Verify.get_seller_user(request)
-        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
-        campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, pk)
-        campaign_title = campaign.title.replace(' ','')
-        buffer = lib.helper.xlsx_helper.OrderReport.create(campaign, user_subscription.lang)
+    #     api_user = lib.util.verify.Verify.get_seller_user(request)
+    #     user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+    #     campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, pk)
+    #     campaign_title = campaign.title.replace(' ','')
+    #     buffer = lib.helper.xlsx_helper.OrderReport.create(campaign, user_subscription.lang)
 
-        response = HttpResponse(buffer, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = f'attachment; filename={campaign_title}.xlsx'
-        return response
+    #     response = HttpResponse(buffer, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    #     response['Content-Disposition'] = f'attachment; filename={campaign_title}.xlsx'
+    #     return response
     
     @action(detail=True, methods=['GET'], url_path=r'product/order_code/dict', permission_classes=(IsAuthenticated, ))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler

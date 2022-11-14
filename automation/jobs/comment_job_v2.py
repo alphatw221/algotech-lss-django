@@ -57,6 +57,7 @@ def comment_job(campaign_data, user_subscription_data, platform_name, platform_i
             customer_name= comment['customer_name'],
             customer_img= comment['image'],
             campaign_id= campaign_data['id'],
+            user_subscription_id = campaign_data['user_subscription_id'],
             platform= comment['platform'],
             platform_id= platform_instance_data.get('id'),
             meta = {'comment':comment}      # for ordr_startr might be useful for other integration

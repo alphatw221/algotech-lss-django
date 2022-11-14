@@ -30,7 +30,7 @@ import pytz
 import random
 import string
 
-
+#------------------------------------------------------------------------------------------
 class UserSubscriptionAccountInfo(models.user.user_subscription.UserSubscriptionSerializer):
 
     facebook_pages = models.facebook.facebook_page.FacebookPageInfoSerializer(
@@ -45,8 +45,19 @@ class UserSubscriptionAccountInfo(models.user.user_subscription.UserSubscription
         many=True, read_only=True, default=list)
     product_categories = models.product.product_category.ProductCategorySerializer(
         many=True, read_only=True, default=list)
-class UserSerializerAccountInfo(models.user.user.UserSerializer):
+class UserSerializerSellerAccountInfo(models.user.user.UserSerializer):
     user_subscription = UserSubscriptionAccountInfo(read_only=True, default=dict)
+#------------------------------------------------------------------------------------------
+class UserSubscriptionSerializerName(models.user.user_subscription.UserSubscriptionSerializer):
+    class Meta:
+        model = models.user.user_subscription.UserSubscription
+        fields = ['name','id']
+class WalletSerializerWithSellerInfo(models.user.buyer_wallet.BuyerWalletSerializer):
+    user_subscription = UserSubscriptionSerializerName(read_only=True, default=dict)
+class UserSerializerBuyerAccountInfo(models.user.user.UserSerializer):
+    wallets = WalletSerializerWithSellerInfo(many=True, read_only=True, default=list)
+#------------------------------------------------------------------------------------------
+
 class UserViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAdminUser,)
     queryset = models.user.user.User.objects.all().order_by('id')
@@ -84,7 +95,7 @@ class UserViewSet(viewsets.ModelViewSet):
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def buyer_get_account_info(self, request):
         api_user = lib.util.verify.Verify.get_customer_user(request)
-        return Response(UserSerializerAccountInfo(api_user).data, status=status.HTTP_200_OK)    
+        return Response(UserSerializerBuyerAccountInfo(api_user).data, status=status.HTTP_200_OK)    
 
 #-----------------------------------------Dealer----------------------------------------------------------------------------------------------
 
@@ -184,7 +195,7 @@ class UserViewSet(viewsets.ModelViewSet):
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def seller_get_account_info(self, request):
         api_user = lib.util.verify.Verify.get_seller_user(request)
-        return Response(UserSerializerAccountInfo(api_user).data, status=status.HTTP_200_OK) 
+        return Response(UserSerializerSellerAccountInfo(api_user).data, status=status.HTTP_200_OK) 
 
     
     # not use for now
@@ -202,7 +213,7 @@ class UserViewSet(viewsets.ModelViewSet):
         api_user.lang = language
         api_user.save()
 
-        return Response(UserSerializerAccountInfo(api_user).data, status=status.HTTP_200_OK)
+        return Response(UserSerializerSellerAccountInfo(api_user).data, status=status.HTTP_200_OK)
 
 
     @action(detail=False, methods=['POST'], url_path=r'seller/password/change', permission_classes=(IsAuthenticated, ))

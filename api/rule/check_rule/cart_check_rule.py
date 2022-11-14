@@ -161,6 +161,44 @@ class CartCheckRule():
             raise lib.error_handle.error.cart_error.CartErrors.CartException('product_type_invalid')
     
 
+    @staticmethod
+    def wallet_enough_points(**kwargs):
+
+        user_subscription = kwargs.get('user_subscription')
+        api_user = kwargs.get('api_user')
+        points_used = kwargs.get('points_used')
+
+        if points_used <=0 or not points_used:
+            return
+
+        if not api_user:
+            raise lib.error_handle.error.cart_error.CartErrors.CartException('points_not_enough')
+            
+        if not models.user.buyer_wallet.BuyerWallet.objects.filter(user_subscription=user_subscription, buyer = api_user).exists():
+            raise lib.error_handle.error.cart_error.CartErrors.CartException('points_not_enough')
+        
+        buyer_wallet = models.user.buyer_wallet.BuyerWallet.objects.get(user_subscription=user_subscription, buyer = api_user)
+
+        if buyer_wallet.points<points_used:
+            raise lib.error_handle.error.cart_error.CartErrors.CartException('points_not_enough')
+            
+        return {'buyer_wallet':buyer_wallet}
+    
+
+
+    @staticmethod
+    def is_point_discount_enable(**kwargs):
+
+        campaign = kwargs.get('campaign')
+        points_used = kwargs.get('points_used')
+
+        if points_used <=0 or not points_used:
+            return
+
+        if not campaign.meta_point.get('enable'):
+            raise lib.error_handle.error.cart_error.CartErrors.CartException('point_discount_not_enable')
+        
+
     # @staticmethod
     # def campaign_product_type(**kwargs):
 

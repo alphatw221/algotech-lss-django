@@ -2,6 +2,9 @@ import traceback
 from api import models
 import database
 import lib
+import math
+from datetime import datetime, timedelta
+
 def make_discount(before_discount_amount, discount_code):
     try:
         type = discount_code['type']
@@ -94,6 +97,11 @@ def check_limitations(limitations, **kwargs):
         return False
     return True
 
+
+
+
+
+
 class CartDiscountHelper:
 
     @classmethod
@@ -171,3 +179,7 @@ class CartDiscountHelper:
         for campaign_product_id_str, qty in cart.products.items():
             subtotal+=campaign_product_dict.get(campaign_product_id_str,{}).get('price',0)*qty
         return subtotal
+
+
+
+

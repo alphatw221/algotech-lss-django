@@ -42,53 +42,38 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
         return Response(models.campaign.campaign_lucky_draw.CampaignLuckyDrawSerializer(lucky_draw).data, status=status.HTTP_200_OK)
 
 
-    @action(detail=False, methods=['POST'], url_path=r'(?P<campaign_id>[^/.]+)/create', parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['POST'], url_path=r'(?P<campaign_id>[^/.]+)/create', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def create_lucky_draw(self, request, campaign_id):
 
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
-        animation, = lib.util.getter.getdata(request, ("animation", ), required=False)
-        data, = lib.util.getter.getdata(request, ("data", ), required=True)
 
-        data = json.loads(data)
-        type = data.get('type', '')
-        prize = data.get('prize', {})
+        data = request.data
 
-        
-        # ret = rule.rule_checker.lucky_draw_rule_checker.LuckyDrawCreateRuleChecker.check(**{
-        #     'type': type, 'prize': prize, 'campaign': campaign
-        # })
-        
-        prize = lib.util.verify.Verify.get_campaign_product_from_campaign(campaign, int(data.get('prize', {}).get('id', 0)))
-        if animation and data.get('path', '') == '':
-            models.user.static_assets.StaticAssets.objects.create(user_subscription=user_subscription, name=animation.name, path=animation_path, type=models.user.static_assets.TYPE_ANIMATION)
-            animation_name = animation.name.replace(" ","")
-            animation_path = f'user_subscription/{user_subscription.id}/luckydraw'
-            animation_url = lib.util.storage.upload_image(animation_path, animation_name, animation)
-            data['animation'] = animation_url
+        data['campaign'] = campaign.id
+        prize = lib.util.verify.Verify.get_campaign_product_from_campaign(campaign, data.get('prize_id'))
+        data['prize'] = prize.id
+
+        if data.get('type') == models.campaign.campaign_lucky_draw.TYPE_PRODUCT:
+            campaign_product = lib.util.verify.Verify.get_campaign_product_from_campaign(campaign, data.get('campaign_product_id'))
+            data['campaign_product'] = campaign_product.id
         else:
-            data['animation'] = data.get('path', '')
+            data['campaign_product'] = None
 
+        print(data)
         serializer = models.campaign.campaign_lucky_draw.CampaignLuckyDrawSerializerCreate(data = data)
         if not serializer.is_valid():
+            print(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         lucky_draw = serializer.save()
-        
-        lucky_draw.campaign = campaign
-        if type == models.campaign.campaign_lucky_draw.TYPE_PRODUCT:
-            campaign_product = lib.util.verify.Verify.get_campaign_product_from_campaign(campaign, int(data.get('campaign_product')))
-            lucky_draw.campaign_product = campaign_product
-        lucky_draw.prize = prize
-        lucky_draw.type = type
-        lucky_draw.status = models.campaign.campaign_lucky_draw.STATUS_INIT
-        lucky_draw.save()
+
         
         return Response(models.campaign.campaign_lucky_draw.CampaignLuckyDrawSerializer(lucky_draw).data, status=status.HTTP_200_OK)
 
 
-    @action(detail=True, methods=['PUT'], url_path=r'update', parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated,))
+    @action(detail=True, methods=['PUT'], url_path=r'update', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def update_lucky_draw(self, request, pk):
 
@@ -97,40 +82,23 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
         lucky_draw = lib.util.verify.Verify.get_lucky_draw(pk)
         campaign = lucky_draw.campaign
         lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign.id)
-        animation, = lib.util.getter.getdata(request, ("animation", ), required=False)
-        data, = lib.util.getter.getdata(request, ("data", ), required=True)
 
-        data = json.loads(data)
-        type = data.get('type', '')
-        prize = data.get('prize', {})
+        data = request.data
+        if data.get('prize_id'):
+            prize = lib.util.verify.Verify.get_campaign_product_from_campaign(campaign, data.get('prize_id'))
+            data['prize'] = prize.id
 
-        # ret = rule.rule_checker.lucky_draw_rule_checker.LuckyDrawUpdateRuleChecker.check(**{
-        #     'type': type, 'prize': prize, 'campaign': campaign
-        # })
-
-        prize = lib.util.verify.Verify.get_campaign_product_from_campaign(campaign, int(data.get('prize', {}).get('id', 0)))
-        if animation and data.get('path', '') == '':
-            models.user.static_assets.StaticAssets.objects.create(user_subscription=user_subscription, name=animation.name, path=animation_path, type=models.user.static_assets.TYPE_ANIMATION)
-            animation_name = animation.name.replace(" ","")
-            animation_path = f'user_subscription/{user_subscription.id}/luckydraw'
-            animation_url = lib.util.storage.upload_image(animation_path, animation_name, animation)
-            data['animation'] = animation_url
+        if data.get('type') == models.campaign.campaign_lucky_draw.TYPE_PRODUCT:
+            campaign_product = lib.util.verify.Verify.get_campaign_product_from_campaign(campaign, data.get('campaign_product_id'))
+            data['campaign_product'] = campaign_product.id
         else:
-            data['animation'] = data.get('path', '')
+            data['campaign_product'] = None
             
-        serializer = models.campaign.campaign_lucky_draw.CampaignLuckyDrawSerializerUpdate(lucky_draw, data=data, partial=True)
+        serializer = models.campaign.campaign_lucky_draw.CampaignLuckyDrawSerializerUpdate(lucky_draw, data = data, partial=True)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         lucky_draw = serializer.save()
-        
-        lucky_draw.campaign = campaign
-        if type == models.campaign.campaign_lucky_draw.TYPE_PRODUCT:
-            campaign_product = lib.util.verify.Verify.get_campaign_product_from_campaign(campaign, int(data.get('campaign_product')))
-            lucky_draw.campaign_product = campaign_product
-        lucky_draw.prize = prize
-        lucky_draw.type = type
-        lucky_draw.status = models.campaign.campaign_lucky_draw.STATUS_INIT
-        lucky_draw.save()
+
         
         return Response(models.campaign.campaign_lucky_draw.CampaignLuckyDrawSerializer(lucky_draw).data, status=status.HTTP_200_OK)
 
@@ -187,7 +155,12 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
         campaign = lucky_draw.campaign
         lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign.id)
         
-        ret = rule.rule_checker.lucky_draw_rule_checker.LuckyDrawStartRuleChecker.check(**{
+        ret = rule.rule_checker.lucky_draw_rule_checker.LuckyDrawStartRuleChecker.check(
+            check_list=[
+            rule.check_rule.lucky_draw_check_rule.LuckyDrawCheckRule.is_draw_type_valid,
+            rule.check_rule.lucky_draw_check_rule.LuckyDrawCheckRule.is_draw_prize_valid,
+            rule.check_rule.lucky_draw_check_rule.LuckyDrawCheckRule.is_connected_to_any_platform,
+        ],**{
             'lucky_draw': lucky_draw, 'campaign': campaign
         })
 

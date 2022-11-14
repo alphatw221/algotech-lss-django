@@ -1,11 +1,14 @@
 
 # TODO: WIP
 from api.models.campaign.campaign import Campaign, CampaignSerializerRetreive, CampaignSerializerWithUserSubscription
+from api.models.user.user_subscription import UserSubscription
 from django.conf import settings
 from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
 from api.models.user.user import User
+
+import business_policy
 
 STATUS_PROCEED = 'proceed'
 STATUS_COMPLETE = 'complete'
@@ -49,6 +52,10 @@ IMAGE_SUPPORTED_TYPE = [IMAGE_JPEG, IMAGE_JPG, IMAGE_PNG]
 IMAGE_MAXIMUM_SIZE = 10*1024*1024
 
 class Order(models.Model):
+
+    user_subscription = models.ForeignKey(
+        UserSubscription, null=True, on_delete=models.SET_NULL, related_name='orders')
+
     campaign = models.ForeignKey(
         Campaign, null=True, on_delete=models.SET_NULL, related_name='orders')
 
@@ -76,6 +83,10 @@ class Order(models.Model):
     remark = models.TextField(null=True, blank=True, default=None)
 
     status = models.CharField(max_length=255, null=True, blank=True, default=STATUS_PROCEED)
+
+    price_unit =   models.CharField(max_length=255, null=False, blank=True, default=business_policy.subscription.PRICE_UNIT_UNIT)
+    decimal_places = models.IntegerField( blank=False, null=False, default=business_policy.subscription.DECIMAL_001)
+    currency = models.CharField(max_length=255, null=True, blank=True, default=business_policy.subscription.CURRENCY_USD)
 
     # payment info
     payment_status = models.CharField(max_length=255, null=True, blank=True, default=PAYMENT_STATUS_AWAITING_PAYMENT)
@@ -109,6 +120,13 @@ class Order(models.Model):
     history = models.JSONField(default=dict, null=True, blank=True)
     
     meta = models.JSONField(default=dict, null=True, blank=True)
+
+    #point system
+    meta_point = models.JSONField(default=dict, null=True, blank=True)
+    points_earned = models.IntegerField(blank=True, null=True, default=0)
+    points_used = models.IntegerField(blank=True, null=True, default=0)
+    point_discount = models.FloatField(null=True, blank=True, default=0)
+    point_expired_at = models.DateTimeField(auto_now=False, null=True, default=None)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

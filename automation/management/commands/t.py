@@ -34,7 +34,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # self.handle_new_registeration_from_hubspot()
-        self.test_import_account()
+        self.test_add_user_subscription_to_order()
         pass
 
 
@@ -901,4 +901,26 @@ class Command(BaseCommand):
 
         jobs.import_account_job.imoprt_account_job('Till End OCT2022.xlsx','1')
 
-           
+    def test_add_user_subscription_to_order(self):
+        from api import models
+        import traceback
+        # for cart in models.cart.cart.Cart.objects.filter(user_subscription=None):
+        #     try:
+        #         print(cart.id)
+        #         cart.user_subscription = cart.campaign.user_subscription
+        #         cart.save()       
+        #     except Exception:
+        #         print(traceback.format_exc())
+        offset = 16000
+        for i, order in enumerate(models.order.order.Order.objects.all()[offset:offset+8000]):
+        # for order in models.order.order.Order.objects.filter(user_subscription=None)[:8000]:
+            try:
+                print(offset+i)
+
+                order.price_unit = order.campaign.price_unit
+                order.decimal_places = order.campaign.decimal_places
+                order.currency = order.campaign.currency
+
+                order.save()       
+            except Exception:
+                print(traceback.format_exc())

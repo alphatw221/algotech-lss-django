@@ -15,7 +15,7 @@ from rest_framework import status
 from rest_framework.parsers import MultiPartParser, JSONParser, FormParser
 
 from api import rule, models, utils
-from api_v2.views.user.user import UserSerializerAccountInfo
+
 import stripe, pytz, lib, service, business_policy, json
 from backend.pymongo.mongodb import db
 
@@ -23,6 +23,22 @@ from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
 import database
 
+class UserSubscriptionAccountInfo(models.user.user_subscription.UserSubscriptionSerializer):
+
+    facebook_pages = models.facebook.facebook_page.FacebookPageInfoSerializer(
+        many=True, read_only=True, default=list)
+    instagram_profiles = models.instagram.instagram_profile.InstagramProfileInfoSerializer(
+        many=True, read_only=True, default=list)
+    youtube_channels = models.youtube.youtube_channel.YoutubeChannelInfoSerializer(
+        many=True, read_only=True, default=list)
+    twitch_channels = models.twitch.twitch_channel.TwitchChannelInfoSerializer(
+        many=True, read_only=True, default=list)
+    tiktok_accounts = models.tiktok.tiktok_account.TikTokAccountInfoSerializer(
+        many=True, read_only=True, default=list)
+    product_categories = models.product.product_category.ProductCategorySerializer(
+        many=True, read_only=True, default=list)
+class UserSerializerSellerAccountInfo(models.user.user.UserSerializer):
+    user_subscription = UserSubscriptionAccountInfo(read_only=True, default=dict)
 
 class UserSubscriptionPagination(PageNumberPagination):
 
@@ -55,7 +71,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         serializer.save()
 
-        return Response(UserSerializerAccountInfo(api_user).data, status=status.HTTP_200_OK)
+        return Response(UserSerializerSellerAccountInfo(api_user).data, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['PUT'], url_path=r'seller/switch_mode', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
@@ -72,7 +88,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         serializer.save()
 
-        return Response(UserSerializerAccountInfo(api_user).data, status=status.HTTP_200_OK)
+        return Response(UserSerializerSellerAccountInfo(api_user).data, status=status.HTTP_200_OK)
 
 
     @action(detail=False, methods=['POST'], url_path=r'seller/upload/animation', parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated,))
@@ -82,13 +98,15 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
 
         animation, = lib.util.getter.getdata(request, ("animation", ), required=True)
-        if animation:
-            animation_name=animation.name.replace(" ","")
-            animation_path = f'user_subscription/{user_subscription.id}/luckydraw'
-            animation_url = lib.util.storage.upload_image(animation_path, animation_name, animation)
-            models.user.static_assets.StaticAssets.objects.create(user_subscription=user_subscription, name=animation.name, path=animation_url, type=models.user.static_assets.TYPE_ANIMATION)
-        
-        return Response({'message': 'success'}, status=status.HTTP_200_OK)
+        if not animation:
+            raise lib.error_handle.error.api_error.ApiVerifyError('no_animation')
+
+        animation_name=str(datetime.utcnow().timestamp())+animation.name.replace(" ","")
+        animation_path = f'user_subscription/{user_subscription.id}/animations'
+        animation_url = lib.util.storage.upload_image(animation_path, animation_name, animation)
+        static_asset = models.user.static_assets.StaticAssets.objects.create(user_subscription=user_subscription, name=animation.name, path=animation_url, type=models.user.static_assets.TYPE_ANIMATION)
+        data = models.user.static_assets.StaticAssetsSerializer(static_asset).data
+        return Response(data, status=status.HTTP_200_OK)
 
 
     @action(detail=False, methods=['PUT'], url_path=r'payment/(?P<payment_key>[^/.]+)', parser_classes=(MultiPartParser, JSONParser, FormParser), permission_classes=(IsAuthenticated,))
@@ -128,7 +146,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
         user_subscription.save()
 
-        return Response(UserSerializerAccountInfo(api_user).data, status=status.HTTP_200_OK)
+        return Response(UserSerializerSellerAccountInfo(api_user).data, status=status.HTTP_200_OK)
 
 
     @action(detail=False, methods=['PUT'], url_path=r'delivery', permission_classes=(IsAuthenticated,))
@@ -140,7 +158,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         user_subscription.meta_logistic.update(request.data)
         user_subscription.save()
 
-        return Response(UserSerializerAccountInfo(api_user).data, status=status.HTTP_200_OK)
+        return Response(UserSerializerSellerAccountInfo(api_user).data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET'], url_path=r'platform/(?P<platform_name>)/(?P<platform_id>)', permission_classes=())
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
@@ -236,7 +254,8 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             'price_unit':user_subscription.price_unit,
             'delivery_note': user_subscription.meta_logistic.get('delivery_note', ''),
             'special_note' : user_subscription.meta_payment.get('special_note', ''),
-            'confirmation_note': user_subscription.meta_payment.get('confirmation_note', '')
+            'confirmation_note': user_subscription.meta_payment.get('confirmation_note', ''),
+            'meta_point':user_subscription.meta_point
         }
         return Response(_json, status=status.HTTP_200_OK)
     
@@ -250,8 +269,8 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
         currency, buyer_lang, decimal_places, price_unit  =\
                 lib.util.getter.getdata(request,('currency', 'buyer_lang', 'decimal_places', 'price_unit'), required=True)
-        delivery_note, special_note, confirmation_note  =\
-                lib.util.getter.getdata(request,('delivery_note', 'special_note', 'confirmation_note'), required=False)
+        delivery_note, special_note, confirmation_note, meta_point  =\
+                lib.util.getter.getdata(request,('delivery_note', 'special_note', 'confirmation_note', 'meta_point'), required=False)
         user_subscription.currency=currency
         user_subscription.buyer_lang=buyer_lang
         user_subscription.decimal_places=decimal_places
@@ -259,10 +278,10 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         user_subscription.meta_logistic['delivery_note'] = delivery_note
         user_subscription.meta_payment['special_note'] = special_note
         user_subscription.meta_payment['confirmation_note'] = confirmation_note
-
+        user_subscription.meta_point = meta_point
         user_subscription.save()
 
-        return Response(UserSerializerAccountInfo(api_user).data, status=status.HTTP_200_OK)
+        return Response(UserSerializerSellerAccountInfo(api_user).data, status=status.HTTP_200_OK)
     
         
     @action(detail=False, methods=['POST'], url_path=r'upgrade/intent')
@@ -418,6 +437,16 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         report = lib.helper.report_helper.SalesReport.merge_data(basic_info, top_10_itmes, order_analysis)
         return Response(report, status=status.HTTP_200_OK)
     
+
+    @action(detail=False, methods=['GET'], url_path=r'list/animation', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def list_animation(self, request):
+
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        static_assets = user_subscription.assets.filter(type=models.user.static_assets.TYPE_ANIMATION)
+        
+        return Response(models.user.static_assets.StaticAssetsSerializer(static_assets, many=True).data, status=status.HTTP_200_OK)
 # --------------------------------- dealer ---------------------------------
     
 

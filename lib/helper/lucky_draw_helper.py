@@ -421,6 +421,7 @@ class LuckyDraw():
                     customer_name=winner.customer_name, 
                     customer_img=winner.customer_image, 
                     campaign = campaign, 
+                    user_subscription = campaign.user_subscription,
                     platform=winner.platform, 
                     platform_id=platform_id_dict.get(winner.platform))
 

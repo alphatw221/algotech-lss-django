@@ -4,6 +4,7 @@ from djongo import models
 from rest_framework import serializers
 
 from api.models.campaign.campaign import Campaign, CampaignSerializer, CampaignSerializerWithUserSubscription
+from api.models.user.user_subscription import UserSubscription
 from api.models.user.user import User
 
 SELLER_ADJUST_ADD = '+'
@@ -13,6 +14,9 @@ class Cart(models.Model):
     class Meta:
         db_table = 'api_cart'
         unique_together = ['platform', 'customer_id', 'campaign']
+
+    user_subscription = models.ForeignKey(
+        UserSubscription, null=True, on_delete=models.SET_NULL, related_name='carts')
 
     campaign = models.ForeignKey(
         Campaign, blank=True, null=True, on_delete=models.SET_NULL, related_name='carts')
@@ -46,6 +50,10 @@ class Cart(models.Model):
 
 
     meta = models.JSONField(default=dict, null=True, blank=True)
+
+    #point system
+    # points_used = models.IntegerField(blank=True, null=True, default=0)
+    # point_discount = models.FloatField(null=True, blank=True, default=0)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
