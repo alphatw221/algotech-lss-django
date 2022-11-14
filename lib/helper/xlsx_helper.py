@@ -6,21 +6,16 @@ import xlsxwriter
 import io
 
 class FieldMapper():
-    field_name=''
-    title=''
-    i18n_key=None
-    _width=None
-    i18n_text=None
-    kwargs = {}
 
-    def __init__(self, field_name='', title='', i18n_key=None, width=None, i18n_text=None, **kwargs):
+    def __init__(self, field_name='', title='', i18n_key=None, width=None, i18n_text=None, first_only=False, **kwargs):
         self.field_name = field_name
         self.title = title
         self._width = width
         self.i18n_key = i18n_key
         self.i18n_text = i18n_text
+        self.first_only = first_only
         self.kwargs = kwargs
-
+        
     def get_field_data(self,object):
         return object.get(self.field_name)
 
@@ -36,15 +31,16 @@ class JSXlsxProcessor():
 
     
 
-    def __init__(self, field_mappers:list=[], objects=[], lang='en') -> None:
+    def __init__(self, field_mappers:list=[], iterable_objects=[], reference_key = 'id',lang='en') -> None:
         self.field_mappers = field_mappers
-        self.objects = objects
+        self.iterable_objects = iterable_objects
         self.lang = lang
 
         self.column_settings = []
         self.header = []
         self.display_header = {}
         self.data = []
+        self.reference_key = reference_key
 
     def __generate_header(self):
 
@@ -54,10 +50,15 @@ class JSXlsxProcessor():
             self.display_header[field_mapper.field_name] = _(field_mapper.i18n_key) if field_mapper.i18n_key else field_mapper.title
 
     def __generate_data(self):
-        for object in  self.objects:
+        reference = None
+        for object in  self.iterable_objects:
+
+            same_object = reference==object.get(self.reference_key) if reference else False
+            reference = object.get(self.reference_key)
+
             row = {}
             for field_mapper in self.field_mappers:
-                row[field_mapper.field_name] = field_mapper.get_field_data(object)
+                row[field_mapper.field_name] = '' if (same_object and field_mapper.first_only) else field_mapper.get_field_data(object)
             self.data.append(row)
 
     def generate_json(self):

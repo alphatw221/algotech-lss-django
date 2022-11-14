@@ -262,35 +262,60 @@ class OrderViewSet(viewsets.ModelViewSet):
             lib.util.getter.getdata(request, ('payment_method_options','delivery_status_options', 'payment_status_options', 'platform_options', 'sort_by'), required=False)
 
         queryset = user_subscription.orders.all()
+        pymongo_filter_query = {'user_subscription_id': user_subscription.id}
 
         if campaign_id not in ["",None,'undefined'] and campaign_id.isnumeric():
             queryset=queryset.filter(campaign_id = int(campaign_id))
+            pymongo_filter_query['campaign_id'] = int(campaign_id)
 
         if search not in ["",None,'undefined'] and search.isnumeric():
             queryset=queryset.filter(Q(id=int(search))|Q(customer_name__contains=search))
+            pymongo_filter_query["$or"]=[{"id":{"$eq":int(search)}}, {"customer_name":{"$regex":str(search),"$options": 'i'}}]
+
         elif search not in ["",None,'undefined']:
             queryset=queryset.filter(customer_name__contains=search)
+            pymongo_filter_query["customer_name"]={"$regex":str(search),"$options": 'i'}
 
         elif order_status in models.order.order.STATUS_CHOICES:
             queryset=queryset.filter(status=order_status)
+            pymongo_filter_query['status']=order_status
+
 
         if payment_methods_dict and[key for key,value in payment_methods_dict.items() if value]:
-            queryset=queryset.filter(payment_method__in=[key for key,value in payment_methods_dict.items() if value])
+            payment_methods = [key for key,value in payment_methods_dict.items() if value]
+            queryset=queryset.filter(payment_method__in=payment_methods)
+            pymongo_filter_query['payment_method'] = {"$in": payment_methods}
+
         if delivery_status_options_dict and [key for key,value in delivery_status_options_dict.items() if value]:
-            queryset=queryset.filter(delivery_status__in=[key for key,value in delivery_status_options_dict.items() if value])
+            delivery_status_options = [key for key,value in delivery_status_options_dict.items() if value]
+            queryset=queryset.filter(delivery_status__in=delivery_status_options)
+            pymongo_filter_query['delivery_status'] = {"$in":delivery_status_options}
+
+
         if payment_status_options_dict and [key for key,value in payment_status_options_dict.items() if value]:
-            queryset=queryset.filter(payment_status__in=[key for key,value in payment_status_options_dict.items() if value])
+            payment_status_options = [key for key,value in payment_status_options_dict.items() if value]
+            queryset=queryset.filter(payment_status__in=payment_status_options)
+            pymongo_filter_query['payment_status'] = {"$in": payment_status_options}
+
+
         if platform_dict and [key for key,value in platform_dict.items() if value]:
-            queryset=queryset.filter(platform__in=[key for key,value in platform_dict.items() if value])
-        
+            platforms =  [key for key,value in platform_dict.items() if value]
+            queryset=queryset.filter(platform__in=platforms)
+            pymongo_filter_query['platform'] = {"$in": platforms}
+
+
+
         queryset = queryset.order_by('-created_at')
-        
+        pymongo_sort_by = sort_by = {"id":-1}
+
         for order_by, asc in sort_by_dict.items():
             if order_by not in ["id", "customer_name", "subtotal","total", 'payment_method', 'delivery_status', 'payment_status']:
                 continue
             order_by = order_by if asc==1 else f"-{order_by}"
             queryset = queryset.order_by(order_by)
-        return queryset
+            pymongo_sort_by['order_by'] = asc
+
+        return queryset, pymongo_filter_query, pymongo_sort_by
 
     @action(detail=False, methods=['POST'], url_path=r'seller/search', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
@@ -299,7 +324,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
 
-        queryset = self.__search_order(user_subscription, request)
+        queryset, _, _ = self.__search_order(user_subscription, request)
         page = self.paginate_queryset(queryset)
         serializer = models.order.order.OrderSerializer(page, many=True)
         result = self.get_paginated_response(serializer.data)
@@ -352,18 +377,20 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         return Response(OrderSerializerWithOrderProductWithCampaign(order).data, status=status.HTTP_200_OK)
     
-    @action(detail=False, methods=['POST'], url_path=r'report', permission_classes=(IsAuthenticated, ))
+    @action(detail=False, methods=['POST'], url_path=r'report/json', permission_classes=(IsAuthenticated, ))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def get_order_report(self, request, pk=None):
 
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
 
-        queryset = self.__search_order(user_subscription, request)
+        _, pymongo_filter_query, pymongo_sort_by = self.__search_order(user_subscription, request)
+        iterable_objects = database.lss.order.get_order_export_cursor(pymongo_filter_query, pymongo_sort_by)
 
         order_export_processor_class:factory.order_export.default.DefaultOrderExportProcessor =\
              factory.order_export.get_order_export_processor_class(user_subscription)
-        order_export_processor = order_export_processor_class(queryset, user_subscription)
+        order_export_processor = order_export_processor_class(iterable_objects, user_subscription)
         
         order_data = order_export_processor.export_order_data()
+        print(order_data)
         return Response(order_data, status=status.HTTP_200_OK)
