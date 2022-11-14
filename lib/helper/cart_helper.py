@@ -232,17 +232,24 @@ class CartHelper():
         meta = {}
 
         product_category_data_dict={}
-
+        product_category_products_dict = {}
         for campaign_prodcut_id_str, qty in pymongo_order.data.get('products',{}).items():
             campaign_product_data = campaign_product_data_dict.get(campaign_prodcut_id_str,{})
 
-            if len(campaign_product_data.get('categories',[])) == 1 and campaign_product_data.get('categories',[])[0] not in product_category_data_dict:
-                product_category_data = database.lss.product_category.ProductCategory.get(id=int(campaign_product_data.get('categories',[])[0]))
-                if product_category_data:
-                    product_category_data_dict[campaign_product_data.get('categories',[])[0]] = product_category_data
-            
+            if len(campaign_product_data.get('categories',[])) == 1 :
+                product_category_id_str = campaign_product_data.get('categories',[])[0]
+                if product_category_id_str not in product_category_data_dict:
+                    product_category_data = database.lss.product_category.ProductCategory.get(id=int(campaign_product_data.get('categories',[])[0]))
+                    if product_category_data:
+                        product_category_data_dict[product_category_data_dict] = product_category_data
+
+                if product_category_products_dict[product_category_id_str]:
+                    product_category_products_dict[product_category_id_str].append({'campaign_product_id':campaign_prodcut_id_str, 'qty':qty})
+                else:
+                    product_category_products_dict[product_category_id_str] = [{'campaign_product_id':campaign_prodcut_id_str, 'qty':qty}]
+
             subtotal += campaign_product_data.get('price',0)*qty
-        shipping_cost, category_logistic_applied = cls.__compute_shipping_cost(campaign, pymongo_order, product_category_data_dict)
+        shipping_cost, category_logistic_applied = cls.__compute_shipping_cost(campaign, pymongo_order, product_category_data_dict, product_category_products_dict, campaign_product_data_dict)
         
 
         #compute free_delivery
@@ -293,16 +300,26 @@ class CartHelper():
         point_discount_processor.update_wallet()
 
     @classmethod 
-    def __compute_shipping_cost(cls, campaign, pymongo_order, product_category_data_dict:dict):
+    def __compute_shipping_cost(cls, campaign, pymongo_order, product_category_data_dict:dict, product_category_products_dict:dict, campaign_product_data_dict:dict):
         if pymongo_order.data.get('shipping_method') == models.order.order.SHIPPING_METHOD_PICKUP:
             return 0, False
 
         shipping_cost = 0
         category_logistic_applied = False
-        for product_category_data in product_category_data_dict.values():
+        for product_category_id_str, product_category_data in product_category_data_dict.items():
             if product_category_data.get('meta_logistic',{}).get('enable_flat_rate')==True:
                 category_logistic_applied = True
-                shipping_cost+=product_category_data.get('meta_logistic').get('flat_rate',0)
+
+                is_category_product_subtotal_above = False
+                if product_category_data.get('meta_logistic',{}).get('is_free_delivery_for_order_above_price'):
+                    category_products_subtotal = 0
+                    
+                    for category_product in product_category_products_dict.get(product_category_id_str):
+                        category_products_subtotal += campaign_product_data_dict.get(category_product.get('campaign_product_id'),{}).get('price') * category_product.get('qty')
+                    
+                    is_category_product_subtotal_above = category_products_subtotal > product_category_data.get('meta_logistic',{}).get('free_delivery_for_order_above_price',0)
+
+                shipping_cost+=0 if is_category_product_subtotal_above else product_category_data.get('meta_logistic').get('flat_rate',0)
         
         if category_logistic_applied:
             return shipping_cost, True
