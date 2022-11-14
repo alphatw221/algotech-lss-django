@@ -118,7 +118,7 @@ class CartHelper():
     def checkout(cls, api_user, campaign, cart_id, point_discount_processor, shipping_data={}):
 
         
-        success, data = cls.__transfer_cart_to_order(api_user, cart_id, shipping_data)
+        success, data = cls.__transfer_cart_to_order(api_user, campaign.user_subscription.id, cart_id, shipping_data)
         if not success:
             error_products_data = data.get('error_products_data', [])
             pymongo_cart = data.get('pymongo_cart')
@@ -143,7 +143,7 @@ class CartHelper():
         return True, pymongo_order
 
     @classmethod
-    def __transfer_cart_to_order(cls, api_user, cart_id, shipping_data, attempts=3):
+    def __transfer_cart_to_order(cls, api_user, user_subscription_id, cart_id, shipping_data, attempts=3):
         try:
             with database.lss.util.start_session() as session:
                 with session.start_transaction():
@@ -185,6 +185,7 @@ class CartHelper():
                         return False, {'pymongo_cart':pymongo_cart, 'error_products_data':error_products_data, }
 
                     pymongo_cart.data['buyer_id']=api_user.id if api_user else None
+                    pymongo_cart.data['user_subscription_id'] = user_subscription_id
                     pymongo_order = database.lss.order.Order.create_object(
                         session=session,
                         **pymongo_cart.data, 
@@ -216,7 +217,7 @@ class CartHelper():
 
         except Exception:
             if attempts > 0:
-                cls.__transfer_cart_to_order(api_user, cart_id, shipping_data, attempts=attempts-1)
+                cls.__transfer_cart_to_order(api_user, user_subscription_id, cart_id, shipping_data, attempts=attempts-1)
             else:
                 print(traceback.format_exc())
                 raise lib.error_handle.error.cart_error.CartErrors.ServerBusy('server_busy')
