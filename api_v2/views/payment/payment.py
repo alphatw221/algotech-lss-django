@@ -98,6 +98,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             "action": "pay",
             "time": pendulum.now("UTC").to_iso8601_string()
         }
+        order.paid_at = datetime.utcnow()
         order.payment_status = models.order.order.PAYMENT_STATUS_PAID
         lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
 
@@ -168,6 +169,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
                 "action": "pay",
                 "time": pendulum.now("UTC").to_iso8601_string()
             }
+            order.paid_at = datetime.utcnow()
             order.payment_status = models.order.order.PAYMENT_STATUS_PAID
             lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
 
@@ -234,6 +236,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             "action": "pay",
             "time": pendulum.now("UTC").to_iso8601_string()
         }
+        order.paid_at = datetime.utcnow()
         order.payment_status = models.order.order.PAYMENT_STATUS_PAID
         lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
 
@@ -327,6 +330,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
                 "action": "pay",
                 "time": pendulum.now("UTC").to_iso8601_string()
             }
+            order.paid_at = datetime.utcnow()
             order.payment_status = models.order.order.PAYMENT_STATUS_PAID
             lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
 
@@ -442,6 +446,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             "action": "pay",
             "time": pendulum.now("UTC").to_iso8601_string()
         }
+        order.paid_at = datetime.utcnow()
         order.payment_status = models.order.order.PAYMENT_STATUS_PAID
         lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
 
@@ -538,6 +543,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
 
         lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
         if payment_status == "CLO":
+            order.paid_at = datetime.utcnow()
             order.payment_status = models.order.order.PAYMENT_STATUS_PAID
         elif payment_status == "ACT":
             order.payment_status = models.order.order.PAYMENT_STATUS_AWAITING_CONFIRM
@@ -601,6 +607,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             if type == "PAYMENT_FAILED":
                 order_status = models.order.order.STATUS_REVIEW
             elif type == "PAYMENT_COMPLETED":
+                order.paid_at = datetime.utcnow()
                 order.status = models.order.order.STATUS_COMPLETE
             
             callback_time = pendulum.now("UTC").to_iso8601_string()

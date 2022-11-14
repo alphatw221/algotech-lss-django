@@ -7,6 +7,7 @@ from dateutil import parser
 
 class DateTimeMapper(FieldMapper):
     def get_field_data(self, object):
+        return '123'
         return parser.parse(super().get_field_data(object)).strftime("%Y-%m-%d")
 
 
@@ -56,24 +57,27 @@ class TotalMapper(FieldMapper):
     def get_field_data(self, object):
         return int(super().get_field_data(object)) if object.get('decimal_places') == 0 else super().get_field_data(object)
 
-class OrderProductsMapper(FieldMapper):
+class OrderProductsNameMapper(FieldMapper):
     def get_field_data(self, object):
-        data = ""
-        for order_product in object.get(self.field_name,[]):
-            data+=f"product: {str(order_product.get('name'))} - qty: {str(order_product.get('qty'))}\n"
+        return object.get('order_products',{}).get('name')
 
-        return data
+class OrderProductsPriceMapper(FieldMapper):
+    def get_field_data(self, object):
+        return object.get('order_products',{}).get('price')
 
+class OrderProductsQtyMapper(FieldMapper):
+    def get_field_data(self, object):
+        return object.get('order_products',{}).get('qty')
+
+class OrderProductsSubtotalMapper(FieldMapper):
+    def get_field_data(self, object):
+        return object.get('order_products',{}).get('subtotal')
 
 
 class TotalMapper(FieldMapper):
     def get_field_data(self, object):
         return int(super().get_field_data(object)) if object.get('decimal_places') == 0 else super().get_field_data(object)
 
-
-
-class OrderSerializerWithOrderProduct(models.order.order.OrderSerializer):
-    order_products = models.order.order_product.OrderProductSerializer(many=True, read_only=True, default=list)
 
 class DefaultOrderExportProcessor:
 
@@ -97,16 +101,17 @@ class DefaultOrderExportProcessor:
             PaymentMethodMapper('payment_method', 'Payment Method', width=30, i18n_key='REPORT/COLUMN_TITLE/PAYMENT_METHOD'),
             FieldMapper('payment_status', 'Payment Status', width=20, i18n_key='REPORT/COLUMN_TITLE/PAYMENT_STATUS'),
             LastFiveDigitMapper('last_five_digit', 'Payment Record', width=20, i18n_key='REPORT/COLUMN_TITLE/PAYMENT_RECORD'),
-            OrderProductsMapper('order_products', 'Order Products', width=40,),
-            TotalMapper('total', 'Total', width=10, i18n_key='REPORT/COLUMN_TITLE/TOTAL'),
+            OrderProductsNameMapper('order_product_name', 'Product Name', width=40),
+            OrderProductsPriceMapper('order_product_price', 'Product Price', width=20),
+            OrderProductsQtyMapper('order_product_qty', 'Qty', width=20),
+            OrderProductsSubtotalMapper('order_product_subtotal', 'Subtotal', width=20)
         ]
 
-    def __init__(self, queryset, user_subscription) -> None:
-        self.queryset = queryset
+    def __init__(self, iterable_objects, user_subscription) -> None:
+        self.iterable_objects = iterable_objects
         self.user_subscription = user_subscription
         
     def export_order_data(self):
 
-        objects = OrderSerializerWithOrderProduct(self.queryset, many=True).data
-        js_xlsx_processor = lib.helper.xlsx_helper.JSXlsxProcessor(field_mappers=self.field_mappers, objects=objects, lang = self.user_subscription.lang)
+        js_xlsx_processor = lib.helper.xlsx_helper.JSXlsxProcessor(field_mappers=self.field_mappers, iterable_objects=self.iterable_objects, lang = self.user_subscription.lang)
         return js_xlsx_processor.generate_json()
