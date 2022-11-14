@@ -156,6 +156,7 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
                             database.lss.campaign_product.CampaignProduct.create(
                                 image = str(request_data.get('image')),
                                 name=str(request_data.get('name', '')), 
+                                sku = str(request_data.get('sku', '')),
                                 order_code=str(request_data.get('order_code', '')), 
                                 qty_for_sale=qty_for_sale, 
                                 max_order_amount=int(request_data.get('max_order_amount')) if request_data.get('max_order_amount') else 0, 
