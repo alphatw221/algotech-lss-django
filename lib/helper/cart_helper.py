@@ -113,6 +113,16 @@ class CartHelper():
 
         return state
 
+    @classmethod
+    def clear(cls, api_user, campaign, cart):    
+
+
+        ##return campaign product
+
+        ##return discount code
+
+        ##clear cart
+        pass
 
     @classmethod
     def checkout(cls, api_user, campaign, cart_id, point_discount_processor, shipping_data={}):
