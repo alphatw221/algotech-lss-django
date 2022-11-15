@@ -1,30 +1,28 @@
-from django.core.management.base import BaseCommand
-from django.conf import settings
-from api import models
-from api.models.user.user import AuthUserSerializer
+import random
+import string
+from datetime import datetime, timedelta
+
 from django.conf import settings
 from django.contrib.auth.models import User as AuthUser
-
-from rest_framework import viewsets, status
+from django.core.management.base import BaseCommand
+from automation.jobs.send_reminder_messages import send_reminder_messages_job
+import database
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+import arrow
+import business_policy
+import lib
+import service
+from api import models, rule
 from api.models.user.promotion_code import PromotionCode
-
-
-from api.utils.common.verify import Verify
-from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
-from api.utils.common.verify import ApiVerifyError
-from api import models
-from api import rule
+from api.models.user.user import AuthUserSerializer
+from api.utils.common.verify import ApiVerifyError, Verify
+from api.utils.error_handle.error_handler.api_error_handler import \
+    api_error_handler
 from api.utils.orm.deal import record_subscription_for_trial_user
 from business_policy.marketing_plan import MarketingPlan
 
-import service
-import business_policy
-import lib
-
-from datetime import datetime, timedelta
-import string, random
 
 class Command(BaseCommand):
     help = ''
@@ -34,20 +32,22 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # self.handle_new_registeration_from_hubspot()
-        self.test_add_user_subscription_to_order()
+        # self.test_add_user_subscription_to_order()
         pass
 
 
     def modify_database(self):
 
-        from api.models.user.user_subscription import UserSubscription
-        from api.models.user.user import User
-        from django.contrib.auth.models import User as AuthUser
-        from json import loads, dumps
-        from collections import OrderedDict
         import json
         import re
+        from collections import OrderedDict
+        from json import dumps, loads
+
+        from django.contrib.auth.models import User as AuthUser
+
         from api.models.campaign.campaign import Campaign
+        from api.models.user.user import User
+        from api.models.user.user_subscription import UserSubscription
         def to_dict(input_ordered_dict):
             return loads(dumps(input_ordered_dict))
         def add_activated_country():
@@ -148,11 +148,11 @@ class Command(BaseCommand):
         print(classify_comment_v1(texts=[['Deliver Delivery delivery','payment payment payment']],threshold=0.7))
 
     def test_pre_order_helper(self):
-        from api.utils.common.order_helper import PreOrderHelper
-        from api.models.user.user import User
-        from api.models.order.pre_order import PreOrder
         from api.models.campaign.campaign_product import CampaignProduct
         from api.models.order.order_product import OrderProduct
+        from api.models.order.pre_order import PreOrder
+        from api.models.user.user import User
+        from api.utils.common.order_helper import PreOrderHelper
 
         api_user = User.objects.get(id=1)
         pre_order = PreOrder.objects.get(id=506)
@@ -165,13 +165,14 @@ class Command(BaseCommand):
 
     
     def test_mongodb_query(self):
-        import database
         from pprint import pprint
+
+        import database
+
         # from backend.pymongo.mongodb import db
         # from api.utils.advance_query.dashboard import get_total_revenue, get_order_total_sales, get_pre_order_total_sales, \
         # get_order_total_sales_by_month,get_campaign_comment_rank, get_campaign_order_rank, get_campaign_complete_sales, get_total_order_complete_proceed,\
         # get_total_pre_order_count, get_campaign_order_complete_proceed,get_total_average_sales,get_total_average_comment_count,get_campaign_merge_order_list
-
         # print(get_total_revenue(1))
         # campaign_products = database.lss.campaign.get_ongoing_campaign_disallow_overbook_campaign_product()
         pre_orders = database.lss.pre_order.get_pre_order_contain_campaign_product(9381)
@@ -188,8 +189,8 @@ class Command(BaseCommand):
     def test_send_email(self):
         
         import lib
-        from automation import jobs
         from api import models
+        from automation import jobs
         order = models.order.order.Order.objects.get(id=32560)
         content = lib.helper.order_helper.OrderHelper.get_confirmation_email_content(order)
         jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)
@@ -202,6 +203,7 @@ class Command(BaseCommand):
     
     def test_user_plan(self):
         from datetime import datetime
+
         from api import models
         api_user_subscription = models.user.user_subscription.UserSubscription.objects.get(id=1)
         
@@ -242,8 +244,10 @@ class Command(BaseCommand):
         # sib.transaction_email.RegistraionConfirmationEmail(first_name="first_name",email="email",password="password", to="alphatw22193@gmail.com").send()
 
     def test_hubspot(self):
-        import service
         from datetime import datetime
+
+        import service
+
         # import pytz
         service.hubspot.contact.update("651",properties={"expiry_date":int(datetime.utcnow().replace(hour=0,minute=0,second=0,microsecond=0).timestamp()*1000)})
         # service.hubspot.contact.update("651",properties={"expiry_date":1652054400})
@@ -266,21 +270,22 @@ class Command(BaseCommand):
 
     
     def test_mongo_aggr(self):
-        from pprint import pprint 
+        from pprint import pprint
+
         import database
         l = database.lss.campaign.get_merge_order_list_pagination(campaign_id=958, status='', search='', filter_payment=[], filter_delivery=[], filter_platform=[])
         pprint(l)
 
     def test_websocket(self):
-        import service
         import database
+        import service
+
         # from asgiref.sync import async_to_sync
         # from channels.layers import get_channel_layer
-        
+
         # channel_layer = get_channel_layer()
         # # async_to_sync(channel_layer.send)("channel_name", {"type": "chat.force_disconnect"})
         # # async_to_sync(channel_layer.group_send)("user_subscription_1", {"type": "notification_message","data":{"message":"testmessage"}})
-
         # async_to_sync(channel_layer.group_send)("campaign_1356", {"type": "cart_data","data":{"message":"123"}})
         # async_to_sync(channel_layer.group_send)("campaign_440", {"type": "order_data","data":{"message":"testmessage"}})
         # async_to_sync(channel_layer.group_send)("campaign_440", {"type": "product_data","data":{"message":"testmessage"}})
@@ -332,10 +337,9 @@ class Command(BaseCommand):
         jobs.campaign_job.campaign_job(661)
 
         from datetime import datetime
+
         from dateutil import parser
 
-        from datetime import datetime
-        from dateutil import parser
         from database.lss._config import db
         ig_datas = db.api_campaign_comment.find({'platform': 'instagram'})
         for ig_data in ig_datas:
@@ -367,8 +371,8 @@ class Command(BaseCommand):
     def test_hitpay_verification(self):
 
 
-        import hmac
         import hashlib
+        import hmac
 
         KEY_LIST = ['amount', 'currency', 'payment_id', 'payment_request_id', 'phone', 'reference_number', 'status']
 
@@ -496,7 +500,11 @@ class Command(BaseCommand):
         print (ret)
 
     def test_create_developer(self):
-        import uuid, base64, random, string
+        import base64
+        import random
+        import string
+        import uuid
+
         from api import models
         data = {
             "api_key" : base64.urlsafe_b64encode(uuid.uuid4().bytes).rstrip(b'=').decode('ascii'),
@@ -508,10 +516,14 @@ class Command(BaseCommand):
         models.user.developer.Developer.objects.create(**data)
 
     def test_generate_developer_token(self):
-        import hashlib, hmac
-        import json, base64
-        from django.conf import settings
+        import base64
+        import hashlib
+        import hmac
+        import json
         from datetime import datetime, timedelta
+
+        from django.conf import settings
+
         from api import models
 
         header_data = {
@@ -545,11 +557,15 @@ class Command(BaseCommand):
         print(token)
 
     def test_discripting_token(self):
-        from api import models
-        import hashlib, hmac
-        import json, base64
-        from django.conf import settings
+        import base64
+        import hashlib
+        import hmac
+        import json
         from datetime import datetime, timedelta
+
+        from django.conf import settings
+
+        from api import models
 
         token = 'eyJhbGciOiAic2hhMjU2IiwgInR5cCI6ICJ2MSJ9.eyJrZXkiOiAiN2JiZHJBNWtRMDZuQVpQOWllRWhUQSIsICJwZXJtIjoge30sICJhdXRoIjogbnVsbCwgIm1ldGEiOiB7fSwgImV4cCI6IDE2NjI1NDAyNjh9.8a1a3f2735e90bd3a8abd9615e7bc26e5860297968250268d371a31728c04556.7bbdrA5kQ06nAZP9ieEhTA.a1ttdUyxI3KdlcO1evA_Fyy1icAxQd8nXgGUlEThLoE'
         header, payload, signature, api_key, secret_key_hash = token.split('.')
@@ -672,9 +688,11 @@ class Command(BaseCommand):
 
         
     def test_cache_redis(self):
-        import pottery
-        import database
         from pprint import pprint
+
+        import pottery
+
+        import database
 
         # database.lss_cache.redis.delete('default')
         campaign_products = database.lss_cache.campaign_product.get_products_all(1211, bypass=True)
@@ -713,9 +731,10 @@ class Command(BaseCommand):
 
 
     def test_shopify(self):
+        from pprint import pprint
+
         from api import models
         from automation import jobs
-        from pprint import pprint
         from plugins.shopify.service.checkouts import create_checkout
 
 
@@ -738,9 +757,10 @@ class Command(BaseCommand):
         # print(len(data.get('orders')))
         # pprint(data)
     def test_easy_store(self):
+        from pprint import pprint
+
         from api import models
         from automation import jobs
-        from pprint import pprint
 
         user_subscription = models.user.user_subscription.UserSubscription.objects.get(id=618)
         c = user_subscription.user_plan.get('plugins').get('easy_store')
@@ -774,7 +794,8 @@ class Command(BaseCommand):
         print(b)
     
     def test_get_facebook_app_secret_proof(self):
-        import hashlib, hmac
+        import hashlib
+        import hmac
 
         page_token = 'EAANwBngXqOABAAOHBdSPAZAWckuo6imoCtBHH8c26aAhZASsIGv9VBvaMuy7pb1lrpieSZASIkC5fQAQoxgPsnpeVRkG4KF5bsSvzmVJimvhxfVIGgcXEA3JdHkyYyZCenGYYeChEaZCWSeL9TK7e60uRU7GdxZAYtRTl4FTftSRvBf3Yg3Mr129Dc0ZA4MnMqlegX0oiAkKWUWriE1Ifzs1XUQUJeUxNkZD'
         app_secret='e36ab1560c8d85cbc413e07fb7232f99'
@@ -902,8 +923,10 @@ class Command(BaseCommand):
         jobs.import_account_job.imoprt_account_job('Till End OCT2022.xlsx','1')
 
     def test_add_user_subscription_to_order(self):
-        from api import models
         import traceback
+
+        from api import models
+
         # for cart in models.cart.cart.Cart.objects.filter(user_subscription=None):
         #     try:
         #         print(cart.id)
