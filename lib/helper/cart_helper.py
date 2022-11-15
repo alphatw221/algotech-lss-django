@@ -118,7 +118,7 @@ class CartHelper():
     def checkout(cls, api_user, campaign, cart_id, point_discount_processor, shipping_data={}):
 
         
-        success, data = cls.__transfer_cart_to_order(api_user, campaign.user_subscription.id, cart_id, shipping_data)
+        success, data = cls.__transfer_cart_to_order(api_user, cart_id, shipping_data)
         if not success:
             error_products_data = data.get('error_products_data', [])
             pymongo_cart = data.get('pymongo_cart')
