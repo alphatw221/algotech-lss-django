@@ -118,7 +118,7 @@ class CartHelper():
     def checkout(cls, api_user, campaign, cart_id, point_discount_processor, shipping_data={}):
 
         
-        success, data = cls.__transfer_cart_to_order(api_user, campaign.user_subscription.id, cart_id, shipping_data)
+        success, data = cls.__transfer_cart_to_order(api_user, cart_id, shipping_data)
         if not success:
             error_products_data = data.get('error_products_data', [])
             pymongo_cart = data.get('pymongo_cart')
@@ -298,9 +298,7 @@ class CartHelper():
             meta_point = campaign.meta_point,
 
             remark = 'new user' if api_user and models.order.order.Order.objects.filter(buyer = api_user, user_subscription = campaign.user_subscription).count()==1 else '',
-            **campaign.meta_logistic.get('default_fields',{}),
-            **campaign.meta_payment.get('default_fields',{}),
-            
+            **campaign.user_subscription.meta.get('order_default_fields',{}),
             sync=True)
 
         point_discount_processor.update_wallet()
