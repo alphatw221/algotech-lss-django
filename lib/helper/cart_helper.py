@@ -298,9 +298,7 @@ class CartHelper():
             meta_point = campaign.meta_point,
 
             remark = 'new user' if api_user and models.order.order.Order.objects.filter(buyer = api_user, user_subscription = campaign.user_subscription).count()==1 else '',
-            **campaign.meta_logistic.get('default_fields',{}),
-            **campaign.meta_payment.get('default_fields',{}),
-            
+            **campaign.user_subscription.meta.get('order_default_fields',{}),
             sync=True)
 
         point_discount_processor.update_wallet()
