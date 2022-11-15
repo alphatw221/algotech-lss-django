@@ -133,7 +133,7 @@ class CartHelper():
         pymongo_cart = data.get('pymongo_cart')
         campaign_product_data_dict = data.get('campaign_product_data_dict')
 
-        cls.__summarize_order(campaign, pymongo_order, campaign_product_data_dict, point_discount_processor)
+        cls.__summarize_order(api_user, campaign, pymongo_order, campaign_product_data_dict, point_discount_processor)
 
         for campaign_product_id_str, qty in pymongo_order.data.get('products',{}).copy().items():
             campaign_product_data = campaign_product_data_dict[campaign_product_id_str]
@@ -197,6 +197,7 @@ class CartHelper():
                         campaign_product_data = campaign_product_data_dict[campaign_product_id_str]
                         order_product_data={
                             "name":campaign_product_data.get('name'),
+                            "sku":campaign_product_data.get('sku'),
                             "price":campaign_product_data.get('price'),
                             "image":campaign_product_data.get('image'),
                             "qty":qty,
@@ -225,7 +226,7 @@ class CartHelper():
 
 
     @classmethod
-    def __summarize_order(cls, campaign:models.campaign.campaign.Campaign, pymongo_order:database.lss.order.Order, campaign_product_data_dict, point_discount_processor):
+    def __summarize_order(cls, api_user, campaign:models.campaign.campaign.Campaign, pymongo_order:database.lss.order.Order, campaign_product_data_dict, point_discount_processor):
 
         subtotal = 0
         shipping_cost = 0
@@ -242,9 +243,9 @@ class CartHelper():
                 if product_category_id_str not in product_category_data_dict:
                     product_category_data = database.lss.product_category.ProductCategory.get(id=int(campaign_product_data.get('categories',[])[0]))
                     if product_category_data:
-                        product_category_data_dict[product_category_data_dict] = product_category_data
+                        product_category_data_dict[product_category_id_str] = product_category_data
 
-                if product_category_products_dict[product_category_id_str]:
+                if product_category_products_dict.get(product_category_id_str):
                     product_category_products_dict[product_category_id_str].append({'campaign_product_id':campaign_prodcut_id_str, 'qty':qty})
                 else:
                     product_category_products_dict[product_category_id_str] = [{'campaign_product_id':campaign_prodcut_id_str, 'qty':qty}]
@@ -296,6 +297,11 @@ class CartHelper():
             points_earned = points_earned,
             point_expired_at = point_expired_at,
             meta_point = campaign.meta_point,
+
+            remark = 'new user' if api_user and models.order.order.Order.objects.filter(buyer = api_user, user_subscription = campaign.user_subscription).count()==1 else '',
+            **campaign.meta_logistic.get('default_fields',{}),
+            **campaign.meta_payment.get('default_fields',{}),
+            
             sync=True)
 
         point_discount_processor.update_wallet()
