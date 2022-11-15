@@ -212,7 +212,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         product = lib.util.verify.Verify.get_product_from_user_subscription(user_subscription, product_id)
 
-        for email, counter in product.meta.get('wish_list',{}).items():
+        for email, buyer_name in product.meta.get('wish_list',{}).items():
             title = ""
             #send email or do something #TODO
             # content = lib.helper.order_helper.OrderHelper.get_checkout_email_content(product,email)
@@ -221,7 +221,7 @@ class ProductViewSet(viewsets.ModelViewSet):
                 lib.i18n.email.notify_wishlist_email.i18n_get_notify_wishlist_subject(lang=api_user.lang),
                 email, 
                 'email_notify_wishlist.html', 
-                parameters={"product_name":product, "seller":api_user, "image_path":product.image}, 
+                parameters={"product_name":product, "seller":api_user, "image_path":product.image,"buyer_name":buyer_name}, 
                 lang=api_user.lang)
             
         
@@ -235,14 +235,14 @@ class ProductViewSet(viewsets.ModelViewSet):
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def wish_list_add(self, request, product_id):
 
-        email, = lib.util.getter.getdata(request,('email',),required=True)
+        email,name, = lib.util.getter.getdata(request,('email','name',),required=True)
         product = lib.util.verify.Verify.get_product_by_id(product_id)
         
         if "wish_list" in product.meta:
             if not email in product.meta["wish_list"]:
-                product.meta['wish_list'][email]=0
+                product.meta['wish_list'][email]=name
         else:
-            product.meta['wish_list'] = {email:0}
+            product.meta['wish_list'] = {email:name}
         
         product.save()
         return Response(models.product.product.ProductSerializer(product).data, status=status.HTTP_200_OK)
