@@ -33,7 +33,7 @@ class UncheckoutCartReminderCronJob(CronJobBase):
         campaigns_ended_over_4_hours = models.campaign.campaign.Campaign.objects.filter(id=1419)
         carts = [cart for campaign in campaigns_ended_over_4_hours for cart in campaign.carts.all() if len(cart.products) > 0]
         for cart in carts:
-            print(cart)
-            service.rq.queue.enqueue_general_queue(job=send_reminder_messages_job, cart=cart)
+            pymongo_cart = database.lss.cart.Cart.get(id=cart.id)
+            service.rq.queue.enqueue_general_queue(job=send_reminder_messages_job, pymongo_cart=pymongo_cart, user_subscription_id=cart.campaign.user_subscription.id)
         end_time = arrow.now()
         print(end_time-start_time)
