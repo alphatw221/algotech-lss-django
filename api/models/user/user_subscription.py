@@ -33,11 +33,11 @@ PLATFORM_TWITCH = 'twitch'
 PLATFORM_TIKTOK = 'tiktok'
 
 PLATFORM_ATTR={
-    PLATFORM_FACEBOOK:{'attr':'facebook_pages','serializer':FacebookPageSerializer}, 
-    PLATFORM_INSTAGRAM:{'attr':'instagram_profiles','serializer':InstagramProfileSerializer}, 
-    PLATFORM_YOUTUBE:{'attr':'youtube_channels','serializer':YoutubeChannelSerializer},
-    PLATFORM_TWITCH:{'attr':'twitch_channels','serializer':TwitchChannelSerializer},
-    PLATFORM_TIKTOK:{'attr':'tiktok_accounts','serializer':TikTokAccountSerializer}
+    PLATFORM_FACEBOOK:{'attr':'facebook_pages','serializer':FacebookPageSerializer, 'model':FacebookPage}, 
+    PLATFORM_INSTAGRAM:{'attr':'instagram_profiles','serializer':InstagramProfileSerializer, 'model':InstagramProfile}, 
+    PLATFORM_YOUTUBE:{'attr':'youtube_channels','serializer':YoutubeChannelSerializer, 'model':YoutubeChannel},
+    PLATFORM_TWITCH:{'attr':'twitch_channels','serializer':TwitchChannelSerializer, 'model':TwitchChannel},
+    PLATFORM_TIKTOK:{'attr':'tiktok_accounts','serializer':TikTokAccountSerializer, 'model':TikTokAccount}
 }
 
 STATUS_VALID='valid'

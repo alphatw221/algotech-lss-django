@@ -20,6 +20,7 @@ from rest_framework.renderers import HTMLFormRenderer,StaticHTMLRenderer
 import  base64
 
 from api import models
+import factory
 import service
 import lib
 import pendulum
@@ -625,6 +626,6 @@ class PaymentViewSet(viewsets.GenericViewSet):
         
 
 def update_wallet(order):
-    point_discount_processor_class:lib.helper.discount_helper.PointDiscountProcessor = lib.helper.discount_helper.get_point_discount_processor_class(order.campaign.user_subscription)
+    point_discount_processor_class:lib.helper.discount_helper.PointDiscountProcessor = factory.point_discount.get_point_discount_processor_class(order.campaign.user_subscription)
     point_discount_processor = point_discount_processor_class(order.buyer, order.campaign.user_subscription, None, order.campaign.meta_point, points_earned = order.points_earned)
     point_discount_processor.update_wallet()
