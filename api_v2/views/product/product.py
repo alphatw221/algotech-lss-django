@@ -239,8 +239,8 @@ class ProductViewSet(viewsets.ModelViewSet):
         product = lib.util.verify.Verify.get_product_by_id(product_id)
         
         if "wish_list" in product.meta:
-            if not email in product.meta["wish_list"]:
-                product.meta['wish_list'][email]=name
+            #重複add email update name
+            product.meta['wish_list'][email]=name
         else:
             product.meta['wish_list'] = {email:name}
         
