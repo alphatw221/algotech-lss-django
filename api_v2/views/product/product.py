@@ -220,7 +220,7 @@ class ProductViewSet(viewsets.ModelViewSet):
                 lib.i18n.email.notify_wishlist_email.i18n_get_notify_wishlist_subject(lang=api_user.lang),
                 email, 
                 'email_notify_wishlist.html', 
-                parameters={"product_name":product, "seller":api_user, "image_path":product.image,"buyer_name":buyer_name}, 
+                parameters={"product_name":product, "seller":api_user, "image_path":product.image,"buyer_name":buyer_name['name']}, 
                 lang=api_user.lang)
             
         
@@ -257,9 +257,9 @@ class ProductViewSet(viewsets.ModelViewSet):
         
         if "wish_list" in product.meta:
             #重複add email update name
-            product.meta['wish_list'][email]=name
+            product.meta['wish_list'][email]={'name':name}
         else:
-            product.meta['wish_list'] = {email:name}
+            product.meta['wish_list'] = {email:{'name':name}}
         
         product.save()
         return Response(models.product.product.ProductSerializer(product).data, status=status.HTTP_200_OK)
