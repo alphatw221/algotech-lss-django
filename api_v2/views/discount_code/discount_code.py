@@ -137,9 +137,11 @@ class DiscountCodeViewSet(viewsets.ModelViewSet):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
 
-        discount_code_import_processor_class:factory.discount_code_import.default.DefaultDiscountCodeImportProcessor = factory.discount_code_import.get_discount_code_import_processor_class(user_subscription)
-        file = request.data.get('file')
-        print(file.__dict__)
-        # discount_code_import_processor_class.process(file)
+        file, = lib.util.getter.getdata(request, ('file',), required=True)
+
+        discount_code_import_processor_class:factory.discount_code_import.default.DefaultDiscountCodeImportProcessor=\
+        factory.discount_code_import.get_discount_code_import_processor_class(user_subscription)
+        discount_code_import_processor = discount_code_import_processor_class(user_subscription)
+        discount_code_import_processor.process(file)
 
         return Response({"message": "ok"}, status=status.HTTP_200_OK)

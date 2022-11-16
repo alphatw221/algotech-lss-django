@@ -217,55 +217,67 @@ class CartViewSet(viewsets.ModelViewSet):
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def buyer_apply_discount_code(self, request, cart_oid):
 
+        LENGTH_OF_REFERRAL_ID = 24
+        
         discount_code, = \
             lib.util.getter.getdata(request, ("discount_code",), required=True)
-
+        api_user = lib.util.verify.Verify.get_customer_user(request)
         cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
         campaign = lib.util.verify.Verify.get_campaign_from_cart(cart)
-
-        discount_codes = campaign.user_subscription.discount_codes.filter(start_at__lte=datetime.utcnow(),end_at__gte=datetime.utcnow())
-
-        valid_discount_code = None
-        for _discount_code in discount_codes:
-
-            if _discount_code.type ==models.discount_code.discount_code.TYPE_GENERAL and discount_code == _discount_code.code:
-                valid_discount_code = _discount_code
-                break
-            elif _discount_code.type == models.discount_code.discount_code.TYPE_CART_REFERAL :
-                code_length = len(_discount_code.code)
-                if code_length+1 > len(discount_code) or _discount_code.code!=discount_code[:code_length]:
-                    continue
-                cart_oid = discount_code[code_length+1:]
-                try:
-                    referrer_cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
-                    # referrer_pre_order=lib.util.verify.Verify.get_pre_order_with_oid(pre_order_oid)
-                except Exception:
-                    break
-                if referrer_cart.campaign.user_subscription != campaign.user_subscription or referrer_cart == cart:
-                    continue
-                if not referrer_cart.applied_discount and lib.helper.discount_helper.CartDiscountHelper.check_limitations(_discount_code.limitations, cart = referrer_cart, discount_code = _discount_code) :
-                    discount_code_data = _discount_code.__dict__.copy()
-                    del discount_code_data['_state']
-                    referrer_cart.applied_discount = discount_code_data
-                    referrer_cart.save()
-                valid_discount_code = _discount_code
-                break
-
-        if not valid_discount_code:
+        user_subscription = campaign.user_subscription
+        queryset = user_subscription.discount_codes.all()
+        if not queryset.filter(Q(code = discount_code)|Q(code = discount_code[:-25])).exists():
             raise lib.error_handle.error.api_error.ApiVerifyError('invalid_discount_code')
         
-        for limitation in valid_discount_code.limitations:
-            if not lib.helper.discount_helper.CartDiscountHelper.check_limitation(limitation, cart=cart, discount_code=valid_discount_code):
-                raise lib.error_handle.error.api_error.ApiVerifyError('not_eligible')
+        _discount_code = queryset.get(Q(code = discount_code)|Q(code = discount_code[:-(LENGTH_OF_REFERRAL_ID+1)]))
 
-        discount_code_data = valid_discount_code.__dict__.copy()
+        if _discount_code.period_enabled and (datetime.utcnow() < _discount_code.start_at or datetime.utcnow() > _discount_code.end_at):
+            raise lib.error_handle.error.api_error.ApiVerifyError('invalid_discount_code')
+
+        if _discount_code.type == models.discount_code.discount_code.TYPE_CART_REFERAL :
+            cart_oid = discount_code[:-LENGTH_OF_REFERRAL_ID]
+            try:
+                referrer_cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
+            except Exception:
+                referrer_cart = None
+            
+            if referrer_cart and \
+                referrer_cart.campaign.user_subscription != user_subscription and \
+                referrer_cart != cart and \
+                referrer_cart.applied_discount and\
+                lib.helper.discount_helper.CartDiscountHelper.check_limitations(
+                    _discount_code.limitations, 
+                    cart = referrer_cart, 
+                    discount_code = _discount_code,
+                    user_subscription = user_subscription,
+                    api_user = None
+                    ):
+                
+                discount_code_data = _discount_code.__dict__.copy()
+                del discount_code_data['_state']
+                referrer_cart.applied_discount = discount_code_data
+                referrer_cart.save()
+
+
+        if not lib.helper.discount_helper.CartDiscountHelper.check_limitations(
+                    _discount_code.limitations, 
+                    cart = cart, 
+                    discount_code = _discount_code,
+                    user_subscription = user_subscription,
+                    api_user = api_user
+                    ):
+            raise lib.error_handle.error.api_error.ApiVerifyError('not_eligible')
+
+        discount_code_data = _discount_code.__dict__.copy()
         del discount_code_data['_state']
         cart.applied_discount = discount_code_data
         lib.helper.discount_helper.CartDiscountHelper.make_discount(cart)
         cart.save()
 
-        valid_discount_code.applied_count+=1
-        valid_discount_code.save()
+        _discount_code.applied_count+=1
+        buyer_usage_count = _discount_code.buyer_usage.get(api_user.email)
+        _discount_code.buyer_usage[api_user.email] = buyer_usage_count+1 if buyer_usage_count else 1
+        _discount_code.save()
 
         return Response(models.cart.cart.CartSerializerWithCampaign(cart).data, status=status.HTTP_200_OK)
     

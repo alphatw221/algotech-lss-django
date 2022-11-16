@@ -33,6 +33,33 @@ def get_complete_sales_of_campaign(campaign_id):
     l = list(cursor)
     return l[0].get('campaign_sales',0) if l else 0
 
+def get_proceed_sales_of_campaign(campaign_id):
+    
+    cursor=__collection.aggregate([
+        {
+            "$match":{
+                "campaign_id":campaign_id,"payment_status":{ 
+                    "$in":[
+                        models.order.order.PAYMENT_STATUS_AWAITING_CONFIRM,
+                        models.order.order.PAYMENT_STATUS_AWAITING_PAYMENT,
+                        models.order.order.PAYMENT_STATUS_FAILED
+                    ]
+                }
+            }
+        },
+        {
+            "$group":
+                {
+                "_id":None,
+                "campaign_sales": { "$sum": "$total" },
+                }
+        },
+        {"$project":{"_id":0,"campaign_sales":1}},
+    ])
+
+    l = list(cursor)
+    return l[0].get('campaign_sales',0) if l else 0
+
 def get_order_export_cursor(pymongo_filter_query, pymongo_sort_by):
 
         query = [

@@ -489,6 +489,15 @@ class CampaignViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['GET'], url_path=r'statistics', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def get_campaign_statistics(self, request, pk):
+        """calculate key indicators of a campaign
+
+        Args:
+            request object: http request data
+            pk str: primary key
+
+        Returns:
+            object: response data
+        """
         
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
@@ -502,7 +511,8 @@ class CampaignViewSet(viewsets.ModelViewSet):
         campaign_comment_count = database.lss.campaign_comment.get_count_in_campaign(campaign.id)
         
         campaign_complete_sales = database.lss.order.get_complete_sales_of_campaign(campaign.id)
-
+        campaign_proceed_sales = database.lss.order.get_proceed_sales_of_campaign(campaign.id)
+        
         campaign_uncheckout_rate = (campaign_cart_count) / (campaign_order_complete_count + campaign_order_proceed_count + campaign_cart_count) * 100\
                 if (campaign_order_complete_count + campaign_order_proceed_count + campaign_cart_count) else 0
 
@@ -531,6 +541,8 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
             "comment_count":campaign_comment_count,
             "complete_sales":campaign_complete_sales,
+            "potential_salse": campaign_proceed_sales,
+            "total_sales": campaign_complete_sales + campaign_proceed_sales,
             "close_rate":campaign_close_rate,
             "uncheckout_rate":campaign_uncheckout_rate,
             
