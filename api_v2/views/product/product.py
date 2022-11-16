@@ -1,5 +1,3 @@
-
-from platform import platform
 from django.core.files.base import ContentFile
 from django.conf import settings
 
@@ -9,13 +7,14 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.parsers import MultiPartParser
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.parsers import MultiPartParser
+
 
 from automation import jobs
 
 from api import models
 from api import rule
 
+import factory
 import lib, json
 class ProductPagination(PageNumberPagination):
     page_query_param = 'page'
@@ -229,6 +228,24 @@ class ProductViewSet(viewsets.ModelViewSet):
         product.save()
         
         return Response("OK", status=status.HTTP_200_OK)
+
+    
+    @action(detail=False, methods=['POST'], url_path=r'import', parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def seller_import_product(self, request):
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+
+        file, = lib.util.getter.getdata(request,('file', ), required=True)
+
+        product_import_processor_class:factory.product_import.default.DefaultProductImportProcessor \
+            = factory.product_import.get_product_import_processor_class(user_subscription)
+        product_import_processor = product_import_processor_class(user_subscription)
+        product_import_processor.process(file)
+
+        return Response("OK", status=status.HTTP_200_OK)
+
+
 
     #----------------------------------------------------------------for buyer-------------------------------------------------------------------------
     @action(detail=False, methods=['POST'], url_path=r'(?P<product_id>[^/.]+)/wish_list/add', permission_classes=(),  authentication_classes=[])
