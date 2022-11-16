@@ -335,7 +335,7 @@ class CartViewSet(viewsets.ModelViewSet):
 
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
 
-        queryset = campaign.carts.exclude(products={}).order_by('id')
+        queryset = campaign.carts.all()
 
         if search:
             if search.isnumeric():
