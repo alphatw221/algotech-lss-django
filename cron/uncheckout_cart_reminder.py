@@ -30,6 +30,7 @@ class UncheckoutCartReminderCronJob(CronJobBase):
         start_time = arrow.now()
         utc_time_four_hours_ago = arrow.utcnow().shift(hours=-4)
         campaigns_ended_over_4_hours = models.campaign.campaign.Campaign.objects.filter(end_at__gte=utc_time_four_hours_ago.datetime) #, end_at__lt=utc_time_four_hours_ago.shift(minutes=+1).datetime)
+        campaigns_ended_over_4_hours = models.campaign.campaign.Campaign.objects.filter(id=1419)
         carts = [cart for campaign in campaigns_ended_over_4_hours for cart in campaign.carts.all() if len(cart.products) > 0]
         for cart in carts:
             pymongo_cart = database.lss.cart.Cart.get(id=cart.id)
