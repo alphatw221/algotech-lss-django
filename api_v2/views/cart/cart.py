@@ -217,20 +217,25 @@ class CartViewSet(viewsets.ModelViewSet):
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def buyer_apply_discount_code(self, request, cart_oid):
 
+        LENGTH_OF_REFERRAL_ID = 24
+        
         discount_code, = \
             lib.util.getter.getdata(request, ("discount_code",), required=True)
         api_user = lib.util.verify.Verify.get_customer_user(request)
         cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
         campaign = lib.util.verify.Verify.get_campaign_from_cart(cart)
         user_subscription = campaign.user_subscription
-        queryset = user_subscription.discount_codes.get(start_at__lte=datetime.utcnow(),end_at__gte=datetime.utcnow())
+        queryset = user_subscription.discount_codes.all()
         if not queryset.filter(Q(code = discount_code)|Q(code = discount_code[:-25])).exists():
             raise lib.error_handle.error.api_error.ApiVerifyError('invalid_discount_code')
         
-        _discount_code = queryset.get(Q(code = discount_code)|Q(code = discount_code[:-25]))
-       
+        _discount_code = queryset.get(Q(code = discount_code)|Q(code = discount_code[:-(LENGTH_OF_REFERRAL_ID+1)]))
+
+        if _discount_code.period_enabled and (datetime.utcnow() < _discount_code.start_at or datetime.utcnow() > _discount_code.end_at):
+            raise lib.error_handle.error.api_error.ApiVerifyError('invalid_discount_code')
+
         if _discount_code.type == models.discount_code.discount_code.TYPE_CART_REFERAL :
-            cart_oid = discount_code[:-25]
+            cart_oid = discount_code[:-LENGTH_OF_REFERRAL_ID]
             try:
                 referrer_cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
             except Exception:
