@@ -1,6 +1,7 @@
 from functools import partial
 from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.parsers import MultiPartParser
 
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -10,7 +11,7 @@ from api import models
 import lib
 
 from datetime import datetime
-
+import factory
 
 class DiscountCodePagination(PageNumberPagination):
     page_query_param = 'page'
@@ -129,3 +130,16 @@ class DiscountCodeViewSet(viewsets.ModelViewSet):
 
         return Response({"message": "delete success"}, status=status.HTTP_200_OK)
 
+
+    @action(detail=False, methods=['POST'], url_path=r'import', permission_classes=(IsAuthenticated,), parser_classes=(MultiPartParser,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def import_discount_code(self, request):
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+
+        discount_code_import_processor_class:factory.discount_code_import.default.DefaultDiscountCodeImportProcessor = factory.discount_code_import.get_discount_code_import_processor_class(user_subscription)
+        file = request.data.get('file')
+        print(file.__dict__)
+        # discount_code_import_processor_class.process(file)
+
+        return Response({"message": "ok"}, status=status.HTTP_200_OK)

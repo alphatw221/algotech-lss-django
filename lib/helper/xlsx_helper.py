@@ -5,6 +5,8 @@ from api import models
 import xlsxwriter
 import io
 
+import pandas
+
 class FieldMapper():
 
     def __init__(self, field_name='', title='', i18n_key=None, width=None, i18n_text=None, first_only=False, **kwargs):
@@ -68,8 +70,25 @@ class JSXlsxProcessor():
 
         return {'header':self.header, 'display_header':self.display_header, 'data':self.data, 'column_settings':self.column_settings}
 
+    # @classmethod
+    # def file_to_json(cls, file, sheet_name):
+    #     excel_data_df = pandas.read_excel(io.BytesIO(file.read()), sheet_name=sheet_name)
+    #     return excel_data_df.to_json()
 
 
+# class XlsxImportProcessor():
+
+#     def __init__(self) -> None:
+#         pass
+
+#     def __to_json(self, file, sheet_name=None):
+        
+#         excel_data_df = pandas.read_excel(io.BytesIO(file.read()), sheet_name=sheet_name)
+#         json_str = excel_data_df.to_json()
+#         return json_str
+
+#     def process(self, file, sheet_name=None):
+#         print(self.__to_json(file, sheet_name))
 
 class XlsxHelper():
     row=0

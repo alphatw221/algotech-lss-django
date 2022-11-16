@@ -4,7 +4,7 @@ from api.models.user.user import User
 from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
-
+from django.conf import settings
 
 TYPE_PRODUCT='product'
 TYPE_PRODUCT_FAST='product-fast'
@@ -67,7 +67,7 @@ class CampaignProduct(models.Model):
     upc = models.CharField(
         max_length=32, null=True, blank=True, default=None)
     image = models.CharField(
-        max_length=256, null=True, blank=True, default=None)
+        max_length=256, null=True, blank=True, default=settings.GOOGLE_STORAGE_STATIC_DIR+IMAGE_NULL)
     sort_order = models.IntegerField(
         null=True, blank=True, default=0)
 
