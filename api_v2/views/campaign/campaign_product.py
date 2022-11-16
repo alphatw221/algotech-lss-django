@@ -299,7 +299,7 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['POST'], url_path=r'seller/import', parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def seller_list_campaign_products(self, request):
+    def seller_import(self, request):
         api_user, campaign_id = lib.util.getter.getparams(request, ("campaign_id",), with_user=True, seller=True)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
