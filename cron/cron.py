@@ -40,6 +40,7 @@ class CampaignReminderCronJob(CronJobBase):
     ALLOW_PARALLEL_RUNS = True
 
     def do(self):
+        print("run campaign_reminder cron")
         start_time = arrow.now()
         after_15min = arrow.utcnow().replace(second=0, microsecond=0).shift(minutes=+15)
         after_16min = after_15min.shift(minutes=+1)
@@ -84,7 +85,7 @@ class CampaignReminderCronJob(CronJobBase):
             }
         ]))
         campaigns = campaings_start_after_15mins + campaings_start_after_1hour
-        print(campaigns)
+        print("campaigns", campaigns)
         channel_layer = get_channel_layer()
         end_time = arrow.now()
         # print(end_time-start_time)
