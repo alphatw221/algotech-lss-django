@@ -14,9 +14,13 @@ DISCOUNT_TYPE_PERCENT_OFF = 'percent_off'
 DISCOUNT_TYPE_DEDUCT = 'deduct'
 
 LIMITATION_SPECIFIC_CAMPAIGN = 'specific_campaign'
+LIMITATION_SPECIFIC_BUYER_NAME = 'specific_buyer_name'
+LIMITATION_SPECIFIC_BUYER_EMAIL = 'specific_buyer_email'
 LIMITATION_SUBTOTAL_OVER_AMOUNT = 'subtotal_over_specific_amount'
 LIMITATION_PRODUCT_OVER_NUMBER = 'product_over_specific_number'
 LIMITATION_DISCOUNT_CODE_USABLE_TIME = 'discount_code_usable_time'
+LIMITATION_NEW_BUYER_ONLY = 'new_buyer_only'
+LIMITATION_BUYER_USAGE_TIMES = 'buyer_usage_times'
 
 class DiscountCode(models.Model):
     class Meta:
@@ -44,6 +48,8 @@ class DiscountCode(models.Model):
     
     meta = models.JSONField(null=True, blank=True, default=dict)
 
+    buyer_usage = models.JSONField(null=True, blank=True, default=dict)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -60,3 +66,4 @@ class DiscountCodeSerializer(serializers.ModelSerializer):
 
     limitations = serializers.JSONField(default=[])
     meta = serializers.JSONField(default=dict)
+    buyer_usage = serializers.JSONField(default=dict)

@@ -5,6 +5,9 @@ from lib.helper.import_helper import FieldMapper
 import io
 import json
 
+CONTENT_TYPE_XLSX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+CONTENT_TYPE_CSV = 'text/csv'
+
 class ProductCategoriesFieldMapper(FieldMapper):
     
     def get_model_data(self, object):
@@ -31,12 +34,13 @@ class ProductCategoriesFieldMapper(FieldMapper):
 
 class DefaultCampaignProductImportProcessor(lib.helper.import_helper.ImportProcessor):
 
-    def __init__(self, user_subscription, campaign, size_limit_bytes=10*1024*1024, accept_types=['text/csv',]) -> None:
+    def __init__(self, user_subscription, campaign, size_limit_bytes=100*1024, accept_types=[CONTENT_TYPE_XLSX, CONTENT_TYPE_CSV]) -> None:
 
         self.user_subscription = user_subscription
         self.campaign = campaign
         product_category_dict = {product_category.name:product_category.id for product_category in user_subscription.product_categories.all()}
-
+        self.sheet_name = 'sheets'
+        
         super().__init__(size_limit_bytes, accept_types)
         self.field_mappers = [
             FieldMapper('SKU', 'sku', ''),
@@ -60,8 +64,12 @@ class DefaultCampaignProductImportProcessor(lib.helper.import_helper.ImportProce
 
     def file_to_data(self, file):
 
-        excel_data_df = pandas.read_csv(io.BytesIO(file.read()))
-        return json.loads( excel_data_df.to_json(orient='records'))
+        if file.content_type == CONTENT_TYPE_XLSX:
+            excel_data_df = pandas.read_excel(io.BytesIO(file.read()), sheet_name=self.sheet_name)
+            return json.loads( excel_data_df.to_json(orient='records'))
+        elif file.content_type == CONTENT_TYPE_CSV:
+            excel_data_df = pandas.read_csv(io.BytesIO(file.read()))
+            return json.loads( excel_data_df.to_json(orient='records'))
 
     def save_data(self, data):
         
@@ -71,11 +79,7 @@ class DefaultCampaignProductImportProcessor(lib.helper.import_helper.ImportProce
                     'campaign':self.campaign,
                     **{field_mapper.model_field:field_mapper.get_model_data(object) for field_mapper in self.field_mappers}
                 }
-                print(data)
-                # models.campaign.campaign_product.CampaignProduct.objects.create(
-                #     campaign = self.campaign,
-                #     **{field_mapper.model_field:field_mapper.get_model_data(object) for field_mapper in self.field_mappers}
-                #     )
+                models.campaign.campaign_product.CampaignProduct.objects.create(**data)
             except Exception:
                 import traceback
                 print(traceback.format_exc())

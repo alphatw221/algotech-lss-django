@@ -27,10 +27,12 @@ class UncheckoutCartReminderCronJob(CronJobBase):
     ALLOW_PARALLEL_RUNS = True
 
     def do(self):
+        print("run uncheckout_cart_reminder cron")
         start_time = arrow.now()
         utc_time_four_hours_ago = arrow.utcnow().shift(hours=-4)
-        campaigns_ended_over_4_hours = models.campaign.campaign.Campaign.objects.filter(end_at__gte=utc_time_four_hours_ago.datetime) #, end_at__lt=utc_time_four_hours_ago.shift(minutes=+1).datetime)
+        campaigns_ended_over_4_hours = models.campaign.campaign.Campaign.objects.filter(end_at__gte=utc_time_four_hours_ago.datetime, end_at__lt=utc_time_four_hours_ago.shift(minutes=+1).datetime)
         carts = [cart for campaign in campaigns_ended_over_4_hours for cart in campaign.carts.all() if len(cart.products) > 0]
+        print("carts", carts)
         for cart in carts:
             pymongo_cart = database.lss.cart.Cart.get(id=cart.id)
             service.rq.queue.enqueue_general_queue(job=send_reminder_messages_job, pymongo_cart=pymongo_cart, user_subscription_id=cart.campaign.user_subscription.id)

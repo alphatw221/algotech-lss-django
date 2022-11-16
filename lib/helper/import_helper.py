@@ -14,7 +14,7 @@ class FieldMapper():
 
 class ImportProcessor():
     
-    def __init__(self, size_limit_bytes=10*1024*1024, accept_types=[]) -> None:
+    def __init__(self, size_limit_bytes=10*1024, accept_types=[]) -> None:
 
         self.size_limit_bytes = size_limit_bytes
         self.accept_types = accept_types
@@ -26,6 +26,7 @@ class ImportProcessor():
 
 
     def check_type_valid(self, file):
+        print(file.content_type)
         if self.accept_types and getattr(file, 'content_type') not in self.accept_types:
             return self.type_not_valid()
         return True
@@ -54,6 +55,6 @@ class ImportProcessor():
         
         if not self.check_type_valid(file):
             return
-        
+        return
         data = self.file_to_data(file)
         self.save_data(data)
