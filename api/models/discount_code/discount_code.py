@@ -35,6 +35,7 @@ class DiscountCode(models.Model):
     description = models.TextField(null=True, blank=True, default=None)
     code = models.CharField(max_length=255, null=True, blank=True)
 
+    period_enabled = models.BooleanField(null=False, blank=False, default=True)
     start_at = models.DateTimeField(null=True, blank=True, default=None)
     end_at = models.DateTimeField(null=True, blank=True, default=None)
 
