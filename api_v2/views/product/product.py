@@ -211,7 +211,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         product = lib.util.verify.Verify.get_product_from_user_subscription(user_subscription, product_id)
 
-        for email, buyer_name in product.meta.get('wish_list',{}).items():
+        for email, buyer_info in product.meta.get('wish_list',{}).items():
             title = ""
             #send email or do something #TODO
             # content = lib.helper.order_helper.OrderHelper.get_checkout_email_content(product,email)
@@ -220,7 +220,7 @@ class ProductViewSet(viewsets.ModelViewSet):
                 lib.i18n.email.notify_wishlist_email.i18n_get_notify_wishlist_subject(lang=api_user.lang),
                 email, 
                 'email_notify_wishlist.html', 
-                parameters={"product_name":product, "seller":api_user, "image_path":product.image,"buyer_name":buyer_name['name']}, 
+                parameters={"product_name":product, "seller":api_user, "image_path":product.image,"buyer_name":buyer_info['name']}, 
                 lang=api_user.lang)
             
         
