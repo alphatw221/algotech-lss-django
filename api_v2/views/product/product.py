@@ -220,7 +220,8 @@ class ProductViewSet(viewsets.ModelViewSet):
                 lib.i18n.email.notify_wishlist_email.i18n_get_notify_wishlist_subject(lang=api_user.lang),
                 email, 
                 'email_notify_wishlist.html', 
-                parameters={"product_name":product, "seller":api_user, "image_path":product.image,"buyer_name":buyer_info['name']}, 
+                parameters={"product_name":product, "seller":api_user, "image_path":product.image,
+                            "buyer_name":buyer_info['name'] if type(buyer_info) == dict else 'customer'}, 
                 lang=api_user.lang)
             
         
