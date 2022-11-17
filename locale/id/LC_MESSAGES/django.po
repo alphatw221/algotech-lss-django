@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-04 03:45+0000\n"
+"POT-Creation-Date: 2022-11-17 09:28+0000\n"
 "PO-Revision-Date: 2021-12-13 15:50+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -260,207 +260,6 @@ msgstr ""
 msgid "PAYMENT/FIRST_DATA/TIME_ZONE"
 msgstr ""
 
-#: lib/helper/order_helper.py:528 lib/helper/order_helper.py:680
-#: lib/i18n/email/delivery_comfirm_mail.py:28
-#: lib/i18n/email/order_comfirm_mail.py:30
-msgid "EMAIL/DELIVERY_CONFIRM/ORDER_NO"
-msgstr "Order NO."
-
-#: lib/helper/order_helper.py:532 lib/helper/order_helper.py:684
-#: lib/i18n/email/delivery_comfirm_mail.py:31
-#: lib/i18n/email/order_comfirm_mail.py:34
-msgid "EMAIL/DELIVERY_CONFIRM/ORDER_INFO"
-msgstr "Order Information"
-
-#: lib/helper/order_helper.py:538 lib/helper/order_helper.py:690
-#: lib/i18n/email/order_comfirm_mail.py:40
-msgid "EMAIL/DELIVERY_CONFIRM/CAMPAIGN_TITLE"
-msgstr "Campaign Title"
-
-#: lib/helper/order_helper.py:543 lib/helper/order_helper.py:695
-#: lib/i18n/email/delivery_comfirm_mail.py:37
-#: lib/i18n/email/order_comfirm_mail.py:43
-msgid "EMAIL/DELIVERY_CONFIRM/ORDER_DATE"
-msgstr "Order Date"
-
-#: lib/helper/order_helper.py:548 lib/i18n/email/order_comfirm_mail.py:48
-msgid "EMAIL/DELIVERY_CONFIRM/BUYER"
-msgstr "Buyer"
-
-#: lib/helper/order_helper.py:553 lib/helper/order_helper.py:698
-#: lib/i18n/email/order_comfirm_mail.py:53
-msgid "EMAIL/DELIVERY_CONFIRM/RECEIVER"
-msgstr "Receiver"
-
-#: lib/helper/order_helper.py:556 lib/helper/order_helper.py:701
-#: lib/helper/xlsx_helper.py:120 lib/i18n/email/order_comfirm_mail.py:56
-msgid "REPORT/COLUMN_TITLE/SHIPPING_PHONE"
-msgstr "Phone"
-
-#: lib/helper/order_helper.py:562 lib/helper/order_helper.py:717
-#: lib/helper/xlsx_helper.py:128 lib/i18n/email/order_comfirm_mail.py:61
-msgid "REPORT/COLUMN_TITLE/PICK_UP_STORE"
-msgstr "Pick Up Store"
-
-#: lib/helper/order_helper.py:567 lib/helper/order_helper.py:721
-#: lib/i18n/email/delivery_comfirm_mail.py:140
-#: lib/i18n/email/order_comfirm_mail.py:66
-msgid "EMAIL/DELIVERY_CONFIRM/DELIVERY_ADDRESS"
-msgstr "Delivery Address"
-
-#: lib/helper/order_helper.py:574 lib/helper/xlsx_helper.py:131
-#: lib/i18n/email/order_comfirm_mail.py:84
-msgid "REPORT/COLUMN_TITLE/PAYMENT_METHOD"
-msgstr "Payment Method"
-
-#: lib/helper/order_helper.py:622 lib/helper/order_helper.py:784
-#: lib/i18n/email/delivery_comfirm_mail.py:98
-#: lib/i18n/email/order_comfirm_mail.py:185
-msgid "EMAIL/DELIVERY_CONFIRM/SUBTOTAL"
-msgstr "Subtotal"
-
-#: lib/helper/order_helper.py:628 lib/helper/order_helper.py:790
-#: lib/i18n/email/order_comfirm_mail.py:191
-msgid "EMAIL/DELIVERY_CONFIRM/DISCOUNT"
-msgstr "Discount"
-
-#: lib/helper/order_helper.py:634 lib/helper/order_helper.py:796
-#: lib/i18n/email/delivery_comfirm_mail.py:107
-#: lib/i18n/email/order_comfirm_mail.py:197
-msgid "EMAIL/DELIVERY_CONFIRM/DELIVERY_CHARGE"
-msgstr "Delivery Charge"
-
-#: lib/helper/order_helper.py:640 lib/helper/order_helper.py:802
-#: lib/i18n/email/delivery_comfirm_mail.py:117
-#: lib/i18n/email/order_comfirm_mail.py:203
-msgid "EMAIL/DELIVERY_CONFIRM/TOTAL"
-msgstr "Total"
-
-#: lib/helper/order_helper.py:653 lib/helper/order_helper.py:814
-#: lib/i18n/email/delivery_comfirm_mail.py:156
-#: lib/i18n/email/order_comfirm_mail.py:215
-#: templates/email_notify_wishlist.html:33
-#: templates/email_verification_code.html:16
-msgid "EMAIL/DELIVERY_CONFIRM/DO_NOT_REPLY_1"
-msgstr ""
-"Please do not reply to this e-mail. This mailbox is not monitored and you "
-"will not receive a response."
-
-#: lib/helper/order_helper.py:654 lib/helper/order_helper.py:815
-#: lib/i18n/email/delivery_comfirm_mail.py:157
-#: lib/i18n/email/order_comfirm_mail.py:216
-msgid "EMAIL/DELIVERY_CONFIRM/DO_NOT_REPLY_2"
-msgstr ""
-"For questions about an order, other questions or comments, please contact "
-"Seller's email. You will be served faster than mail inquiry."
-
-#: lib/helper/order_helper.py:660
-#, python-brace-format
-msgid "EMAIL/ORDER_PLACED/SUBJECT{order_id}{campaign_title}"
-msgstr ""
-"Thanks for your order! Your order #{order_id} from {campaign_title} is "
-"confirmed!"
-
-#: lib/helper/order_helper.py:679
-msgid "EMAIL/ORDER_PLACED/TITLE"
-msgstr "Your Order Has Been Placed!"
-
-#: lib/helper/order_helper.py:704
-msgid "EMAIL/ORDER_CONFIRM/SHIPPING_METHOD"
-msgstr "Payment method"
-
-#: lib/helper/order_helper.py:736
-msgid "EMAIL/ORDER_CONFIRM/PROCESS_PAYMENT"
-msgstr "Process Payment"
-
-#: lib/helper/xlsx_helper.py:115
-msgid "REPORT/COLUMN_TITLE/ID"
-msgstr "ID"
-
-#: lib/helper/xlsx_helper.py:116
-msgid "REPORT/COLUMN_TITLE/ORDER_DATE"
-msgstr "Order Date"
-
-#: lib/helper/xlsx_helper.py:117
-msgid "REPORT/COLUMN_TITLE/PLATFORM"
-msgstr "Platform"
-
-#: lib/helper/xlsx_helper.py:118
-msgid "REPORT/COLUMN_TITLE/CUSTOMER_NAME"
-msgstr "Account Name"
-
-#: lib/helper/xlsx_helper.py:119
-msgid "REPORT/COLUMN_TITLE/SHIPPING_NAME"
-msgstr "Customer Name"
-
-#: lib/helper/xlsx_helper.py:121
-msgid "REPORT/COLUMN_TITLE/EMAIL"
-msgstr "E-mail"
-
-#: lib/helper/xlsx_helper.py:122
-msgid "REPORT/COLUMN_TITLE/SHIPPING_METHOD"
-msgstr "Shipping_Method"
-
-#: lib/helper/xlsx_helper.py:123
-msgid "REPORT/COLUMN_TITLE/SHIPPING_OPTION"
-msgstr "Shipping Option"
-
-#: lib/helper/xlsx_helper.py:124
-msgid "REPORT/COLUMN_TITLE/SHIPPING_ADDRESS_1"
-msgstr "Shipping Address_1"
-
-#: lib/helper/xlsx_helper.py:125
-msgid "REPORT/COLUMN_TITLE/LOCATION"
-msgstr "Location"
-
-#: lib/helper/xlsx_helper.py:126
-msgid "REPORT/COLUMN_TITLE/REGION"
-msgstr "Region"
-
-#: lib/helper/xlsx_helper.py:127
-msgid "REPORT/COLUMN_TITLE/POSTCODE"
-msgstr "Postcode"
-
-#: lib/helper/xlsx_helper.py:129
-msgid "REPORT/COLUMN_TITLE/PICK_UP_ADDRESS"
-msgstr "Pick Up Addrwess"
-
-#: lib/helper/xlsx_helper.py:130
-msgid "REPORT/COLUMN_TITLE/REMARK"
-msgstr "Remark"
-
-#: lib/helper/xlsx_helper.py:132
-msgid "REPORT/COLUMN_TITLE/PAYMENT_STATUS"
-msgstr "Payment Status"
-
-#: lib/helper/xlsx_helper.py:133
-msgid "REPORT/COLUMN_TITLE/PAYMENT_RECORD"
-msgstr "Payment Record"
-
-#: lib/helper/xlsx_helper.py:134
-msgid "REPORT/COLUMN_TITLE/TOTAL"
-msgstr "Total"
-
-#: lib/helper/xlsx_helper.py:166
-msgid "REPORT/SECTION_TITLE/TITLE"
-msgstr "Order Report"
-
-#: lib/helper/xlsx_helper.py:169
-msgid "REPORT/SECTION_TITLE/CONTACT_INFO"
-msgstr "Contact Information"
-
-#: lib/helper/xlsx_helper.py:170
-msgid "REPORT/SECTION_TITLE/DELIVERY_INFO"
-msgstr "Delivery Information"
-
-#: lib/helper/xlsx_helper.py:171 lib/i18n/email/order_comfirm_mail.py:80
-msgid "REPORT/SECTION_TITLE/PAYMENT_INFO"
-msgstr "Payment Information"
-
-#: lib/helper/xlsx_helper.py:172
-msgid "REPORT/SECTION_TITLE/ORDER_INFO"
-msgstr "Order Information"
-
 #: lib/i18n/campaign_announcement.py:29
 #, python-brace-format
 msgid "QUIZ_GAME_WINNER{customer_name}{product_name}"
@@ -473,6 +272,110 @@ msgstr ""
 msgid "ITEM_INFO{order_code}{result}"
 msgstr "“{order_code}” {result}."
 
+#: lib/i18n/email/cart_checkout_mail.py:8
+#, python-brace-format
+msgid "EMAIL/ORDER_PLACED/SUBJECT{order_id}{campaign_title}"
+msgstr ""
+"Thanks for your order! Your order #{order_id} from {campaign_title} is "
+"confirmed!"
+
+#: lib/i18n/email/cart_checkout_mail.py:28
+msgid "EMAIL/ORDER_PLACED/TITLE"
+msgstr "Your Order Has Been Placed!"
+
+#: lib/i18n/email/cart_checkout_mail.py:29
+#: lib/i18n/email/delivery_comfirm_mail.py:26
+#: lib/i18n/email/order_comfirm_mail.py:31
+msgid "EMAIL/DELIVERY_CONFIRM/ORDER_NO"
+msgstr "Order NO."
+
+#: lib/i18n/email/cart_checkout_mail.py:33
+#: lib/i18n/email/delivery_comfirm_mail.py:29
+#: lib/i18n/email/order_comfirm_mail.py:35
+msgid "EMAIL/DELIVERY_CONFIRM/ORDER_INFO"
+msgstr "Order Information"
+
+#: lib/i18n/email/cart_checkout_mail.py:39
+#: lib/i18n/email/order_comfirm_mail.py:41
+msgid "EMAIL/DELIVERY_CONFIRM/CAMPAIGN_TITLE"
+msgstr "Campaign Title"
+
+#: lib/i18n/email/cart_checkout_mail.py:44
+#: lib/i18n/email/delivery_comfirm_mail.py:35
+#: lib/i18n/email/order_comfirm_mail.py:44
+msgid "EMAIL/DELIVERY_CONFIRM/ORDER_DATE"
+msgstr "Order Date"
+
+#: lib/i18n/email/cart_checkout_mail.py:47
+#: lib/i18n/email/order_comfirm_mail.py:54
+msgid "EMAIL/DELIVERY_CONFIRM/RECEIVER"
+msgstr "Receiver"
+
+#: lib/i18n/email/cart_checkout_mail.py:50
+#: lib/i18n/email/order_comfirm_mail.py:57
+msgid "REPORT/COLUMN_TITLE/SHIPPING_PHONE"
+msgstr "Phone"
+
+#: lib/i18n/email/cart_checkout_mail.py:53
+msgid "EMAIL/ORDER_CONFIRM/SHIPPING_METHOD"
+msgstr "Payment method"
+
+#: lib/i18n/email/cart_checkout_mail.py:66
+#: lib/i18n/email/order_comfirm_mail.py:62
+msgid "REPORT/COLUMN_TITLE/PICK_UP_STORE"
+msgstr "Pick Up Store"
+
+#: lib/i18n/email/cart_checkout_mail.py:70
+#: lib/i18n/email/delivery_comfirm_mail.py:134
+#: lib/i18n/email/order_comfirm_mail.py:67
+msgid "EMAIL/DELIVERY_CONFIRM/DELIVERY_ADDRESS"
+msgstr "Delivery Address"
+
+#: lib/i18n/email/cart_checkout_mail.py:85
+msgid "EMAIL/ORDER_CONFIRM/PROCESS_PAYMENT"
+msgstr "Process Payment"
+
+#: lib/i18n/email/cart_checkout_mail.py:134
+#: lib/i18n/email/delivery_comfirm_mail.py:84
+#: lib/i18n/email/order_comfirm_mail.py:200
+msgid "EMAIL/DELIVERY_CONFIRM/SUBTOTAL"
+msgstr "Subtotal"
+
+#: lib/i18n/email/cart_checkout_mail.py:140
+#: lib/i18n/email/order_comfirm_mail.py:206
+msgid "EMAIL/DELIVERY_CONFIRM/DISCOUNT"
+msgstr "Discount"
+
+#: lib/i18n/email/cart_checkout_mail.py:146
+#: lib/i18n/email/delivery_comfirm_mail.py:93
+#: lib/i18n/email/order_comfirm_mail.py:212
+msgid "EMAIL/DELIVERY_CONFIRM/DELIVERY_CHARGE"
+msgstr "Delivery Charge"
+
+#: lib/i18n/email/cart_checkout_mail.py:153
+#: lib/i18n/email/delivery_comfirm_mail.py:111
+#: lib/i18n/email/order_comfirm_mail.py:228
+msgid "EMAIL/DELIVERY_CONFIRM/TOTAL"
+msgstr "Total"
+
+#: lib/i18n/email/cart_checkout_mail.py:165
+#: lib/i18n/email/delivery_comfirm_mail.py:150
+#: lib/i18n/email/order_comfirm_mail.py:240
+#: templates/email_notify_wishlist.html:33
+#: templates/email_verification_code.html:16
+msgid "EMAIL/DELIVERY_CONFIRM/DO_NOT_REPLY_1"
+msgstr ""
+"Please do not reply to this e-mail. This mailbox is not monitored and you "
+"will not receive a response."
+
+#: lib/i18n/email/cart_checkout_mail.py:166
+#: lib/i18n/email/delivery_comfirm_mail.py:151
+#: lib/i18n/email/order_comfirm_mail.py:241
+msgid "EMAIL/DELIVERY_CONFIRM/DO_NOT_REPLY_2"
+msgstr ""
+"For questions about an order, other questions or comments, please contact "
+"Seller's email. You will be served faster than mail inquiry."
+
 #: lib/i18n/email/delivery_comfirm_mail.py:10
 #, python-brace-format
 msgid "EMAIL/DELIVERY_CONFIRM/SUBJECT{order_id}{campaign_title}"
@@ -480,28 +383,29 @@ msgstr ""
 "Thanks for your order! Your order #{order_id} from {campaign_title} is "
 "confirmed!"
 
-#: lib/i18n/email/delivery_comfirm_mail.py:27
+#: lib/i18n/email/delivery_comfirm_mail.py:25
 msgid "EMAIL/DELIVERY_CONFIRM/TITLE"
 msgstr "Your Order Has Been Shipped !."
 
-#: lib/i18n/email/delivery_comfirm_mail.py:40
-#: lib/i18n/email/delivery_comfirm_mail.py:43
+#: lib/i18n/email/delivery_comfirm_mail.py:38
+#: lib/i18n/email/delivery_comfirm_mail.py:41
 msgid "EMAIL/DELIVERY_CONFIRM/SELLER"
 msgstr "Seller"
 
-#: lib/i18n/email/delivery_comfirm_mail.py:85
+#: lib/i18n/email/delivery_comfirm_mail.py:101
+#: lib/i18n/email/order_comfirm_mail.py:218
 msgid "EMAIL/DELIVERY_CONFIRM/TAX"
 msgstr "Tax"
 
-#: lib/i18n/email/delivery_comfirm_mail.py:129
+#: lib/i18n/email/delivery_comfirm_mail.py:123
 msgid "EMAIL/DELIVERY_CONFIRM/SHIPPING_INFO"
 msgstr "Shipping information"
 
-#: lib/i18n/email/delivery_comfirm_mail.py:135
+#: lib/i18n/email/delivery_comfirm_mail.py:129
 msgid "EMAIL/DELIVERY_CONFIRM/SHIPPING_DATE"
 msgstr "Shipping Date"
 
-#: lib/i18n/email/delivery_comfirm_mail.py:145
+#: lib/i18n/email/delivery_comfirm_mail.py:139
 msgid "EMAIL/DELIVERY_CONFIRM/REMARK"
 msgstr "Remark"
 
@@ -516,33 +420,53 @@ msgstr ""
 "Thanks for your order! Your order #{order_id} from {campaign_title} is "
 "confirmed!"
 
-#: lib/i18n/email/order_comfirm_mail.py:29
+#: lib/i18n/email/order_comfirm_mail.py:30
 msgid "EMAIL/ORDER_CONFIRM/TITLE"
 msgstr "Thanks for your order!"
 
-#: lib/i18n/email/order_comfirm_mail.py:74
+#: lib/i18n/email/order_comfirm_mail.py:49
+msgid "EMAIL/DELIVERY_CONFIRM/BUYER"
+msgstr "Buyer"
+
+#: lib/i18n/email/order_comfirm_mail.py:77
 msgid "EMAIL/ORDER_CONFIRM/DIRECT_PAYMENT"
 msgstr "Direct Payment"
 
-#: lib/i18n/email/order_comfirm_mail.py:87
+#: lib/i18n/email/order_comfirm_mail.py:84
+msgid "REPORT/SECTION_TITLE/PAYMENT_INFO"
+msgstr "Payment Information"
+
+#: lib/i18n/email/order_comfirm_mail.py:88
+#: lib/i18n/email/order_comfirm_mail.py:112
+msgid "REPORT/COLUMN_TITLE/PAYMENT_METHOD"
+msgstr "Payment Method"
+
+#: lib/i18n/email/order_comfirm_mail.py:91
 msgid "EMAIL/ORDER_CONFIRM/ACCOUNT_MODE"
 msgstr "Banking / Financial Services"
 
-#: lib/i18n/email/order_comfirm_mail.py:90
+#: lib/i18n/email/order_comfirm_mail.py:94
 msgid "EMAIL/ORDER_CONFIRM/SELLER_ACCOUNT"
 msgstr "Seller's account number"
 
-#: lib/i18n/email/order_comfirm_mail.py:95
+#: lib/i18n/email/order_comfirm_mail.py:99
 msgid "EMAIL/ORDER_CONFIRM/LAST_FIVE_DIGIT"
 msgstr "Billing Account Last Five Digits"
 
-#: lib/i18n/email/order_comfirm_mail.py:107
+#: lib/i18n/email/order_comfirm_mail.py:121
 msgid "EMAIL/ORDER_CONFIRM/SELLER_CONTACT"
 msgstr "Contact seller"
 
 #: lib/i18n/email/verification_code_email.py:6
 msgid "EMAIL/VERIFY/SUBJECT"
 msgstr "Your LSS login verification code"
+
+#: lib/i18n/reminder_message.py:16
+#, python-brace-format
+msgid "UNCHECKOUT_CART_REMINDER{link}"
+msgstr ""
+"You left a few items in your cart!Our stock are limited, get it before they "
+"are gone! View your cart and complete the order.{link}"
 
 #: templates/email_notify_wishlist.html:10
 #: templates/email_notify_wishlist.html:11
@@ -725,6 +649,69 @@ msgstr ""
 "Nakuha na namin ang inyong request para i-reset ang inyong Live Show Seller "
 "password. I-click ang link sa ibaba para gumawa ng panibago:"
 
+#~ msgid "REPORT/COLUMN_TITLE/ID"
+#~ msgstr "ID"
+
+#~ msgid "REPORT/COLUMN_TITLE/ORDER_DATE"
+#~ msgstr "Order Date"
+
+#~ msgid "REPORT/COLUMN_TITLE/PLATFORM"
+#~ msgstr "Platform"
+
+#~ msgid "REPORT/COLUMN_TITLE/CUSTOMER_NAME"
+#~ msgstr "Account Name"
+
+#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_NAME"
+#~ msgstr "Customer Name"
+
+#~ msgid "REPORT/COLUMN_TITLE/EMAIL"
+#~ msgstr "E-mail"
+
+#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_METHOD"
+#~ msgstr "Shipping_Method"
+
+#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_OPTION"
+#~ msgstr "Shipping Option"
+
+#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_ADDRESS_1"
+#~ msgstr "Shipping Address_1"
+
+#~ msgid "REPORT/COLUMN_TITLE/LOCATION"
+#~ msgstr "Location"
+
+#~ msgid "REPORT/COLUMN_TITLE/REGION"
+#~ msgstr "Region"
+
+#~ msgid "REPORT/COLUMN_TITLE/POSTCODE"
+#~ msgstr "Postcode"
+
+#~ msgid "REPORT/COLUMN_TITLE/PICK_UP_ADDRESS"
+#~ msgstr "Pick Up Addrwess"
+
+#~ msgid "REPORT/COLUMN_TITLE/REMARK"
+#~ msgstr "Remark"
+
+#~ msgid "REPORT/COLUMN_TITLE/PAYMENT_STATUS"
+#~ msgstr "Payment Status"
+
+#~ msgid "REPORT/COLUMN_TITLE/PAYMENT_RECORD"
+#~ msgstr "Payment Record"
+
+#~ msgid "REPORT/COLUMN_TITLE/TOTAL"
+#~ msgstr "Total"
+
+#~ msgid "REPORT/SECTION_TITLE/TITLE"
+#~ msgstr "Order Report"
+
+#~ msgid "REPORT/SECTION_TITLE/CONTACT_INFO"
+#~ msgstr "Contact Information"
+
+#~ msgid "REPORT/SECTION_TITLE/DELIVERY_INFO"
+#~ msgstr "Delivery Information"
+
+#~ msgid "REPORT/SECTION_TITLE/ORDER_INFO"
+#~ msgstr "Order Information"
+
 #~ msgid "DETAIL{link}"
 #~ msgstr "Pelajari lebih lanjut: {link}\n"
 
@@ -754,9 +741,3 @@ msgstr ""
 
 #~ msgid "MESSAGE_HEADER"
 #~ msgstr "Pesanan anda:"
-
-msgid "UNCHECKOUT_CART_REMINDER{link}"
-msgstr ""
-"You left a few items in your cart!"
-"Our stock are limited, get it before they are gone! View your cart and complete the order."
-"{link}"
