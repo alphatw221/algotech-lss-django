@@ -31,8 +31,7 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        # self.handle_new_registeration_from_hubspot()
-        # self.test_add_user_subscription_to_order()
+        self.test_cart_expired_adjustment()
         pass
 
 
@@ -947,3 +946,12 @@ class Command(BaseCommand):
                 order.save()       
             except Exception:
                 print(traceback.format_exc())
+    
+    def test_cart_expired_adjustment(self):
+        import traceback
+        import database
+        from api import models
+
+        # data = database.lss.order.get_wallet_with_expired_points()
+        data = database.lss.order.get_used_expired_points_sum(673, 1)
+        print(data)

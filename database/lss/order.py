@@ -87,3 +87,80 @@ def get_order_export_cursor(pymongo_filter_query, pymongo_sort_by):
 
         return cursor
 
+def get_wallet_with_expired_points(start_from = None, end_at = None):
+
+    point_expired_at_filter_query = {"$ne":None}
+
+    # if start_from:
+    #     point_expired_at_filter_query["$gt"] = start_from
+
+    # if end_at:
+    #     point_expired_at_filter_query["$lt"] = end_at
+    
+    query = [
+            {"$match":{"point_expired_at":point_expired_at_filter_query, "buyer_id":{"$ne":None}}},
+            {
+                "$lookup": 
+                {
+                    "from": "api_user_subscription",
+                    "localField": "user_subscription_id",
+                    "foreignField": "id",
+                    "as": "user_subscription"
+                }
+            },
+            {
+                "$lookup": 
+                {
+                    "from": "api_user",
+                    "localField": "buyer_id",
+                    "foreignField": "id",
+                    "as": "buyer"
+                }
+            },
+            {"$unwind": '$user_subscription'},
+            {"$unwind": '$buyer'},
+            {
+                "$group":{
+                    "_id": {
+                        "user_subscription_id": "$user_subscription.id",
+                        "buyer_id": "$buyer.id"
+                    }
+                }
+            },
+            { "$project":{"_id":0,"user_subscription_id":"$_id.user_subscription_id", "buyer_id":"$_id.buyer_id"} },
+
+        ]
+
+    cursor=__collection.aggregate(query)
+    l = list(cursor)
+    return l 
+
+
+def get_used_expired_points_sum(buyer_id, user_subscription_id, start_from = None, end_at = None):
+
+    created_at_filter_query = {}
+    
+    # if start_from:
+    #     created_at_filter_query["$gt"] = start_from
+
+    # if end_at:
+    #     created_at_filter_query["$lt"] = end_at
+    
+    query = [
+            {"$match":{"buyer_id":buyer_id, "user_subscription_id":user_subscription_id}},
+            
+            {'$project':{
+                '_id':0,
+                'points_used':1,
+
+            }},
+
+            {'$project':{
+
+                'test':{"$sum":'$points_used'}
+            }}
+        ]
+
+    cursor=__collection.aggregate(query)
+    l = list(cursor)
+    return l 
