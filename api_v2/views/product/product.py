@@ -221,7 +221,7 @@ class ProductViewSet(viewsets.ModelViewSet):
                 email, 
                 'email_notify_wishlist.html', 
                 parameters={"product_name":product, "seller":api_user, "image_path":product.image,
-                            "buyer_name":buyer_info['name'] if type(buyer_info) == dict else 'customer'}, 
+                            "buyer_name":buyer_info.get('name','') if type(buyer_info) == dict else ''}, 
                 lang=api_user.lang)
             
         
