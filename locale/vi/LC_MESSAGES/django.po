@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-17 09:28+0000\n"
+"POT-Creation-Date: 2022-11-17 09:44+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -461,8 +461,10 @@ msgstr "Your LSS login verification code"
 #, python-brace-format
 msgid "UNCHECKOUT_CART_REMINDER{link}"
 msgstr ""
-"You left a few items in your cart!Our stock are limited, get it before they "
-"are gone! View your cart and complete the order.{link}"
+"You left a few items in your cart!\n"
+"Our stock are limited, get it before they are gone! View your cart and "
+"complete the order.\n"
+"{link}"
 
 #: templates/email_notify_wishlist.html:10
 #: templates/email_notify_wishlist.html:11
