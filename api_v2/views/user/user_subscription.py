@@ -279,6 +279,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         user_subscription.meta_payment['special_note'] = special_note
         user_subscription.meta_payment['confirmation_note'] = confirmation_note
         user_subscription.meta_point = meta_point
+        print(meta_point)
         user_subscription.save()
 
         return Response(UserSerializerSellerAccountInfo(api_user).data, status=status.HTTP_200_OK)
