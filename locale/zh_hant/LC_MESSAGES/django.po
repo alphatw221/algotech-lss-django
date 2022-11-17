@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-04 03:45+0000\n"
+"POT-Creation-Date: 2022-11-17 09:28+0000\n"
 "PO-Revision-Date: 2021-12-13 15:50+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -255,201 +255,6 @@ msgstr "共享密鑰"
 msgid "PAYMENT/FIRST_DATA/TIME_ZONE"
 msgstr "時區"
 
-#: lib/helper/order_helper.py:528 lib/helper/order_helper.py:680
-#: lib/i18n/email/delivery_comfirm_mail.py:28
-#: lib/i18n/email/order_comfirm_mail.py:30
-msgid "EMAIL/DELIVERY_CONFIRM/ORDER_NO"
-msgstr "訂單號。"
-
-#: lib/helper/order_helper.py:532 lib/helper/order_helper.py:684
-#: lib/i18n/email/delivery_comfirm_mail.py:31
-#: lib/i18n/email/order_comfirm_mail.py:34
-msgid "EMAIL/DELIVERY_CONFIRM/ORDER_INFO"
-msgstr "訂單信息"
-
-#: lib/helper/order_helper.py:538 lib/helper/order_helper.py:690
-#: lib/i18n/email/order_comfirm_mail.py:40
-msgid "EMAIL/DELIVERY_CONFIRM/CAMPAIGN_TITLE"
-msgstr "活動名稱"
-
-#: lib/helper/order_helper.py:543 lib/helper/order_helper.py:695
-#: lib/i18n/email/delivery_comfirm_mail.py:37
-#: lib/i18n/email/order_comfirm_mail.py:43
-msgid "EMAIL/DELIVERY_CONFIRM/ORDER_DATE"
-msgstr "訂單日期"
-
-#: lib/helper/order_helper.py:548 lib/i18n/email/order_comfirm_mail.py:48
-msgid "EMAIL/DELIVERY_CONFIRM/BUYER"
-msgstr "付款人"
-
-#: lib/helper/order_helper.py:553 lib/helper/order_helper.py:698
-#: lib/i18n/email/order_comfirm_mail.py:53
-msgid "EMAIL/DELIVERY_CONFIRM/RECEIVER"
-msgstr "收件人"
-
-#: lib/helper/order_helper.py:556 lib/helper/order_helper.py:701
-#: lib/helper/xlsx_helper.py:120 lib/i18n/email/order_comfirm_mail.py:56
-msgid "REPORT/COLUMN_TITLE/SHIPPING_PHONE"
-msgstr "客戶電話"
-
-#: lib/helper/order_helper.py:562 lib/helper/order_helper.py:717
-#: lib/helper/xlsx_helper.py:128 lib/i18n/email/order_comfirm_mail.py:61
-msgid "REPORT/COLUMN_TITLE/PICK_UP_STORE"
-msgstr "自取店家"
-
-#: lib/helper/order_helper.py:567 lib/helper/order_helper.py:721
-#: lib/i18n/email/delivery_comfirm_mail.py:140
-#: lib/i18n/email/order_comfirm_mail.py:66
-msgid "EMAIL/DELIVERY_CONFIRM/DELIVERY_ADDRESS"
-msgstr "收貨地址"
-
-#: lib/helper/order_helper.py:574 lib/helper/xlsx_helper.py:131
-#: lib/i18n/email/order_comfirm_mail.py:84
-msgid "REPORT/COLUMN_TITLE/PAYMENT_METHOD"
-msgstr "付款方式"
-
-#: lib/helper/order_helper.py:622 lib/helper/order_helper.py:784
-#: lib/i18n/email/delivery_comfirm_mail.py:98
-#: lib/i18n/email/order_comfirm_mail.py:185
-msgid "EMAIL/DELIVERY_CONFIRM/SUBTOTAL"
-msgstr "小計"
-
-#: lib/helper/order_helper.py:628 lib/helper/order_helper.py:790
-#: lib/i18n/email/order_comfirm_mail.py:191
-msgid "EMAIL/DELIVERY_CONFIRM/DISCOUNT"
-msgstr "優惠代碼"
-
-#: lib/helper/order_helper.py:634 lib/helper/order_helper.py:796
-#: lib/i18n/email/delivery_comfirm_mail.py:107
-#: lib/i18n/email/order_comfirm_mail.py:197
-msgid "EMAIL/DELIVERY_CONFIRM/DELIVERY_CHARGE"
-msgstr "運費"
-
-#: lib/helper/order_helper.py:640 lib/helper/order_helper.py:802
-#: lib/i18n/email/delivery_comfirm_mail.py:117
-#: lib/i18n/email/order_comfirm_mail.py:203
-msgid "EMAIL/DELIVERY_CONFIRM/TOTAL"
-msgstr "總計"
-
-#: lib/helper/order_helper.py:653 lib/helper/order_helper.py:814
-#: lib/i18n/email/delivery_comfirm_mail.py:156
-#: lib/i18n/email/order_comfirm_mail.py:215
-#: templates/email_notify_wishlist.html:33
-#: templates/email_verification_code.html:16
-msgid "EMAIL/DELIVERY_CONFIRM/DO_NOT_REPLY_1"
-msgstr "此郵件為系統自動發送。請勿回覆。"
-
-#: lib/helper/order_helper.py:654 lib/helper/order_helper.py:815
-#: lib/i18n/email/delivery_comfirm_mail.py:157
-#: lib/i18n/email/order_comfirm_mail.py:216
-msgid "EMAIL/DELIVERY_CONFIRM/DO_NOT_REPLY_2"
-msgstr "如有訂單相關問題或意見，請聯繫賣家的電子郵件，謝謝!"
-
-#: lib/helper/order_helper.py:660
-#, python-brace-format
-msgid "EMAIL/ORDER_PLACED/SUBJECT{order_id}{campaign_title}"
-msgstr "感謝您的訂單！您來自 {campaign_title} 的訂單 #{order_id} 已下單成功！"
-
-#: lib/helper/order_helper.py:679
-msgid "EMAIL/ORDER_PLACED/TITLE"
-msgstr "您的訂單已下單成功!"
-
-#: lib/helper/order_helper.py:704
-msgid "EMAIL/ORDER_CONFIRM/SHIPPING_METHOD"
-msgstr "運送方式"
-
-#: lib/helper/order_helper.py:736
-msgid "EMAIL/ORDER_CONFIRM/PROCESS_PAYMENT"
-msgstr "前往付款"
-
-#: lib/helper/xlsx_helper.py:115
-msgid "REPORT/COLUMN_TITLE/ID"
-msgstr "編號"
-
-#: lib/helper/xlsx_helper.py:116
-msgid "REPORT/COLUMN_TITLE/ORDER_DATE"
-msgstr "訂單日期"
-
-#: lib/helper/xlsx_helper.py:117
-msgid "REPORT/COLUMN_TITLE/PLATFORM"
-msgstr "使用平台"
-
-#: lib/helper/xlsx_helper.py:118
-msgid "REPORT/COLUMN_TITLE/CUSTOMER_NAME"
-msgstr "帳戶名稱"
-
-#: lib/helper/xlsx_helper.py:119
-msgid "REPORT/COLUMN_TITLE/SHIPPING_NAME"
-msgstr "客户名稱"
-
-#: lib/helper/xlsx_helper.py:121
-msgid "REPORT/COLUMN_TITLE/EMAIL"
-msgstr "E-mail"
-
-#: lib/helper/xlsx_helper.py:122
-msgid "REPORT/COLUMN_TITLE/SHIPPING_METHOD"
-msgstr "運送方式"
-
-#: lib/helper/xlsx_helper.py:123
-msgid "REPORT/COLUMN_TITLE/SHIPPING_OPTION"
-msgstr "運送選項"
-
-#: lib/helper/xlsx_helper.py:124
-msgid "REPORT/COLUMN_TITLE/SHIPPING_ADDRESS_1"
-msgstr "收件住址"
-
-#: lib/helper/xlsx_helper.py:125
-msgid "REPORT/COLUMN_TITLE/LOCATION"
-msgstr "地點"
-
-#: lib/helper/xlsx_helper.py:126
-msgid "REPORT/COLUMN_TITLE/REGION"
-msgstr "區域"
-
-#: lib/helper/xlsx_helper.py:127
-msgid "REPORT/COLUMN_TITLE/POSTCODE"
-msgstr "郵遞區號"
-
-#: lib/helper/xlsx_helper.py:129
-msgid "REPORT/COLUMN_TITLE/PICK_UP_ADDRESS"
-msgstr "自取地址"
-
-#: lib/helper/xlsx_helper.py:130
-msgid "REPORT/COLUMN_TITLE/REMARK"
-msgstr "註記"
-
-#: lib/helper/xlsx_helper.py:132
-msgid "REPORT/COLUMN_TITLE/PAYMENT_STATUS"
-msgstr "付款狀態"
-
-#: lib/helper/xlsx_helper.py:133
-msgid "REPORT/COLUMN_TITLE/PAYMENT_RECORD"
-msgstr "付款證明"
-
-#: lib/helper/xlsx_helper.py:134
-msgid "REPORT/COLUMN_TITLE/TOTAL"
-msgstr "總金額"
-
-#: lib/helper/xlsx_helper.py:166
-msgid "REPORT/SECTION_TITLE/TITLE"
-msgstr "訂單報表"
-
-#: lib/helper/xlsx_helper.py:169
-msgid "REPORT/SECTION_TITLE/CONTACT_INFO"
-msgstr "聯絡資訊"
-
-#: lib/helper/xlsx_helper.py:170
-msgid "REPORT/SECTION_TITLE/DELIVERY_INFO"
-msgstr "出貨資訊"
-
-#: lib/helper/xlsx_helper.py:171 lib/i18n/email/order_comfirm_mail.py:80
-msgid "REPORT/SECTION_TITLE/PAYMENT_INFO"
-msgstr "付款資訊"
-
-#: lib/helper/xlsx_helper.py:172
-msgid "REPORT/SECTION_TITLE/ORDER_INFO"
-msgstr "訂單資訊"
-
 #: lib/i18n/campaign_announcement.py:29
 #, python-brace-format
 msgid "QUIZ_GAME_WINNER{customer_name}{product_name}"
@@ -461,33 +266,132 @@ msgstr ""
 msgid "ITEM_INFO{order_code}{result}"
 msgstr "商品 {order_code}，{result}"
 
+#: lib/i18n/email/cart_checkout_mail.py:8
+#, python-brace-format
+msgid "EMAIL/ORDER_PLACED/SUBJECT{order_id}{campaign_title}"
+msgstr "感謝您的訂單！您來自 {campaign_title} 的訂單 #{order_id} 已下單成功！"
+
+#: lib/i18n/email/cart_checkout_mail.py:28
+msgid "EMAIL/ORDER_PLACED/TITLE"
+msgstr "您的訂單已下單成功!"
+
+#: lib/i18n/email/cart_checkout_mail.py:29
+#: lib/i18n/email/delivery_comfirm_mail.py:26
+#: lib/i18n/email/order_comfirm_mail.py:31
+msgid "EMAIL/DELIVERY_CONFIRM/ORDER_NO"
+msgstr "訂單號。"
+
+#: lib/i18n/email/cart_checkout_mail.py:33
+#: lib/i18n/email/delivery_comfirm_mail.py:29
+#: lib/i18n/email/order_comfirm_mail.py:35
+msgid "EMAIL/DELIVERY_CONFIRM/ORDER_INFO"
+msgstr "訂單信息"
+
+#: lib/i18n/email/cart_checkout_mail.py:39
+#: lib/i18n/email/order_comfirm_mail.py:41
+msgid "EMAIL/DELIVERY_CONFIRM/CAMPAIGN_TITLE"
+msgstr "活動名稱"
+
+#: lib/i18n/email/cart_checkout_mail.py:44
+#: lib/i18n/email/delivery_comfirm_mail.py:35
+#: lib/i18n/email/order_comfirm_mail.py:44
+msgid "EMAIL/DELIVERY_CONFIRM/ORDER_DATE"
+msgstr "訂單日期"
+
+#: lib/i18n/email/cart_checkout_mail.py:47
+#: lib/i18n/email/order_comfirm_mail.py:54
+msgid "EMAIL/DELIVERY_CONFIRM/RECEIVER"
+msgstr "收件人"
+
+#: lib/i18n/email/cart_checkout_mail.py:50
+#: lib/i18n/email/order_comfirm_mail.py:57
+msgid "REPORT/COLUMN_TITLE/SHIPPING_PHONE"
+msgstr "客戶電話"
+
+#: lib/i18n/email/cart_checkout_mail.py:53
+msgid "EMAIL/ORDER_CONFIRM/SHIPPING_METHOD"
+msgstr "運送方式"
+
+#: lib/i18n/email/cart_checkout_mail.py:66
+#: lib/i18n/email/order_comfirm_mail.py:62
+msgid "REPORT/COLUMN_TITLE/PICK_UP_STORE"
+msgstr "自取店家"
+
+#: lib/i18n/email/cart_checkout_mail.py:70
+#: lib/i18n/email/delivery_comfirm_mail.py:134
+#: lib/i18n/email/order_comfirm_mail.py:67
+msgid "EMAIL/DELIVERY_CONFIRM/DELIVERY_ADDRESS"
+msgstr "收貨地址"
+
+#: lib/i18n/email/cart_checkout_mail.py:85
+msgid "EMAIL/ORDER_CONFIRM/PROCESS_PAYMENT"
+msgstr "前往付款"
+
+#: lib/i18n/email/cart_checkout_mail.py:134
+#: lib/i18n/email/delivery_comfirm_mail.py:84
+#: lib/i18n/email/order_comfirm_mail.py:200
+msgid "EMAIL/DELIVERY_CONFIRM/SUBTOTAL"
+msgstr "小計"
+
+#: lib/i18n/email/cart_checkout_mail.py:140
+#: lib/i18n/email/order_comfirm_mail.py:206
+msgid "EMAIL/DELIVERY_CONFIRM/DISCOUNT"
+msgstr "優惠代碼"
+
+#: lib/i18n/email/cart_checkout_mail.py:146
+#: lib/i18n/email/delivery_comfirm_mail.py:93
+#: lib/i18n/email/order_comfirm_mail.py:212
+msgid "EMAIL/DELIVERY_CONFIRM/DELIVERY_CHARGE"
+msgstr "運費"
+
+#: lib/i18n/email/cart_checkout_mail.py:153
+#: lib/i18n/email/delivery_comfirm_mail.py:111
+#: lib/i18n/email/order_comfirm_mail.py:228
+msgid "EMAIL/DELIVERY_CONFIRM/TOTAL"
+msgstr "總計"
+
+#: lib/i18n/email/cart_checkout_mail.py:165
+#: lib/i18n/email/delivery_comfirm_mail.py:150
+#: lib/i18n/email/order_comfirm_mail.py:240
+#: templates/email_notify_wishlist.html:33
+#: templates/email_verification_code.html:16
+msgid "EMAIL/DELIVERY_CONFIRM/DO_NOT_REPLY_1"
+msgstr "此郵件為系統自動發送。請勿回覆。"
+
+#: lib/i18n/email/cart_checkout_mail.py:166
+#: lib/i18n/email/delivery_comfirm_mail.py:151
+#: lib/i18n/email/order_comfirm_mail.py:241
+msgid "EMAIL/DELIVERY_CONFIRM/DO_NOT_REPLY_2"
+msgstr "如有訂單相關問題或意見，請聯繫賣家的電子郵件，謝謝!"
+
 #: lib/i18n/email/delivery_comfirm_mail.py:10
 #, python-brace-format
 msgid "EMAIL/DELIVERY_CONFIRM/SUBJECT{order_id}{campaign_title}"
 msgstr "感謝您的訂單！您來自 {campaign_title} 的訂單 #{order_id} 已確認！"
 
-#: lib/i18n/email/delivery_comfirm_mail.py:27
+#: lib/i18n/email/delivery_comfirm_mail.py:25
 msgid "EMAIL/DELIVERY_CONFIRM/TITLE"
 msgstr "您的訂單已經寄出"
 
-#: lib/i18n/email/delivery_comfirm_mail.py:40
-#: lib/i18n/email/delivery_comfirm_mail.py:43
+#: lib/i18n/email/delivery_comfirm_mail.py:38
+#: lib/i18n/email/delivery_comfirm_mail.py:41
 msgid "EMAIL/DELIVERY_CONFIRM/SELLER"
 msgstr "賣家"
 
-#: lib/i18n/email/delivery_comfirm_mail.py:85
+#: lib/i18n/email/delivery_comfirm_mail.py:101
+#: lib/i18n/email/order_comfirm_mail.py:218
 msgid "EMAIL/DELIVERY_CONFIRM/TAX"
 msgstr "稅額"
 
-#: lib/i18n/email/delivery_comfirm_mail.py:129
+#: lib/i18n/email/delivery_comfirm_mail.py:123
 msgid "EMAIL/DELIVERY_CONFIRM/SHIPPING_INFO"
 msgstr "發貨信息"
 
-#: lib/i18n/email/delivery_comfirm_mail.py:135
+#: lib/i18n/email/delivery_comfirm_mail.py:129
 msgid "EMAIL/DELIVERY_CONFIRM/SHIPPING_DATE"
 msgstr "發貨日期"
 
-#: lib/i18n/email/delivery_comfirm_mail.py:145
+#: lib/i18n/email/delivery_comfirm_mail.py:139
 msgid "EMAIL/DELIVERY_CONFIRM/REMARK"
 msgstr "備註"
 
@@ -500,33 +404,53 @@ msgstr "您的購物清單裡面的商品已到貨！"
 msgid "EMAIL/ORDER_CONFIRM/SUBJECT{order_id}{campaign_title}"
 msgstr "感謝您的訂單！您來自 {campaign_title} 的訂單 #{order_id} 已確認！"
 
-#: lib/i18n/email/order_comfirm_mail.py:29
+#: lib/i18n/email/order_comfirm_mail.py:30
 msgid "EMAIL/ORDER_CONFIRM/TITLE"
 msgstr "感謝您的訂單！"
 
-#: lib/i18n/email/order_comfirm_mail.py:74
+#: lib/i18n/email/order_comfirm_mail.py:49
+msgid "EMAIL/DELIVERY_CONFIRM/BUYER"
+msgstr "付款人"
+
+#: lib/i18n/email/order_comfirm_mail.py:77
 msgid "EMAIL/ORDER_CONFIRM/DIRECT_PAYMENT"
 msgstr "銀行轉帳"
 
-#: lib/i18n/email/order_comfirm_mail.py:87
+#: lib/i18n/email/order_comfirm_mail.py:84
+msgid "REPORT/SECTION_TITLE/PAYMENT_INFO"
+msgstr "付款資訊"
+
+#: lib/i18n/email/order_comfirm_mail.py:88
+#: lib/i18n/email/order_comfirm_mail.py:112
+msgid "REPORT/COLUMN_TITLE/PAYMENT_METHOD"
+msgstr "付款方式"
+
+#: lib/i18n/email/order_comfirm_mail.py:91
 msgid "EMAIL/ORDER_CONFIRM/ACCOUNT_MODE"
 msgstr "銀行/金融服務"
 
-#: lib/i18n/email/order_comfirm_mail.py:90
+#: lib/i18n/email/order_comfirm_mail.py:94
 msgid "EMAIL/ORDER_CONFIRM/SELLER_ACCOUNT"
 msgstr "收款銀行賬號"
 
-#: lib/i18n/email/order_comfirm_mail.py:95
+#: lib/i18n/email/order_comfirm_mail.py:99
 msgid "EMAIL/ORDER_CONFIRM/LAST_FIVE_DIGIT"
 msgstr "付款賬戶末五碼"
 
-#: lib/i18n/email/order_comfirm_mail.py:107
+#: lib/i18n/email/order_comfirm_mail.py:121
 msgid "EMAIL/ORDER_CONFIRM/SELLER_CONTACT"
 msgstr "聯絡賣家粉絲團"
 
 #: lib/i18n/email/verification_code_email.py:6
 msgid "EMAIL/VERIFY/SUBJECT"
 msgstr "您的LSS登入验证码"
+
+#: lib/i18n/reminder_message.py:16
+#, python-brace-format
+msgid "UNCHECKOUT_CART_REMINDER{link}"
+msgstr ""
+"你的購物車中還有一些商品!我們的庫存有限, 在商品售完前趕緊行動! 進入你的購物車"
+"並完成訂單{link}"
 
 #: templates/email_notify_wishlist.html:10
 #: templates/email_notify_wishlist.html:11
@@ -704,6 +628,69 @@ msgstr "您在Live Show Seller 所使用的帳號"
 #: templates/reset_password_success_email.html:15
 msgid "EMAIL/PASSWORD_RESET_SUCCESS/CONTENT2"
 msgstr "已成功修改密碼. 若您沒有要求修改密碼, 請立即聯絡我們的客服專員。"
+
+#~ msgid "REPORT/COLUMN_TITLE/ID"
+#~ msgstr "編號"
+
+#~ msgid "REPORT/COLUMN_TITLE/ORDER_DATE"
+#~ msgstr "訂單日期"
+
+#~ msgid "REPORT/COLUMN_TITLE/PLATFORM"
+#~ msgstr "使用平台"
+
+#~ msgid "REPORT/COLUMN_TITLE/CUSTOMER_NAME"
+#~ msgstr "帳戶名稱"
+
+#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_NAME"
+#~ msgstr "客户名稱"
+
+#~ msgid "REPORT/COLUMN_TITLE/EMAIL"
+#~ msgstr "E-mail"
+
+#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_METHOD"
+#~ msgstr "運送方式"
+
+#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_OPTION"
+#~ msgstr "運送選項"
+
+#~ msgid "REPORT/COLUMN_TITLE/SHIPPING_ADDRESS_1"
+#~ msgstr "收件住址"
+
+#~ msgid "REPORT/COLUMN_TITLE/LOCATION"
+#~ msgstr "地點"
+
+#~ msgid "REPORT/COLUMN_TITLE/REGION"
+#~ msgstr "區域"
+
+#~ msgid "REPORT/COLUMN_TITLE/POSTCODE"
+#~ msgstr "郵遞區號"
+
+#~ msgid "REPORT/COLUMN_TITLE/PICK_UP_ADDRESS"
+#~ msgstr "自取地址"
+
+#~ msgid "REPORT/COLUMN_TITLE/REMARK"
+#~ msgstr "註記"
+
+#~ msgid "REPORT/COLUMN_TITLE/PAYMENT_STATUS"
+#~ msgstr "付款狀態"
+
+#~ msgid "REPORT/COLUMN_TITLE/PAYMENT_RECORD"
+#~ msgstr "付款證明"
+
+#~ msgid "REPORT/COLUMN_TITLE/TOTAL"
+#~ msgstr "總金額"
+
+#~ msgid "REPORT/SECTION_TITLE/TITLE"
+#~ msgstr "訂單報表"
+
+#~ msgid "REPORT/SECTION_TITLE/CONTACT_INFO"
+#~ msgstr "聯絡資訊"
+
+#~ msgid "REPORT/SECTION_TITLE/DELIVERY_INFO"
+#~ msgstr "出貨資訊"
+
+#~ msgid "REPORT/SECTION_TITLE/ORDER_INFO"
+#~ msgstr "訂單資訊"
 
 #~ msgid "EMAIL/ORDER_CONFIRM/PAYMENT_METHOD"
 #~ msgstr "付款方式"
