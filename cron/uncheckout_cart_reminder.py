@@ -35,6 +35,6 @@ class UncheckoutCartReminderCronJob(CronJobBase):
         print("carts", carts)
         for cart in carts:
             pymongo_cart = database.lss.cart.Cart.get(id=cart.id)
-            service.rq.queue.enqueue_general_queue(job=send_reminder_messages_job, pymongo_cart=pymongo_cart, user_subscription_id=cart.campaign.user_subscription.id)
+            service.rq.queue.enqueue_general_queue(job=send_reminder_messages_job, pymongo_cart=pymongo_cart, user_subscription_id=cart.campaign.user_subscription.id, lang=cart.campaign.lang)
         end_time = arrow.now()
         print(end_time-start_time)

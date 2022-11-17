@@ -725,3 +725,8 @@ msgstr "已成功修改密碼. 若您沒有要求修改密碼, 請立即聯絡�
 
 #~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_CHARGE"
 #~ msgstr "運費"
+msgid "UNCHECKOUT_CART_REMINDER{link}"
+msgstr ""
+"你的購物車中還有一些商品!"
+"我們的庫存有限, 在商品售完前趕緊行動! 進入你的購物車並完成訂單"
+"{link}"

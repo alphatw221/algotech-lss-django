@@ -730,3 +730,9 @@ msgstr ""
 
 #~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_CHARGE"
 #~ msgstr "运费"
+
+msgid "UNCHECKOUT_CART_REMINDER{link}"
+msgstr ""
+"你的购物车中还有一些商品!"
+"我们的库存有限, 在商品售完前赶紧行动! 进入你的购物车并完成订单"
+"{link}"

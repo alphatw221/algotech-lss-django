@@ -750,3 +750,9 @@ msgstr ""
 
 #~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_CHARGE"
 #~ msgstr "Delivery Charge"
+
+msgid "UNCHECKOUT_CART_REMINDER{link}"
+msgstr ""
+"You left a few items in your cart!"
+"Our stock are limited, get it before they are gone! View your cart and complete the order."
+"{link}"
