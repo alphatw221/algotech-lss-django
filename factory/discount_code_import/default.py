@@ -11,15 +11,11 @@ CONTENT_TYPE_CSV = 'text/csv'
 
 class DefaultDiscountCodeImportProcessor(lib.helper.import_helper.ImportProcessor):
 
-    def __init__(self, user_subscription, size_limit_bytes=100*1024, accept_types=[CONTENT_TYPE_XLSX, CONTENT_TYPE_CSV]) -> None:
+    def __init__(self, user_subscription, size_limit_bytes=100*1024*1024, accept_types=[CONTENT_TYPE_XLSX, CONTENT_TYPE_CSV]) -> None:
 
         self.user_subscription = user_subscription
-        self.sheet_name = 'sheets'
+        self.sheet_name = 'bal'
         super().__init__(size_limit_bytes, accept_types)
-        self.field_mappers = [
-            FieldMapper('SKU', 'sku', ''),
-         
-        ]
 
     def size_not_valid(self):
         raise lib.error_handle.error.api_error.ApiVerifyError('size_invalid')
@@ -39,18 +35,6 @@ class DefaultDiscountCodeImportProcessor(lib.helper.import_helper.ImportProcesso
             return json.loads( excel_data_df.to_json(orient='records'))
 
     def save_data(self, data):
-        for object in data:
-            try:
-                data = {
-                    'user_subscription':self.user_subscription
-                    **{field_mapper.model_field:field_mapper.get_model_data(object) for field_mapper in self.field_mappers}
-                }
-                print(data)
-                # models.discount_code.discount_code.DiscountCode.objects.create(
-                #     user_subscription = self.user_subscription,
-                #     **{field_mapper.model_field:field_mapper.get_model_data(object) for field_mapper in self.field_mappers}
 
-                # )
-            except Exception:
-                import traceback
-                print(traceback.format_exc())
+        print(data)
+       

@@ -55,6 +55,6 @@ class ImportProcessor():
         
         if not self.check_type_valid(file):
             return
-        return
+
         data = self.file_to_data(file)
         self.save_data(data)
