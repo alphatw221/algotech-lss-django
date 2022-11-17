@@ -525,6 +525,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
         perivious_campaign_order_complete_count, perivious_campaign_order_proceed_count = database.lss.campaign.get_order_complete_proceed_count(previous_campaign_id) 
         perivious_campaign_comment_count = database.lss.campaign_comment.get_count_in_campaign(previous_campaign_id)
         perivious_campaign_complete_sales = database.lss.order.get_complete_sales_of_campaign(previous_campaign_id)
+        perivious_campaign_proceed_sales = database.lss.order.get_proceed_sales_of_campaign(previous_campaign_id)
 
 
         perivious_campaign_uncheckout_rate = (perivious_campaign_cart_count) / (perivious_campaign_order_complete_count + perivious_campaign_order_proceed_count + perivious_campaign_cart_count) * 100\
@@ -541,13 +542,15 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
             "comment_count":campaign_comment_count,
             "complete_sales":campaign_complete_sales,
-            "potential_salse": campaign_proceed_sales,
+            "proceed_sales": campaign_proceed_sales,
             "total_sales": campaign_complete_sales + campaign_proceed_sales,
             "close_rate":campaign_close_rate,
             "uncheckout_rate":campaign_uncheckout_rate,
             
             "comment_count_raise":campaign_comment_count / perivious_campaign_comment_count if perivious_campaign_comment_count else 0,
             "campaign_sales_raise":campaign_complete_sales / perivious_campaign_complete_sales if perivious_campaign_complete_sales else 0,
+            "proceed_sales_raise":campaign_proceed_sales / perivious_campaign_proceed_sales if perivious_campaign_proceed_sales else 0,
+            "total_sales_raise":(campaign_complete_sales + campaign_proceed_sales) / (perivious_campaign_complete_sales + perivious_campaign_proceed_sales) if (perivious_campaign_complete_sales + perivious_campaign_proceed_sales) else 0,
             "close_rate_raise":campaign_close_rate - perivious_campaign_close_rate,
             "uncheckout_rate_raise":campaign_uncheckout_rate - perivious_campaign_uncheckout_rate,
         }
