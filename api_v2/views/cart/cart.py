@@ -320,14 +320,17 @@ class CartViewSet(viewsets.ModelViewSet):
 
 # ---------------------------------------------- seller ------------------------------------------------------
 
-    @action(detail=False, methods=['GET'], url_path=r'seller/list', permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['POST'], url_path=r'seller/list', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def seller_list_cart(self, request):
         try:
             api_user, campaign_id = lib.util.getter.getparams(request, ('campaign_id',), with_user=True, seller=True)
             user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
             campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
-            queryset = campaign.carts.exclude(products=Value('null')).order_by('id')
+
+
+            queryset = self.__search_cart(user_subscription, request, campaign = campaign)
+            # queryset = campaign.carts.exclude(products=Value('null')).order_by('id')
 
             serializer = models.cart.cart.CartSerializer(queryset, many=True)
             data = serializer.data
@@ -430,3 +433,58 @@ class CartViewSet(viewsets.ModelViewSet):
         cart.save()
         
         return Response(models.cart.cart.CartSerializer(cart).data, status=status.HTTP_200_OK)
+
+    def __search_cart(self, user_subscription, request, campaign = None):
+        
+        search, = lib.util.getter.getparams(request, ('search',), with_user=False)
+
+
+        platform_dict, sort_by_dict, = \
+            lib.util.getter.getdata(request, ('platform_options', 'sort_by'), required=False)
+
+        queryset = user_subscription.carts.exclude(products = Value('null'))
+        # pymongo_filter_query = {'user_subscription_id': user_subscription.id, 'products':{"$ne":{}}}
+
+        search_conditions = Q()
+
+        if campaign :
+            queryset=queryset.filter(campaign = campaign)
+            # pymongo_filter_query['campaign_id'] = campaign.id
+
+            if search not in ["",None,'undefined']:
+
+                for campaign_product in campaign.products.filter(Q(name__contains=search)|Q(order_code__contains=search)):
+                    search_conditions.add({'products__has_key':str(campaign_product.id)},Q.OR)
+
+        if search not in ["",None,'undefined'] and search.isnumeric():
+            search_conditions.add({'id':int(search)},Q.OR)
+            search_conditions.add({'customer_name__contains':search},Q.OR)
+
+            # pymongo_filter_query["$or"]=[{"id":{"$eq":int(search)}}, {"customer_name":{"$regex":str(search),"$options": 'i'}}]
+
+        elif search not in ["",None,'undefined']:
+            search_conditions.add({'customer_name__contains':search},Q.OR)
+            # pymongo_filter_query["customer_name"]={"$regex":str(search),"$options": 'i'}
+
+        queryset = queryset.filter(search_conditions)
+
+
+        if platform_dict and [key for key,value in platform_dict.items() if value]:
+            platforms =  [key for key,value in platform_dict.items() if value]
+            queryset=queryset.filter(platform__in=platforms)
+            # pymongo_filter_query['platform'] = {"$in": platforms}
+
+
+
+        queryset = queryset.order_by('-created_at')
+        # pymongo_sort_by = sort_by = {"id":-1}
+        if sort_by_dict:
+            for order_by, asc in sort_by_dict.items():
+                if order_by not in ["id", "customer_name", "updated_at"]:
+                    continue
+                order_by = order_by if asc==1 else f"-{order_by}"
+                queryset = queryset.order_by(order_by)
+                # pymongo_sort_by['order_by'] = asc
+
+        return queryset
+        # , pymongo_filter_query, pymongo_sort_by

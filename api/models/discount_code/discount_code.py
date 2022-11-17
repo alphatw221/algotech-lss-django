@@ -50,6 +50,7 @@ class DiscountCode(models.Model):
     meta = models.JSONField(null=True, blank=True, default=dict)
 
     buyer_usage = models.JSONField(null=True, blank=True, default=dict)
+    # buyer_applied = models.JSONField(null=True, blank=True, default=dict)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
