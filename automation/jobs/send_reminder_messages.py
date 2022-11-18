@@ -2,6 +2,8 @@ import os
 import config
 import django
 
+from lib.i18n.reminder_message import get_uncheckout_cart_reminder_message
+
 try:
     os.environ['DJANGO_SETTINGS_MODULE'] = config.DJANGO_SETTINGS  # for rq_job
     django.setup()
@@ -16,12 +18,12 @@ import service
 import plugins as lss_plugins
 
 @lib.error_handle.error_handler.comment_job_error_handler.comment_job_error_handler
-def send_reminder_messages_job(pymongo_cart, user_subscription_id):
+def send_reminder_messages_job(pymongo_cart, user_subscription_id, lang="en"):
     sender_id = pymongo_cart['customer_id']
     user_subscription_data = database.lss.user_subscription.UserSubscription.get(id=user_subscription_id)
     plugins = user_subscription_data.get('user_plan',{}).get('plugins')
     link = __get_link(pymongo_cart, plugins)
-    message = f"Live Show Seller: Your shopping cart is not checked out yet, shopping cart link: {link}"
+    message = get_uncheckout_cart_reminder_message(link, lang=lang)
     if sender_id in [None,""]:
         return False
     if pymongo_cart['platform'] not in ["facebook", "instagram"]:

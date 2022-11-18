@@ -105,6 +105,7 @@ class UserSubscription(models.Model):
     product_limit=models.IntegerField(blank=False, null=False, default=10)
     order_limit=models.IntegerField(blank=False, null=False, default=100)
 
+    customers = models.ManyToManyField('User', related_name='stores')
 
     def __str__(self) -> str:
         return str(self.name)

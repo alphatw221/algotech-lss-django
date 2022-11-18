@@ -114,20 +114,44 @@ class CartHelper():
         return state
 
     @classmethod
-    def clear(cls, api_user, campaign, cart):    
+    def clear(cls, cart):    
 
+        ## in case we need to do something else in the future
 
-        ##return campaign product
+        pymongo_cart, pymongo_campaign_products = cls.__clear_cart_and_return_campaign_product(cart)
+        for pymongo_campaign_product in pymongo_campaign_products:
+            cls.send_campaign_product_websocket_data(pymongo_campaign_product)
+        cls.send_cart_websocket_data(pymongo_cart)
 
-        ##return discount code
+        ## in case we need to do something else in the future
 
-        ##clear cart
-        pass
+    @classmethod
+    def __clear_cart_and_return_campaign_product(cls, cart, attempts=3):
+
+        try:
+            with database.lss.util.start_session() as session:
+                with session.start_transaction():
+                    campaign_products = []
+                    for campaign_product_id_str, qty in cart.products:
+                        campaign_product = database.lss.campaign_product.CampaignProduct(id=int(campaign_product_id_str))
+                        campaign_product.customer_return(qty, sync=True, session=session)
+                        campaign_products.append(campaign_product)
+                    pymongo_cart = database.lss.cart.Cart(id=cart.id)
+                    pymongo_cart.clear(sync=True, session=session)
+
+                    return pymongo_cart, campaign_products
+
+        except Exception:
+            if attempts > 0:
+                return cls.__clear_cart_and_return_campaign_product(cart, attempts=attempts-1)
+            else:
+                print(traceback.format_exc())
+                raise lib.error_handle.error.cart_error.CartErrors.ServerBusy('server_busy')
+
 
     @classmethod
     def checkout(cls, api_user, campaign, cart_id, point_discount_processor, shipping_data={}):
 
-        
         success, data = cls.__transfer_cart_to_order(api_user, cart_id, shipping_data)
         if not success:
             error_products_data = data.get('error_products_data', [])
@@ -436,9 +460,13 @@ class CartHelper():
         service.channels.campaign.send_cart_data(pymongo_cart.data.get('campaign_id'), pymongo_cart.data)
     
     @staticmethod
-    def send_campaign_product_websocket_data(campaign_product_data):
-    
-        campaign_product_data = database.lss.campaign_product.CampaignProduct.get(id=campaign_product_data.get('id'))
+    def send_campaign_product_websocket_data(campaign_product_data={}, pymongo_campaign_product=None):
+
+        if pymongo_campaign_product:
+            campaign_product_data = pymongo_campaign_product.data
+        else:
+            campaign_product_data = database.lss.campaign_product.CampaignProduct.get(id=campaign_product_data.get('id'))
+
         product_data = {
             "id": campaign_product_data.get('id'),
             'qty_sold': campaign_product_data.get('qty_sold'),

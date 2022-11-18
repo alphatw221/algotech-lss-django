@@ -13,7 +13,6 @@ class Cart(Collection):
     collection_name='api_cart'
     template = models.cart.cart.api_cart_template
     
-
     def clear(self, sync=False, session=None):
         self.update(session=session, sync=sync, adjust_title=None, adjust_price=0, free_delivery = False, products={}, applied_discount={}, discount=0)
 

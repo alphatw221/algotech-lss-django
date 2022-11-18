@@ -164,6 +164,12 @@ class Verify():
         return Cart.objects.get(id=cart_id)
 
     @staticmethod
+    def get_cart_from_user_subscription(user_subscription, cart_id):
+        if not user_subscription.carts.filter(id=cart_id).exists():
+            raise ApiVerifyError('util.no_cart_found')
+        return user_subscription.carts.get(id=cart_id)
+
+    @staticmethod
     def get_cart_with_oid(oid):
         try:
             _id=ObjectId(oid)
@@ -220,6 +226,12 @@ class Verify():
         if not Order.objects.filter(id=order_id).exists():
             raise ApiVerifyError('util.no_order_found')
         return Order.objects.get(id=order_id)
+
+    @staticmethod
+    def get_order_from_user_subscription(user_subscription, order_id):
+        if not user_subscription.orders.filter(id=order_id).exists():
+            raise ApiVerifyError('util.no_order_found')
+        return user_subscription.orders.get(id=order_id)
 
     @staticmethod
     def get_order_with_oid(oid):
