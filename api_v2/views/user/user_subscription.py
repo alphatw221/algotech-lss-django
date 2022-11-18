@@ -255,7 +255,8 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             'delivery_note': user_subscription.meta_logistic.get('delivery_note', ''),
             'special_note' : user_subscription.meta_payment.get('special_note', ''),
             'confirmation_note': user_subscription.meta_payment.get('confirmation_note', ''),
-            'meta_point':user_subscription.meta_point
+            'meta_point':user_subscription.meta_point,
+            "meta_reply":user_subscription.meta_reply
         }
         return Response(_json, status=status.HTTP_200_OK)
     
@@ -269,8 +270,8 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
         currency, buyer_lang, decimal_places, price_unit  =\
                 lib.util.getter.getdata(request,('currency', 'buyer_lang', 'decimal_places', 'price_unit'), required=True)
-        delivery_note, special_note, confirmation_note, meta_point  =\
-                lib.util.getter.getdata(request,('delivery_note', 'special_note', 'confirmation_note', 'meta_point'), required=False)
+        delivery_note, special_note, confirmation_note, meta_point, meta_reply  =\
+                lib.util.getter.getdata(request,('delivery_note', 'special_note', 'confirmation_note', 'meta_point', meta_reply), required=False)
         user_subscription.currency=currency
         user_subscription.buyer_lang=buyer_lang
         user_subscription.decimal_places=decimal_places
@@ -279,7 +280,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         user_subscription.meta_payment['special_note'] = special_note
         user_subscription.meta_payment['confirmation_note'] = confirmation_note
         user_subscription.meta_point = meta_point
-        print(meta_point)
+        user_subscription.meta_reply = meta_reply
         user_subscription.save()
 
         return Response(UserSerializerSellerAccountInfo(api_user).data, status=status.HTTP_200_OK)
