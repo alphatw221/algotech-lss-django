@@ -105,6 +105,23 @@ def check_limitations(limitations, **kwargs):
 class CartDiscountHelper:
 
     @classmethod
+    def is_cart_applied_discount_eligable(cls, user_subscription, api_user, cart):
+        try:
+            if not cart.applied_discount:
+                return True
+            discount_code = models.discount_code.discount_code.DiscountCode.objects.get(id=cart.applied_discount.get('id'))
+            return cls.check_limitations(
+                    discount_code.limitations, 
+                    cart = cart, 
+                    discount_code = discount_code,
+                    user_subscription = user_subscription,
+                    api_user = api_user
+                    )
+
+        except Exception:
+            return False
+
+    @classmethod
     def make_discount(cls, cart):
         try:
             discount_code = cart.applied_discount
