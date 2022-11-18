@@ -116,13 +116,30 @@ class CartHelper():
     @classmethod
     def clear(cls, api_user, campaign, cart):    
 
+        ## in case we need to do something else in the future
 
-        ##return campaign product
+        cls.__clear_cart_and_return_campaign_product(cart)
+        
+        ## in case we need to do something else in the future
 
-        ##return discount code
+    @classmethod
+    def __clear_cart_and_return_campaign_product(cls, cart, attempts=3):
 
-        ##clear cart
-        pass
+        try:
+            with database.lss.util.start_session() as session:
+                with session.start_transaction():
+
+                    for campaign_product_id_str, qty in cart.products:
+                        database.lss.campaign_product.CampaignProduct(id=int(campaign_product_id_str)).customer_return(qty, sync=False, session=session)
+
+                    database.lss.cart.Cart(id=cart.id).clear(sync=False, session=session)
+        except Exception:
+            if attempts > 0:
+                cls.__clear_cart_and_return_campaign_product(cart, attempts=attempts-1)
+            else:
+                print(traceback.format_exc())
+                raise lib.error_handle.error.cart_error.CartErrors.ServerBusy('server_busy')
+
 
     @classmethod
     def checkout(cls, api_user, campaign, cart_id, point_discount_processor, shipping_data={}):

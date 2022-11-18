@@ -328,9 +328,7 @@ class CartViewSet(viewsets.ModelViewSet):
             user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
             campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
 
-
             queryset = self.__search_cart(user_subscription, request, campaign = campaign)
-            # queryset = campaign.carts.exclude(products=Value('null')).order_by('id')
 
             serializer = models.cart.cart.CartSerializer(queryset, many=True)
             data = serializer.data
@@ -350,13 +348,7 @@ class CartViewSet(viewsets.ModelViewSet):
 
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
 
-        queryset = campaign.carts.exclude(products={}).order_by('id')
-
-        if search:
-            if search.isnumeric():
-                queryset = queryset.filter(Q(id=int(search)) | Q(customer_name__icontains=search) )
-            else:
-                queryset = queryset.filter(customer_name__icontains=search)
+        queryset = self.__search_cart(user_subscription, request, campaign = campaign)
 
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -488,3 +480,19 @@ class CartViewSet(viewsets.ModelViewSet):
 
         return queryset
         # , pymongo_filter_query, pymongo_sort_by
+
+    @action(detail=True, methods=['PUT'], url_path=r'seller/clear', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def seller_adjust(self, request, pk=None):
+
+        adjust_price, adjust_title, free_delivery = lib.util.getter.getdata(request, ('adjust_price', 'adjust_title', 'free_delivery'))
+        if type(adjust_price) not in [int, float, None]:
+            raise lib.error_handle.error.api_error.ApiVerifyError("request_data_error")
+
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        cart = lib.util.verify.Verify.get_cart_from_user_subscription(user_subscription, pk)
+
+        lib.helper.cart_helper.CartHelper.clear(api_user, None, cart)
+
+        return Response('ok', status=status.HTTP_200_OK)
