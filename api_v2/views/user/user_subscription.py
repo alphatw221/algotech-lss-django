@@ -271,7 +271,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         currency, buyer_lang, decimal_places, price_unit  =\
                 lib.util.getter.getdata(request,('currency', 'buyer_lang', 'decimal_places', 'price_unit'), required=True)
         delivery_note, special_note, confirmation_note, meta_point, meta_reply  =\
-                lib.util.getter.getdata(request,('delivery_note', 'special_note', 'confirmation_note', 'meta_point', meta_reply), required=False)
+                lib.util.getter.getdata(request,('delivery_note', 'special_note', 'confirmation_note', 'meta_point', 'meta_reply'), required=False)
         user_subscription.currency=currency
         user_subscription.buyer_lang=buyer_lang
         user_subscription.decimal_places=decimal_places
@@ -279,8 +279,8 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         user_subscription.meta_logistic['delivery_note'] = delivery_note
         user_subscription.meta_payment['special_note'] = special_note
         user_subscription.meta_payment['confirmation_note'] = confirmation_note
-        user_subscription.meta_point = meta_point
-        user_subscription.meta_reply = meta_reply
+        user_subscription.meta_point = meta_point if type(meta_point)==dict else {}
+        user_subscription.meta_reply = meta_reply if type(meta_reply)==dict else {}
         user_subscription.save()
 
         return Response(UserSerializerSellerAccountInfo(api_user).data, status=status.HTTP_200_OK)

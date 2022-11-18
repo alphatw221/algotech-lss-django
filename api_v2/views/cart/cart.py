@@ -17,7 +17,7 @@ from automation import jobs
 
 import factory
 import lib
-from datetime import datetime
+from datetime import datetime, timezone
 import uuid
 import service
 import database
@@ -238,7 +238,7 @@ class CartViewSet(viewsets.ModelViewSet):
         
         _discount_code = queryset.get(Q(code = discount_code)|Q(code = discount_code[:-(LENGTH_OF_REFERRAL_ID+1)]))
 
-        if _discount_code.period_enabled and (datetime.utcnow() < _discount_code.start_at or datetime.utcnow() > _discount_code.end_at):
+        if _discount_code.period_enabled and (datetime.now(timezone.utc) < _discount_code.start_at or datetime.now(timezone.utc) > _discount_code.end_at):
             raise lib.error_handle.error.api_error.ApiVerifyError('invalid_discount_code')
 
         if _discount_code.type == models.discount_code.discount_code.TYPE_CART_REFERAL :
@@ -492,6 +492,7 @@ class CartViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['PUT'], url_path=r'seller/clear', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    @lib.error_handle.error_handler.cart_operation_error_handler.update_cart_product_error_handler
     def seller_clear_cart(self, request, pk=None):
 
         api_user = lib.util.verify.Verify.get_seller_user(request)
@@ -500,4 +501,20 @@ class CartViewSet(viewsets.ModelViewSet):
 
         lib.helper.cart_helper.CartHelper.clear(cart)
 
-        return Response('ok', status=status.HTTP_200_OK)
+        cart = lib.util.verify.Verify.get_cart(pk)
+
+        return Response(models.cart.cart.CartSerializer(cart).data, status=status.HTTP_200_OK)
+    
+    @action(detail=True, methods=['DELETE'], url_path=r'seller/delete', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    @lib.error_handle.error_handler.cart_operation_error_handler.update_cart_product_error_handler
+    def seller_clear_cart(self, request, pk=None):
+
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        cart = lib.util.verify.Verify.get_cart_from_user_subscription(user_subscription, pk)
+
+        lib.helper.cart_helper.CartHelper.clear(cart)
+        cart.delete()
+
+        return Response('OK', status=status.HTTP_200_OK)

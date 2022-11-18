@@ -93,7 +93,7 @@ def __comment_responding(platform_name, platform_instance_data, campaign_data, u
 
         if 'facebook_buttons' in campaign_data.get('meta_reply',{}):
             facebook_buttons = campaign_data.get('meta_reply',{}).get('facebook_buttons',[])
-
+            private_message = private_message.replace('[LINK]','')
             view_order_button =  {
                 "type":"web_url",
                 "url":link,
@@ -105,13 +105,13 @@ def __comment_responding(platform_name, platform_instance_data, campaign_data, u
             if code!=200:
                 print("response", ret)
             return
-
+        private_message = private_message.replace('[LINK]', link)
         code, ret = service.facebook.post.post_page_message_on_comment(platform_instance_data.get('token'), comment['id'], private_message)
         if code!=200:
             print("response", ret)
         
     elif platform_name == 'youtube':
-
+        private_message = private_message.replace('[LINK]',link)
         customer_name =comment['customer_name']
         text = f"@{customer_name}"+ private_message
         live_chat_id = comment.get("live_chat_id")
@@ -128,13 +128,13 @@ def __comment_responding(platform_name, platform_instance_data, campaign_data, u
             print("response", ret)
 
     elif platform_name == 'instagram':
-
+        private_message = private_message.replace('[LINK]',link)
         code, ret =service.instagram.post.private_message( platform_instance_data.get('token'), comment['id'], private_message)
         if code!=200:
             print("response", ret)
     
     elif platform_name == 'twitch':
-        
+        private_message = private_message.replace('[LINK]',link)
         code, ret = service.twitch.twitch.whisper_to_user(platform_instance_data.get('token'), platform_instance_data.get('user_name'), comment['customer_id'], private_message)
         if code!=200:
             print("response", ret)
@@ -193,7 +193,7 @@ def __get_comment_and_private_message( pymongo_cart, campaign_data, state, campa
 
     if state in campaign_data.get('meta_reply',{}):
         reply_message = campaign_data.get('meta_reply',{}).get(state)
-        reply_message = reply_message.replace('[LINK]',link)
+        # reply_message = reply_message.replace('[LINK]',link)
         reply_message = reply_message.replace('[PRODUCT_NAME]', campaign_product.get('name',''))
         #reply_message = reply_message.replace('[ORDER_CODE]', campaign_product.get('order_code'))
         description = campaign_product.get('description') if campaign_product.get('description') else ''
