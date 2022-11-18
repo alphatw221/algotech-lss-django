@@ -85,7 +85,19 @@ class UserSerializer(serializers.ModelSerializer):
     
     meta = serializers.JSONField(default=dict)
     payment_meta = serializers.JSONField(default=dict)
+    
+class BuyerInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'name', 'email', 'phone', 'facebook_info', 'instagram_info', 'youtube_info', 'google_info']
+        read_only_fields = ['created_at', 'modified_at']
 
+    facebook_info = FacebookInfoSerializer(default=dict, required=False)
+    instagram_info = serializers.JSONField(default=dict, required=False)
+    youtube_info = serializers.JSONField(default=dict, required=False)
+    google_info = serializers.JSONField(default=dict, required=False)
+    
+    
 
 class UserSerializerAccountInfo(UserSerializer):
     user_subscription = UserSubscriptionSerializerAccountInfo(read_only=True, default=dict)

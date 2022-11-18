@@ -5,6 +5,7 @@ from django.core.files.base import ContentFile
 from django.http import HttpResponseRedirect
 from itsdangerous import Serializer
 from numpy import require
+from django.db.models import Q, Value
 
 from rest_framework import serializers, status, viewsets
 from rest_framework.decorators import action
@@ -17,6 +18,7 @@ from rest_framework.parsers import MultiPartParser, JSONParser, FormParser
 from api import rule, models, utils
 
 import stripe, pytz, lib, service, business_policy, json
+from api_v2.views.order.order import OrderSerializerWithCampaign
 from backend.pymongo.mongodb import db
 
 from datetime import date, datetime, timedelta
@@ -549,3 +551,49 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             start_date = this_end_date
         
         return Response(dealer_revenue, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['GET'], url_path=r'list/buyers', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def buyers_list(self, request):
+        keyword, page, page_size, = lib.util.getter.getparams(request, ( 'keyword', 'page', 'page_size'),with_user=False)
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        print(user_subscription)
+        
+        anonymous_buyers_data = database.lss.order.get_anonymous_buyers_data(user_subscription.id)
+        registered_buyers_data = database.lss.order.get_registered_buyers_data(user_subscription.id)
+        
+        buyers_id_data = anonymous_buyers_data + registered_buyers_data
+        queryset = models.order.order.Order.objects.filter(id__in=buyers_id_data)
+        
+        page = self.paginate_queryset(queryset)
+        serializer = models.order.order.OrderWithBuyerSerializer(page, many=True)
+        result = self.get_paginated_response(serializer.data)
+        data = result.data
+        return Response(data, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['GET'], url_path=r'retrieve/buyers/history', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def retrieve_buyer_order_history(self, request):
+        
+        buyer_id, points_relative, page, page_size, = lib.util.getter.getparams(request, ('buyer_id', 'points_relative', 'page', 'page_size'), with_user=False)
+        if buyer_id in ["", None,'undefined','null'] or not buyer_id.isnumeric():
+            raise lib.error_handle.error.api_error.ApiCallerError("Missing data")
+        
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        buyer = models.user.user.User.objects.get(id=buyer_id)
+        
+        queryset = models.order.order.Order.objects.filter(buyer=buyer, user_subscription=user_subscription).order_by('-created_at')
+        
+        if points_relative:
+            queryset=queryset.filter(Q(points_earned__gt = 0)|Q(points_used__gt = 0)|Q(point_discount__gt = 0))
+            
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = models.order.order.OrderWithBuyerSerializer(page, many=True)
+            data = self.get_paginated_response(serializer.data).data
+        else:
+            data = models.order.order.OrderWithBuyerSerializer(queryset, many=True).data
+        return Response(data, status=status.HTTP_200_OK)
+       
