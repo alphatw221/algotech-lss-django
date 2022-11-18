@@ -17,7 +17,7 @@ from automation import jobs
 
 import factory
 import lib
-from datetime import datetime
+from datetime import datetime, timezone
 import uuid
 import service
 import database
@@ -238,7 +238,7 @@ class CartViewSet(viewsets.ModelViewSet):
         
         _discount_code = queryset.get(Q(code = discount_code)|Q(code = discount_code[:-(LENGTH_OF_REFERRAL_ID+1)]))
 
-        if _discount_code.period_enabled and (datetime.utcnow() < _discount_code.start_at or datetime.utcnow() > _discount_code.end_at):
+        if _discount_code.period_enabled and (datetime.now(timezone.utc) < _discount_code.start_at or datetime.now(timezone.utc) > _discount_code.end_at):
             raise lib.error_handle.error.api_error.ApiVerifyError('invalid_discount_code')
 
         if _discount_code.type == models.discount_code.discount_code.TYPE_CART_REFERAL :
@@ -517,4 +517,4 @@ class CartViewSet(viewsets.ModelViewSet):
         lib.helper.cart_helper.CartHelper.clear(cart)
         cart.delete()
 
-        return Response({"message": "delete success"}, status=status.HTTP_200_OK)
+        return Response('OK', status=status.HTTP_200_OK)

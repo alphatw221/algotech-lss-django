@@ -499,3 +499,28 @@ def get_previous_campaign_data(campaign_id, user_subscription_id):
     cursor = __collection.find({"user_subscription_id":user_subscription_id, "id":{"$lt":campaign_id}}).sort('id',-1).limit(1)
     l = list(cursor)
     return l[0] if len(l) else None
+
+def get_campaign_abandon_cart_which_enable_auto_clear(start_from=None, end_at=None):
+
+    query = [
+        {
+            "$match":{
+                # "$or":[
+                #     {"start_at":{"$and":[{"$gt":start_from},{"$lt":end_at}]}},
+                #     {"start_at":{"$lt":start_from}, "end_at":{"$gt":end_at}},
+                #     {"end_at":{"$and":[{"$gt":start_from},{"$lt":end_at}]}},
+                # ],
+                "meta.enable_auto_clear" : True
+            }
+        },
+        {
+            "$project":{
+                "_id" : 0,
+                "id" : 1, 
+                "allow_idle_period" : "$meta.allow_idle_period"
+            }
+        }
+    ]
+    cursor = __collection.aggregate(query)
+    l = list(cursor)
+    return l

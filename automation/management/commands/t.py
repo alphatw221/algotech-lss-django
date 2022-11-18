@@ -31,7 +31,7 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.test_add_all_order_buyer_to_user_subscription_customer()
+        self.test_auto_remove_abandon_cart()
         pass
 
 
@@ -988,15 +988,24 @@ class Command(BaseCommand):
             except Exception:
                 print(traceback.format_exc())
         print(data)
-        # data = database.lss.order.get_total_earned_used_expired_points(buyer_id=673, user_subscription_id = 1)
-        # print(data)   
 
-        # # wallets = models.user.buyer_wallet.BuyerWallet.objects.all()
-        # # for wallet in wallets:
-        #     lib.helper.wallet_helper.WalletHelper.adjust_wallet(wallet)
+    def test_auto_clear_idle_cart(self):
+        import traceback
+        import database
+        from api import models
+        import lib
+        from datetime import datetime, timedelta
+
+    def test_auto_remove_abandon_cart(self):
+        import traceback
+        import database
+        from api import models
+        import lib
+        from datetime import datetime, timedelta
 
 
-        # end_at = datetime.utcnow()
-        # start_from = end_at - timedelta(days=1)
-        
-        # lib.helper.wallet_helper.WalletHelper.adjust_all_wallet_with_expired_points(start_from=start_from, end_at=end_at)
+        end_at = datetime.utcnow()
+        start_from = end_at - timedelta(days=365)
+
+        data = database.lss.campaign.get_campaign_abandon_cart_which_enable_auto_clear(start_from, end_at)
+        print(data)
