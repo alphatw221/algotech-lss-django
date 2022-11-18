@@ -166,8 +166,12 @@ class CartHelper():
         pymongo_order = data.get('pymongo_order')
         pymongo_cart = data.get('pymongo_cart')
         campaign_product_data_dict = data.get('campaign_product_data_dict')
+        is_new_customer = cls.__is_new_customer(campaign, api_user)
 
-        cls.__summarize_order(api_user, campaign, pymongo_order, campaign_product_data_dict, point_discount_processor)
+        cls.__summarize_order(api_user, campaign, pymongo_order, campaign_product_data_dict, point_discount_processor, is_new_customer = is_new_customer)
+
+        if is_new_customer:
+            campaign.user_subscription.customers.add(api_user)
 
         for campaign_product_id_str, qty in pymongo_order.data.get('products',{}).copy().items():
             campaign_product_data = campaign_product_data_dict[campaign_product_id_str]
@@ -256,10 +260,12 @@ class CartHelper():
                 print(traceback.format_exc())
                 raise lib.error_handle.error.cart_error.CartErrors.ServerBusy('server_busy')
 
-
+    @staticmethod
+    def __is_new_customer(campaign, api_user):
+        return True if api_user and not campaign.user_subscription.customers.filter(id=api_user.id).exists() else False
 
     @classmethod
-    def __summarize_order(cls, api_user, campaign:models.campaign.campaign.Campaign, pymongo_order:database.lss.order.Order, campaign_product_data_dict, point_discount_processor):
+    def __summarize_order(cls, api_user, campaign:models.campaign.campaign.Campaign, pymongo_order:database.lss.order.Order, campaign_product_data_dict, point_discount_processor, is_new_customer=False):
 
         subtotal = 0
         shipping_cost = 0
@@ -331,7 +337,7 @@ class CartHelper():
             point_expired_at = point_expired_at,
             meta_point = campaign.meta_point,
 
-            remark = 'new user' if api_user and models.order.order.Order.objects.filter(buyer = api_user, user_subscription = campaign.user_subscription).count()==1 else '',
+            remark = 'new customer' if is_new_customer else '',
             **campaign.user_subscription.meta.get('order_default_fields',{}),
             sync=True)
 

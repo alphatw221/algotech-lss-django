@@ -170,3 +170,44 @@ def get_total_earned_used_expired_points(buyer_id, user_subscription_id):
     cursor=__collection.aggregate(query)
     l = list(cursor)
     return l[0].get('total_points_earned',0) if l else 0, l[0].get('total_points_used',0) if l else 0, l[0].get('total_points_expired',0) if l else 0,
+
+
+def get_wallet_data(start_from = None, end_at = None ):
+
+    query = [
+            {"$match":{"user_subscription_id":{"$ne":None}, "buyer_id":{"$ne":None}, "created_at":{"$gt":start_from, "$lt":end_at }}},
+            {
+                "$lookup": 
+                {
+                    "from": "api_user_subscription",
+                    "localField": "user_subscription_id",
+                    "foreignField": "id",
+                    "as": "user_subscription"
+                }
+            },
+            {
+                "$lookup": 
+                {
+                    "from": "api_user",
+                    "localField": "buyer_id",
+                    "foreignField": "id",
+                    "as": "buyer"
+                }
+            },
+            {"$unwind": '$user_subscription'},
+            {"$unwind": '$buyer'},
+            {
+                "$group":{
+                    "_id": {
+                        "user_subscription_id": "$user_subscription.id",
+                        "buyer_id": "$buyer.id"
+                    }
+                }
+            },
+            { "$project":{"_id":0,"user_subscription_id":"$_id.user_subscription_id", "buyer_id":"$_id.buyer_id"} },
+
+        ]
+
+    cursor=__collection.aggregate(query)
+    l = list(cursor)
+    return l 

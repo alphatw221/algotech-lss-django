@@ -209,8 +209,12 @@ class CartDiscountHelper:
                 user_subscription = kwargs['user_subscription']
                 if not api_user:
                     return False
-                if api_user.orders.filter(user_subscription=user_subscription).exists():
+
+                if user_subscription.customers.filter(id=api_user.id).exists():
                     return False
+
+                # if api_user.orders.filter(user_subscription=user_subscription).exists():
+                #     return False
 
         except Exception:
             return False
