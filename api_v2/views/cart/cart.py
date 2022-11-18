@@ -492,6 +492,7 @@ class CartViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['PUT'], url_path=r'seller/clear', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    @lib.error_handle.error_handler.cart_operation_error_handler.update_cart_product_error_handler
     def seller_clear_cart(self, request, pk=None):
 
         api_user = lib.util.verify.Verify.get_seller_user(request)
@@ -500,4 +501,6 @@ class CartViewSet(viewsets.ModelViewSet):
 
         lib.helper.cart_helper.CartHelper.clear(cart)
 
-        return Response('ok', status=status.HTTP_200_OK)
+        cart = lib.util.verify.Verify.get_cart(pk)
+
+        return Response(models.cart.cart.CartSerializer(cart).data, status=status.HTTP_200_OK)

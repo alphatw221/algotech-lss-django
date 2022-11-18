@@ -120,7 +120,7 @@ class CartHelper():
 
         pymongo_cart, pymongo_campaign_products = cls.__clear_cart_and_return_campaign_product(cart)
         for pymongo_campaign_product in pymongo_campaign_products:
-            cls.send_campaign_product_websocket_data(pymongo_campaign_product)
+            cls.send_campaign_product_websocket_data(pymongo_campaign_product=pymongo_campaign_product)
         cls.send_cart_websocket_data(pymongo_cart)
 
         ## in case we need to do something else in the future
@@ -132,7 +132,7 @@ class CartHelper():
             with database.lss.util.start_session() as session:
                 with session.start_transaction():
                     campaign_products = []
-                    for campaign_product_id_str, qty in cart.products:
+                    for campaign_product_id_str, qty in cart.products.items():
                         campaign_product = database.lss.campaign_product.CampaignProduct(id=int(campaign_product_id_str))
                         campaign_product.customer_return(qty, sync=True, session=session)
                         campaign_products.append(campaign_product)
