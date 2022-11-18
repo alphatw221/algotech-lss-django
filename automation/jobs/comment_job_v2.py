@@ -105,7 +105,7 @@ def __comment_responding(platform_name, platform_instance_data, campaign_data, u
             if code!=200:
                 print("response", ret)
             return
-
+        private_message = private_message.replace('[LINK]', link)
         code, ret = service.facebook.post.post_page_message_on_comment(platform_instance_data.get('token'), comment['id'], private_message)
         if code!=200:
             print("response", ret)
