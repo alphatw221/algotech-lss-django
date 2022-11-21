@@ -375,7 +375,7 @@ class OrderViewSet(viewsets.ModelViewSet):
             point_discount_processor.update_wallet()
 
         order.payment_status = payment_status
-        order.save()
+        lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
 
         return Response(OrderSerializerWithOrderProductWithCampaign(order).data, status=status.HTTP_200_OK)
     

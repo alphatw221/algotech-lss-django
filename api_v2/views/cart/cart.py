@@ -508,7 +508,7 @@ class CartViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['DELETE'], url_path=r'seller/delete', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     @lib.error_handle.error_handler.cart_operation_error_handler.update_cart_product_error_handler
-    def seller_clear_cart(self, request, pk=None):
+    def seller_delete_cart(self, request, pk=None):
 
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
