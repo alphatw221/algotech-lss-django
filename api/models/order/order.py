@@ -6,7 +6,7 @@ from django.conf import settings
 from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
-from api.models.user.user import BuyerInfoSerializer, User
+from api.models.user.user import User
 
 import business_policy
 
@@ -149,8 +149,6 @@ class OrderSerializer(serializers.ModelSerializer):
 class OrderWithCampaignSerializer(OrderSerializer):
 
     campaign = CampaignSerializerRetreive()
-class OrderWithBuyerSerializer(OrderSerializer):
-    buyer = BuyerInfoSerializer()
     
 class OrderSerializerWithUserSubscription(OrderSerializer):
 

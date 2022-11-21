@@ -18,7 +18,9 @@ from rest_framework.parsers import MultiPartParser, JSONParser, FormParser
 from api import rule, models, utils
 
 import stripe, pytz, lib, service, business_policy, json
-from api_v2.views.order.order import OrderSerializerWithCampaign
+from api_v2.views.user.user import UserSerializerBuyerAccountInfo
+from api.views.order.order import OrderWithBuyerSerializer
+import  api_v2
 from backend.pymongo.mongodb import db
 
 from datetime import date, datetime, timedelta
@@ -558,16 +560,15 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         keyword, page, page_size, = lib.util.getter.getparams(request, ( 'keyword', 'page', 'page_size'),with_user=False)
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
-        print(user_subscription)
-        
-        anonymous_buyers_data = database.lss.order.get_anonymous_buyers_data(user_subscription.id)
-        registered_buyers_data = database.lss.order.get_registered_buyers_data(user_subscription.id)
-        
-        buyers_id_data = anonymous_buyers_data + registered_buyers_data
-        queryset = models.order.order.Order.objects.filter(id__in=buyers_id_data)
-        
+        buyers = user_subscription.customers.all()
+        search_fields = ["name"]
+        query = Q()
+        if keyword:
+            for field in search_fields:
+                query |= Q(**{field: keyword})
+        queryset = buyers.filter(query)
         page = self.paginate_queryset(queryset)
-        serializer = models.order.order.OrderWithBuyerSerializer(page, many=True)
+        serializer = UserSerializerBuyerAccountInfo(page, many=True)
         result = self.get_paginated_response(serializer.data)
         data = result.data
         return Response(data, status=status.HTTP_200_OK)
@@ -579,21 +580,18 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         buyer_id, points_relative, page, page_size, = lib.util.getter.getparams(request, ('buyer_id', 'points_relative', 'page', 'page_size'), with_user=False)
         if buyer_id in ["", None,'undefined','null'] or not buyer_id.isnumeric():
             raise lib.error_handle.error.api_error.ApiCallerError("Missing data")
-        
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         buyer = models.user.user.User.objects.get(id=buyer_id)
-        
-        queryset = models.order.order.Order.objects.filter(buyer=buyer, user_subscription=user_subscription).order_by('-created_at')
-        
-        if points_relative:
+        queryset = buyer.orders.filter(user_subscription=user_subscription).order_by('-created_at')
+        if points_relative == "true":
             queryset=queryset.filter(Q(points_earned__gt = 0)|Q(points_used__gt = 0)|Q(point_discount__gt = 0))
-            
+        
         page = self.paginate_queryset(queryset)
         if page is not None:
-            serializer = models.order.order.OrderWithBuyerSerializer(page, many=True)
+            serializer = OrderWithBuyerSerializer(page, many=True)
             data = self.get_paginated_response(serializer.data).data
         else:
-            data = models.order.order.OrderWithBuyerSerializer(queryset, many=True).data
+            data = OrderWithBuyerSerializer(queryset, many=True).data
         return Response(data, status=status.HTTP_200_OK)
        
