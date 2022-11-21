@@ -199,7 +199,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         if points_relative:
             queryset=queryset.filter(Q(points_earned__gt = 0)|Q(points_used__gt = 0)|Q(point_discount__gt = 0))
- 
+            queryset=queryset.filter(payment_status = models.order.order.PAYMENT_STATUS_PAID)
 
         queryset = queryset.order_by('-created_at')
         page = self.paginate_queryset(queryset)
