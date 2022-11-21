@@ -18,14 +18,25 @@ from rest_framework.parsers import MultiPartParser, JSONParser, FormParser
 from api import rule, models, utils
 
 import stripe, pytz, lib, service, business_policy, json
-from api_v2.views.user.user import UserSerializerBuyerAccountInfo
-from api.views.order.order import OrderWithBuyerSerializer
-import  api_v2
 from backend.pymongo.mongodb import db
 
 from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
 import database
+
+class UserSubscriptionSerializerName(models.user.user_subscription.UserSubscriptionSerializer):
+    class Meta:
+        model = models.user.user_subscription.UserSubscription
+        fields = ['name','id']
+
+class WalletSerializerWithSellerInfo(models.user.buyer_wallet.BuyerWalletSerializer):
+    user_subscription = UserSubscriptionSerializerName(read_only=True, default=dict)
+    
+class UserSerializerBuyerAccountInfo(models.user.user.UserSerializer):
+    wallets = WalletSerializerWithSellerInfo(many=True, read_only=True, default=list)
+
+class OrderSerializerWithBuyerAccountInfo(models.order.order.OrderSerializer):
+    buyer = UserSerializerBuyerAccountInfo()
 
 class UserSubscriptionAccountInfo(models.user.user_subscription.UserSubscriptionSerializer):
 
@@ -589,9 +600,9 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         
         page = self.paginate_queryset(queryset)
         if page is not None:
-            serializer = OrderWithBuyerSerializer(page, many=True)
+            serializer = OrderSerializerWithBuyerAccountInfo(page, many=True)
             data = self.get_paginated_response(serializer.data).data
         else:
-            data = OrderWithBuyerSerializer(queryset, many=True).data
+            data = OrderSerializerWithBuyerAccountInfo(queryset, many=True).data
         return Response(data, status=status.HTTP_200_OK)
        

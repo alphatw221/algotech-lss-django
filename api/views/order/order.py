@@ -8,15 +8,11 @@ from api.models.order.order import Order, OrderSerializer
 from api.utils.common.verify import Verify
 from api.utils.common.common import getparams
 from api.utils.common.order_helper import OrderHelper
-from api_v2.views.user.user import UserSerializerBuyerAccountInfo
 
 from mail.sender.sender import *
 from django.http import HttpResponse
 from backend.pymongo.mongodb import db
 import xlsxwriter
-
-class OrderWithBuyerSerializer(OrderSerializer):
-    buyer = UserSerializerBuyerAccountInfo()
 
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 def get_title_map():
