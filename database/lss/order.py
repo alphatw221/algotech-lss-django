@@ -211,3 +211,51 @@ def get_wallet_data(start_from = None, end_at = None ):
     cursor=__collection.aggregate(query)
     l = list(cursor)
     return l 
+def get_anonymous_buyers_data(user_subscription_id):
+    query = [
+        {
+            "$match":{
+                "user_subscription_id": user_subscription_id,
+                "buyer_id":{'$eq':None}
+            },
+        },
+        {
+            "$group": {
+                '_id':None,
+                'order_id_list': {'$addToSet': '$id'},
+            }
+        }
+    ]
+    cursor = __collection.aggregate(query)
+    return list(cursor)[0].get('order_id_list', [])
+
+def get_registered_buyers_data(user_subscription_id):
+    query = [
+        {
+            "$match":{
+                "user_subscription_id": user_subscription_id,
+                "buyer_id":{'$ne':None}
+            }
+        },
+        {
+            '$group': {
+                '_id': '$buyer_id',
+                'order_id': {'$last':'$id'}
+                
+            }
+        },
+        {
+            "$project": {
+                '_id':0,
+                'order_id': '$order_id'
+            }
+        },
+        {
+            "$group": {
+                '_id':None,
+                'order_id_list': {'$addToSet': '$order_id'},
+            }
+        }
+    ]
+    cursor = __collection.aggregate(query)
+    return list(cursor)[0].get('order_id_list', [])

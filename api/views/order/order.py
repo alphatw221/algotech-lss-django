@@ -14,7 +14,6 @@ from django.http import HttpResponse
 from backend.pymongo.mongodb import db
 import xlsxwriter
 
-
 from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
 def get_title_map():
     title_map = {
