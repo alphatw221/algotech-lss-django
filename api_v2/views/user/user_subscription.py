@@ -572,11 +572,11 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         buyers = user_subscription.customers.all()
-        search_fields = ["name"]
+        search_fields = ["name", "email"]
         query = Q()
         if keyword:
             for field in search_fields:
-                query |= Q(**{field: keyword})
+                query |= Q(**{f"{field}__icontains": keyword})
         queryset = buyers.filter(query)
         page = self.paginate_queryset(queryset)
         serializer = UserSerializerBuyerAccountInfo(page, many=True)
