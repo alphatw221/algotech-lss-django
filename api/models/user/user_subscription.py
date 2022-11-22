@@ -76,6 +76,8 @@ class UserSubscription(models.Model):
     meta_country = models.JSONField(null=True, blank=True, default=dict)
     meta_reply = models.JSONField(null=False, blank=False, default=dict)
     meta_point = models.JSONField(null=False, blank=False, default=dict)
+    meta_cart_remind = models.JSONField(null=False, blank=False, default=dict)
+    meta_store = models.JSONField(null=False, blank=False, default=dict)
 
     buyer_lang = models.CharField(max_length=255, blank=True,
                             choices=business_policy.subscription.LANGUAGE_CHOICES, default=business_policy.subscription.LANGUAGE_ENGLICH)
@@ -138,6 +140,8 @@ class UserSubscriptionSerializer(serializers.ModelSerializer):
     meta_country = serializers.JSONField(default=dict, required=False)
     meta_reply = serializers.JSONField(default=dict, required=False)
     meta_point = serializers.JSONField(default=dict, required=False)
+    meta_remind = serializers.JSONField(default=dict, required=False)
+    meta_store = serializers.JSONField(default=dict, required=False)
     user_plan = serializers.JSONField(default=dict, required=False)
 
 class UserSubscriptionSerializerAccountInfo(serializers.ModelSerializer):
@@ -151,6 +155,8 @@ class UserSubscriptionSerializerAccountInfo(serializers.ModelSerializer):
     meta_country = serializers.JSONField(default=dict, required=False)
     meta_reply = serializers.JSONField(default=dict, required=False)
     meta_point = serializers.JSONField(default=dict, required=False)
+    meta_remind = serializers.JSONField(default=dict, required=False)
+    meta_store = serializers.JSONField(default=dict, required=False)
     user_plan = serializers.JSONField(default=dict, required=False)
 
 

@@ -4,7 +4,8 @@ from rest_framework import serializers
 
 
 TYPE_ANIMATION='animation'
-
+TYPE_ICON='icon'
+TYPE_CHOICE = [TYPE_ANIMATION, TYPE_ICON]
 class StaticAssets(models.Model):
     class Meta:
         db_table = 'api_static_assets'
