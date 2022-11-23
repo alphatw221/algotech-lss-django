@@ -83,10 +83,3 @@ def get_post_sharedpost(page_token: str, page_id:str, post_id: str, after: str =
                             params=params).get()
     return ret
 
-def post_get_live_video_object(page_token: str, page_id:str):
-    params = {
-        'status': 'LIVE_NOW'
-    }
-    ret = FacebookApiCaller(f'{page_id}/live_videos', bearer_token=page_token,
-                            params=params).post()
-    return ret
