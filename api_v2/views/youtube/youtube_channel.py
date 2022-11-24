@@ -57,9 +57,9 @@ class YoutubeChannelViewSet(viewsets.GenericViewSet):
     @action(detail=True, methods=['GET'], url_path=r'live_broadcasts', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def get_youtube_channel_live_broadcasts(self, request, pk):
+        limit = request.query_params.get('limit')
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
-        
         if 'youtube' not in user_subscription.user_plan.get('activated_platform'):
             raise lib.error_handle.error.api_error.ApiVerifyError('youtube_not_activated')
         
@@ -69,9 +69,8 @@ class YoutubeChannelViewSet(viewsets.GenericViewSet):
         if refresh_api_status == 200:
             youtube_channel.token = refresh_response.get('access_token')
             youtube_channel.save()
-            
-        code, response = service.youtube.channel.get_live_broadcasts(youtube_channel.token)
-        print(response)
+        
+        code, response = service.youtube.channel.get_live_broadcasts(youtube_channel.token, max_results=limit)
         if code !=200:
-            return Response({"error_response": response}, status=status.HTTP_400_BAD_REQUEST)
+            raise lib.error_handle.error.api_error.ApiCallerError('youtube_api_error', {"_error_message":response})
         return Response(response, status=status.HTTP_200_OK)

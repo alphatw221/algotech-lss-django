@@ -48,6 +48,8 @@ class FacebookPageViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['GET'], url_path=r'videos', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def get_facebook_page_videos(self, request, pk):
+        limit = request.query_params.get('limit')
+        
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         
@@ -55,7 +57,7 @@ class FacebookPageViewSet(viewsets.ModelViewSet):
             raise lib.error_handle.error.api_error.ApiVerifyError('facebook_not_activated')
         
         facebook_page = lib.util.verify.Verify.get_facebook_page_from_user_subscription(user_subscription, pk)
-        code, response = service.facebook.page.get_page_videos(facebook_page.token, facebook_page.page_id, 5)
+        code, response = service.facebook.page.get_page_videos(facebook_page.token, facebook_page.page_id, limit=limit)
         if code !=200:
             return Response({"error_response": response}, status=status.HTTP_200_OK)
         return Response(response, status=status.HTTP_200_OK)
@@ -63,12 +65,13 @@ class FacebookPageViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['GET'], url_path=r'live_videos', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def get_facebook_page_live_videos(self, request, pk):
+        limit = request.query_params.get('limit')
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         if 'facebook' not in user_subscription.user_plan.get('activated_platform'):
             raise lib.error_handle.error.api_error.ApiVerifyError('facebook_not_activated')
         facebook_page = lib.util.verify.Verify.get_facebook_page_from_user_subscription(user_subscription, pk)
-        code, response = service.facebook.page.get_live_video(facebook_page.token, facebook_page.page_id)
+        code, response = service.facebook.page.get_live_video(facebook_page.token, facebook_page.page_id, limit=limit)
         if code !=200:
             return Response({"error_response": response}, status=status.HTTP_200_OK)
         return Response(response, status=status.HTTP_200_OK)

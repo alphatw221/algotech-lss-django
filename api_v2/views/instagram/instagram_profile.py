@@ -76,6 +76,7 @@ class InstagramProfileViewSet(viewsets.ModelViewSet):
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def get_instagram_profile_media(self, request, pk):
         limit = request.query_params.get('limit')
+        print(limit)
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         instagram_profile = models.instagram.instagram_profile.InstagramProfile.objects.get(id=pk)
