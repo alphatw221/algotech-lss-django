@@ -116,7 +116,7 @@ def post_send_quick_replies(page_token:str, recipient_id: str, replies_options: 
 def get_page_videos(page_token: str, page_id: str, limit: int):
     params = {
         'limit': limit,
-        'fields': 'created_time,embeddable,embed_html,title,description,live_status'
+        'fields': 'created_time,embeddable,embed_html,title,description,live_status,from'
     }
     ret = FacebookApiCaller(f'{page_id}/videos', bearer_token=page_token,
                             params=params).get()
@@ -126,7 +126,7 @@ def get_live_video(page_token: str, page_id:str, broadcast_status:list=["LIVE"],
     params = {
         'limit': limit,
         'broadcast_status': f"{broadcast_status}",
-        'fields': 'title,status,embed_html,video,broadcast_start_time,description'
+        'fields': 'title,status,embed_html,video,broadcast_start_time,description,from'
     }
     ret = FacebookApiCaller(f'{page_id}/live_videos', bearer_token=page_token,
                             params=params).get()

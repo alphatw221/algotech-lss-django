@@ -47,7 +47,7 @@ class FacebookPageViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['GET'], url_path=r'videos', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def check_facebook_page_videos(self, request, pk):
+    def get_facebook_page_videos(self, request, pk):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         
