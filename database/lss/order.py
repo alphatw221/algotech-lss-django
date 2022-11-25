@@ -100,7 +100,7 @@ def get_wallet_data_with_expired_points(start_from = None, end_at = None):
         point_expired_at_filter_query["$lte"] = end_at
     
     query = [
-            {"$match":{"point_expired_at":point_expired_at_filter_query, "buyer_id":{"$ne":None}}, "point_expired_calculated":False},
+            {"$match":{"point_expired_at":point_expired_at_filter_query, "buyer_id":{"$ne":None}, "point_expired_calculated":False}},
             {
                 "$lookup": 
                 {
@@ -129,10 +129,10 @@ def get_wallet_data_with_expired_points(start_from = None, end_at = None):
                         "user_subscription_id": "$user_subscription.id",
                         "buyer_id": "$buyer.id"
                     },
-                    "created_at":{"$first": "$created_at"}
+                    "expired_points_order_created_at":{"$first": "$created_at"}
                 }
             },
-            { "$project":{"_id":0,"user_subscription_id":"$_id.user_subscription_id", "buyer_id":"$_id.buyer_id", "created_at":1} },
+            { "$project":{"_id":0,"user_subscription_id":"$_id.user_subscription_id", "buyer_id":"$_id.buyer_id", "expired_points_order_created_at":1} },
 
         ]
 
@@ -187,18 +187,24 @@ def get_earned_used_expired_points_sum(buyer_id, user_subscription_id, order_cre
     return l[0].get('total_points_earned',0) if l else 0, l[0].get('total_points_used',0) if l else 0, l[0].get('total_points_expired',0) if l else 0,
 
 def mark_order_points_used_calculated(buyer_id, start_from=datetime.utcnow()):
-    assert buyer_id != None
-    __collection.update_many({"buyer_id":buyer_id, "created_at":{"$gt":start_from}},{"$set":{"points_used_calculated":True}})
+
+    __collection.update_many(
+        {
+            "buyer_id":buyer_id, 
+            "created_at":{"$gt":start_from} #use gt here
+        },
+        {"$set":{"points_used_calculated":True}})
 
 def mark_order_point_expired_calculated(buyer_id, start_from=datetime.utcnow()):
-    assert buyer_id != None
+
+    
     __collection.update_many({
             "buyer_id":buyer_id,
-            "created_at":{"$gt":start_from},
-            "point_expired_at":{"$ne":None, "$lte":datetime.utcnow()}
+            "created_at":{"$gte":start_from}, #use gte here
+            "point_expired_at":{"$lte":datetime.utcnow()}
         },
         {
-            "$set":{"points_used_calculated":True}
+            "$set":{"point_expired_calculated":True}
         })
 
 

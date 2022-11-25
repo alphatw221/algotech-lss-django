@@ -37,7 +37,8 @@ class WalletHelper():
         for _wallet_data in wallet_data:
             
             wallet = models.user.buyer_wallet.BuyerWallet.objects.get(
-                user_subscription_id=_wallet_data.get('user_subscription_id', 
-                buyer_id = _wallet_data.get('buyer_id')))
+                user_subscription_id=_wallet_data.get('user_subscription_id'), 
+                buyer_id = _wallet_data.get('buyer_id')
+            )
 
-            cls.adjust_wallet(wallet, wallet_data.get('created_at'))
+            cls.adjust_wallet(wallet, _wallet_data.get('expired_points_order_created_at'))
