@@ -21,10 +21,12 @@ class WalletHelper():
     def adjust_wallet(cls, wallet, order_created_after = None):
 
         _, total_used, total_expired = database.lss.order.get_total_earned_used_expired_points(wallet.buyer.id, wallet.user_subscription.id, order_created_after = order_created_after)
-
+        
         points_expired = max(total_expired-total_used,0)
         wallet.points = max(wallet.points-points_expired,0)
         wallet.save()
+
+        database.lss.order.mark_order_points_used_calculated(order_created_after)
 
     @classmethod
     def adjust_all_wallet_with_expired_points(cls, start_from=None, end_at=None):

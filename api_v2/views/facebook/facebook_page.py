@@ -59,7 +59,11 @@ class FacebookPageViewSet(viewsets.ModelViewSet):
         facebook_page = lib.util.verify.Verify.get_facebook_page_from_user_subscription(user_subscription, pk)
         code, response = service.facebook.page.get_page_videos(facebook_page.token, facebook_page.page_id, limit=limit)
         if code !=200:
-            return Response({"error_response": response}, status=status.HTTP_200_OK)
+            print(response)
+            message = response.get('error').get("message") if response.get('error').get("message") else response
+            if "token" in response.get('error').get("message"):
+                raise lib.error_handle.error.api_error.ApiCallerError("facebook_token_expired")
+            raise lib.error_handle.error.api_error.ApiCallerError(message)
         return Response(response, status=status.HTTP_200_OK)
     
     @action(detail=True, methods=['GET'], url_path=r'live_videos', permission_classes=(IsAuthenticated,))
@@ -73,7 +77,11 @@ class FacebookPageViewSet(viewsets.ModelViewSet):
         facebook_page = lib.util.verify.Verify.get_facebook_page_from_user_subscription(user_subscription, pk)
         code, response = service.facebook.page.get_live_video(facebook_page.token, facebook_page.page_id, limit=limit)
         if code !=200:
-            return Response({"error_response": response}, status=status.HTTP_200_OK)
+            print(response)
+            message = response.get('error').get("message") if response.get('error').get("message") else response
+            if "token" in response.get('error').get("message"):
+                raise lib.error_handle.error.api_error.ApiCallerError("facebook_token_expired")
+            raise lib.error_handle.error.api_error.ApiCallerError(message)
         return Response(response, status=status.HTTP_200_OK)
     
     @action(detail=True, methods=['POST'], url_path=r'create/live_object', permission_classes=(IsAuthenticated,))
