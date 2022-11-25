@@ -118,6 +118,12 @@ class CartViewSet(viewsets.ModelViewSet):
         cart_oid = database.lss.cart.get_oid_by_id(cart.id)
         return Response({ 'cart_oid':cart_oid}, status=status.HTTP_200_OK)
     
+    @action(detail=False, methods=['GET'], url_path=r'buyer/retrieve/(?P<cart_oid>[^/.]+)/platform', permission_classes=())
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def buyer_retrieve_cart_platform(self, request, cart_oid):
+        cart_oid = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
+        return Response(cart_oid.platform, status=status.HTTP_200_OK)
+    
     @action(detail=False, methods=['GET'], url_path=r'buyer/retrieve/(?P<cart_oid>[^/.]+)', permission_classes=())
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def buyer_retrieve_cart(self, request, cart_oid):

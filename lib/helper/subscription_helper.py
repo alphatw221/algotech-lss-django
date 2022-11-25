@@ -42,8 +42,6 @@ def remove_pages(platform, user_subscription, id_of_binded_pages):
 def bind_facebook_pages(request, user_subscription):
     token, = lib.util.getter.getdata(request,('accessToken',), required=True)
     status_code, response = service.facebook.user.get_me_accounts(token)
-    print(status_code)
-    print(response)
     if status_code != 200:
         raise lib.error_handle.error.api_error.ApiCallerError("api_fb_get_accounts_error")
 

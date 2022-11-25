@@ -9,7 +9,8 @@ def get_user_picture(user_asid:str, page_token: str):
 
 def get_page_posts(page_token: str, page_id: str, limit: int):
     params = {
-        'limit': limit
+        'limit': limit,
+        'fields': 'attachments{media},message,created_time'
     }
     ret = FacebookApiCaller(f'{page_id}/posts', bearer_token=page_token,
                             params=params).get()
@@ -110,6 +111,33 @@ def post_send_quick_replies(page_token:str, recipient_id: str, replies_options: 
         }
     }
     ret = FacebookApiCaller("me/messages", bearer_token=page_token, params=params).post()
+    return ret
+
+def get_page_videos(page_token: str, page_id: str, limit: int):
+    params = {
+        'limit': limit,
+        'fields': 'created_time,embeddable,embed_html,title,description,live_status,from'
+    }
+    ret = FacebookApiCaller(f'{page_id}/videos', bearer_token=page_token,
+                            params=params).get()
+    return ret
+
+def get_live_video(page_token: str, page_id:str, broadcast_status:list=["LIVE"], limit:int=100):
+    params = {
+        'limit': limit,
+        'broadcast_status': f"{broadcast_status}",
+        'fields': 'title,status,embed_html,video,broadcast_start_time,description,from'
+    }
+    ret = FacebookApiCaller(f'{page_id}/live_videos', bearer_token=page_token,
+                            params=params).get()
+    return ret
+
+def post_get_live_video_object(page_token: str, page_id:str):
+    params = {
+        'status': 'LIVE_NOW'
+    }
+    ret = FacebookApiCaller(f'{page_id}/live_videos', bearer_token=page_token,
+                            params=params).post()
     return ret
         
     
