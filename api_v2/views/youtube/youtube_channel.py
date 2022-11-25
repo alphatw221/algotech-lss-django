@@ -69,8 +69,11 @@ class YoutubeChannelViewSet(viewsets.GenericViewSet):
         if refresh_api_status == 200:
             youtube_channel.token = refresh_response.get('access_token')
             youtube_channel.save()
-        
         code, response = service.youtube.channel.get_live_broadcasts(youtube_channel.token, max_results=limit)
         if code !=200:
-            raise lib.error_handle.error.api_error.ApiCallerError('youtube_api_error', {"_error_message":response})
+            print(response)
+            message = response.get('error').get("message") if response.get('error').get("message") else response
+            if "token" in response.get('error').get("message"):
+                raise lib.error_handle.error.api_error.ApiCallerError("youtube_token_expired")
+            raise lib.error_handle.error.api_error.ApiCallerError(message)
         return Response(response, status=status.HTTP_200_OK)
