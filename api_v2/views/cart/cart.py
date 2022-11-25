@@ -29,10 +29,11 @@ class CartPagination(PageNumberPagination):
 
 class UserSubscriptionSerializerWithProductCategory(models.user.user_subscription.UserSubscriptionSerializer):
     product_categories = models.product.product_category.ProductCategorySerializer(many=True, read_only=True, default=list)
-class CampaignSerializerWithSellerInfo(models.campaign.campaign.CampaignSerializer):
-    user_subscription = UserSubscriptionSerializerWithProductCategory(read_only=True)
+# class CampaignSerializerWithSellerInfo(models.campaign.campaign.CampaignSerializer):
+#     user_subscription = UserSubscriptionSerializerWithProductCategory(read_only=True)
 class CartSerializerWithSellerInfo(models.cart.cart.CartSerializer):
-    campaign = CampaignSerializerWithSellerInfo()
+    campaign = models.campaign.campaign.CampaignSerializer()
+    user_subscription = UserSubscriptionSerializerWithProductCategory()
 class CartViewSet(viewsets.ModelViewSet):
     queryset = models.cart.cart.Cart.objects.all().order_by('id')
     serializer_class = models.cart.cart.CartSerializer
@@ -116,6 +117,12 @@ class CartViewSet(viewsets.ModelViewSet):
 
         cart_oid = database.lss.cart.get_oid_by_id(cart.id)
         return Response({ 'cart_oid':cart_oid}, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['GET'], url_path=r'buyer/retrieve/(?P<cart_oid>[^/.]+)/platform', permission_classes=())
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def buyer_retrieve_cart_platform(self, request, cart_oid):
+        cart_oid = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
+        return Response(cart_oid.platform, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['GET'], url_path=r'buyer/retrieve/(?P<cart_oid>[^/.]+)', permission_classes=())
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
