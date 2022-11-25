@@ -32,7 +32,7 @@ class OrderSerializerWithOrderProduct(models.order.order.OrderSerializer):
     
 class OrderSerializerWithOrderProductWithCampaign(OrderSerializerWithOrderProduct):
     campaign = models.campaign.campaign.CampaignSerializer(read_only=True, default=dict)
-
+    user_subscription = models.user.user_subscription.UserSubscriptionSerializer(read_only=True, default=dict)
 
 class OrderPagination(PageNumberPagination):
     page_query_param = 'page'
@@ -199,7 +199,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         if points_relative:
             queryset=queryset.filter(Q(points_earned__gt = 0)|Q(points_used__gt = 0)|Q(point_discount__gt = 0))
- 
+            queryset=queryset.filter(payment_status = models.order.order.PAYMENT_STATUS_PAID)
 
         queryset = queryset.order_by('-created_at')
         page = self.paginate_queryset(queryset)

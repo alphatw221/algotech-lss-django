@@ -5,6 +5,7 @@ from django.core.files.base import ContentFile
 from django.http import HttpResponseRedirect
 from itsdangerous import Serializer
 from numpy import require
+from django.db.models import Q, Value
 
 from rest_framework import serializers, status, viewsets
 from rest_framework.decorators import action
@@ -22,6 +23,20 @@ from backend.pymongo.mongodb import db
 from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
 import database
+
+class UserSubscriptionSerializerName(models.user.user_subscription.UserSubscriptionSerializer):
+    class Meta:
+        model = models.user.user_subscription.UserSubscription
+        fields = ['name','id']
+
+class WalletSerializerWithSellerInfo(models.user.buyer_wallet.BuyerWalletSerializer):
+    user_subscription = UserSubscriptionSerializerName(read_only=True, default=dict)
+    
+class UserSerializerBuyerAccountInfo(models.user.user.UserSerializer):
+    wallets = WalletSerializerWithSellerInfo(many=True, read_only=True, default=list)
+
+class OrderSerializerWithBuyerAccountInfo(models.order.order.OrderSerializer):
+    buyer = UserSerializerBuyerAccountInfo()
 
 class UserSubscriptionAccountInfo(models.user.user_subscription.UserSubscriptionSerializer):
 
@@ -179,8 +194,24 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         queryset = getattr(user_subscription, models.user.user_subscription.PLATFORM_ATTR[platform_name]['attr']).all()
         serializer = models.user.user_subscription.PLATFORM_ATTR[platform_name]['serializer']
         return Response(serializer(queryset,many=True).data, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['PUT'], url_path=r'platform/unbind/all', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def unbind_platform_all(self, request):
+        
+        unbind_platforms, = lib.util.getter.getdata(request, ('unbind_platforms',), required=True)
+        if unbind_platforms in [None, '', "undefined", 'null']:
+            raise lib.error_handle.error.api_error.ApiVerifyError('invalid_data')
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        for platform_name in unbind_platforms:
+            campaigns_connected_to_the_platform = user_subscription.campaigns.exclude(end_at__lte=datetime.utcnow())
+            campaigns_connected_to_the_platform.update(**{models.user.user_subscription.PLATFORM_ATTR[platform_name]['attr'][:-1]:None, f'{platform_name}_campaign':{}})
+            
+            queryset = getattr(user_subscription, models.user.user_subscription.PLATFORM_ATTR[platform_name]['attr']).all()
+            queryset.delete()
 
-
+        return Response({"data": unbind_platforms}, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['PUT'], url_path=r'platform/(?P<platform_name>[^/.]+)/unbind', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
@@ -256,7 +287,8 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             'special_note' : user_subscription.meta_payment.get('special_note', ''),
             'confirmation_note': user_subscription.meta_payment.get('confirmation_note', ''),
             'meta_point':user_subscription.meta_point,
-            "meta_reply":user_subscription.meta_reply
+            "meta_reply":user_subscription.meta_reply,
+            "meta_cart_remind":user_subscription.meta_cart_remind
         }
         return Response(_json, status=status.HTTP_200_OK)
     
@@ -270,8 +302,8 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
         currency, buyer_lang, decimal_places, price_unit  =\
                 lib.util.getter.getdata(request,('currency', 'buyer_lang', 'decimal_places', 'price_unit'), required=True)
-        delivery_note, special_note, confirmation_note, meta_point, meta_reply  =\
-                lib.util.getter.getdata(request,('delivery_note', 'special_note', 'confirmation_note', 'meta_point', 'meta_reply'), required=False)
+        delivery_note, special_note, confirmation_note, meta_point, meta_reply, meta_cart_remind  =\
+                lib.util.getter.getdata(request,('delivery_note', 'special_note', 'confirmation_note', 'meta_point', 'meta_reply', 'meta_cart_remind'), required=False)
         user_subscription.currency=currency
         user_subscription.buyer_lang=buyer_lang
         user_subscription.decimal_places=decimal_places
@@ -281,6 +313,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         user_subscription.meta_payment['confirmation_note'] = confirmation_note
         user_subscription.meta_point = meta_point if type(meta_point)==dict else {}
         user_subscription.meta_reply = meta_reply if type(meta_reply)==dict else {}
+        user_subscription.meta_cart_remind = meta_cart_remind if type(meta_cart_remind)==dict else {}
         user_subscription.save()
 
         return Response(UserSerializerSellerAccountInfo(api_user).data, status=status.HTTP_200_OK)
@@ -449,6 +482,48 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         static_assets = user_subscription.assets.filter(type=models.user.static_assets.TYPE_ANIMATION)
         
         return Response(models.user.static_assets.StaticAssetsSerializer(static_assets, many=True).data, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['GET'], url_path=r'list/buyers', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def buyers_list(self, request):
+        keyword, page, page_size, = lib.util.getter.getparams(request, ( 'keyword', 'page', 'page_size'),with_user=False)
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        buyers = user_subscription.customers.all()
+        search_fields = ["name", "email"]
+        query = Q()
+        if keyword:
+            for field in search_fields:
+                query |= Q(**{f"{field}__icontains": keyword})
+        queryset = buyers.filter(query)
+        page = self.paginate_queryset(queryset)
+        serializer = UserSerializerBuyerAccountInfo(page, many=True)
+        result = self.get_paginated_response(serializer.data)
+        data = result.data
+        return Response(data, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['GET'], url_path=r'retrieve/buyers/history', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def retrieve_buyer_order_history(self, request):
+        
+        buyer_id, points_relative, page, page_size, = lib.util.getter.getparams(request, ('buyer_id', 'points_relative', 'page', 'page_size'), with_user=False)
+        if buyer_id in ["", None,'undefined','null'] or not buyer_id.isnumeric():
+            raise lib.error_handle.error.api_error.ApiCallerError("Missing data")
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        buyer = models.user.user.User.objects.get(id=buyer_id)
+        queryset = buyer.orders.filter(user_subscription=user_subscription).order_by('-created_at')
+        if points_relative == "true":
+            queryset=queryset.filter(Q(points_earned__gt = 0)|Q(points_used__gt = 0)|Q(point_discount__gt = 0))
+        
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = OrderSerializerWithBuyerAccountInfo(page, many=True)
+            data = self.get_paginated_response(serializer.data).data
+        else:
+            data = OrderSerializerWithBuyerAccountInfo(queryset, many=True).data
+        return Response(data, status=status.HTTP_200_OK)
+       
 # --------------------------------- dealer ---------------------------------
     
 

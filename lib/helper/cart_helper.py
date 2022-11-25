@@ -197,14 +197,24 @@ class CartHelper():
                         try:
                             qty_avaliable = campaign_product_data.get('qty_for_sale')-campaign_product_data.get('qty_sold')-campaign_product_data.get('qty_pending_payment')
 
-                            if qty_avaliable < 1 or qty < 1:
+                            if qty < 1:
                                 del pymongo_cart.data.get('products',{})[campaign_product_id_str] 
                                 database.lss.campaign_product.CampaignProduct(id=campaign_product_data.get('id')).customer_return(qty, sync=False, session=session)
                                 error_products_data.append({'id':campaign_product_data.get('id')})
                                 success = False
+                                continue
 
+                            if campaign_product_data.get('oversell')==True:
+                                continue
 
-                            elif qty>qty_avaliable and not campaign_product_data.get('oversell'):
+                            if qty_avaliable < 1 :
+                                del pymongo_cart.data.get('products',{})[campaign_product_id_str] 
+                                database.lss.campaign_product.CampaignProduct(id=campaign_product_data.get('id')).customer_return(qty, sync=False, session=session)
+                                error_products_data.append({'id':campaign_product_data.get('id')})
+                                success = False
+                                continue
+
+                            if qty>qty_avaliable :
                                 return_qty = qty - qty_avaliable
                                 pymongo_cart.data.get('products',{})[campaign_product_id_str] = qty_avaliable
                                 database.lss.campaign_product.CampaignProduct(id=campaign_product_data.get('id')).customer_return(return_qty, sync=False, session=session)

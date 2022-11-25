@@ -85,7 +85,7 @@ class UserSerializer(serializers.ModelSerializer):
     
     meta = serializers.JSONField(default=dict)
     payment_meta = serializers.JSONField(default=dict)
-
+    
 
 class UserSerializerAccountInfo(UserSerializer):
     user_subscription = UserSubscriptionSerializerAccountInfo(read_only=True, default=dict)

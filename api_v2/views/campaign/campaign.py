@@ -545,10 +545,8 @@ class CampaignViewSet(viewsets.ModelViewSet):
         
         ig_media_url = None
         try:
-            
             status_code, response = service.instagram.post.get_post_media_url(campaign.instagram_profile.token, campaign.instagram_campaign.get("live_media_id", ""))
             if status_code == 200:
-                print(response)
                 ig_media_url = response["media_url"]
         except Exception:
             pass
