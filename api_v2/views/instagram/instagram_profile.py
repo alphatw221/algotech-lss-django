@@ -69,7 +69,11 @@ class InstagramProfileViewSet(viewsets.ModelViewSet):
         instagram_profile = models.instagram.instagram_profile.InstagramProfile.objects.get(id=pk)
         code, response = service.instagram.profile.get_profile_live_media(page_token=instagram_profile.token, profile_id=instagram_profile.business_id, limit=limit)
         if code !=200:
-            return Response({"error_response": response}, status=status.HTTP_400_BAD_REQUEST)
+            print(response)
+            message = response.get('error').get("message") if response.get('error').get("message") else response
+            if "token" in response.get('error').get("message"):
+                raise lib.error_handle.error.api_error.ApiCallerError("instagram_token_expired")
+            raise lib.error_handle.error.api_error.ApiCallerError(message)
         return Response(response, status=status.HTTP_200_OK)
     
     @action(detail=True, methods=['GET'], url_path=r'media', permission_classes=(IsAuthenticated,))
@@ -82,6 +86,10 @@ class InstagramProfileViewSet(viewsets.ModelViewSet):
         instagram_profile = models.instagram.instagram_profile.InstagramProfile.objects.get(id=pk)
         code, response = service.instagram.profile.get_profile_media(page_token=instagram_profile.token, profile_id=instagram_profile.business_id, limit=limit)
         if code !=200:
-            return Response({"error_response": response}, status=status.HTTP_400_BAD_REQUEST)
+            print(response)
+            message = response.get('error').get("message") if response.get('error').get("message") else response
+            if "token" in response.get('error').get("message"):
+                raise lib.error_handle.error.api_error.ApiCallerError("instagram_token_expired")
+            raise lib.error_handle.error.api_error.ApiCallerError(message)
         return Response(response, status=status.HTTP_200_OK)
 
