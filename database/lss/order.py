@@ -121,15 +121,18 @@ def get_wallet_data_with_expired_points(start_from = None, end_at = None):
             },
             {"$unwind": '$user_subscription'},
             {"$unwind": '$buyer'},
+            {"$sort":{"created_at":1}},
+
             {
                 "$group":{
                     "_id": {
                         "user_subscription_id": "$user_subscription.id",
                         "buyer_id": "$buyer.id"
-                    }
+                    },
+                    "created_at":{"$first": "$created_at"}
                 }
             },
-            { "$project":{"_id":0,"user_subscription_id":"$_id.user_subscription_id", "buyer_id":"$_id.buyer_id"} },
+            { "$project":{"_id":0,"user_subscription_id":"$_id.user_subscription_id", "buyer_id":"$_id.buyer_id", "created_at":1} },
 
         ]
 
@@ -138,11 +141,11 @@ def get_wallet_data_with_expired_points(start_from = None, end_at = None):
     return l 
 
 
-def get_total_earned_used_expired_points(buyer_id, user_subscription_id):
+def get_total_earned_used_expired_points(buyer_id, user_subscription_id, order_created_after=None):
 
     
     query = [
-            {"$match":{"buyer_id":buyer_id, "user_subscription_id":user_subscription_id}},
+            {"$match":{"buyer_id":buyer_id, "user_subscription_id":user_subscription_id, "created_at":{"$gte":order_created_after}}},
             
             {
                 "$group": {

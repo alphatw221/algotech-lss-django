@@ -29,10 +29,11 @@ class CartPagination(PageNumberPagination):
 
 class UserSubscriptionSerializerWithProductCategory(models.user.user_subscription.UserSubscriptionSerializer):
     product_categories = models.product.product_category.ProductCategorySerializer(many=True, read_only=True, default=list)
-class CampaignSerializerWithSellerInfo(models.campaign.campaign.CampaignSerializer):
-    user_subscription = UserSubscriptionSerializerWithProductCategory(read_only=True)
+# class CampaignSerializerWithSellerInfo(models.campaign.campaign.CampaignSerializer):
+#     user_subscription = UserSubscriptionSerializerWithProductCategory(read_only=True)
 class CartSerializerWithSellerInfo(models.cart.cart.CartSerializer):
-    campaign = CampaignSerializerWithSellerInfo()
+    campaign = models.campaign.campaign.CampaignSerializer()
+    user_subscription = UserSubscriptionSerializerWithProductCategory()
 class CartViewSet(viewsets.ModelViewSet):
     queryset = models.cart.cart.Cart.objects.all().order_by('id')
     serializer_class = models.cart.cart.CartSerializer

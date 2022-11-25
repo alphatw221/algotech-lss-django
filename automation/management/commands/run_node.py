@@ -13,6 +13,7 @@ import config
 import pottery
 
 from multiprocessing import Process
+import threading
 
 POSITION_FOLLOWER = 'follower'
 POSITION_LEADER = 'leader'
@@ -30,15 +31,28 @@ class Command(BaseCommand):
             if self.position == POSITION_FOLLOWER:
                 self.follower_loop()
             elif self.position == POSITION_LEADER:
-                level_1_process = Process(target=self.capture_campaign_with_priority_level_1)
-                level_2_process = Process(target=self.capture_campaign_with_priority_level_2)
-                level_3_process = Process(target=self.capture_campaign_with_priority_level_3)
-                level_1_process.start()
-                level_2_process.start()
-                level_3_process.start()
-                level_1_process.join()
-                level_2_process.join()
-                level_3_process.join()
+                #i/o bound => threading
+                level_1_thread = threading.Thread(target = self.capture_campaign_with_priority_level_1) 
+                level_2_thread = threading.Thread(target = self.capture_campaign_with_priority_level_2)
+                level_3_thread = threading.Thread(target = self.capture_campaign_with_priority_level_3)
+
+                level_1_thread.start()
+                level_2_thread.start()
+                level_3_thread.start()
+
+                level_1_thread.join()
+                level_2_thread.join()
+                level_3_thread.join()
+
+                # level_1_process = Process(target=self.capture_campaign_with_priority_level_1)
+                # level_2_process = Process(target=self.capture_campaign_with_priority_level_2)
+                # level_3_process = Process(target=self.capture_campaign_with_priority_level_3)
+                # level_1_process.start()
+                # level_2_process.start()
+                # level_3_process.start()
+                # level_1_process.join()
+                # level_2_process.join()
+                # level_3_process.join()
 
 
 
