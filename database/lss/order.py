@@ -141,7 +141,7 @@ def get_wallet_data_with_expired_points(start_from = None, end_at = None):
     return l 
 
 
-def get_total_earned_used_expired_points(buyer_id, user_subscription_id, order_created_after=None):
+def get_total_earned_used_expired_points(buyer_id, user_subscription_id, order_created_after=None, ):
 
     
     query = [
@@ -151,7 +151,18 @@ def get_total_earned_used_expired_points(buyer_id, user_subscription_id, order_c
                 "$group": {
                     '_id': None,
                     'total_points_earned': { "$sum": "$points_earned" },
-                    'total_points_used': { "$sum": "$points_used" },
+                    'total_points_used': { "$sum": {
+                            "$cond": [
+                                {
+                                    "$or":[
+                                        {"$eq": ["$created_at",order_created_after]},
+                                        {"$eq": ["$points_used_calculated",True]}
+                                    ]
+                                },
+                                0,
+                                "$points_used"
+                            ]
+                        } },
                     'total_points_expired':{
                         "$sum": {
                             "$cond": [
@@ -173,6 +184,9 @@ def get_total_earned_used_expired_points(buyer_id, user_subscription_id, order_c
     cursor=__collection.aggregate(query)
     l = list(cursor)
     return l[0].get('total_points_earned',0) if l else 0, l[0].get('total_points_used',0) if l else 0, l[0].get('total_points_expired',0) if l else 0,
+
+def mark_order_points_used_calculated(start_from=datetime.utcnow()):
+    __collection.update_many({"created_at":{"$gt":start_from}},{"$set":{"points_used_calculated":True}})
 
 
 def get_wallet_data(start_from = None, end_at = None ):
