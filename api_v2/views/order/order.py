@@ -299,13 +299,18 @@ class OrderViewSet(viewsets.ModelViewSet):
             queryset=queryset.filter(payment_status__in=payment_status_options)
             pymongo_filter_query['payment_status'] = {"$in": payment_status_options}
 
-
         if platform_dict and [key for key,value in platform_dict.items() if value]:
             platforms =  [key for key,value in platform_dict.items() if value]
-            queryset=queryset.filter(platform__in=platforms)
-            pymongo_filter_query['platform'] = {"$in": platforms}
-
-
+            if "" in platforms:
+                # contain express cart
+                queryset=queryset.filter(Q(platform__in=platforms) | Q(platform__isnull=True))
+                pymongo_filter_query['platform'] = {'$or': [{"platform": {"$in": platforms}},{"platform": {"$exists": False}}]}
+            else:
+                # not contain express cart
+                queryset=queryset.filter(platform__in=platforms)
+                pymongo_filter_query['platform'] = {"$in": platforms}
+                
+        
 
         queryset = queryset.order_by('-created_at')
         pymongo_sort_by = sort_by = {"id":-1}
