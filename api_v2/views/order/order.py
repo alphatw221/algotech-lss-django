@@ -32,7 +32,7 @@ class OrderSerializerWithOrderProduct(models.order.order.OrderSerializer):
     
 class OrderSerializerWithOrderProductWithCampaign(OrderSerializerWithOrderProduct):
     campaign = models.campaign.campaign.CampaignSerializer(read_only=True, default=dict)
-
+    user_subscription = models.user.user_subscription.UserSubscriptionSerializer(read_only=True, default=dict)
 
 class OrderPagination(PageNumberPagination):
     page_query_param = 'page'
