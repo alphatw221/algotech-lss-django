@@ -955,7 +955,7 @@ class Command(BaseCommand):
         from datetime import datetime, timedelta
         from pprint import pprint
         data = database.lss.order.get_wallet_data_with_expired_points()
-        # data = database.lss.order.get_total_earned_used_expired_points(buyer_id=673, user_subscription_id = 1)
+        # data = database.lss.order.get_earned_used_expired_points_sum(buyer_id=673, user_subscription_id = 1)
         pprint(data)   
 
         # wallets = models.user.buyer_wallet.BuyerWallet.objects.all()
