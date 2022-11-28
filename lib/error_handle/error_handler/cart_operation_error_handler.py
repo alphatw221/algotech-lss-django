@@ -6,8 +6,6 @@ import lib
 import functools, logging, traceback
 logger = logging.getLogger(__name__)
 
-import lib
-
 def update_cart_product_error_handler(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):

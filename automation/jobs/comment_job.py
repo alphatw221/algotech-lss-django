@@ -9,10 +9,6 @@ except Exception:
     pass
 
 from django.conf import settings
-from backend.utils.text_processing.command_processor import \
-    CommandTextProcessor
-from backend.utils.text_processing.order_code_processor import \
-    OrderCodeTextProcessor
 
 import lib
 import database
@@ -36,7 +32,7 @@ def comment_job(campaign_data, user_subscription_data, platform_name, platform_i
 
     order_placement = None
     for order_code, campaign_product in order_codes_mapping.items():
-        qty = OrderCodeTextProcessor.process(
+        qty = lib.util.text_processor.OrderCodeTextProcessor.process(
             comment['message'], order_code)
         if qty is not None:
             order_placement = (campaign_product, qty)

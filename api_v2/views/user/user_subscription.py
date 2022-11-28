@@ -18,7 +18,7 @@ from rest_framework.parsers import MultiPartParser, JSONParser, FormParser
 from api import rule, models, utils
 
 import stripe, pytz, lib, service, business_policy, json
-from backend.pymongo.mongodb import db
+from database.lss._config import db
 
 from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
@@ -403,9 +403,16 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         )
         if serializer.is_valid():
             api_user_subscription = serializer.save()
-        
-        deal_obj = utils.orm.deal.record_subscription_for_paid_user(api_user_subscription, plan, amount, api_user, original_plan=original_plan)
-        
+
+        deal_obj = models.user.deal.Deal.objects.create(
+                user_subscription=api_user_subscription,
+                purchased_plan=plan,
+                total=amount,
+                payer=api_user,
+                original_plan=original_plan,
+                status=models.user.deal.STATUS_SUCCESS, 
+                payment_time=datetime.utcnow()
+            )
         marketing_plans = kwargs.get('marketing_plans')
         for key, val in marketing_plans.items():
             if key == "welcome_gift":

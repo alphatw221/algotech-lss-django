@@ -1,6 +1,5 @@
 from api import models
 import lib
-from backend.pymongo.mongodb import db
 from django.conf import settings
 from datetime import datetime, timedelta, timezone
 import arrow

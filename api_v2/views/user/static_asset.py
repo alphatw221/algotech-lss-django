@@ -17,7 +17,6 @@ from rest_framework.parsers import MultiPartParser, JSONParser, FormParser
 from api import rule, models, utils
 
 import stripe, pytz, lib, service, business_policy, json
-from backend.pymongo.mongodb import db
 
 from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta

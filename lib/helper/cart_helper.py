@@ -2,8 +2,9 @@ from api import models
 from api import rule
 import traceback
 import database
+from lib.error_handle.error_handler import cart_operation_error_handler
+from lib.error_handle.error import cart_error
 import service
-import lib
 
 from datetime import datetime
 
@@ -56,7 +57,7 @@ class CartHelper():
 
 
         if not cls.__check_stock_avaliable_and_add_to_cart_by_api(campaign_product.__dict__, qty_difference):
-            raise lib.error_handle.error.cart_error.CartErrors.UnderStock('out_of_stock') 
+            raise cart_error.CartErrors.UnderStock('out_of_stock') 
 
         pymongo_cart = database.lss.cart.Cart(id=cart.id)
         cls.__update_cart_product(   #pymongo_cart sync here
@@ -71,7 +72,7 @@ class CartHelper():
 
 
     @classmethod
-    @lib.error_handle.error_handler.cart_operation_error_handler.update_cart_product_by_comment_error_handler
+    @cart_operation_error_handler.update_cart_product_by_comment_error_handler
     def update_cart_product_by_comment(cls, pymongo_cart, campaign_product_data, qty):
 
         state = None
@@ -146,7 +147,7 @@ class CartHelper():
                 return cls.__clear_cart_and_return_campaign_product(cart, attempts=attempts-1)
             else:
                 print(traceback.format_exc())
-                raise lib.error_handle.error.cart_error.CartErrors.ServerBusy('server_busy')
+                raise cart_error.CartErrors.ServerBusy('server_busy')
 
 
     @classmethod
@@ -272,7 +273,7 @@ class CartHelper():
                 cls.__transfer_cart_to_order(api_user, cart_id, shipping_data, attempts=attempts-1)
             else:
                 print(traceback.format_exc())
-                raise lib.error_handle.error.cart_error.CartErrors.ServerBusy('server_busy')
+                raise cart_error.CartErrors.ServerBusy('server_busy')
 
     @staticmethod
     def __is_new_customer(campaign, api_user):
@@ -412,7 +413,7 @@ class CartHelper():
             if attempts > 0:
                 cls.__check_stock_avaliable_and_add_to_cart_by_api(campaign_product_data, qty_difference, attempts=attempts-1)
             else:
-                raise lib.error_handle.error.cart_error.CartErrors.ServerBusy('server_busy')
+                raise cart_error.CartErrors.ServerBusy('server_busy')
 
     @classmethod
     def __check_stock_avaliable_and_add_to_cart_by_comment(cls, campaign_product_data, pymongo_cart:database.lss.cart.Cart, qty, attempts=10):
@@ -437,7 +438,7 @@ class CartHelper():
             if attempts > 0:
                 cls.__check_stock_avaliable_and_add_to_cart_by_comment(campaign_product_data, pymongo_cart, qty, attempts=attempts-1)
             else:
-                raise lib.error_handle.error.cart_error.CartErrors.ServerBusy('server_busy')
+                raise cart_error.CartErrors.ServerBusy('server_busy')
 
     @staticmethod
     def __check_stock_avaliable_and_add_to_cart(campaign_product_data, qty_difference, session):

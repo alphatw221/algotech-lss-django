@@ -1,5 +1,4 @@
 import abc
-from djongo.models import Model
 class FieldMapper():
 
     def __init__(self, json_field, model_field, default=None, **kwargs):

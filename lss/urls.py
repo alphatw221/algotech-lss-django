@@ -45,7 +45,6 @@ urlpatterns = [
     path('custom_token/verify/', CustomTokenVerifyView.as_view(),
          name='custom_token_verify'),
 
-    path('backend/', include('backend.urls')),
     
     path('chat_bot/facebook/', facebook_messenger_webhook),
     
@@ -54,7 +53,7 @@ urlpatterns = [
     re_path(r'^buyer/',TemplateView.as_view(template_name="lss_enigma_entry.html")),
     re_path(r'^admin/',TemplateView.as_view(template_name="lss_enigma_entry.html")),
 
-    path('test',TemplateView.as_view(template_name="email_reset_password_link.html")),
+    path('test',TemplateView.as_view(template_name="reset_password_link_email.html")),
     path('test2',TemplateView.as_view(template_name="reset_password_success_email.html")),
 
 

@@ -108,6 +108,7 @@ class UserSubscription(models.Model):
     order_limit=models.IntegerField(blank=False, null=False, default=100)
 
     customers = models.ManyToManyField('User', related_name='stores')
+    license = models.JSONField(null=True, blank=True, default=dict)
 
     def __str__(self) -> str:
         return str(self.name)

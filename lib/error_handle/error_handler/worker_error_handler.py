@@ -4,7 +4,6 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from datetime import datetime
-from backend.google_cloud_logging.google_cloud_logging import ApiLogEntry
 import functools, logging, traceback
 from django.core.exceptions import ObjectDoesNotExist
 logger = logging.getLogger(__name__)
