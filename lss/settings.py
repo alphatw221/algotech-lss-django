@@ -370,21 +370,11 @@ GOOGLE_OAUTH_CLIENT_SECRET_FOR_LIVESHOWSELLER = "GOCSPX-oT9Wmr0nM0QRsCALC_H5j_yC
 TIKTOK_APP_ID = "7132396308677001218"
 TIKTOK_APP_SECRET = "e76d92bc644166d14c842d15d87a6c48a79e3717"
 
-# backend app
-COMMENT_PROCESSING = {
-    'REST_INTERVAL_SECONDS': 40,
-    'COMMENT_BATCH_SIZE': 300,
-    'MAX_RESPONSE_WORKERS': 50,
-}
-FACEBOOK_COMMENT_CAPTURING = {
-    'MAX_CONTINUOUS_REQUEST_TIMES': 10,
-    'REST_INTERVAL_SECONDS': 10,
-}
-
 # chat_bot app
 CHAT_BOT_FACEBOOK = {
     'VERIFY_TOKEN': 'ALGOTECHLSSMESSENGER'
 }
+
 #FTP
 FTP_STORAGE_LOCATION = "ftp://lssimages@tig.algotech.app:_TqUPZc*CMdG@74.124.210.137:21" #FTP server: ftp.tig.algotech.app
 BASE_URL = "https://tig.algotech.app/lssimages/"
@@ -458,22 +448,19 @@ PAYPAL_CONFIG = {
 STRIPE_API_KEY = "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"
 # STRIPE_API_KEY = "sk_test_51J2aFmF3j9D00CA0KABMZVKtOVnZNbBvM2hcokicJmfx8vvrmNyys5atEAcpp0Au2O3HtX0jz176my7g0ozbinof00RL4QAZrY"
 
-# APPEND_SLASH=False
-# OPERATION_CODE_NAME: AGILE
-ADMIN_LIST = [1, ]
 
 # for subscription code
 FERNET_KEY = '4zQFttQhIuTXZr15hKSEOwndw_VdLg_bQGc_vPRTtb8='
 
 
-WEBPACK_LOADER = {
-  'DEFAULT': {
-    'CACHE': not DEBUG,
-    'STATS_FILE': os.path.join(BASE_DIR.parent,'lss_vue/webpack-stats.json'),
-    'POLL_INTERVAL': 0.1,
-    'IGNORE': [r'.+\.hot-update.js', r'.+\.map'],
-  }
-}
+# WEBPACK_LOADER = {
+#   'DEFAULT': {
+#     'CACHE': not DEBUG,
+#     'STATS_FILE': os.path.join(BASE_DIR.parent,'lss_vue/webpack-stats.json'),
+#     'POLL_INTERVAL': 0.1,
+#     'IGNORE': [r'.+\.hot-update.js', r'.+\.map'],
+#   }
+# }
 
 # sendinblue api key
 SENDINBLUE_API_KEY = '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'
