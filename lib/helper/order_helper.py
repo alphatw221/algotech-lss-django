@@ -6,7 +6,8 @@ from math import prod,floor
 from django.conf import settings
 
 
-from api import rule,models
+from api import models
+from api_v2 import rule
 
 import service
 from ..error_handle.error_handler.pymongo_error_handler import pymongo_error_handler

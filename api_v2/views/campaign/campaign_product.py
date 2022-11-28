@@ -10,7 +10,6 @@ from rest_framework.parsers import MultiPartParser
 from django.db.models import Q
 
 from api import models
-from api import utils
 
 import lib
 from datetime import datetime

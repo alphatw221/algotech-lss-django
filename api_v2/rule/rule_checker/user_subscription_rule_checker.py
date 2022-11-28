@@ -1,6 +1,6 @@
-from api.rule.check_rule.user_subscription_check_rule import UserSubscriptionCheckRule
-from api.rule.rule_checker.rule_checker import RuleChecker
-from api.rule import check_rule
+from api_v2.rule.check_rule.user_subscription_check_rule import UserSubscriptionCheckRule
+from api_v2.rule.rule_checker.rule_checker import RuleChecker
+from api_v2.rule import check_rule
 
 class UpgradeIntentDataRuleChecker(RuleChecker):
 

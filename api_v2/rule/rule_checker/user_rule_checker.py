@@ -1,6 +1,6 @@
 from subprocess import check_call
-from api.rule.rule_checker.rule_checker import RuleChecker
-from api.rule import check_rule
+from api_v2.rule.rule_checker.rule_checker import RuleChecker
+from api_v2.rule import check_rule
 class AdminCreateAccountRuleChecker(RuleChecker):
     check_list=[
         check_rule.user_check_rule.AdminCheckRule.is_role_valid_for_creation,

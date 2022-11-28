@@ -1,5 +1,5 @@
-from api.rule.check_rule.lucky_draw_check_rule import LuckyDrawCheckRule
-from api.rule.rule_checker.rule_checker import RuleChecker
+from api_v2.rule.check_rule.lucky_draw_check_rule import LuckyDrawCheckRule
+from api_v2.rule.rule_checker.rule_checker import RuleChecker
 class LuckyDrawCreateRuleChecker(RuleChecker):
 
     check_list=[

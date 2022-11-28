@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from api.models.user.promotion_code import PromotionCode
 
 from api import models
-from api import rule
+from api_v2 import rule
 from business_policy.marketing_plan import MarketingPlan
 
 import service
