@@ -12,7 +12,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.renderers import StaticHTMLRenderer
 
 from api import models
-from api import rule
+from api_v2 import rule
 
 from automation import jobs
 import database

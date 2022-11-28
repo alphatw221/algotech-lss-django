@@ -1,5 +1,5 @@
-from api.rule.rule_checker.rule_checker import RuleChecker
-from api.rule import check_rule
+from api_v2.rule.rule_checker.rule_checker import RuleChecker
+from api_v2.rule import check_rule
 
 
 

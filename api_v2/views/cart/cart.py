@@ -10,7 +10,7 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.decorators import action
 
 from api import models
-from api import rule
+from api_v2 import rule
 from api.models.product import product_category
 
 from automation import jobs
