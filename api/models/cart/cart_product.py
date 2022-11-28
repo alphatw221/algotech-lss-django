@@ -38,8 +38,7 @@ class CartProduct(models.Model):
     qty = models.IntegerField(blank=False, null=True, default=0)
     order_code = models.CharField(max_length=255, null=True, blank=True)
 
-    platform = models.CharField(max_length=255, blank=True,
-                                choices=settings.SUPPORTED_PLATFORMS, default='n/a')
+    platform = models.CharField(max_length=255, blank=True, default=None)
     customer_id = models.CharField(max_length=255, null=True, blank=True)
     customer_name = models.CharField(max_length=255, null=True, blank=True)
     remark = models.TextField(default=None, null=True, blank=True)

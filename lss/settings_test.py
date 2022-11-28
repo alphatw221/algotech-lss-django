@@ -25,8 +25,8 @@ DATABASES = {
         'CLIENT': {
             'host': 'mongodb://34.126.92.142:27017, 35.240.200.4:27017, 34.126.155.150:27017',
             'replicaSet': 'rs0',
-            'username': config.MONGO_DB_USERNAME,
-            'password': config.MONGO_DB_PASSWORD,
+            'username': 'lss',
+            'password': 'algo83111T%%',
             'authSource': 'test_lss',
             'authMechanism': 'SCRAM-SHA-1',
             'readPreference': 'secondaryPreferred',
@@ -36,7 +36,7 @@ DATABASES = {
 }
 
 MONGODB_CONNECTION_STRING = \
-    'mongodb://'+config.MONGO_DB_USERNAME+':'+config.MONGO_DB_PASSWORD+\
+    'mongodb://'+'lss'+':'+'algo83111T%%'+\
     '@34.126.92.142:27017,35.240.200.4:27017,34.126.155.150:27017/'+\
     '?authSource='+'test_lss'
     

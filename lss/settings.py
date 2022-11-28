@@ -294,27 +294,17 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # gcp load balancer
 GCP_API_LOADBALANCER_URL = "https://v2login.liveshowseller.com"
-# for social lab
-# GCP_API_LOADBALANCER_URL = "https://sb.liveshowseller.ph"
 
-LOCAL_API_SERVER = "http://localhost:8001"
-TEST_API_SERVER = "http://192.168.74.114/lss-backend"
 
 # Live Show Seller info
 WEB_SERVER_URL = "https://v2login.liveshowseller.com"
-# for social lab
-# WEB_SERVER_URL = "https://plusone.sociallab.ph/lss/public"
+
 
 # SHOPPING_CART_URL = f"{WEB_SERVER_URL}/buyer/login_to_cart"
 SHOPPING_CART_URL = f"{GCP_API_LOADBALANCER_URL}/buyer/cart"
 SHOPPING_CART_RECAPTCHA_URL = f"{GCP_API_LOADBALANCER_URL}/buyer/recaptcha"
 
-SUPPORTED_PLATFORMS = [
-    ("n/a", "No specific platform"),
-    ("facebook", "Facebook"),
-    ("youtube", "Youtube"),
-    ("instagram", "Instagram"),
-]
+
 
 # HITPAY_API_URL = 'https://api.sandbox.hit-pay.com/v1/payment-requests' # for test mode
 # HITPAY_API_KEY = '64044c7551b232cbf23b32d9b21e30ff1f4c5b42068c8c59864f161cad6af21b' # for test mode
