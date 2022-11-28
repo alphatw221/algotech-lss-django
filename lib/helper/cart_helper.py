@@ -152,6 +152,7 @@ class CartHelper():
     @classmethod
     def checkout(cls, api_user, campaign, cart_id, point_discount_processor, shipping_data={}):
 
+        #transfer cart to order ( transaction required )
         success, data = cls.__transfer_cart_to_order(api_user, cart_id, shipping_data)
         if not success:
             error_products_data = data.get('error_products_data', [])
@@ -168,11 +169,14 @@ class CartHelper():
         campaign_product_data_dict = data.get('campaign_product_data_dict')
         is_new_customer = cls.__is_new_customer(campaign, api_user)
 
+        #summarize order (discount, points , shippings fee computing happen here)
         cls.__summarize_order(api_user, campaign, pymongo_order, campaign_product_data_dict, point_discount_processor, is_new_customer = is_new_customer)
 
+        #add new customer
         if is_new_customer:
             campaign.user_subscription.customers.add(api_user)
 
+        #push data to frontend
         for campaign_product_id_str, qty in pymongo_order.data.get('products',{}).copy().items():
             campaign_product_data = campaign_product_data_dict[campaign_product_id_str]
             cls.send_campaign_product_websocket_data(campaign_product_data)
@@ -312,7 +316,7 @@ class CartHelper():
             
 
         #compute point discount
-        point_discount = point_discount_processor.compute_point_discount()
+        point_discount = point_discount_processor.compute_point_discount() if point_discount_processor else 0
         
 
         #summarize_total
@@ -328,8 +332,8 @@ class CartHelper():
         total = max(total, 0)
         
         #compute points earned
-        points_earned = point_discount_processor.compute_points_earned(subtotal_after_discount)
-        point_expired_at = point_discount_processor.compute_expired_date()
+        points_earned = point_discount_processor.compute_points_earned(subtotal_after_discount) if point_discount_processor else 0
+        point_expired_at = point_discount_processor.compute_expired_date() if point_discount_processor else None
 
         pymongo_order.update(
 
@@ -341,7 +345,7 @@ class CartHelper():
             shipping_cost = shipping_cost,
             total = total,
             meta = meta,
-            points_used = point_discount_processor.points_used,
+            points_used = point_discount_processor.points_used if point_discount_processor else 0,
             point_discount = point_discount,
             points_earned = points_earned,
             point_expired_at = point_expired_at,
@@ -351,7 +355,8 @@ class CartHelper():
             **campaign.user_subscription.meta.get('order_default_fields',{}),
             sync=True)
 
-        point_discount_processor.update_wallet()
+        if point_discount_processor:
+            point_discount_processor.update_wallet()
 
     @classmethod 
     def __compute_shipping_cost(cls, campaign, pymongo_order, product_category_data_dict:dict, product_category_products_dict:dict, campaign_product_data_dict:dict):
