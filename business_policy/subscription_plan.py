@@ -1,13 +1,10 @@
-from api.utils.error_handle.error.api_error import ApiVerifyError
-from . import subscription
-
 class CountryPlan:
 
     @classmethod
     def get_plan(cls,plan):
         subscription_plan = cls.plans.get(plan)
         if not subscription_plan:
-            raise ApiVerifyError("invalid subscription plan")
+            raise Exception("invalid subscription plan")
         return subscription_plan
 class SubscriptionPlan: 
 
@@ -17,7 +14,7 @@ class SubscriptionPlan:
     @classmethod
     def get_country(cls,country_code):
         if country_code not in cls.support_country:
-            raise ApiVerifyError("invalid country")
+            raise Exception("invalid country")
         return getattr(cls,country_code, None)
 
 
@@ -144,7 +141,7 @@ class SubscriptionPlan:
     @classmethod
     def get_plan_limit(cls,plan):
         if plan not in cls.support_plan:
-            raise ApiVerifyError("invalid subscription plan")
+            raise Exception("invalid subscription plan")
         return getattr(cls, plan)
 
     trial = {

@@ -1,5 +1,3 @@
-
-
 from lib.error_handle.error.api_error import ApiCallerError, ApiVerifyError
 
 from datetime import datetime

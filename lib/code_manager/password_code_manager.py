@@ -1,9 +1,7 @@
+from lib import error_handle
 from .code_manager import CodeManager
 from datetime import datetime
 from django.contrib.auth.models import User as AuthUser
-
-
-import lib
 
 class PasswordResetCodeManager(CodeManager):
 
@@ -34,11 +32,11 @@ class PasswordResetCodeManager(CodeManager):
         data = cls._decode(code)
 
         if float(data.get('expired_time', 1)) <datetime.now().timestamp():
-            raise  lib.error_handle.error.api_error.ApiVerifyError('reset_password_code_manager.code_expired') 
+            raise  error_handle.error.api_error.ApiVerifyError('reset_password_code_manager.code_expired') 
 
         
         if not AuthUser.objects.filter(id=data.get('auth_user_id',-1)).exists():
-            raise  lib.error_handle.error.api_error.ApiVerifyError('user_not_found')
+            raise  error_handle.error.api_error.ApiVerifyError('user_not_found')
 
         auth_user = AuthUser.objects.get(id=data.get('auth_user_id'))
 

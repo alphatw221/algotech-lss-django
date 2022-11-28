@@ -1,1 +1,1 @@
-from . import rule, orm, advance_query
+from . import orm, advance_query

@@ -14,10 +14,10 @@ from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from django.template.loader import render_to_string
-from api.utils.error_handle.error_handler.email_error_handler import email_error_handler
 from django.utils import translation
+import lib
 
-@email_error_handler
+@lib.error_handle.error_handler.email_error_handler.email_error_handler
 def send_email_job(subject, email, template=None, content=None, parameters={}, file=None, lang='en'):
     
     mail = MIMEMultipart()
