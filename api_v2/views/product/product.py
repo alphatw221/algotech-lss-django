@@ -12,7 +12,7 @@ from rest_framework.response import Response
 from automation import jobs
 
 from api import models
-from api import rule
+from api_v2 import rule
 
 import factory
 import lib, json

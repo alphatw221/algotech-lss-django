@@ -1,5 +1,5 @@
 from api import models
-from api import rule
+from api_v2 import rule
 import traceback
 import database
 from lib.error_handle.error_handler import cart_operation_error_handler
