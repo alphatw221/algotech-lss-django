@@ -58,5 +58,5 @@ pytest = "^7.2.0"
 autopep8 = "^1.5.7"
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+requires = ["poetry-core>=1.0.0","setuptools"]
 build-backend = "poetry.core.masonry.api"
