@@ -639,6 +639,10 @@ def capture_instagram_v2(campaign, user_subscription_data, logs, attempts=2):
                 __update_campaign_silent_count(campaign)
                 return 
             
+            if instagram_comments[0]['id'] == instagram_last_create_message_id:
+                __update_campaign_silent_count(campaign)
+                return 
+
             if not after_page:   #first run in the loop
                 instagram_latest_message_id = instagram_comments[0]['id']
                 instagram_campaign['last_create_message_id'] = instagram_latest_message_id
