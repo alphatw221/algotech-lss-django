@@ -49,17 +49,17 @@ MONGODB_CONNECTION_STRING = \
 MONGODB_DATABASE_NAME = 'lss_dev'
 
 
-# REDIS_SERVER = {
-#     "host": "34.124.140.74",
-#     "port": "6379",
-#     "username": None,
-#     "password": r"algo83111T%%"}
+REDIS_SERVER = {
+    "host": "35.194.149.116",
+    "port": "6379",
+    "username": None,
+    "password": r"lss_dev"}
 
-# CACHE_SERVER = {
-#     "host": "34.124.140.74",
-#     "port": "6380",
-#     "username": None,
-#     "password": r"algo83111T%%"}
+CACHE_SERVER = {
+    "host": "35.194.149.116",
+    "port": "6380",
+    "username": None,
+    "password": r"lss_dev"}
 
 # google storage
 GS_BUCKET_NAME = 'lss_dev_bucket'
@@ -68,3 +68,14 @@ GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
 )
 GS_URL = "https://storage.googleapis.com/lss_dev_bucket/"
 GOOGLE_STORAGE_STATIC_DIR=GS_URL+'static/'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': 
+        {
+            "hosts": [r"redis://:lss_dev@35.194.149.116:6379/0"],
+        }
+        ,
+    },
+}

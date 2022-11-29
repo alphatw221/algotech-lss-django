@@ -144,6 +144,7 @@ class UserSubscriptionSerializer(serializers.ModelSerializer):
     meta_remind = serializers.JSONField(default=dict, required=False)
     meta_store = serializers.JSONField(default=dict, required=False)
     user_plan = serializers.JSONField(default=dict, required=False)
+    license = serializers.JSONField(default=dict, required=False)
 
 class UserSubscriptionSerializerAccountInfo(serializers.ModelSerializer):
     class Meta:
@@ -159,7 +160,7 @@ class UserSubscriptionSerializerAccountInfo(serializers.ModelSerializer):
     meta_remind = serializers.JSONField(default=dict, required=False)
     meta_store = serializers.JSONField(default=dict, required=False)
     user_plan = serializers.JSONField(default=dict, required=False)
-
+    license = serializers.JSONField(default=dict, required=False)
 
 class UserSubscriptionSerializerForDealerRetrieve(serializers.ModelSerializer):
     class Meta:

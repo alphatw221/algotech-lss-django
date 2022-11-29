@@ -73,7 +73,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
-        
+
         #temp
         language, = lib.util.getter.getdata(request,('lang',))
         api_user.lang = language
@@ -85,8 +85,9 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         serializer.save()
-
-        return Response(UserSerializerSellerAccountInfo(api_user).data, status=status.HTTP_200_OK)
+        data = UserSerializerSellerAccountInfo(api_user).data
+        print(data)
+        return Response(data, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['PUT'], url_path=r'seller/switch_mode', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
