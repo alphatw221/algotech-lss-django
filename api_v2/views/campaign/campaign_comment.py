@@ -4,6 +4,7 @@ from rest_framework.pagination import CursorPagination
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from api import models
+from api.models.campaign.campaign_comment import CampaignCommentSerializer
 
 import lib
 
@@ -16,6 +17,19 @@ class CampaignCommentViewSet(viewsets.ModelViewSet):
     queryset = models.campaign.campaign_comment.CampaignComment.objects.all().order_by('id')
     pagination_class = CampaignCommentPagination
 
+    @action(detail=True, methods=['GET'], url_path=r'summarize', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def get_summerize_comment_main_categories(self, request, pk):
+
+        tag, = lib.util.getter.getparams(request, ('tag',), with_user=False)
+        print(tag)
+        
+        comments = models.campaign.campaign_comment.CampaignComment.objects.filter(campaign=pk, categories__contains=tag.lower())
+        
+        main_categories = CampaignCommentSerializer(comments, many=True)
+        res = main_categories.data
+
+        return Response(res, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['GET'], url_path=r'(?P<campaign_id>[^/.]+)/(?P<platform_name>[^/.]+)', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
