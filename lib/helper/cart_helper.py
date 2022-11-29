@@ -357,7 +357,7 @@ class CartHelper():
             sync=True)
 
         if point_discount_processor:
-            point_discount_processor.update_wallet()
+            point_discount_processor.update_wallet(points_earned, point_expired_at, pymongo_order['id'])
 
     @classmethod 
     def __compute_shipping_cost(cls, campaign, pymongo_order, product_category_data_dict:dict, product_category_products_dict:dict, campaign_product_data_dict:dict):

@@ -44,8 +44,18 @@ class PointDiscountProcessor:
             return None
         return datetime.utcnow()+timedelta(days=30*point_validity)
 
-
-    def update_wallet(self):
+    def create_point_transaction(self, points_earned, point_expired_at, order_id=None):
+        data = {
+            "user_subscription": self.user_subscription,
+            "buyer": self.api_user,
+            "order": models.order.order.Order.objects.get(id=order_id) if order_id else None,
+            "earned": points_earned,
+            "used": self.points_used,
+            "expired_at": point_expired_at
+        }
+        models.user.buyer_point.BuyerPoint.objects.create(**data)
+        
+    def update_wallet(self, points_earned, point_expired_at, order_id):
         if not self.api_user:
             return
 
@@ -57,7 +67,7 @@ class PointDiscountProcessor:
                 self.buyer_wallet = models.user.buyer_wallet.BuyerWallet.objects.get(buyer = self.api_user, user_subscription=self.user_subscription)
             else:
                 self.buyer_wallet = models.user.buyer_wallet.BuyerWallet.objects.create(buyer = self.api_user, user_subscription=self.user_subscription)
-
+        self.create_point_transaction(points_earned, point_expired_at, order_id)
         self.buyer_wallet.points-=self.points_used if self.points_used else 0
         self.buyer_wallet.points+=self.points_earned if self.points_earned else 0
         self.buyer_wallet.save()
