@@ -9,7 +9,6 @@ except Exception:
 from django.conf import settings
 
 from automation import jobs
-import lib
 import service
 import requests
 import traceback
@@ -17,7 +16,8 @@ from dateutil import parser
 from datetime import datetime
 import database
 from api import models
-
+from lib.error_handle.error_handler import campaign_job_error_handler, capture_platform_error_handler
+from lib import util
 C_VALUE = 60
 LOWEST_PRIORITY = 3
 class OrderCodesMappingSingleton:
@@ -34,8 +34,7 @@ class OrderCodesMappingSingleton:
                                 for campaign_product in campaign_products}
         return cls.order_codes_mapping
 
-
-@lib.error_handle.error_handler.campaign_job_error_handler.campaign_job_error_handler
+@campaign_job_error_handler.campaign_job_error_handler
 def campaign_job(campaign_id):
 
     logs=[]
@@ -45,10 +44,10 @@ def campaign_job(campaign_id):
     capture_facebook_v2(campaign, user_subscription_data, logs)
     capture_youtube_v2(campaign, user_subscription_data, logs)
     capture_instagram_v2(campaign, user_subscription_data, logs)
-    lib.util.logger.print_table(["Campaign ID", campaign_id],logs)
+    util.logger.print_table(["Campaign ID", campaign_id],logs)
 
 
-@lib.error_handle.error_handler.capture_platform_error_handler.capture_platform_error_handler
+@capture_platform_error_handler.capture_platform_error_handler
 def capture_facebook(campaign, user_subscription_data, logs):
     logs.append(["facebook",""])
     if not campaign.data.get('facebook_page_id'):
@@ -127,7 +126,7 @@ def capture_facebook(campaign, user_subscription_data, logs):
     facebook_campaign['comment_capture_since'] = comment_capture_since
     campaign.update(facebook_campaign=facebook_campaign, sync=False)
 
-@lib.error_handle.error_handler.capture_platform_error_handler.capture_platform_error_handler
+@capture_platform_error_handler.capture_platform_error_handler
 def capture_youtube(campaign, user_subscription_data, logs):
     logs.append(["youtube",""])
 
@@ -279,7 +278,7 @@ def capture_youtube(campaign, user_subscription_data, logs):
         return
 
 
-@lib.error_handle.error_handler.capture_platform_error_handler.capture_platform_error_handler
+@capture_platform_error_handler.capture_platform_error_handler
 def capture_instagram(campaign, user_subscription_data, logs):
     logs.append(["instagram",""])
     
@@ -488,7 +487,7 @@ def refresh_youtube_channel_token(youtube_channel, logs):
 
 
 
-@lib.error_handle.error_handler.capture_platform_error_handler.capture_platform_error_handler
+@capture_platform_error_handler.capture_platform_error_handler
 def capture_facebook_v2(campaign, user_subscription_data, logs, attempts=2):
     try:
         logs.append(["facebook",""])
@@ -585,7 +584,7 @@ def capture_facebook_v2(campaign, user_subscription_data, logs, attempts=2):
 
 
 
-@lib.error_handle.error_handler.capture_platform_error_handler.capture_platform_error_handler
+@capture_platform_error_handler.capture_platform_error_handler
 def capture_instagram_v2(campaign, user_subscription_data, logs, attempts=2):
 
     try:
@@ -706,7 +705,7 @@ def capture_instagram_v2(campaign, user_subscription_data, logs, attempts=2):
 
 
 
-@lib.error_handle.error_handler.capture_platform_error_handler.capture_platform_error_handler
+@capture_platform_error_handler.capture_platform_error_handler
 def capture_youtube_v2(campaign, user_subscription_data, logs, attempts=2):
     logs.append(["youtube",""])
 

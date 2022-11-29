@@ -1,7 +1,8 @@
 from django.conf import settings
 
-import lib
 from cryptography.fernet import Fernet
+
+from lib import error_handle
 class CodeManager():
 
     code_key=""
@@ -31,16 +32,16 @@ class CodeManager():
             message_string = cls._fernet.decrypt(code.encode()).decode()
         except Exception:
 
-            raise  lib.error_handle.error.api_error.ApiVerifyError('invalid token')
+            raise  error_handle.error.api_error.ApiVerifyError('invalid token')
             
         parameters = message_string.split('|')
 
         # data = cls.data_format.copy()
         if len(parameters) != len(cls.data_format)+2:
-            raise  lib.error_handle.error.api_error.ApiVerifyError('subscription code not valid')
+            raise  error_handle.error.api_error.ApiVerifyError('subscription code not valid')
         
         if parameters[-2] != cls.code_key or parameters[-1] != settings.FERNET_KEY:
-            raise  lib.error_handle.error.api_error.ApiVerifyError('code not valid')
+            raise  error_handle.error.api_error.ApiVerifyError('code not valid')
 
         data = {}
         for i ,key in enumerate(cls.data_format):

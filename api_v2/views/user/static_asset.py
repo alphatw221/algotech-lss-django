@@ -14,10 +14,9 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser, JSONParser, FormParser
 
-from api import rule, models, utils
-
+from api_v2 import models
+from api_v2 import rule
 import stripe, pytz, lib, service, business_policy, json
-from backend.pymongo.mongodb import db
 
 from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta

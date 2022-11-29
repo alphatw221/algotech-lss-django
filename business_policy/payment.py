@@ -1,15 +1,7 @@
 from dataclasses import dataclass
-from backend.api._api_caller import RestApiJsonCaller
 from django.conf import settings
 from django.utils.translation import gettext as _
 from django.utils import translation
-
-class HitPay_Helper:
-
-    @dataclass
-    class HitPayApiCaller(RestApiJsonCaller):
-        domain_url: str = settings.HITPAY_API_URL
-
 
 class PaymentMeta():
     #country : SG PH IN ID MY TW CN VN TH KH HK AU

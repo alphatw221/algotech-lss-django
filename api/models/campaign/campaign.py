@@ -1,4 +1,3 @@
-from email.policy import default
 from django.contrib import admin
 from djongo import models
 

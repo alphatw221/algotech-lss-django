@@ -15,10 +15,10 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser, JSONParser, FormParser
 
-from api import rule, models, utils
-
+from api import models
+from api_v2 import rule
 import stripe, pytz, lib, service, business_policy, json
-from backend.pymongo.mongodb import db
+from database.lss._config import db
 
 from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
@@ -73,7 +73,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
-        
+
         #temp
         language, = lib.util.getter.getdata(request,('lang',))
         api_user.lang = language
@@ -85,8 +85,9 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         serializer.save()
-
-        return Response(UserSerializerSellerAccountInfo(api_user).data, status=status.HTTP_200_OK)
+        data = UserSerializerSellerAccountInfo(api_user).data
+        print(data)
+        return Response(data, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['PUT'], url_path=r'seller/switch_mode', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
@@ -403,9 +404,16 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         )
         if serializer.is_valid():
             api_user_subscription = serializer.save()
-        
-        deal_obj = utils.orm.deal.record_subscription_for_paid_user(api_user_subscription, plan, amount, api_user, original_plan=original_plan)
-        
+
+        deal_obj = models.user.deal.Deal.objects.create(
+                user_subscription=api_user_subscription,
+                purchased_plan=plan,
+                total=amount,
+                payer=api_user,
+                original_plan=original_plan,
+                status=models.user.deal.STATUS_SUCCESS, 
+                payment_time=datetime.utcnow()
+            )
         marketing_plans = kwargs.get('marketing_plans')
         for key, val in marketing_plans.items():
             if key == "welcome_gift":

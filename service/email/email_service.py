@@ -1,12 +1,10 @@
-from backend.python_rq.python_rq import email_queue
-# from service.email.email_job import send_email_job
-# from automation import jobs
-from ..rq.queue import enqueue_email_queue
+from ..rq._rq import general_queue
+from ..rq.queue import enqueue_general_queue
 class EmailService:
     @staticmethod
     def send_email(job, subject, email, content, file = None, lang = 'en'):
 
-        email_queue.enqueue(
+        general_queue.enqueue(
             job,
             kwargs={
                 "subject": subject,
@@ -21,4 +19,4 @@ class EmailService:
     @staticmethod
     def send_email_template(job, subject, email, template, parameters, file=None, lang="en"):
 
-        enqueue_email_queue(job, subject, email, template, parameters, file, lang)
+        enqueue_general_queue(job, subject, email, template, parameters, file, lang)

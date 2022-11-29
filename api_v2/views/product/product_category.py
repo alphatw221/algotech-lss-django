@@ -15,7 +15,7 @@ from api.models.product import product_category
 from automation import jobs
 
 from api import models
-from api import rule
+from api_v2 import rule
 import database
 
 import lib, json

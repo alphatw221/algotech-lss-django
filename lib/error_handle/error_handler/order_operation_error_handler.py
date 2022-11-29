@@ -6,8 +6,6 @@ from rest_framework import status
 import functools, logging, traceback
 logger = logging.getLogger(__name__)
 
-import lib
-
 def order_operation_error_handler(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):

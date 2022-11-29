@@ -10,7 +10,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 
 from datetime import datetime
-from api import models, rule
+from api import models
+from api_v2 import rule
 import api
 import database
 import lib

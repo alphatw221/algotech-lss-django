@@ -108,6 +108,7 @@ class UserSubscription(models.Model):
     order_limit=models.IntegerField(blank=False, null=False, default=100)
 
     customers = models.ManyToManyField('User', related_name='stores')
+    license = models.JSONField(null=True, blank=True, default=dict)
 
     def __str__(self) -> str:
         return str(self.name)
@@ -143,6 +144,7 @@ class UserSubscriptionSerializer(serializers.ModelSerializer):
     meta_remind = serializers.JSONField(default=dict, required=False)
     meta_store = serializers.JSONField(default=dict, required=False)
     user_plan = serializers.JSONField(default=dict, required=False)
+    license = serializers.JSONField(default=dict, required=False)
 
 class UserSubscriptionSerializerAccountInfo(serializers.ModelSerializer):
     class Meta:
@@ -158,7 +160,7 @@ class UserSubscriptionSerializerAccountInfo(serializers.ModelSerializer):
     meta_remind = serializers.JSONField(default=dict, required=False)
     meta_store = serializers.JSONField(default=dict, required=False)
     user_plan = serializers.JSONField(default=dict, required=False)
-
+    license = serializers.JSONField(default=dict, required=False)
 
 class UserSubscriptionSerializerForDealerRetrieve(serializers.ModelSerializer):
     class Meta:

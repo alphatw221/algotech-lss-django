@@ -17,10 +17,6 @@ import service
 from api import models, rule
 from api.models.user.promotion_code import PromotionCode
 from api.models.user.user import AuthUserSerializer
-from api.utils.common.verify import ApiVerifyError, Verify
-from api.utils.error_handle.error_handler.api_error_handler import \
-    api_error_handler
-from api.utils.orm.deal import record_subscription_for_trial_user
 from business_policy.marketing_plan import MarketingPlan
 
 
@@ -142,25 +138,9 @@ class Command(BaseCommand):
         models.user.user_subscription.UserSubscription.objects.get(id=1).root_users.add(models.user.user.User.objects.get(id=44))
 
     def test_text_classifier(self):
-        from backend.api.nlp.classify import classify_comment_v1
+        from service.nlp.classification import classify_comment_v1
 
         print(classify_comment_v1(texts=[['Deliver Delivery delivery','payment payment payment']],threshold=0.7))
-
-    def test_pre_order_helper(self):
-        from api.models.campaign.campaign_product import CampaignProduct
-        from api.models.order.order_product import OrderProduct
-        from api.models.order.pre_order import PreOrder
-        from api.models.user.user import User
-        from api.utils.common.order_helper import PreOrderHelper
-
-        api_user = User.objects.get(id=1)
-        pre_order = PreOrder.objects.get(id=506)
-        # campaign_product = CampaignProduct.objects.get(id=7400)
-        # order_product = OrderProduct.objects.get(id=252464)
-        # PreOrderHelper.add_product(api_user,pre_order,campaign_product,1)
-        # PreOrderHelper.update_product(api_user,pre_order,order_product,2)
-        # PreOrderHelper.delete_product(api_user,pre_order,order_product)
-        PreOrderHelper.checkout(api_user,pre_order)
 
     
     def test_mongodb_query(self):
@@ -195,10 +175,6 @@ class Command(BaseCommand):
         jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)
 
 
-        # service.email.email_service.EmailService.send_email_template('test','alphatw22193@gmail.com',
-        #     "email_reset_password_link.html",
-        #     {"url":settings.GCP_API_LOADBALANCER_URL +"/lss/#/password/reset","code":"1234","username":"test"},
-        #     lang='en')
     
     def test_user_plan(self):
         from datetime import datetime
@@ -862,7 +838,7 @@ class Command(BaseCommand):
             # set new password
             auth_user.set_password(password)
             auth_user.save()
-
+        last_name = ""
         # else:
         #     auth_user = AuthUser.objects.create_user(
         #         username=f'{first_name} {last_name}', email=email, password=password)
@@ -893,7 +869,6 @@ class Command(BaseCommand):
         #     auth_user=auth_user, 
         #     user_subscription=user_subscription)
         
-        # record_subscription_for_trial_user(user_subscription, api_user)
         
         # lib.util.marking_tool.NewUserMark.mark(api_user, save = True)
         # marketing_plans = MarketingPlan.get_plans("current_plans")

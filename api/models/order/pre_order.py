@@ -61,8 +61,7 @@ class PreOrder(models.Model):
     shipping_option_index = models.IntegerField(blank=True, null=True, default=None)
     shipping_option_data = models.JSONField(default=dict, null=False, blank=False)
 
-    platform = models.CharField(max_length=255, blank=True,
-                                choices=settings.SUPPORTED_PLATFORMS, default='n/a')
+    platform = models.CharField(max_length=255, blank=True, default=None)
     platform_id = models.IntegerField(blank=True, null=True, default=None)
     status = models.CharField(max_length=255, null=True, blank=True, default='review')
     created_at = models.DateTimeField(auto_now_add=True)

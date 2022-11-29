@@ -1,8 +1,6 @@
 import traceback
 from api import models
 import database
-import lib
-import math
 from datetime import datetime, timedelta
 
 def make_discount(before_discount_amount, discount_code):

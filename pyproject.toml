@@ -5,7 +5,7 @@ description = ""
 authors = ["Ian Liu <ipuppyian@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.8"
 pendulum = "^2.1.2"
 requests = "^2.26.0"
 PyMySQL = "^1.0.2"
@@ -58,5 +58,5 @@ pytest = "^7.2.0"
 autopep8 = "^1.5.7"
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+requires = ["poetry-core>=1.0.0","setuptools"]
 build-backend = "poetry.core.masonry.api"
