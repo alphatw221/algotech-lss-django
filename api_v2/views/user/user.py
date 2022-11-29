@@ -26,6 +26,10 @@ from datetime import datetime, timedelta
 #------------------------------------------------------------------------------------------
 class UserSubscriptionAccountInfo(models.user.user_subscription.UserSubscriptionSerializer):
 
+    class Meta:
+        model = models.user.user_subscription.UserSubscription
+        exclude=['created_at', 'updated_at','customers']
+        
     facebook_pages = models.facebook.facebook_page.FacebookPageInfoSerializer(
         many=True, read_only=True, default=list)
     instagram_profiles = models.instagram.instagram_profile.InstagramProfileInfoSerializer(
