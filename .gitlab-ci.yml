@@ -2,10 +2,12 @@ build-job:
     stage: build
     before_script:
         - apt update
-        - apt install python3
+        - apt install python3 -y
         - python3 --version  # For debugging
         - pip install poetry
-    script: echo "build"
+    script:
+        - pwd 
+        - echo "build"
 
 unit-test:
     stage: test
