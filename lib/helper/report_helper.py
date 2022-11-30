@@ -1,4 +1,4 @@
-from backend.pymongo.mongodb import db
+from database.lss._config import db
 import pandas as pd
 from pandas import json_normalize
 from datetime import datetime

@@ -1,8 +1,6 @@
 
 from django.contrib.auth.models import User as AuthUser
 from django.conf import settings
-from django.core.files.base import ContentFile
-from lib.util import verify
 
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -14,8 +12,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.renderers import StaticHTMLRenderer
 
 from api import models
-from api import rule
-from api.models.user import user_register
+from api_v2 import rule
 
 from automation import jobs
 import database
@@ -23,16 +20,16 @@ import database
 import service
 import lib
 import business_policy
-from backend.i18n.email.subject import i18n_get_reset_password_success_mail_subject, i18n_get_reset_password_mail_subject #temp
 
 from datetime import datetime, timedelta
-import pytz
-import random
-import string
 
 #------------------------------------------------------------------------------------------
 class UserSubscriptionAccountInfo(models.user.user_subscription.UserSubscriptionSerializer):
 
+    class Meta:
+        model = models.user.user_subscription.UserSubscription
+        exclude=['created_at', 'updated_at','customers']
+        
     facebook_pages = models.facebook.facebook_page.FacebookPageInfoSerializer(
         many=True, read_only=True, default=list)
     instagram_profiles = models.instagram.instagram_profile.InstagramProfileInfoSerializer(
@@ -249,22 +246,13 @@ class UserViewSet(viewsets.ModelViewSet):
         auth_user = AuthUser.objects.get(email=email)
         
         api_user = models.user.user.User.objects.get(email=email,type='user')
-        # user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         jobs.send_email_job.send_email_job(
-            i18n_get_reset_password_success_mail_subject(lang=api_user.lang),
+            lib.i18n.email.reset_password_success_mail.i18n_get_mail_subject(lang=api_user.lang),
             email,
             "reset_password_success_email.html",
             {"email":email,"username":auth_user.username},
             lang=api_user.lang
         )
-        # service.email.email_service.EmailService.send_email_template(
-        #     jobs.send_email_job.send_email_job,
-        #     i18n_get_reset_password_success_mail_subject(lang=api_user.lang),
-        #     email,
-        #     "reset_password_success_email.html",
-        #     {"email":email,"username":auth_user.username},
-        #     lang=api_user.lang
-        # )
         
         return Response(ret, status=status.HTTP_200_OK)
 
@@ -284,19 +272,12 @@ class UserViewSet(viewsets.ModelViewSet):
         code = lib.code_manager.password_code_manager.PasswordResetCodeManager.generate(auth_user.id,api_user.lang)
         
         jobs.send_email_job.send_email_job(
-            subject=i18n_get_reset_password_mail_subject(lang=api_user.lang),
+            subject=lib.i18n.email.reset_password_link_mail.i18n_get_mail_subject(lang=api_user.lang),
             email=email,
-            template="email_reset_password_link.html",
+            template="reset_password_link_email.html",
             parameters={"url":settings.GCP_API_LOADBALANCER_URL +"/seller/web/password/reset","code":code,"username":auth_user.username},
             lang=api_user.lang,
-            )
-        # service.email.email_service.EmailService.send_email_template(
-        #     jobs.send_email_job.send_email_job,
-        #     i18n_get_reset_password_mail_subject(lang=api_user.lang),
-        #     email,
-        #     "email_reset_password_link.html",
-        #     {"url":settings.GCP_API_LOADBALANCER_URL +"/seller/web/password/reset","code":code,"username":auth_user.username},
-        #     lang=api_user.lang)
+        )
 
         return Response({"message":"The email has been sent. If you haven't received the email after a few minutes, please check your spam folder. "}, status=status.HTTP_200_OK)
 

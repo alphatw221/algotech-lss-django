@@ -1,7 +1,7 @@
 from django.conf import settings
-from backend.pymongo.mongodb import db
 import hmac, hashlib, base64, binascii
 import requests
+from database.lss._config import db
 def create_link(order_id, amount, secret_key):
     amount = int(amount * 100)
     

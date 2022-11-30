@@ -10,7 +10,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 
 from datetime import datetime
-from api import models, rule
+from api import models
+from api_v2 import rule
 import api
 import database
 import lib
@@ -509,52 +510,30 @@ class CampaignViewSet(viewsets.ModelViewSet):
         campaign_cart_count = database.lss.cart.get_count_in_campaign(campaign.id)
         campaign_order_complete_count,campaign_order_proceed_count = database.lss.campaign.get_order_complete_proceed_count(campaign.id) 
         campaign_comment_count = database.lss.campaign_comment.get_count_in_campaign(campaign.id)
-        
         campaign_complete_sales = database.lss.order.get_complete_sales_of_campaign(campaign.id)
         campaign_proceed_sales = database.lss.order.get_proceed_sales_of_campaign(campaign.id)
-        
-        campaign_uncheckout_rate = (campaign_cart_count) / (campaign_order_complete_count + campaign_order_proceed_count + campaign_cart_count) * 100\
-                if (campaign_order_complete_count + campaign_order_proceed_count + campaign_cart_count) else 0
 
-        campaign_close_rate = (campaign_order_complete_count) / (campaign_order_complete_count + campaign_order_proceed_count + campaign_cart_count) * 100\
-                if (campaign_order_complete_count + campaign_order_proceed_count + campaign_cart_count) else 0
-
-        
-
-        perivious_campaign_cart_count = database.lss.cart.get_count_in_campaign(previous_campaign_id)
-        perivious_campaign_order_complete_count, perivious_campaign_order_proceed_count = database.lss.campaign.get_order_complete_proceed_count(previous_campaign_id) 
-        perivious_campaign_comment_count = database.lss.campaign_comment.get_count_in_campaign(previous_campaign_id)
-        perivious_campaign_complete_sales = database.lss.order.get_complete_sales_of_campaign(previous_campaign_id)
-        perivious_campaign_proceed_sales = database.lss.order.get_proceed_sales_of_campaign(previous_campaign_id)
-
-
-        perivious_campaign_uncheckout_rate = (perivious_campaign_cart_count) / (perivious_campaign_order_complete_count + perivious_campaign_order_proceed_count + perivious_campaign_cart_count) * 100\
-                if (perivious_campaign_order_complete_count + perivious_campaign_order_proceed_count + perivious_campaign_cart_count) else 0
-
-        perivious_campaign_close_rate = (perivious_campaign_order_complete_count) / (perivious_campaign_order_complete_count + perivious_campaign_order_proceed_count + perivious_campaign_cart_count) * 100\
-                if (perivious_campaign_order_complete_count + perivious_campaign_order_proceed_count + perivious_campaign_cart_count) else 0
-
-        
+        previous_campaign_cart_count = database.lss.cart.get_count_in_campaign(previous_campaign_id)
+        previous_campaign_order_complete_count, perivious_campaign_order_proceed_count = database.lss.campaign.get_order_complete_proceed_count(previous_campaign_id) 
+        previous_campaign_comment_count = database.lss.campaign_comment.get_count_in_campaign(previous_campaign_id)
+        previous_campaign_complete_sales = database.lss.order.get_complete_sales_of_campaign(previous_campaign_id)
+        previous_campaign_proceed_sales = database.lss.order.get_proceed_sales_of_campaign(previous_campaign_id)
 
         statistics_data = {
-            "order_qty":(campaign_order_complete_count + campaign_order_proceed_count),
-            "cart_qty":campaign_cart_count,
-
+            "cart_count":campaign_cart_count,
+            "order_complete_count":campaign_order_complete_count,
+            "order_proceed_count":campaign_order_proceed_count,
             "comment_count":campaign_comment_count,
             "complete_sales":campaign_complete_sales,
             "proceed_sales": campaign_proceed_sales,
-            "total_sales": campaign_complete_sales + campaign_proceed_sales,
-            "close_rate":campaign_close_rate,
-            "uncheckout_rate":campaign_uncheckout_rate,
-            
-            "comment_count_raise":campaign_comment_count / perivious_campaign_comment_count if perivious_campaign_comment_count else 0,
-            "campaign_sales_raise":campaign_complete_sales / perivious_campaign_complete_sales if perivious_campaign_complete_sales else 0,
-            "proceed_sales_raise":campaign_proceed_sales / perivious_campaign_proceed_sales if perivious_campaign_proceed_sales else 0,
-            "total_sales_raise":(campaign_complete_sales + campaign_proceed_sales) / (perivious_campaign_complete_sales + perivious_campaign_proceed_sales) if (perivious_campaign_complete_sales + perivious_campaign_proceed_sales) else 0,
-            "close_rate_raise":campaign_close_rate - perivious_campaign_close_rate,
-            "uncheckout_rate_raise":campaign_uncheckout_rate - perivious_campaign_uncheckout_rate,
-        }
 
+            "previous_cart_count":previous_campaign_cart_count,
+            "previous_order_complete_count":previous_campaign_order_complete_count,
+            "previous_order_proceed_count":perivious_campaign_order_proceed_count,
+            "previous_comment_count":previous_campaign_comment_count,
+            "previous_complete_sales":previous_campaign_complete_sales,
+            "previous_proceed_sales": previous_campaign_proceed_sales,
+        }
         return Response(statistics_data, status=status.HTTP_200_OK)
 
 
@@ -567,10 +546,8 @@ class CampaignViewSet(viewsets.ModelViewSet):
         
         ig_media_url = None
         try:
-            
             status_code, response = service.instagram.post.get_post_media_url(campaign.instagram_profile.token, campaign.instagram_campaign.get("live_media_id", ""))
             if status_code == 200:
-                print(response)
                 ig_media_url = response["media_url"]
         except Exception:
             pass

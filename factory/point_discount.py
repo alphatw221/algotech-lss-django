@@ -13,12 +13,19 @@ class PointDiscountProcessor:
         self.points_earned = points_earned
 
     def compute_point_discount(self):
+        
+        if self.meta_point.get('enable')!=True:
+            return 0
+
         return math.floor( (self.points_used/self.meta_point.get('redemption_rate_point',1)))*self.meta_point.get('redemption_rate_cash',0)
         
     
 
     def compute_points_earned(self, subtotal_after_discount=0):
-        
+
+        if self.meta_point.get('enable')!=True:
+            return 0
+
         point_redemption_rate = self.meta_point.get('default_point_redemption_rate',0)
         for tier in self.meta_point.get('reward_table',[]):
             if subtotal_after_discount < tier.get('upper_bound',0):
@@ -28,6 +35,10 @@ class PointDiscountProcessor:
 
 
     def compute_expired_date(self):
+
+        if self.meta_point.get('enable')!=True:
+            return None
+
         point_validity = self.meta_point.get('point_validity',None)
         if not point_validity:
             return None

@@ -20,10 +20,9 @@ class Product(Collection):
         if sync:
             self._sync(session=session)
 
-def remove_categories(user_subscription_id, product_category_id, session=None):
+def remove_categories(product_category_id, session=None):
     __collection.update_many(
         {
-            "user_subscription_id":user_subscription_id,
             "categories":str(product_category_id)
         },
         {"$pull":{"categories":str(product_category_id)}}, 

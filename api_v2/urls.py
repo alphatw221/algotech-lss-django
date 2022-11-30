@@ -17,6 +17,7 @@ from api_v2.views.discount_code import discount_code
 from api_v2.views.twitch import twitch_channel
 from api_v2.views.tiktok import tiktok_live
 
+from api_v2.views.webhook import hubspot
 router = routers.DefaultRouter()
 router.register(r'product', product.ProductViewSet)
 router.register(r'product-category', product_category.ProductCatoegoryViewSet)
@@ -41,6 +42,8 @@ router.register(r'cart',cart.CartViewSet)
 router.register(r'discount-code',discount_code.DiscountCodeViewSet)
 router.register(r'twitch',twitch_channel.TwitchViewSet)
 router.register(r'tiktok',tiktok_live.TikTokViewSet)
+router.register(r'hubspot', hubspot.HubspotViewSet)
+
 
 urlpatterns = [
     url(r'^', include(router.urls)),

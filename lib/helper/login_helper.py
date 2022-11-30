@@ -2,19 +2,17 @@ from django.contrib.auth.models import User as AuthUser
 from django.conf import settings
 
 from api import models
-from api.utils.error_handle.error.api_error import ApiCallerError, ApiVerifyError
 
 from lss.views.custom_jwt import CustomTokenObtainPairSerializer
-from backend.api.facebook.user import api_fb_get_me_login
-from backend.api.google.user import api_google_get_userinfo
 
 import lib
 from datetime import datetime
 import random
 import string
-import requests
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
+
+import service
 
 class GeneralLogin():
 
@@ -45,9 +43,9 @@ class FacebookLogin():
 
     @classmethod
     def get_token(cls, token, user_type):
-        status_code, response = api_fb_get_me_login(token)
+        status_code, response = service.facebook.user.get_me_login(token)
         if status_code / 100 != 2:
-            raise ApiVerifyError("fb_user_token_invalid")
+            raise lib.error_handle.error.api_error.ApiVerifyError("fb_user_token_invalid")
             
         facebook_id = response.get('id')
         facebook_name = response.get('name')
@@ -55,7 +53,7 @@ class FacebookLogin():
         email = response.get('email')
 
         if not email:
-            raise ApiVerifyError("unable_get_fb_email")
+            raise lib.error_handle.error.api_error.ApiVerifyError("unable_get_fb_email")
 
         api_user_exists = models.user.user.User.objects.filter(
             email=email, type=user_type).exists()
@@ -87,7 +85,7 @@ class FacebookLogin():
                 name=facebook_name, email=email, type=user_type, status='new', auth_user=auth_user)
 
         if user_type == 'user' and api_user.status != 'valid':
-            raise ApiVerifyError('helper.account_not_activated')
+            raise lib.error_handle.error.api_error.ApiVerifyError('helper.account_not_activated')
 
         api_user.facebook_info["token"] = token
         api_user.facebook_info["id"] = facebook_id
@@ -150,7 +148,7 @@ class GoogleLogin():
                 name=google_name, email=email, type=user_type, status='new', auth_user=auth_user)
 
         if user_type == 'user' and api_user.status != 'valid':
-            raise ApiVerifyError('helper.account_not_activated')
+            raise lib.error_handle.error.api_error.ApiVerifyError('helper.account_not_activated')
 
         api_user.google_info["id"] = google_id
         api_user.google_info["name"] = google_name
@@ -167,3 +165,36 @@ class GoogleLogin():
             'access': str(refresh.access_token),
         }
 
+
+
+def create_or_get_user(email, user_type, user_name="unknown", ):
+    api_user_exists = models.user.user.User.objects.filter(
+        email=email, type=user_type).exists()
+    auth_user_exists = AuthUser.objects.filter(email=email).exists()
+
+    scenario1 = api_user_exists and auth_user_exists
+    scenario2 = api_user_exists and not auth_user_exists
+    scenario3 = not api_user_exists and auth_user_exists
+
+    # scenario4: both don't exists
+    if scenario1:
+        api_user = models.user.user.User.objects.get(email=email, type=user_type)
+        auth_user = AuthUser.objects.get(email=email)
+        if not api_user.auth_user:
+            api_user.auth_user=auth_user
+    elif scenario2:
+        api_user = models.user.user.User.objects.get(email=email, type=user_type)
+        auth_user = AuthUser.objects.create_user(
+            user_name, email, ''.join(random.choice(string.ascii_letters+string.digits) for _ in range(8)))
+        api_user.auth_user = auth_user
+    elif scenario3:
+        auth_user = AuthUser.objects.get(email=email)
+        api_user = models.user.user.User.objects.create(
+            name=user_name, email=email, type=user_type, status='new', auth_user=auth_user)
+    else:  # scenario4
+        auth_user = AuthUser.objects.create_user(
+            user_name, email, ''.join(random.choice(string.ascii_letters+string.digits) for _ in range(8)))
+        api_user = models.user.user.User.objects.create(
+            name=user_name, email=email, type=user_type, status='new', auth_user=auth_user)
+
+    return auth_user, api_user

@@ -32,7 +32,7 @@ class OrderSerializerWithOrderProduct(models.order.order.OrderSerializer):
     
 class OrderSerializerWithOrderProductWithCampaign(OrderSerializerWithOrderProduct):
     campaign = models.campaign.campaign.CampaignSerializer(read_only=True, default=dict)
-
+    user_subscription = models.user.user_subscription.UserSubscriptionSerializer(read_only=True, default=dict)
 
 class OrderPagination(PageNumberPagination):
     page_query_param = 'page'
@@ -146,7 +146,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         data = models.order.order.OrderSerializerUpdateShipping(order).data
         return Response(data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['PUT'], url_path=r'(?P<order_oid>[^/.]+)/buyer/receipt/upload', parser_classes=(MultiPartParser,), permission_classes=())
+    @action(detail=False, methods=['PUT'], url_path=r'(?P<order_oid>[^/.]+)/buyer/receipt/upload', url_name='buyer_upload_receipt', parser_classes=(MultiPartParser,), permission_classes=())
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def buyer_upload_receipt(self, request, order_oid):
 
@@ -199,7 +199,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         if points_relative:
             queryset=queryset.filter(Q(points_earned__gt = 0)|Q(points_used__gt = 0)|Q(point_discount__gt = 0))
- 
+            queryset=queryset.filter(payment_status = models.order.order.PAYMENT_STATUS_PAID)
 
         queryset = queryset.order_by('-created_at')
         page = self.paginate_queryset(queryset)
@@ -299,13 +299,18 @@ class OrderViewSet(viewsets.ModelViewSet):
             queryset=queryset.filter(payment_status__in=payment_status_options)
             pymongo_filter_query['payment_status'] = {"$in": payment_status_options}
 
-
         if platform_dict and [key for key,value in platform_dict.items() if value]:
             platforms =  [key for key,value in platform_dict.items() if value]
-            queryset=queryset.filter(platform__in=platforms)
-            pymongo_filter_query['platform'] = {"$in": platforms}
-
-
+            if "" in platforms:
+                # contain express cart
+                queryset=queryset.filter(Q(platform__in=platforms) | Q(platform__isnull=True))
+                pymongo_filter_query['platform'] = {'$or': [{"platform": {"$in": platforms}},{"platform": {"$exists": False}}]}
+            else:
+                # not contain express cart
+                queryset=queryset.filter(platform__in=platforms)
+                pymongo_filter_query['platform'] = {"$in": platforms}
+                
+        
 
         queryset = queryset.order_by('-created_at')
         pymongo_sort_by = sort_by = {"id":-1}
@@ -375,7 +380,7 @@ class OrderViewSet(viewsets.ModelViewSet):
             point_discount_processor.update_wallet()
 
         order.payment_status = payment_status
-        order.save()
+        lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
 
         return Response(OrderSerializerWithOrderProductWithCampaign(order).data, status=status.HTTP_200_OK)
     

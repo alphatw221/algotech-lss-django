@@ -8,7 +8,8 @@ from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser
 
 
-from api import models, rule
+from api import models
+from api_v2 import rule
 import lib, json
 import service
 

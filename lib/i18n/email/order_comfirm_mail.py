@@ -1,8 +1,8 @@
 from xml.etree.ElementTree import tostring
-from backend.i18n._helper import lang_translate_default_en
 from django.conf import settings
 from django.utils.translation import ugettext as _
 from math import prod,floor
+from lib.i18n._i18n import lang_translate_default_en
 
 @lang_translate_default_en
 def i18n_get_mail_subject(order, lang=None):

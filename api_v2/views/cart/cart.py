@@ -10,14 +10,14 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.decorators import action
 
 from api import models
-from api import rule
+from api_v2 import rule
 from api.models.product import product_category
 
 from automation import jobs
 
 import factory
 import lib
-from datetime import datetime
+from datetime import datetime, timezone
 import uuid
 import service
 import database
@@ -29,10 +29,11 @@ class CartPagination(PageNumberPagination):
 
 class UserSubscriptionSerializerWithProductCategory(models.user.user_subscription.UserSubscriptionSerializer):
     product_categories = models.product.product_category.ProductCategorySerializer(many=True, read_only=True, default=list)
-class CampaignSerializerWithSellerInfo(models.campaign.campaign.CampaignSerializer):
-    user_subscription = UserSubscriptionSerializerWithProductCategory(read_only=True)
+# class CampaignSerializerWithSellerInfo(models.campaign.campaign.CampaignSerializer):
+#     user_subscription = UserSubscriptionSerializerWithProductCategory(read_only=True)
 class CartSerializerWithSellerInfo(models.cart.cart.CartSerializer):
-    campaign = CampaignSerializerWithSellerInfo()
+    campaign = models.campaign.campaign.CampaignSerializer()
+    user_subscription = UserSubscriptionSerializerWithProductCategory()
 class CartViewSet(viewsets.ModelViewSet):
     queryset = models.cart.cart.Cart.objects.all().order_by('id')
     serializer_class = models.cart.cart.CartSerializer
@@ -117,6 +118,12 @@ class CartViewSet(viewsets.ModelViewSet):
         cart_oid = database.lss.cart.get_oid_by_id(cart.id)
         return Response({ 'cart_oid':cart_oid}, status=status.HTTP_200_OK)
     
+    @action(detail=False, methods=['GET'], url_path=r'buyer/retrieve/(?P<cart_oid>[^/.]+)/platform', permission_classes=())
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def buyer_retrieve_cart_platform(self, request, cart_oid):
+        cart_oid = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
+        return Response(cart_oid.platform, status=status.HTTP_200_OK)
+    
     @action(detail=False, methods=['GET'], url_path=r'buyer/retrieve/(?P<cart_oid>[^/.]+)', permission_classes=())
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def buyer_retrieve_cart(self, request, cart_oid):
@@ -140,6 +147,13 @@ class CartViewSet(viewsets.ModelViewSet):
         cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
         campaign = lib.util.verify.Verify.get_campaign_from_cart(cart)
         user_subscription = campaign.user_subscription
+
+        if not lib.helper.discount_helper.CartDiscountHelper.is_cart_applied_discount_eligable(user_subscription, api_user, cart):
+            cart.applied_discount = {}
+            cart.discount = 0
+            cart.save()
+            return Response(CartSerializerWithSellerInfo(cart).data, status=status.HTTP_200_OK)
+            
         ret = rule.rule_checker.cart_rule_checker.RuleChecker.check(
             check_list=[
                 rule.rule_checker.cart_rule_checker.CartCheckRule.allow_checkout,
@@ -231,7 +245,7 @@ class CartViewSet(viewsets.ModelViewSet):
         
         _discount_code = queryset.get(Q(code = discount_code)|Q(code = discount_code[:-(LENGTH_OF_REFERRAL_ID+1)]))
 
-        if _discount_code.period_enabled and (datetime.utcnow() < _discount_code.start_at or datetime.utcnow() > _discount_code.end_at):
+        if _discount_code.period_enabled and (datetime.now(timezone.utc) < _discount_code.start_at or datetime.now(timezone.utc) > _discount_code.end_at):
             raise lib.error_handle.error.api_error.ApiVerifyError('invalid_discount_code')
 
         if _discount_code.type == models.discount_code.discount_code.TYPE_CART_REFERAL :
@@ -328,9 +342,7 @@ class CartViewSet(viewsets.ModelViewSet):
             user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
             campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
 
-
             queryset = self.__search_cart(user_subscription, request, campaign = campaign)
-            # queryset = campaign.carts.exclude(products=Value('null')).order_by('id')
 
             serializer = models.cart.cart.CartSerializer(queryset, many=True)
             data = serializer.data
@@ -350,13 +362,7 @@ class CartViewSet(viewsets.ModelViewSet):
 
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
 
-        queryset = campaign.carts.exclude(products={}).order_by('id')
-
-        if search:
-            if search.isnumeric():
-                queryset = queryset.filter(Q(id=int(search)) | Q(customer_name__icontains=search) )
-            else:
-                queryset = queryset.filter(customer_name__icontains=search)
+        queryset = self.__search_cart(user_subscription, request, campaign = campaign)
 
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -375,9 +381,8 @@ class CartViewSet(viewsets.ModelViewSet):
     def seller_retrieve_cart(self, request, pk=None):
 
         api_user = lib.util.verify.Verify.get_seller_user(request)
-        cart = lib.util.verify.Verify.get_cart(pk)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
-        lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, cart.campaign.id)
+        cart = lib.util.verify.Verify.get_cart_from_user_subscription(user_subscription, pk)
 
         return Response(models.cart.cart.CartSerializer(cart).data, status=status.HTTP_200_OK)
     
@@ -386,8 +391,9 @@ class CartViewSet(viewsets.ModelViewSet):
     def seller_retrieve_cart_oid(self, request, pk=None):
 
         api_user = lib.util.verify.Verify.get_seller_user(request)
-        cart = lib.util.verify.Verify.get_cart(pk)
-        lib.util.verify.Verify.get_campaign_from_user_subscription(api_user.user_subscription, cart.campaign.id)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        cart = lib.util.verify.Verify.get_cart_from_user_subscription(user_subscription, pk)
+
         oid = database.lss.cart.get_oid_by_id(cart.id)
 
         return Response(oid, status=status.HTTP_200_OK)
@@ -397,10 +403,11 @@ class CartViewSet(viewsets.ModelViewSet):
     @lib.error_handle.error_handler.cart_operation_error_handler.update_cart_product_error_handler
     def seller_edit_cart_product(self, request, cart_id):
 
-        api_user = lib.util.verify.Verify.get_seller_user(request)
         campaign_product_id, qty = lib.util.getter.getdata(request, ('campaign_product_id', 'qty',), required=True)
-
-        cart = lib.util.verify.Verify.get_cart(cart_id)
+        
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        cart = lib.util.verify.Verify.get_cart_from_user_subscription(user_subscription, cart_id)
         campaign = lib.util.verify.Verify.get_campaign_from_cart(cart)
         campaign_product = lib.util.verify.Verify.get_campaign_product_from_campaign(campaign, campaign_product_id)
 
@@ -421,8 +428,9 @@ class CartViewSet(viewsets.ModelViewSet):
 
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
-        cart = lib.util.verify.Verify.get_cart(pk)
-        lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, cart.campaign.id)
+        cart = lib.util.verify.Verify.get_cart_from_user_subscription(user_subscription, pk)
+        # cart = lib.util.verify.Verify.get_cart(pk)
+        # lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, cart.campaign.id)
 
         cart.free_delivery = bool(free_delivery)
         cart.adjust_title = adjust_title
@@ -488,3 +496,32 @@ class CartViewSet(viewsets.ModelViewSet):
 
         return queryset
         # , pymongo_filter_query, pymongo_sort_by
+
+    @action(detail=True, methods=['PUT'], url_path=r'seller/clear', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    @lib.error_handle.error_handler.cart_operation_error_handler.update_cart_product_error_handler
+    def seller_clear_cart(self, request, pk=None):
+
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        cart = lib.util.verify.Verify.get_cart_from_user_subscription(user_subscription, pk)
+
+        lib.helper.cart_helper.CartHelper.clear(cart)
+
+        cart = lib.util.verify.Verify.get_cart(pk)
+
+        return Response(models.cart.cart.CartSerializer(cart).data, status=status.HTTP_200_OK)
+    
+    @action(detail=True, methods=['DELETE'], url_path=r'seller/delete', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    @lib.error_handle.error_handler.cart_operation_error_handler.update_cart_product_error_handler
+    def seller_delete_cart(self, request, pk=None):
+
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        cart = lib.util.verify.Verify.get_cart_from_user_subscription(user_subscription, pk)
+
+        lib.helper.cart_helper.CartHelper.clear(cart)
+        cart.delete()
+
+        return Response('OK', status=status.HTTP_200_OK)

@@ -80,7 +80,7 @@ class CampaignProduct(models.Model):
         blank=False, null=True, default=False)
 
     type = models.CharField(max_length=255, blank=True,
-                            choices=TYPE_CHOICES, default='n/a')
+                            choices=TYPE_CHOICES, default=TYPE_PRODUCT)
     status = models.BooleanField(blank=False, null=False, default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

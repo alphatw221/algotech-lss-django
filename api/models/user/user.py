@@ -15,26 +15,35 @@ import business_policy
 
 TYPE_SELLER = 'user'
 TYPE_BUYER = 'customer'
+TYPE_CHOICES = [
+    (TYPE_SELLER, 'User'),
+    (TYPE_BUYER, 'Customer'),
+]
 
 STATUS_NEW = 'new'
 STATUS_VALID = 'valid'
+STATUS_CHOICES = [
+    (STATUS_NEW, 'New'),
+    (STATUS_VALID, 'Valid'),
+]
+
+IDENTITY_AGENT = 'agent'
+IDENTITY_MANAGER = 'manager'
+IDENTITY_ADMIN = 'admin'
+IDENTITY_USER = 'user'
+IDENTITY_CHOICES = [
+    (IDENTITY_AGENT, 'Agent'),
+    (IDENTITY_MANAGER, 'Manager'),
+    (IDENTITY_ADMIN, 'Admin'),
+    (IDENTITY_USER, 'User')
+]
 class User(models.Model):
     class Meta:
         db_table = 'api_user'
 
-    TYPE_CHOICES = [
-        ('customer', 'Customer'),
-        ('user', 'User'),
-    ]
-
-    STATUS_CHOICES = [
-        ('new', 'New'),
-        ('valid', 'Valid'),
-    ]
-
     user_subscription = models.ForeignKey(
         UserSubscription,  null=True, on_delete=models.SET_NULL, related_name='users')
-        
+    
     name = models.CharField(max_length=255, null=True, blank=True)
     description = models.TextField(null=True, blank=True, default=None)
     remark = models.TextField(null=True, blank=True, default=None)
@@ -68,6 +77,8 @@ class User(models.Model):
 
     lang = models.CharField(max_length=255, blank=False, null=False,
                             choices=business_policy.subscription.LANGUAGE_CHOICES, default=business_policy.subscription.LANGUAGE_ENGLICH)
+    identity = models.CharField(
+        max_length=255, null=True, blank=True, choices=IDENTITY_CHOICES, default='user')
     def __str__(self):
         return str(self.name)
 
@@ -85,7 +96,7 @@ class UserSerializer(serializers.ModelSerializer):
     
     meta = serializers.JSONField(default=dict)
     payment_meta = serializers.JSONField(default=dict)
-
+    
 
 class UserSerializerAccountInfo(UserSerializer):
     user_subscription = UserSubscriptionSerializerAccountInfo(read_only=True, default=dict)

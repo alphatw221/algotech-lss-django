@@ -5,7 +5,6 @@ import pendulum
 import service
 from automation import jobs
 
-# from backend.google_cloud_monitoring.google_cloud_monitoring import CommentQueueLengthMetric
 
 
 class Command(BaseCommand):

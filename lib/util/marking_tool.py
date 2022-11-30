@@ -1,10 +1,9 @@
 from abc import abstractclassmethod
 from django.conf import settings
-from api.utils.common.verify import Verify
 import business_policy
 from business_policy.marketing_plan import MarketingPlan
 import service
-
+from lib.util import verify
 class MetaMark():
 
     mark_key = ""
@@ -55,7 +54,7 @@ class NewUserMark(MetaMark):
             if not cls._get_mark(api_user):
                 return
             
-            user_subscription = Verify.get_user_subscription_from_api_user(api_user)
+            user_subscription = verify.Verify.get_user_subscription_from_api_user(api_user)
 
             country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(user_subscription.country)
             service.sendinblue.transaction_email.WelcomeEmail(

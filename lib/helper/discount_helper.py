@@ -1,8 +1,6 @@
 import traceback
 from api import models
 import database
-import lib
-import math
 from datetime import datetime, timedelta
 
 def make_discount(before_discount_amount, discount_code):
@@ -105,6 +103,23 @@ def check_limitations(limitations, **kwargs):
 class CartDiscountHelper:
 
     @classmethod
+    def is_cart_applied_discount_eligable(cls, user_subscription, api_user, cart):
+        try:
+            if not cart.applied_discount:
+                return True
+            discount_code = models.discount_code.discount_code.DiscountCode.objects.get(id=cart.applied_discount.get('id'))
+            return cls.check_limitations(
+                    discount_code.limitations, 
+                    cart = cart, 
+                    discount_code = discount_code,
+                    user_subscription = user_subscription,
+                    api_user = api_user
+                    )
+
+        except Exception:
+            return False
+
+    @classmethod
     def make_discount(cls, cart):
         try:
             discount_code = cart.applied_discount
@@ -192,8 +207,12 @@ class CartDiscountHelper:
                 user_subscription = kwargs['user_subscription']
                 if not api_user:
                     return False
-                if api_user.orders.filter(user_subscription=user_subscription).exists():
+
+                if user_subscription.customers.filter(id=api_user.id).exists():
                     return False
+
+                # if api_user.orders.filter(user_subscription=user_subscription).exists():
+                #     return False
 
         except Exception:
             return False

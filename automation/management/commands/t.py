@@ -17,10 +17,6 @@ import service
 from api import models, rule
 from api.models.user.promotion_code import PromotionCode
 from api.models.user.user import AuthUserSerializer
-from api.utils.common.verify import ApiVerifyError, Verify
-from api.utils.error_handle.error_handler.api_error_handler import \
-    api_error_handler
-from api.utils.orm.deal import record_subscription_for_trial_user
 from business_policy.marketing_plan import MarketingPlan
 
 
@@ -33,17 +29,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         # self.handle_new_registeration_from_hubspot()
         # self.test_add_user_subscription_to_order()
-        print("run uncheckout_cart_reminder cron")
-        start_time = arrow.now()
-        utc_time_four_hours_ago = arrow.utcnow().shift(hours=-4)
-        campaigns_ended_over_4_hours = models.campaign.campaign.Campaign.objects.filter(id=1419) #, end_at__gte=utc_time_four_hours_ago.datetime, end_at__lt=utc_time_four_hours_ago.shift(minutes=+1).datetime)
-        carts = [cart for campaign in campaigns_ended_over_4_hours for cart in campaign.carts.all() if len(cart.products) > 0]
-        print("carts", carts)
-        for cart in carts:
-            pymongo_cart = database.lss.cart.Cart.get(id=cart.id)
-            service.rq.queue.enqueue_test_queue(job=send_reminder_messages_job, pymongo_cart=pymongo_cart, user_subscription_id=cart.campaign.user_subscription.id, lang=cart.campaign.lang)
-        end_time = arrow.now()
-        print(end_time-start_time)
+        
+        self.test_cart_expired_adjustment()
         pass
 
 
@@ -154,25 +141,9 @@ class Command(BaseCommand):
         models.user.user_subscription.UserSubscription.objects.get(id=1).root_users.add(models.user.user.User.objects.get(id=44))
 
     def test_text_classifier(self):
-        from backend.api.nlp.classify import classify_comment_v1
+        from service.nlp.classification import classify_comment_v1
 
         print(classify_comment_v1(texts=[['Deliver Delivery delivery','payment payment payment']],threshold=0.7))
-
-    def test_pre_order_helper(self):
-        from api.models.campaign.campaign_product import CampaignProduct
-        from api.models.order.order_product import OrderProduct
-        from api.models.order.pre_order import PreOrder
-        from api.models.user.user import User
-        from api.utils.common.order_helper import PreOrderHelper
-
-        api_user = User.objects.get(id=1)
-        pre_order = PreOrder.objects.get(id=506)
-        # campaign_product = CampaignProduct.objects.get(id=7400)
-        # order_product = OrderProduct.objects.get(id=252464)
-        # PreOrderHelper.add_product(api_user,pre_order,campaign_product,1)
-        # PreOrderHelper.update_product(api_user,pre_order,order_product,2)
-        # PreOrderHelper.delete_product(api_user,pre_order,order_product)
-        PreOrderHelper.checkout(api_user,pre_order)
 
     
     def test_mongodb_query(self):
@@ -207,10 +178,6 @@ class Command(BaseCommand):
         jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)
 
 
-        # service.email.email_service.EmailService.send_email_template('test','alphatw22193@gmail.com',
-        #     "email_reset_password_link.html",
-        #     {"url":settings.GCP_API_LOADBALANCER_URL +"/lss/#/password/reset","code":"1234","username":"test"},
-        #     lang='en')
     
     def test_user_plan(self):
         from datetime import datetime
@@ -874,7 +841,7 @@ class Command(BaseCommand):
             # set new password
             auth_user.set_password(password)
             auth_user.save()
-
+        last_name = ""
         # else:
         #     auth_user = AuthUser.objects.create_user(
         #         username=f'{first_name} {last_name}', email=email, password=password)
@@ -905,7 +872,6 @@ class Command(BaseCommand):
         #     auth_user=auth_user, 
         #     user_subscription=user_subscription)
         
-        # record_subscription_for_trial_user(user_subscription, api_user)
         
         # lib.util.marking_tool.NewUserMark.mark(api_user, save = True)
         # marketing_plans = MarketingPlan.get_plans("current_plans")
@@ -958,3 +924,80 @@ class Command(BaseCommand):
                 order.save()       
             except Exception:
                 print(traceback.format_exc())
+    
+    def test_cart_expired_adjustment(self):
+        import traceback
+        import database
+        from api import models
+        import lib
+        from datetime import datetime, timedelta
+        from pprint import pprint
+        data = database.lss.order.get_wallet_data_with_expired_points()
+        # data = database.lss.order.get_earned_used_expired_points_sum(buyer_id=673, user_subscription_id = 1)
+        pprint(data)   
+
+        # wallets = models.user.buyer_wallet.BuyerWallet.objects.all()
+        # for wallet in wallets:
+        #     lib.helper.wallet_helper.WalletHelper.adjust_wallet(wallet)
+
+
+        # end_at = datetime.utcnow()
+        # start_from = end_at - timedelta(days=1)
+        
+        # lib.helper.wallet_helper.WalletHelper.adjust_all_wallet_with_expired_points(start_from=start_from, end_at=end_at)
+
+
+    def test_add_all_order_buyer_to_user_subscription_customer(self):
+        import traceback
+        import database
+        from api import models
+        import lib
+        from datetime import datetime, timedelta
+
+
+        end_at = datetime.utcnow()
+        start_from = end_at - timedelta(days=365)
+
+        data = database.lss.order.get_wallet_data(start_from, end_at)
+        for _data in data:
+            user_subscription = models.user.user_subscription.UserSubscription.objects.get(id=_data.get('user_subscription_id'))
+            api_user = models.user.user.User.objects.get(id = _data.get('buyer_id'))
+            try:
+                user_subscription.customers.add(api_user)
+            except Exception:
+                print(traceback.format_exc())
+        print(data)
+
+    def test_auto_clear_idle_cart(self):
+        import traceback
+        import database
+        from api import models
+        import lib
+        from datetime import datetime, timedelta
+
+    def test_auto_remove_abandon_cart(self):
+        import traceback
+        import database
+        from api import models
+        import lib
+        from datetime import datetime, timedelta
+
+
+        end_at = datetime.utcnow()
+        start_from = end_at - timedelta(days=365)
+
+        data = database.lss.campaign.get_campaign_abandon_cart_which_enable_auto_clear(start_from, end_at)
+        print(data)
+        
+    def test_uncheckout_cart_remind():
+        print("run uncheckout_cart_reminder cron")
+        start_time = arrow.now()
+        utc_time_four_hours_ago = arrow.utcnow().shift(hours=-4)
+        campaigns_ended_over_4_hours = models.campaign.campaign.Campaign.objects.filter(id=1419) #, end_at__gte=utc_time_four_hours_ago.datetime, end_at__lt=utc_time_four_hours_ago.shift(minutes=+1).datetime)
+        carts = [cart for campaign in campaigns_ended_over_4_hours for cart in campaign.carts.all() if len(cart.products) > 0]
+        print("carts", carts)
+        for cart in carts:
+            pymongo_cart = database.lss.cart.Cart.get(id=cart.id)
+            service.rq.queue.enqueue_test_queue(job=send_reminder_messages_job, pymongo_cart=pymongo_cart, user_subscription_id=cart.campaign.user_subscription.id, lang=cart.campaign.lang)
+        end_time = arrow.now()
+        print(end_time-start_time)

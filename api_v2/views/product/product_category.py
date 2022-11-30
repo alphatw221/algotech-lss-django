@@ -15,7 +15,7 @@ from api.models.product import product_category
 from automation import jobs
 
 from api import models
-from api import rule
+from api_v2 import rule
 import database
 
 import lib, json
@@ -88,7 +88,8 @@ class ProductCatoegoryViewSet(viewsets.ModelViewSet):
         
 
         #unset all product and campaign product categories key
-        database.lss.product.remove_categories(user_subscription.id, product_category.id)
+        database.lss.product.remove_categories(product_category.id)
+        database.lss.campaign_product.remove_categories(product_category.id)
         product_category.delete()
         return Response({"message": "delete success"}, status=status.HTTP_200_OK)
 
