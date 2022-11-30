@@ -1,8 +1,7 @@
 build-job:
     stage: build
+    image: python:3.8.15
     before_script:
-        - apt update
-        - apt install python3 -y
         - python3 --version  # For debugging
         - pip install poetry
     script:
