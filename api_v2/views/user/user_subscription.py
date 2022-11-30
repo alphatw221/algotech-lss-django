@@ -3,6 +3,7 @@ from tracemalloc import start
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.http import HttpResponseRedirect
+from api.models.user.buyer_point import BuyerPointSerializer
 from itsdangerous import Serializer
 from numpy import require
 from django.db.models import Q, Value
@@ -54,6 +55,9 @@ class UserSubscriptionAccountInfo(models.user.user_subscription.UserSubscription
         many=True, read_only=True, default=list)
 class UserSerializerSellerAccountInfo(models.user.user.UserSerializer):
     user_subscription = UserSubscriptionAccountInfo(read_only=True, default=dict)
+
+class BuyerPointSerializerWithBuyerAccountInfo(models.user.buyer_point.BuyerPointSerializer):
+    buyer = UserSerializerBuyerAccountInfo()
 
 class UserSubscriptionPagination(PageNumberPagination):
 
@@ -510,19 +514,17 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         data = result.data
         return Response(data, status=status.HTTP_200_OK)
     
-    @action(detail=False, methods=['GET'], url_path=r'retrieve/buyers/history', permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['GET'], url_path=r'list/buyer/(?P<buyer_id>[^/.]+)/order/history', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def retrieve_buyer_order_history(self, request):
+    def list_buyer_order_history(self, request, buyer_id):
         
-        buyer_id, points_relative, page, page_size, = lib.util.getter.getparams(request, ('buyer_id', 'points_relative', 'page', 'page_size'), with_user=False)
+        page, page_size, = lib.util.getter.getparams(request, ('page', 'page_size'), with_user=False)
         if buyer_id in ["", None,'undefined','null'] or not buyer_id.isnumeric():
             raise lib.error_handle.error.api_error.ApiCallerError("Missing data")
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         buyer = models.user.user.User.objects.get(id=buyer_id)
         queryset = buyer.orders.filter(user_subscription=user_subscription).order_by('-created_at')
-        if points_relative == "true":
-            queryset=queryset.filter(Q(points_earned__gt = 0)|Q(points_used__gt = 0)|Q(point_discount__gt = 0))
         
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -530,6 +532,26 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             data = self.get_paginated_response(serializer.data).data
         else:
             data = OrderSerializerWithBuyerAccountInfo(queryset, many=True).data
+        return Response(data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['GET'], url_path=r'list/buyer/(?P<buyer_id>[^/.]+)/point/history', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def list_buyer_point_history(self, request, buyer_id):
+        
+        page, page_size, = lib.util.getter.getparams(request, ('page', 'page_size'), with_user=False)
+        if buyer_id in ["", None,'undefined','null'] or not buyer_id.isnumeric():
+            raise lib.error_handle.error.api_error.ApiCallerError("Missing data")
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        buyer = models.user.user.User.objects.get(id=buyer_id)
+        queryset = buyer.points.filter(user_subscription=user_subscription).order_by('-created_at')
+        
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = BuyerPointSerializerWithBuyerAccountInfo(page, many=True)
+            data = self.get_paginated_response(serializer.data).data
+        else:
+            data = BuyerPointSerializerWithBuyerAccountInfo(queryset, many=True).data
         return Response(data, status=status.HTTP_200_OK)
        
 # --------------------------------- dealer ---------------------------------
