@@ -192,7 +192,6 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         api_user = lib.util.verify.Verify.get_customer_user(request)
         user_subscription_id, points_relative = lib.util.getter.getparams(request, ('user_subscription_id', 'points_relative'), with_user=False)
-
         queryset = api_user.orders.all()
         if user_subscription_id not in ["", None,'undefined','null'] and user_subscription_id.isnumeric():
             queryset=queryset.filter(user_subscription_id = int(user_subscription_id))

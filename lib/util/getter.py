@@ -1,4 +1,5 @@
 import lib
+import json
 
 def getparams(request, params: tuple, with_user=True, seller=True):
     ret = []
@@ -12,7 +13,7 @@ def getparams(request, params: tuple, with_user=True, seller=True):
                 raise lib.error_handle.error.api_error.ApiVerifyError('util.no_api_user_found')
             ret = [request.user.api_users.get(type='customer')]
     for param in params:
-        ret.append(request.query_params.get(param, None))
+        ret.append(json.loads(request.query_params.get(param, None)))
     return ret
 
 def getdata(request, data: tuple, required=False):
