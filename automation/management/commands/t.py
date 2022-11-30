@@ -27,6 +27,9 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
+        # self.handle_new_registeration_from_hubspot()
+        # self.test_add_user_subscription_to_order()
+        
         self.test_cart_expired_adjustment()
         pass
 
@@ -985,3 +988,16 @@ class Command(BaseCommand):
 
         data = database.lss.campaign.get_campaign_abandon_cart_which_enable_auto_clear(start_from, end_at)
         print(data)
+        
+    def test_uncheckout_cart_remind():
+        print("run uncheckout_cart_reminder cron")
+        start_time = arrow.now()
+        utc_time_four_hours_ago = arrow.utcnow().shift(hours=-4)
+        campaigns_ended_over_4_hours = models.campaign.campaign.Campaign.objects.filter(id=1419) #, end_at__gte=utc_time_four_hours_ago.datetime, end_at__lt=utc_time_four_hours_ago.shift(minutes=+1).datetime)
+        carts = [cart for campaign in campaigns_ended_over_4_hours for cart in campaign.carts.all() if len(cart.products) > 0]
+        print("carts", carts)
+        for cart in carts:
+            pymongo_cart = database.lss.cart.Cart.get(id=cart.id)
+            service.rq.queue.enqueue_test_queue(job=send_reminder_messages_job, pymongo_cart=pymongo_cart, user_subscription_id=cart.campaign.user_subscription.id, lang=cart.campaign.lang)
+        end_time = arrow.now()
+        print(end_time-start_time)

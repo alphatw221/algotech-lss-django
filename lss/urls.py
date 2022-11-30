@@ -16,6 +16,7 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import include, path, re_path
+from lss.views.iframe import iframe_facebook
 from rest_framework_simplejwt.views import (TokenObtainPairView,
                                             TokenRefreshView, TokenVerifyView)
 
@@ -55,6 +56,7 @@ urlpatterns = [
 
     path('test',TemplateView.as_view(template_name="reset_password_link_email.html")),
     path('test2',TemplateView.as_view(template_name="reset_password_success_email.html")),
+    path('iframe/facebook', iframe_facebook),
 
 
     #-------------------------plugin---------------------------------------------------
