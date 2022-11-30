@@ -1,8 +1,7 @@
 build-job:
     stage: build
-    image: python:latest
     before_script:
-        - python --version  # For debugging
+        - python3 --version  # For debugging
         - pip install poetry
     script: echo "build"
 
