@@ -193,7 +193,7 @@ def __comment_responding(platform_name, platform_instance_data, campaign_data, u
 def __get_comment_and_private_message( pymongo_cart, campaign_data, state, campaign_product, qty, plugins):
 
 
-    if state in campaign_data.get('meta_reply',{}) and campaign_data.get('meta_reply',{}).get(f'{state}_enable')==True:
+    if state in campaign_data.get('meta_reply',{}) and campaign_data.get('meta_reply',{}).get(f'{state}_enabled')==True:
         reply_message = campaign_data.get('meta_reply',{}).get(state)
         reply_message = reply_message.replace('[PRODUCT_NAME]', campaign_product.get('name',''))
         description = campaign_product.get('description') if campaign_product.get('description') else ''
