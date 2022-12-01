@@ -3,14 +3,23 @@ import lib
 from api import models
 import math
 from datetime import datetime, timedelta
+
+CONTENT_TYPE_XLSX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+CONTENT_TYPE_CSV = 'text/csv'
+
+
 class SHCCustomerImportProcessor(DefaultCustomerImportProcessor):
     
+    def __init__(self, user_subscription, size_limit_bytes=10 * 1024 * 1024, accept_types=[CONTENT_TYPE_XLSX, CONTENT_TYPE_CSV]) -> None:
+        super().__init__(user_subscription, size_limit_bytes, accept_types)
+        self.sheet_name = 'Organization'
+
     def save_data(self, data):
         point_expire_at = datetime.utcnow()+timedelta(days=30*6)
         for object in data:
             try:
                 
-                _, customer = lib.helper.login_helper.create_or_get_user(object.get('Email'), models.user.user.TYPE_BUYER,  user_name=object.get('Name'))
+                _, customer = lib.helper.login_helper.create_or_get_user(object.get('Email','').lower(), models.user.user.TYPE_BUYER,  user_name=object.get('Name'))
                 
                 #delete all point transactions if there are
                 customer.point_transactions.all().delete()
@@ -42,6 +51,7 @@ class SHCCustomerImportProcessor(DefaultCustomerImportProcessor):
                 if not self.user_subscription.customers.filter(id=customer.id).exists():
                     self.user_subscription.customers.add(customer)
 
+                # break
             except Exception:
                 import traceback
                 print(traceback.format_exc())

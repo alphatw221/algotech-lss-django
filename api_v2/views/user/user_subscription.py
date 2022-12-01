@@ -18,12 +18,15 @@ from rest_framework.parsers import MultiPartParser, JSONParser, FormParser
 
 from api import models
 from api_v2 import rule
+from automation import jobs
+
 import stripe, pytz, lib, service, business_policy, json
 from database.lss._config import db
 
 from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
 import database
+import factory
 
 class UserSubscriptionSerializerName(models.user.user_subscription.UserSubscriptionSerializer):
     class Meta:
@@ -553,7 +556,22 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         else:
             data = models.user.point_transaction.PointTransactionSerializer(queryset, many=True).data
         return Response(data, status=status.HTTP_200_OK)
-       
+    
+    @action(detail=False, methods=['POST'], url_path=r'customer/import', parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def seller_import_customer(self, request):
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+
+        file, room_id = lib.util.getter.getdata(request,('file', 'room_id'), required=True)
+
+        service.rq.queue.enqueue_test_queue(
+            jobs.import_data_job.customer_import_job, 
+            room_id = room_id, 
+            user_subscription_id = user_subscription.id, 
+            file = file)
+
+        return Response("OK", status=status.HTTP_200_OK)
 # --------------------------------- dealer ---------------------------------
     
 
@@ -654,3 +672,5 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             start_date = this_end_date
         
         return Response(dealer_revenue, status=status.HTTP_200_OK)
+
+    
