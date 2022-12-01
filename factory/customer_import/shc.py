@@ -27,14 +27,14 @@ class SHCCustomerImportProcessor(DefaultCustomerImportProcessor):
                 )
 
                 #create wallet
-                if not models.user.buyer_wallet.BuyerWallet.objects.filter(user_subscription = self.user_subscription, buyer=api_user).exists():
+                if not models.user.buyer_wallet.BuyerWallet.objects.filter(user_subscription = self.user_subscription, buyer=customer).exists():
                     models.user.buyer_wallet.BuyerWallet.objects.create(
                     user_subscription = self.user_subscription,
                     buyer = customer,
                     points = max(object.get('PointsEarned') - object.get('PointsUsed'), 0)
                     )
                 else:
-                    wallet = models.user.buyer_wallet.BuyerWallet.objects.get(user_subscription = self.user_subscription, buyer=api_user)
+                    wallet = models.user.buyer_wallet.BuyerWallet.objects.get(user_subscription = self.user_subscription, buyer=customer)
                     wallet.points = max(object.get('PointsEarned') - object.get('PointsUsed'), 0)
                     wallet.save()
 
