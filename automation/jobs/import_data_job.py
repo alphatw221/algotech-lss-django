@@ -10,11 +10,12 @@ except Exception as e:
 
 
 import traceback
-import service
-import factory
-import lib
+
 
 def customer_import_job(room_id, user_subscription_id, file):
+    import service
+    import factory
+    import lib
     try:
         user_subscription = lib.util.verify.Verify.get_user_subscription(user_subscription_id)
         customer_import_processor_class:factory.customer_import.default.DefaultCustomerImportProcessor \
