@@ -34,20 +34,22 @@ def comment_job(campaign_data, user_subscription_data, platform_name, platform_i
 
     if not order_placement:
         logs.append(["action",'no order_placement'])
+        lib.util.logger.print_table(["Campaign ID", campaign_data.get('id')],logs)
+        return
 
-        comment_auto_reply = campaign_data.get('meta',{}).get('comment_auto_reply',{})
-        if comment_auto_reply and comment_auto_reply.get('input_msg'):
-            for keyword in comment_auto_reply.get('input_msg').split(','):
-                if keyword in comment['message']:
-                    match_keyword = True
-                    break
+        # comment_auto_reply = campaign_data.get('meta',{}).get('comment_auto_reply',{})
+        # if comment_auto_reply and comment_auto_reply.get('input_msg'):
+        #     for keyword in comment_auto_reply.get('input_msg').split(','):
+        #         if keyword in comment['message']:
+        #             match_keyword = True
+        #             break
         
-        if match_keyword:
-            __demo_responding(platform_name, platform_instance_data, campaign_data, user_subscription_data, comment)
-        else:
-            logs.append(["action",'no matched keyword'])
-            lib.util.logger.print_table(["Campaign ID", campaign_data.get('id')],logs)
-            return
+        # if match_keyword:
+        #     __demo_responding(platform_name, platform_instance_data, campaign_data, user_subscription_data, comment)
+        # else:
+        #     logs.append(["action",'no matched keyword'])
+        #     lib.util.logger.print_table(["Campaign ID", campaign_data.get('id')],logs)
+        #     return
         
     pymongo_cart = database.lss.cart.Cart.get_object(customer_id= comment['customer_id'], campaign_id= campaign_data['id'], platform= comment['platform'])
 
@@ -83,7 +85,7 @@ def __comment_responding(platform_name, platform_instance_data, campaign_data, u
     plugins = user_subscription_data.get('user_plan',{}).get('plugins')
     link = __get_link(pymongo_cart, plugins)
     
-    _, private_message = __get_comment_and_private_message( pymongo_cart, campaign_data, state, campaign_product, qty, link, plugins)
+    _, private_message = __get_comment_and_private_message( pymongo_cart, campaign_data, state, campaign_product, qty, plugins)
     if platform_name == 'facebook':
 
         # if state == lib.helper.order_helper.RequestState.INSUFFICIENT_INV:    
@@ -146,58 +148,57 @@ def __comment_responding(platform_name, platform_instance_data, campaign_data, u
 
 
 
-def __demo_responding(platform_name, platform_instance_data, campaign_data, user_subscription_data, comment):
+# def __demo_responding(platform_name, platform_instance_data, campaign_data, user_subscription_data, comment):
     
-    private_message = campaign_data.get('meta',{}).get('comment_auto_reply',{}).get('output_msg','')
-    private_message.replace('[NAME]', comment['customer_name'])
-    if platform_name == 'facebook':
+#     private_message = campaign_data.get('meta',{}).get('comment_auto_reply',{}).get('output_msg','')
+#     private_message.replace('[NAME]', comment['customer_name'])
+#     if platform_name == 'facebook':
 
-        code, ret = service.facebook.post.post_page_message_on_comment(platform_instance_data.get('token'), comment['id'], private_message)
-        if code!=200:
-            print("response", ret)
+#         code, ret = service.facebook.post.post_page_message_on_comment(platform_instance_data.get('token'), comment['id'], private_message)
+#         if code!=200:
+#             print("response", ret)
         
-    elif platform_name == 'youtube':
+#     elif platform_name == 'youtube':
 
-        customer_name =comment['customer_name']
-        text = f"@{customer_name}"+ private_message
-        live_chat_id = comment.get("live_chat_id")
+#         customer_name =comment['customer_name']
+#         text = f"@{customer_name}"+ private_message
+#         live_chat_id = comment.get("live_chat_id")
         
-        if not live_chat_id:
-            return
+#         if not live_chat_id:
+#             return
 
-        access_token = platform_instance_data.get('token')
-        if not access_token :
-            print("no access token")
-            return
-        code, ret = service.youtube.live_chat.post_live_chat_comment(access_token, live_chat_id, text)
-        if code!=200:
-            print("response", ret)
+#         access_token = platform_instance_data.get('token')
+#         if not access_token :
+#             print("no access token")
+#             return
+#         code, ret = service.youtube.live_chat.post_live_chat_comment(access_token, live_chat_id, text)
+#         if code!=200:
+#             print("response", ret)
 
-    elif platform_name == 'instagram':
+#     elif platform_name == 'instagram':
 
-        code, ret =service.instagram.post.private_message( platform_instance_data.get('token'), comment['id'], private_message)
-        if code!=200:
-            print("response", ret)
+#         code, ret =service.instagram.post.private_message( platform_instance_data.get('token'), comment['id'], private_message)
+#         if code!=200:
+#             print("response", ret)
     
-    elif platform_name == 'twitch':
+#     elif platform_name == 'twitch':
         
-        code, ret = service.twitch.twitch.whisper_to_user(platform_instance_data.get('token'), platform_instance_data.get('user_name'), comment['customer_id'], private_message)
-        if code!=200:
-            print("response", ret)
+#         code, ret = service.twitch.twitch.whisper_to_user(platform_instance_data.get('token'), platform_instance_data.get('user_name'), comment['customer_id'], private_message)
+#         if code!=200:
+#             print("response", ret)
 
-    elif platform_name == 'tiktok':
-        pass
+#     elif platform_name == 'tiktok':
+#         pass
 
-def __get_comment_and_private_message( pymongo_cart, campaign_data, state, campaign_product, qty, link, plugins):
+def __get_comment_and_private_message( pymongo_cart, campaign_data, state, campaign_product, qty, plugins):
 
 
-    if state in campaign_data.get('meta_reply',{}):
+    if state in campaign_data.get('meta_reply',{}) and campaign_data.get('meta_reply',{}).get(f'{state}_enable')==True:
         reply_message = campaign_data.get('meta_reply',{}).get(state)
-        # reply_message = reply_message.replace('[LINK]',link)
         reply_message = reply_message.replace('[PRODUCT_NAME]', campaign_product.get('name',''))
-        #reply_message = reply_message.replace('[ORDER_CODE]', campaign_product.get('order_code'))
         description = campaign_product.get('description') if campaign_product.get('description') else ''
         reply_message = reply_message.replace('[DESCRIPTION]', description)
+        #reply_message = reply_message.replace('[ORDER_CODE]', campaign_product.get('order_code'))
         # reply_message.replace('[QTY]', str(qty))
         return "", reply_message
 
