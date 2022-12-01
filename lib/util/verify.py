@@ -153,6 +153,18 @@ class Verify():
         return platform
 
     @staticmethod
+    def get_support_stock_user_subscriptions_from_user_subscription(support_stock_user_subscription_id,self_user_subscription_subscription):
+        support_stock_user_subscriptions = self_user_subscription_subscription.meta_store.get("support_stock_user_subscriptions", [])
+        if not support_stock_user_subscriptions:
+            return None
+        for i in support_stock_user_subscriptions:
+            try:
+                if i.get("user_subscription_id","") == support_stock_user_subscription_id:
+                    return models.user.user_subscription.objects.get(id=i.get("user_subscription_id",""))
+            except:
+                pass
+        return None
+    @staticmethod
     def get_cart(cart_id):
         if not Cart.objects.filter(id=cart_id).exists():
             raise ApiVerifyError('util.no_cart_found')
