@@ -24,9 +24,6 @@ from automation import jobs
 from datetime import datetime
 
 
-class OrderSerializerWithCampaign(models.order.order.OrderSerializer):
-    campaign = models.campaign.campaign.CampaignSerializer(read_only=True, default=dict)
-
 class OrderSerializerWithOrderProduct(models.order.order.OrderSerializer):
     order_products = models.order.order_product.OrderProductSerializer(many=True, read_only=True, default=list)
     
@@ -186,30 +183,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         return Response(OrderSerializerWithOrderProductWithCampaign(order).data, status=status.HTTP_200_OK)
 
 
-    @action(detail=False, methods=['GET'], url_path=r'buyer/history', permission_classes=(IsAuthenticated,))
-    @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def list_buyer_order_history(self, request):
-
-        api_user = lib.util.verify.Verify.get_customer_user(request)
-        user_subscription_id, points_relative = lib.util.getter.getparams(request, ('user_subscription_id', 'points_relative'), with_user=False)
-        queryset = api_user.orders.all()
-        if user_subscription_id not in ["", None,'undefined','null'] and user_subscription_id.isnumeric():
-            queryset=queryset.filter(user_subscription_id = int(user_subscription_id))
-
-        if points_relative:
-            queryset=queryset.filter(Q(points_earned__gt = 0)|Q(points_used__gt = 0)|Q(point_discount__gt = 0))
-            queryset=queryset.filter(payment_status = models.order.order.PAYMENT_STATUS_PAID)
-
-        queryset = queryset.order_by('-created_at')
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = OrderSerializerWithCampaign(page, many=True)
-            data = self.get_paginated_response(serializer.data).data
-        else:
-            
-            data = OrderSerializerWithCampaign(api_user.orders, many=True).data
-
-        return Response(data, status=status.HTTP_200_OK)
+    
        
 
     @action(detail=False, methods=['GET'], url_path=r'buyer/retrieve/(?P<order_oid>[^/.]+)/state', permission_classes=())
