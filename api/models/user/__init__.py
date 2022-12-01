@@ -1,1 +1,1 @@
-from . import user,user_subscription, deal, promotion_code, static_assets,user_register, developer, buyer_wallet, buyer_point
+from . import point_transaction, user,user_subscription, deal, promotion_code, static_assets,user_register, developer, buyer_wallet

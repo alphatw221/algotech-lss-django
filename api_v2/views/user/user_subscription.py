@@ -3,7 +3,7 @@ from tracemalloc import start
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.http import HttpResponseRedirect
-from api.models.user.buyer_point import BuyerPointSerializer
+
 from itsdangerous import Serializer
 from numpy import require
 from django.db.models import Q, Value
@@ -56,8 +56,8 @@ class UserSubscriptionAccountInfo(models.user.user_subscription.UserSubscription
 class UserSerializerSellerAccountInfo(models.user.user.UserSerializer):
     user_subscription = UserSubscriptionAccountInfo(read_only=True, default=dict)
 
-class BuyerPointSerializerWithBuyerAccountInfo(models.user.buyer_point.BuyerPointSerializer):
-    buyer = UserSerializerBuyerAccountInfo()
+# class BuyerPointSerializerWithBuyerAccountInfo(models.user.point_transaction.BuyerPointSerializer):
+#     buyer = UserSerializerBuyerAccountInfo()
 
 class UserSubscriptionPagination(PageNumberPagination):
 
@@ -543,15 +543,15 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             raise lib.error_handle.error.api_error.ApiCallerError("Missing data")
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
-        buyer = models.user.user.User.objects.get(id=buyer_id)
-        queryset = buyer.points.filter(user_subscription=user_subscription).order_by('-created_at')
+        customer = lib.util.verify.Verify.get_customer_from_user_subscription(user_subscription, buyer_id)
+        queryset = customer.point_transactions.filter(user_subscription = user_subscription) #temp 
         
         page = self.paginate_queryset(queryset)
         if page is not None:
-            serializer = BuyerPointSerializerWithBuyerAccountInfo(page, many=True)
+            serializer = models.user.point_transaction.PointTransactionSerializer(page, many=True)
             data = self.get_paginated_response(serializer.data).data
         else:
-            data = BuyerPointSerializerWithBuyerAccountInfo(queryset, many=True).data
+            data = models.user.point_transaction.PointTransactionSerializer(queryset, many=True).data
         return Response(data, status=status.HTTP_200_OK)
        
 # --------------------------------- dealer ---------------------------------
