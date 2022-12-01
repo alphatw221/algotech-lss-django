@@ -565,7 +565,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
         file, room_id = lib.util.getter.getdata(request,('file', 'room_id'), required=True)
 
-        service.rq.queue.enqueue_test_queue(
+        service.rq.queue.enqueue_general_queue(
             jobs.import_data_job.customer_import_job, 
             room_id = room_id, 
             user_subscription_id = user_subscription.id, 
