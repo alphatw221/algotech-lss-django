@@ -14,8 +14,8 @@ default:
 unit-test:
     stage: test
     script: 
-        # - poetry run pytest
-        - echo "test"
+        - poetry run pytest
+
 
 
 
