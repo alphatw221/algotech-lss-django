@@ -25,7 +25,7 @@ deploy-runner1:
     - web 
   tags:
     - deploy_runner1
-  script: ./shell_script/deploy-backend.sh main
+  script: ./shell_script/deploy-worker.sh main
 
 
 deploy-runner2:
@@ -34,4 +34,4 @@ deploy-runner2:
     - web 
   tags:
     - deploy_runner2
-  script: ./shell_script/deploy-backend.sh main
+  script: ./shell_script/deploy-worker.sh main
