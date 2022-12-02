@@ -1,24 +1,36 @@
-default:
+unit-test:
+  stage: test
+  only: 
+    - web 
+  tags: 
+    - shared
   image: ubuntu:20.04
   before_script:
-
     - apt -y update
     - apt -y install apt-utils
     - apt -y install net-tools python3.8 python3-pip mysql-client libmysqlclient-dev
     - apt -y upgrade
     - pip3 install poetry
     - poetry install
+  script: 
+      - poetry run pytest
 
 
 
-unit-test:
-    stage: test
-    script: 
-        # - poetry run pytest
-        - echo "test"
 
-
-
-deploy-app:
+deploy-runner1:
   stage: deploy
-  script: echo "deploment"
+  only: 
+    - web 
+  tags:
+    - deploy_runner1
+  script: ./shell_script/deploy_backend main
+
+
+deploy-runner2:
+  stage: deploy
+  only: 
+    - web 
+  tags:
+    - deploy_runner2
+  script: ./shell_script/deploy_backend main
