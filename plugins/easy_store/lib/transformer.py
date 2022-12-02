@@ -49,6 +49,11 @@ def to_lss_order(easy_store_order, lss_cart, campaign_product_external_internal_
         "shipping_cost" : float(easy_store_order.get('total_shipping',0)),
         "total" : float(easy_store_order.get('total_price',0)),
         "meta" : {'easy_store':easy_store_order},
+
+        "price_unit" :lss_cart.campaign.price_unit,
+        "decimal_places" :lss_cart.campaign.decimal_places,
+        "currency" :lss_cart.campaign.currency,
+
     }
 
     return order_data
