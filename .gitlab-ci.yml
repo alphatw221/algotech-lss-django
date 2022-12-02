@@ -12,6 +12,7 @@ unit-test:
     - apt -y upgrade
     - pip3 install poetry
     - poetry install
+    - cp config_example.py config.py
   script: 
       - poetry run pytest
 
