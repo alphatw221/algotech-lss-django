@@ -41,6 +41,6 @@ deploy-runner2:
     - deploy_runner2
   script: 
     - pwd
-    - cd /home/home/liveshowseller
+    - cd /home/liveshowseller
     - pwd
     - ./shell_script/deploy-worker.sh main
