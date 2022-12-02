@@ -30,7 +30,7 @@ deploy-runner1:
     - cd /home/agt-e5-2670-v3/liveshowseller
     - pwd
     # - git config --global --add safe.directory /home/agt-e5-2670-v3/liveshowseller
-    - sudo ./shell_script/deploy-worker.sh main
+    - ./shell_script/deploy-worker.sh main
     # - ./shell_script/deploy-worker.sh main
 
 
