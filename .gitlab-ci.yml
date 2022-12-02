@@ -27,6 +27,9 @@ deploy-runner1:
     - deploy_runner1
   script: 
     - pwd
+    - cd /home/agt-e5-2670-v3/liveshowseller
+    - pwd
+    - ./shell_script/deploy-worker.sh main
     # - ./shell_script/deploy-worker.sh main
 
 
@@ -37,5 +40,7 @@ deploy-runner2:
   tags:
     - deploy_runner2
   script: 
+    - pwd
+    - cd /home/home/liveshowseller
     - pwd
     - ./shell_script/deploy-worker.sh main
