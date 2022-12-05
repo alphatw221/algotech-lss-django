@@ -505,14 +505,14 @@ class CampaignViewSet(viewsets.ModelViewSet):
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, pk)
 
         previous_campaign_data = database.lss.campaign.get_previous_campaign_data(campaign.id, user_subscription.id)
-        previous_campaign_id = previous_campaign_data.get('id')
+        previous_campaign_id = previous_campaign_data.get('id', None)
 
         campaign_cart_count = database.lss.cart.get_count_in_campaign(campaign.id)
         campaign_order_complete_count,campaign_order_proceed_count = database.lss.campaign.get_order_complete_proceed_count(campaign.id) 
         campaign_comment_count = database.lss.campaign_comment.get_count_in_campaign(campaign.id)
         campaign_complete_sales = database.lss.order.get_complete_sales_of_campaign(campaign.id)
         campaign_proceed_sales = database.lss.order.get_proceed_sales_of_campaign(campaign.id)
-
+    
         previous_campaign_cart_count = database.lss.cart.get_count_in_campaign(previous_campaign_id)
         previous_campaign_order_complete_count, perivious_campaign_order_proceed_count = database.lss.campaign.get_order_complete_proceed_count(previous_campaign_id) 
         previous_campaign_comment_count = database.lss.campaign_comment.get_count_in_campaign(previous_campaign_id)

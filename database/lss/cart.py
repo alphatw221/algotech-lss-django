@@ -22,4 +22,6 @@ class Cart(Collection):
             self._sync()
 
 def get_count_in_campaign(campaign_id):
-    return __collection.find({'campaign_id': campaign_id, 'products': {'$ne': {}}}).count()
+    if campaign_id:
+        return __collection.find({'campaign_id': campaign_id, 'products': {'$ne': {}}}).count()
+    return 0
