@@ -12,6 +12,7 @@ unit-test:
     - apt -y upgrade
     - pip3 install poetry
     - poetry install
+    - cp config_example.py config.py
   script: 
       - poetry run pytest
 
@@ -24,7 +25,13 @@ deploy-runner1:
     - web 
   tags:
     - deploy_runner1
-  script: ./shell_script/deploy_backend main
+  script: 
+    - pwd
+    - cd /home/agt-e5-2670-v3/liveshowseller
+    - pwd
+    - git config --global --add safe.directory /home/agt-e5-2670-v3/liveshowseller
+    - ./shell_script/deploy-worker.sh main
+
 
 
 deploy-runner2:
@@ -33,4 +40,9 @@ deploy-runner2:
     - web 
   tags:
     - deploy_runner2
-  script: ./shell_script/deploy_backend main
+  script: 
+    - pwd
+    - cd /home/liveshowseller
+    - pwd
+    - git config --global --add safe.directory /home/liveshowseller
+    - ./shell_script/deploy-worker.sh main

@@ -233,3 +233,7 @@ def __get_link(pymongo_cart, plugins=None):
     # {
     #     'added':'You successfully bidded for:\n [PRODUCT_NAME] - [DESCRIPTION]\n\nCut Off Time:Thursday, 25th August 2022, 12 noon!\n\nKindly click View Order and proceed to make payment before cut off time to secure your order.\n[LINK]',
     # }
+
+
+
+#test if auto deploy works
