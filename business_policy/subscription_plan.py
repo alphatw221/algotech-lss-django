@@ -9,7 +9,7 @@ class CountryPlan:
 class SubscriptionPlan: 
 
     support_country=['SG', 'PH', 'TH', 'IN', 'ID', 'MY', 'VN', 'TW', 'KH']
-    support_plan=['trial', 'lite', 'standard', 'premium', 'dealer']
+    support_plan=['trial', 'lite', 'standard', 'premium', 'kol', 'dealer']
 
     @classmethod
     def get_country(cls,country_code):
@@ -122,6 +122,7 @@ class SubscriptionPlan:
             "lite" : {"value":"lite","text": "Lite", "price":{"month":300,"quarter":900,"year":3240}},
             "standard" : {"value":"standard","text": "Standard", "price":{"month":900,"quarter":2700,"year":9720}},
             "premium" : {"value":"premium","text": "Premium", "price":{"month":450,"quarter":1350,"year":4320}},
+            "kol": {"value":"kol","text": "kol"}
         }
    
 
@@ -171,6 +172,13 @@ class SubscriptionPlan:
         'channel_limit': 3,
         'product_limit': 300,
         'order_limit': 5000
+    }
+    kol = {
+        'campaign_limit':0,
+        'campaign_live_limit': 100,
+        'channel_limit': 30,
+        'product_limit': 3000,
+        'order_limit': 500000
     }
     dealer = {
         'campaign_limit':0,
