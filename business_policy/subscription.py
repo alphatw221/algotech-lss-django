@@ -82,6 +82,7 @@ TYPE_STANDARD='standard'
 TYPE_PRO='pro' # for social lab
 TYPE_PREMIUM='premium'
 TYPE_DEALER='dealer'
+TYPE_KOL='kol'
 
 TYPE_CHOICES = [
     (TYPE_TRIAL, 'Trial'),
@@ -90,6 +91,7 @@ TYPE_CHOICES = [
     (TYPE_PRO, 'Pro'), # for social lab
     (TYPE_PREMIUM, 'Premium'),
     (TYPE_DEALER,'Dealer'),
+    (TYPE_KOL,'Kol')
 ]
 
 PERIOD_MONTH = 'month'

@@ -1,7 +1,7 @@
 import random
 import string
 from datetime import datetime, timedelta
-
+from django.db.models import Q
 from django.conf import settings
 from django.contrib.auth.models import User as AuthUser
 from django.core.management.base import BaseCommand
@@ -1019,7 +1019,7 @@ class Command(BaseCommand):
         data = database.lss.campaign.get_campaign_abandon_cart_which_enable_auto_clear(start_from, end_at)
         print(data)
         
-    def test_uncheckout_cart_remind():
+    def test_uncheckout_cart_remind(self):
         print("run uncheckout_cart_reminder cron")
         start_time = arrow.now()
         utc_time_four_hours_ago = arrow.utcnow().shift(hours=-4)
@@ -1031,3 +1031,18 @@ class Command(BaseCommand):
             service.rq.queue.enqueue_test_queue(job=send_reminder_messages_job, pymongo_cart=pymongo_cart, user_subscription_id=cart.campaign.user_subscription.id, lang=cart.campaign.lang)
         end_time = arrow.now()
         print(end_time-start_time)
+        
+    def test_transfter_point_data_from_order_to_point_table(self):
+        for order in models.order.order.Order.objects.filter(Q(points_used__gt=0)|Q(points_earned__gt=0)):
+            print("order id", order.id)
+            # if order.points_earned > 0 or order.points_used > 0:
+            models.user.point_transaction.PointTransaction.objects.create(
+                user_subscription=order.user_subscription,
+                buyer=order.buyer,
+                order=order,
+                earned=order.points_earned,
+                used=order.points_used,
+                expired_at=order.point_expired_at,
+                created_at=order.created_at
+            )
+            

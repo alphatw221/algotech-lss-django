@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
+import json
 from os import stat
+import traceback
 
 from django.conf import settings
 from api.models.campaign.campaign import Campaign
@@ -152,6 +154,17 @@ class Verify():
             raise ApiVerifyError("util.user_is_not_platform_admin")
         return platform
 
+    @staticmethod
+    def get_support_stock_user_subscriptions_from_user_subscription(support_stock_user_subscription_id,self_user_subscription_subscription):
+        support_stock_user_subscriptions = json.loads(json.dumps(self_user_subscription_subscription.meta_store.get("support_stock_user_subscriptions", [])))
+        print(support_stock_user_subscriptions)
+        for i in support_stock_user_subscriptions:
+            try:
+                if i.get("user_subscription_id","") == int(support_stock_user_subscription_id):
+                    return models.user.user_subscription.UserSubscription.objects.get(id=support_stock_user_subscription_id)
+            except:
+                print(traceback.format_exc())
+        raise ApiVerifyError("util.no_support_stock_user_subscription_found")
     @staticmethod
     def get_cart(cart_id):
         if not Cart.objects.filter(id=cart_id).exists():
