@@ -47,7 +47,7 @@ urlpatterns = [
          name='custom_token_verify'),
 
     
-    path('chat_bot/facebook/', facebook_messenger_webhook),
+    path('temp/chat_bot/facebook/', facebook_messenger_webhook),
     
     re_path(r'^lss/',TemplateView.as_view(template_name="lss_entry.html")),
     re_path(r'^seller/',TemplateView.as_view(template_name="lss_enigma_entry.html")),

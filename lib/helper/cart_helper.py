@@ -334,7 +334,7 @@ class CartHelper():
         
         #compute points earned
         points_earned = point_discount_processor.compute_points_earned(subtotal_after_discount) if point_discount_processor else 0
-        point_expired_at = point_discount_processor.compute_expired_date() if point_discount_processor else None
+        # point_expired_at = point_discount_processor.compute_expired_date() if point_discount_processor else None
 
         pymongo_order.update(
 
@@ -349,7 +349,7 @@ class CartHelper():
             points_used = point_discount_processor.points_used if point_discount_processor else 0,
             point_discount = point_discount,
             points_earned = points_earned,
-            point_expired_at = point_expired_at,
+            # point_expired_at = point_expired_at,
             meta_point = campaign.meta_point,
 
             remark = 'new customer' if is_new_customer else '',
@@ -357,6 +357,7 @@ class CartHelper():
             sync=True)
 
         if point_discount_processor:
+            point_discount_processor.create_point_transaction(order_id = pymongo_order.id)
             point_discount_processor.update_wallet()
 
     @classmethod 

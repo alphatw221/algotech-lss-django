@@ -259,7 +259,12 @@ class Verify():
             raise ApiVerifyError("util.platform_not_in_any_user_subscription")
         user_subscription = user_subscriptions[0]
         return user_subscription
-
+    @staticmethod
+    def get_customer_from_user_subscription(user_subscription, customer_id):
+        if not user_subscription.customers.filter(id=customer_id).exists():
+            raise ApiVerifyError("customer_not_found")
+        return user_subscription.customers.get(id=customer_id)
+        
     @staticmethod
     def get_user_subscription_from_api_user(api_user):
         user_subscription = api_user.user_subscription

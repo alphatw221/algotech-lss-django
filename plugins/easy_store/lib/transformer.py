@@ -35,6 +35,7 @@ def to_lss_order(easy_store_order, lss_cart, campaign_product_external_internal_
 
     order_data = {
         "campaign":lss_cart.campaign,
+        "user_subscription":lss_cart.user_subscription,
         "customer_id" : lss_cart.customer_id,
         "customer_name" : lss_cart.customer_name,
         "customer_img" : lss_cart.customer_img,
@@ -48,6 +49,11 @@ def to_lss_order(easy_store_order, lss_cart, campaign_product_external_internal_
         "shipping_cost" : float(easy_store_order.get('total_shipping',0)),
         "total" : float(easy_store_order.get('total_price',0)),
         "meta" : {'easy_store':easy_store_order},
+
+        "price_unit" :lss_cart.campaign.price_unit,
+        "decimal_places" :lss_cart.campaign.decimal_places,
+        "currency" :lss_cart.campaign.currency,
+
     }
 
     return order_data

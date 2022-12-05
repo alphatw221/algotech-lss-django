@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-TIMEOUT=60
+TIMEOUT=300
 LAST_CHANGED="$(date +%s)"
 
 {

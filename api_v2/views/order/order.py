@@ -192,7 +192,6 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         api_user = lib.util.verify.Verify.get_customer_user(request)
         user_subscription_id, points_relative = lib.util.getter.getparams(request, ('user_subscription_id', 'points_relative'), with_user=False)
-
         queryset = api_user.orders.all()
         if user_subscription_id not in ["", None,'undefined','null'] and user_subscription_id.isnumeric():
             queryset=queryset.filter(user_subscription_id = int(user_subscription_id))
@@ -377,6 +376,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 
             point_discount_processor_class:lib.helper.discount_helper.PointDiscountProcessor = factory.point_discount.get_point_discount_processor_class(order.campaign.user_subscription)
             point_discount_processor = point_discount_processor_class(order.buyer, order.campaign.user_subscription, None, order.campaign.meta_point, points_earned = order.points_earned)
+            point_discount_processor.create_point_transaction(order_id = order.id)
             point_discount_processor.update_wallet()
 
         order.payment_status = payment_status

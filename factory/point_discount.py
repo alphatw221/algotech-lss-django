@@ -12,6 +12,7 @@ class PointDiscountProcessor:
         self.points_used = points_used
         self.points_earned = points_earned
 
+        
     def compute_point_discount(self):
         
         if self.meta_point.get('enable')!=True:
@@ -31,7 +32,8 @@ class PointDiscountProcessor:
             if subtotal_after_discount < tier.get('upper_bound',0):
                 point_redemption_rate = tier.get('point_redemption_rate',0)
                 break
-        return math.floor(point_redemption_rate * subtotal_after_discount)
+  
+        return math.floor(point_redemption_rate * subtotal_after_discount)  
 
 
     def compute_expired_date(self):
@@ -42,9 +44,23 @@ class PointDiscountProcessor:
         point_validity = self.meta_point.get('point_validity',None)
         if not point_validity:
             return None
+        
+        if not self.points_earned:
+            return None
+
         return datetime.utcnow()+timedelta(days=30*point_validity)
 
-
+    def create_point_transaction(self, order_id=None):
+        data = {
+            "user_subscription": self.user_subscription,
+            "buyer": self.api_user,
+            "order_id": order_id,
+            "earned": self.points_earned,
+            "used": self.points_used,
+            "expired_at": self.compute_expired_date()
+        }
+        models.user.point_transaction.PointTransaction.objects.create(**data)
+        
     def update_wallet(self):
         if not self.api_user:
             return
