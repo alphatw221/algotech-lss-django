@@ -7,6 +7,7 @@ from django.contrib.auth.models import User as AuthUser
 from django.core.management.base import BaseCommand
 from automation.jobs.send_reminder_messages import send_reminder_messages_job
 import database
+from lib.helper.register_helper import create_new_register_account
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -14,7 +15,8 @@ import arrow
 import business_policy
 import lib
 import service
-from api import models, rule
+from api import models
+from api_v2 import rule
 from api.models.user.promotion_code import PromotionCode
 from api.models.user.user import AuthUserSerializer
 from business_policy.marketing_plan import MarketingPlan
@@ -29,11 +31,39 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         # self.handle_new_registeration_from_hubspot()
         # self.test_add_user_subscription_to_order()
-        
-        self.test_transfter_point_data_from_order_to_point_table()
+       
+        # self.test_cart_expired_adjustment()
+        self.create_kol_account()
         pass
 
+    def create_kol_account(self):
+        country_code = "TW"
+        # email, password, plan, period, intentSecret = lib.util.getter.getdata(request,("email", "password", "plan", "period", "intentSecret"),required=True)
+        email = "tenx2@kimo.com"
+        password = "algotech8311"
+        plan = "kol"
+        firstName = "kol"
+        lastName = "tien"
+        contactNumber = ""
+        country = "TW"
+        timezone = ""
+        period = ""
+        kwargs = {'email':email,'plan':plan,'period':period}
 
+        try:
+            country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(country_code)
+            subscription_plan = country_plan.get_plan(plan)
+
+            kwargs.update({'country_plan':country_plan, 'subscription_plan':subscription_plan})
+        except Exception as e:
+            print(str(e))
+            #TODO refund
+            raise lib.error_handle.error.api_error.ApiVerifyError('support_for_refunding')
+
+        email = kwargs.get('email')
+        amount = kwargs.get('amount')
+
+        ret = lib.helper.register_helper.create_new_register_account(plan, country_plan, subscription_plan, timezone, period, firstName, lastName, email, password, country, country_code,  contactNumber,  amount)
     def modify_database(self):
 
         import json
