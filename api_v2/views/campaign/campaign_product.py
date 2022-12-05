@@ -190,9 +190,11 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def seller_bulk_create_campaign_product(self, request):
         api_user, campaign_id, support_stock_user_subscription_id, = lib.util.getter.getparams(request, ("campaign_id", "support_stock_user_subscription_id",), with_user=True, seller=True)
-        self_user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
-        support_stock_user_subscription = lib.util.verify.Verify.get_support_stock_user_subscriptions_from_user_subscription(support_stock_user_subscription_id,self_user_subscription)
-        campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(self_user_subscription, campaign_id)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
+        if support_stock_user_subscription_id:
+            user_subscription = lib.util.verify.Verify.get_support_stock_user_subscriptions_from_user_subscription(support_stock_user_subscription_id,user_subscription)
+        
 
         try:
             with database.lss.util.start_session() as session:
@@ -209,10 +211,7 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
                         data['message']='Invalid'
                     for request_data in request.data :
                         e = {}
-                        if support_stock_user_subscription:
-                            api_product = database.lss.product.Product.get_object(id=request_data.get('id'), user_subscription_id=support_stock_user_subscription.id, session=session)
-                        else:
-                            api_product = database.lss.product.Product.get_object(id=request_data.get('id'), user_subscription_id=self_user_subscription.id, session=session)
+                        api_product = database.lss.product.Product.get_object(id=request_data.get('id'), user_subscription_id=user_subscription.id, session=session)
                         if not api_product:
                             e['name']='no product found'
                             data.get('errors').append(e)
@@ -329,6 +328,8 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         campaign_product = lib.util.verify.Verify.get_campaign_product(pk)
+        left_qty = campaign_product.qty_for_sale
+        stock_product = campaign_product.product
         campaign = campaign_product.campaign
         lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign.id)
 
@@ -338,6 +339,10 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
         ## soft delete:
         campaign_product.campaign = None
         campaign_product.save()
+        
+        # get left qty back to stock
+        stock_product.qty += left_qty
+        stock_product.save()
 
         return Response({"message": "delete success"}, status=status.HTTP_200_OK)
     
@@ -349,15 +354,23 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         campaign_product = lib.util.verify.Verify.get_campaign_product(pk)
+        original_campaign_product_qyt = campaign_product.qty_for_sale
         campaign = campaign_product.campaign
+        
         lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign.id)
-        print(request.data)
         serializer = models.campaign.campaign_product.CampaignProductSerializerUpdate(
             campaign_product, data=request.data, partial=True)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         campaign_product = serializer.save()
         serializer = models.campaign.campaign_product.CampaignProductSerializer(campaign_product)
+        
+        #update stock product qty
+        product = campaign_product.product
+        if campaign_product.qty_for_sale != original_campaign_product_qyt:
+            qty_difference = campaign_product.qty_for_sale - original_campaign_product_qyt
+            product.qty -= qty_difference
+            product.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     @action(detail=True, methods=['PUT'], url_path=r'seller/toggle/active', permission_classes=(IsAuthenticated,))
