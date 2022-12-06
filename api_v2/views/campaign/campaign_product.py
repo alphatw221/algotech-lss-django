@@ -15,6 +15,9 @@ import lib
 from datetime import datetime
 import database
 import factory
+
+class CampaignProductSerializerWithProductInfo(models.campaign.campaign_product.CampaignProductSerializer):
+    product = models.product.product.ProductSerializer(default=dict)
 class CampaignProductPagination(PageNumberPagination):
 
     page_size = 25
@@ -189,95 +192,104 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['POST'], url_path=r'seller/create/bulk', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def seller_bulk_create_campaign_product(self, request):
-        api_user, campaign_id, support_stock_user_subscription_id, = lib.util.getter.getparams(request, ("campaign_id", "support_stock_user_subscription_id",), with_user=True, seller=True)
+        api_user, campaign_id, = lib.util.getter.getparams(request, ("campaign_id",), with_user=True, seller=True)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        self_user_subscription_id = user_subscription.id
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
-        if support_stock_user_subscription_id:
-            user_subscription = lib.util.verify.Verify.get_support_stock_user_subscriptions_from_user_subscription(support_stock_user_subscription_id,user_subscription)
-        
+        user_subscription_set = set()
+        new_format_data = {}
+        for i in request.data:
+            if i['user_subscription'] not in user_subscription_set:
+                user_subscription_set.add(i['user_subscription'])
+                new_format_data[i['user_subscription']] = []
+            new_format_data[i['user_subscription']].append(i)
+        print(new_format_data)
+        for user_subscription_id, product_data in new_format_data.items():
+            try:
+                if user_subscription_id == self_user_subscription_id:
+                    pass
+                else:
+                    user_subscription = lib.util.verify.Verify.get_support_stock_user_subscriptions_from_user_subscription(support_stock_user_subscription_id=user_subscription_id, self_user_subscription_subscription=user_subscription)
+                
+                with database.lss.util.start_session() as session:
+                    with session.start_transaction():
+                        data = {'message':'Invalid','errors':[]}
+                        got_error=False
+                        order_code_set = set()
+                        api_campaign_products = database.lss.campaign_product.CampaignProduct.filter(campaign_id=campaign.id, session=session)
+                        for api_campaign_product in api_campaign_products:
+                            order_code_set.add(api_campaign_product.get('order_code'))
 
-        try:
-            with database.lss.util.start_session() as session:
-                with session.start_transaction():
-                    data = {'message':'Invalid','errors':[]}
-                    got_error=False
-                    order_code_set = set()
-                    api_campaign_products = database.lss.campaign_product.CampaignProduct.filter(campaign_id=campaign.id, session=session)
-                    for api_campaign_product in api_campaign_products:
-                        order_code_set.add(api_campaign_product.get('order_code'))
+                        if not request.data:
+                            got_error = True
+                            data['message']='Invalid'
+                        for request_data in product_data :
+                            e = {}
+                            api_product = database.lss.product.Product.get_object(id=request_data.get('id'), user_subscription_id=request_data['user_subscription'], session=session)
+                            if not api_product:
+                                e['name']='no product found'
+                                data.get('errors').append(e)
+                                got_error = True
+                                continue
+                            if request_data.get('type') not in [models.campaign.campaign_product.TYPE_PRODUCT,models.campaign.campaign_product.TYPE_LUCKY_DRAW]:
+                                e['type'] = 'type_invalid'
+                                data.get('errors').append(e)
+                                got_error = True
+                                continue
 
-                    if not request.data:
-                        got_error = True
-                        data['message']='Invalid'
-                    for request_data in request.data :
-                        e = {}
-                        api_product = database.lss.product.Product.get_object(id=request_data.get('id'), user_subscription_id=user_subscription.id, session=session)
-                        if not api_product:
-                            e['name']='no product found'
+                            if request_data.get('type')==models.campaign.campaign_product.TYPE_PRODUCT and request_data.get('order_code') in order_code_set:
+                                e['order_code']='order_code_duplicate'
+                                got_error = True
+                            else:
+                                order_code_set.add(request_data.get('order_code'))
+
+                            if not request_data.get('assign_qty'):
+                                e['assign_qty']='invalid_qty'
+                                got_error = True
+
+                            # elif api_product.data.get('qty') < request_data.get('qty'):
+                            #     e['qty']=f"only {api_product.data.get('qty')} left"
+                            #     got_error = True
+                            max_order_amount = request_data.get('max_order_amount') if request_data.get('max_order_amount') else 0
+                            max_order_amount = int(max_order_amount)
+                            if request_data.get('type')==models.campaign.campaign_product.TYPE_PRODUCT and max_order_amount > request_data.get('assign_qty'):
+                                e['max_order_amount']='max_order_amount_grater_than_qty'
+                                got_error = True
+                            
                             data.get('errors').append(e)
-                            got_error = True
-                            continue
-                        if request_data.get('type') not in [models.campaign.campaign_product.TYPE_PRODUCT,models.campaign.campaign_product.TYPE_LUCKY_DRAW]:
-                            e['type'] = 'type_invalid'
-                            data.get('errors').append(e)
-                            got_error = True
-                            continue
 
-                        if request_data.get('type')==models.campaign.campaign_product.TYPE_PRODUCT and request_data.get('order_code') in order_code_set:
-                            e['order_code']='order_code_duplicate'
-                            got_error = True
-                        else:
-                            order_code_set.add(request_data.get('order_code'))
+                            if not e:
+                                data.get('errors').append(None)
+                                qty_for_sale = int(request_data.get('assign_qty', 0)) if request_data.get('assign_qty') else 0
+                                api_product.distribute(qty_for_sale, sync=False, session=session)
+                                database.lss.campaign_product.CampaignProduct.create(
+                                    image = str(request_data.get('image')),
+                                    name=str(request_data.get('name', '')), 
+                                    sku = str(request_data.get('sku', '')),
+                                    order_code=str(request_data.get('order_code', '')), 
+                                    qty_for_sale=qty_for_sale, 
+                                    max_order_amount=int(request_data.get('max_order_amount')) if request_data.get('max_order_amount') else 0, 
+                                    price=float(request_data.get('price', 0)) if request_data.get('type')==models.product.product.TYPE_PRODUCT else 0, 
+                                    customer_editable=bool(request_data.get('customer_editable', True)), 
+                                    customer_removable=bool(request_data.get('customer_removable', True)),
+                                    oversell = bool(request_data.get('oversell', False)),
+                                    overbook = bool(request_data.get('overbook', False)),
+                                    tag=list(request_data.get('tag',[])),
+                                    type=str(request_data.get('type',models.product.product.TYPE_PRODUCT)),
+                                    description = request_data.get('description',''),
+                                    product_id = int(request_data.get('id')) if request_data.get('id') else None,
+                                    campaign_id=campaign.id,
+                                    categories = list(request_data.get('categories',[])) if request_data.get('categories',[]) else [],
+                                    meta = api_product.data.get('meta',{}),      
+                                    session=session)
 
-                        if not request_data.get('assign_qty'):
-                            e['assign_qty']='invalid_qty'
-                            got_error = True
+                        if got_error:
+                            print(data)
+                            raise Exception()
 
-                        # elif api_product.data.get('qty') < request_data.get('qty'):
-                        #     e['qty']=f"only {api_product.data.get('qty')} left"
-                        #     got_error = True
-                        max_order_amount = request_data.get('max_order_amount') if request_data.get('max_order_amount') else 0
-                        max_order_amount = int(max_order_amount)
-                        if request_data.get('type')==models.campaign.campaign_product.TYPE_PRODUCT and max_order_amount > request_data.get('assign_qty'):
-                            e['max_order_amount']='max_order_amount_grater_than_qty'
-                            got_error = True
-                        
-                        data.get('errors').append(e)
-
-                        if not e:
-                            data.get('errors').append(None)
-                            qty_for_sale = int(request_data.get('assign_qty', 0)) if request_data.get('assign_qty') else 0
-                            api_product.distribute(qty_for_sale, sync=False, session=session)
-                            database.lss.campaign_product.CampaignProduct.create(
-                                image = str(request_data.get('image')),
-                                name=str(request_data.get('name', '')), 
-                                sku = str(request_data.get('sku', '')),
-                                order_code=str(request_data.get('order_code', '')), 
-                                qty_for_sale=qty_for_sale, 
-                                max_order_amount=int(request_data.get('max_order_amount')) if request_data.get('max_order_amount') else 0, 
-                                price=float(request_data.get('price', 0)) if request_data.get('type')==models.product.product.TYPE_PRODUCT else 0, 
-                                customer_editable=bool(request_data.get('customer_editable', True)), 
-                                customer_removable=bool(request_data.get('customer_removable', True)),
-                                oversell = bool(request_data.get('oversell', False)),
-                                overbook = bool(request_data.get('overbook', False)),
-                                tag=list(request_data.get('tag',[])),
-                                type=str(request_data.get('type',models.product.product.TYPE_PRODUCT)),
-                                description = request_data.get('description',''),
-                                product_id = int(request_data.get('id')) if request_data.get('id') else None,
-                                campaign_id=campaign.id,
-                                categories = list(request_data.get('categories',[])) if request_data.get('categories',[]) else [],
-                                meta = api_product.data.get('meta',{}),      
-                                session=session)
-
-                    if got_error:
-                        print(data)
-                        raise Exception()
-
-            
-
-        except Exception :
-            print(traceback.format_exc())
-            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+            except Exception :
+                print(traceback.format_exc())
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)
             
         return Response(models.campaign.campaign_product.CampaignProductSerializer(campaign.products, many=True).data, status=status.HTTP_200_OK)
 
@@ -313,11 +325,11 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
         queryset = campaign.products.filter(**kwargs)
         page = self.paginate_queryset(queryset)
         if page is not None:
-            serializer = models.campaign.campaign_product.CampaignProductSerializer(page, many=True)
+            serializer = CampaignProductSerializerWithProductInfo(page, many=True)
             result = self.get_paginated_response(serializer.data)
             data = result.data
         else:
-            serializer = models.campaign.campaign_product.CampaignProductSerializer(queryset, many=True)
+            serializer = CampaignProductSerializerWithProductInfo(queryset, many=True)
             data = serializer.data
 
         return Response(data, status=status.HTTP_200_OK)
