@@ -550,7 +550,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         customer = lib.util.verify.Verify.get_customer_from_user_subscription(user_subscription, buyer_id)
         wallet = customer.wallets.get(user_subscription=user_subscription)
-        queryset = customer.point_transactions.filter(user_subscription = user_subscription) #temp 
+        queryset = customer.point_transactions.filter(user_subscription = user_subscription).order_by('-created_at') #temp 
         
         page = self.paginate_queryset(queryset)
         if page is not None:
