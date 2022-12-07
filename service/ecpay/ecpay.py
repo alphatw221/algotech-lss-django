@@ -13,17 +13,19 @@ import time
 import random
 
 
-action_url = 'https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5'  # 測試環境
-# action_url = 'https://payment.ecpay.com.tw/Cashier/AioCheckOut/V5' # 正式環境
-Invoice_Url = 'https://einvoice-stage.ecpay.com.tw/Invoice/Issue'
-# Invoice_Url = 'https://einvoice.ecpay.com.tw/B2CInvoice/Issue'
+# action_url = 'https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5'  # 測試環境
+action_url = 'https://payment.ecpay.com.tw/Cashier/AioCheckOut/V5' # 正式環境
+# Invoice_Url = 'https://einvoice-stage.ecpay.com.tw/Invoice/Issue'
+Invoice_Url = 'https://einvoice.ecpay.com.tw/B2CInvoice/Issue'
 
 
 
 def create_order(merchant_id, hash_key, hash_iv,payment_amount, order, return_url, order_result_url):
-    item_name = ''
-    for item in order.products:
-        item_name += f'#{dict(order.products[item])["name"]}'
+    
+    # item_name = ''
+    # for item in order.products:
+    #     print(order.products)
+    #     item_name += f'#{dict(order.products[item])["name"]}'
     params = {
     'MerchantTradeNo': str(order.id)+datetime.now().strftime("%Y%m%d") ,
     'StoreID': '',
@@ -31,7 +33,7 @@ def create_order(merchant_id, hash_key, hash_iv,payment_amount, order, return_ur
     'PaymentType': 'aio',
     'TotalAmount': payment_amount,
     'TradeDesc': 'test order',
-    'ItemName': item_name[1:],
+    'ItemName': 'Order#',
     'ReturnURL': str(return_url),
     'ChoosePayment': 'ALL',
     'ClientBackURL': 'https://www.ecpay.com.tw/client_back_url.php',
@@ -56,15 +58,18 @@ def create_order(merchant_id, hash_key, hash_iv,payment_amount, order, return_ur
         HashKey=hash_key,
         HashIV=hash_iv
     )
+    
     try:
         # 產生綠界訂單所需參數
+        print(params)
         final_order_params = ecpay_payment_sdk.create_order(params)
 
         # 產生 html 的 form 格式
-        action_url = 'https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5'  # 測試環境
-        # action_url = 'https://payment.ecpay.com.tw/Cashier/AioCheckOut/V5' # 正式環境
+        # action_url = 'https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5'  # 測試環境
+        action_url = 'https://payment.ecpay.com.tw/Cashier/AioCheckOut/V5' # 正式環境
         html = ecpay_payment_sdk.gen_html_post_form(action_url, final_order_params)
         # return action_url,final_order_params
+       
         return action_url,final_order_params
     except Exception as error:
         print('An exception happened: ' + str(error))
@@ -105,8 +110,8 @@ def create_register_order(merchant_id, hash_key, hash_iv,payment_amount:int,plan
         final_order_params = ecpay_payment_sdk.create_order(params)
 
         # 產生 html 的 form 格式
-        action_url = 'https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5'  # 測試環境
-        # action_url = 'https://payment.ecpay.com.tw/Cashier/AioCheckOut/V5' # 正式環境
+        # action_url = 'https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5'  # 測試環境
+        action_url = 'https://payment.ecpay.com.tw/Cashier/AioCheckOut/V5' # 正式環境
         html = ecpay_payment_sdk.gen_html_post_form(action_url, final_order_params)
 
         return True, action_url, final_order_params
