@@ -360,7 +360,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
 
         action,payment = service.ecpay.ecpay.create_order(merchant_id, hash_key, hash_iv, int(payment_amount) , order, 
             f'https://staginglss.accoladeglobal.net/api/v2/payment/ecpay/callback/success/{order_oid}/', 
-            f'https://staginglss.accoladeglobal.net/buyer/order/{order_oid}/confirmation',
+            f'https://staginglss.accoladeglobal.net/buyer/order/{order_oid}/confirmation'
             )
         
         if not payment:
