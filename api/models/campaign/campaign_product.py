@@ -1,5 +1,6 @@
 from api.models.campaign.campaign import Campaign
 from api.models.product.product import Product
+from api.models.supplier.supplier import Supplier
 from api.models.user.user import User
 from django.contrib import admin
 from djongo import models
@@ -33,6 +34,8 @@ class CampaignProduct(models.Model):
     product = models.ForeignKey(
         Product, blank=True, null=True, on_delete=models.SET_NULL, related_name='campaign_products')
 
+    supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, related_name='campaign_products')
+    
     qty_for_sale = models.IntegerField(blank=False, null=True, default=0)
     qty_sold = models.IntegerField(blank=False, null=True, default=0)
     qty_pending_payment = models.IntegerField(blank=False, null=False, default=0)
