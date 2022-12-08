@@ -243,7 +243,12 @@ class CartHelper():
                         **pymongo_cart.data, 
                         **shipping_data,
                         
-                        )  
+                        )
+                    
+                    #for ecpay logistic 
+                    if pymongo_cart.data['meta'].get('ecpay_cvs'):
+                        pymongo_order.data['meta']['ecpay_cvs'] = pymongo_cart.data['meta'].get('ecpay_cvs')
+                        pymongo_order.update(session=session, sync=True, **pymongo_order.data)
 
                     for campaign_product_id_str, qty in pymongo_order.data.get('products',{}).copy().items():
                         campaign_product_data = campaign_product_data_dict[campaign_product_id_str]
@@ -285,7 +290,7 @@ class CartHelper():
         subtotal = 0
         shipping_cost = 0
         total = 0
-        meta = {}
+        meta = pymongo_order.data.get('meta',{})
 
         product_category_data_dict={}
         product_category_products_dict = {}

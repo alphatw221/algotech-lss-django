@@ -8,6 +8,7 @@
 import traceback
 from .payment_sdk import ECPayPaymentSdk
 from .invoice_sdk import EcpayInvoice
+from .logistic_sdk import ECPayLogisticSdk
 from datetime import datetime
 import time
 import random
@@ -237,3 +238,91 @@ def register_create_invoice(merchant_id,hash_key,hash_iv,user_register,amount):
     print('發票號碼：' + aReturn_Info['InvoiceNumber'])
     
     return aReturn_Info
+
+def cvs_map(cart_oid,merchant_id,hash_key,hash_iv,logistics_sub_type,server_reply_url):
+    # FAMIC2C 
+    MerchantTradeNo = 'ECPAY' + time.strftime("%Y%m%d%H%M%S", time.localtime())
+    cvs_map_params = {
+        "MerchantTradeNo": MerchantTradeNo,
+        "LogisticsType": "CVS",
+        # 若申請類型為 B2C，只能串參數為 FAMI、UNIMART、HILIFE
+        # 若申請類型為 C2C，只能串參數為 FAMIC2C、UNIMARTC2C、HILIFEC2C
+        "LogisticsSubType": logistics_sub_type,
+        "IsCollection": "N",
+        "ServerReplyURL": server_reply_url,
+        "ExtraData": cart_oid,
+        "Device": 0,
+    }
+
+    # 建立實體
+    ecpay_logistic_sdk = ECPayLogisticSdk(
+        MerchantID=merchant_id,
+        HashKey=hash_key,
+        HashIV=hash_iv
+    )
+
+    try:
+        # 產生綠界物流訂單所需參數
+        final_params = ecpay_logistic_sdk.cvs_map(cvs_map_params)
+
+        # 產生 html 的 form 格式
+        #action_url = 'https://logistics-stage.ecpay.com.tw/Express/map'  # 測試環境
+        action_url = 'https://logistics.ecpay.com.tw/Express/map' # 正式環境
+        html = ecpay_logistic_sdk.gen_html_post_form(action_url, final_params)
+        return action_url,final_params
+    except Exception as error:
+        print('An exception happened: ' + str(error))
+        
+
+def create_shipping_order(is_collection,amount):
+    create_shipping_order_params = {
+        'MerchantTradeNo': datetime.now().strftime("NO%Y%m%d%H%M%S"),
+        'MerchantTradeDate': datetime.now().strftime("%Y/%m/%d %H:%M:%S"),
+        'LogisticsType': 'cvs',
+        'LogisticsSubType': module.LogisticsSubType['UNIMART_C2C'],
+        'GoodsAmount': amount,
+        'CollectionAmount': amount,
+        'IsCollection': is_collection,
+        'GoodsName': '測試商品',
+        'SenderName': '測試寄件者',
+        'SenderPhone': '0226550115',
+        'SenderCellPhone': '0911222333',
+        'ReceiverName': '測試收件者',
+        'ReceiverPhone': '0226550115',
+        'ReceiverCellPhone': '0933222111',
+        'ReceiverEmail': 'test@gmail.com',
+        'TradeDesc': '測試交易敘述',
+        'ServerReplyURL': 'https://www.ecpay.com.tw/server_reply_url',
+        'ClientReplyURL': '',
+        'Remark': '測試備註',
+        'PlatformID': '',
+        'LogisticsC2CReplyURL': 'https://www.ecpay.com.tw/logistics_c2c_reply',
+    }
+
+    shipping_cvs_params = {
+        'ReceiverStoreID': '991182',
+        'ReturnStoreID': '991182',
+    }
+
+    # 更新及合併參數
+    create_shipping_order_params.update(shipping_cvs_params)
+
+    # 建立實體
+    ecpay_logistic_sdk = ECPayLogisticSdk(
+        MerchantID='2000933',
+        HashKey='XBERn1YOvpM9nfZc',
+        HashIV='h1ONHk4P4yqbl5LK'
+    )
+
+    try:
+        # 介接路徑
+        action_url = 'https://logistics-stage.ecpay.com.tw/Express/Create'  # 測試環境
+        # action_url = 'https://logistics.ecpay.com.tw/Express/Create' # 正式環境
+
+        # 建立物流訂單並接收回應訊息
+        reply_result = ecpay_logistic_sdk.create_shipping_order(
+            action_url=action_url,
+            client_parameters=create_shipping_order_params)
+
+    except Exception as error:
+        print('An exception happened: ' + str(error))
