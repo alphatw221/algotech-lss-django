@@ -7,7 +7,6 @@ from dateutil import parser
 
 class DateTimeMapper(FieldMapper):
     def get_field_data(self, object):
-        return '123'
         return parser.parse(super().get_field_data(object)).strftime("%Y-%m-%d")
 
 

@@ -88,6 +88,66 @@ def get_order_export_cursor(pymongo_filter_query, pymongo_sort_by):
         # data_json = loads(data_str)    
 
         return cursor
+    
+def get_order_export_cursor_for_kol(pymongo_filter_query, pymongo_sort_by):
+
+        query = [
+            {"$match":pymongo_filter_query},
+            {
+                "$lookup": 
+                {
+                    "from": "api_order_product",
+                    "localField": "id",
+                    "foreignField": "order_id",
+                    "as": "order_products",
+                }
+            },
+            {
+                "$lookup": 
+                {
+                    "from": "api_campaign_product",
+                    "localField": "order_products.campaign_product_id",
+                    "foreignField": "id",
+                    "as": "campaign_products"
+                }
+            },
+            { "$sort" : pymongo_sort_by},
+            { "$project":{
+                "_id":0,
+                "id":1,
+                "subtotal":1,
+                "discount":1,
+                "point_discount":1,
+                "adjust_price":1,
+                "shipping_cost":1,
+                "total_without_shipping_cost": {
+                    "$subtract": [ 
+                        "$subtotal", 
+                        {"$add": [
+                            "$point_discount", "$discount", "$adjust_price"
+                        ]}
+                    ]
+                },
+                "price_ori_subtotal":{"$sum":"$campaign_products.price_ori"},
+                "gross": {
+                    "$subtract": [
+                        {
+                            "$subtract": [ 
+                                "$subtotal", 
+                                {"$add": [
+                                    "$point_discount", "$discount", "$adjust_price"
+                                ]}
+                            ]
+                        },
+                        {"$sum":"$campaign_products.price_ori"}
+                    ]
+                }
+            }},
+        ]
+
+        cursor=__collection.aggregate(query)
+        # print(list(cursor))
+        return cursor
 
 def get_wallet_data_with_expired_points(start_from = None, end_at = None):
 
