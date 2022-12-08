@@ -18,4 +18,6 @@ class CampaignComment(Collection):
             return cls(data.get('id'), data.get('_id'), data)
 
 def get_count_in_campaign(campaign_id):
-    return __collection.find({'campaign_id': campaign_id}).count()
+    if campaign_id:
+        return __collection.find({'campaign_id': campaign_id}).count()
+    return 0

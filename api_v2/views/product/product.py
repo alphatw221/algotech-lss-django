@@ -31,11 +31,13 @@ class ProductViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'], url_path=r'search', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def search_product(self, request):
-        api_user, search_column, keyword, product_status, product_type, category_id, exclude_products, sort_by = \
-            lib.util.getter.getparams(request, ("search_column", "keyword", "product_status", "product_type", "category_id", "exclude", "sort_by"), with_user=True, seller=True)
-        
+        api_user, support_stock_user_subscription_id, search_column, keyword, product_status, product_type, category_id, exclude_products, sort_by = \
+            lib.util.getter.getparams(request, ("support_stock_user_subscription_id", "search_column", "keyword", "product_status", "product_type", "category_id", "exclude", "sort_by"), with_user=True, seller=True)
         user_subscription = \
             lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        if support_stock_user_subscription_id:
+            user_subscription = lib.util.verify.Verify.get_support_stock_user_subscriptions_from_user_subscription(support_stock_user_subscription_id,user_subscription)
+        
         
         kwargs = {'status': product_status if product_status else 'enabled'}
         if (search_column in ["", None]) and (keyword not in [None, ""]):

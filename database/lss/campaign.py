@@ -167,34 +167,35 @@ def get_ongoing_campaign_disallow_overbook_campaign_product():
 
 def get_order_complete_proceed_count(campaign_id):
 
-    
-    cursor=__collection.aggregate([
-        {"$match":{"id":campaign_id}},
-        {
-            "$lookup": {
-                "from": "api_order","as": "orders", # "localField": "id","foreignField": "campaign_id",
-                'let': {'id': "$id" },
-                "pipeline":[
-                    {"$match":{
-                        '$expr': { '$eq': ["$$id", "$campaign_id"] },
-                        "id":{"$ne":None}}
-                     },
-                    {"$project":{"_id":0,
-                    "complete": {  "$cond": [ { "$eq":["$payment_status", models.order.order.PAYMENT_STATUS_PAID ] }, 1, 0]},
-                    "proceed":{  "$cond": [ { "$ne":["$payment_status", models.order.order.PAYMENT_STATUS_PAID ] }, 1, 0]}
-                    }},
-                ]
+    if campaign_id:
+        cursor=__collection.aggregate([
+            {"$match":{"id":campaign_id}},
+            {
+                "$lookup": {
+                    "from": "api_order","as": "orders", # "localField": "id","foreignField": "campaign_id",
+                    'let': {'id': "$id" },
+                    "pipeline":[
+                        {"$match":{
+                            '$expr': { '$eq': ["$$id", "$campaign_id"] },
+                            "id":{"$ne":None}}
+                        },
+                        {"$project":{"_id":0,
+                        "complete": {  "$cond": [ { "$eq":["$payment_status", models.order.order.PAYMENT_STATUS_PAID ] }, 1, 0]},
+                        "proceed":{  "$cond": [ { "$ne":["$payment_status", models.order.order.PAYMENT_STATUS_PAID ] }, 1, 0]}
+                        }},
+                    ]
+                },
             },
-        },
-        {"$project":{"_id":0,
-        "orders":1,
-        "complete_count":{"$sum":"$orders.complete"},
-        "proceed_count":{"$sum":"$orders.proceed"}
-        }}
-    ])
-    l = list(cursor)
-    return l[0].get('complete_count',0) if l else 0,\
-        l[0].get('proceed_count',0) if l else 0
+            {"$project":{"_id":0,
+            "orders":1,
+            "complete_count":{"$sum":"$orders.complete"},
+            "proceed_count":{"$sum":"$orders.proceed"}
+            }}
+        ])
+        l = list(cursor)
+        return l[0].get('complete_count',0) if l else 0,\
+            l[0].get('proceed_count',0) if l else 0
+    return 0, 0
         
 def sales_basic_info(start_time, end_time, user_subscription_id):
     query=db.api_campaign.aggregate([
@@ -498,7 +499,7 @@ def get_order_sales_data(start_time, end_time, user_subscription_id):
 def get_previous_campaign_data(campaign_id, user_subscription_id):
     cursor = __collection.find({"user_subscription_id":user_subscription_id, "id":{"$lt":campaign_id}}).sort('id',-1).limit(1)
     l = list(cursor)
-    return l[0] if len(l) else None
+    return l[0] if len(l) else {}
 
 def get_campaign_abandon_cart_which_enable_auto_clear(start_from=None, end_at=None):
 

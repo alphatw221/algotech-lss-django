@@ -1,12 +1,13 @@
 import random
 import string
 from datetime import datetime, timedelta
-
+from django.db.models import Q
 from django.conf import settings
 from django.contrib.auth.models import User as AuthUser
 from django.core.management.base import BaseCommand
 from automation.jobs.send_reminder_messages import send_reminder_messages_job
 import database
+from lib.helper.register_helper import create_new_register_account
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -14,10 +15,12 @@ import arrow
 import business_policy
 import lib
 import service
-from api import models, rule
+from api import models
+from api_v2 import rule
 from api.models.user.promotion_code import PromotionCode
 from api.models.user.user import AuthUserSerializer
 from business_policy.marketing_plan import MarketingPlan
+import pytz
 
 
 class Command(BaseCommand):
@@ -29,11 +32,85 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         # self.handle_new_registeration_from_hubspot()
         # self.test_add_user_subscription_to_order()
-        
-        self.test_cart_expired_adjustment()
+       
+        # self.test_cart_expired_adjustment()
+        self.create_kol_account()
         pass
+    
+    def __create_new_register_account(self, plan, country_plan, subscription_plan, timezone, period, firstName, lastName, email, password, country, country_code,  contactNumber,  amount, paymentIntent=None, subscription_meta:dict={}):
+        now = datetime.now(pytz.timezone(timezone)) if timezone in pytz.common_timezones else datetime.now()
+        expired_at = now+timedelta(days=90) if period == business_policy.subscription.PERIOD_QUARTER else now+timedelta(days=365)
+        
+        auth_user = AuthUser.objects.create_user(
+            username=f'{firstName} {lastName}', email=email, password=password)
 
+        user_subscription = models.user.user_subscription.UserSubscription.objects.create(
+            name=f'{firstName} {lastName}', 
+            status='valid', 
+            started_at=now,
+            expired_at=expired_at, 
+            user_plan= {"activated_platform" : ["facebook","youtube","instagram"]}, 
+            meta_country={ 'activated_country': [country_code] },
+            meta = subscription_meta,
+            type=plan,
+            lang=country_plan.language,
+            country = country_code,
+            purchase_price = amount,
+            **business_policy.subscription_plan.SubscriptionPlan.get_plan_limit(plan)
+            )
+            
+        api_user = models.user.user.User.objects.create(
+            name=f'{firstName} {lastName}', email=email, type='user', status='valid', phone=contactNumber, auth_user=auth_user, user_subscription=user_subscription)
+        
+        models.user.deal.Deal.objects.create(
+            user_subscription=user_subscription,
+            purchased_plan=plan, 
+            total=amount, 
+            status=models.user.deal.STATUS_SUCCESS, 
+            payer=api_user, 
+            payment_time=datetime.utcnow()
+        )
 
+        lib.util.marking_tool.NewUserMark.mark(api_user, save = True)
+        
+        return {
+            "Customer Name":f'{firstName} {lastName}',
+            "Email":email,
+            "Password":password[:4]+"*"*(len(password)-4),
+            "Target Country":country, 
+            "Your Plan":subscription_plan.get('text'),
+            "Subscription Period":"Monthly",
+            "Subscription End Date":expired_at.strftime("%d %B %Y %H:%M"),
+            "Receipt":paymentIntent.charges.get('data')[0].get('receipt_url') if paymentIntent else ""
+        }
+    def create_kol_account(self):
+        country_code = "TW"
+        # email, password, plan, period, intentSecret = lib.util.getter.getdata(request,("email", "password", "plan", "period", "intentSecret"),required=True)
+        email = "nick@lss.com"
+        password = "1234"
+        plan = "premium"
+        firstName = "nick"
+        lastName = "lien"
+        contactNumber = ""
+        country = "TW"
+        timezone = ""
+        period = ""
+        kwargs = {'email':email,'plan':plan,'period':period}
+
+        try:
+            country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(country_code)
+            subscription_plan = country_plan.get_plan(plan)
+
+            kwargs.update({'country_plan':country_plan, 'subscription_plan':subscription_plan})
+        except Exception as e:
+            print(str(e))
+            #TODO refund
+            raise lib.error_handle.error.api_error.ApiVerifyError('support_for_refunding')
+
+        email = kwargs.get('email')
+        amount = kwargs.get('amount')
+
+        ret = self.__create_new_register_account(plan, country_plan, subscription_plan, timezone, period, firstName, lastName, email, password, country, country_code,  contactNumber,  amount)
     def modify_database(self):
 
         import json
@@ -989,7 +1066,7 @@ class Command(BaseCommand):
         data = database.lss.campaign.get_campaign_abandon_cart_which_enable_auto_clear(start_from, end_at)
         print(data)
         
-    def test_uncheckout_cart_remind():
+    def test_uncheckout_cart_remind(self):
         print("run uncheckout_cart_reminder cron")
         start_time = arrow.now()
         utc_time_four_hours_ago = arrow.utcnow().shift(hours=-4)
@@ -1001,3 +1078,18 @@ class Command(BaseCommand):
             service.rq.queue.enqueue_test_queue(job=send_reminder_messages_job, pymongo_cart=pymongo_cart, user_subscription_id=cart.campaign.user_subscription.id, lang=cart.campaign.lang)
         end_time = arrow.now()
         print(end_time-start_time)
+        
+    def test_transfter_point_data_from_order_to_point_table(self):
+        for order in models.order.order.Order.objects.filter(Q(points_used__gt=0)|Q(points_earned__gt=0)):
+            print("order id", order.id)
+            # if order.points_earned > 0 or order.points_used > 0:
+            models.user.point_transaction.PointTransaction.objects.create(
+                user_subscription=order.user_subscription,
+                buyer=order.buyer,
+                order=order,
+                earned=order.points_earned,
+                used=order.points_used,
+                expired_at=order.point_expired_at,
+                created_at=order.created_at
+            )
+            

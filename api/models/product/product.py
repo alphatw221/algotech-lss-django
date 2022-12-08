@@ -1,3 +1,4 @@
+from api.models.supplier.supplier import Supplier
 from api.models.user.user import User, UserSerializer
 from api.models.user.user_subscription import (UserSubscription,
                                                UserSubscriptionSerializer)
@@ -33,7 +34,7 @@ class Product(models.Model):
         UserSubscription, null=True, on_delete=models.SET_NULL, related_name='products')
     created_by = models.ForeignKey(
         User, null=True, on_delete=models.SET_NULL, related_name='products')
-
+    supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, related_name='products')
     qty = models.IntegerField(blank=False, null=True, default=0)
 
     name = models.CharField(
@@ -82,6 +83,7 @@ class Product(models.Model):
     meta_logistic = models.JSONField(default=dict, null=True, blank=True)
     tag = models.JSONField(default=list, null=True, blank=True)
     categories = models.JSONField(default=list, null=True, blank=True)
+    
     def __str__(self):
         return self.name
 

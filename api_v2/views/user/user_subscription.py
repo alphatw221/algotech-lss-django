@@ -3,6 +3,8 @@ from tracemalloc import start
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.http import HttpResponseRedirect
+from api.models.user.point_transaction import PointTransactionSerializer
+from api.models.user.buyer_wallet import BuyerWalletSerializer
 from itsdangerous import Serializer
 from numpy import require
 from django.db.models import Q, Value
@@ -17,12 +19,15 @@ from rest_framework.parsers import MultiPartParser, JSONParser, FormParser
 
 from api import models
 from api_v2 import rule
+from automation import jobs
+
 import stripe, pytz, lib, service, business_policy, json
 from database.lss._config import db
 
 from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
 import database
+import factory
 
 class UserSubscriptionSerializerName(models.user.user_subscription.UserSubscriptionSerializer):
     class Meta:
@@ -30,7 +35,10 @@ class UserSubscriptionSerializerName(models.user.user_subscription.UserSubscript
         fields = ['name','id']
 
 class WalletSerializerWithSellerInfo(models.user.buyer_wallet.BuyerWalletSerializer):
-    user_subscription = UserSubscriptionSerializerName(read_only=True, default=dict)
+    user_subscription = UserSubscriptionSerializerName(read_only=True, default=dict)\
+        
+class WalletSerializerWithBuyerInfo(models.user.buyer_wallet.BuyerWalletSerializer):
+    buyer = models.user.user.UserSerializer()
     
 class UserSerializerBuyerAccountInfo(models.user.user.UserSerializer):
     wallets = WalletSerializerWithSellerInfo(many=True, read_only=True, default=list)
@@ -54,6 +62,7 @@ class UserSubscriptionAccountInfo(models.user.user_subscription.UserSubscription
         many=True, read_only=True, default=list)
 class UserSerializerSellerAccountInfo(models.user.user.UserSerializer):
     user_subscription = UserSubscriptionAccountInfo(read_only=True, default=dict)
+
 
 class UserSubscriptionPagination(PageNumberPagination):
 
@@ -510,19 +519,17 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         data = result.data
         return Response(data, status=status.HTTP_200_OK)
     
-    @action(detail=False, methods=['GET'], url_path=r'retrieve/buyers/history', permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['GET'], url_path=r'list/buyer/(?P<buyer_id>[^/.]+)/order/history', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def retrieve_buyer_order_history(self, request):
+    def list_buyer_order_history(self, request, buyer_id):
         
-        buyer_id, points_relative, page, page_size, = lib.util.getter.getparams(request, ('buyer_id', 'points_relative', 'page', 'page_size'), with_user=False)
+        page, page_size, = lib.util.getter.getparams(request, ('page', 'page_size'), with_user=False)
         if buyer_id in ["", None,'undefined','null'] or not buyer_id.isnumeric():
             raise lib.error_handle.error.api_error.ApiCallerError("Missing data")
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         buyer = models.user.user.User.objects.get(id=buyer_id)
         queryset = buyer.orders.filter(user_subscription=user_subscription).order_by('-created_at')
-        if points_relative == "true":
-            queryset=queryset.filter(Q(points_earned__gt = 0)|Q(points_used__gt = 0)|Q(point_discount__gt = 0))
         
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -531,9 +538,70 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         else:
             data = OrderSerializerWithBuyerAccountInfo(queryset, many=True).data
         return Response(data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['GET'], url_path=r'list/buyer/(?P<buyer_id>[^/.]+)/points/history', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def list_buyer_point_history(self, request, buyer_id):
+        
+        page, page_size, = lib.util.getter.getparams(request, ('page', 'page_size'), with_user=False)
+        if buyer_id in ["", None,'undefined','null'] or not buyer_id.isnumeric():
+            raise lib.error_handle.error.api_error.ApiCallerError("Missing data")
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        customer = lib.util.verify.Verify.get_customer_from_user_subscription(user_subscription, buyer_id)
+        wallet = customer.wallets.get(user_subscription=user_subscription)
+        queryset = customer.point_transactions.filter(user_subscription = user_subscription).order_by('-created_at') #temp 
+        
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = models.user.point_transaction.PointTransactionSerializer(page, many=True)
+            data = self.get_paginated_response(serializer.data).data
+        else:
+            data = models.user.point_transaction.PointTransactionSerializer(queryset, many=True).data
+        return Response({"data":data, "wallet":WalletSerializerWithBuyerInfo(wallet).data}, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['POST'], url_path=r'customer/import', parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def seller_import_customer(self, request):
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+
+        file, room_id = lib.util.getter.getdata(request,('file', 'room_id'), required=True)
+
+        service.rq.queue.enqueue_general_queue(
+            jobs.import_data_job.customer_import_job, 
+            room_id = room_id, 
+            user_subscription_id = user_subscription.id, 
+            file = file)
+
+        return Response("OK", status=status.HTTP_200_OK)
+    @action(detail=False, methods=['POST'], url_path=r'buyer/(?P<buyer_id>[^/.]+)/points/transaction/create', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def buyer_point_transaction_create(self, request, buyer_id):
+        if buyer_id in ["", None,'undefined','null'] or not buyer_id.isnumeric():
+            raise lib.error_handle.error.api_error.ApiCallerError("Missing data")
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        buyer = models.user.user.User.objects.get(id=buyer_id)
+        serializer = PointTransactionSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        point_transaction = serializer.save()
+        
+        wallet = buyer.wallets.get(user_subscription=user_subscription)
+        wallet.points += point_transaction.earned
+        wallet.save()
+        
+        queryset = buyer.point_transactions.filter(user_subscription=user_subscription).order_by('-created_at')
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = PointTransactionSerializer(page, many=True)
+            data = self.get_paginated_response(serializer.data).data
+        else:
+            data = PointTransactionSerializer(queryset, many=True).data
+        return Response({"data":data, "wallet":WalletSerializerWithBuyerInfo(wallet).data}, status=status.HTTP_200_OK)
        
 # --------------------------------- dealer ---------------------------------
-    
 
     @action(detail=False, methods=['GET'], url_path=r'dashboard/cards', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
@@ -632,3 +700,5 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             start_date = this_end_date
         
         return Response(dealer_revenue, status=status.HTTP_200_OK)
+
+    

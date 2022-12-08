@@ -1,6 +1,7 @@
 
 from django.contrib.auth.models import User as AuthUser
 from django.conf import settings
+from api.models.user.point_transaction import PointTransactionSerializer
 
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -53,6 +54,10 @@ class WalletSerializerWithSellerInfo(models.user.buyer_wallet.BuyerWalletSeriali
     user_subscription = UserSubscriptionSerializerName(read_only=True, default=dict)
 class UserSerializerBuyerAccountInfo(models.user.user.UserSerializer):
     wallets = WalletSerializerWithSellerInfo(many=True, read_only=True, default=list)
+    
+class OrderSerializerWithCampaign(models.order.order.OrderSerializer):
+    campaign = models.campaign.campaign.CampaignSerializer(read_only=True, default=dict)
+    
 #------------------------------------------------------------------------------------------
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -94,6 +99,47 @@ class UserViewSet(viewsets.ModelViewSet):
         api_user = lib.util.verify.Verify.get_customer_user(request)
         return Response(UserSerializerBuyerAccountInfo(api_user).data, status=status.HTTP_200_OK)    
 
+    @action(detail=False, methods=['GET'], url_path=r'buyer/order/history', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def list_buyer_order_history(self, request):
+
+        api_user = lib.util.verify.Verify.get_customer_user(request)
+        user_subscription_id, = lib.util.getter.getparams(request, ('user_subscription_id',), with_user=False)
+        queryset = api_user.orders.all()
+        if user_subscription_id not in ["", None,'undefined','null'] and user_subscription_id.isnumeric():
+            queryset=queryset.filter(user_subscription_id = int(user_subscription_id))
+
+        queryset = queryset.order_by('-created_at')
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = OrderSerializerWithCampaign(page, many=True)
+            data = self.get_paginated_response(serializer.data).data
+        else:
+            
+            data = OrderSerializerWithCampaign(api_user.orders, many=True).data
+
+        return Response(data, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['GET'], url_path=r'buyer/points/history', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def list_buyer_point_history(self, request):
+
+        api_user = lib.util.verify.Verify.get_customer_user(request)
+        user_subscription_id, = lib.util.getter.getparams(request, ('user_subscription_id',), with_user=False)
+        queryset = api_user.point_transactions.all()
+        if user_subscription_id not in ["", None,'undefined','null'] and user_subscription_id.isnumeric():
+            queryset=queryset.filter(user_subscription_id = int(user_subscription_id))
+
+        queryset = queryset.order_by('-created_at')
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = PointTransactionSerializer(page, many=True)
+            data = self.get_paginated_response(serializer.data).data
+        else:
+            
+            data = PointTransactionSerializer(api_user.orders, many=True).data
+
+        return Response(data, status=status.HTTP_200_OK)
 #-----------------------------------------Dealer----------------------------------------------------------------------------------------------
 
     # @action(detail=False, methods=['POST'], url_path=r'dealer/login', permission_classes=(IsAdminUser,))
