@@ -261,6 +261,7 @@ class CartHelper():
                             "type":campaign_product_data.get('type'),
                             "subtotal":campaign_product_data.get('price')*qty,
                             #relation:
+                            "order_code": campaign_product_data.get('order_code'),
                             "order_id":pymongo_order.id,
                             "campaign_product_id":int(campaign_product_id_str)
                         }
@@ -286,14 +287,37 @@ class CartHelper():
 
     @classmethod
     def __summarize_order(cls, api_user, campaign:models.campaign.campaign.Campaign, pymongo_order:database.lss.order.Order, campaign_product_data_dict, point_discount_processor, is_new_customer=False):
-
         subtotal = 0
         shipping_cost = 0
         total = 0
         meta = pymongo_order.data.get('meta',{})
 
         product_category_data_dict={}
+        """
+        example: 
+        product_category_data_dict = {
+            <product_category_id1>: <product_category_data>.
+            <product_category_id2>: <product_category_data>
+            ...
+        }
+        """
         product_category_products_dict = {}
+        """
+        example: 
+        product_category_products_dict = {
+            <product_category_id1>: [
+                { "campaign_product_id": 545, "qty": 1},
+                { "campaign_product_id": 544, "qty": 3},
+                ...
+            ],
+            <product_category_id2>: [
+                { "campaign_product_id": 878, "qty": 1},
+                { "campaign_product_id": 788, "qty": 3},
+                ...
+            ]
+            ...
+        }
+        """
         for campaign_prodcut_id_str, qty in pymongo_order.data.get('products',{}).items():
             campaign_product_data = campaign_product_data_dict.get(campaign_prodcut_id_str,{})
 
@@ -383,7 +407,7 @@ class CartHelper():
                     for category_product in product_category_products_dict.get(product_category_id_str):
                         category_products_subtotal += campaign_product_data_dict.get(category_product.get('campaign_product_id'),{}).get('price') * category_product.get('qty')
                     
-                    is_category_product_subtotal_above = category_products_subtotal > product_category_data.get('meta_logistic',{}).get('free_delivery_for_order_above_price',0)
+                    is_category_product_subtotal_above = category_products_subtotal > product_category_data.get('meta_logistic',{}).get('free_delivery_for_order_above_price')
 
                 shipping_cost+=0 if is_category_product_subtotal_above else product_category_data.get('meta_logistic').get('flat_rate',0)
         

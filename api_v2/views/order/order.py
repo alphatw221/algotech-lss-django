@@ -395,11 +395,24 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         _, pymongo_filter_query, pymongo_sort_by = self.__search_order(user_subscription, request)
         iterable_objects = database.lss.order.get_order_export_cursor(pymongo_filter_query, pymongo_sort_by)
-
         order_export_processor_class:factory.order_export.default.DefaultOrderExportProcessor =\
              factory.order_export.get_order_export_processor_class(user_subscription)
         order_export_processor = order_export_processor_class(iterable_objects, user_subscription)
         
         order_data = order_export_processor.export_order_data()
         print(order_data)
+        return Response(order_data, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['POST'], url_path=r'report/kol/json', permission_classes=(IsAuthenticated, ))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def get_order_report_for_kol(self, request, pk=None):
+
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+
+        _, pymongo_filter_query, pymongo_sort_by = self.__search_order(user_subscription, request)
+        iterable_objects = database.lss.order.get_order_export_cursor_for_kol(pymongo_filter_query, pymongo_sort_by)
+        order_export_processor = factory.order_export.kol.KOLOrderExportProcessor(iterable_objects, user_subscription)
+        
+        order_data = order_export_processor.export_order_data()
         return Response(order_data, status=status.HTTP_200_OK)
