@@ -7,7 +7,8 @@ from dateutil import parser
 
 class DateTimeMapper(FieldMapper):
     def get_field_data(self, object):
-        return parser.parse(super().get_field_data(object)).strftime("%Y-%m-%d")
+        print(object)
+        return super().get_field_data(object).strftime("%Y-%m-%d")
 
 
 class ShippingNameMapper(FieldMapper):
@@ -46,7 +47,7 @@ class PickupAddressMapper(FieldMapper):
         
 class PaymentMethodMapper(FieldMapper):
     def get_field_data(self, object):
-        return f'Direct Payment - ' +object.get('meta',{}).get("account_mode", "") if object.get('payment_method') == models.order.order.PAYMENT_METHOD_DIRECT else super().get_field_data(object)
+        return f'{models.order.order.PAYMENT_METHOD_DIRECT} - ' +object.get('meta',{}).get("account_mode", "") if object.get('payment_method') == models.order.order.PAYMENT_METHOD_DIRECT else super().get_field_data(object)
 
 class LastFiveDigitMapper(FieldMapper):
     def get_field_data(self, object):
@@ -81,30 +82,30 @@ class TotalMapper(FieldMapper):
 class DefaultOrderExportProcessor:
 
     field_mappers = [
-            FieldMapper('id','ID', width=10,i18n_key='REPORT/COLUMN_TITLE/ID'),
-            DateTimeMapper('created_at', 'Order Date', width=15, i18n_key='REPORT/COLUMN_TITLE/ORDER_DATE'),
-            FieldMapper('platform', 'Platform', width=15, i18n_key='REPORT/COLUMN_TITLE/PLATFORM'),
-            FieldMapper('customer_name', 'Customer Name', width=20, i18n_key='REPORT/COLUMN_TITLE/CUSTOMER_NAME'),
-            ShippingNameMapper('shipping_name', 'Shipping Name', width=20, i18n_key='REPORT/COLUMN_TITLE/SHIPPING_NAME'),
-            FieldMapper('shipping_phone', 'Shipping Phone', width=20, i18n_key='REPORT/COLUMN_TITLE/SHIPPING_PHONE'),
-            FieldMapper('shipping_email', 'E-mail', width=40, i18n_key='REPORT/COLUMN_TITLE/EMAIL'),
-            ShippingMethodMapper('shipping_method', 'Shipping Method', width=20, i18n_key='REPORT/COLUMN_TITLE/SHIPPING_METHOD'),
-            ShippingOptionMapper('shipping_option', 'Shipping Option', width=20, i18n_key='REPORT/COLUMN_TITLE/SHIPPING_OPTION'),
-            DeliveryInfonMapper('shipping_address_1', 'Shipping Address 1', width=40, i18n_key='REPORT/COLUMN_TITLE/SHIPPING_ADDRESS_1'),
-            DeliveryInfonMapper('shipping_location', 'Location', width=20, i18n_key='REPORT/COLUMN_TITLE/LOCATION'),
-            DeliveryInfonMapper('shipping_region', 'Region', width=20, i18n_key='REPORT/COLUMN_TITLE/REGION'),
-            DeliveryInfonMapper('shipping_postcode', 'Postcode', width=20, i18n_key='REPORT/COLUMN_TITLE/POSTCODE'),
-            PickupStoreMapper('pick_up_store', 'Pick up Store', width=20, i18n_key='REPORT/COLUMN_TITLE/PICK_UP_STORE'),
-            PickupAddressMapper('pickup_address', 'Pick up Address', width=20, i18n_key='REPORT/COLUMN_TITLE/PICK_UP_ADDRESS'),
-            FieldMapper('shipping_remark', 'Remark', width=20, i18n_key='REPORT/COLUMN_TITLE/REMARK'),
-            PaymentMethodMapper('payment_method', 'Payment Method', width=30, i18n_key='REPORT/COLUMN_TITLE/PAYMENT_METHOD'),
-            FieldMapper('payment_status', 'Payment Status', width=20, i18n_key='REPORT/COLUMN_TITLE/PAYMENT_STATUS'),
-            LastFiveDigitMapper('last_five_digit', 'Payment Record', width=20, i18n_key='REPORT/COLUMN_TITLE/PAYMENT_RECORD'),
-            OrderProductsNameMapper('order_product_name', 'Product Name', width=40),
-            OrderProductsPriceMapper('order_product_price', 'Product Price', width=20),
-            OrderProductsQtyMapper('order_product_qty', 'Qty', width=20),
-            OrderProductsSubtotalMapper('order_product_subtotal', 'Subtotal', width=20)
-        ]
+        FieldMapper('id','id', width=10),
+        DateTimeMapper('created_at', 'created_at', width=15),
+        FieldMapper('platform', 'platform', width=15),
+        FieldMapper('customer_name', 'customer_name', width=20),
+        ShippingNameMapper('shipping_name', 'shipping_name', width=20),
+        FieldMapper('shipping_phone', 'shipping_phone', width=20),
+        FieldMapper('shipping_email', 'shipping_email', width=40),
+        ShippingMethodMapper('shipping_method', 'shipping_method', width=20),
+        ShippingOptionMapper('shipping_option', 'shipping_option', width=20),
+        DeliveryInfonMapper('shipping_address_1', 'shipping_address_1', width=40),
+        DeliveryInfonMapper('shipping_location', 'shipping_location', width=20),
+        DeliveryInfonMapper('shipping_region', 'shipping_region', width=20,),
+        DeliveryInfonMapper('shipping_postcode', 'shipping_postcode', width=20),
+        PickupStoreMapper('pick_up_store', 'pick_up_store', width=20),
+        PickupAddressMapper('pickup_address', 'pickup_address', width=20),
+        FieldMapper('shipping_remark', 'shipping_remark', width=20,),
+        PaymentMethodMapper('payment_method', 'payment_method', width=30),
+        FieldMapper('payment_status', 'payment_status', width=20),
+        LastFiveDigitMapper('last_five_digit', 'last_five_digit', width=20),
+        OrderProductsNameMapper('order_product_name', 'order_product_name', width=40),
+        OrderProductsPriceMapper('order_product_price', 'order_product_price', width=20),
+        OrderProductsQtyMapper('order_product_qty', 'order_product_qty', width=20),
+        OrderProductsSubtotalMapper('order_product_subtotal', 'order_product_subtotal', width=20)
+    ]
 
     def __init__(self, iterable_objects, user_subscription) -> None:
         self.iterable_objects = iterable_objects

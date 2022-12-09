@@ -129,16 +129,9 @@ def get_order_export_cursor_for_kol(pymongo_filter_query, pymongo_sort_by):
                     ]
                 },
                 "price_ori_subtotal":{"$sum":"$campaign_products.price_ori"},
-                "gross": {
+                "profit": {
                     "$subtract": [
-                        {
-                            "$subtract": [ 
-                                "$subtotal", 
-                                {"$add": [
-                                    "$point_discount", "$discount", "$adjust_price"
-                                ]}
-                            ]
-                        },
+                        "$subtotal",
                         {"$sum":"$campaign_products.price_ori"}
                     ]
                 }
