@@ -215,7 +215,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         sub_data = request.data
         
         reply_result = service.ecpay.ecpay.create_shipping_order(order,campaign, sub_data, 
-            f'https://28ea-220-136-105-200.jp.ngrok.io/api/v2/order/{order_oid}/buyer/delivery_order/callback/'
+            f'{settings.GCP_API_LOADBALANCER_URL}/api/v2/order/{order_oid}/buyer/delivery_order/callback/'
             )
         
         return Response(reply_result, status=status.HTTP_200_OK)

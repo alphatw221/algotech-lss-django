@@ -281,18 +281,18 @@ def create_shipping_order(order,campaign,sub_data,server_reply_url):
     create_shipping_order_params = {
         'MerchantTradeNo': MerchantTradeNo,
         'MerchantTradeDate': datetime.now().strftime("%Y/%m/%d %H:%M:%S"),
-        'LogisticsType': sub_data.get('logistics_type'), #HOME or CVS
+        'LogisticsType': order.shipping_option_data.get('logisticsType'), #HOME or CVS
         'GoodsAmount': int(order.total),
         'CollectionAmount': int(order.total),
         'GoodsName': 'LSS Order',
         'SenderName': '測試寄件者',
-        'SenderPhone': '0226550115',
+        'SenderPhone': '0226550115', #campaign data
         'SenderCellPhone': '0911222333',
-        'ReceiverName': '測試收件者',
-        'ReceiverPhone': '0226550115',
-        'ReceiverCellPhone': '0933222111',
-        'ReceiverEmail': 'test@gmail.com',
-        'TradeDesc': '測試交易敘述',
+        'ReceiverName': str(order.shipping_first_name) + str(order.shipping_last_name),
+        'ReceiverPhone': order.shipping_phone,
+        'ReceiverCellPhone': order.shipping_phone,
+        'ReceiverEmail': order.shipping_email,
+        'TradeDesc': 'lss',
         'ServerReplyURL': server_reply_url,
         'ClientReplyURL': '',
         'Remark': '',
@@ -301,7 +301,7 @@ def create_shipping_order(order,campaign,sub_data,server_reply_url):
     }
 
     update_params = {}
-    if sub_data.get('logistics_type') == 'CVS':
+    if order.shipping_option_data.get('logisticsType') == 'CVS':
         update_params = {
             'IsCollection': sub_data.get('is_collection'),
             'LogisticsSubType': order.meta.get('ecpay_cvs',{}).get('logistics_sub_type'), #[TCAT POST][FAMIC2C UNIMARTC2C]
@@ -309,7 +309,7 @@ def create_shipping_order(order,campaign,sub_data,server_reply_url):
             #TODO #setting seller return store
             'ReturnStoreID': '863698', #返回之超商店號
         }
-    elif sub_data.get('logistics_type') == 'HOME':
+    elif order.shipping_option_data.get('logisticsType') == 'HOME':
         update_params = {
             'IsCollection': 'N',
             'LogisticsSubType': 'TCAT', #[TCAT POST][FAMIC2C UNIMARTC2C]
@@ -331,9 +331,9 @@ def create_shipping_order(order,campaign,sub_data,server_reply_url):
 
     # 建立實體
     ecpay_logistic_sdk = ECPayLogisticSdk(
-        # MerchantID='3344643', #campaign.meta_logistic.ecpay.merchant_id
-        # HashKey='RXiMOiIBiEveXxSb',
-        # HashIV='hcV2UGIITv0PCxlt'
+        MerchantID='3344643', #campaign.meta_logistic.ecpay.merchant_id
+        HashKey='RXiMOiIBiEveXxSb',
+        HashIV='hcV2UGIITv0PCxlt'
         
         #C2C test
         # MerchantID='2000933',
@@ -341,15 +341,15 @@ def create_shipping_order(order,campaign,sub_data,server_reply_url):
         # HashIV='h1ONHk4P4yqbl5LK'
         
         #HOME test
-        MerchantID='2000132',
-        HashKey='5294y06JbISpM5x9',
-        HashIV='v77hoKGq4kWxNNIS'
+        # MerchantID='2000132',
+        # HashKey='5294y06JbISpM5x9',
+        # HashIV='v77hoKGq4kWxNNIS'
     )
 
     try:
         # 介接路徑
-        action_url = 'https://logistics-stage.ecpay.com.tw/Express/Create'  # 測試環境
-        # action_url = 'https://logistics.ecpay.com.tw/Express/Create' # 正式環境
+        # action_url = 'https://logistics-stage.ecpay.com.tw/Express/Create'  # 測試環境
+        action_url = 'https://logistics.ecpay.com.tw/Express/Create' # 正式環境
 
         # print(create_shipping_order_params)
         # 建立物流訂單並接收回應訊息
