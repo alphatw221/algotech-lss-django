@@ -399,5 +399,4 @@ class OrderViewSet(viewsets.ModelViewSet):
         order_export_processor = order_export_processor_class(iterable_objects, user_subscription)
         
         order_data = order_export_processor.export_order_data()
-        print(order_data)
         return Response(order_data, status=status.HTTP_200_OK)

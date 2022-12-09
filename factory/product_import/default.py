@@ -42,6 +42,7 @@ class DefaultProductImportProcessor(lib.helper.import_helper.ImportProcessor):
         
         super().__init__(size_limit_bytes, accept_types)
         self.field_mappers = [
+            FieldMapper('Product Name', 'name', ''),
             FieldMapper('SKU', 'sku', ''),
             FieldMapper('Description', 'description', ''),
             FieldMapper('Keyword', 'order_code', ''),
