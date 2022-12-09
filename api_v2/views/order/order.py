@@ -4,7 +4,8 @@ from rest_framework import viewsets,status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.decorators import action
-from rest_framework.parsers import MultiPartParser
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.renderers import StaticHTMLRenderer
 
 
 from django.conf import settings
@@ -16,6 +17,7 @@ from api import models
 import database
 import lib
 import factory
+import service
 
 
 
@@ -203,6 +205,31 @@ class OrderViewSet(viewsets.ModelViewSet):
         oid = database.lss.order.get_oid_by_id(order.id)
 
         return Response(oid, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['PUT'], url_path=r'(?P<order_oid>[^/.]+)/buyer/cash_on_delivery', permission_classes=())
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def buyer_cash_on_delivery(self, request, order_oid):
+        
+        order = lib.util.verify.Verify.get_order_with_oid(order_oid)
+        campaign = lib.util.verify.Verify.get_campaign_from_order(order)
+        sub_data = request.data
+        
+        reply_result = service.ecpay.ecpay.create_shipping_order(order,campaign, sub_data, 
+            f'https://28ea-220-136-105-200.jp.ngrok.io/api/v2/order/{order_oid}/buyer/delivery_order/callback/'
+            )
+        
+        return Response(reply_result, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['POST'], url_path=r'(?P<order_oid>[^/.]+)/buyer/delivery_order/callback', parser_classes=(FormParser,MultiPartParser), renderer_classes = (StaticHTMLRenderer,),permission_classes=())
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def buyer_delivery_order_callback(self, request, order_oid):
+        data = request.data.dict()
+        order = lib.util.verify.Verify.get_order_with_oid(order_oid)
+        campaign = lib.util.verify.Verify.get_campaign_from_order(order)
+        
+        print(data)
+        
+        return Response('ok', status=status.HTTP_200_OK)
     # ------------------------------------seller----------------------------------------
     
     @action(detail=True, methods=['GET'], url_path=r'seller/retrieve', permission_classes=(IsAuthenticated,))

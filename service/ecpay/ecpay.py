@@ -248,7 +248,7 @@ def cvs_map(cart_oid,merchant_id,hash_key,hash_iv,logistics_sub_type,server_repl
         # 若申請類型為 B2C，只能串參數為 FAMI、UNIMART、HILIFE
         # 若申請類型為 C2C，只能串參數為 FAMIC2C、UNIMARTC2C、HILIFEC2C
         "LogisticsSubType": logistics_sub_type,
-        "IsCollection": "N",
+        "IsCollection": "Y",
         "ServerReplyURL": server_reply_url,
         "ExtraData": cart_oid,
         "Device": 0,
@@ -274,16 +274,17 @@ def cvs_map(cart_oid,merchant_id,hash_key,hash_iv,logistics_sub_type,server_repl
         print('An exception happened: ' + str(error))
         
 
-def create_shipping_order(is_collection,amount):
+def create_shipping_order(order,campaign,sub_data,server_reply_url):
+    
+    MerchantTradeNo = str(order.id) + time.strftime("%Y%m%d%H%M%S", time.localtime())
+    
     create_shipping_order_params = {
-        'MerchantTradeNo': datetime.now().strftime("NO%Y%m%d%H%M%S"),
+        'MerchantTradeNo': MerchantTradeNo,
         'MerchantTradeDate': datetime.now().strftime("%Y/%m/%d %H:%M:%S"),
-        'LogisticsType': 'cvs',
-        'LogisticsSubType': module.LogisticsSubType['UNIMART_C2C'],
-        'GoodsAmount': amount,
-        'CollectionAmount': amount,
-        'IsCollection': is_collection,
-        'GoodsName': '測試商品',
+        'LogisticsType': sub_data.get('logistics_type'), #HOME or CVS
+        'GoodsAmount': int(order.total),
+        'CollectionAmount': int(order.total),
+        'GoodsName': 'LSS Order',
         'SenderName': '測試寄件者',
         'SenderPhone': '0226550115',
         'SenderCellPhone': '0911222333',
@@ -292,26 +293,57 @@ def create_shipping_order(is_collection,amount):
         'ReceiverCellPhone': '0933222111',
         'ReceiverEmail': 'test@gmail.com',
         'TradeDesc': '測試交易敘述',
-        'ServerReplyURL': 'https://www.ecpay.com.tw/server_reply_url',
+        'ServerReplyURL': server_reply_url,
         'ClientReplyURL': '',
-        'Remark': '測試備註',
+        'Remark': '',
         'PlatformID': '',
-        'LogisticsC2CReplyURL': 'https://www.ecpay.com.tw/logistics_c2c_reply',
+        'LogisticsC2CReplyURL': '',
     }
 
-    shipping_cvs_params = {
-        'ReceiverStoreID': '991182',
-        'ReturnStoreID': '991182',
-    }
+    update_params = {}
+    if sub_data.get('logistics_type') == 'CVS':
+        update_params = {
+            'IsCollection': sub_data.get('is_collection'),
+            'LogisticsSubType': order.meta.get('ecpay_cvs',{}).get('logistics_sub_type'), #[TCAT POST][FAMIC2C UNIMARTC2C]
+            'ReceiverStoreID': order.meta.get('ecpay_cvs',{}).get('cvs_store_id'),
+            #TODO #setting seller return store
+            'ReturnStoreID': '863698', #返回之超商店號
+        }
+    elif sub_data.get('logistics_type') == 'HOME':
+        update_params = {
+            'IsCollection': 'N',
+            'LogisticsSubType': 'TCAT', #[TCAT POST][FAMIC2C UNIMARTC2C]
+            'SenderZipCode': '11560',
+            'SenderAddress': '台北市南港區三重路19-2號10樓D棟',
+            'ReceiverZipCode': order.shipping_postcode,
+            'ReceiverAddress': order.shipping_location + order.shipping_address_1,
+            'Temperature': '0001', #0001:常溫 (預設值) 0002:冷藏 0003:冷凍 [*POST必為0001]
+            'Distance': '00', #00:同縣市 (預設值) 01:外縣市 02:離島 會自動調整 [*POST忽略]
+            'Specification': '0001', #0001: 60cm (預設值) 0002: 90cm 0003: 120cm 0004: 150cm [*POST忽略]
+            'ScheduledPickupTime': '4', #[*POST忽略]
+            'ScheduledDeliveryTime': '4', #1: 13點前 2: 14點~18點 3: 14點~18點 4:不限時 [*POST忽略]
+            'ScheduledDeliveryDate': '',
+            'PackageCount': '',
+        }
 
     # 更新及合併參數
-    create_shipping_order_params.update(shipping_cvs_params)
+    create_shipping_order_params.update(update_params)
 
     # 建立實體
     ecpay_logistic_sdk = ECPayLogisticSdk(
-        MerchantID='2000933',
-        HashKey='XBERn1YOvpM9nfZc',
-        HashIV='h1ONHk4P4yqbl5LK'
+        # MerchantID='3344643', #campaign.meta_logistic.ecpay.merchant_id
+        # HashKey='RXiMOiIBiEveXxSb',
+        # HashIV='hcV2UGIITv0PCxlt'
+        
+        #C2C test
+        # MerchantID='2000933',
+        # HashKey='XBERn1YOvpM9nfZc',
+        # HashIV='h1ONHk4P4yqbl5LK'
+        
+        #HOME test
+        MerchantID='2000132',
+        HashKey='5294y06JbISpM5x9',
+        HashIV='v77hoKGq4kWxNNIS'
     )
 
     try:
@@ -319,10 +351,12 @@ def create_shipping_order(is_collection,amount):
         action_url = 'https://logistics-stage.ecpay.com.tw/Express/Create'  # 測試環境
         # action_url = 'https://logistics.ecpay.com.tw/Express/Create' # 正式環境
 
+        # print(create_shipping_order_params)
         # 建立物流訂單並接收回應訊息
         reply_result = ecpay_logistic_sdk.create_shipping_order(
             action_url=action_url,
             client_parameters=create_shipping_order_params)
+        return reply_result
 
     except Exception as error:
         print('An exception happened: ' + str(error))
