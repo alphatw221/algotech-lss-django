@@ -285,9 +285,9 @@ def create_shipping_order(order,campaign,sub_data,server_reply_url):
         'GoodsAmount': int(order.total),
         'CollectionAmount': int(order.total),
         'GoodsName': 'LSS Order',
-        'SenderName': '測試寄件者',
-        'SenderPhone': '0226550115', #campaign data
-        'SenderCellPhone': '0911222333',
+        'SenderName': campaign.meta_logistic.ecpay.sender_name,
+        'SenderPhone': campaign.meta_logistic.ecpay.sender_phone, #campaign data
+        'SenderCellPhone': campaign.meta_logistic.ecpay.sender_phone,
         'ReceiverName': str(order.shipping_first_name) + str(order.shipping_last_name),
         'ReceiverPhone': order.shipping_phone,
         'ReceiverCellPhone': order.shipping_phone,
@@ -307,14 +307,14 @@ def create_shipping_order(order,campaign,sub_data,server_reply_url):
             'LogisticsSubType': order.meta.get('ecpay_cvs',{}).get('logistics_sub_type'), #[TCAT POST][FAMIC2C UNIMARTC2C]
             'ReceiverStoreID': order.meta.get('ecpay_cvs',{}).get('cvs_store_id'),
             #TODO #setting seller return store
-            'ReturnStoreID': '863698', #返回之超商店號
+            'ReturnStoreID':  campaign.meta_logistic.ecpay.return_store_id, #返回之超商店號
         }
     elif order.shipping_option_data.get('logisticsType') == 'HOME':
         update_params = {
             'IsCollection': 'N',
             'LogisticsSubType': 'TCAT', #[TCAT POST][FAMIC2C UNIMARTC2C]
-            'SenderZipCode': '11560',
-            'SenderAddress': '台北市南港區三重路19-2號10樓D棟',
+            'SenderZipCode': campaign.meta_logistic.ecpay.sender_zip_code,
+            'SenderAddress': campaign.meta_logistic.ecpay.sender_address,
             'ReceiverZipCode': order.shipping_postcode,
             'ReceiverAddress': order.shipping_location + order.shipping_address_1,
             'Temperature': '0001', #0001:常溫 (預設值) 0002:冷藏 0003:冷凍 [*POST必為0001]
@@ -331,11 +331,10 @@ def create_shipping_order(order,campaign,sub_data,server_reply_url):
 
     # 建立實體
     ecpay_logistic_sdk = ECPayLogisticSdk(
-        MerchantID='3344643', #campaign.meta_logistic.ecpay.merchant_id
-        HashKey='RXiMOiIBiEveXxSb',
-        HashIV='hcV2UGIITv0PCxlt'
-        
-        #C2C test
+        MerchantID=campaign.meta_logistic.ecpay.merchant_id,
+        HashKey=campaign.meta_logistic.ecpay.hash_key,
+        HashIV=campaign.meta_logistic.ecpay.hash_iv
+        # C2C test
         # MerchantID='2000933',
         # HashKey='XBERn1YOvpM9nfZc',
         # HashIV='h1ONHk4P4yqbl5LK'
@@ -348,8 +347,8 @@ def create_shipping_order(order,campaign,sub_data,server_reply_url):
 
     try:
         # 介接路徑
-        # action_url = 'https://logistics-stage.ecpay.com.tw/Express/Create'  # 測試環境
-        action_url = 'https://logistics.ecpay.com.tw/Express/Create' # 正式環境
+        action_url = 'https://logistics-stage.ecpay.com.tw/Express/Create'  # 測試環境
+        # action_url = 'https://logistics.ecpay.com.tw/Express/Create' # 正式環境
 
         # print(create_shipping_order_params)
         # 建立物流訂單並接收回應訊息

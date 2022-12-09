@@ -148,14 +148,13 @@ class CartViewSet(viewsets.ModelViewSet):
         cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
         campaign = lib.util.verify.Verify.get_campaign_from_cart(cart)
         
-        #TODO #改成取料庫的欄位
-        merchant_id = '3344643'#campaign.meta_payment.get("ecpay",{}).get("merchant_id")
-        hash_key = 'RXiMOiIBiEveXxSb'#campaign.meta_payment.get("ecpay",{}).get("hash_key")
-        hash_iv = 'hcV2UGIITv0PCxlt'#campaign.meta_payment.get("ecpay",{}).get("hash_iv")
+        merchant_id=campaign.meta_logistic['ecpay']['merchant_id'],
+        hash_key=campaign.meta_logistic['ecpay']['hash_key'],
+        hash_iv=campaign.meta_logistic['ecpay']['hash_iv']
 
         action,map = service.ecpay.ecpay.cvs_map(cart_oid,merchant_id, hash_key, hash_iv,
             request.data.get('LogisticsSubType'), 
-            f'{settings.GCP_API_LOADBALANCER_URL}/api/v2/cart/buyer/cvsmap/callback/'
+            f'https://42d1-220-136-105-200.jp.ngrok.io/api/v2/cart/buyer/cvsmap/callback/'
             )
         return Response({'action':action,'data':map})
     
@@ -190,8 +189,7 @@ class CartViewSet(viewsets.ModelViewSet):
         cart.save()
 
         
-        return HttpResponseRedirect(redirect_to=f'{settings.GCP_API_LOADBALANCER_URL}/buyer/cart/{cart_oid}?tab=2')
-        # return HttpResponseRedirect(redirect_to=f'https://localhost:3000/buyer/cart/{cart_oid}?tab=2') #local use this
+        return HttpResponseRedirect(redirect_to=f'https://localhost:3000/buyer/cart/{cart_oid}?tab=2') #local use this
 
     @action(detail=False, methods=['PUT'], url_path=r'(?P<cart_oid>[^/.]+)/buyer/checkout', permission_classes=())
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
