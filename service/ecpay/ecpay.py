@@ -281,7 +281,7 @@ def create_shipping_order(order,campaign,sub_data,server_reply_url):
     create_shipping_order_params = {
         'MerchantTradeNo': MerchantTradeNo,
         'MerchantTradeDate': datetime.now().strftime("%Y/%m/%d %H:%M:%S"),
-        'LogisticsType': sub_data.get('logistics_type'), #HOME or CVS
+        'LogisticsType': order.shipping_option_data.get('logisticsType'), #HOME or CVS
         'GoodsAmount': int(order.total),
         'CollectionAmount': int(order.total),
         'GoodsName': 'LSS Order',
@@ -301,7 +301,7 @@ def create_shipping_order(order,campaign,sub_data,server_reply_url):
     }
 
     update_params = {}
-    if sub_data.get('logistics_type') == 'CVS':
+    if order.shipping_option_data.get('logisticsType') == 'CVS':
         update_params = {
             'IsCollection': sub_data.get('is_collection'),
             'LogisticsSubType': order.meta.get('ecpay_cvs',{}).get('logistics_sub_type'), #[TCAT POST][FAMIC2C UNIMARTC2C]
@@ -309,7 +309,7 @@ def create_shipping_order(order,campaign,sub_data,server_reply_url):
             #TODO #setting seller return store
             'ReturnStoreID': '863698', #返回之超商店號
         }
-    elif sub_data.get('logistics_type') == 'HOME':
+    elif order.shipping_option_data.get('logisticsType') == 'HOME':
         update_params = {
             'IsCollection': 'N',
             'LogisticsSubType': 'TCAT', #[TCAT POST][FAMIC2C UNIMARTC2C]
