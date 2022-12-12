@@ -140,7 +140,13 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         campaign_data, = lib.util.getter.getdata(request, ('data',), required=True)
         campaign_data = json.loads(campaign_data)
-        
+        supplier_id = campaign_data.get("supplier")
+        if supplier_id not in ["", "null", "undefined"]:
+            supplier = lib.util.verify.Verify.get_support_stock_user_subscriptions_from_user_subscription(supplier_id,user_subscription)
+            campaign_data.update({
+                "meta_logistic": supplier.meta_logistic,
+                "meta_payment": supplier.meta_payment
+            })
         ret = rule.rule_checker.user_subscription_rule_checker.RuleChecker.check(
             check_list=[
                 rule.check_rule.user_subscription_check_rule.UserSubscriptionCheckRule.is_expired,

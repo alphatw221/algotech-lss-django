@@ -154,7 +154,7 @@ class CartViewSet(viewsets.ModelViewSet):
 
         action,map = service.ecpay.ecpay.cvs_map(cart_oid,merchant_id, hash_key, hash_iv,
             request.data.get('LogisticsSubType'), 
-            f'https://f04a-220-136-90-230.jp.ngrok.io/api/v2/cart/buyer/cvsmap/callback/'
+            f'{settings.GCP_API_LOADBALANCER_URL}/api/v2/cart/buyer/cvsmap/callback/'
             )
         return Response({'action':action,'data':map})
     
