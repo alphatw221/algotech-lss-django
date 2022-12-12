@@ -285,9 +285,9 @@ def create_shipping_order(order,campaign,sub_data,server_reply_url):
         'GoodsAmount': int(order.total),
         'CollectionAmount': int(order.total),
         'GoodsName': 'LSS Order',
-        'SenderName': campaign.meta_logistic.ecpay.sender_name,
-        'SenderPhone': campaign.meta_logistic.ecpay.sender_phone, #campaign data
-        'SenderCellPhone': campaign.meta_logistic.ecpay.sender_phone,
+        'SenderName': campaign.meta_logistic['ecpay']['sender_name'],
+        'SenderPhone': campaign.meta_logistic['ecpay']['sender_phone'], #campaign data
+        'SenderCellPhone': campaign.meta_logistic['ecpay']['sender_phone'],
         'ReceiverName': str(order.shipping_first_name) + str(order.shipping_last_name),
         'ReceiverPhone': order.shipping_phone,
         'ReceiverCellPhone': order.shipping_phone,
@@ -307,14 +307,14 @@ def create_shipping_order(order,campaign,sub_data,server_reply_url):
             'LogisticsSubType': order.meta.get('ecpay_cvs',{}).get('logistics_sub_type'), #[TCAT POST][FAMIC2C UNIMARTC2C]
             'ReceiverStoreID': order.meta.get('ecpay_cvs',{}).get('cvs_store_id'),
             #TODO #setting seller return store
-            'ReturnStoreID':  campaign.meta_logistic.ecpay.return_store_id, #返回之超商店號
+            'ReturnStoreID':  campaign.meta_logistic['ecpay']['return_store_id'], #返回之超商店號
         }
     elif order.shipping_option_data.get('logisticsType') == 'HOME':
         update_params = {
             'IsCollection': 'N',
             'LogisticsSubType': 'TCAT', #[TCAT POST][FAMIC2C UNIMARTC2C]
-            'SenderZipCode': campaign.meta_logistic.ecpay.sender_zip_code,
-            'SenderAddress': campaign.meta_logistic.ecpay.sender_address,
+            'SenderZipCode': campaign.meta_logistic['ecpay']['sender_zip_code'],
+            'SenderAddress': campaign.meta_logistic['ecpay']['sender_address'],
             'ReceiverZipCode': order.shipping_postcode,
             'ReceiverAddress': order.shipping_location + order.shipping_address_1,
             'Temperature': '0001', #0001:常溫 (預設值) 0002:冷藏 0003:冷凍 [*POST必為0001]
@@ -331,9 +331,9 @@ def create_shipping_order(order,campaign,sub_data,server_reply_url):
 
     # 建立實體
     ecpay_logistic_sdk = ECPayLogisticSdk(
-        MerchantID=campaign.meta_logistic.ecpay.merchant_id,
-        HashKey=campaign.meta_logistic.ecpay.hash_key,
-        HashIV=campaign.meta_logistic.ecpay.hash_iv
+        MerchantID=campaign.meta_logistic['ecpay']['merchant_id'],
+        HashKey=campaign.meta_logistic['ecpay']['hash_key'],
+        HashIV=campaign.meta_logistic['ecpay']['hash_iv']
         # C2C test
         # MerchantID='2000933',
         # HashKey='XBERn1YOvpM9nfZc',
