@@ -44,7 +44,8 @@ class Campaign(models.Model):
 
     user_subscription = models.ForeignKey(
         UserSubscription, null=True, on_delete=models.SET_NULL, related_name='campaigns')
-
+    supplier_subscripiton = models.ForeignKey(
+        UserSubscription, null=True, on_delete=models.SET_NULL, related_name='cooperator_campaigns')
     dealer = models.ForeignKey(
         UserSubscription, null=True, on_delete=models.SET_NULL, related_name='subscriber_campaigns')
 
