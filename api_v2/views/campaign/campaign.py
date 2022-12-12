@@ -92,7 +92,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
         campaignData = json.loads(campaignData)
         end_at = campaignData['end_at']
         supplier_id = campaignData.get("supplier")
-        if supplier_id not in ["", "null", "undefined"]:
+        if supplier_id not in ["", None, "null", "undefined"]:
             supplier = lib.util.verify.Verify.get_support_stock_user_subscriptions_from_user_subscription(supplier_id,user_subscription)
             campaignData.update({
                 "meta_logistic": supplier.meta_logistic,
