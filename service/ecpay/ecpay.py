@@ -347,8 +347,8 @@ def create_shipping_order(order,campaign,sub_data,server_reply_url):
 
     try:
         # 介接路徑
-        action_url = 'https://logistics-stage.ecpay.com.tw/Express/Create'  # 測試環境
-        # action_url = 'https://logistics.ecpay.com.tw/Express/Create' # 正式環境
+        # action_url = 'https://logistics-stage.ecpay.com.tw/Express/Create'  # 測試環境
+        action_url = 'https://logistics.ecpay.com.tw/Express/Create' # 正式環境
 
         # print(create_shipping_order_params)
         # 建立物流訂單並接收回應訊息
