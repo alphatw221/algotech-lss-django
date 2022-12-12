@@ -1,5 +1,4 @@
 from lss.settings import *
-DEBUG = True
 
 # Live Show Seller info
 WEB_SERVER_URL = "https://staginglss.accoladeglobal.net"
