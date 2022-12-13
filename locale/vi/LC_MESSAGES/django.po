@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-17 09:44+0000\n"
+"POT-Creation-Date: 2022-12-09 08:44+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,243 +17,83 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: backend/i18n/campaign_announcement.py:8 lib/i18n/campaign_announcement.py:7
+#: business_policy/payment.py:13
+msgid "PAYMENT/DIRECT_PAYMENT/NAME_OF_BANK_OR_PAYMENT_MODE"
+msgstr "Tên ngân hàng/Phương thức thanh toán"
+
+#: business_policy/payment.py:14
+msgid "PAYMENT/DIRECT_PAYMENT/ACCOUNT_NAME"
+msgstr "Tên tài khoản"
+
+#: business_policy/payment.py:15
+msgid "PAYMENT/DIRECT_PAYMENT/ACCOUNT_NUMBER"
+msgstr "Số tài khoản"
+
+#: business_policy/payment.py:16
+msgid "PAYMENT/DIRECT_PAYMENT/OTHER_NOTE"
+msgstr "Ghi chú khác (Nhấn enter để thêm dòng mới)"
+
+#: business_policy/payment.py:17
+msgid "PAYMENT/DIRECT_PAYMENT/REQUIRE_CUSTOMER_PAYMENT_RECORD"
+msgstr "Yêu cầu người mua đính kèm hóa đơn thanh toán"
+
+#: business_policy/payment.py:30
+msgid "PAYMENT/HIT_PAY/PAYMENT_BUTTON_TITLE"
+msgstr "Tiêu đề nút thanh toán"
+
+#: business_policy/payment.py:31 business_policy/payment.py:46
+#: business_policy/payment.py:60 business_policy/payment.py:98
+msgid "PAYMENT/CURRENCY_CODE"
+msgstr "Mã tiền tệ"
+
+#: business_policy/payment.py:32
+msgid "PAYMENT/HIT_PAY/API_KEY"
+msgstr "Mã API"
+
+#: business_policy/payment.py:33
+msgid "PAYMENT/HIT_PAY/SALT"
+msgstr "Muối ăn"
+
+#: business_policy/payment.py:45
+msgid "PAYMENT/PAYPAL/CLIENT_ID"
+msgstr "Client ID"
+
+#: business_policy/payment.py:47
+msgid "PAYMENT/PAYPAL/SECRET"
+msgstr "Mã bảo mật"
+
+#: business_policy/payment.py:59 business_policy/payment.py:84
+msgid "PAYMENT/SECRET_KEY"
+msgstr "Mã bảo mật"
+
+#: business_policy/payment.py:96
+msgid "PAYMENT/FIRST_DATA/STORE_ID"
+msgstr "Mã cửa hàng"
+
+#: business_policy/payment.py:97
+msgid "PAYMENT/FIRST_DATA/SHARE_SECRET"
+msgstr "Chìa khóa bí mật"
+
+#: business_policy/payment.py:99
+msgid "PAYMENT/FIRST_DATA/TIME_ZONE"
+msgstr "Múi giờ"
+
+#: lib/i18n/campaign_announcement.py:7
 #, python-brace-format
 msgid "PRODUCT_CLOSED{order_code}"
 msgstr "Mã đơn hàng: {order_code} đã đóng cửa."
 
-#: backend/i18n/campaign_announcement.py:15
 #: lib/i18n/campaign_announcement.py:14
 #, python-brace-format
 msgid "PRODUCT_SOLD_OUT{order_code}"
 msgstr "Mã đơn hàng: {order_code} đã bán hết."
 
-#: backend/i18n/campaign_announcement.py:22
 #: lib/i18n/campaign_announcement.py:21
 #, python-brace-format
 msgid "LUCKY_DRAW_WINNER{customer_name}{product_name}"
 msgstr ""
 "Xin chúc mừng {customer_name} đã giành được Quà tặng! Giải "
 "thưởng: {product_name}. Vui lòng kiểm tra giỏ hàng của bạn."
-
-#: backend/i18n/cart_product_request.py:9 lib/i18n/cart_product_request.py:11
-msgid "MESSAGE_PREFIX"
-msgstr "Live Show Seller: "
-
-#: backend/i18n/cart_product_request.py:21 lib/i18n/cart_product_request.py:24
-#: lib/i18n/cart_product_request.py:32 lib/i18n/cart_product_request.py:40
-#: lib/i18n/cart_product_request.py:55
-#, python-brace-format
-msgid "SHOPPING_CART_INFO{link}"
-msgstr ""
-"Vui lòng nhấn/giữ Liên kết Giỏ hàng bên dưới và mở trên Safari hoặc Chrome: "
-"{link}"
-
-#: backend/i18n/cart_product_request.py:23 lib/i18n/cart_product_request.py:26
-#: lib/i18n/cart_product_request.py:34 lib/i18n/cart_product_request.py:42
-#: lib/i18n/cart_product_request.py:57
-msgid "MORE_INFO_IN_PM_NOTICE"
-msgstr ""
-"Link giỏ hàng được gửi qua FB Messenger, vui lòng liên hệ quản trị viên "
-"trang (page admin) nếu không nhận được thông báo."
-
-#: backend/i18n/cart_product_request.py:30
-#: backend/i18n/cart_product_request.py:66 lib/i18n/cart_product_request.py:64
-#: lib/i18n/cart_product_request.py:104
-#, python-brace-format
-msgid "INVALID_EXCEED_MAX_ORDER_AMOUNT{order_code}{max_order_amount}"
-msgstr "\"{order_code}\" có số lượng đặt hàng tối đa là {max_order_amount}. "
-
-#: backend/i18n/cart_product_request.py:36
-#: backend/i18n/cart_product_request.py:73 lib/i18n/cart_product_request.py:70
-#: lib/i18n/cart_product_request.py:111
-msgid "ADDED"
-msgstr "được thêm vào"
-
-#: backend/i18n/cart_product_request.py:38
-#: backend/i18n/cart_product_request.py:75 lib/i18n/cart_product_request.py:72
-#: lib/i18n/cart_product_request.py:113
-msgid "UPDATED"
-msgstr "được cập nhật"
-
-#: backend/i18n/cart_product_request.py:40
-#: backend/i18n/cart_product_request.py:77 lib/i18n/cart_product_request.py:74
-#: lib/i18n/cart_product_request.py:115
-msgid "DELETED"
-msgstr "được xóa bỏ"
-
-#: backend/i18n/cart_product_request.py:42
-#: backend/i18n/cart_product_request.py:79 lib/i18n/cart_product_request.py:76
-#: lib/i18n/cart_product_request.py:117
-msgid "INSUFFICIENT_INV"
-msgstr "đã bán hết"
-
-#: backend/i18n/cart_product_request.py:44
-#: backend/i18n/cart_product_request.py:81 lib/i18n/cart_product_request.py:78
-#: lib/i18n/cart_product_request.py:119
-msgid "INVALID_PRODUCT_NOT_ACTIVATED"
-msgstr "không có sẵn"
-
-#: backend/i18n/cart_product_request.py:46
-#: backend/i18n/cart_product_request.py:83 lib/i18n/cart_product_request.py:84
-#: lib/i18n/cart_product_request.py:121
-msgid "INVALID_REMOVE_NOT_ALLOWED"
-msgstr "không được phép xóa bỏ"
-
-#: backend/i18n/cart_product_request.py:48
-#: backend/i18n/cart_product_request.py:85 lib/i18n/cart_product_request.py:86
-#: lib/i18n/cart_product_request.py:123
-msgid "INVALID_EDIT_NOT_ALLOWED"
-msgstr "không được phép chỉnh sửa"
-
-#: backend/i18n/cart_product_request.py:50
-#: backend/i18n/cart_product_request.py:87 lib/i18n/cart_product_request.py:88
-#: lib/i18n/cart_product_request.py:125
-msgid "INVALID_ADD_ZERO_QTY"
-msgstr "không thể thêm vào với số lượng bằng 0"
-
-#: backend/i18n/cart_product_request.py:52
-#: backend/i18n/cart_product_request.py:89 lib/i18n/cart_product_request.py:90
-#: lib/i18n/cart_product_request.py:127
-msgid "N/A"
-msgstr "lỗi hoạt động"
-
-#: backend/i18n/cart_product_request.py:54
-#: backend/i18n/cart_product_request.py:92 lib/i18n/cart_product_request.py:92
-#: lib/i18n/cart_product_request.py:130
-#, python-brace-format
-msgid "ITEM_INFO{order_code}{qty}{result}"
-msgstr "\"{order_code}\" Số lượng: {qty} {result}. "
-
-#: backend/i18n/comment_command.py:24 backend/i18n/comment_command.py:27
-#: backend/i18n/comment_command.py:29 lib/i18n/comment_command.py:25
-#: lib/i18n/comment_command.py:28 lib/i18n/comment_command.py:30
-msgid "COMMENT_COMMAND_CART_NO_CART_PRODUCT"
-msgstr "Không có sản phẩm trong giỏ hàng."
-
-#: backend/i18n/comment_command.py:36 lib/i18n/comment_command.py:35
-#: templates/register_confirmation.html:11
-#: templates/register_confirmation.html:16
-msgid "COMMENT_COMMAND_CART_MESSAGE_HEADER"
-msgstr "Giỏ hàng của bạn:"
-
-#: backend/i18n/comment_command.py:39 backend/i18n/comment_command.py:96
-#: lib/i18n/comment_command.py:38
-#, python-brace-format
-msgid "TOTAL{dollar_sign}{total}\n"
-msgstr "Tổng thanh toán: {dollar_sign}{total}\n"
-
-#: backend/i18n/comment_command.py:41 backend/i18n/comment_command.py:99
-#: lib/i18n/comment_command.py:40
-#, python-brace-format
-msgid "DETAIL{link}\n"
-msgstr "Find out details: {link}\n"
-
-#: backend/i18n/comment_command.py:76 backend/i18n/comment_command.py:79
-#: backend/i18n/comment_command.py:84
-msgid "COMMENT_COMMAND_ORDER_NO_ORDER"
-msgstr "Bạn không có đơn hàng gần đây."
-
-#: backend/i18n/comment_command.py:86
-msgid "COMMENT_COMMAND_ORDER_MESSAGE_HEADER"
-msgstr "Đơn hàng gần nhất:"
-
-#: backend/i18n/comment_command.py:90
-#, python-brace-format
-msgid "DELIVERY{dollar_sign}{delivery}\n"
-msgstr "Vận chuyển: {dollar_sign}{delivery}\n"
-
-#: backend/i18n/comment_command.py:93
-#, python-brace-format
-msgid "OPTION{dollar_sign}{option}\n"
-msgstr "Tùy chọn: {dollar_sign}{option}\n"
-
-#: backend/i18n/comment_command.py:117 lib/i18n/comment_command.py:117
-#, python-brace-format
-msgid "ITEM_INFO{name}{qty}{dollar_sign}{total}\n"
-msgstr "{name} Số lượng:{qty} {dollar_sign}{total}\n"
-
-#: backend/i18n/email/subject.py:8 templates/email_reset_password_link.html:8
-#: templates/reset_password_success_email.html:7
-msgid "EMAIL/PASSWORD_RESET_LINK/SUBJECT"
-msgstr "Live Show Seller Xin chào"
-
-#: backend/i18n/email/subject.py:12
-msgid "EMAIL/PASSWORD_RESET_SUCCESS/SUBJECT"
-msgstr "Mật khẩu Live Show Seller của bạn đã được thay đổi thành công"
-
-#: backend/i18n/payment_comfirm_mail.py:52
-msgid "EMAIL/DELIVERY_CONFIRM/ORDER_CONFIRMATION"
-msgstr "xác nhận đơn hàng"
-
-#: backend/i18n/register_confirm_mail.py:17 lib/i18n/email/password_reset.py:5
-msgid "MAIL_SUBJECT_WELCOME"
-msgstr "Chào mừng đến với Live Show Seller"
-
-#: backend/i18n/register_confirm_mail.py:22
-msgid "MAIL_SUBJECT_ACTIVATION"
-msgstr "Chi tiết tài khoản đã kích hoạt tại."
-
-#: business_policy/payment.py:21
-msgid "PAYMENT/DIRECT_PAYMENT/NAME_OF_BANK_OR_PAYMENT_MODE"
-msgstr "Tên ngân hàng/Phương thức thanh toán"
-
-#: business_policy/payment.py:22
-msgid "PAYMENT/DIRECT_PAYMENT/ACCOUNT_NAME"
-msgstr "Tên tài khoản"
-
-#: business_policy/payment.py:23
-msgid "PAYMENT/DIRECT_PAYMENT/ACCOUNT_NUMBER"
-msgstr "Số tài khoản"
-
-#: business_policy/payment.py:24
-msgid "PAYMENT/DIRECT_PAYMENT/OTHER_NOTE"
-msgstr "Ghi chú khác (Nhấn enter để thêm dòng mới)"
-
-#: business_policy/payment.py:25
-msgid "PAYMENT/DIRECT_PAYMENT/REQUIRE_CUSTOMER_PAYMENT_RECORD"
-msgstr "Yêu cầu người mua đính kèm hóa đơn thanh toán"
-
-#: business_policy/payment.py:38
-msgid "PAYMENT/HIT_PAY/PAYMENT_BUTTON_TITLE"
-msgstr "Tiêu đề nút thanh toán"
-
-#: business_policy/payment.py:39 business_policy/payment.py:54
-#: business_policy/payment.py:68 business_policy/payment.py:106
-msgid "PAYMENT/CURRENCY_CODE"
-msgstr "Mã tiền tệ"
-
-#: business_policy/payment.py:40
-msgid "PAYMENT/HIT_PAY/API_KEY"
-msgstr "Mã API"
-
-#: business_policy/payment.py:41
-msgid "PAYMENT/HIT_PAY/SALT"
-msgstr "Muối ăn"
-
-#: business_policy/payment.py:53
-msgid "PAYMENT/PAYPAL/CLIENT_ID"
-msgstr "Client ID"
-
-#: business_policy/payment.py:55
-msgid "PAYMENT/PAYPAL/SECRET"
-msgstr "Mã bảo mật"
-
-#: business_policy/payment.py:67 business_policy/payment.py:92
-msgid "PAYMENT/SECRET_KEY"
-msgstr "Mã bảo mật"
-
-#: business_policy/payment.py:104
-msgid "PAYMENT/FIRST_DATA/STORE_ID"
-msgstr "Mã cửa hàng"
-
-#: business_policy/payment.py:105
-msgid "PAYMENT/FIRST_DATA/SHARE_SECRET"
-msgstr "Chìa khóa bí mật"
-
-#: business_policy/payment.py:107
-msgid "PAYMENT/FIRST_DATA/TIME_ZONE"
-msgstr "Múi giờ"
 
 #: lib/i18n/campaign_announcement.py:29
 #, python-brace-format
@@ -262,10 +102,100 @@ msgstr ""
 "Xin chúc mừng {customer_name} đã rút thăm trúng thưởng!"
 "Giải: {product_name}. Vui lòng kiểm tra giỏ hàng của bạn."
 
+#: lib/i18n/cart_product_request.py:11
+msgid "MESSAGE_PREFIX"
+msgstr "Live Show Seller: "
+
+#: lib/i18n/cart_product_request.py:24 lib/i18n/cart_product_request.py:32
+#: lib/i18n/cart_product_request.py:40 lib/i18n/cart_product_request.py:55
+#, python-brace-format
+msgid "SHOPPING_CART_INFO{link}"
+msgstr ""
+"Vui lòng nhấn/giữ Liên kết Giỏ hàng bên dưới và mở trên Safari hoặc Chrome: "
+"{link}"
+
+#: lib/i18n/cart_product_request.py:26 lib/i18n/cart_product_request.py:34
+#: lib/i18n/cart_product_request.py:42 lib/i18n/cart_product_request.py:57
+msgid "MORE_INFO_IN_PM_NOTICE"
+msgstr ""
+"Link giỏ hàng được gửi qua FB Messenger, vui lòng liên hệ quản trị viên "
+"trang (page admin) nếu không nhận được thông báo."
+
+#: lib/i18n/cart_product_request.py:64 lib/i18n/cart_product_request.py:104
+#, python-brace-format
+msgid "INVALID_EXCEED_MAX_ORDER_AMOUNT{order_code}{max_order_amount}"
+msgstr "\"{order_code}\" có số lượng đặt hàng tối đa là {max_order_amount}. "
+
+#: lib/i18n/cart_product_request.py:70 lib/i18n/cart_product_request.py:111
+msgid "ADDED"
+msgstr "được thêm vào"
+
+#: lib/i18n/cart_product_request.py:72 lib/i18n/cart_product_request.py:113
+msgid "UPDATED"
+msgstr "được cập nhật"
+
+#: lib/i18n/cart_product_request.py:74 lib/i18n/cart_product_request.py:115
+msgid "DELETED"
+msgstr "được xóa bỏ"
+
+#: lib/i18n/cart_product_request.py:76 lib/i18n/cart_product_request.py:117
+msgid "INSUFFICIENT_INV"
+msgstr "đã bán hết"
+
+#: lib/i18n/cart_product_request.py:78 lib/i18n/cart_product_request.py:119
+msgid "INVALID_PRODUCT_NOT_ACTIVATED"
+msgstr "không có sẵn"
+
 #: lib/i18n/cart_product_request.py:79
 #, python-brace-format
 msgid "ITEM_INFO{order_code}{result}"
 msgstr "\"{order_code}\" {result}."
+
+#: lib/i18n/cart_product_request.py:84 lib/i18n/cart_product_request.py:121
+msgid "INVALID_REMOVE_NOT_ALLOWED"
+msgstr "không được phép xóa bỏ"
+
+#: lib/i18n/cart_product_request.py:86 lib/i18n/cart_product_request.py:123
+msgid "INVALID_EDIT_NOT_ALLOWED"
+msgstr "không được phép chỉnh sửa"
+
+#: lib/i18n/cart_product_request.py:88 lib/i18n/cart_product_request.py:125
+msgid "INVALID_ADD_ZERO_QTY"
+msgstr "không thể thêm vào với số lượng bằng 0"
+
+#: lib/i18n/cart_product_request.py:90 lib/i18n/cart_product_request.py:127
+msgid "N/A"
+msgstr "lỗi hoạt động"
+
+#: lib/i18n/cart_product_request.py:92 lib/i18n/cart_product_request.py:130
+#, python-brace-format
+msgid "ITEM_INFO{order_code}{qty}{result}"
+msgstr "\"{order_code}\" Số lượng: {qty} {result}. "
+
+#: lib/i18n/comment_command.py:24 lib/i18n/comment_command.py:27
+#: lib/i18n/comment_command.py:29
+msgid "COMMENT_COMMAND_CART_NO_CART_PRODUCT"
+msgstr "Không có sản phẩm trong giỏ hàng."
+
+#: lib/i18n/comment_command.py:34 templates/register_confirmation.html:11
+#: templates/register_confirmation.html:16
+msgid "COMMENT_COMMAND_CART_MESSAGE_HEADER"
+msgstr "Giỏ hàng của bạn:"
+
+#: lib/i18n/comment_command.py:37
+#, python-brace-format
+msgid "TOTAL{dollar_sign}{total}\n"
+msgstr "Tổng thanh toán: {dollar_sign}{total}\n"
+
+#: lib/i18n/comment_command.py:39
+#, python-brace-format
+msgid "DETAIL{link}\n"
+msgstr "Find out details: {link}\n"
+
+#: lib/i18n/comment_command.py:116
+#, python-brace-format
+msgid "ITEM_INFO{name}{qty}{dollar_sign}{total}\n"
+msgstr "{name} Số lượng:{qty} {dollar_sign}{total}\n"
 
 #: lib/i18n/email/cart_checkout_mail.py:8
 #, python-brace-format
@@ -453,11 +383,21 @@ msgstr "Tài khoản thanh toán Năm chữ số cuối cùng"
 msgid "EMAIL/ORDER_CONFIRM/SELLER_CONTACT"
 msgstr "Liên hệ với người bán"
 
+#: lib/i18n/email/reset_password_link_mail.py:7
+#: templates/reset_password_link_email.html:8
+#: templates/reset_password_success_email.html:7
+msgid "EMAIL/PASSWORD_RESET_LINK/SUBJECT"
+msgstr "Live Show Seller Xin chào"
+
+#: lib/i18n/email/reset_password_success_mail.py:10
+msgid "EMAIL/PASSWORD_RESET_SUCCESS/SUBJECT"
+msgstr "Mật khẩu Live Show Seller của bạn đã được thay đổi thành công"
+
 #: lib/i18n/email/verification_code_email.py:6
 msgid "EMAIL/VERIFY/SUBJECT"
 msgstr "Your LSS login verification code"
 
-#: lib/i18n/reminder_message.py:16
+#: lib/i18n/reminder_message.py:10
 #, python-brace-format
 msgid "UNCHECKOUT_CART_REMINDER{link}"
 msgstr ""
@@ -495,46 +435,6 @@ msgstr "to secure your account."
 #: templates/email_notify_wishlist.html:18
 msgid "EMAIL/WISHLIST/TEXT_2"
 msgstr "Please follow up more information from "
-
-#: templates/email_reset_password_link.html:13
-#: templates/reset_password_success_email.html:12
-msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT1"
-msgstr "Xin chào bạn"
-
-#: templates/email_reset_password_link.html:16
-msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT2"
-msgstr ""
-"Chúng tôi đã nhận được yêu cầu đặt lại mật khẩu tài khoản Live Show Seller "
-"của bạn.Nhấp vào liên kết bên dưới để đặt lại mật khẩu của bạn:"
-
-#: templates/email_reset_password_link.html:19
-msgid "EMAIL/PASSWORD_RESET_LINK/BUTTON"
-msgstr "Thay đổi mật khẩu"
-
-#: templates/email_reset_password_link.html:22
-msgid "EMAIL/IF_YOU_CAN_NOT_CLICK"
-msgstr ""
-"Nếu bạn gặp sự cố khi đặt lại mật khẩu, vui lòng nhập URLvào trình duyệt của "
-"bạn."
-
-#: templates/email_reset_password_link.html:24
-msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT3"
-msgstr ""
-"Nếu bạn bỏ qua thông báo này, mật khẩu của bạn sẽ không được thay đổi. Nếu "
-"bạn không yêu cầu đặt lại mật khẩu, vui lòng cho chúng tôi biết "
-
-#: templates/email_reset_password_link.html:26
-#: templates/reset_password_success_email.html:17
-msgid "CONTACT_INFO/EMAIL"
-msgstr "Email: app@algotech.app"
-
-#: templates/email_reset_password_link.html:27
-msgid "CONTACT_INFO/PHONE"
-msgstr "Contact Number: +65 9489 2086"
-
-#: templates/email_reset_password_link.html:28
-msgid "CONTACT_INFO/ADDRESS"
-msgstr "Address: 8 Burn Road #15-13, Singapore 369977"
 
 #: templates/email_verification_code.html:10
 msgid "EMAIL/VERIFY/TITLE"
@@ -644,6 +544,46 @@ msgstr "Bắt đầu bán hàng livestream nào!"
 msgid "CONGRATS_2_WELCOME"
 msgstr "Chúc may mắn và thuận lợi,"
 
+#: templates/reset_password_link_email.html:13
+#: templates/reset_password_success_email.html:12
+msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT1"
+msgstr "Xin chào bạn"
+
+#: templates/reset_password_link_email.html:16
+msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT2"
+msgstr ""
+"Chúng tôi đã nhận được yêu cầu đặt lại mật khẩu tài khoản Live Show Seller "
+"của bạn.Nhấp vào liên kết bên dưới để đặt lại mật khẩu của bạn:"
+
+#: templates/reset_password_link_email.html:19
+msgid "EMAIL/PASSWORD_RESET_LINK/BUTTON"
+msgstr "Thay đổi mật khẩu"
+
+#: templates/reset_password_link_email.html:22
+msgid "EMAIL/IF_YOU_CAN_NOT_CLICK"
+msgstr ""
+"Nếu bạn gặp sự cố khi đặt lại mật khẩu, vui lòng nhập URLvào trình duyệt của "
+"bạn."
+
+#: templates/reset_password_link_email.html:24
+msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT3"
+msgstr ""
+"Nếu bạn bỏ qua thông báo này, mật khẩu của bạn sẽ không được thay đổi. Nếu "
+"bạn không yêu cầu đặt lại mật khẩu, vui lòng cho chúng tôi biết "
+
+#: templates/reset_password_link_email.html:26
+#: templates/reset_password_success_email.html:17
+msgid "CONTACT_INFO/EMAIL"
+msgstr "Email: app@algotech.app"
+
+#: templates/reset_password_link_email.html:27
+msgid "CONTACT_INFO/PHONE"
+msgstr "Contact Number: +65 9489 2086"
+
+#: templates/reset_password_link_email.html:28
+msgid "CONTACT_INFO/ADDRESS"
+msgstr "Address: 8 Burn Road #15-13, Singapore 369977"
+
 #: templates/reset_password_success_email.html:15
 msgid "EMAIL/PASSWORD_RESET_SUCCESS/CONTENT1"
 msgstr "Mật khẩu cho tài khoản Live Show Seller"
@@ -654,6 +594,27 @@ msgstr ""
 "has been successfully changed.\n"
 "Nếu bạn không yêu cầu thay đổi này, vui lòng liên hệ với bộ phận hỗ trợ ngay "
 "lập tức."
+
+#~ msgid "COMMENT_COMMAND_ORDER_NO_ORDER"
+#~ msgstr "Bạn không có đơn hàng gần đây."
+
+#~ msgid "COMMENT_COMMAND_ORDER_MESSAGE_HEADER"
+#~ msgstr "Đơn hàng gần nhất:"
+
+#~ msgid "DELIVERY{dollar_sign}{delivery}\n"
+#~ msgstr "Vận chuyển: {dollar_sign}{delivery}\n"
+
+#~ msgid "OPTION{dollar_sign}{option}\n"
+#~ msgstr "Tùy chọn: {dollar_sign}{option}\n"
+
+#~ msgid "EMAIL/DELIVERY_CONFIRM/ORDER_CONFIRMATION"
+#~ msgstr "xác nhận đơn hàng"
+
+#~ msgid "MAIL_SUBJECT_WELCOME"
+#~ msgstr "Chào mừng đến với Live Show Seller"
+
+#~ msgid "MAIL_SUBJECT_ACTIVATION"
+#~ msgstr "Chi tiết tài khoản đã kích hoạt tại."
 
 #~ msgid "REPORT/COLUMN_TITLE/ID"
 #~ msgstr "ID"

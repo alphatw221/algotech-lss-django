@@ -62,7 +62,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             campaign.decimal_places,
             campaign.price_unit,
             success_url=settings.GCP_API_LOADBALANCER_URL + '/api/v2/payment/stripe/callback/success?session_id={CHECKOUT_SESSION_ID}&order_oid=' + str(order_oid), 
-            cancel_url=f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{str(order_oid)}/payment')
+            cancel_url=f'{settings.WEB_SERVER_URL}/buyer/order/{str(order_oid)}/payment')
 
         if not checkout_session:
             raise lib.error_handle.error.api_error.ApiCallerError('choose_another_payment_method')
@@ -111,7 +111,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         content = lib.i18n.email.order_comfirm_mail.i18n_get_mail_content(order, campaign, lang=campaign.lang)
         jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)
 
-        return HttpResponseRedirect(redirect_to=f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}/confirmation')
+        return HttpResponseRedirect(redirect_to=f'{settings.WEB_SERVER_URL}/buyer/order/{order_oid}/confirmation')
 
     # @action(detail=False, methods=['GET'], url_path=r'strip/callback/cancel', )
     # @lib.error_handle.error_handler.api_error_handler.api_error_handler
@@ -141,7 +141,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             payment_amount, 
             currency,
             order.id,
-            f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}',
+            f'{settings.WEB_SERVER_URL}/buyer/order/{order_oid}',
             f'{settings.GCP_API_LOADBALANCER_URL}/api/v2/payment/hitpay/webhook/')
 
         if code != 201:
@@ -204,7 +204,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
 
         payment = service.paypal.paypal.create_payment(client_id, secret, payment_amount, currency , 
             f"{settings.GCP_API_LOADBALANCER_URL}/api/v2/payment/paypal/callback/success?order_oid={order_oid}", 
-            f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}',
+            f'{settings.WEB_SERVER_URL}/buyer/order/{order_oid}',
             )
         if not payment:
             raise lib.error_handle.error.api_error.ApiCallerError('choose_another_payment_method')
@@ -247,7 +247,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         subject = lib.i18n.email.order_comfirm_mail.i18n_get_mail_subject(order, lang=campaign.lang)
         content = lib.i18n.email.order_comfirm_mail.i18n_get_mail_content(order, campaign, lang=campaign.lang)
         jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)
-        return HttpResponseRedirect(redirect_to=f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}/confirmation')
+        return HttpResponseRedirect(redirect_to=f'{settings.WEB_SERVER_URL}/buyer/order/{order_oid}/confirmation')
 
     # @action(detail=False, methods=['GET'], url_path=r"paypal_cancel")
     # @api_error_handler
@@ -359,8 +359,8 @@ class PaymentViewSet(viewsets.GenericViewSet):
 
 
         action,payment = service.ecpay.ecpay.create_order(merchant_id, hash_key, hash_iv, int(payment_amount) , order, 
-            f'https://staginglss.accoladeglobal.net/api/v2/payment/ecpay/callback/success/{order_oid}/', 
-            f'https://staginglss.accoladeglobal.net/buyer/order/{order_oid}/confirmation'
+            f'{settings.GCP_API_LOADBALANCER_URL}/api/v2/payment/ecpay/callback/success/{order_oid}/', 
+            f'{settings.WEB_SERVER_URL}/buyer/order/{order_oid}/confirmation'
             )
         
         if not payment:
@@ -484,7 +484,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             #     "dynamic_currency_conversion": True
             # },
             complete_checkout_url = f"{settings.GCP_API_LOADBALANCER_URL}/api/v2/payment/rapyd/callback/success?order_oid={str(order_oid)}&checkout_time={checkout_time}",
-            cancel_checkout_url = f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{str(order_oid)}/payment',
+            cancel_checkout_url = f'{settings.WEB_SERVER_URL}/buyer/order/{str(order_oid)}/payment',
             payment_method_type_categories = ["bank_transfer", "card"],
             metadata = {
                 "order_oid": order_oid
@@ -572,9 +572,9 @@ class PaymentViewSet(viewsets.GenericViewSet):
             subject = lib.i18n.email.order_comfirm_mail.i18n_get_mail_subject(order, lang=campaign.lang)
             content = lib.i18n.email.order_comfirm_mail.i18n_get_mail_content(order, campaign, lang=campaign.lang)
             jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)
-            return HttpResponseRedirect(redirect_to=f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}/confirmation')
+            return HttpResponseRedirect(redirect_to=f'{settings.WEB_SERVER_URL}/buyer/order/{order_oid}/confirmation')
         else:
-            return HttpResponseRedirect(redirect_to=f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}')
+            return HttpResponseRedirect(redirect_to=f'{settings.WEB_SERVER_URL}/buyer/order/{order_oid}')
     
     
     

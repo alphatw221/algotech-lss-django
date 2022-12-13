@@ -44,7 +44,8 @@ class Campaign(models.Model):
 
     user_subscription = models.ForeignKey(
         UserSubscription, null=True, on_delete=models.SET_NULL, related_name='campaigns')
-
+    supplier = models.ForeignKey(
+        UserSubscription, null=True, on_delete=models.SET_NULL, related_name='cooperator_campaigns')
     dealer = models.ForeignKey(
         UserSubscription, null=True, on_delete=models.SET_NULL, related_name='subscriber_campaigns')
 
@@ -206,7 +207,7 @@ class CampaignSerializerUpdate(serializers.ModelSerializer):
 
     class Meta:
         model = Campaign
-        fields = ['title', 'start_at', 'end_at', 'meta', 'meta_payment', 'meta_logistic', 'lang', 'currency', 'price_unit', 'decimal_places', 'meta_reply', 'meta_point']
+        fields = ['title', 'start_at', 'end_at', 'meta', 'meta_payment', 'meta_logistic', 'lang', 'currency', 'price_unit', 'decimal_places', 'meta_reply', 'meta_point', 'supplier']
 
     meta = serializers.JSONField(default={"allow_checkout": 1})
     meta_payment = serializers.JSONField(default=dict)

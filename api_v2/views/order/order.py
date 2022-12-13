@@ -4,7 +4,8 @@ from rest_framework import viewsets,status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.decorators import action
-from rest_framework.parsers import MultiPartParser
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.renderers import StaticHTMLRenderer
 
 
 from django.conf import settings
@@ -16,6 +17,7 @@ from api import models
 import database
 import lib
 import factory
+import service
 
 
 
@@ -203,6 +205,52 @@ class OrderViewSet(viewsets.ModelViewSet):
         oid = database.lss.order.get_oid_by_id(order.id)
 
         return Response(oid, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['PUT'], url_path=r'(?P<order_oid>[^/.]+)/buyer/create/delivery_order', permission_classes=())
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def buyer_create_delivery_order(self, request, order_oid):
+        
+        order = lib.util.verify.Verify.get_order_with_oid(order_oid)
+        campaign = lib.util.verify.Verify.get_campaign_from_order(order)
+        sub_data = request.data
+        
+        #TODO #根據seller setting 決定是否使用綠界物流，線上付款後再成立delivery order
+        reply_result = service.ecpay.ecpay.create_shipping_order(order,campaign, sub_data, 
+            f'{settings.GCP_API_LOADBALANCER_URL}/api/v2/order/{order_oid}/buyer/delivery_order/callback/'
+            # f'https://28ea-220-136-105-200.jp.ngrok.io/api/v2/order/{order_oid}/buyer/delivery_order/callback/'
+            )
+        
+        return Response(reply_result, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['POST'], url_path=r'(?P<order_oid>[^/.]+)/buyer/delivery_order/callback', parser_classes=(FormParser,MultiPartParser), renderer_classes = (StaticHTMLRenderer,),permission_classes=())
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def buyer_delivery_order_callback(self, request, order_oid):
+        data = request.data.dict()
+        order = lib.util.verify.Verify.get_order_with_oid(order_oid)
+        campaign = lib.util.verify.Verify.get_campaign_from_order(order)
+        
+        #TODO #save this callback data
+        # {'CVSValidationNo': '',
+        #  'ReceiverEmail': 'test@gmail.com',
+        #  'UpdateStatusDate': '2022/12/09 15:20:18',
+        #  'BookingNote': '901355249391',
+        #  'LogisticsSubType': 'TCAT',
+        #  'MerchantTradeNo': '3363320221209062838',
+        #  'LogisticsType': 'HOME',
+        #  'ReceiverCellPhone': '0933222111', 
+        #  'CVSPaymentNo': '',
+        #  'RtnMsg': '訂單上傳處理中',
+        #  'GoodsAmount': '350',
+        #  'AllPayLogisticsID': '27379122',
+        #  'MerchantID': '3344643',
+        #  'ReceiverName': '測試收件者',
+        #  'CheckMacValue': '3A9D2933255F4E28B638FD99787BF94C',
+        #  'RtnCode': '310',
+        #  'ReceiverPhone': '0226550115',
+        #  'ReceiverAddress': '台北市南港區三重路19-2號5樓D棟'
+        #  }
+        
+        return Response('ok', status=status.HTTP_200_OK)
     # ------------------------------------seller----------------------------------------
     
     @action(detail=True, methods=['GET'], url_path=r'seller/retrieve', permission_classes=(IsAuthenticated,))
@@ -367,11 +415,23 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         _, pymongo_filter_query, pymongo_sort_by = self.__search_order(user_subscription, request)
         iterable_objects = database.lss.order.get_order_export_cursor(pymongo_filter_query, pymongo_sort_by)
-
         order_export_processor_class:factory.order_export.default.DefaultOrderExportProcessor =\
              factory.order_export.get_order_export_processor_class(user_subscription)
         order_export_processor = order_export_processor_class(iterable_objects, user_subscription)
         
         order_data = order_export_processor.export_order_data()
-        print(order_data)
+        return Response(order_data, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['POST'], url_path=r'report/kol/json', permission_classes=(IsAuthenticated, ))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def get_order_report_for_kol(self, request, pk=None):
+
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+
+        _, pymongo_filter_query, pymongo_sort_by = self.__search_order(user_subscription, request)
+        iterable_objects = database.lss.order.get_order_export_cursor_for_kol(pymongo_filter_query, pymongo_sort_by)
+        order_export_processor = factory.order_export.kol.KOLOrderExportProcessor(iterable_objects, user_subscription)
+        
+        order_data = order_export_processor.export_order_data()
         return Response(order_data, status=status.HTTP_200_OK)

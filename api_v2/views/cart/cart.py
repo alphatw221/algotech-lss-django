@@ -1,13 +1,17 @@
 from email.policy import default
 from re import S
-from django.http import JsonResponse
+from django.http import JsonResponse,HttpResponseRedirect
 from django.db.models import Q, Value
+from django.conf import settings
 
 from rest_framework import viewsets, status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.decorators import action
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.renderers import StaticHTMLRenderer
+
 
 from api import models
 from api_v2 import rule
@@ -135,6 +139,57 @@ class CartViewSet(viewsets.ModelViewSet):
             raise lib.error_handle.error.api_error.ApiVerifyError('invalid_user')
         data = CartSerializerWithSellerInfo(cart).data
         return Response(data, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['POST'], url_path=r'buyer/cvs_map/(?P<cart_oid>[^/.]+)', permission_classes=())
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def buyer_cvs_map(self, request, cart_oid):
+
+        api_user = lib.util.verify.Verify.get_customer_user(request) if request.user.is_authenticated else None
+        cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
+        campaign = lib.util.verify.Verify.get_campaign_from_cart(cart)
+        
+        merchant_id=campaign.meta_logistic['ecpay']['merchant_id'],
+        hash_key=campaign.meta_logistic['ecpay']['hash_key'],
+        hash_iv=campaign.meta_logistic['ecpay']['hash_iv']
+
+        action,map = service.ecpay.ecpay.cvs_map(cart_oid,merchant_id, hash_key, hash_iv,
+            request.data.get('LogisticsSubType'), 
+            f'{settings.GCP_API_LOADBALANCER_URL}/api/v2/cart/buyer/cvsmap/callback/'
+            )
+        return Response({'action':action,'data':map})
+    
+    @action(detail=False, methods=['POST'], url_path=r'buyer/cvsmap/callback',parser_classes=(FormParser,MultiPartParser), renderer_classes = (StaticHTMLRenderer,),permission_classes=())
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def buyer_cvs_map_callback(self, request):
+        data = request.data.dict()
+        # {'MerchantID': '3344643', 
+        #  'MerchantTradeNo': 'ECPAY20221207094136', 
+        #  'LogisticsSubType': 'FAMIC2C', 
+        #  'CVSStoreID': '018965', 
+        #  'CVSStoreName': '全家新竹關新店', 
+        #  'CVSAddress': '新竹市東區關新東路350號1樓', 
+        #  'CVSTelephone': '03-5679359', 
+        #  'CVSOutSide': '', 
+        #  'ExtraData': '6390449bbc4b20ae3d99e212'}
+        cart_oid = data.get('ExtraData')
+        
+        cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
+        ecpay_cvs = {
+            'merchant_id':data['MerchantID'],
+            'merchant_trade_no':data['MerchantTradeNo'],
+            'logistics_sub_type':data['LogisticsSubType'],
+            'cvs_store_id':data['CVSStoreID'],
+            'cvs_store_name':data['CVSStoreName'],
+            'cvs_address':data['CVSAddress'],
+            'cvs_telephone':data['CVSTelephone'],
+            'cvs_out_side':data['CVSOutSide'],
+            'extra_data':data['ExtraData'],
+        }
+        cart.meta['ecpay_cvs'] = ecpay_cvs
+        cart.save()
+
+        
+        return HttpResponseRedirect(redirect_to=f'https://localhost:3000/buyer/cart/{cart_oid}?tab=2') #local use this
 
     @action(detail=False, methods=['PUT'], url_path=r'(?P<cart_oid>[^/.]+)/buyer/checkout', permission_classes=())
     @lib.error_handle.error_handler.api_error_handler.api_error_handler

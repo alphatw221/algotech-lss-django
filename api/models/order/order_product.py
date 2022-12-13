@@ -18,7 +18,9 @@ class OrderProduct(models.Model):
                             blank=True, default=None)
     sku = models.CharField(
         max_length=32, null=True, blank=True, default=None)
-
+    
+    order_code = models.CharField(max_length=255, blank=True, default="")
+    
     price = models.FloatField(null=True, blank=True, default=0)
     
     image = models.CharField(

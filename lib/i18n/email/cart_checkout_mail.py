@@ -16,7 +16,7 @@ def i18n_get_mail_content(order, order_oid, lang=None):
         "1000":"K",
         "1000000":"M"
     }
-    order_detail_link = f"{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}"
+    order_detail_link = f"{settings.WEB_SERVER_URL}/buyer/order/{order_oid}"
     date_time = order.created_at.strftime("%b %d %Y")
 
     if 'code' not in order.applied_discount:
