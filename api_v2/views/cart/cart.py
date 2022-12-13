@@ -1,4 +1,5 @@
 from email.policy import default
+import json
 from re import S
 from django.http import JsonResponse,HttpResponseRedirect
 from django.db.models import Q, Value
@@ -21,7 +22,7 @@ from automation import jobs
 
 import factory
 import lib
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 import uuid
 import service
 import database
@@ -175,6 +176,7 @@ class CartViewSet(viewsets.ModelViewSet):
         
         cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
         ecpay_cvs = {
+            'shipping_option_index': data['LogisticsSubType'],
             'merchant_id':data['MerchantID'],
             'merchant_trade_no':data['MerchantTradeNo'],
             'logistics_sub_type':data['LogisticsSubType'],
@@ -187,9 +189,13 @@ class CartViewSet(viewsets.ModelViewSet):
         }
         cart.meta['ecpay_cvs'] = ecpay_cvs
         cart.save()
-
-        
-        return HttpResponseRedirect(redirect_to=f'https://localhost:3000/buyer/cart/{cart_oid}?tab=2') #local use this
+        response = HttpResponseRedirect(redirect_to=f'https://localhost:3000/buyer/cart/{cart_oid}?tab=2') #local use this
+        max_age = 60 * 15
+        expires = datetime.strftime(datetime.utcnow() + timedelta(seconds=max_age), "%a, %d-%b-%Y %H:%M:%S GMT")
+        response.set_cookie(
+            key="selected_cvs", value=json.dumps(ecpay_cvs), 
+            domain=settings.WEB_SERVER_URL, path=f"/buyer/cart/{cart_oid}", expires=expires, max_age=max_age)
+        return response
 
     @action(detail=False, methods=['PUT'], url_path=r'(?P<cart_oid>[^/.]+)/buyer/checkout', permission_classes=())
     @lib.error_handle.error_handler.api_error_handler.api_error_handler

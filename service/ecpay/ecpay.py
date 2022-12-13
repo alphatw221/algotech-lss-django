@@ -274,10 +274,10 @@ def cvs_map(cart_oid,merchant_id,hash_key,hash_iv,logistics_sub_type,server_repl
         print('An exception happened: ' + str(error))
         
 
-def create_shipping_order(order,campaign,sub_data,server_reply_url):
-    
+def create_shipping_order(order,server_reply_url,sub_data={}):
+    print(sub_data)
     MerchantTradeNo = str(order.id) + time.strftime("%Y%m%d%H%M%S", time.localtime())
-    
+    campaign = order.campaign
     create_shipping_order_params = {
         'MerchantTradeNo': MerchantTradeNo,
         'MerchantTradeDate': datetime.now().strftime("%Y/%m/%d %H:%M:%S"),
@@ -303,11 +303,12 @@ def create_shipping_order(order,campaign,sub_data,server_reply_url):
     update_params = {}
     if order.shipping_option_data.get('logisticsType') == 'CVS':
         update_params = {
-            'IsCollection': sub_data.get('is_collection'),
+            'IsCollection': sub_data.get('is_collection', 'N'),
             'LogisticsSubType': order.meta.get('ecpay_cvs',{}).get('logistics_sub_type'), #[TCAT POST][FAMIC2C UNIMARTC2C]
             'ReceiverStoreID': order.meta.get('ecpay_cvs',{}).get('cvs_store_id'),
             #TODO #setting seller return store
             'ReturnStoreID':  campaign.meta_logistic['ecpay']['return_store_id'], #返回之超商店號
+            'SenderName': "Ｎick .L"
         }
     elif order.shipping_option_data.get('logisticsType') == 'HOME':
         update_params = {
