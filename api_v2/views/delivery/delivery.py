@@ -40,14 +40,15 @@ class DeliveryViewSet(viewsets.GenericViewSet):
         
         order = lib.util.verify.Verify.get_order_with_oid(order_oid)
         sub_data = request.data
-        print(sub_data)
         params = {
+            'delivery_service': 'ecpay',
             "order_oid": order_oid,
             "order": order,
             "extra_data": sub_data
         }
         reponse = lib.helper.delivery_helper.DeliveryHelper.create_delivery_order(**params)
-        print(reponse)
+        if not reponse.get("RtnMsg", None):
+            raise lib.error_handle.error.api_error.ApiVerifyError('create_delivery_order_fail')
         return Response(reponse, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['POST'], url_path=r'/ecpay/create/delivery_order/callback/(?P<order_oid>[^/.]+)', parser_classes=(FormParser,MultiPartParser), renderer_classes = (StaticHTMLRenderer,),permission_classes=())

@@ -99,9 +99,11 @@ class PaymentViewSet(viewsets.GenericViewSet):
             "action": "pay",
             "time": pendulum.now("UTC").to_iso8601_string()
         }
+        #payment status update
         order.paid_at = datetime.utcnow()
         order.payment_status = models.order.order.PAYMENT_STATUS_PAID
-        lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
+        #delivery status update
+        lib.helper.delivery_helper.DeliveryHelper.update_delivery_status(**{ "order_oid": order_oid, "order": order, "extra_data": {}, "create_order": True})
 
         #wallet
         update_wallet(order)
@@ -111,6 +113,9 @@ class PaymentViewSet(viewsets.GenericViewSet):
         content = lib.i18n.email.order_comfirm_mail.i18n_get_mail_content(order, campaign, lang=campaign.lang)
         jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)
 
+        #order status update
+        lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
+        
         return HttpResponseRedirect(redirect_to=f'{settings.WEB_SERVER_URL}/buyer/order/{order_oid}/confirmation')
 
     # @action(detail=False, methods=['GET'], url_path=r'strip/callback/cancel', )
@@ -140,7 +145,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             order.shipping_email, 
             payment_amount, 
             currency,
-            order.id,
+            order_oid,
             f'{settings.WEB_SERVER_URL}/buyer/order/{order_oid}',
             f'{settings.GCP_API_LOADBALANCER_URL}/api/v2/payment/hitpay/webhook/')
 
@@ -153,11 +158,10 @@ class PaymentViewSet(viewsets.GenericViewSet):
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def hit_pay_webhook(self, request):
 
-        amount, status, reference_number, hmac,  = \
+        amount, status, order_oid, hmac,  = \
             lib.util.getter.getdata(request, ("amount", "status", "reference_number", "hmac"), required=True)
-
-        order = lib.util.verify.Verify.get_order(reference_number)
-        campaign = order.campaign
+        order = lib.util.verify.Verify.get_order_with_oid(order_oid)
+        campaign = lib.util.verify.Verify.get_campaign_from_order(order)
         salt = campaign.meta_payment.get(models.order.order.PAYMENT_METHOD_HITPAY,{}).get('salt')
         
         if not lib.helper.hitpay_helper.is_request_valid(request, salt, hmac):
@@ -171,8 +175,11 @@ class PaymentViewSet(viewsets.GenericViewSet):
                 "time": pendulum.now("UTC").to_iso8601_string()
             }
             order.paid_at = datetime.utcnow()
+            #payment status update
             order.payment_status = models.order.order.PAYMENT_STATUS_PAID
-            lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
+            #delivery status update
+            lib.helper.delivery_helper.DeliveryHelper.update_delivery_status(**{ "order_oid": order_oid, "order": order, "extra_data": {}, "create_order": True})
+            
 
             #wallet
             update_wallet(order)
@@ -181,12 +188,9 @@ class PaymentViewSet(viewsets.GenericViewSet):
             subject = lib.i18n.email.order_comfirm_mail.i18n_get_mail_subject(order, lang=campaign.lang)
             content = lib.i18n.email.order_comfirm_mail.i18n_get_mail_content(order, campaign, lang=campaign.lang)
             jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)
+        #order status update
+        lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
         return Response('ok')
-
-
-
-
-
 
     @action(detail=False, methods=['GET'], url_path=r"paypal/gateway")
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
@@ -222,7 +226,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
 
         paymentId, PayerID, order_oid = lib.util.getter.getparams(request, ('paymentId', 'PayerID', 'order_oid'), with_user=False)
         order = lib.util.verify.Verify.get_order_with_oid(order_oid)
-        campaign = order.campaign
+        campaign = lib.util.verify.Verify.get_campaign_from_order(order)
         client_id = campaign.meta_payment.get("paypal",{}).get("client_id")
         secret = campaign.meta_payment.get("paypal",{}).get("secret")
 
@@ -238,8 +242,10 @@ class PaymentViewSet(viewsets.GenericViewSet):
             "time": pendulum.now("UTC").to_iso8601_string()
         }
         order.paid_at = datetime.utcnow()
+        #payment status update
         order.payment_status = models.order.order.PAYMENT_STATUS_PAID
-        lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
+        #delivery status update
+        lib.helper.delivery_helper.DeliveryHelper.update_delivery_status(**{ "order_oid": order_oid, "order": order, "extra_data": {}, "create_order": True})
 
         #wallet
         update_wallet(order)
@@ -247,6 +253,9 @@ class PaymentViewSet(viewsets.GenericViewSet):
         subject = lib.i18n.email.order_comfirm_mail.i18n_get_mail_subject(order, lang=campaign.lang)
         content = lib.i18n.email.order_comfirm_mail.i18n_get_mail_content(order, campaign, lang=campaign.lang)
         jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)
+        
+        #order status update
+        lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
         return HttpResponseRedirect(redirect_to=f'{settings.WEB_SERVER_URL}/buyer/order/{order_oid}/confirmation')
 
     # @action(detail=False, methods=['GET'], url_path=r"paypal_cancel")
@@ -304,7 +313,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
                 raise lib.error_handle.error.api_error.ApiCallerError("choose_another_payment_method")
 
         payment_amount = lib.helper.payment_helper.transform_payment_amount(order.total, campaign.decimal_places, campaign.price_unit)
-        response = service.pay_mongo.pay_mongo.create_link(order.id, payment_amount, secret_key)
+        response = service.pay_mongo.pay_mongo.create_link(order_oid, payment_amount, secret_key)
         if response.status_code != 200:
             order.history[models.order.order.PAYMENT_METHOD_PAYMONGO]={
                 "action": "create_link",
@@ -321,8 +330,8 @@ class PaymentViewSet(viewsets.GenericViewSet):
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def pay_mongo_webhook_paid(self, request):
         print(request.data)
-        order_id = int(request.data['data']['attributes']['data']['attributes']['description'].split('_')[1])
-        order = lib.util.verify.Verify.get_order(order_id)
+        order_oid = int(request.data['data']['attributes']['data']['attributes']['description'].split('_')[1])
+        order = lib.util.verify.Verify.get_order_with_oid(order_oid)
         if (request.data['data']['attributes']['data']['attributes']['status'] == 'paid'):
             
             order.payment_method = models.order.order.PAYMENT_METHOD_PAYMONGO
@@ -332,8 +341,11 @@ class PaymentViewSet(viewsets.GenericViewSet):
                 "time": pendulum.now("UTC").to_iso8601_string()
             }
             order.paid_at = datetime.utcnow()
+            #payment status update
             order.payment_status = models.order.order.PAYMENT_STATUS_PAID
-            lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
+            #delivery status update
+            lib.helper.delivery_helper.DeliveryHelper.update_delivery_status(**{ "order_oid": order_oid, "order": order, "extra_data": {}, "create_order": True})
+            
 
             #wallet
             update_wallet(order)
@@ -341,6 +353,9 @@ class PaymentViewSet(viewsets.GenericViewSet):
             subject = lib.i18n.email.order_comfirm_mail.i18n_get_mail_subject(order, lang=order.campaign.lang)
             content = lib.i18n.email.order_comfirm_mail.i18n_get_mail_content(order, order.campaign, lang=order.campaign.lang)
             jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)
+            
+        #order status update
+        lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
         return Response('response', status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['GET'], url_path=r"ecpay/credential")
@@ -448,8 +463,11 @@ class PaymentViewSet(viewsets.GenericViewSet):
             "time": pendulum.now("UTC").to_iso8601_string()
         }
         order.paid_at = datetime.utcnow()
+        #payment status update
         order.payment_status = models.order.order.PAYMENT_STATUS_PAID
-        lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
+        #delivery status update
+        lib.helper.delivery_helper.DeliveryHelper.update_delivery_status(**{ "order_oid": order_oid, "order": order, "extra_data": {}, "create_order": True})
+        
 
         #wallet
         update_wallet(order)
@@ -459,6 +477,9 @@ class PaymentViewSet(viewsets.GenericViewSet):
         jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)
         # return HttpResponseRedirect(redirect_to=f'{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}/confirmation')
         res = '1|OK'
+        
+        #order status update
+        lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
         
         return Response(res)
     
@@ -534,23 +555,8 @@ class PaymentViewSet(viewsets.GenericViewSet):
         checkout_id = order.history[f'{models.order.order.PAYMENT_METHOD_RAPYD}_{checkout_time}']['id']
         api_response = rapyd_service.retrieve_checkout(checkout_id)
         response_data = api_response.json()
-        print(response_data)
         payment_data = response_data.get('data',{}).get('payment', {})
         payment_status = payment_data.get("status", False)
-        
-        if not payment_status:
-            raise lib.error_handle.error.api_error.ApiVerifyError('payment_failed')
-
-
-        lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
-        if payment_status == "CLO":
-            order.paid_at = datetime.utcnow()
-            order.payment_status = models.order.order.PAYMENT_STATUS_PAID
-        elif payment_status == "ACT":
-            order.payment_status = models.order.order.PAYMENT_STATUS_AWAITING_CONFIRM
-        elif payment_status == "EXP":
-            order.payment_status = models.order.order.PAYMENT_STATUS_EXPIRED
-            
         order.meta[models.order.order.PAYMENT_METHOD_RAPYD] = response_data
         order.payment_method = models.order.order.PAYMENT_METHOD_RAPYD
         order.checkout_details[models.order.order.PAYMENT_METHOD_RAPYD] = {
@@ -562,10 +568,11 @@ class PaymentViewSet(viewsets.GenericViewSet):
             "action": "checkout_success_callback",
             "time": callback_time
         }
-        
-        lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
         if payment_status == "CLO":
-
+            order.paid_at = datetime.utcnow()
+            order.payment_status = models.order.order.PAYMENT_STATUS_PAID
+            #delivery status update
+            lib.helper.delivery_helper.DeliveryHelper.update_delivery_status(**{ "order_oid": order_oid, "order": order, "extra_data": {}, "create_order": True})
             #wallet
             update_wallet(order)
 
@@ -573,8 +580,15 @@ class PaymentViewSet(viewsets.GenericViewSet):
             content = lib.i18n.email.order_comfirm_mail.i18n_get_mail_content(order, campaign, lang=campaign.lang)
             jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)
             return HttpResponseRedirect(redirect_to=f'{settings.WEB_SERVER_URL}/buyer/order/{order_oid}/confirmation')
-        else:
-            return HttpResponseRedirect(redirect_to=f'{settings.WEB_SERVER_URL}/buyer/order/{order_oid}')
+        elif payment_status == "ACT":
+            order.payment_status = models.order.order.PAYMENT_STATUS_AWAITING_CONFIRM
+        elif payment_status == "EXP":
+            order.payment_status = models.order.order.PAYMENT_STATUS_EXPIRED
+        
+        #order status update
+        lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
+        
+        return HttpResponseRedirect(redirect_to=f'{settings.WEB_SERVER_URL}/buyer/order/{order_oid}')
     
     
     
@@ -583,6 +597,13 @@ class PaymentViewSet(viewsets.GenericViewSet):
     def get_rapyd_webhook(self, request):
         order = None
         try:
+            callback_time = pendulum.now("UTC").to_iso8601_string()
+            order.history[f"{models.order.order.PAYMENT_METHOD_RAPYD}_{callback_time}"]={
+                "action": "webhook",
+                "time": callback_time,
+                "data": body
+            }
+            
             signature = request.headers['Signature']
             http_uri = settings.GCP_API_LOADBALANCER_URL+request.get_full_path()
             salt = request.headers['Salt']
@@ -592,7 +613,6 @@ class PaymentViewSet(viewsets.GenericViewSet):
             id = body['id']
             type = body['type']
             data = body['data']
-            print("body", body)
             
             order_oid = data.get("metadata", {}).get("order_oid", "")
             order = lib.util.verify.Verify.get_order_with_oid(order_oid)
@@ -609,15 +629,20 @@ class PaymentViewSet(viewsets.GenericViewSet):
                 order_status = models.order.order.STATUS_REVIEW
             elif type == "PAYMENT_COMPLETED":
                 order.paid_at = datetime.utcnow()
-                order.status = models.order.order.STATUS_COMPLETE
-            
-            callback_time = pendulum.now("UTC").to_iso8601_string()
-            order.history[f"{models.order.order.PAYMENT_METHOD_RAPYD}_{callback_time}"]={
-                "action": "webhook",
-                "time": callback_time,
-                "data": body
-            }
-            order.save()
+                #payment status update
+                order.payment_status = models.order.order.PAYMENT_STATUS_PAID
+                #delivery status update
+                lib.helper.delivery_helper.DeliveryHelper.update_delivery_status(**{ "order_oid": order_oid, "order": order, "extra_data": {}, "create_order": True})
+
+                #wallet
+                update_wallet(order)
+
+                subject = lib.i18n.email.order_comfirm_mail.i18n_get_mail_subject(order, lang=campaign.lang)
+                content = lib.i18n.email.order_comfirm_mail.i18n_get_mail_content(order, campaign, lang=campaign.lang)
+                jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)
+                
+            #order status update
+            lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
         except Exception:
             if order:
                 order.save()

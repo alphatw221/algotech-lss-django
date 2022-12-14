@@ -275,7 +275,6 @@ def cvs_map(cart_oid,merchant_id,hash_key,hash_iv,logistics_sub_type,server_repl
         
 
 def create_shipping_order(order,server_reply_url,sub_data={}):
-    print(sub_data)
     MerchantTradeNo = str(order.id) + time.strftime("%Y%m%d%H%M%S", time.localtime())
     campaign = order.campaign
     create_shipping_order_params = {
@@ -308,7 +307,6 @@ def create_shipping_order(order,server_reply_url,sub_data={}):
             'ReceiverStoreID': order.meta.get('ecpay_cvs',{}).get('cvs_store_id'),
             #TODO #setting seller return store
             'ReturnStoreID':  campaign.meta_logistic['ecpay']['return_store_id'], #返回之超商店號
-            'SenderName': "Ｎick .L"
         }
     elif order.shipping_option_data.get('logisticsType') == 'HOME':
         update_params = {

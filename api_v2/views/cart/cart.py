@@ -238,7 +238,7 @@ class CartViewSet(viewsets.ModelViewSet):
         if not success:
             cart = lib.util.verify.Verify.get_cart(cart.id)
             return Response(CartSerializerWithSellerInfo(cart).data, status=status.HTTP_200_OK)
-        
+        # cart.delete()
         order = lib.util.verify.Verify.get_order(pymongo_order.id)
         order_oid = str(pymongo_order._id)   
         
