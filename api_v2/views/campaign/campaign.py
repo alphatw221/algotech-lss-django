@@ -159,7 +159,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         campaign_data, = lib.util.getter.getdata(request, ('data',), required=True)
         campaign_data = json.loads(campaign_data)
-        supplier_id = campaign_data.get("supplier")
+        supplier_id = campaign_data.get("supplier").get('id', '')
         if supplier_id not in ["", "null", "undefined"]:
             supplier = lib.util.verify.Verify.get_support_stock_user_subscriptions_from_user_subscription(supplier_id,user_subscription)
             campaign_data.update({
@@ -178,6 +178,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         serializer = models.campaign.campaign.CampaignSerializerUpdate(campaign, data=campaign_data, partial=True)
         if not serializer.is_valid():
+            print(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         campaign = serializer.save()
 
