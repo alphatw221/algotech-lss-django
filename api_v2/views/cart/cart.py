@@ -189,12 +189,12 @@ class CartViewSet(viewsets.ModelViewSet):
         }
         cart.meta['ecpay_cvs'] = ecpay_cvs
         cart.save()
-        response = HttpResponseRedirect(redirect_to=f'https://localhost:3000/buyer/cart/{cart_oid}?tab=2') #local use this
-        max_age = 60 * 15
-        expires = datetime.strftime(datetime.utcnow() + timedelta(seconds=max_age), "%a, %d-%b-%Y %H:%M:%S GMT")
-        response.set_cookie(
-            key="selected_cvs", value=json.dumps(ecpay_cvs), 
-            domain=settings.WEB_SERVER_URL, path=f"/buyer/cart/{cart_oid}", expires=expires, max_age=max_age)
+        response = HttpResponseRedirect(redirect_to=f'{settings.WEB_SERVER_URL}/buyer/cart/{cart_oid}?tab=2') #local use this
+        # max_age = 60 * 15
+        # expires = datetime.strftime(datetime.utcnow() + timedelta(seconds=max_age), "%a, %d-%b-%Y %H:%M:%S GMT")
+        # response.set_cookie(
+        #     key="selected_cvs", value=json.dumps(ecpay_cvs), 
+        #     domain=settings.WEB_SERVER_URL, path=f"/buyer/cart/{cart_oid}", expires=expires, max_age=max_age)
         return response
 
     @action(detail=False, methods=['PUT'], url_path=r'(?P<cart_oid>[^/.]+)/buyer/checkout', permission_classes=())

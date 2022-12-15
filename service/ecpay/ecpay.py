@@ -21,7 +21,7 @@ Invoice_Url = 'https://einvoice.ecpay.com.tw/B2CInvoice/Issue'
 
 
 
-def create_order(merchant_id, hash_key, hash_iv,payment_amount, order, return_url, order_result_url):
+def create_order(merchant_id, hash_key, hash_iv,payment_amount, order, return_url, order_result_url, client_back_url):
     
     # item_name = ''
     # for item in order.products:
@@ -37,7 +37,7 @@ def create_order(merchant_id, hash_key, hash_iv,payment_amount, order, return_ur
     'ItemName': 'Order#',
     'ReturnURL': str(return_url),
     'ChoosePayment': 'ALL',
-    'ClientBackURL': 'https://www.ecpay.com.tw/client_back_url.php',
+    'ClientBackURL': str(client_back_url),
     'ItemURL': 'https://www.ecpay.com.tw/item_url.php',
     'Remark': '',
     'ChooseSubPayment': '',
@@ -289,7 +289,7 @@ def create_shipping_order(order,server_reply_url,sub_data={}):
         'SenderCellPhone': campaign.meta_logistic['ecpay']['sender_phone'],
         'ReceiverName': str(order.shipping_first_name) + str(order.shipping_last_name),
         'ReceiverPhone': order.shipping_phone,
-        'ReceiverCellPhone': order.shipping_phone,
+        'ReceiverCellPhone': order.shipping_cellphone,
         'ReceiverEmail': order.shipping_email,
         'TradeDesc': 'lss',
         'ServerReplyURL': server_reply_url,
@@ -315,7 +315,7 @@ def create_shipping_order(order,server_reply_url,sub_data={}):
             'SenderZipCode': campaign.meta_logistic['ecpay']['sender_zip_code'],
             'SenderAddress': campaign.meta_logistic['ecpay']['sender_address'],
             'ReceiverZipCode': order.shipping_postcode,
-            'ReceiverAddress': order.shipping_location + order.shipping_address_1,
+            'ReceiverAddress': order.shipping_region + order.shipping_location + order.shipping_address_1,
             'Temperature': '0001', #0001:常溫 (預設值) 0002:冷藏 0003:冷凍 [*POST必為0001]
             'Distance': '00', #00:同縣市 (預設值) 01:外縣市 02:離島 會自動調整 [*POST忽略]
             'Specification': '0001', #0001: 60cm (預設值) 0002: 90cm 0003: 120cm 0004: 150cm [*POST忽略]

@@ -97,32 +97,5 @@ class DeliveryViewSet(viewsets.GenericViewSet):
         
         return Response('ok', status=status.HTTP_200_OK)
     
-    
-    @action(detail=False, methods=['GET'], url_path=r'stripe/gateway', permission_classes=(),  authentication_classes=[])
-    @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def get_stripe_gateway(self, request):
-        order_oid, = lib.util.getter.getparams(request,('order_oid',),with_user=False) 
-        order = lib.util.verify.Verify.get_order_with_oid(order_oid)
-        campaign = lib.util.verify.Verify.get_campaign_from_order(order)
-
-        if not campaign.meta_payment.get("stripe",{}).get("enabled"):
-            raise lib.error_handle.error.api_error.ApiVerifyError('payment_not_enable')
-            
-        secret = campaign.meta_payment.get("stripe",{}).get("secret")
-        currency = campaign.meta_payment.get("stripe",{}).get("currency")
-
-        checkout_session = service.stripe.stripe.create_checkout_session(
-            secret,
-            currency,
-            order,
-            campaign.decimal_places,
-            campaign.price_unit,
-            success_url=settings.GCP_API_LOADBALANCER_URL + '/api/v2/payment/stripe/callback/success?session_id={CHECKOUT_SESSION_ID}&order_oid=' + str(order_oid), 
-            cancel_url=f'{settings.WEB_SERVER_URL}/buyer/order/{str(order_oid)}/payment')
-
-        if not checkout_session:
-            raise lib.error_handle.error.api_error.ApiCallerError('choose_another_payment_method')
-        
-        return Response(checkout_session.url, status=status.HTTP_200_OK)
 
     
