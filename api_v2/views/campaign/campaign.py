@@ -102,13 +102,22 @@ class CampaignViewSet(viewsets.ModelViewSet):
         
         campaignData, = lib.util.getter.getdata(request, ('data',), required=True)
         campaignData = json.loads(campaignData)
+        
+            
         end_at = campaignData['end_at']
         supplier_id = campaignData.get("supplier")
         if supplier_id not in ["", None, "null", "undefined"]:
             supplier = lib.util.verify.Verify.get_support_stock_user_subscriptions_from_user_subscription(supplier_id,user_subscription)
             campaignData.update({
                 "meta_logistic": supplier.meta_logistic,
-                "meta_payment": supplier.meta_payment
+            })
+        # kol will use dealer's payment
+        if user_subscription.type == "kol":
+            dear_subscription = user_subscription.dealer
+            if not dear_subscription:
+                raise lib.error_handle.error.api_error.ApiVerifyError('not_belong_to_any_dealer')
+            campaignData.update({
+                "meta_payment": dear_subscription.meta_payment
             })
         ret = rule.rule_checker.user_subscription_rule_checker.CreateCampaignRuleChecker.check(**{
             'api_user': api_user, 'user_subscription': user_subscription, 'end_at': end_at
@@ -164,7 +173,14 @@ class CampaignViewSet(viewsets.ModelViewSet):
             supplier = lib.util.verify.Verify.get_support_stock_user_subscriptions_from_user_subscription(supplier_id,user_subscription)
             campaign_data.update({
                 "meta_logistic": supplier.meta_logistic,
-                "meta_payment": supplier.meta_payment
+            })
+        # kol will use dealer's payment
+        if user_subscription.type == "kol":
+            dear_subscription = user_subscription.dealer
+            if not dear_subscription:
+                raise lib.error_handle.error.api_error.ApiVerifyError('not_belong_to_any_dealer')
+            campaign_data.update({
+                "meta_payment": dear_subscription.meta_payment
             })
         ret = rule.rule_checker.user_subscription_rule_checker.RuleChecker.check(
             check_list=[
