@@ -40,13 +40,9 @@ class DeliveryViewSet(viewsets.GenericViewSet):
         
         order = lib.util.verify.Verify.get_order_with_oid(order_oid)
         sub_data = request.data
-        params = {
-            'delivery_service': 'ecpay',
-            "order_oid": order_oid,
-            "order": order,
-            "extra_data": sub_data
-        }
-        reponse = lib.helper.delivery_helper.DeliveryHelper.create_delivery_order(**params)
+        delivery_params = {"order_oid": order_oid, "order": order, "extra_data": sub_data, "create_order": True, "update_status": True}
+        reponse = lib.helper.delivery_helper.DeliveryHelper.create_delivery_order_and_update_delivery_status(**delivery_params)
+                
         if not reponse.get("RtnMsg", None):
             raise lib.error_handle.error.api_error.ApiVerifyError('create_delivery_order_fail')
         return Response(reponse, status=status.HTTP_200_OK)
@@ -65,13 +61,9 @@ class DeliveryViewSet(viewsets.GenericViewSet):
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             order = serializer.save()
             
-            params = {
-                "order_oid": order_oid,
-                "order": order,
-                "extra_data": {},
-                "create_order": False
-            }
-            reponse = lib.helper.delivery_helper.DeliveryHelper.update_delivery_status(**params)
+            delivery_params = {"order_oid": order_oid, "order": order, "extra_data": sub_data, "create_order": False, "update_status": True}
+            lib.helper.delivery_helper.DeliveryHelper.create_delivery_order_and_update_delivery_status(**delivery_params)
+        
             #TODO #save this callback data
             # {'CVSValidationNo': '',
             #  'ReceiverEmail': 'test@gmail.com',

@@ -189,7 +189,7 @@ class CartViewSet(viewsets.ModelViewSet):
         }
         cart.meta['ecpay_cvs'] = ecpay_cvs
         cart.save()
-        response = HttpResponseRedirect(redirect_to=f'{settings.WEB_SERVER_URL}/buyer/cart/{cart_oid}?tab=2') #local use this
+        response = HttpResponseRedirect(redirect_to=f'{settings.WEB_SERVER_URL}/buyer/cart/{cart_oid}?tab=2')
         # max_age = 60 * 15
         # expires = datetime.strftime(datetime.utcnow() + timedelta(seconds=max_age), "%a, %d-%b-%Y %H:%M:%S GMT")
         # response.set_cookie(

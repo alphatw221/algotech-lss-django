@@ -21,14 +21,14 @@ Invoice_Url = 'https://einvoice.ecpay.com.tw/B2CInvoice/Issue'
 
 
 
-def create_order(merchant_id, hash_key, hash_iv,payment_amount, order, return_url, order_result_url, client_back_url):
+def create_order(merchant_id, hash_key, hash_iv,payment_amount, order_oid, order, return_url, order_result_url, client_back_url):
     
     # item_name = ''
     # for item in order.products:
     #     print(order.products)
     #     item_name += f'#{dict(order.products[item])["name"]}'
     params = {
-    'MerchantTradeNo': str(order.id)+datetime.now().strftime("%Y%m%d") ,
+    'MerchantTradeNo': str(order.id)+time.strftime("%Y%m%d%H%M%S", time.localtime()) ,
     'StoreID': '',
     'MerchantTradeDate': datetime.now().strftime("%Y/%m/%d %H:%M:%S"),
     'PaymentType': 'aio',
@@ -38,7 +38,7 @@ def create_order(merchant_id, hash_key, hash_iv,payment_amount, order, return_ur
     'ReturnURL': str(return_url),
     'ChoosePayment': 'ALL',
     'ClientBackURL': str(client_back_url),
-    'ItemURL': 'https://www.ecpay.com.tw/item_url.php',
+    'ItemURL': '',
     'Remark': '',
     'ChooseSubPayment': '',
     'OrderResultURL': str(order_result_url),
@@ -47,7 +47,7 @@ def create_order(merchant_id, hash_key, hash_iv,payment_amount, order, return_ur
     'IgnorePayment': '',
     'PlatformID': '',
     'InvoiceMark': 'N',
-    'CustomField1': '',
+    'CustomField1': str(order_oid),
     'CustomField2': '',
     'CustomField3': '',
     'CustomField4': '',
@@ -66,9 +66,9 @@ def create_order(merchant_id, hash_key, hash_iv,payment_amount, order, return_ur
         final_order_params = ecpay_payment_sdk.create_order(params)
 
         # 產生 html 的 form 格式
-        # action_url = 'https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5'  # 測試環境
-        action_url = 'https://payment.ecpay.com.tw/Cashier/AioCheckOut/V5' # 正式環境
-        html = ecpay_payment_sdk.gen_html_post_form(action_url, final_order_params)
+        action_url = 'https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5'  # 測試環境
+        # action_url = 'https://payment.ecpay.com.tw/Cashier/AioCheckOut/V5' # 正式環境
+        # html = ecpay_payment_sdk.gen_html_post_form(action_url, final_order_params)
         # return action_url,final_order_params
        
         return action_url,final_order_params
@@ -87,7 +87,7 @@ def create_register_order(merchant_id, hash_key, hash_iv,payment_amount:int,plan
         'TradeDesc': 'test order',
         'ItemName': plan,
         'ReturnURL': str(return_url),
-        'ChoosePayment': 'ALL',
+        'ChoosePayment': 'Credit',
         'ClientBackURL': '',
         'ItemURL': '',
         'Remark': '',
@@ -330,24 +330,24 @@ def create_shipping_order(order,server_reply_url,sub_data={}):
 
     # 建立實體
     ecpay_logistic_sdk = ECPayLogisticSdk(
-        MerchantID=campaign.meta_logistic['ecpay']['merchant_id'],
-        HashKey=campaign.meta_logistic['ecpay']['hash_key'],
-        HashIV=campaign.meta_logistic['ecpay']['hash_iv']
+        # MerchantID=campaign.meta_logistic['ecpay']['merchant_id'],
+        # HashKey=campaign.meta_logistic['ecpay']['hash_key'],
+        # HashIV=campaign.meta_logistic['ecpay']['hash_iv']
         # C2C test
         # MerchantID='2000933',
         # HashKey='XBERn1YOvpM9nfZc',
         # HashIV='h1ONHk4P4yqbl5LK'
         
         #HOME test
-        # MerchantID='2000132',
-        # HashKey='5294y06JbISpM5x9',
-        # HashIV='v77hoKGq4kWxNNIS'
+        MerchantID='2000132',
+        HashKey='5294y06JbISpM5x9',
+        HashIV='v77hoKGq4kWxNNIS'
     )
 
     try:
         # 介接路徑
-        # action_url = 'https://logistics-stage.ecpay.com.tw/Express/Create'  # 測試環境
-        action_url = 'https://logistics.ecpay.com.tw/Express/Create' # 正式環境
+        action_url = 'https://logistics-stage.ecpay.com.tw/Express/Create'  # 測試環境
+        # action_url = 'https://logistics.ecpay.com.tw/Express/Create' # 正式環境
 
         # print(create_shipping_order_params)
         # 建立物流訂單並接收回應訊息
