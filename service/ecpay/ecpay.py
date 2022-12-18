@@ -66,8 +66,8 @@ def create_order(merchant_id, hash_key, hash_iv,payment_amount, order_oid, order
         final_order_params = ecpay_payment_sdk.create_order(params)
 
         # 產生 html 的 form 格式
-        action_url = 'https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5'  # 測試環境
-        # action_url = 'https://payment.ecpay.com.tw/Cashier/AioCheckOut/V5' # 正式環境
+        # action_url = 'https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5'  # 測試環境
+        action_url = 'https://payment.ecpay.com.tw/Cashier/AioCheckOut/V5' # 正式環境
         # html = ecpay_payment_sdk.gen_html_post_form(action_url, final_order_params)
         # return action_url,final_order_params
        
@@ -330,24 +330,24 @@ def create_shipping_order(order,server_reply_url,sub_data={}):
 
     # 建立實體
     ecpay_logistic_sdk = ECPayLogisticSdk(
-        # MerchantID=campaign.meta_logistic['ecpay']['merchant_id'],
-        # HashKey=campaign.meta_logistic['ecpay']['hash_key'],
-        # HashIV=campaign.meta_logistic['ecpay']['hash_iv']
+        MerchantID=campaign.meta_logistic['ecpay']['merchant_id'],
+        HashKey=campaign.meta_logistic['ecpay']['hash_key'],
+        HashIV=campaign.meta_logistic['ecpay']['hash_iv']
         # C2C test
         # MerchantID='2000933',
         # HashKey='XBERn1YOvpM9nfZc',
         # HashIV='h1ONHk4P4yqbl5LK'
         
         #HOME test
-        MerchantID='2000132',
-        HashKey='5294y06JbISpM5x9',
-        HashIV='v77hoKGq4kWxNNIS'
+        # MerchantID='2000132',
+        # HashKey='5294y06JbISpM5x9',
+        # HashIV='v77hoKGq4kWxNNIS'
     )
 
     try:
         # 介接路徑
-        action_url = 'https://logistics-stage.ecpay.com.tw/Express/Create'  # 測試環境
-        # action_url = 'https://logistics.ecpay.com.tw/Express/Create' # 正式環境
+        # action_url = 'https://logistics-stage.ecpay.com.tw/Express/Create'  # 測試環境
+        action_url = 'https://logistics.ecpay.com.tw/Express/Create' # 正式環境
 
         # print(create_shipping_order_params)
         # 建立物流訂單並接收回應訊息
