@@ -35,7 +35,7 @@ class ProductViewSet(viewsets.ModelViewSet):
             lib.util.getter.getparams(request, ("support_stock_user_subscription_id", "search_column", "keyword", "product_status", "product_type", "category_id", "exclude", "sort_by"), with_user=True, seller=True)
         user_subscription = \
             lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
-        if support_stock_user_subscription_id:
+        if support_stock_user_subscription_id not in ["", None, "null", "undefined"]:
             user_subscription = lib.util.verify.Verify.get_support_stock_user_subscriptions_from_user_subscription(support_stock_user_subscription_id,user_subscription)
         
         

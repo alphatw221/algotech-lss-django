@@ -114,7 +114,7 @@ class PaymentMeta():
     
     PH = ['direct_payment', 'paypal', 'hitpay', 'pay_mongo']
     
-    if settings.GCP_API_LOADBALANCER_URL == "https://sb.liveshowseller.ph":
+    if settings.WEB_SERVER_URL == "https://plusoneapp.sociallab.ph":
         PH = ['direct_payment','paypal']
 
     

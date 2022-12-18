@@ -103,6 +103,7 @@ class Order(models.Model):
     shipping_last_name = models.CharField(max_length=64, blank=True, default='')
     shipping_email = models.CharField(max_length=128, blank=True, default='')
     shipping_phone = models.CharField(max_length=64, blank=True, default='')
+    shipping_cellphone = models.CharField(max_length=64, blank=True, default='')
     shipping_postcode = models.CharField(max_length=10, blank=True, default='')
     shipping_region = models.CharField(max_length=32, blank=True, default='')
     shipping_location = models.CharField(max_length=32, blank=True, default='')

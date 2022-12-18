@@ -321,7 +321,7 @@ class UserViewSet(viewsets.ModelViewSet):
             subject=lib.i18n.email.reset_password_link_mail.i18n_get_mail_subject(lang=api_user.lang),
             email=email,
             template="reset_password_link_email.html",
-            parameters={"url":settings.GCP_API_LOADBALANCER_URL +"/seller/web/password/reset","code":code,"username":auth_user.username},
+            parameters={"url":settings.WEB_SERVER_URL +"/seller/web/password/reset","code":code,"username":auth_user.username},
             lang=api_user.lang,
         )
 

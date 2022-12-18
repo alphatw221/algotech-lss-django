@@ -2,7 +2,7 @@ from django.conf import settings
 import hmac, hashlib, base64, binascii
 import requests
 from database.lss._config import db
-def create_link(order_id, amount, secret_key):
+def create_link(order_oid, amount, secret_key):
     amount = int(amount * 100)
     
     message_bytes = secret_key.encode('ascii')
@@ -13,7 +13,7 @@ def create_link(order_id, amount, secret_key):
         "data": {
             "attributes": {
                 "amount": amount,
-                "description": f"Order_{order_id}",
+                "description": f"Order_{order_oid}",
                 "remarks": ""
             },
         }
