@@ -105,8 +105,9 @@ class OrderViewSet(viewsets.ModelViewSet):
         #payment status update
         order.payment_status = models.order.order.PAYMENT_STATUS_AWAITING_CONFIRM
         #delivery status update
-        lib.helper.delivery_helper.DeliveryHelper.update_delivery_status(**{ "order_oid": order_oid, "order": order, "extra_data": {}, "create_order": True})
-       
+        delivery_params = {"order_oid": order_oid, "order": order, "extra_data": {}, "create_order": True, "update_status": True}
+        lib.helper.delivery_helper.DeliveryHelper.create_delivery_order_and_update_delivery_status(**delivery_params)
+                
         #wallet
         update_wallet(order)
 
