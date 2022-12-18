@@ -367,7 +367,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         test_merchant_id = "3002607"
         test_hash_key = "pwFHCqoQZGmho4w6"
         test_hash_iv = "EkRm7iFT261dpevs"
-        test_mode = True
+        test_mode = False
         order = lib.util.verify.Verify.get_order_with_oid(order_oid)
         campaign = order.campaign
         merchant_id = test_merchant_id if test_mode else campaign.meta_payment.get("ecpay",{}).get("merchant_id")
@@ -397,7 +397,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         test_merchant_id = "3002607"
         test_hash_key = "pwFHCqoQZGmho4w6"
         test_hash_iv = "EkRm7iFT261dpevs"
-        test_mode = True
+        test_mode = False
         payment_res = request.data.dict()
         print(payment_res)
         order_oid = payment_res.get("CustomField1")
@@ -502,7 +502,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         test_merchant_id = "3002607"
         test_hash_key = "pwFHCqoQZGmho4w6"
         test_hash_iv = "EkRm7iFT261dpevs"
-        test_mode = True
+        test_mode = False
         payment_res = request.data.dict()
         print(payment_res)
         order_oid = payment_res.get("CustomField1")
