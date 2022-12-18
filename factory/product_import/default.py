@@ -46,6 +46,7 @@ class DefaultProductImportProcessor(lib.helper.import_helper.ImportProcessor):
             FieldMapper('SKU', 'sku', ''),
             FieldMapper('Description', 'description', ''),
             FieldMapper('Keyword', 'order_code', ''),
+            FieldMapper('Cost', 'price_ori', ''),
             FieldMapper('Price', 'price', ''),
             FieldMapper('Stock', 'qty', ''),
             FieldMapper('MaxQty', 'max_order_amount', ''),
