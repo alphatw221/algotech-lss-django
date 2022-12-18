@@ -1,5 +1,7 @@
+import traceback
 from django.core.files.base import ContentFile
 from django.conf import settings
+from api_v2.views.user.user import UserSerializerSellerAccountInfo
 
 from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
@@ -237,16 +239,19 @@ class ProductViewSet(viewsets.ModelViewSet):
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def seller_import_product(self, request):
         api_user = lib.util.verify.Verify.get_seller_user(request)
-        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        try:
+            user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
 
-        file, = lib.util.getter.getdata(request,('file', ), required=True)
+            file, = lib.util.getter.getdata(request,('file', ), required=True)
 
-        product_import_processor_class:factory.product_import.default.DefaultProductImportProcessor \
-            = factory.product_import.get_product_import_processor_class(user_subscription)
-        product_import_processor = product_import_processor_class(user_subscription)
-        product_import_processor.process(file)
+            product_import_processor_class:factory.product_import.default.DefaultProductImportProcessor \
+                = factory.product_import.get_product_import_processor_class(user_subscription)
+            product_import_processor = product_import_processor_class(user_subscription)
+            product_import_processor.process(file)
+        except:
+            print(traceback.format_exc())
 
-        return Response("OK", status=status.HTTP_200_OK)
+        return Response(UserSerializerSellerAccountInfo(api_user).data, status=status.HTTP_200_OK)
 
 
 

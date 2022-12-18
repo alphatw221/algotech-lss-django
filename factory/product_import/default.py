@@ -34,7 +34,7 @@ class ProductCategoriesFieldMapper(FieldMapper):
 
 class DefaultProductImportProcessor(lib.helper.import_helper.ImportProcessor):
 
-    def __init__(self, user_subscription, size_limit_bytes=100*1024, accept_types=[CONTENT_TYPE_XLSX, CONTENT_TYPE_CSV]) -> None:
+    def __init__(self, user_subscription, size_limit_bytes=1024*1024*10, accept_types=[CONTENT_TYPE_XLSX, CONTENT_TYPE_CSV]) -> None:
 
         self.user_subscription = user_subscription
         product_category_dict = {product_category.name:product_category.id for product_category in user_subscription.product_categories.all()}
