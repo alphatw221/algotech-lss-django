@@ -13,13 +13,17 @@ class FieldMapper():
 
 class ImportProcessor():
     
-    def __init__(self, size_limit_bytes=10*1024, accept_types=[]) -> None:
+    def __init__(self, size_limit_bytes=1024*1024*10, accept_types=[]) -> None:
 
         self.size_limit_bytes = size_limit_bytes
         self.accept_types = accept_types
 
     def check_size_valid(self, file):
-        if self.size_limit_bytes and getattr(file, 'size', 0) > self.size_limit_bytes:
+        print()
+        print(getattr(file, 'size', 0))
+        print(self.size_limit_bytes)
+        print(getattr(file, 'size', 0) > self.size_limit_bytes)
+        if self.size_limit_bytes and (getattr(file, 'size', 0) > self.size_limit_bytes):
             return self.size_not_valid()
         return True
 
