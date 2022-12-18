@@ -201,7 +201,6 @@ class CartViewSet(viewsets.ModelViewSet):
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     @lib.error_handle.error_handler.cart_operation_error_handler.update_cart_product_error_handler
     def buyer_checkout_cart(self, request, cart_oid):
-        
         shipping_data, points_used = lib.util.getter.getdata(request, ("shipping_data", "points_used"), required=True)
 
         api_user = lib.util.verify.Verify.get_customer_user(request) if request.user.is_authenticated else None
@@ -229,6 +228,7 @@ class CartViewSet(viewsets.ModelViewSet):
 
         serializer =models.order.order.OrderSerializerUpdateShipping(data=shipping_data) 
         if not serializer.is_valid():
+            print(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         point_discount_processor_class:factory.point_discount.PointDiscountProcessor = factory.point_discount.get_point_discount_processor_class(user_subscription)

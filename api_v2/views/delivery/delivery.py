@@ -42,8 +42,12 @@ class DeliveryViewSet(viewsets.GenericViewSet):
         sub_data = request.data
         delivery_params = {"order_oid": order_oid, "order": order, "extra_data": sub_data, "create_order": True, "update_status": True}
         reponse = lib.helper.delivery_helper.DeliveryHelper.create_delivery_order_and_update_delivery_status(**delivery_params)
-                
+        order.payment_method = models.order.order.PAYMENT_METHOD_ECPAY_CASH_ON_DELIVERY
+        meta = order.meta
+        meta["ecpay_create_delivery_order"] = reponse
+        order.save()
         if not reponse.get("RtnMsg", None):
+            
             raise lib.error_handle.error.api_error.ApiVerifyError('create_delivery_order_fail')
         return Response(reponse, status=status.HTTP_200_OK)
     
