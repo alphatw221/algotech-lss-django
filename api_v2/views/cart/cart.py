@@ -1,4 +1,5 @@
 from email.policy import default
+import json
 from re import S
 from django.http import JsonResponse,HttpResponseRedirect
 from django.db.models import Q, Value
@@ -21,7 +22,7 @@ from automation import jobs
 
 import factory
 import lib
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 import uuid
 import service
 import database
@@ -128,6 +129,18 @@ class CartViewSet(viewsets.ModelViewSet):
         cart_oid = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
         return Response(cart_oid.platform, status=status.HTTP_200_OK)
     
+    @action(detail=False, methods=['GET'], url_path=r'buyer/retrieve/(?P<cart_oid>[^/.]+)/platform_and_products', permission_classes=())
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def buyer_retrieve_cart_platform_and_products(self, request, cart_oid):
+        cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
+        response_data = {
+            "platform": cart.platform,
+            "products": cart.products
+            
+        }
+        print(response_data)
+        return Response(response_data, status=status.HTTP_200_OK)
+    
     @action(detail=False, methods=['GET'], url_path=r'buyer/retrieve/(?P<cart_oid>[^/.]+)', permission_classes=())
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def buyer_retrieve_cart(self, request, cart_oid):
@@ -175,6 +188,7 @@ class CartViewSet(viewsets.ModelViewSet):
         
         cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
         ecpay_cvs = {
+            'shipping_option_index': data['LogisticsSubType'],
             'merchant_id':data['MerchantID'],
             'merchant_trade_no':data['MerchantTradeNo'],
             'logistics_sub_type':data['LogisticsSubType'],
@@ -187,15 +201,18 @@ class CartViewSet(viewsets.ModelViewSet):
         }
         cart.meta['ecpay_cvs'] = ecpay_cvs
         cart.save()
-
-        
-        return HttpResponseRedirect(redirect_to=f'https://localhost:3000/buyer/cart/{cart_oid}?tab=2') #local use this
+        response = HttpResponseRedirect(redirect_to=f'{settings.WEB_SERVER_URL}/buyer/cart/{cart_oid}?tab=2')
+        # max_age = 60 * 15
+        # expires = datetime.strftime(datetime.utcnow() + timedelta(seconds=max_age), "%a, %d-%b-%Y %H:%M:%S GMT")
+        # response.set_cookie(
+        #     key="selected_cvs", value=json.dumps(ecpay_cvs), 
+        #     domain=settings.WEB_SERVER_URL, path=f"/buyer/cart/{cart_oid}", expires=expires, max_age=max_age)
+        return response
 
     @action(detail=False, methods=['PUT'], url_path=r'(?P<cart_oid>[^/.]+)/buyer/checkout', permission_classes=())
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     @lib.error_handle.error_handler.cart_operation_error_handler.update_cart_product_error_handler
     def buyer_checkout_cart(self, request, cart_oid):
-        
         shipping_data, points_used = lib.util.getter.getdata(request, ("shipping_data", "points_used"), required=True)
 
         api_user = lib.util.verify.Verify.get_customer_user(request) if request.user.is_authenticated else None
@@ -224,6 +241,7 @@ class CartViewSet(viewsets.ModelViewSet):
 
         serializer =models.order.order.OrderSerializerUpdateShipping(data=shipping_data) 
         if not serializer.is_valid():
+            print(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         point_discount_processor_class:factory.point_discount.PointDiscountProcessor = factory.point_discount.get_point_discount_processor_class(user_subscription)
@@ -233,7 +251,7 @@ class CartViewSet(viewsets.ModelViewSet):
         if not success:
             cart = lib.util.verify.Verify.get_cart(cart.id)
             return Response(CartSerializerWithSellerInfo(cart).data, status=status.HTTP_200_OK)
-        
+        # cart.delete()
         order = lib.util.verify.Verify.get_order(pymongo_order.id)
         order_oid = str(pymongo_order._id)   
         

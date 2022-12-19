@@ -21,14 +21,14 @@ Invoice_Url = 'https://einvoice.ecpay.com.tw/B2CInvoice/Issue'
 
 
 
-def create_order(merchant_id, hash_key, hash_iv,payment_amount, order, return_url, order_result_url):
+def create_order(merchant_id, hash_key, hash_iv,payment_amount, order_oid, order, return_url, order_result_url, client_back_url):
     
     # item_name = ''
     # for item in order.products:
     #     print(order.products)
     #     item_name += f'#{dict(order.products[item])["name"]}'
     params = {
-    'MerchantTradeNo': str(order.id)+datetime.now().strftime("%Y%m%d") ,
+    'MerchantTradeNo': str(order.id)+time.strftime("%Y%m%d%H%M%S", time.localtime()) ,
     'StoreID': '',
     'MerchantTradeDate': datetime.now().strftime("%Y/%m/%d %H:%M:%S"),
     'PaymentType': 'aio',
@@ -37,8 +37,8 @@ def create_order(merchant_id, hash_key, hash_iv,payment_amount, order, return_ur
     'ItemName': 'Order#',
     'ReturnURL': str(return_url),
     'ChoosePayment': 'ALL',
-    'ClientBackURL': 'https://www.ecpay.com.tw/client_back_url.php',
-    'ItemURL': 'https://www.ecpay.com.tw/item_url.php',
+    'ClientBackURL': str(client_back_url),
+    'ItemURL': '',
     'Remark': '',
     'ChooseSubPayment': '',
     'OrderResultURL': str(order_result_url),
@@ -47,7 +47,7 @@ def create_order(merchant_id, hash_key, hash_iv,payment_amount, order, return_ur
     'IgnorePayment': '',
     'PlatformID': '',
     'InvoiceMark': 'N',
-    'CustomField1': '',
+    'CustomField1': str(order_oid),
     'CustomField2': '',
     'CustomField3': '',
     'CustomField4': '',
@@ -68,7 +68,7 @@ def create_order(merchant_id, hash_key, hash_iv,payment_amount, order, return_ur
         # 產生 html 的 form 格式
         # action_url = 'https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5'  # 測試環境
         action_url = 'https://payment.ecpay.com.tw/Cashier/AioCheckOut/V5' # 正式環境
-        html = ecpay_payment_sdk.gen_html_post_form(action_url, final_order_params)
+        # html = ecpay_payment_sdk.gen_html_post_form(action_url, final_order_params)
         # return action_url,final_order_params
        
         return action_url,final_order_params
@@ -87,7 +87,7 @@ def create_register_order(merchant_id, hash_key, hash_iv,payment_amount:int,plan
         'TradeDesc': 'test order',
         'ItemName': plan,
         'ReturnURL': str(return_url),
-        'ChoosePayment': 'ALL',
+        'ChoosePayment': 'Credit',
         'ClientBackURL': '',
         'ItemURL': '',
         'Remark': '',
@@ -159,7 +159,7 @@ def order_create_invoice(merchant_id,hash_key,hash_iv,order,amount):
     ecpay_invoice.Send['RelateNumber'] = RelateNumber
     ecpay_invoice.Send['CustomerID'] = ''
     ecpay_invoice.Send['CustomerIdentifier'] = ''
-    ecpay_invoice.Send['CustomerName'] = order.shipping_last_name+order.shipping_first_name
+    ecpay_invoice.Send['CustomerName'] = order.shipping_first_name
     ecpay_invoice.Send['CustomerAddr'] = 'address'
     ecpay_invoice.Send['CustomerPhone'] = ''
     ecpay_invoice.Send['CustomerEmail'] = order.shipping_email
@@ -274,10 +274,9 @@ def cvs_map(cart_oid,merchant_id,hash_key,hash_iv,logistics_sub_type,server_repl
         print('An exception happened: ' + str(error))
         
 
-def create_shipping_order(order,campaign,sub_data,server_reply_url):
-    
+def create_shipping_order(order,server_reply_url,sub_data={}):
     MerchantTradeNo = str(order.id) + time.strftime("%Y%m%d%H%M%S", time.localtime())
-    
+    campaign = order.campaign
     create_shipping_order_params = {
         'MerchantTradeNo': MerchantTradeNo,
         'MerchantTradeDate': datetime.now().strftime("%Y/%m/%d %H:%M:%S"),
@@ -288,9 +287,9 @@ def create_shipping_order(order,campaign,sub_data,server_reply_url):
         'SenderName': campaign.meta_logistic['ecpay']['sender_name'],
         'SenderPhone': campaign.meta_logistic['ecpay']['sender_phone'], #campaign data
         'SenderCellPhone': campaign.meta_logistic['ecpay']['sender_phone'],
-        'ReceiverName': str(order.shipping_first_name) + str(order.shipping_last_name),
+        'ReceiverName': str(order.shipping_first_name),
         'ReceiverPhone': order.shipping_phone,
-        'ReceiverCellPhone': order.shipping_phone,
+        'ReceiverCellPhone': order.shipping_cellphone,
         'ReceiverEmail': order.shipping_email,
         'TradeDesc': 'lss',
         'ServerReplyURL': server_reply_url,
@@ -303,7 +302,7 @@ def create_shipping_order(order,campaign,sub_data,server_reply_url):
     update_params = {}
     if order.shipping_option_data.get('logisticsType') == 'CVS':
         update_params = {
-            'IsCollection': sub_data.get('is_collection'),
+            'IsCollection': sub_data.get('is_collection', 'N'),
             'LogisticsSubType': order.meta.get('ecpay_cvs',{}).get('logistics_sub_type'), #[TCAT POST][FAMIC2C UNIMARTC2C]
             'ReceiverStoreID': order.meta.get('ecpay_cvs',{}).get('cvs_store_id'),
             #TODO #setting seller return store
@@ -316,7 +315,7 @@ def create_shipping_order(order,campaign,sub_data,server_reply_url):
             'SenderZipCode': campaign.meta_logistic['ecpay']['sender_zip_code'],
             'SenderAddress': campaign.meta_logistic['ecpay']['sender_address'],
             'ReceiverZipCode': order.shipping_postcode,
-            'ReceiverAddress': order.shipping_location + order.shipping_address_1,
+            'ReceiverAddress': order.shipping_region + order.shipping_location + order.shipping_address_1,
             'Temperature': '0001', #0001:常溫 (預設值) 0002:冷藏 0003:冷凍 [*POST必為0001]
             'Distance': '00', #00:同縣市 (預設值) 01:外縣市 02:離島 會自動調整 [*POST忽略]
             'Specification': '0001', #0001: 60cm (預設值) 0002: 90cm 0003: 120cm 0004: 150cm [*POST忽略]

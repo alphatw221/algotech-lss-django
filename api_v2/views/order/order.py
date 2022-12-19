@@ -1,4 +1,5 @@
 from platform import platform
+from api_v2.views.payment.payment import update_wallet
 from rest_framework.response import Response
 from rest_framework import viewsets,status
 from rest_framework.pagination import PageNumberPagination
@@ -43,73 +44,6 @@ class OrderViewSet(viewsets.ModelViewSet):
     queryset = models.order.order.Order.objects.all().order_by('id')
     pagination_class = OrderPagination
 
-    # ----------------------------------------------- guest ----------------------------------------------------
-    # @action(detail=False, methods=['GET'], url_path=r'guest/retrieve/(?P<order_oid>[^/.]+)/platform', permission_classes=(), authentication_classes=[])
-    # @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    # def guest_retrieve_order_platform(self, request, order_oid):
-    #     order = lib.util.verify.Verify.get_order_with_oid(order_oid)
-    #     return Response(order.platform, status=status.HTTP_200_OK)
-
-    # @action(detail=False, methods=['GET'], url_path=r'guest/retrieve/(?P<order_oid>[^/.]+)/subscription', permission_classes=(), authentication_classes=[])
-    # @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    # def guest_retrieve_order_with_user_subscription(self, request, order_oid):
-    #     order = lib.util.verify.Verify.get_order_with_oid(order_oid)
-    #     return Response(models.order.order.OrderSerializerWithUserSubscription(order).data, status=status.HTTP_200_OK)
-
-    # @action(detail=False, methods=['GET'], url_path=r'guest/retrieve/(?P<order_oid>[^/.]+)', permission_classes=(), authentication_classes=[])
-    # @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    # def guest_retrieve_order(self, request, order_oid):
-    #     order = lib.util.verify.Verify.get_order_with_oid(order_oid)
-    #     return Response(models.order.order.OrderSerializer(order).data, status=status.HTTP_200_OK)
-
-    # @action(detail=False, methods=['PUT'], url_path=r'(?P<order_oid>[^/.]+)/guest/receipt/upload', url_name='guest_upload_receipt', parser_classes=(MultiPartParser,), permission_classes=(), authentication_classes=[])
-    # @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    # def guest_upload_receipt(self, request, order_oid):
-
-    #     order = lib.util.verify.Verify.get_order_with_oid(order_oid)
-    #     campaign = lib.util.verify.Verify.get_campaign_from_order(order)
-
-    #     last_five_digit, image, account_name, account_mode = lib.util.getter.getdata(request,('last_five_digit', 'image', 'account_name', 'account_mode'), required=False)
-
-    #     if image in [None, '', "undefined", 'null']:
-    #         pass
-    #     elif image.size > models.order.order.IMAGE_MAXIMUM_SIZE:
-    #         raise lib.error_handle.error.api_error.ApiVerifyError('image_size_exceed_maximum_size')
-    #     elif image.content_type not in models.order.order.IMAGE_SUPPORTED_TYPE:
-    #         raise lib.error_handle.error.api_error.ApiVerifyError('not_support_this_image_type')
-    #     else:
-    #         try:
-    #             image_name = image.name.replace(" ","")
-    #             image_dir = f'campaign/{order.campaign.id}/order/{order.id}/receipt'
-    #             image_url = lib.util.storage.upload_image(image_dir, image_name, image)
-    #             order.meta["receipt_image"] = image_url
-    #         except Exception as e:
-    #             history = order.history
-    #             history["receipt_image_error"] = str(e)
-
-    #     order.meta["last_five_digit"] = last_five_digit
-    #     order.meta['account_name'] = account_name
-    #     order.meta['account_mode'] = account_mode
-    #     order.payment_method = models.order.order.PAYMENT_METHOD_DIRECT
-    #     order.status = "complete"
-    #     order.save()
-
-    #     lib.helper.order_helper.OrderHelper.sold_campaign_product(order.id)
-    #     # content = lib.helper.order_helper.OrderHelper.get_confirmation_email_content(order)
-    #     subject = lib.i18n.email.order_comfirm_mail.i18n_get_mail_subject(order, lang=campaign.lang)
-    #     content = lib.i18n.email.order_comfirm_mail.i18n_get_mail_content(order, campaign, lang=campaign.lang)
-    #     jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)     #queue this to redis if needed
-
-    #     return Response(models.order.order.OrderSerializer(order).data, status=status.HTTP_200_OK)
-
-
-    # @action(detail=False, methods=['GET'], url_path=r'guest/retrieve/(?P<order_oid>[^/.]+)/state', permission_classes=())
-    # @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    # def check_guest_order_state(self, request, order_oid):
-
-    #     order = lib.util.verify.Verify.get_order_with_oid(order_oid)
-    #     return Response(order.status, status=status.HTTP_200_OK)
-
 
     # ----------------------------------------------- buyer ----------------------------------------------------
 
@@ -149,7 +83,6 @@ class OrderViewSet(viewsets.ModelViewSet):
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def buyer_upload_receipt(self, request, order_oid):
 
-
         order = lib.util.verify.Verify.get_order_with_oid(order_oid)
         campaign = lib.util.verify.Verify.get_campaign_from_order(order)
         last_five_digit, image, account_name, account_mode = lib.util.getter.getdata(request,('last_five_digit', 'image', 'account_name', 'account_mode'), required=False)
@@ -168,10 +101,15 @@ class OrderViewSet(viewsets.ModelViewSet):
         order.meta['account_name'] = account_name
         order.meta['account_mode'] = account_mode
         order.payment_method = models.order.order.PAYMENT_METHOD_DIRECT
-        order.payment_status = models.order.order.PAYMENT_STATUS_AWAITING_CONFIRM
         order.paid_at = datetime.utcnow()
-        lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
-
+        #payment status update
+        order.payment_status = models.order.order.PAYMENT_STATUS_AWAITING_CONFIRM
+        #delivery status update
+        delivery_params = {"order_oid": order_oid, "order": order, "extra_data": {}, "create_order": True, "update_status": True}
+        lib.helper.delivery_helper.DeliveryHelper.create_delivery_order_and_update_delivery_status(**delivery_params)
+                
+        #wallet
+        update_wallet(order)
 
         for campaign_product_id_str, qty in order.products.items():
             pymongo_campaign_product = database.lss.campaign_product.CampaignProduct(id=int(campaign_product_id_str))
@@ -181,7 +119,9 @@ class OrderViewSet(viewsets.ModelViewSet):
         content = lib.i18n.email.order_comfirm_mail.i18n_get_mail_content(order, campaign, lang=campaign.lang)
 
         jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)     #queue this to redis if needed
-
+        
+        #order status update
+        lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
         return Response(OrderSerializerWithOrderProductWithCampaign(order).data, status=status.HTTP_200_OK)
 
 
@@ -193,8 +133,11 @@ class OrderViewSet(viewsets.ModelViewSet):
     def check_buyer_order_state(self, request, order_oid):
 
         order = lib.util.verify.Verify.get_order_with_oid(order_oid)
-
-        return Response(order.status, status=status.HTTP_200_OK)
+        response_data = {
+            "payment_method": order.payment_method,
+            "status": order.status
+        }
+        return Response(response_data, status=status.HTTP_200_OK)
     
     @action(detail=True, methods=['GET'], url_path=r'buyer/retrieve/oid', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
@@ -206,51 +149,9 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         return Response(oid, status=status.HTTP_200_OK)
     
-    @action(detail=False, methods=['PUT'], url_path=r'(?P<order_oid>[^/.]+)/buyer/create/delivery_order', permission_classes=())
-    @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def buyer_create_delivery_order(self, request, order_oid):
-        
-        order = lib.util.verify.Verify.get_order_with_oid(order_oid)
-        campaign = lib.util.verify.Verify.get_campaign_from_order(order)
-        sub_data = request.data
-        
-        #TODO #根據seller setting 決定是否使用綠界物流，線上付款後再成立delivery order
-        reply_result = service.ecpay.ecpay.create_shipping_order(order,campaign, sub_data, 
-            f'{settings.GCP_API_LOADBALANCER_URL}/api/v2/order/{order_oid}/buyer/delivery_order/callback/'
-            # f'https://28ea-220-136-105-200.jp.ngrok.io/api/v2/order/{order_oid}/buyer/delivery_order/callback/'
-            )
-        
-        return Response(reply_result, status=status.HTTP_200_OK)
     
-    @action(detail=False, methods=['POST'], url_path=r'(?P<order_oid>[^/.]+)/buyer/delivery_order/callback', parser_classes=(FormParser,MultiPartParser), renderer_classes = (StaticHTMLRenderer,),permission_classes=())
-    @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def buyer_delivery_order_callback(self, request, order_oid):
-        data = request.data.dict()
-        order = lib.util.verify.Verify.get_order_with_oid(order_oid)
-        campaign = lib.util.verify.Verify.get_campaign_from_order(order)
-        
-        #TODO #save this callback data
-        # {'CVSValidationNo': '',
-        #  'ReceiverEmail': 'test@gmail.com',
-        #  'UpdateStatusDate': '2022/12/09 15:20:18',
-        #  'BookingNote': '901355249391',
-        #  'LogisticsSubType': 'TCAT',
-        #  'MerchantTradeNo': '3363320221209062838',
-        #  'LogisticsType': 'HOME',
-        #  'ReceiverCellPhone': '0933222111', 
-        #  'CVSPaymentNo': '',
-        #  'RtnMsg': '訂單上傳處理中',
-        #  'GoodsAmount': '350',
-        #  'AllPayLogisticsID': '27379122',
-        #  'MerchantID': '3344643',
-        #  'ReceiverName': '測試收件者',
-        #  'CheckMacValue': '3A9D2933255F4E28B638FD99787BF94C',
-        #  'RtnCode': '310',
-        #  'ReceiverPhone': '0226550115',
-        #  'ReceiverAddress': '台北市南港區三重路19-2號5樓D棟'
-        #  }
-        
-        return Response('ok', status=status.HTTP_200_OK)
+    
+    
     # ------------------------------------seller----------------------------------------
     
     @action(detail=True, methods=['GET'], url_path=r'seller/retrieve', permission_classes=(IsAuthenticated,))

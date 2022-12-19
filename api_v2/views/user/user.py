@@ -238,6 +238,18 @@ class UserViewSet(viewsets.ModelViewSet):
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def seller_get_account_info(self, request):
         api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        if user_subscription.type == "kol":
+            meta_country = user_subscription.meta_country
+            meta_country["activated_country"] = ["TW"]
+            meta_store = user_subscription.meta_store
+            meta_store["support_stock_user_subscriptions"] = [
+                {
+                    "name": "algotech",
+                    "user_subscription_id": 21
+                }
+            ]
+            user_subscription.save()
         return Response(UserSerializerSellerAccountInfo(api_user).data, status=status.HTTP_200_OK) 
 
     

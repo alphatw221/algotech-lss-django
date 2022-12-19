@@ -17,6 +17,18 @@ import database
 import lib
 import json
 import service
+
+class UserSubscriptionAccountInfo(models.user.user_subscription.UserSubscriptionSerializer):
+
+    class Meta:
+        model = models.user.user_subscription.UserSubscription
+        exclude=['created_at', 'updated_at','customers']
+        
+    product_categories = models.product.product_category.ProductCategorySerializer(
+        many=True, read_only=True, default=list)
+class CampaignSerializerwithSpplierInfo(models.campaign.campaign.CampaignSerializer):
+    supplier = UserSubscriptionAccountInfo(read_only=True, default=dict)
+    
 class CampaignPagination(PageNumberPagination):
     page_query_param = 'page'
     page_size_query_param = 'page_size'
@@ -90,13 +102,22 @@ class CampaignViewSet(viewsets.ModelViewSet):
         
         campaignData, = lib.util.getter.getdata(request, ('data',), required=True)
         campaignData = json.loads(campaignData)
+        
+            
         end_at = campaignData['end_at']
         supplier_id = campaignData.get("supplier")
         if supplier_id not in ["", None, "null", "undefined"]:
             supplier = lib.util.verify.Verify.get_support_stock_user_subscriptions_from_user_subscription(supplier_id,user_subscription)
             campaignData.update({
                 "meta_logistic": supplier.meta_logistic,
-                "meta_payment": supplier.meta_payment
+            })
+        # kol will use dealer's payment
+        if user_subscription.type == "kol":
+            dear_subscription = user_subscription.dealer
+            if not dear_subscription:
+                raise lib.error_handle.error.api_error.ApiVerifyError('not_belong_to_any_dealer')
+            campaignData.update({
+                "meta_payment": dear_subscription.meta_payment
             })
         ret = rule.rule_checker.user_subscription_rule_checker.CreateCampaignRuleChecker.check(**{
             'api_user': api_user, 'user_subscription': user_subscription, 'end_at': end_at
@@ -147,12 +168,21 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         campaign_data, = lib.util.getter.getdata(request, ('data',), required=True)
         campaign_data = json.loads(campaign_data)
-        supplier_id = campaign_data.get("supplier")
+        supplier_id = ''
+        if campaign_data.get("supplier", {}):
+            supplier_id = campaign_data.get("supplier", {}).get('id', '')
         if supplier_id not in ["", "null", "undefined"]:
             supplier = lib.util.verify.Verify.get_support_stock_user_subscriptions_from_user_subscription(supplier_id,user_subscription)
             campaign_data.update({
                 "meta_logistic": supplier.meta_logistic,
-                "meta_payment": supplier.meta_payment
+            })
+        # kol will use dealer's payment
+        if user_subscription.type == "kol":
+            dear_subscription = user_subscription.dealer
+            if not dear_subscription:
+                raise lib.error_handle.error.api_error.ApiVerifyError('not_belong_to_any_dealer')
+            campaign_data.update({
+                "meta_payment": dear_subscription.meta_payment
             })
         ret = rule.rule_checker.user_subscription_rule_checker.RuleChecker.check(
             check_list=[
@@ -166,6 +196,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         serializer = models.campaign.campaign.CampaignSerializerUpdate(campaign, data=campaign_data, partial=True)
         if not serializer.is_valid():
+            print(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         campaign = serializer.save()
 
@@ -206,7 +237,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, pk)
 
-        return Response(models.campaign.campaign.CampaignSerializer(campaign).data, status=status.HTTP_200_OK)
+        return Response(CampaignSerializerwithSpplierInfo(campaign).data, status=status.HTTP_200_OK)
     
     @action(detail=True, methods=['DELETE'], url_path=r'delete', permission_classes = (IsAuthenticated, ))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler

@@ -10,6 +10,7 @@ from api_v2.views.facebook import facebook_page
 from api_v2.views.youtube import youtube_channel
 from api_v2.views.instagram import instagram_profile
 from api_v2.views.payment import payment
+from api_v2.views.delivery import delivery
 from api_v2.views.auto_response import auto_response
 from api_v2.views.business_policy import business_policy
 from api_v2.views.cart import cart
@@ -33,6 +34,7 @@ router.register(r'facebook-page', facebook_page.FacebookPageViewSet)
 router.register(r'youtube-channel', youtube_channel.YoutubeChannelViewSet)
 router.register(r'instagram-profile', instagram_profile.InstagramProfileViewSet)
 router.register(r'payment', payment.PaymentViewSet)
+router.register(r'delivery', delivery.DeliveryViewSet)
 router.register(r'auto-response', auto_response.AutoResponseViewSet)
 router.register(r'campaign-comment', campaign_comment.CampaignCommentViewSet)
 router.register(r'campaign-luckydraw', campaign_lucky_draw.CampaignLuckyDrawViewSet)
