@@ -375,14 +375,20 @@ class PaymentViewSet(viewsets.GenericViewSet):
         hash_iv = test_hash_iv if test_mode else campaign.meta_payment.get("ecpay",{}).get("hash_iv")
         
         payment_amount = lib.helper.payment_helper.transform_payment_amount(order.total, campaign.decimal_places, campaign.price_unit)
-
+        
 
         action,payment = service.ecpay.ecpay.create_order(merchant_id, hash_key, hash_iv, int(payment_amount) , order_oid, order,
             return_url=f'{settings.GCP_API_LOADBALANCER_URL}/api/v2/payment/ecpay/complete/webhook/',
             order_result_url=f'{settings.GCP_API_LOADBALANCER_URL}/api/v2/payment/ecpay/complete/callback/',
             client_back_url=f'{settings.WEB_SERVER_URL}/buyer/order/{order_oid}/payment',
         )
-        
+        order.payment_method = models.order.order.PAYMENT_METHOD_ECPAY
+        order.history[models.order.order.PAYMENT_METHOD_ECPAY]={
+            "action": "pay",
+            "time": pendulum.now("UTC").to_iso8601_string()
+        }
+        order.checkout_details[models.order.order.PAYMENT_METHOD_ECPAY] = payment
+        order.save()
         if not payment:
             raise lib.error_handle.error.api_error.ApiCallerError('choose_another_payment_method')
 

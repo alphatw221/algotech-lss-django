@@ -159,7 +159,7 @@ def order_create_invoice(merchant_id,hash_key,hash_iv,order,amount):
     ecpay_invoice.Send['RelateNumber'] = RelateNumber
     ecpay_invoice.Send['CustomerID'] = ''
     ecpay_invoice.Send['CustomerIdentifier'] = ''
-    ecpay_invoice.Send['CustomerName'] = order.shipping_last_name+order.shipping_first_name
+    ecpay_invoice.Send['CustomerName'] = order.shipping_first_name
     ecpay_invoice.Send['CustomerAddr'] = 'address'
     ecpay_invoice.Send['CustomerPhone'] = ''
     ecpay_invoice.Send['CustomerEmail'] = order.shipping_email
@@ -287,7 +287,7 @@ def create_shipping_order(order,server_reply_url,sub_data={}):
         'SenderName': campaign.meta_logistic['ecpay']['sender_name'],
         'SenderPhone': campaign.meta_logistic['ecpay']['sender_phone'], #campaign data
         'SenderCellPhone': campaign.meta_logistic['ecpay']['sender_phone'],
-        'ReceiverName': str(order.shipping_first_name) + str(order.shipping_last_name),
+        'ReceiverName': str(order.shipping_first_name),
         'ReceiverPhone': order.shipping_phone,
         'ReceiverCellPhone': order.shipping_cellphone,
         'ReceiverEmail': order.shipping_email,
