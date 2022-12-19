@@ -133,8 +133,11 @@ class OrderViewSet(viewsets.ModelViewSet):
     def check_buyer_order_state(self, request, order_oid):
 
         order = lib.util.verify.Verify.get_order_with_oid(order_oid)
-
-        return Response(order.status, status=status.HTTP_200_OK)
+        response_data = {
+            "payment_method": order.payment_method,
+            "status": order.status
+        }
+        return Response(response_data, status=status.HTTP_200_OK)
     
     @action(detail=True, methods=['GET'], url_path=r'buyer/retrieve/oid', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
