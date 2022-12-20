@@ -281,6 +281,7 @@ def create_shipping_order(order,server_reply_url,sub_data={}):
         'MerchantTradeNo': MerchantTradeNo,
         'MerchantTradeDate': datetime.now().strftime("%Y/%m/%d %H:%M:%S"),
         'LogisticsType': order.shipping_option_data.get('logisticsType'), #HOME or CVS
+        'LogisticsSubType': '',
         'GoodsAmount': int(order.total),
         'CollectionAmount': int(order.total),
         'GoodsName': 'LSS Order',
@@ -300,18 +301,20 @@ def create_shipping_order(order,server_reply_url,sub_data={}):
     }
 
     update_params = {}
+    print(order.shipping_option_data.get('logisticsType'))
     if order.shipping_option_data.get('logisticsType') == 'CVS':
         update_params = {
             'IsCollection': sub_data.get('is_collection', 'N'),
-            'LogisticsSubType': order.meta.get('ecpay_cvs',{}).get('logistics_sub_type'), #[TCAT POST][FAMIC2C UNIMARTC2C]
-            'ReceiverStoreID': order.meta.get('ecpay_cvs',{}).get('cvs_store_id'),
+            'LogisticsSubType': order.shipping_option_data.get('LogisticsSubType'), #[TCAT POST][FAMIC2C UNIMARTC2C]
+            'ReceiverStoreID': order.shipping_option_data.get('cvs_store_id'),
             #TODO #setting seller return store
             'ReturnStoreID':  campaign.meta_logistic['ecpay']['return_store_id'], #返回之超商店號
         }
     elif order.shipping_option_data.get('logisticsType') == 'HOME':
+        
         update_params = {
             'IsCollection': 'N',
-            'LogisticsSubType': 'TCAT', #[TCAT POST][FAMIC2C UNIMARTC2C]
+            'LogisticsSubType': order.shipping_option_data.get('LogisticsSubType'), #[TCAT POST][FAMIC2C UNIMARTC2C]
             'SenderZipCode': campaign.meta_logistic['ecpay']['sender_zip_code'],
             'SenderAddress': campaign.meta_logistic['ecpay']['sender_address'],
             'ReceiverZipCode': order.shipping_postcode,
@@ -327,7 +330,7 @@ def create_shipping_order(order,server_reply_url,sub_data={}):
 
     # 更新及合併參數
     create_shipping_order_params.update(update_params)
-
+    print(create_shipping_order_params)
     # 建立實體
     ecpay_logistic_sdk = ECPayLogisticSdk(
         MerchantID=campaign.meta_logistic['ecpay']['merchant_id'],
@@ -358,3 +361,4 @@ def create_shipping_order(order,server_reply_url,sub_data={}):
 
     except Exception as error:
         print('An exception happened: ' + str(error))
+        return {'error': str(error)}
