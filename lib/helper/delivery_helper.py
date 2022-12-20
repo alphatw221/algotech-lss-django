@@ -78,8 +78,8 @@ class DeliveryHelper():
             f'{settings.GCP_API_LOADBALANCER_URL}/api/v2/delivery/ecpay/create/delivery_order/callback/{order_oid}/',
             extra_data
         )
-        print("response", response)
-        return response
+        print("response", response.json())
+        return response.json()
     @classmethod
     def __ecpay_delivery_status_map(cls, delivery_order):
         if not delivery_order:
