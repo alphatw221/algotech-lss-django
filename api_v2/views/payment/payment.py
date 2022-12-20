@@ -383,11 +383,10 @@ class PaymentViewSet(viewsets.GenericViewSet):
             client_back_url=f'{settings.WEB_SERVER_URL}/buyer/order/{order_oid}/payment',
         )
         order.payment_method = models.order.order.PAYMENT_METHOD_ECPAY
-        order.history[models.order.order.PAYMENT_METHOD_ECPAY]={
-            "action": "pay",
-            "time": pendulum.now("UTC").to_iso8601_string()
+        order.history[f"{models.order.order.PAYMENT_METHOD_ECPAY}_create_order"]={
+            "time": pendulum.now("UTC").to_iso8601_string(),
+            "data": payment
         }
-        order.checkout_details[models.order.order.PAYMENT_METHOD_ECPAY] = payment
         order.save()
         if not payment:
             raise lib.error_handle.error.api_error.ApiCallerError('choose_another_payment_method')
@@ -472,9 +471,9 @@ class PaymentViewSet(viewsets.GenericViewSet):
 
         order.payment_method = models.order.order.PAYMENT_METHOD_ECPAY
         order.checkout_details[models.order.order.PAYMENT_METHOD_ECPAY] = payment_res
-        order.history[models.order.order.PAYMENT_METHOD_ECPAY]={
-            "action": "complete callback",
-            "time": pendulum.now("UTC").to_iso8601_string()
+        order.history[f"{models.order.order.PAYMENT_METHOD_ECPAY}_complete_callback"]={
+            "time": pendulum.now("UTC").to_iso8601_string(),
+            "data": payment_res
         }
         order.paid_at = datetime.utcnow()
         
@@ -581,10 +580,9 @@ class PaymentViewSet(viewsets.GenericViewSet):
             # 'CheckMacValue': ['9D8011AE1ADC9F13854745CA88F8DA4DF14B111580EF7AACD29631E034CDC9AA']}
             
             order.payment_method = models.order.order.PAYMENT_METHOD_ECPAY
-            order.checkout_details[models.order.order.PAYMENT_METHOD_ECPAY] = payment_res
-            order.history[models.order.order.PAYMENT_METHOD_ECPAY]={
-                "action": "complete webhook",
-                "time": pendulum.now("UTC").to_iso8601_string()
+            order.history[f"{models.order.order.PAYMENT_METHOD_ECPAY}_complete_webhook"]={
+                "time": pendulum.now("UTC").to_iso8601_string(),
+                "data": payment_res
             }
             order.paid_at = datetime.utcnow()
             
