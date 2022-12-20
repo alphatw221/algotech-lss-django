@@ -415,8 +415,7 @@ class CartHelper():
             return shipping_cost, True
 
         shipping_cost = float(campaign.meta_logistic.get('delivery_charge',0))
-
-        if(type(pymongo_order.data.get('shipping_option_index'))==int):
+        if(pymongo_order.data.get('shipping_option_data')):
             if pymongo_order.data.get('shipping_option_data',{}).get('type') == '+':
                 shipping_cost += float(pymongo_order.data.get('shipping_option_data',{}).get('price',0)) 
 
