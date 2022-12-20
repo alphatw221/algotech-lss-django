@@ -318,7 +318,10 @@ class CartHelper():
             ...
         }
         """
+        product_amount = 0
         for campaign_prodcut_id_str, qty in pymongo_order.data.get('products',{}).items():
+            product_amount += qty
+            
             campaign_product_data = campaign_product_data_dict.get(campaign_prodcut_id_str,{})
 
             if len(campaign_product_data.get('categories',[])) == 1 :
@@ -335,12 +338,12 @@ class CartHelper():
 
             subtotal += campaign_product_data.get('price',0)*qty
         shipping_cost, category_logistic_applied = cls.__compute_shipping_cost(campaign, pymongo_order, product_category_data_dict, product_category_products_dict, campaign_product_data_dict)
-        
+        print("product_amount", product_amount)
 
         #compute free_delivery
         meta_logistic = campaign.meta_logistic
         is_subtotal_over_free_delivery_threshold = subtotal >= float(meta_logistic.get('free_delivery_for_order_above_price')) if meta_logistic.get('is_free_delivery_for_order_above_price') else False
-        is_items_over_free_delivery_threshold = len(pymongo_order.data.get('products')) >= float(meta_logistic.get('free_delivery_for_how_many_order_minimum')) if meta_logistic.get('is_free_delivery_for_how_many_order_minimum') else False
+        is_items_over_free_delivery_threshold = product_amount >= float(meta_logistic.get('free_delivery_for_how_many_order_minimum')) if meta_logistic.get('is_free_delivery_for_how_many_order_minimum') else False
         meta['subtotal_over_free_delivery_threshold'] = True if is_subtotal_over_free_delivery_threshold else False
         meta['items_over_free_delivery_threshold'] = True if is_items_over_free_delivery_threshold else False
             
@@ -395,6 +398,7 @@ class CartHelper():
             return 0, False
 
         shipping_cost = 0
+        
         category_logistic_applied = False
         for product_category_id_str, product_category_data in product_category_data_dict.items():
             if product_category_data.get('meta_logistic',{}).get('enable_flat_rate')==True:
