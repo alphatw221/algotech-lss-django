@@ -375,14 +375,13 @@ class PaymentViewSet(viewsets.GenericViewSet):
         hash_iv = test_hash_iv if test_mode else campaign.meta_payment.get("ecpay",{}).get("hash_iv")
         
         payment_amount = lib.helper.payment_helper.transform_payment_amount(order.total, campaign.decimal_places, campaign.price_unit)
-        
 
         action,payment = service.ecpay.ecpay.create_order(merchant_id, hash_key, hash_iv, int(payment_amount) , order_oid, order,
             return_url=f'{settings.GCP_API_LOADBALANCER_URL}/api/v2/payment/ecpay/complete/webhook/',
             order_result_url=f'{settings.GCP_API_LOADBALANCER_URL}/api/v2/payment/ecpay/complete/callback/',
             client_back_url=f'{settings.WEB_SERVER_URL}/buyer/order/{order_oid}/payment',
         )
-        order.payment_method = models.order.order.PAYMENT_METHOD_ECPAY
+        order.checkout_details[models.order.order.PAYMENT_METHOD_ECPAY] = payment
         order.history[f"{models.order.order.PAYMENT_METHOD_ECPAY}_create_order"]={
             "time": pendulum.now("UTC").to_iso8601_string(),
             "data": payment
@@ -390,8 +389,20 @@ class PaymentViewSet(viewsets.GenericViewSet):
         order.save()
         if not payment:
             raise lib.error_handle.error.api_error.ApiCallerError('choose_another_payment_method')
-
         
+        order.paid_at = datetime.utcnow()
+        order.payment_method = models.order.order.PAYMENT_METHOD_ECPAY
+        
+        #delivery status update
+        delivery_params = {"order_oid": order_oid, "order": order, "extra_data": {}, "create_order": True, "update_status": True}
+        delivery_order = lib.helper.delivery_helper.DeliveryHelper.create_delivery_order_and_update_delivery_status(**delivery_params)
+        order.history[f"{models.order.order.PAYMENT_METHOD_ECPAY}_delivery_order"] = {
+            "time": pendulum.now("UTC").to_iso8601_string(),
+            "data": delivery_order
+        }
+        
+        #order status update
+        lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
         return Response({'action':action,'data':payment})
         
         # raise lib.error_handle.error.api_error.ApiCallerError('Payment Error, Please Choose Another Payment Method')
@@ -414,75 +425,24 @@ class PaymentViewSet(viewsets.GenericViewSet):
         hash_key = test_hash_key if test_mode else campaign.meta_payment.get("ecpay",{}).get("hash_key")
         hash_iv = test_hash_iv if test_mode else campaign.meta_payment.get("ecpay",{}).get("hash_iv")
         
-        
-        
-        
-        
         check_value = service.ecpay.ecpay.check_mac_value(merchant_id, hash_key, hash_iv, payment_res)
         
         
         if not payment_res or payment_res['CheckMacValue'] != check_value :
             return print('order is not match')
         
-        # {'AlipayID': [''], 
-        # 'AlipayTradeNo': [''], 
-        # 'amount': ['620'], 
-        # 'ATMAccBank': [''], 
-        # 'ATMAccNo': [''], 
-        # 'auth_code': ['777777'], 
-        # 'card4no': ['2222'], 
-        # 'card6no': ['431195'], 
-        # 'CustomField1': [''], 
-        # 'CustomField2': [''], 
-        # 'CustomField3': [''], 
-        # 'CustomField4': [''], 
-        # 'eci': ['0'], 
-        # 'ExecTimes': [''], 
-        # 'Frequency': [''], 
-        # 'gwsr': ['12084016'], 
-        # 'MerchantID': ['2000132'], 
-        # 'MerchantTradeNo': ['32963'], 
-        # 'PayFrom': [''], 
-        # 'PaymentDate': ['2022/08/12 10:21:28'], 
-        # 'PaymentNo': [''], 
-        # 'PaymentType': ['Credit_CreditCard'], 
-        # 'PaymentTypeChargeFee': ['12'], 
-        # 'PeriodAmount': [''],
-        # 'PeriodType': [''], 
-        # 'process_date': ['2022/08/12 10:21:28'], 
-        # 'red_dan': ['0'], 'red_de_amt': ['0'], 
-        # 'red_ok_amt': ['0'], 'red_yet': ['0'], 
-        # 'RtnCode': ['1'], 'RtnMsg': ['交易成功'], 
-        # 'SimulatePaid': ['0'], 'staed': ['0'], 
-        # 'stage': ['0'], 'stast': ['0'], 
-        # 'StoreID': [''], 
-        # 'TenpayTradeNo': [''], 
-        # 'TotalSuccessAmount': [''], 
-        # 'TotalSuccessTimes': [''], 
-        # 'TradeAmt': ['620'], 
-        # 'TradeDate': ['2022/08/12 10:21:04'], 
-        # 'TradeNo': ['2208121021044275'], 
-        # 'WebATMAccBank': [''], 
-        # 'WebATMAccNo': [''], 
-        # 'WebATMBankName': [''], 
-        # 'CheckMacValue': ['9D8011AE1ADC9F13854745CA88F8DA4DF14B111580EF7AACD29631E034CDC9AA']}
-        
-        
-
-        order.payment_method = models.order.order.PAYMENT_METHOD_ECPAY
-        order.checkout_details[models.order.order.PAYMENT_METHOD_ECPAY] = payment_res
         order.history[f"{models.order.order.PAYMENT_METHOD_ECPAY}_complete_callback"]={
             "time": pendulum.now("UTC").to_iso8601_string(),
             "data": payment_res
         }
-        order.paid_at = datetime.utcnow()
         
         #payment status update
         if payment_res['RtnCode'] == '0':
             order.payment_status = models.order.order.PAYMENT_STATUS_FAILED
             order.save()
             print(traceback.format_exc())
-            jobs.send_email_job.send_email_job("ecpay webhook", "nicklien@accoladeglobal.net", content=str(e))
+            content = f"order id: {order.id} , payment fail, please check history"
+            jobs.send_email_job.send_email_job("ecpay complete callback", "nicklien@accoladeglobal.net", content=content)
             raise lib.error_handle.error.api_error.ApiVerifyError('payment not successful',payment_res['RtnMsg'])
         elif payment_res['RtnCode'] == '1':
             order.payment_status = models.order.order.PAYMENT_STATUS_PAID
@@ -490,11 +450,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         if order.campaign.meta_payment['ecpay']['invoice_enabled']:
             invoice = service.ecpay.ecpay.order_create_invoice(merchant_id, hash_key, hash_iv, order,int(payment_res['amount']))
             order.meta['InvoiceNumber'] = invoice['InvoiceNumber']
-        
-        #delivery status update
-        delivery_params = {"order_oid": order_oid, "order": order, "extra_data": {}, "create_order": True, "update_status": True}
-        lib.helper.delivery_helper.DeliveryHelper.create_delivery_order_and_update_delivery_status(**delivery_params)
-
+            
         #wallet
         update_wallet(order)
 
@@ -517,95 +473,39 @@ class PaymentViewSet(viewsets.GenericViewSet):
             test_hash_iv = "EkRm7iFT261dpevs"
             test_mode = False
             payment_res = request.data.dict()
-            print(payment_res)
             order_oid = payment_res.get("CustomField1")
-            print("order_oid", order_oid)
             order = lib.util.verify.Verify.get_order_with_oid(order_oid)
-            meta = order.meta
-            meta["ecapy_webhook"] = payment_res
-            order.save()
             campaign = order.campaign
             merchant_id = test_merchant_id if test_mode else campaign.meta_payment.get("ecpay",{}).get("merchant_id")
             hash_key = test_hash_key if test_mode else campaign.meta_payment.get("ecpay",{}).get("hash_key")
             hash_iv = test_hash_iv if test_mode else campaign.meta_payment.get("ecpay",{}).get("hash_iv")
-
-            
             check_value = service.ecpay.ecpay.check_mac_value(merchant_id, hash_key, hash_iv, payment_res)
             
             
             if not payment_res or payment_res['CheckMacValue'] != check_value :
                 return print('order is not match')
             
-            # {'AlipayID': [''], 
-            # 'AlipayTradeNo': [''], 
-            # 'amount': ['620'], 
-            # 'ATMAccBank': [''], 
-            # 'ATMAccNo': [''], 
-            # 'auth_code': ['777777'], 
-            # 'card4no': ['2222'], 
-            # 'card6no': ['431195'], 
-            # 'CustomField1': [''], 
-            # 'CustomField2': [''], 
-            # 'CustomField3': [''], 
-            # 'CustomField4': [''], 
-            # 'eci': ['0'], 
-            # 'ExecTimes': [''], 
-            # 'Frequency': [''], 
-            # 'gwsr': ['12084016'], 
-            # 'MerchantID': ['2000132'], 
-            # 'MerchantTradeNo': ['32963'], 
-            # 'PayFrom': [''], 
-            # 'PaymentDate': ['2022/08/12 10:21:28'], 
-            # 'PaymentNo': [''], 
-            # 'PaymentType': ['Credit_CreditCard'], 
-            # 'PaymentTypeChargeFee': ['12'], 
-            # 'PeriodAmount': [''],
-            # 'PeriodType': [''], 
-            # 'process_date': ['2022/08/12 10:21:28'], 
-            # 'red_dan': ['0'], 'red_de_amt': ['0'], 
-            # 'red_ok_amt': ['0'], 'red_yet': ['0'], 
-            # 'RtnCode': ['1'], 'RtnMsg': ['交易成功'], 
-            # 'SimulatePaid': ['0'], 'staed': ['0'], 
-            # 'stage': ['0'], 'stast': ['0'], 
-            # 'StoreID': [''], 
-            # 'TenpayTradeNo': [''], 
-            # 'TotalSuccessAmount': [''], 
-            # 'TotalSuccessTimes': [''], 
-            # 'TradeAmt': ['620'], 
-            # 'TradeDate': ['2022/08/12 10:21:04'], 
-            # 'TradeNo': ['2208121021044275'], 
-            # 'WebATMAccBank': [''], 
-            # 'WebATMAccNo': [''], 
-            # 'WebATMBankName': [''], 
-            # 'CheckMacValue': ['9D8011AE1ADC9F13854745CA88F8DA4DF14B111580EF7AACD29631E034CDC9AA']}
-            
-            order.payment_method = models.order.order.PAYMENT_METHOD_ECPAY
             order.history[f"{models.order.order.PAYMENT_METHOD_ECPAY}_complete_webhook"]={
                 "time": pendulum.now("UTC").to_iso8601_string(),
                 "data": payment_res
             }
-            order.paid_at = datetime.utcnow()
             
             #payment status update
             if payment_res['RtnCode'] == '0':
                 order.payment_status = models.order.order.PAYMENT_STATUS_FAILED
                 order.save()
                 print(traceback.format_exc())
-                jobs.send_email_job.send_email_job("ecpay webhook", "nicklien@accoladeglobal.net", content=str(e))
-                raise lib.error_handle.error.api_error.ApiVerifyError('payment not successful', payment_res['RtnMsg'])
+                content = f"order id: {order.id} , payment fail, please check history"
+                jobs.send_email_job.send_email_job("ecpay complete webhook", "nicklien@accoladeglobal.net", content=content)
+                raise lib.error_handle.error.api_error.ApiVerifyError('payment not successful',payment_res['RtnMsg'])
             elif payment_res['RtnCode'] == '1':
                 order.payment_status = models.order.order.PAYMENT_STATUS_PAID
                 
-            
+
             if order.campaign.meta_payment['ecpay']['invoice_enabled']:
                 invoice = service.ecpay.ecpay.order_create_invoice(merchant_id, hash_key, hash_iv, order,int(payment_res['amount']))
                 order.meta['InvoiceNumber'] = invoice['InvoiceNumber']
-            
-            
-            #delivery status update
-            delivery_params = {"order_oid": order_oid, "order": order, "extra_data": {}, "create_order": True, "update_status": True}
-            lib.helper.delivery_helper.DeliveryHelper.create_delivery_order_and_update_delivery_status(**delivery_params)
-
+                
             #wallet
             update_wallet(order)
 
@@ -615,9 +515,8 @@ class PaymentViewSet(viewsets.GenericViewSet):
             
             #order status update
             lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
-        except Exception as e :
+        except Exception as e:
             print(traceback.format_exc())
-            jobs.send_email_job.send_email_job("ecpay webhook", "nicklien@accoladeglobal.net", content=str(e))
         
         return Response('1|OK')
         
