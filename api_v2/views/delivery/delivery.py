@@ -39,16 +39,25 @@ class DeliveryViewSet(viewsets.GenericViewSet):
     def buyer_create_delivery_order(self, request, order_oid):
         
         order = lib.util.verify.Verify.get_order_with_oid(order_oid)
+        campaign = order.campaign
         sub_data = request.data
         delivery_params = {"order_oid": order_oid, "order": order, "extra_data": sub_data, "create_order": True, "update_status": True}
         reponse = lib.helper.delivery_helper.DeliveryHelper.create_delivery_order_and_update_delivery_status(**delivery_params)
         order.payment_method = models.order.order.PAYMENT_METHOD_ECPAY_CASH_ON_DELIVERY
-        meta = order.meta
-        meta["ecpay_create_delivery_order"] = reponse
+        order.history[f"{models.order.order.PAYMENT_METHOD_ECPAY}_delivery_order"] = {
+            "time": pendulum.now("UTC").to_iso8601_string(),
+            "data": reponse
+        }
         order.save()
         if not reponse.get("RtnMsg", None):
             
             raise lib.error_handle.error.api_error.ApiVerifyError('create_delivery_order_fail')
+        subject = lib.i18n.email.order_comfirm_mail.i18n_get_mail_subject(order, lang=campaign.lang)
+        content = lib.i18n.email.order_comfirm_mail.i18n_get_mail_content(order, campaign, lang=campaign.lang)
+        jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)
+        
+        #order status update
+        lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
         return Response(reponse, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['POST'], url_path=r'/ecpay/create/delivery_order/callback/(?P<order_oid>[^/.]+)', parser_classes=(FormParser,MultiPartParser), renderer_classes = (StaticHTMLRenderer,),permission_classes=())
@@ -65,7 +74,7 @@ class DeliveryViewSet(viewsets.GenericViewSet):
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             order = serializer.save()
             
-            delivery_params = {"order_oid": order_oid, "order": order, "extra_data": sub_data, "create_order": False, "update_status": True}
+            delivery_params = {"order_oid": order_oid, "order": order, "extra_data": {}, "create_order": False, "update_status": True}
             lib.helper.delivery_helper.DeliveryHelper.create_delivery_order_and_update_delivery_status(**delivery_params)
         
             #TODO #save this callback data
