@@ -80,6 +80,7 @@ class DiscountCodeViewSet(viewsets.ModelViewSet):
 
         #TODO validation type and limitations
         # print(request.data)
+        request.data['user_subscription'] = user_subscription.id
         serializer = models.discount_code.discount_code.DiscountCodeSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -87,9 +88,9 @@ class DiscountCodeViewSet(viewsets.ModelViewSet):
         try:
             discount_code = serializer.save()
             
-            discount_code.user_subscription = user_subscription
+            # discount_code.user_subscription = user_subscription
             
-            discount_code.save()
+            # discount_code.save()
         except Exception :      
             raise lib.error_handle.error.api_error.ApiVerifyError('duplicate_discount_code')
 
@@ -106,7 +107,8 @@ class DiscountCodeViewSet(viewsets.ModelViewSet):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         discount_code = lib.util.verify.Verify.get_discount_code_from_user_subscription(user_subscription, pk)
-
+        
+        request.data['user_subscription'] = user_subscription.id   #temp create a serializer for update
         serializer = models.discount_code.discount_code.DiscountCodeSerializer(discount_code, data=request.data, partial=True)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
