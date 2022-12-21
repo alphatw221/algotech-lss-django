@@ -83,16 +83,12 @@ class DiscountCodeViewSet(viewsets.ModelViewSet):
         request.data['user_subscription'] = user_subscription.id
         serializer = models.discount_code.discount_code.DiscountCodeSerializer(data=request.data)
         if not serializer.is_valid():
+            if 'non_field_errors' in serializer.errors and serializer.errors['non_field_errors'][0].code=='unique':
+                raise lib.error_handle.error.api_error.ApiVerifyError('duplicate_discount_code')
+
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        try:
-            discount_code = serializer.save()
-            
-            # discount_code.user_subscription = user_subscription
-            
-            # discount_code.save()
-        except Exception :      
-            raise lib.error_handle.error.api_error.ApiVerifyError('duplicate_discount_code')
+        discount_code = serializer.save()
 
         return Response(models.discount_code.discount_code.DiscountCodeSerializer(discount_code).data, status=status.HTTP_200_OK)
 
@@ -111,13 +107,11 @@ class DiscountCodeViewSet(viewsets.ModelViewSet):
         request.data['user_subscription'] = user_subscription.id   #temp create a serializer for update
         serializer = models.discount_code.discount_code.DiscountCodeSerializer(discount_code, data=request.data, partial=True)
         if not serializer.is_valid():
+            if 'non_field_errors' in serializer.errors and serializer.errors['non_field_errors'][0].code=='unique':
+                raise lib.error_handle.error.api_error.ApiVerifyError('duplicate_discount_code')
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
-        try:
-            discount_code = serializer.save()
-        except Exception :
-            raise lib.error_handle.error.api_error.ApiVerifyError('duplicate_discount_code')
-        
+        discount_code = serializer.save()
 
         return Response(models.discount_code.discount_code.DiscountCodeSerializer(discount_code).data, status=status.HTTP_200_OK)
 
