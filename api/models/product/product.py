@@ -83,6 +83,8 @@ class Product(models.Model):
     meta_logistic = models.JSONField(default=dict, null=True, blank=True)
     tag = models.JSONField(default=list, null=True, blank=True)
     categories = models.JSONField(default=list, null=True, blank=True)
+    pinned = models.BooleanField(null=False, default=False)
+    meta_variant = models.JSONField(default=dict, null=False, blank=True)
     
     def __str__(self):
         return self.name
