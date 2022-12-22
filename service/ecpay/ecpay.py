@@ -13,6 +13,10 @@ from datetime import datetime
 import time
 import random
 
+# Algotech ecpay credentials
+MERCHANT_ID = "3344643"
+HASH_KEY= "RXiMOiIBiEveXxSb"
+HASH_IV= "hcV2UGIITv0PCxlt"
 
 # action_url = 'https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5'  # 測試環境
 action_url = 'https://payment.ecpay.com.tw/Cashier/AioCheckOut/V5' # 正式環境

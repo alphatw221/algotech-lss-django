@@ -157,23 +157,30 @@ class CartViewSet(viewsets.ModelViewSet):
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def buyer_cvs_map(self, request, cart_oid):
 
+        shipping_method, shipping_option_index, logistic_sub_type, = lib.util.getter.getdata(request, ("shipping_method", "shipping_option_index", "LogisticsSubType",),required=True)
         api_user = lib.util.verify.Verify.get_customer_user(request) if request.user.is_authenticated else None
         cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
         campaign = lib.util.verify.Verify.get_campaign_from_cart(cart)
+        merchant_id= campaign.meta_logistic.get('ecpay',{}).get('merchant_id','')
+        hash_key=campaign.meta_logistic.get('ecpay',{}).get('hash_key','')
+        hash_iv=campaign.meta_logistic.get('ecpay',{}).get('hash_iv','')
+        if not merchant_id:
+            merchant_id = service.ecpay.ecpay.MERCHANT_ID
+        if not hash_key:
+            hash_key = service.ecpay.ecpay.HASH_KEY
+        if not hash_iv:
+            hash_iv = service.ecpay.ecpay.HASH_IV
         
-        merchant_id=campaign.meta_logistic['ecpay']['merchant_id'],
-        hash_key=campaign.meta_logistic['ecpay']['hash_key'],
-        hash_iv=campaign.meta_logistic['ecpay']['hash_iv']
-
         action,map = service.ecpay.ecpay.cvs_map(cart_oid,merchant_id, hash_key, hash_iv,
-            request.data.get('LogisticsSubType'), 
-            f'{settings.GCP_API_LOADBALANCER_URL}/api/v2/cart/buyer/cvsmap/callback/'
-            )
+            logistic_sub_type, 
+            f'{settings.GCP_API_LOADBALANCER_URL}/api/v2/cart/buyer/cvsmap/callback/?shipping_method={shipping_method}&shipping_option_index={shipping_option_index}'
+        )
         return Response({'action':action,'data':map})
     
     @action(detail=False, methods=['POST'], url_path=r'buyer/cvsmap/callback',parser_classes=(FormParser,MultiPartParser), renderer_classes = (StaticHTMLRenderer,),permission_classes=())
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def buyer_cvs_map_callback(self, request):
+        shipping_method, shipping_option_index, = lib.util.getter.getparams(request, ("shipping_method", "shipping_option_index",),with_user=False)
         data = request.data.dict()
         # {'MerchantID': '3344643', 
         #  'MerchantTradeNo': 'ECPAY20221207094136', 
@@ -188,7 +195,8 @@ class CartViewSet(viewsets.ModelViewSet):
         
         cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
         ecpay_cvs = {
-            'shipping_option_index': data['LogisticsSubType'],
+            'shipping_method': shipping_method,
+            'shipping_option_index': shipping_option_index,
             'merchant_id':data['MerchantID'],
             'merchant_trade_no':data['MerchantTradeNo'],
             'logistics_sub_type':data['LogisticsSubType'],
