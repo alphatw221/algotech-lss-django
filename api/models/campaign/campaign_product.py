@@ -105,6 +105,7 @@ class CampaignProductSerializer(serializers.ModelSerializer):
 
     meta = serializers.JSONField(default=dict)
     meta_logistic = serializers.JSONField(default=dict)
+    meta_variant = serializers.JSONField(default=dict)
     tag = serializers.JSONField(default=list)
     categories = serializers.JSONField(default=list)
 
@@ -123,7 +124,8 @@ class CampaignProductSerializerAssign(serializers.ModelSerializer):
             'customer_editable',
             'type',
             'status',
-            'tag'
+            'tag',
+            'meta_variant'
         ]
 
 
@@ -142,7 +144,8 @@ class CampaignProductSerializerUpdate(CampaignProductSerializer):
             'order_code', 
             'oversell', 
             'overbook',
-            'categories'
+            'categories',
+            'meta_variant'
         ]
 
 
