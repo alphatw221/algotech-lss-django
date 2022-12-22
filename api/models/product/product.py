@@ -99,6 +99,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
     meta = serializers.JSONField(default=dict)
     meta_logistic = serializers.JSONField(default=dict)
+    meta_variant = serializers.JSONField(default=dict)
     tag = serializers.JSONField(default=dict)
     categories = serializers.JSONField(default=list)
 

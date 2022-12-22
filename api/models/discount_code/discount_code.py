@@ -64,7 +64,7 @@ class DiscountCodeSerializer(serializers.ModelSerializer):
     class Meta:
         model = DiscountCode
         fields = '__all__'
-        read_only_fields = ['user_subscription', 'created_at', 'updated_at', 'applied_count', 'used_count']
+        read_only_fields = ['created_at', 'updated_at', 'applied_count', 'used_count']
 
     limitations = serializers.JSONField(default=[])
     meta = serializers.JSONField(default=dict)
