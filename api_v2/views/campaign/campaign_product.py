@@ -181,13 +181,15 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
                                     customer_removable=bool(request_data.get('customer_removable', True)),
                                     oversell = bool(request_data.get('oversell', False)),
                                     overbook = bool(request_data.get('overbook', False)),
+                                    pinned = bool(request_data.get('pinned', False)),
                                     tag=list(request_data.get('tag',[])),
                                     type=str(request_data.get('type',models.product.product.TYPE_PRODUCT)),
                                     description = request_data.get('description',''),
                                     product_id = int(request_data.get('id')) if request_data.get('id') else None,
                                     campaign_id=campaign.id,
                                     categories = list(request_data.get('categories',[])) if request_data.get('categories',[]) else [],
-                                    meta = api_product.data.get('meta',{}),      
+                                    meta = api_product.data.get('meta',{}),
+                                    meta_variant = api_product.data.get('meta_variant',{}),       
                                     session=session)
 
                         if got_error:

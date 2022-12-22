@@ -224,6 +224,7 @@ class CartViewSet(viewsets.ModelViewSet):
             cart.applied_discount = {}
             cart.discount = 0
             cart.save()
+            print('discount')
             return Response(CartSerializerWithSellerInfo(cart).data, status=status.HTTP_200_OK)
             
         ret = rule.rule_checker.cart_rule_checker.RuleChecker.check(
