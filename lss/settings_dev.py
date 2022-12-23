@@ -28,8 +28,8 @@ DATABASES = {
         'CLIENT': {
             'host': 'mongodb://34.126.92.142:27017, 35.240.200.4:27017, 34.126.155.150:27017',
             'replicaSet': 'rs0',
-            'username': config.MONGO_DB_USERNAME,
-            'password': config.MONGO_DB_PASSWORD,
+            'username': 'lin',
+            'password': 'lin',
             'authSource': 'lss_dev',
             'authMechanism': 'SCRAM-SHA-1',
             'readPreference': 'secondaryPreferred',
