@@ -293,7 +293,7 @@ def create_shipping_order(order,server_reply_url,sub_data={}):
         'SenderPhone': campaign.meta_logistic['ecpay']['sender_phone'], #campaign data
         'SenderCellPhone': campaign.meta_logistic['ecpay']['sender_phone'],
         'ReceiverName': str(order.shipping_first_name),
-        'ReceiverPhone': order.shipping_phone,
+        'ReceiverPhone': '',
         'ReceiverCellPhone': order.shipping_cellphone,
         'ReceiverEmail': order.shipping_email,
         'TradeDesc': 'lss',

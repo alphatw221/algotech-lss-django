@@ -44,7 +44,7 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
         cart_oid, type = lib.util.getter.getparams(request, ('cart_oid','type'), with_user=False)
         # pre_order = lib.util.verify.Verify.get_pre_order_with_oid(pre_order_oid)
         cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
-        queryset = cart.campaign.products.all()
+        queryset = cart.campaign.products.all().order_by("-pinned")
         if type == models.campaign.campaign_product.TYPE_PRODUCT:
             queryset = queryset.filter(type=models.campaign.campaign_product.TYPE_PRODUCT)
         elif type == models.campaign.campaign_product.TYPE_LUCKY_DRAW:
