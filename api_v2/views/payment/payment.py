@@ -381,29 +381,29 @@ class PaymentViewSet(viewsets.GenericViewSet):
             order_result_url=f'{settings.GCP_API_LOADBALANCER_URL}/api/v2/payment/ecpay/complete/callback/',
             client_back_url=f'{settings.WEB_SERVER_URL}/buyer/order/{order_oid}/payment',
         )
-        # order.checkout_details[models.order.order.PAYMENT_METHOD_ECPAY] = payment
-        # order.history[f"{models.order.order.PAYMENT_METHOD_ECPAY}_create_order"]={
-        #     "time": pendulum.now("UTC").to_iso8601_string(),
-        #     "data": payment
-        # }
-        # order.save()
+        order.checkout_details[models.order.order.PAYMENT_METHOD_ECPAY] = params
+        order.history[f"{models.order.order.PAYMENT_METHOD_ECPAY}_create_order"]={
+            "time": pendulum.now("UTC").to_iso8601_string(),
+            "data": params
+        }
+        order.save()
         if not params:
             raise lib.error_handle.error.api_error.ApiCallerError('choose_another_payment_method')
         
-        print(params)
-        # order.paid_at = datetime.utcnow()
-        # order.payment_method = models.order.order.PAYMENT_METHOD_ECPAY
+
+        order.paid_at = datetime.utcnow()
+        order.payment_method = models.order.order.PAYMENT_METHOD_ECPAY
         
         #delivery status update
-        # delivery_params = {"order_oid": order_oid, "order": order, "extra_data": {}, "create_order": True, "update_status": True}
-        # delivery_order = lib.helper.delivery_helper.DeliveryHelper.create_delivery_order_and_update_delivery_status(**delivery_params)
-        # order.history[f"{models.order.order.PAYMENT_METHOD_ECPAY}_delivery_order"] = {
-        #     "time": pendulum.now("UTC").to_iso8601_string(),
-        #     "data": delivery_order
-        # }
+        delivery_params = {"order_oid": order_oid, "order": order, "extra_data": {}, "create_order": True, "update_status": True}
+        delivery_order = lib.helper.delivery_helper.DeliveryHelper.create_delivery_order_and_update_delivery_status(**delivery_params)
+        order.history[f"{models.order.order.PAYMENT_METHOD_ECPAY}_delivery_order"] = {
+            "time": pendulum.now("UTC").to_iso8601_string(),
+            "data": delivery_order
+        }
         
         #order status update
-        # lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
+        lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
         return Response({'url':url,'params':params})
         
         # raise lib.error_handle.error.api_error.ApiCallerError('Payment Error, Please Choose Another Payment Method')
