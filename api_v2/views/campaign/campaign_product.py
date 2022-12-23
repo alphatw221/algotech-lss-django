@@ -188,6 +188,7 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
                                     description = request_data.get('description',''),
                                     product_id = int(request_data.get('id')) if request_data.get('id') else None,
                                     campaign_id=campaign.id,
+                                    category = request_data.get('category', None),
                                     categories = list(request_data.get('categories',[])) if request_data.get('categories',[]) else [],
                                     meta = api_product.data.get('meta',{}),      
                                     session=session)

@@ -1,5 +1,6 @@
 from api.models.supplier.supplier import Supplier
 from api.models.user.user import User, UserSerializer
+from api.models.product.product_category import ProductCategory
 from api.models.user.user_subscription import (UserSubscription,
                                                UserSubscriptionSerializer)
 from django.contrib import admin
@@ -39,8 +40,10 @@ class Product(models.Model):
 
     name = models.CharField(
         max_length=255, null=True, blank=True, default=None)
-    category = models.CharField(
-        max_length=255, null=True, blank=True, default=None)
+    # category = models.CharField(
+    #     max_length=255, null=True, blank=True, default=None)
+    
+
     excerpt = models.TextField(null=True, blank=True, default=None)
     description = models.TextField(null=True, blank=True, default=None)
     content = models.TextField(null=True, blank=True, default=None)
@@ -82,6 +85,7 @@ class Product(models.Model):
     meta = models.JSONField(default=dict, null=True, blank=True)
     meta_logistic = models.JSONField(default=dict, null=True, blank=True)
     tag = models.JSONField(default=list, null=True, blank=True)
+    # category = models.ForeignKey(ProductCategory, blank=True, null=True, default=None)
     categories = models.JSONField(default=list, null=True, blank=True)
     pinned = models.BooleanField(null=False, default=False)
     meta_variant = models.JSONField(default=dict, null=False, blank=True)
