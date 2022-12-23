@@ -7,7 +7,7 @@ import djongo.models.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api', '0006_order_shipping_cellphone'),
+        ('api', '0007_auto_20221221_0605'),
     ]
 
     operations = [

@@ -85,7 +85,7 @@ class Product(models.Model):
     meta = models.JSONField(default=dict, null=True, blank=True)
     meta_logistic = models.JSONField(default=dict, null=True, blank=True)
     tag = models.JSONField(default=list, null=True, blank=True)
-    # category = models.ForeignKey(ProductCategory, blank=True, null=True, default=None)
+    category = models.ForeignKey(ProductCategory, blank=True, null=True, on_delete=models.SET_NULL, default=None)
     categories = models.JSONField(default=list, null=True, blank=True)
     pinned = models.BooleanField(null=False, default=False)
     meta_variant = models.JSONField(default=dict, null=False, blank=True)
