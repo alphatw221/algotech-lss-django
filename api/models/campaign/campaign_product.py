@@ -125,7 +125,8 @@ class CampaignProductSerializerAssign(serializers.ModelSerializer):
             'type',
             'status',
             'tag',
-            'meta_variant'
+            'meta_variant',
+            'pinned'
         ]
 
 
@@ -145,7 +146,8 @@ class CampaignProductSerializerUpdate(CampaignProductSerializer):
             'oversell', 
             'overbook',
             'categories',
-            'meta_variant'
+            'meta_variant',
+            'pinned'
         ]
 
 

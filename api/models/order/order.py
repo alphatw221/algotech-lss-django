@@ -163,6 +163,7 @@ class OrderSerializerUpdateShipping(serializers.ModelSerializer):
                   "shipping_last_name",
                   "shipping_email",
                   "shipping_phone",
+                  "shipping_cellphone",
                   "shipping_postcode",
                   "shipping_region",
                   "shipping_location",
