@@ -87,7 +87,7 @@ class DefaultOrderExportProcessor:
         FieldMapper('platform', 'platform', width=15),
         FieldMapper('customer_name', 'customer_name', width=20),
         ShippingNameMapper('shipping_name', 'shipping_name', width=20),
-        FieldMapper('shipping_phone', 'shipping_phone', width=20),
+        FieldMapper('shipping_cellphone', 'shipping_cellphone', width=20),
         FieldMapper('shipping_email', 'shipping_email', width=40),
         ShippingMethodMapper('shipping_method', 'shipping_method', width=20),
         ShippingOptionMapper('shipping_option', 'shipping_option', width=20),
