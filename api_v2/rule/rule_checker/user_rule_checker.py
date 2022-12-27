@@ -45,7 +45,7 @@ class FreeRegistrationDataRuleChecker(RuleChecker):
 
     check_list=[
         check_rule.user_check_rule.UserCheckRule.is_email_format_valid,
-        # check_rule.user_check_rule.UserCheckRule.has_email_been_registered,
+        check_rule.user_check_rule.UserCheckRule.has_email_been_registered,
         check_rule.user_check_rule.UserCheckRule.is_activated_country_valid,
         check_rule.user_check_rule.UserCheckRule.is_plan_valid,
     ]
