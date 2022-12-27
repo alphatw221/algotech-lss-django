@@ -414,6 +414,24 @@ class CartViewSet(viewsets.ModelViewSet):
 
         return Response(models.user.buyer_wallet.BuyerWalletSerializer(buyer_wallet).data, status=status.HTTP_200_OK)
 
+    @action(detail=False, methods=['GET'], url_path=r'buyer/search/(?P<campaign_id>[^/.]+)/tiktok', permission_classes=())
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def buyer_search_tiktok_cart(self, request, campaign_id):
+
+        recaptcha_token, customer_name, = lib.util.getter.getparams(request, ('recaptcha_token', 'customer_name', ), with_user=False)
+        
+        code, response = service.recaptcha.recaptcha.verify_token(recaptcha_token)
+
+        if code!=200 or not response.get('success'):
+            raise lib.error_handle.error.api_error.ApiVerifyError('refresh_try_again')
+        print(campaign_id)
+        print(customer_name)
+        if not models.cart.cart.Cart.objects.filter(campaign_id=campaign_id, customer_name=customer_name, platform=models.user.user_subscription.PLATFORM_TIKTOK).exists():
+            raise lib.error_handle.error.api_error.ApiVerifyError('cart_not_found')
+        cart = models.cart.cart.Cart.objects.filter(campaign_id=campaign_id, customer_name=customer_name, platform=models.user.user_subscription.PLATFORM_TIKTOK).first()
+        oid = database.lss.cart.get_oid_by_id(cart.id)
+        return Response(oid, status=status.HTTP_200_OK)
+
 # ---------------------------------------------- seller ------------------------------------------------------
 
     @action(detail=False, methods=['POST'], url_path=r'seller/list', permission_classes=(IsAuthenticated,))
@@ -607,3 +625,5 @@ class CartViewSet(viewsets.ModelViewSet):
         cart.delete()
 
         return Response('OK', status=status.HTTP_200_OK)
+    
+    
