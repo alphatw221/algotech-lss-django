@@ -171,6 +171,47 @@ def create_user_register(plan, timezone, period, firstName, lastName, email, pas
     )
 
 
+def create_free_register_account(plan, country_plan, subscription_plan, timezone, period, firstName, lastName, email, password, country, country_code,  contactNumber):
+
+    now = datetime.now(pytz.timezone(timezone)) if timezone in pytz.common_timezones else datetime.now()
+
+    if plan == business_policy.subscription.TYPE_TRIAL:
+        expired_at = now+timedelta(days=30)
+
+    elif period == business_policy.subscription.PERIOD_QUARTER:
+        expired_at = now+timedelta(days=90)
+
+    else: now+timedelta(days=90)
+    
+    auth_user = AuthUser.objects.create_user(
+        username=f'{firstName} {lastName}', email=email, password=password)
+
+    user_subscription = models.user.user_subscription.UserSubscription.objects.create(
+        name=f'{firstName} {lastName}', 
+        status='valid', 
+        started_at=now,
+        expired_at=expired_at, 
+        user_plan= {"activated_platform" : ["facebook","youtube","instagram"]}, 
+        meta_country={ 'activated_country': [country_code] },
+        type=plan,
+        lang=country_plan.language,
+        country = country_code,
+        **business_policy.subscription_plan.SubscriptionPlan.get_plan_limit(plan)
+        )
+        
+    api_user = models.user.user.User.objects.create(
+        name=f'{firstName} {lastName}', email=email, type='user', status='valid', phone=contactNumber, auth_user=auth_user, user_subscription=user_subscription)
+    
+    lib.util.marking_tool.NewUserMark.mark(api_user, save = True)
+
+    return {
+        "Customer Name":f'{firstName} {lastName}',
+        "Email":email,
+        "Password":password[:4]+"*"*(len(password)-4),
+        "Your Plan":subscription_plan.get('text'),
+        "Subscription End Date":expired_at.strftime("%d %B %Y %H:%M"),
+    }
+
 
 
 
@@ -186,7 +227,7 @@ def create_new_account_for_james(country_code, usbscription_plan, username, emai
     else:
         auth_user = AuthUser.objects.create_user(
             username=username, email=email, password=password)
-    
+     
     if models.user.user.User.objects.filter(email=email, type=models.user.user.TYPE_SELLER).exists():
         api_user = models.user.user.User.objects.get(email=email, type=models.user.user.TYPE_SELLER)
         user_subscription = api_user.user_subscription

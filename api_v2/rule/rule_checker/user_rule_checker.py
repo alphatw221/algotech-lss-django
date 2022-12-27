@@ -41,6 +41,14 @@ class RegistrationPaymentCompleteChecker(RuleChecker):
         check_rule.stripe_check_rule.StripeCheckRule.is_payment_successed,
     ]
 
+class FreeRegistrationDataRuleChecker(RuleChecker):
+
+    check_list=[
+        check_rule.user_check_rule.UserCheckRule.is_email_format_valid,
+        # check_rule.user_check_rule.UserCheckRule.has_email_been_registered,
+        check_rule.user_check_rule.UserCheckRule.is_activated_country_valid,
+        check_rule.user_check_rule.UserCheckRule.is_plan_valid,
+    ]
 
 class RegistrationDataRuleChecker(RuleChecker):
 
@@ -52,6 +60,7 @@ class RegistrationDataRuleChecker(RuleChecker):
         check_rule.stripe_check_rule.StripeCheckRule.adjust_price_if_promo_code_valid,
         check_rule.stripe_check_rule.StripeCheckRule.adjust_price_if_marketing_plan, # This is a activity, if activity end, remove this rule, also remove from RegistrationRequireRefundChecker class below
     ]
+
 class RegistrationRequireRefundChecker(RuleChecker):
 
     check_list=[

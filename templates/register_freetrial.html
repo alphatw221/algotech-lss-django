@@ -1,0 +1,93 @@
+{% load i18n %}
+{% load settings_value %}
+
+<html>
+    <body style="color:black;">
+        <div style="width:100%; background: #eaeaea; font-family: \'Open Sans\', sans-serif;"> 
+            <div style="margin: auto; padding:5%; max-width:900px; background: #ffffff; text-align: left;">
+
+                <table align="center">
+                    <tr><td align="center"><img src='{% settings_value "LOGO_URL" %}'></td></tr>
+                </table>
+
+                <h3>{% translate "THANKS_PHRASE_WELCOME" %}!</h3>
+                <p>{% translate "TITLE_GREETING" %} {{ firstName }}, </p>
+                <div>
+                    <p>{% translate "YOUR_ACTIVATION" %} {{plan}} {% translate "PLAN_ACCOUNT_ACTIVATION" %}</p>
+                    <p>{% translate "LOGIN_ACTIVATION" %} <a href="{% settings_value "WEB_SERVER_URL" %}/seller/web/login">{% translate "LOGIN_2_WELCOME" %}</a></p>
+                    <p>{% translate "EMAIL" %}: {{ email }}</p>
+                    <p>{% translate "PASSWORD" %}: {{ password }}</p>
+                </div>
+                <div style="background: #eaeaea; height:100px; position: relative;">
+                    <table align="center" > 
+                        <tr><td align="center">
+                            <h4 style="color: #ff0000; font-size: 1.5rem; 
+                            top: 50%; -ms-transform: translateY(100%); transform: translateY(100%);"> {% translate "STEP1_ACTIVATION" %}  </h4> 
+                        </td></tr>
+                    </table>
+                    
+                </div>
+                <br>
+                <h4>{% translate "EMAIL/ACTIVATED/SUBTITLE_1" %}</h4>
+                <p>
+                    {% translate "EMAIL/ACTIVATED/GUIDE" %}
+                    <a href="https://docs.google.com/presentation/d/1krykRiRRKcWv5EpZJXyXvH4_Isn7Gz9yybML7xBufB4/edit#slide=id.g12938356dec_0_172">
+                        {% translate "LOGIN_2_WELCOME" %} </a>
+                        {% translate "EMAIL/ACTIVATED/GUIDE_2" %}
+                </p>
+                <div style="height: 80px;"> 
+                    <table align="center" > 
+                        <tr><td align="center">
+                    <a 
+                        href="https://liveshowseller.com/schedule-meeting/"
+                        style="
+                        font-style: normal; font-weight: bold; line-height: 1.15; 
+                        text-decoration: none; border-style: solid; display: inline-block; 
+                        -webkit-text-size-adjust: none; mso-hide: all; background-color: #111111; border-color: #111111; 
+                        border-radius: 50px; border-width: 0px; color: #ffffff; text-align: center;
+                        font-size: 16px; height: 18px; padding: 15px; width: 200px;">
+                        <p style="margin: auto;">{% translate "EMAIL/ACTIVATED/SCHEDULE" %}</p>
+                    </a>
+                    </td></tr></table>
+                </div>
+
+                <h4>{% translate "EMAIL/ACTIVATED/SUBTITLE_2" %}</h4>
+                <p>
+                    {% translate "EMAIL/ACTIVATED/FAQ" %}
+                    <a href="https://liveshowseller.com/faq/" style="font-weight: 700;"> {% translate "EMAIL/ACTIVATED/FAQLINK" %} </a>
+                    <br/>
+                    {% translate "EMAIL/ACTIVATED/CONTACT_1" %} lss@algotech.app {% translate "EMAIL/ACTIVATED/CONTACT_2" %}.
+                </p>
+
+                <p>
+                    {% translate "REGARDS_ACTIVATION" %}<br/>
+                    {% translate "CONGRATS_3_WELCOME" %}
+                </p>
+
+                <div style="height: 80px;"> 
+                    <table align="center" > <tr><td align="center">
+                    <a 
+                        href='{% settings_value "WEB_SERVER_URL" %}/seller/web/login'
+                        style="
+                        font-style: normal; font-weight: bold; line-height: 1.15; 
+                        text-decoration: none; border-style: solid; display: inline-block; 
+                        -webkit-text-size-adjust: none; mso-hide: all; background-color: #ed2225; border-color: #111111; 
+                        border-radius: 50px; border-width: 0px; color: #ffffff; text-align: center;
+                        font-size: 16px; height: 18px; padding: 15px; width: 200px; ">
+                        <p style="margin: auto;">{% translate "EMAIL/ACTIVATED/LOGIN" %}</p>
+                    </a>    
+                    </td></tr></table>
+                </div>
+
+                <div style="width: 100%; background-color: #eaeaea; text-align: center; padding: 10px;">
+                    <table align="center" > 
+                        <tr><td><img style="width: 150px; margin: auto;" src='{% settings_value "LOGO_URL" %}'></td></tr>
+                        <tr><td><p><a href="https://liveshowseller.com/"> https://liveshowseller.com/ </a></p></td></tr>
+                        <tr><td><p>Powered by Algotech Pte Ltd</p></td> </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </body>
+</html>   
