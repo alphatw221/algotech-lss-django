@@ -39,7 +39,7 @@ DATABASES = {
 }
 
 MONGODB_CONNECTION_STRING = \
-    'mongodb://'+config.MONGO_DB_USERNAME+':'+config.MONGO_DB_PASSWORD+\
+    'mongodb://'+'lin'+':'+'lin'+\
     '@34.126.92.142:27017,35.240.200.4:27017,34.126.155.150:27017/'+\
     '?authSource=lss_dev'
     
