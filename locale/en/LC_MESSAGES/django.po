@@ -476,9 +476,15 @@ msgstr "You may now log in to the system"
 msgid "LOGIN_2_WELCOME"
 msgstr "here"
 
+msgid "EMAIL"
+msgstr "Email"
+
+msgid "PASSWORD"
+msgstr "Password"
+
 #: templates/register_activation.html:27
 msgid "STEP1_ACTIVATION"
-msgstr "What happens next?"
+msgstr "WHAT HAPPENS NEXT?"
 
 #: templates/register_activation.html:28
 msgid "STEP2_ACTIVATION"
@@ -505,7 +511,10 @@ msgstr "The Live Show Seller Team"
 
 #: templates/register_confirmation.html:22
 msgid "TITLE_WELCOME"
-msgstr "Welcome to Live Show Seller"
+msgstr "Thank you for registering Live Show Seller"
+
+msgid "TITLE_GREETING"
+msgstr "Dear"
 
 #: templates/register_confirmation.html:30
 msgid "THANKS_PHRASE_WELCOME"
@@ -721,3 +730,37 @@ msgstr ""
 
 #~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_CHARGE"
 #~ msgstr "Delivery Charge"
+
+
+msgid "EMAIL/ACTIVATED/SUBTITLE_1"
+msgstr "Quickstart Guide:"
+
+msgid "EMAIL/ACTIVATED/GUIDE"
+msgstr "We think the best way to get familiar with the LSS system is to log in and play around with it. However, if you’d prefer to have a more formal introduction, feel free to contact us for an online demo or click"
+
+msgid "EMAIL/ACTIVATED/GUIDE_2"
+msgstr "to read our user guide."
+
+msgid "EMAIL/ACTIVATED/SUBTITLE_2"
+msgstr "Frequently Asked Questions:"
+
+msgid "EMAIL/ACTIVATED/FAQ"
+msgstr "Find answers to the most frequently asked questions and start your live selling journey today!"
+
+msgid "EMAIL/ACTIVATED/FAQLINK"
+msgstr "Live Show Seller FAQ"
+
+msgid "EMAIL/ACTIVATED/CONTACT_1"
+msgstr "If any further assistance is needed, feel free to contact us at"
+
+msgid "EMAIL/ACTIVATED/CONTACT_2"
+msgstr "during office hours."
+
+msgid "EMAIL/ACTIVATED/SCHEDULE"
+msgstr "Schedule a Meeting"
+
+msgid "EMAIL/ACTIVATED/LOGIN"
+msgstr "Log In Here"
+
+
+

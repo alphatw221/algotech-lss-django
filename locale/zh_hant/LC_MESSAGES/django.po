@@ -441,28 +441,24 @@ msgstr "重置您的密码"
 
 #: templates/register_activation.html:10
 msgid "TITLE_ACTIVATION"
-msgstr ""
+msgstr "您的 Live Show Seller 帳戶已經可以開始使用了"
 
 #: templates/register_activation.html:18
 msgid "YOUR_ACTIVATION"
-msgstr ""
+msgstr "您的 Live Show Seller "
 
 #: templates/register_activation.html:18
 msgid "PLAN_ACCOUNT_ACTIVATION"
-msgstr ""
+msgstr "帳戶已經可以開始使用了"
 
 #: templates/register_activation.html:19
 msgid "LOGIN_ACTIVATION"
-msgstr ""
+msgstr "您可以登入並啟用您的帳戶:"
 
 #: templates/register_activation.html:19
 #: templates/register_confirmation.html:31
 msgid "LOGIN_2_WELCOME"
-msgstr ""
-
-#: templates/register_activation.html:27
-msgid "STEP1_ACTIVATION"
-msgstr ""
+msgstr "點擊這裡"
 
 #: templates/register_activation.html:28
 msgid "STEP2_ACTIVATION"
@@ -478,16 +474,18 @@ msgstr ""
 
 #: templates/register_activation.html:33
 msgid "REGARDS_ACTIVATION"
-msgstr ""
+msgstr "祝您直播銷售愉快"
 
 #: templates/register_activation.html:34
 #: templates/register_confirmation.html:47
 msgid "CONGRATS_3_WELCOME"
-msgstr ""
+msgstr "The Live Show Seller Team"
 
-#: templates/register_confirmation.html:22
 msgid "TITLE_WELCOME"
-msgstr ""
+msgstr "感謝您註冊 Live Show Seller!" 
+
+msgid "TITLE_GREETING"
+msgstr "親愛的"
 
 #: templates/register_confirmation.html:30
 msgid "THANKS_PHRASE_WELCOME"
@@ -689,3 +687,43 @@ msgstr "已成功修改密碼. 若您沒有要求修改密碼, 請立即聯絡�
 
 #~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_CHARGE"
 #~ msgstr "運費"
+
+msgid "EMAIL/ACTIVATED/SUBTITLE_1"
+msgstr "入門指南："
+
+msgid "EMAIL/ACTIVATED/GUIDE"
+msgstr "我們認為最能讓您快速上手 Live Show Seller 系統的方法就是登入系統並試著操作、建立您的直播銷售活動，能夠讓您更快速地了解這個系統能夠如何為您的直播銷售帶來助益。如果您需要更詳細的產品介紹，可以與我們安排 1 對 1 專人線上說明或"
+
+msgid "EMAIL/ACTIVATED/GUIDE_2"
+msgstr "觀看 Live Show Seller 的使用說明。"
+
+msgid "EMAIL/ACTIVATED/SUBTITLE_2"
+msgstr "常見問題："
+
+msgid "EMAIL/ACTIVATED/FAQ"
+msgstr "使用 Live Show Seller 時遇到問題了嗎？可以"
+
+msgid "EMAIL/ACTIVATED/FAQLINK"
+msgstr "參考常見問答。"
+
+msgid "EMAIL/ACTIVATED/CONTACT_1"
+msgstr "倘若您對我們的服務仍有許多相關問題的話，歡迎直接來信"
+
+msgid "EMAIL/ACTIVATED/CONTACT_2"
+msgstr "，我們將在服務時間內盡快回覆您。"
+
+msgid "EMAIL"
+msgstr "登入帳號"
+
+msgid "PASSWORD"
+msgstr "密碼"
+
+#: templates/register_activation.html:27
+msgid "STEP1_ACTIVATION"
+msgstr "您接下來可以?"
+
+msgid "EMAIL/ACTIVATED/SCHEDULE"
+msgstr "安排線上會議"
+
+msgid "EMAIL/ACTIVATED/LOGIN"
+msgstr "登入系統"
