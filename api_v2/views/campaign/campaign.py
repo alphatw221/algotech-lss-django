@@ -18,16 +18,6 @@ import lib
 import json
 import service
 
-class UserSubscriptionAccountInfo(models.user.user_subscription.UserSubscriptionSerializer):
-
-    class Meta:
-        model = models.user.user_subscription.UserSubscription
-        exclude=['created_at', 'updated_at','customers']
-        
-    product_categories = models.product.product_category.ProductCategorySerializer(
-        many=True, read_only=True, default=list)
-class CampaignSerializerwithSpplierInfo(models.campaign.campaign.CampaignSerializer):
-    supplier = UserSubscriptionAccountInfo(read_only=True, default=dict)
     
 class CampaignPagination(PageNumberPagination):
     page_query_param = 'page'
@@ -237,7 +227,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, pk)
 
-        return Response(CampaignSerializerwithSpplierInfo(campaign).data, status=status.HTTP_200_OK)
+        return Response(models.campaign.campaign.CampaignSerializer(campaign).data, status=status.HTTP_200_OK)
     
     @action(detail=True, methods=['DELETE'], url_path=r'delete', permission_classes = (IsAuthenticated, ))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
