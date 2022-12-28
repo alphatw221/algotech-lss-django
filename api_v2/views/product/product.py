@@ -91,7 +91,8 @@ class ProductViewSet(viewsets.ModelViewSet):
         data, = lib.util.getter.getdata(request,('data',),required=True)
         data = json.loads(data)
 
-        data['user_subscription'] = user_subscription.id
+        data['user_subscription'] = user_subscription.id                                                        #temp
+        data['category'] = int(data['categories'][0]) if 'categories' in data and data['categories'] else None  #temp
         rule.rule_checker.product_rule_checker.RuleChecker.check(check_list=[
             rule.check_rule.product_check_rule.ProductCheckRule.is_max_order_amount_less_than_qty,
             rule.check_rule.product_check_rule.ProductCheckRule.is_images_type_supported,
@@ -132,7 +133,8 @@ class ProductViewSet(viewsets.ModelViewSet):
         image, = lib.util.getter.getdata(request,('image', ), required=False)
         data, = lib.util.getter.getdata(request,('data',),required=True)
         data = json.loads(data)
-
+        data['category'] = int(data['categories'][0]) if 'categories' in data and data['categories'] else None  #temp
+        
         rule.rule_checker.product_rule_checker.RuleChecker.check(check_list=[
             rule.check_rule.product_check_rule.ProductCheckRule.is_max_order_amount_less_than_qty,
             rule.check_rule.product_check_rule.ProductCheckRule.is_images_type_supported,

@@ -6,7 +6,7 @@ from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
 from django.conf import settings
-
+from api.models.product.product_category import ProductCategory
 TYPE_PRODUCT='product'
 TYPE_PRODUCT_FAST='product-fast'
 TYPE_LUCKY_DRAW='lucky_draw'
@@ -91,6 +91,7 @@ class CampaignProduct(models.Model):
     meta = models.JSONField(default=dict, null=True, blank=True)
     meta_logistic = models.JSONField(default=dict, null=True, blank=True)
     tag = models.JSONField(default=dict, null=True, blank=True)
+    category = models.ForeignKey(ProductCategory, blank=True, null=True, on_delete=models.SET_NULL, default=None)
     categories = models.JSONField(default=list, null=True, blank=True)
     pinned = models.BooleanField(null=False, default=False)
     meta_variant = models.JSONField(default=dict, null=False, blank=True)
@@ -144,6 +145,7 @@ class CampaignProductSerializerUpdate(CampaignProductSerializer):
             'order_code', 
             'oversell', 
             'overbook',
+            'category',
             'categories',
             'meta_variant'
         ]
