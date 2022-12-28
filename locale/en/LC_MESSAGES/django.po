@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-09 08:44+0000\n"
+"POT-Creation-Date: 2022-12-28 01:48+0000\n"
 "PO-Revision-Date: 2021-12-13 15:51+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -18,23 +18,23 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 3.0\n"
 
-#: business_policy/payment.py:13
+#: business_policy/delivery.py:14 business_policy/payment.py:13
 msgid "PAYMENT/DIRECT_PAYMENT/NAME_OF_BANK_OR_PAYMENT_MODE"
 msgstr "Name of Bank/Payment Mode"
 
-#: business_policy/payment.py:14
+#: business_policy/delivery.py:15 business_policy/payment.py:14
 msgid "PAYMENT/DIRECT_PAYMENT/ACCOUNT_NAME"
 msgstr "Account Name"
 
-#: business_policy/payment.py:15
+#: business_policy/delivery.py:16 business_policy/payment.py:15
 msgid "PAYMENT/DIRECT_PAYMENT/ACCOUNT_NUMBER"
 msgstr "Account Number"
 
-#: business_policy/payment.py:16
+#: business_policy/delivery.py:17 business_policy/payment.py:16
 msgid "PAYMENT/DIRECT_PAYMENT/OTHER_NOTE"
 msgstr "Other Note (Press enter to add new line)"
 
-#: business_policy/payment.py:17
+#: business_policy/delivery.py:18 business_policy/payment.py:17
 msgid "PAYMENT/DIRECT_PAYMENT/REQUIRE_CUSTOMER_PAYMENT_RECORD"
 msgstr "Require Customer's Payment Record"
 
@@ -179,8 +179,7 @@ msgstr "\"{order_code}\" Qty: {qty} {result}. "
 msgid "COMMENT_COMMAND_CART_NO_CART_PRODUCT"
 msgstr "There's no products in cart."
 
-#: lib/i18n/comment_command.py:34 templates/register_confirmation.html:11
-#: templates/register_confirmation.html:16
+#: lib/i18n/comment_command.py:34
 msgid "COMMENT_COMMAND_CART_MESSAGE_HEADER"
 msgstr "Your shopping cart:"
 
@@ -386,6 +385,11 @@ msgstr "Billing Account Last Five Digits"
 msgid "EMAIL/ORDER_CONFIRM/SELLER_CONTACT"
 msgstr "Contact seller"
 
+#: lib/i18n/email/registration_confirm.py:6
+#: templates/register_activation.html:10
+msgid "TITLE_ACTIVATION"
+msgstr "Activated account details at Live Show Seller."
+
 #: lib/i18n/email/reset_password_link_mail.py:7
 #: templates/reset_password_link_email.html:8
 #: templates/reset_password_success_email.html:7
@@ -455,34 +459,25 @@ msgstr "If this wasn't you, please"
 msgid "EMAIL/VERIFY/TEXT_2_2"
 msgstr "reset your password"
 
-#: templates/register_activation.html:10
-msgid "TITLE_ACTIVATION"
-msgstr "Activated account details at Live Show Seller."
-
-#: templates/register_activation.html:18
+#: templates/register_activation.html:18 templates/register_freetrial.html:16
 msgid "YOUR_ACTIVATION"
 msgstr "Your"
 
-#: templates/register_activation.html:18
+#: templates/register_activation.html:18 templates/register_freetrial.html:16
 msgid "PLAN_ACCOUNT_ACTIVATION"
 msgstr "account at Live Show Seller has been activated."
 
-#: templates/register_activation.html:19
+#: templates/register_activation.html:19 templates/register_freetrial.html:17
 msgid "LOGIN_ACTIVATION"
 msgstr "You may now log in to the system"
 
 #: templates/register_activation.html:19
-#: templates/register_confirmation.html:31
+#: templates/register_confirmation.html:20 templates/register_freetrial.html:17
+#: templates/register_freetrial.html:35
 msgid "LOGIN_2_WELCOME"
 msgstr "here"
 
-msgid "EMAIL"
-msgstr "Email"
-
-msgid "PASSWORD"
-msgstr "Password"
-
-#: templates/register_activation.html:27
+#: templates/register_activation.html:27 templates/register_freetrial.html:25
 msgid "STEP1_ACTIVATION"
 msgstr "WHAT HAPPENS NEXT?"
 
@@ -500,60 +495,114 @@ msgstr "If any further assistance is needed, feel free to contact us at"
 msgid "STEP4_ACTIVATION"
 msgstr "during office hours."
 
-#: templates/register_activation.html:33
+#: templates/register_activation.html:33 templates/register_freetrial.html:63
 msgid "REGARDS_ACTIVATION"
 msgstr "Best regards,"
 
 #: templates/register_activation.html:34
-#: templates/register_confirmation.html:47
+#: templates/register_confirmation.html:36 templates/register_freetrial.html:64
 msgid "CONGRATS_3_WELCOME"
 msgstr "The Live Show Seller Team"
 
-#: templates/register_confirmation.html:22
+#: templates/register_confirmation.html:11
 msgid "TITLE_WELCOME"
 msgstr "Thank you for registering Live Show Seller"
 
-msgid "TITLE_GREETING"
-msgstr "Dear"
-
-#: templates/register_confirmation.html:30
+#: templates/register_confirmation.html:19 templates/register_freetrial.html:13
 msgid "THANKS_PHRASE_WELCOME"
 msgstr ""
 "Thank you for signing up with Live Show Seller, we’re thrilled to have you "
 "here!"
 
-#: templates/register_confirmation.html:31
+#: templates/register_confirmation.html:20
 msgid "LOGIN_1_WELCOME"
 msgstr "Please log in"
 
-#: templates/register_confirmation.html:31
+#: templates/register_confirmation.html:20
 msgid "LOGIN_3_WELCOME"
 msgstr "to start the journey."
 
-#: templates/register_confirmation.html:39
+#: templates/register_confirmation.html:28
 msgid "PLAN_CHOOSE_1_WELCOME"
 msgstr ""
 "Choose an upgrade plan to boost your business with new member discount!"
 
-#: templates/register_confirmation.html:40
+#: templates/register_confirmation.html:29
 msgid "PLAN_CHOOSE_2_WELCOME"
 msgstr "Not sure which one suits your business the best?"
 
-#: templates/register_confirmation.html:41
+#: templates/register_confirmation.html:30
 msgid "PLAN_CHOOSE_3_WELCOME"
 msgstr "Feel free to contact us at"
 
-#: templates/register_confirmation.html:41
+#: templates/register_confirmation.html:30
 msgid "PLAN_CHOOSE_4_WELCOME"
 msgstr "at any time."
 
-#: templates/register_confirmation.html:45
+#: templates/register_confirmation.html:34
 msgid "CONGRATS_1_WELCOME"
 msgstr "Let’s start selling live now!"
 
-#: templates/register_confirmation.html:46
+#: templates/register_confirmation.html:35
 msgid "CONGRATS_2_WELCOME"
 msgstr "Cheers,"
+
+#: templates/register_freetrial.html:14
+msgid "TITLE_GREETING"
+msgstr "Dear"
+
+#: templates/register_freetrial.html:18
+msgid "EMAIL"
+msgstr "Email"
+
+#: templates/register_freetrial.html:19
+msgid "PASSWORD"
+msgstr "Password"
+
+#: templates/register_freetrial.html:31
+msgid "EMAIL/ACTIVATED/SUBTITLE_1"
+msgstr "Quickstart Guide:"
+
+#: templates/register_freetrial.html:33
+msgid "EMAIL/ACTIVATED/GUIDE"
+msgstr ""
+"We think the best way to get familiar with the LSS system is to log in and "
+"play around with it. However, if you’d prefer to have a more formal "
+"introduction, feel free to contact us for an online demo or click"
+
+#: templates/register_freetrial.html:36
+msgid "EMAIL/ACTIVATED/GUIDE_2"
+msgstr "to read our user guide."
+
+#: templates/register_freetrial.html:49
+msgid "EMAIL/ACTIVATED/SCHEDULE"
+msgstr "Schedule a Meeting"
+
+#: templates/register_freetrial.html:54
+msgid "EMAIL/ACTIVATED/SUBTITLE_2"
+msgstr "Frequently Asked Questions:"
+
+#: templates/register_freetrial.html:56
+msgid "EMAIL/ACTIVATED/FAQ"
+msgstr ""
+"Find answers to the most frequently asked questions and start your live "
+"selling journey today!"
+
+#: templates/register_freetrial.html:57
+msgid "EMAIL/ACTIVATED/FAQLINK"
+msgstr "Live Show Seller FAQ"
+
+#: templates/register_freetrial.html:59
+msgid "EMAIL/ACTIVATED/CONTACT_1"
+msgstr "If any further assistance is needed, feel free to contact us at"
+
+#: templates/register_freetrial.html:59
+msgid "EMAIL/ACTIVATED/CONTACT_2"
+msgstr "during office hours."
+
+#: templates/register_freetrial.html:77
+msgid "EMAIL/ACTIVATED/LOGIN"
+msgstr "Log In Here"
 
 #: templates/reset_password_link_email.html:13
 #: templates/reset_password_success_email.html:12
@@ -730,37 +779,3 @@ msgstr ""
 
 #~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_CHARGE"
 #~ msgstr "Delivery Charge"
-
-
-msgid "EMAIL/ACTIVATED/SUBTITLE_1"
-msgstr "Quickstart Guide:"
-
-msgid "EMAIL/ACTIVATED/GUIDE"
-msgstr "We think the best way to get familiar with the LSS system is to log in and play around with it. However, if you’d prefer to have a more formal introduction, feel free to contact us for an online demo or click"
-
-msgid "EMAIL/ACTIVATED/GUIDE_2"
-msgstr "to read our user guide."
-
-msgid "EMAIL/ACTIVATED/SUBTITLE_2"
-msgstr "Frequently Asked Questions:"
-
-msgid "EMAIL/ACTIVATED/FAQ"
-msgstr "Find answers to the most frequently asked questions and start your live selling journey today!"
-
-msgid "EMAIL/ACTIVATED/FAQLINK"
-msgstr "Live Show Seller FAQ"
-
-msgid "EMAIL/ACTIVATED/CONTACT_1"
-msgstr "If any further assistance is needed, feel free to contact us at"
-
-msgid "EMAIL/ACTIVATED/CONTACT_2"
-msgstr "during office hours."
-
-msgid "EMAIL/ACTIVATED/SCHEDULE"
-msgstr "Schedule a Meeting"
-
-msgid "EMAIL/ACTIVATED/LOGIN"
-msgstr "Log In Here"
-
-
-

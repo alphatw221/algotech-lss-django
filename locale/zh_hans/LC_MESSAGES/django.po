@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-09 08:44+0000\n"
+"POT-Creation-Date: 2022-12-28 01:48+0000\n"
 "PO-Revision-Date: 2021-12-13 15:50+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -18,23 +18,23 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: Poedit 3.0\n"
 
-#: business_policy/payment.py:13
+#: business_policy/delivery.py:14 business_policy/payment.py:13
 msgid "PAYMENT/DIRECT_PAYMENT/NAME_OF_BANK_OR_PAYMENT_MODE"
 msgstr ""
 
-#: business_policy/payment.py:14
+#: business_policy/delivery.py:15 business_policy/payment.py:14
 msgid "PAYMENT/DIRECT_PAYMENT/ACCOUNT_NAME"
 msgstr ""
 
-#: business_policy/payment.py:15
+#: business_policy/delivery.py:16 business_policy/payment.py:15
 msgid "PAYMENT/DIRECT_PAYMENT/ACCOUNT_NUMBER"
 msgstr ""
 
-#: business_policy/payment.py:16
+#: business_policy/delivery.py:17 business_policy/payment.py:16
 msgid "PAYMENT/DIRECT_PAYMENT/OTHER_NOTE"
 msgstr ""
 
-#: business_policy/payment.py:17
+#: business_policy/delivery.py:18 business_policy/payment.py:17
 msgid "PAYMENT/DIRECT_PAYMENT/REQUIRE_CUSTOMER_PAYMENT_RECORD"
 msgstr ""
 
@@ -174,8 +174,7 @@ msgstr "商品 {order_code} < {qty} 件，{result}"
 msgid "COMMENT_COMMAND_CART_NO_CART_PRODUCT"
 msgstr "您的购物车内没有商品。"
 
-#: lib/i18n/comment_command.py:34 templates/register_confirmation.html:11
-#: templates/register_confirmation.html:16
+#: lib/i18n/comment_command.py:34
 msgid "COMMENT_COMMAND_CART_MESSAGE_HEADER"
 msgstr "您的购物车："
 
@@ -371,6 +370,11 @@ msgstr "支付账戶末五码"
 msgid "EMAIL/ORDER_CONFIRM/SELLER_CONTACT"
 msgstr "联络卖家营销号"
 
+#: lib/i18n/email/registration_confirm.py:6
+#: templates/register_activation.html:10
+msgid "TITLE_ACTIVATION"
+msgstr ""
+
 #: lib/i18n/email/reset_password_link_mail.py:7
 #: templates/reset_password_link_email.html:8
 #: templates/reset_password_success_email.html:7
@@ -437,28 +441,25 @@ msgstr "如果這不是你，請"
 msgid "EMAIL/VERIFY/TEXT_2_2"
 msgstr "重置您的密碼"
 
-#: templates/register_activation.html:10
-msgid "TITLE_ACTIVATION"
-msgstr ""
-
-#: templates/register_activation.html:18
+#: templates/register_activation.html:18 templates/register_freetrial.html:16
 msgid "YOUR_ACTIVATION"
 msgstr ""
 
-#: templates/register_activation.html:18
+#: templates/register_activation.html:18 templates/register_freetrial.html:16
 msgid "PLAN_ACCOUNT_ACTIVATION"
 msgstr ""
 
-#: templates/register_activation.html:19
+#: templates/register_activation.html:19 templates/register_freetrial.html:17
 msgid "LOGIN_ACTIVATION"
 msgstr ""
 
 #: templates/register_activation.html:19
-#: templates/register_confirmation.html:31
+#: templates/register_confirmation.html:20 templates/register_freetrial.html:17
+#: templates/register_freetrial.html:35
 msgid "LOGIN_2_WELCOME"
 msgstr ""
 
-#: templates/register_activation.html:27
+#: templates/register_activation.html:27 templates/register_freetrial.html:25
 msgid "STEP1_ACTIVATION"
 msgstr ""
 
@@ -474,53 +475,109 @@ msgstr ""
 msgid "STEP4_ACTIVATION"
 msgstr ""
 
-#: templates/register_activation.html:33
+#: templates/register_activation.html:33 templates/register_freetrial.html:63
 msgid "REGARDS_ACTIVATION"
 msgstr ""
 
 #: templates/register_activation.html:34
-#: templates/register_confirmation.html:47
+#: templates/register_confirmation.html:36 templates/register_freetrial.html:64
 msgid "CONGRATS_3_WELCOME"
 msgstr ""
 
-#: templates/register_confirmation.html:22
+#: templates/register_confirmation.html:11
 msgid "TITLE_WELCOME"
 msgstr ""
 
-#: templates/register_confirmation.html:30
+#: templates/register_confirmation.html:19 templates/register_freetrial.html:13
 msgid "THANKS_PHRASE_WELCOME"
 msgstr ""
 
-#: templates/register_confirmation.html:31
+#: templates/register_confirmation.html:20
 msgid "LOGIN_1_WELCOME"
 msgstr ""
 
-#: templates/register_confirmation.html:31
+#: templates/register_confirmation.html:20
 msgid "LOGIN_3_WELCOME"
 msgstr ""
 
-#: templates/register_confirmation.html:39
+#: templates/register_confirmation.html:28
 msgid "PLAN_CHOOSE_1_WELCOME"
 msgstr ""
 
-#: templates/register_confirmation.html:40
+#: templates/register_confirmation.html:29
 msgid "PLAN_CHOOSE_2_WELCOME"
 msgstr ""
 
-#: templates/register_confirmation.html:41
+#: templates/register_confirmation.html:30
 msgid "PLAN_CHOOSE_3_WELCOME"
 msgstr ""
 
-#: templates/register_confirmation.html:41
+#: templates/register_confirmation.html:30
 msgid "PLAN_CHOOSE_4_WELCOME"
 msgstr ""
 
-#: templates/register_confirmation.html:45
+#: templates/register_confirmation.html:34
 msgid "CONGRATS_1_WELCOME"
 msgstr ""
 
-#: templates/register_confirmation.html:46
+#: templates/register_confirmation.html:35
 msgid "CONGRATS_2_WELCOME"
+msgstr ""
+
+#: templates/register_freetrial.html:14
+msgid "TITLE_GREETING"
+msgstr ""
+
+#: templates/register_freetrial.html:18
+msgid "EMAIL"
+msgstr ""
+
+#: templates/register_freetrial.html:19
+msgid "PASSWORD"
+msgstr ""
+
+#: templates/register_freetrial.html:31
+#, fuzzy
+#| msgid "EMAIL/ORDER_PLACED/TITLE"
+msgid "EMAIL/ACTIVATED/SUBTITLE_1"
+msgstr "您的订单已成功下单"
+
+#: templates/register_freetrial.html:33
+msgid "EMAIL/ACTIVATED/GUIDE"
+msgstr ""
+
+#: templates/register_freetrial.html:36
+msgid "EMAIL/ACTIVATED/GUIDE_2"
+msgstr ""
+
+#: templates/register_freetrial.html:49
+msgid "EMAIL/ACTIVATED/SCHEDULE"
+msgstr ""
+
+#: templates/register_freetrial.html:54
+#, fuzzy
+#| msgid "EMAIL/ORDER_PLACED/TITLE"
+msgid "EMAIL/ACTIVATED/SUBTITLE_2"
+msgstr "您的订单已成功下单"
+
+#: templates/register_freetrial.html:56
+msgid "EMAIL/ACTIVATED/FAQ"
+msgstr ""
+
+#: templates/register_freetrial.html:57
+msgid "EMAIL/ACTIVATED/FAQLINK"
+msgstr ""
+
+#: templates/register_freetrial.html:59
+msgid "EMAIL/ACTIVATED/CONTACT_1"
+msgstr ""
+
+#: templates/register_freetrial.html:59
+msgid "EMAIL/ACTIVATED/CONTACT_2"
+msgstr ""
+
+#: templates/register_freetrial.html:77
+msgid "EMAIL/ACTIVATED/LOGIN"
 msgstr ""
 
 #: templates/reset_password_link_email.html:13
