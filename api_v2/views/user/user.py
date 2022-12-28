@@ -563,3 +563,42 @@ class UserViewSet(viewsets.ModelViewSet):
         lib.helper.register_helper.create_account_with_user_register(user_register)
 
         return Response('1|ok')
+
+
+    @action(detail=False, methods=['POST'], url_path=r'register/(?P<country_code>[^/.]+)/trial', permission_classes=())
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def user_register_trial(self, request, country_code):
+        country_code = business_policy.subscription.COUNTRY_SG if country_code in ['', 'undefined', 'null', None] else country_code
+        email, password, plan, period = lib.util.getter.getdata(request,("email", "password", "plan", "period"),required=True)
+        firstName, lastName, contactNumber, country, timezone = lib.util.getter.getdata(request, ("firstName", "lastName", "contactNumber", "country", "timezone"), required=False)
+
+        kwargs = {'email':email,'plan':plan,'period':period}
+        kwargs=rule.rule_checker.user_rule_checker.FreeRegistrationDataRuleChecker.check(**kwargs)
+
+        try:
+            country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(country_code)
+            subscription_plan = country_plan.get_plan(plan)
+
+            kwargs.update({'country_plan':country_plan, 'subscription_plan':subscription_plan})
+        except Exception:
+            raise lib.error_handle.error.api_error.ApiVerifyError('bee-boo something when wrong')
+
+        email = kwargs.get('email')
+
+        ret = lib.helper.register_helper.create_free_register_account(plan, country_plan, subscription_plan, timezone, period, firstName, lastName, email, password, country, country_code,  contactNumber)
+
+        if country_code == 'TW':
+            email_lang = 'zh_hant'
+        elif country_code == 'VN':
+            email_lang = 'vi'
+        else: email_lang = 'en'
+
+        jobs.send_email_job.send_email_job(
+            subject=lib.i18n.email.registration_confirm.i18n_get_mail_subject(lang=email_lang),
+            email=email,
+            template="register_freetrial.html",
+            parameters={"plan":plan,"firstName":firstName, "email":email,"password":password},
+            lang=email_lang,
+        )
+
+        return Response(ret, status=status.HTTP_200_OK)

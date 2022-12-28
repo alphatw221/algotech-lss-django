@@ -1,24 +1,13 @@
 {% load i18n %}
-
+{% load settings_value %}
 
 <html>
     <head>
     </head>
     <body style="color:black;">
-        <!-- <div>
-            {% get_current_language as LANGUAGE_CODE %}
-            Current language: {{ LANGUAGE_CODE }}
-            <p>{% translate "COMMENT_COMMAND_CART_MESSAGE_HEADER" %}</p>
-
-            {% language 'en' %}
-                {% get_current_language as LANGUAGE_CODE %}
-                Current language: {{ LANGUAGE_CODE }}
-                <p>{% translate "COMMENT_COMMAND_CART_MESSAGE_HEADER" %}</p>
-            {% endlanguage %}
-        </div> -->
         
         <div>
-            <img src="{% settings_value "WELCOME_HEADER__URL" %}">
+            <img src='{% settings_value "LOGO_URL" %}'>
             <h3>{% translate "TITLE_WELCOME" %}, {{ firstName }} !</h3>
         </div>
         <br>
