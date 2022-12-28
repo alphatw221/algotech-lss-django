@@ -13,6 +13,10 @@ from datetime import datetime
 import time
 import random
 
+# Algotech ecpay credentials
+MERCHANT_ID = "3344643"
+HASH_KEY= "RXiMOiIBiEveXxSb"
+HASH_IV= "hcV2UGIITv0PCxlt"
 
 # action_url = 'https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5'  # 測試環境
 action_url = 'https://payment.ecpay.com.tw/Cashier/AioCheckOut/V5' # 正式環境
@@ -289,7 +293,7 @@ def create_shipping_order(order,server_reply_url,sub_data={}):
         'SenderPhone': campaign.meta_logistic['ecpay']['sender_phone'], #campaign data
         'SenderCellPhone': campaign.meta_logistic['ecpay']['sender_phone'],
         'ReceiverName': str(order.shipping_first_name),
-        'ReceiverPhone': order.shipping_phone,
+        'ReceiverPhone': '',
         'ReceiverCellPhone': order.shipping_cellphone,
         'ReceiverEmail': order.shipping_email,
         'TradeDesc': 'lss',

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-09 08:44+0000\n"
+"POT-Creation-Date: 2022-12-28 01:48+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,23 +17,23 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: business_policy/payment.py:13
+#: business_policy/delivery.py:14 business_policy/payment.py:13
 msgid "PAYMENT/DIRECT_PAYMENT/NAME_OF_BANK_OR_PAYMENT_MODE"
 msgstr "Tên ngân hàng/Phương thức thanh toán"
 
-#: business_policy/payment.py:14
+#: business_policy/delivery.py:15 business_policy/payment.py:14
 msgid "PAYMENT/DIRECT_PAYMENT/ACCOUNT_NAME"
 msgstr "Tên tài khoản"
 
-#: business_policy/payment.py:15
+#: business_policy/delivery.py:16 business_policy/payment.py:15
 msgid "PAYMENT/DIRECT_PAYMENT/ACCOUNT_NUMBER"
 msgstr "Số tài khoản"
 
-#: business_policy/payment.py:16
+#: business_policy/delivery.py:17 business_policy/payment.py:16
 msgid "PAYMENT/DIRECT_PAYMENT/OTHER_NOTE"
 msgstr "Ghi chú khác (Nhấn enter để thêm dòng mới)"
 
-#: business_policy/payment.py:17
+#: business_policy/delivery.py:18 business_policy/payment.py:17
 msgid "PAYMENT/DIRECT_PAYMENT/REQUIRE_CUSTOMER_PAYMENT_RECORD"
 msgstr "Yêu cầu người mua đính kèm hóa đơn thanh toán"
 
@@ -177,8 +177,7 @@ msgstr "\"{order_code}\" Số lượng: {qty} {result}. "
 msgid "COMMENT_COMMAND_CART_NO_CART_PRODUCT"
 msgstr "Không có sản phẩm trong giỏ hàng."
 
-#: lib/i18n/comment_command.py:34 templates/register_confirmation.html:11
-#: templates/register_confirmation.html:16
+#: lib/i18n/comment_command.py:34
 msgid "COMMENT_COMMAND_CART_MESSAGE_HEADER"
 msgstr "Giỏ hàng của bạn:"
 
@@ -383,6 +382,11 @@ msgstr "Tài khoản thanh toán Năm chữ số cuối cùng"
 msgid "EMAIL/ORDER_CONFIRM/SELLER_CONTACT"
 msgstr "Liên hệ với người bán"
 
+#: lib/i18n/email/registration_confirm.py:6
+#: templates/register_activation.html:10
+msgid "TITLE_ACTIVATION"
+msgstr "Chi tiết tài khoản đã kích hoạt tại Live Show Seller."
+
 #: lib/i18n/email/reset_password_link_mail.py:7
 #: templates/reset_password_link_email.html:8
 #: templates/reset_password_success_email.html:7
@@ -452,28 +456,25 @@ msgstr "If this wasn't you, please"
 msgid "EMAIL/VERIFY/TEXT_2_2"
 msgstr "reset your password"
 
-#: templates/register_activation.html:10
-msgid "TITLE_ACTIVATION"
-msgstr "Chi tiết tài khoản đã kích hoạt tại Live Show Seller."
-
-#: templates/register_activation.html:18
+#: templates/register_activation.html:18 templates/register_freetrial.html:16
 msgid "YOUR_ACTIVATION"
 msgstr "Tài khoản của bạn"
 
-#: templates/register_activation.html:18
+#: templates/register_activation.html:18 templates/register_freetrial.html:16
 msgid "PLAN_ACCOUNT_ACTIVATION"
 msgstr "Live Show Seller đã được kích hoạt."
 
-#: templates/register_activation.html:19
+#: templates/register_activation.html:19 templates/register_freetrial.html:17
 msgid "LOGIN_ACTIVATION"
 msgstr "Bây giờ bạn có thể đăng nhập vào hệ thống"
 
 #: templates/register_activation.html:19
-#: templates/register_confirmation.html:31
+#: templates/register_confirmation.html:20 templates/register_freetrial.html:17
+#: templates/register_freetrial.html:35
 msgid "LOGIN_2_WELCOME"
 msgstr "tại đây"
 
-#: templates/register_activation.html:27
+#: templates/register_activation.html:27 templates/register_freetrial.html:25
 msgid "STEP1_ACTIVATION"
 msgstr "Điều gì tiếp theo sẽ diễn ra?"
 
@@ -491,58 +492,116 @@ msgstr "Nếu cần hỗ trợ thêm, vui lòng liên hệ với chúng tôi t�
 msgid "STEP4_ACTIVATION"
 msgstr "trong giờ làm việc."
 
-#: templates/register_activation.html:33
+#: templates/register_activation.html:33 templates/register_freetrial.html:63
 msgid "REGARDS_ACTIVATION"
 msgstr "Trân trọng,"
 
 #: templates/register_activation.html:34
-#: templates/register_confirmation.html:47
+#: templates/register_confirmation.html:36 templates/register_freetrial.html:64
 msgid "CONGRATS_3_WELCOME"
 msgstr "Đội ngũ Live Show Seller"
 
-#: templates/register_confirmation.html:22
+#: templates/register_confirmation.html:11
 msgid "TITLE_WELCOME"
 msgstr "Chào mừng bạn đến với Live Show Seller"
 
-#: templates/register_confirmation.html:30
+#: templates/register_confirmation.html:19 templates/register_freetrial.html:13
 msgid "THANKS_PHRASE_WELCOME"
 msgstr ""
 "Cảm ơn bạn đã đăng ký sử dụng Live Show Seller, chúng tôi rất vui khi được "
 "hỗ trợ bạn tăng trưởng doanh sốtại đây!"
 
-#: templates/register_confirmation.html:31
+#: templates/register_confirmation.html:20
 msgid "LOGIN_1_WELCOME"
 msgstr "Vui lòng hãy đăng nhập"
 
-#: templates/register_confirmation.html:31
+#: templates/register_confirmation.html:20
 msgid "LOGIN_3_WELCOME"
 msgstr "bắt đầu hành trình bán hàng livestream."
 
-#: templates/register_confirmation.html:39
+#: templates/register_confirmation.html:28
 msgid "PLAN_CHOOSE_1_WELCOME"
 msgstr ""
 "Chọn nâng cấp gói dịch vụ để thúc đẩy hoạt động kinh doanh của bạn với ưu "
 "đãi cực hấp dẫn dành cho thành viên mới!"
 
-#: templates/register_confirmation.html:40
+#: templates/register_confirmation.html:29
 msgid "PLAN_CHOOSE_2_WELCOME"
 msgstr "Bạn không chắc gói dịch vụ nào phù hợp với doanh nghiệp của bạn nhất??"
 
-#: templates/register_confirmation.html:41
+#: templates/register_confirmation.html:30
 msgid "PLAN_CHOOSE_3_WELCOME"
 msgstr "Đừng do dự hãy liên hệ với chúng tôi tại"
 
-#: templates/register_confirmation.html:41
+#: templates/register_confirmation.html:30
 msgid "PLAN_CHOOSE_4_WELCOME"
 msgstr "bất cứ lúc nào."
 
-#: templates/register_confirmation.html:45
+#: templates/register_confirmation.html:34
 msgid "CONGRATS_1_WELCOME"
 msgstr "Bắt đầu bán hàng livestream nào!"
 
-#: templates/register_confirmation.html:46
+#: templates/register_confirmation.html:35
 msgid "CONGRATS_2_WELCOME"
 msgstr "Chúc may mắn và thuận lợi,"
+
+#: templates/register_freetrial.html:14
+#, fuzzy
+#| msgid "TITLE_ACTIVATION"
+msgid "TITLE_GREETING"
+msgstr "Chi tiết tài khoản đã kích hoạt tại Live Show Seller."
+
+#: templates/register_freetrial.html:18
+msgid "EMAIL"
+msgstr ""
+
+#: templates/register_freetrial.html:19
+msgid "PASSWORD"
+msgstr ""
+
+#: templates/register_freetrial.html:31
+#, fuzzy
+#| msgid "EMAIL/ORDER_PLACED/TITLE"
+msgid "EMAIL/ACTIVATED/SUBTITLE_1"
+msgstr "đơn đặt hàng của bạn đã được đặt!"
+
+#: templates/register_freetrial.html:33
+msgid "EMAIL/ACTIVATED/GUIDE"
+msgstr ""
+
+#: templates/register_freetrial.html:36
+msgid "EMAIL/ACTIVATED/GUIDE_2"
+msgstr ""
+
+#: templates/register_freetrial.html:49
+msgid "EMAIL/ACTIVATED/SCHEDULE"
+msgstr ""
+
+#: templates/register_freetrial.html:54
+#, fuzzy
+#| msgid "EMAIL/ORDER_PLACED/TITLE"
+msgid "EMAIL/ACTIVATED/SUBTITLE_2"
+msgstr "đơn đặt hàng của bạn đã được đặt!"
+
+#: templates/register_freetrial.html:56
+msgid "EMAIL/ACTIVATED/FAQ"
+msgstr ""
+
+#: templates/register_freetrial.html:57
+msgid "EMAIL/ACTIVATED/FAQLINK"
+msgstr ""
+
+#: templates/register_freetrial.html:59
+msgid "EMAIL/ACTIVATED/CONTACT_1"
+msgstr ""
+
+#: templates/register_freetrial.html:59
+msgid "EMAIL/ACTIVATED/CONTACT_2"
+msgstr ""
+
+#: templates/register_freetrial.html:77
+msgid "EMAIL/ACTIVATED/LOGIN"
+msgstr ""
 
 #: templates/reset_password_link_email.html:13
 #: templates/reset_password_success_email.html:12

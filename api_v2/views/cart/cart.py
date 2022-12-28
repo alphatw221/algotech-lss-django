@@ -157,23 +157,30 @@ class CartViewSet(viewsets.ModelViewSet):
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def buyer_cvs_map(self, request, cart_oid):
 
+        shipping_method, shipping_option_index, logistic_sub_type, = lib.util.getter.getdata(request, ("shipping_method", "shipping_option_index", "LogisticsSubType",),required=True)
         api_user = lib.util.verify.Verify.get_customer_user(request) if request.user.is_authenticated else None
         cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
         campaign = lib.util.verify.Verify.get_campaign_from_cart(cart)
+        merchant_id= campaign.meta_logistic.get('ecpay',{}).get('merchant_id','')
+        hash_key=campaign.meta_logistic.get('ecpay',{}).get('hash_key','')
+        hash_iv=campaign.meta_logistic.get('ecpay',{}).get('hash_iv','')
+        if not merchant_id:
+            merchant_id = service.ecpay.ecpay.MERCHANT_ID
+        if not hash_key:
+            hash_key = service.ecpay.ecpay.HASH_KEY
+        if not hash_iv:
+            hash_iv = service.ecpay.ecpay.HASH_IV
         
-        merchant_id=campaign.meta_logistic['ecpay']['merchant_id'],
-        hash_key=campaign.meta_logistic['ecpay']['hash_key'],
-        hash_iv=campaign.meta_logistic['ecpay']['hash_iv']
-
         action,map = service.ecpay.ecpay.cvs_map(cart_oid,merchant_id, hash_key, hash_iv,
-            request.data.get('LogisticsSubType'), 
-            f'{settings.GCP_API_LOADBALANCER_URL}/api/v2/cart/buyer/cvsmap/callback/'
-            )
+            logistic_sub_type, 
+            f'{settings.GCP_API_LOADBALANCER_URL}/api/v2/cart/buyer/cvsmap/callback/?shipping_method={shipping_method}&shipping_option_index={shipping_option_index}'
+        )
         return Response({'action':action,'data':map})
     
     @action(detail=False, methods=['POST'], url_path=r'buyer/cvsmap/callback',parser_classes=(FormParser,MultiPartParser), renderer_classes = (StaticHTMLRenderer,),permission_classes=())
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def buyer_cvs_map_callback(self, request):
+        shipping_method, shipping_option_index, = lib.util.getter.getparams(request, ("shipping_method", "shipping_option_index",),with_user=False)
         data = request.data.dict()
         # {'MerchantID': '3344643', 
         #  'MerchantTradeNo': 'ECPAY20221207094136', 
@@ -188,7 +195,8 @@ class CartViewSet(viewsets.ModelViewSet):
         
         cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
         ecpay_cvs = {
-            'shipping_option_index': data['LogisticsSubType'],
+            'shipping_method': shipping_method,
+            'shipping_option_index': shipping_option_index,
             'merchant_id':data['MerchantID'],
             'merchant_trade_no':data['MerchantTradeNo'],
             'logistics_sub_type':data['LogisticsSubType'],
@@ -224,6 +232,7 @@ class CartViewSet(viewsets.ModelViewSet):
             cart.applied_discount = {}
             cart.discount = 0
             cart.save()
+            print('discount')
             return Response(CartSerializerWithSellerInfo(cart).data, status=status.HTTP_200_OK)
             
         ret = rule.rule_checker.cart_rule_checker.RuleChecker.check(
@@ -404,6 +413,24 @@ class CartViewSet(viewsets.ModelViewSet):
         buyer_wallet = models.user.buyer_wallet.BuyerWallet.objects.get(buyer=api_user, user_subscription = campaign.user_subscription)
 
         return Response(models.user.buyer_wallet.BuyerWalletSerializer(buyer_wallet).data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['GET'], url_path=r'buyer/search/(?P<campaign_id>[^/.]+)/tiktok', permission_classes=())
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def buyer_search_tiktok_cart(self, request, campaign_id):
+
+        recaptcha_token, customer_name, = lib.util.getter.getparams(request, ('recaptcha_token', 'customer_name', ), with_user=False)
+        
+        code, response = service.recaptcha.recaptcha.verify_token(recaptcha_token)
+
+        if code!=200 or not response.get('success'):
+            raise lib.error_handle.error.api_error.ApiVerifyError('refresh_try_again')
+        print(campaign_id)
+        print(customer_name)
+        if not models.cart.cart.Cart.objects.filter(campaign_id=campaign_id, customer_name=customer_name, platform=models.user.user_subscription.PLATFORM_TIKTOK).exists():
+            raise lib.error_handle.error.api_error.ApiVerifyError('cart_not_found')
+        cart = models.cart.cart.Cart.objects.filter(campaign_id=campaign_id, customer_name=customer_name, platform=models.user.user_subscription.PLATFORM_TIKTOK).first()
+        oid = database.lss.cart.get_oid_by_id(cart.id)
+        return Response(oid, status=status.HTTP_200_OK)
 
 # ---------------------------------------------- seller ------------------------------------------------------
 
@@ -598,3 +625,5 @@ class CartViewSet(viewsets.ModelViewSet):
         cart.delete()
 
         return Response('OK', status=status.HTTP_200_OK)
+    
+    
