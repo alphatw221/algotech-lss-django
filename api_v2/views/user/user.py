@@ -1,6 +1,7 @@
 
 from django.contrib.auth.models import User as AuthUser
 from django.conf import settings
+from django.http import HttpResponseRedirect
 from api.models.user.point_transaction import PointTransactionSerializer
 
 from rest_framework import status, viewsets
@@ -78,6 +79,20 @@ class UserViewSet(viewsets.ModelViewSet):
 #         return Response(data, status=status.HTTP_200_OK)
 
 #-----------------------------------------buyer----------------------------------------------------------------------------------------------
+
+    # @action(detail=False, methods=['GET'], url_path=r'buyer/login/tiktok/callback', permission_classes=())
+    # @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    # def buyer_tiktok_login_callback(self, request):
+
+    #     #verification
+
+    #     request_from = ''
+    #     code = ''
+    #     token = lib.helper.login_helper.ToktokLogin.get_token(code)
+    #     response = HttpResponseRedirect(
+    #         redirect_to=request_from)
+    #     response.set_cookie('access_token',token.get('access'))
+    #     return response
 
     @action(detail=False, methods=['POST'], url_path=r'buyer/login/facebook', permission_classes=())
     @lib.error_handle.error_handler.api_error_handler.api_error_handler

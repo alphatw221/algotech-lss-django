@@ -166,6 +166,18 @@ class GoogleLogin():
         }
 
 
+class ToktokLogin():
+
+    @classmethod
+    def get_token(cls, code):
+        
+
+        return {
+            'refresh': str(''),
+            'access': str(''),
+        }
+
+
 
 def create_or_get_user(email, user_type, user_name="unknown", ):
     api_user_exists = models.user.user.User.objects.filter(

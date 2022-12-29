@@ -4,18 +4,23 @@ from .._rest_api_json_caller import RestApiJsonCaller
 
 import json
 @dataclass
-class TiktokApiCaller(RestApiJsonCaller):
+class TiktokAdsApiCaller(RestApiJsonCaller):
     domain_url: str = "https://ads.tiktok.com"
     
 @dataclass
 class TiktokBusinessApiCaller(RestApiJsonCaller):
     domain_url: str = "https://business-api.tiktok.com"
 
+@dataclass
+class TiktokApiCaller(RestApiJsonCaller):
+    domain_url: str = "https://open-api.tiktok.com"
 
 
 def load_response(response):
-    data = json.loads(response.text)
     print(response.status_code)
+    print(response.text)
+    data = json.loads(response.text)
+    
     if not int(response.status_code / 100 )== 2 :
         return False, data
     return True, data
