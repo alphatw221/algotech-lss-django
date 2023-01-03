@@ -30,6 +30,16 @@ class CampaignViewSet(viewsets.ModelViewSet):
     pagination_class = CampaignPagination
     permission_classes = (IsAdminUser,)
 
+
+    #--------------------------------------------- buyer ---------------------------------------------------------
+    @action(detail=True, methods=['GET'], url_path=r'buyer/retrieve', permission_classes=())
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def buyer_retrieve_campaign(self, request, pk):
+        campaign = lib.util.verify.Verify.get_campaign((pk))
+        return Response(models.campaign.campaign.CampaignSerializer(campaign).data, status=status.HTTP_200_OK)
+
+
+    #--------------------------------------------- seller ---------------------------------------------------------
     @action(detail=False, methods=['GET'], url_path=r'list', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def list_campaign(self, request):
@@ -219,11 +229,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
         
         return Response(models.campaign.campaign.CampaignSerializer(campaign).data, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['GET'], url_path=r'buyer/retrieve', permission_classes=())
-    @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def retrieve_campaign(self, request, pk):
-        campaign = lib.util.verify.Verify.get_campaign((pk))
-        return Response(models.campaign.campaign.CampaignSerializer(campaign).data, status=status.HTTP_200_OK)
+    
     
     @action(detail=True, methods=['GET'], url_path=r'retrieve', permission_classes=(IsAuthenticated, ))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
