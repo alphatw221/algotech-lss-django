@@ -1,5 +1,5 @@
 from xml.etree.ElementTree import tostring
-from backend.i18n._helper import lang_translate_default_en
+from lib.i18n._i18n import lang_translate_default_en
 from django.conf import settings
 from django.utils.translation import ugettext as _
 from math import prod,floor
@@ -16,7 +16,7 @@ def i18n_get_mail_content(order, order_oid, lang=None):
         "1000":"K",
         "1000000":"M"
     }
-    order_detail_link = f"{settings.GCP_API_LOADBALANCER_URL}/buyer/order/{order_oid}"
+    order_detail_link = f"{settings.WEB_SERVER_URL}/buyer/order/{order_oid}"
     date_time = order.created_at.strftime("%b %d %Y")
 
     if 'code' not in order.applied_discount:
@@ -47,7 +47,7 @@ def i18n_get_mail_content(order, order_oid, lang=None):
                             <td style="color: #4b4b4b; font-weight: 600; width: 35%; text-align:left;" valign="top">' + _('EMAIL/DELIVERY_CONFIRM/RECEIVER') + f' : {order.shipping_first_name} {order.shipping_last_name}</td>\
                         </tr>\
                         <tr>\
-                            <td style="color: #4b4b4b; font-weight: 600; width: 35%; text-align:left;" valign="top">' + _('REPORT/COLUMN_TITLE/SHIPPING_PHONE') + f' : {order.shipping_phone}</td>\
+                            <td style="color: #4b4b4b; font-weight: 600; width: 35%; text-align:left;" valign="top">' + _('REPORT/COLUMN_TITLE/SHIPPING_PHONE') + f' : {order.shipping_cellphone}</td>\
                         </tr>\
                         <tr>\
                             <td style="color: #4b4b4b; font-weight: 600; width: 35%; text-align:left;" valign="top">' + _('EMAIL/ORDER_CONFIRM/SHIPPING_METHOD') + f' : {order.shipping_method}</td>\

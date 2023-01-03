@@ -1,5 +1,5 @@
 from re import L
-from backend.pymongo.mongodb import db
+from database.lss._config import db
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 

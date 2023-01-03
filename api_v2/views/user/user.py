@@ -1,8 +1,8 @@
 
 from django.contrib.auth.models import User as AuthUser
 from django.conf import settings
-from django.core.files.base import ContentFile
-from lib.util import verify
+from django.http import HttpResponseRedirect
+from api.models.user.point_transaction import PointTransactionSerializer
 
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -14,8 +14,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.renderers import StaticHTMLRenderer
 
 from api import models
-from api import rule
-from api.models.user import user_register
+from api_v2 import rule
 
 from automation import jobs
 import database
@@ -23,16 +22,16 @@ import database
 import service
 import lib
 import business_policy
-from backend.i18n.email.subject import i18n_get_reset_password_success_mail_subject, i18n_get_reset_password_mail_subject #temp
 
 from datetime import datetime, timedelta
-import pytz
-import random
-import string
 
 #------------------------------------------------------------------------------------------
 class UserSubscriptionAccountInfo(models.user.user_subscription.UserSubscriptionSerializer):
 
+    class Meta:
+        model = models.user.user_subscription.UserSubscription
+        exclude=['created_at', 'updated_at','customers']
+        
     facebook_pages = models.facebook.facebook_page.FacebookPageInfoSerializer(
         many=True, read_only=True, default=list)
     instagram_profiles = models.instagram.instagram_profile.InstagramProfileInfoSerializer(
@@ -56,6 +55,10 @@ class WalletSerializerWithSellerInfo(models.user.buyer_wallet.BuyerWalletSeriali
     user_subscription = UserSubscriptionSerializerName(read_only=True, default=dict)
 class UserSerializerBuyerAccountInfo(models.user.user.UserSerializer):
     wallets = WalletSerializerWithSellerInfo(many=True, read_only=True, default=list)
+    
+class OrderSerializerWithCampaign(models.order.order.OrderSerializer):
+    campaign = models.campaign.campaign.CampaignSerializer(read_only=True, default=dict)
+    
 #------------------------------------------------------------------------------------------
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -77,6 +80,20 @@ class UserViewSet(viewsets.ModelViewSet):
 
 #-----------------------------------------buyer----------------------------------------------------------------------------------------------
 
+    # @action(detail=False, methods=['GET'], url_path=r'buyer/login/tiktok/callback', permission_classes=())
+    # @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    # def buyer_tiktok_login_callback(self, request):
+
+    #     #verification
+
+    #     request_from = ''
+    #     code = ''
+    #     token = lib.helper.login_helper.ToktokLogin.get_token(code)
+    #     response = HttpResponseRedirect(
+    #         redirect_to=request_from)
+    #     response.set_cookie('access_token',token.get('access'))
+    #     return response
+
     @action(detail=False, methods=['POST'], url_path=r'buyer/login/facebook', permission_classes=())
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def buyer_login_with_facebook(self, request):
@@ -97,6 +114,47 @@ class UserViewSet(viewsets.ModelViewSet):
         api_user = lib.util.verify.Verify.get_customer_user(request)
         return Response(UserSerializerBuyerAccountInfo(api_user).data, status=status.HTTP_200_OK)    
 
+    @action(detail=False, methods=['GET'], url_path=r'buyer/order/history', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def list_buyer_order_history(self, request):
+
+        api_user = lib.util.verify.Verify.get_customer_user(request)
+        user_subscription_id, = lib.util.getter.getparams(request, ('user_subscription_id',), with_user=False)
+        queryset = api_user.orders.all()
+        if user_subscription_id not in ["", None,'undefined','null'] and user_subscription_id.isnumeric():
+            queryset=queryset.filter(user_subscription_id = int(user_subscription_id))
+
+        queryset = queryset.order_by('-created_at')
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = OrderSerializerWithCampaign(page, many=True)
+            data = self.get_paginated_response(serializer.data).data
+        else:
+            
+            data = OrderSerializerWithCampaign(api_user.orders, many=True).data
+
+        return Response(data, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['GET'], url_path=r'buyer/points/history', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def list_buyer_point_history(self, request):
+
+        api_user = lib.util.verify.Verify.get_customer_user(request)
+        user_subscription_id, = lib.util.getter.getparams(request, ('user_subscription_id',), with_user=False)
+        queryset = api_user.point_transactions.all()
+        if user_subscription_id not in ["", None,'undefined','null'] and user_subscription_id.isnumeric():
+            queryset=queryset.filter(user_subscription_id = int(user_subscription_id))
+
+        queryset = queryset.order_by('-created_at')
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = PointTransactionSerializer(page, many=True)
+            data = self.get_paginated_response(serializer.data).data
+        else:
+            
+            data = PointTransactionSerializer(api_user.orders, many=True).data
+
+        return Response(data, status=status.HTTP_200_OK)
 #-----------------------------------------Dealer----------------------------------------------------------------------------------------------
 
     # @action(detail=False, methods=['POST'], url_path=r'dealer/login', permission_classes=(IsAdminUser,))
@@ -195,6 +253,18 @@ class UserViewSet(viewsets.ModelViewSet):
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def seller_get_account_info(self, request):
         api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        if user_subscription.type == "kol":
+            meta_country = user_subscription.meta_country
+            meta_country["activated_country"] = ["TW"]
+            meta_store = user_subscription.meta_store
+            meta_store["support_stock_user_subscriptions"] = [
+                {
+                    "name": "algotech",
+                    "user_subscription_id": 21
+                }
+            ]
+            user_subscription.save()
         return Response(UserSerializerSellerAccountInfo(api_user).data, status=status.HTTP_200_OK) 
 
     
@@ -249,22 +319,13 @@ class UserViewSet(viewsets.ModelViewSet):
         auth_user = AuthUser.objects.get(email=email)
         
         api_user = models.user.user.User.objects.get(email=email,type='user')
-        # user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         jobs.send_email_job.send_email_job(
-            i18n_get_reset_password_success_mail_subject(lang=api_user.lang),
+            lib.i18n.email.reset_password_success_mail.i18n_get_mail_subject(lang=api_user.lang),
             email,
             "reset_password_success_email.html",
             {"email":email,"username":auth_user.username},
             lang=api_user.lang
         )
-        # service.email.email_service.EmailService.send_email_template(
-        #     jobs.send_email_job.send_email_job,
-        #     i18n_get_reset_password_success_mail_subject(lang=api_user.lang),
-        #     email,
-        #     "reset_password_success_email.html",
-        #     {"email":email,"username":auth_user.username},
-        #     lang=api_user.lang
-        # )
         
         return Response(ret, status=status.HTTP_200_OK)
 
@@ -284,19 +345,12 @@ class UserViewSet(viewsets.ModelViewSet):
         code = lib.code_manager.password_code_manager.PasswordResetCodeManager.generate(auth_user.id,api_user.lang)
         
         jobs.send_email_job.send_email_job(
-            subject=i18n_get_reset_password_mail_subject(lang=api_user.lang),
+            subject=lib.i18n.email.reset_password_link_mail.i18n_get_mail_subject(lang=api_user.lang),
             email=email,
-            template="email_reset_password_link.html",
-            parameters={"url":settings.GCP_API_LOADBALANCER_URL +"/seller/web/password/reset","code":code,"username":auth_user.username},
+            template="reset_password_link_email.html",
+            parameters={"url":settings.WEB_SERVER_URL +"/seller/web/password/reset","code":code,"username":auth_user.username},
             lang=api_user.lang,
-            )
-        # service.email.email_service.EmailService.send_email_template(
-        #     jobs.send_email_job.send_email_job,
-        #     i18n_get_reset_password_mail_subject(lang=api_user.lang),
-        #     email,
-        #     "email_reset_password_link.html",
-        #     {"url":settings.GCP_API_LOADBALANCER_URL +"/seller/web/password/reset","code":code,"username":auth_user.username},
-        #     lang=api_user.lang)
+        )
 
         return Response({"message":"The email has been sent. If you haven't received the email after a few minutes, please check your spam folder. "}, status=status.HTTP_200_OK)
 
@@ -524,3 +578,42 @@ class UserViewSet(viewsets.ModelViewSet):
         lib.helper.register_helper.create_account_with_user_register(user_register)
 
         return Response('1|ok')
+
+
+    @action(detail=False, methods=['POST'], url_path=r'register/(?P<country_code>[^/.]+)/trial', permission_classes=())
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def user_register_trial(self, request, country_code):
+        country_code = business_policy.subscription.COUNTRY_SG if country_code in ['', 'undefined', 'null', None] else country_code
+        email, password, plan, period = lib.util.getter.getdata(request,("email", "password", "plan", "period"),required=True)
+        firstName, lastName, contactNumber, country, timezone = lib.util.getter.getdata(request, ("firstName", "lastName", "contactNumber", "country", "timezone"), required=False)
+
+        kwargs = {'email':email,'plan':plan,'period':period}
+        kwargs=rule.rule_checker.user_rule_checker.FreeRegistrationDataRuleChecker.check(**kwargs)
+
+        try:
+            country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(country_code)
+            subscription_plan = country_plan.get_plan(plan)
+
+            kwargs.update({'country_plan':country_plan, 'subscription_plan':subscription_plan})
+        except Exception:
+            raise lib.error_handle.error.api_error.ApiVerifyError('bee-boo something when wrong')
+
+        email = kwargs.get('email')
+
+        ret = lib.helper.register_helper.create_free_register_account(plan, country_plan, subscription_plan, timezone, period, firstName, lastName, email, password, country, country_code,  contactNumber)
+
+        if country_code == 'TW':
+            email_lang = 'zh_hant'
+        elif country_code == 'VN':
+            email_lang = 'vi'
+        else: email_lang = 'en'
+
+        jobs.send_email_job.send_email_job(
+            subject=lib.i18n.email.registration_confirm.i18n_get_mail_subject(lang=email_lang),
+            email=email,
+            template="register_freetrial.html",
+            parameters={"plan":plan,"firstName":firstName, "email":email,"password":password},
+            lang=email_lang,
+        )
+
+        return Response(ret, status=status.HTTP_200_OK)

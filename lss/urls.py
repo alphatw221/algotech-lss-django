@@ -16,6 +16,7 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import include, path, re_path
+from lss.views.iframe import iframe_facebook
 from rest_framework_simplejwt.views import (TokenObtainPairView,
                                             TokenRefreshView, TokenVerifyView)
 
@@ -45,17 +46,17 @@ urlpatterns = [
     path('custom_token/verify/', CustomTokenVerifyView.as_view(),
          name='custom_token_verify'),
 
-    path('backend/', include('backend.urls')),
     
-    path('chat_bot/facebook/', facebook_messenger_webhook),
+    path('temp/chat_bot/facebook/', facebook_messenger_webhook),
     
     re_path(r'^lss/',TemplateView.as_view(template_name="lss_entry.html")),
     re_path(r'^seller/',TemplateView.as_view(template_name="lss_enigma_entry.html")),
     re_path(r'^buyer/',TemplateView.as_view(template_name="lss_enigma_entry.html")),
     re_path(r'^admin/',TemplateView.as_view(template_name="lss_enigma_entry.html")),
 
-    path('test',TemplateView.as_view(template_name="email_reset_password_link.html")),
+    path('test',TemplateView.as_view(template_name="reset_password_link_email.html")),
     path('test2',TemplateView.as_view(template_name="reset_password_success_email.html")),
+    path('iframe/facebook', iframe_facebook),
 
 
     #-------------------------plugin---------------------------------------------------

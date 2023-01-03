@@ -1,5 +1,5 @@
 from django.conf import settings
-from backend.api.google._google_api_caller import GoogleApiCaller, GoogleAccountApiCaller, GoogleOauth2ApiCaller
+from ..google._google_api_caller import GoogleApiCaller, GoogleAccountApiCaller, GoogleOauth2ApiCaller
 import requests
 
 def api_google_get_me(token: str):

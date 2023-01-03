@@ -1,4 +1,6 @@
+from api.models.supplier.supplier import Supplier
 from api.models.user.user import User, UserSerializer
+from api.models.product.product_category import ProductCategory
 from api.models.user.user_subscription import (UserSubscription,
                                                UserSubscriptionSerializer)
 from django.contrib import admin
@@ -33,13 +35,15 @@ class Product(models.Model):
         UserSubscription, null=True, on_delete=models.SET_NULL, related_name='products')
     created_by = models.ForeignKey(
         User, null=True, on_delete=models.SET_NULL, related_name='products')
-
+    supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, related_name='products')
     qty = models.IntegerField(blank=False, null=True, default=0)
 
     name = models.CharField(
         max_length=255, null=True, blank=True, default=None)
-    category = models.CharField(
-        max_length=255, null=True, blank=True, default=None)
+    # category = models.CharField(
+    #     max_length=255, null=True, blank=True, default=None)
+    
+
     excerpt = models.TextField(null=True, blank=True, default=None)
     description = models.TextField(null=True, blank=True, default=None)
     content = models.TextField(null=True, blank=True, default=None)
@@ -81,7 +85,11 @@ class Product(models.Model):
     meta = models.JSONField(default=dict, null=True, blank=True)
     meta_logistic = models.JSONField(default=dict, null=True, blank=True)
     tag = models.JSONField(default=list, null=True, blank=True)
+    category = models.ForeignKey(ProductCategory, blank=True, null=True, on_delete=models.SET_NULL, default=None)
     categories = models.JSONField(default=list, null=True, blank=True)
+    pinned = models.BooleanField(null=False, default=False)
+    meta_variant = models.JSONField(default=dict, null=False, blank=True)
+    
     def __str__(self):
         return self.name
 
@@ -95,6 +103,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
     meta = serializers.JSONField(default=dict)
     meta_logistic = serializers.JSONField(default=dict)
+    meta_variant = serializers.JSONField(default=dict)
     tag = serializers.JSONField(default=dict)
     categories = serializers.JSONField(default=list)
 

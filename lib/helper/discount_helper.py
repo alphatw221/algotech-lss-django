@@ -1,8 +1,6 @@
 import traceback
 from api import models
 import database
-import lib
-import math
 from datetime import datetime, timedelta
 
 def make_discount(before_discount_amount, discount_code):
@@ -105,6 +103,23 @@ def check_limitations(limitations, **kwargs):
 class CartDiscountHelper:
 
     @classmethod
+    def is_cart_applied_discount_eligable(cls, user_subscription, api_user, cart):
+        try:
+            if not cart.applied_discount:
+                return True
+            discount_code = models.discount_code.discount_code.DiscountCode.objects.get(id=cart.applied_discount.get('id'))
+            return cls.check_limitations(
+                    discount_code.limitations, 
+                    cart = cart, 
+                    discount_code = discount_code,
+                    user_subscription = user_subscription,
+                    api_user = api_user
+                    )
+
+        except Exception:
+            return False
+
+    @classmethod
     def make_discount(cls, cart):
         try:
             discount_code = cart.applied_discount
@@ -137,22 +152,68 @@ class CartDiscountHelper:
                 cart = kwargs['cart']
                 if cart.campaign.id != campaign_id:
                     return False
+
+            elif limitation['key']==models.discount_code.discount_code.LIMITATION_SPECIFIC_BUYER_NAME:
+                names = limitation['names'].split(',')
+                cart = kwargs['cart']
+
+                if cart.customer_name not in names:
+                    return False
+
+            elif limitation['key']==models.discount_code.discount_code.LIMITATION_SPECIFIC_BUYER_EMAIL:
+                emails = limitation['emails'].split(',')
+                api_user = kwargs['api_user']
+
+                if not api_user:
+                    return False
+
+                if api_user.email not in emails:
+                    return False
+
             elif limitation['key']==models.discount_code.discount_code.LIMITATION_PRODUCT_OVER_NUMBER:
                 number = limitation['number']
                 cart = kwargs['cart']
                 if len(cart.products) < number:
                     return False
+
             elif limitation['key']==models.discount_code.discount_code.LIMITATION_SUBTOTAL_OVER_AMOUNT:
                 amount = limitation['amount']
                 cart = kwargs['cart']
                 cart_subtotal = cls.__caculate_subtotal(cart)
                 if cart_subtotal < amount:
                     return False
+
             elif limitation['key']==models.discount_code.discount_code.LIMITATION_DISCOUNT_CODE_USABLE_TIME:
                 times = limitation['times']
                 discount_code = kwargs['discount_code']
                 if discount_code.used_count>=times:
                     return False
+            
+            elif limitation['key']==models.discount_code.discount_code.LIMITATION_BUYER_USAGE_TIMES:
+
+                times = limitation['times']
+                api_user = kwargs['api_user']
+                cart = kwargs['cart']
+                discount_code = kwargs['discount_code']
+
+                if not api_user:
+                    return False
+                if discount_code.buyer_usage.get(api_user.email,0) >= times:
+                    return False
+            
+            elif limitation['key']==models.discount_code.discount_code.LIMITATION_NEW_BUYER_ONLY:
+
+                api_user = kwargs['api_user']
+                user_subscription = kwargs['user_subscription']
+                if not api_user:
+                    return False
+
+                if user_subscription.customers.filter(id=api_user.id).exists():
+                    return False
+
+                # if api_user.orders.filter(user_subscription=user_subscription).exists():
+                #     return False
+
         except Exception:
             return False
         return True
@@ -163,7 +224,7 @@ class CartDiscountHelper:
     def check_limitations(cls, limitations, **kwargs):
         try:
             for limitation in limitations:
-                if not check_limitation(limitation, **kwargs):
+                if not cls.check_limitation(limitation, **kwargs):
                     return False
         except Exception:
             return False

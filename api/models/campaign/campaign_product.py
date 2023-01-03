@@ -1,11 +1,12 @@
 from api.models.campaign.campaign import Campaign
 from api.models.product.product import Product
+from api.models.supplier.supplier import Supplier
 from api.models.user.user import User
 from django.contrib import admin
 from djongo import models
 from rest_framework import serializers
-
-
+from django.conf import settings
+from api.models.product.product_category import ProductCategory
 TYPE_PRODUCT='product'
 TYPE_PRODUCT_FAST='product-fast'
 TYPE_LUCKY_DRAW='lucky_draw'
@@ -33,6 +34,8 @@ class CampaignProduct(models.Model):
     product = models.ForeignKey(
         Product, blank=True, null=True, on_delete=models.SET_NULL, related_name='campaign_products')
 
+    supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, related_name='campaign_products')
+    
     qty_for_sale = models.IntegerField(blank=False, null=True, default=0)
     qty_sold = models.IntegerField(blank=False, null=True, default=0)
     qty_pending_payment = models.IntegerField(blank=False, null=False, default=0)
@@ -67,7 +70,7 @@ class CampaignProduct(models.Model):
     upc = models.CharField(
         max_length=32, null=True, blank=True, default=None)
     image = models.CharField(
-        max_length=256, null=True, blank=True, default=None)
+        max_length=256, null=True, blank=True, default=settings.GOOGLE_STORAGE_STATIC_DIR+IMAGE_NULL)
     sort_order = models.IntegerField(
         null=True, blank=True, default=0)
 
@@ -80,7 +83,7 @@ class CampaignProduct(models.Model):
         blank=False, null=True, default=False)
 
     type = models.CharField(max_length=255, blank=True,
-                            choices=TYPE_CHOICES, default='n/a')
+                            choices=TYPE_CHOICES, default=TYPE_PRODUCT)
     status = models.BooleanField(blank=False, null=False, default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -88,7 +91,10 @@ class CampaignProduct(models.Model):
     meta = models.JSONField(default=dict, null=True, blank=True)
     meta_logistic = models.JSONField(default=dict, null=True, blank=True)
     tag = models.JSONField(default=dict, null=True, blank=True)
+    category = models.ForeignKey(ProductCategory, blank=True, null=True, on_delete=models.SET_NULL, default=None)
     categories = models.JSONField(default=list, null=True, blank=True)
+    pinned = models.BooleanField(null=False, default=False)
+    meta_variant = models.JSONField(default=dict, null=False, blank=True)
 
 
 class CampaignProductSerializer(serializers.ModelSerializer):
@@ -100,6 +106,7 @@ class CampaignProductSerializer(serializers.ModelSerializer):
 
     meta = serializers.JSONField(default=dict)
     meta_logistic = serializers.JSONField(default=dict)
+    meta_variant = serializers.JSONField(default=dict)
     tag = serializers.JSONField(default=list)
     categories = serializers.JSONField(default=list)
 
@@ -118,7 +125,9 @@ class CampaignProductSerializerAssign(serializers.ModelSerializer):
             'customer_editable',
             'type',
             'status',
-            'tag'
+            'tag',
+            'meta_variant',
+            'pinned'
         ]
 
 
@@ -137,7 +146,10 @@ class CampaignProductSerializerUpdate(CampaignProductSerializer):
             'order_code', 
             'oversell', 
             'overbook',
-            'categories'
+            'category',
+            'categories',
+            'meta_variant',
+            'pinned'
         ]
 
 

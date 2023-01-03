@@ -4,10 +4,9 @@ import database
 
 
 from ._i18n import lang_translate_default_en
-from backend.utils.text_processing.command_processor import Command
+from lib.util.command_processor import Command
 from django.conf import settings
 from django.utils.translation import ugettext as _
-# from backend.pymongo.mongodb import db
 
 
 def get_comment_command_response(campaign, comment, command: Command, lang='en'):

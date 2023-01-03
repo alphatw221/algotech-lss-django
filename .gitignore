@@ -14,3 +14,4 @@ config.py
 /static
 /pkl/cookies/*
 chromedriver*
+poetry.lock

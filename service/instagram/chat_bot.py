@@ -1,4 +1,4 @@
-from backend.api.facebook._fb_api_caller import FacebookApiCaller, FacebookApiV12Caller
+from ..facebook._fb_api_caller import FacebookApiCaller, FacebookApiV12Caller
 
 def post_page_message_chat_bot(relate_fb_page_id:str, page_token: str, recipient_id: str, message: str):
     data = {
@@ -13,13 +13,13 @@ def post_page_message_chat_bot(relate_fb_page_id:str, page_token: str, recipient
                             data=data).post()
     return ret
 
-def post_page＿text_message_chat_bot(relate_fb_page_id:str, page_token: str, recipient_id: str, test: str):
+def post_page＿text_message_chat_bot(relate_fb_page_id:str, page_token: str, recipient_id: str, text: str):
     data = {
         "recipient": {
             "id": recipient_id
         },
         "message": {
-            'text':test
+            'text':text
         }
     }
     ret = FacebookApiCaller(f'{relate_fb_page_id}/messages', bearer_token=page_token,

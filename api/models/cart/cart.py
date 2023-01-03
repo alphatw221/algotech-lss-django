@@ -25,8 +25,7 @@ class Cart(models.Model):
     customer_name = models.CharField(max_length=255, null=True, blank=True)
     customer_img = models.CharField(max_length=255, null=True, blank=True)
 
-    platform = models.CharField(max_length=255, blank=True,
-                                choices=settings.SUPPORTED_PLATFORMS, default='n/a')
+    platform = models.CharField(max_length=255, blank=True, default=None)
     platform_id = models.IntegerField(blank=True, null=True, default=None)
     
     products = models.JSONField(default=dict, null=True, blank=True)

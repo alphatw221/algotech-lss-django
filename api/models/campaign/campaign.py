@@ -1,5 +1,5 @@
-from email.policy import default
 from django.contrib import admin
+from api.models.product.product_category import ProductCategorySerializer
 from djongo import models
 
 
@@ -45,7 +45,8 @@ class Campaign(models.Model):
 
     user_subscription = models.ForeignKey(
         UserSubscription, null=True, on_delete=models.SET_NULL, related_name='campaigns')
-
+    supplier = models.ForeignKey(
+        UserSubscription, null=True, on_delete=models.SET_NULL, related_name='cooperator_campaigns')
     dealer = models.ForeignKey(
         UserSubscription, null=True, on_delete=models.SET_NULL, related_name='subscriber_campaigns')
 
@@ -143,13 +144,22 @@ class TwitchCampaignSerializer(serializers.Serializer):
 class TiktokCampaignSerializer(serializers.Serializer):
     username = serializers.CharField(required=False, default="", allow_blank=True)
 
+class SupplierUserSubscriptionAccountInfo(UserSubscriptionSerializer):
 
+    class Meta:
+        model = UserSubscription
+        fields = ['id', 'product_categories']
+        
+    product_categories = ProductCategorySerializer(many=True, read_only=True, default=list)
+
+    
 class CampaignSerializer(serializers.ModelSerializer):
     class Meta:
         model = Campaign
         fields = '__all__'
         read_only_fields = ['created_at', 'updated_at']
 
+    supplier = SupplierUserSubscriptionAccountInfo(read_only=True, default=dict)
     facebook_page = FacebookPageInfoSerializer(default=dict)
     facebook_campaign = FacebookCampaignSerializer(default=dict)
     youtube_channel = YoutubeChannelInfoSerializer(default=dict)

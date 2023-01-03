@@ -38,6 +38,7 @@ PAYMENT_METHOD_DIRECT = 'direct_payment'
 PAYMENT_METHOD_HITPAY = 'hitpay'
 PAYMENT_METHOD_PAYPAL = 'paypal'
 PAYMENT_METHOD_ECPAY = 'ecpay'
+PAYMENT_METHOD_ECPAY_CASH_ON_DELIVERY = 'ecpay_cash_on_delivery'
 PAYMENT_METHOD_PAYMONGO = 'pay_mongo'
 PAYMENT_METHOD_RAPYD = 'rapyd'
 
@@ -62,8 +63,7 @@ class Order(models.Model):
     customer_id = models.CharField(max_length=255, null=True, blank=True)
     customer_name = models.CharField(max_length=255, null=True, blank=True)
     customer_img = models.CharField(max_length=255, null=True, blank=True)
-    platform = models.CharField(max_length=255, blank=True,
-                                choices=settings.SUPPORTED_PLATFORMS, default='n/a')
+    platform = models.CharField(max_length=255, blank=True, default=None)
     platform_id = models.IntegerField(blank=True, null=True, default=None)
     buyer = models.ForeignKey(
         User, null=True, default=None, blank=True, on_delete=models.SET_NULL, related_name='orders')
@@ -104,6 +104,7 @@ class Order(models.Model):
     shipping_last_name = models.CharField(max_length=64, blank=True, default='')
     shipping_email = models.CharField(max_length=128, blank=True, default='')
     shipping_phone = models.CharField(max_length=64, blank=True, default='')
+    shipping_cellphone = models.CharField(max_length=64, blank=True, default='')
     shipping_postcode = models.CharField(max_length=10, blank=True, default='')
     shipping_region = models.CharField(max_length=32, blank=True, default='')
     shipping_location = models.CharField(max_length=32, blank=True, default='')
@@ -112,6 +113,7 @@ class Order(models.Model):
     shipping_method = models.CharField(max_length=32, blank=True, default='')
     shipping_remark = models.TextField(blank=True, default='')
     shipping_date = models.DateField(blank=True, null=True, default=None)
+    shipping_date_time = models.DateTimeField(blank=True, null=True, default=None)
     shipping_option = models.CharField(max_length=32, blank=True, default='')
     shipping_option_index = models.IntegerField(blank=True, null=True, default=None)
     shipping_option_data = models.JSONField(default=dict, null=False, blank=False)
@@ -126,8 +128,8 @@ class Order(models.Model):
     points_earned = models.IntegerField(blank=True, null=True, default=0)
     points_used = models.IntegerField(blank=True, null=True, default=0)
     point_discount = models.FloatField(null=True, blank=True, default=0)
-    point_expired_at = models.DateTimeField(auto_now=False, null=True, default=None)
-
+    point_expired_at = models.DateTimeField(auto_now=False, null=True, default=None) #
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -148,7 +150,7 @@ class OrderSerializer(serializers.ModelSerializer):
 class OrderWithCampaignSerializer(OrderSerializer):
 
     campaign = CampaignSerializerRetreive()
-
+    
 class OrderSerializerWithUserSubscription(OrderSerializer):
 
     campaign = CampaignSerializerWithUserSubscription()
@@ -161,6 +163,7 @@ class OrderSerializerUpdateShipping(serializers.ModelSerializer):
                   "shipping_last_name",
                   "shipping_email",
                   "shipping_phone",
+                  "shipping_cellphone",
                   "shipping_postcode",
                   "shipping_region",
                   "shipping_location",
@@ -184,6 +187,7 @@ class OrderSerializerUpdatePaymentShipping(serializers.ModelSerializer):
                   "shipping_last_name",
                   "shipping_email",
                   "shipping_phone",
+                  "shipping_cellphone",
                   "shipping_postcode",
                   "shipping_region",
                   "shipping_location",

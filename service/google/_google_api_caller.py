@@ -1,6 +1,6 @@
 from django.conf import settings
 from dataclasses import dataclass
-from backend.api._api_caller import RestApiJsonCaller
+from service._rest_api_json_caller import RestApiJsonCaller
 
 
 @dataclass

@@ -1,30 +1,27 @@
-from django.core.management.base import BaseCommand
-from django.conf import settings
-from api import models
-from api.models.user.user import AuthUserSerializer
+import random
+import string
+from datetime import datetime, timedelta
+from django.db.models import Q
 from django.conf import settings
 from django.contrib.auth.models import User as AuthUser
-
-from rest_framework import viewsets, status
+from django.core.management.base import BaseCommand
+from automation.jobs.send_reminder_messages import send_reminder_messages_job
+import database
+from lib.helper.register_helper import create_new_register_account
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from api.models.user.promotion_code import PromotionCode
-
-
-from api.utils.common.verify import Verify
-from api.utils.error_handle.error_handler.api_error_handler import api_error_handler
-from api.utils.common.verify import ApiVerifyError
-from api import models
-from api import rule
-from api.utils.orm.deal import record_subscription_for_trial_user
-from business_policy.marketing_plan import MarketingPlan
-
-import service
+import arrow
 import business_policy
 import lib
+import service
+from api import models
+from api_v2 import rule
+from api.models.user.promotion_code import PromotionCode
+from api.models.user.user import AuthUserSerializer
+from business_policy.marketing_plan import MarketingPlan
+import pytz
 
-from datetime import datetime, timedelta
-import string, random
 
 class Command(BaseCommand):
     help = ''
@@ -34,20 +31,98 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # self.handle_new_registeration_from_hubspot()
-        self.test_add_user_subscription_to_order()
+        # self.test_add_user_subscription_to_order()
+       
+        # self.test_cart_expired_adjustment()
+        self.create_kol_account()
         pass
+    
+    def __create_new_register_account(self, plan, country_plan, subscription_plan, timezone, period, firstName, lastName, email, password, country, country_code,  contactNumber,  amount, paymentIntent=None, subscription_meta:dict={}):
+        now = datetime.now(pytz.timezone(timezone)) if timezone in pytz.common_timezones else datetime.now()
+        expired_at = now+timedelta(days=90) if period == business_policy.subscription.PERIOD_QUARTER else now+timedelta(days=365)
+        
+        auth_user = AuthUser.objects.create_user(
+            username=f'{firstName} {lastName}', email=email, password=password)
 
+        user_subscription = models.user.user_subscription.UserSubscription.objects.create(
+            name=f'{firstName} {lastName}', 
+            status='valid', 
+            started_at=now,
+            expired_at=expired_at, 
+            user_plan= {"activated_platform" : ["facebook","youtube","instagram"]}, 
+            meta_country={ 'activated_country': [country_code] },
+            meta = subscription_meta,
+            type=plan,
+            lang=country_plan.language,
+            country = country_code,
+            purchase_price = amount,
+            **business_policy.subscription_plan.SubscriptionPlan.get_plan_limit(plan)
+            )
+            
+        api_user = models.user.user.User.objects.create(
+            name=f'{firstName} {lastName}', email=email, type='user', status='valid', phone=contactNumber, auth_user=auth_user, user_subscription=user_subscription)
+        
+        models.user.deal.Deal.objects.create(
+            user_subscription=user_subscription,
+            purchased_plan=plan, 
+            total=amount, 
+            status=models.user.deal.STATUS_SUCCESS, 
+            payer=api_user, 
+            payment_time=datetime.utcnow()
+        )
 
+        lib.util.marking_tool.NewUserMark.mark(api_user, save = True)
+        
+        return {
+            "Customer Name":f'{firstName} {lastName}',
+            "Email":email,
+            "Password":password[:4]+"*"*(len(password)-4),
+            "Target Country":country, 
+            "Your Plan":subscription_plan.get('text'),
+            "Subscription Period":"Monthly",
+            "Subscription End Date":expired_at.strftime("%d %B %Y %H:%M"),
+            "Receipt":paymentIntent.charges.get('data')[0].get('receipt_url') if paymentIntent else ""
+        }
+    def create_kol_account(self):
+        country_code = "TW"
+        # email, password, plan, period, intentSecret = lib.util.getter.getdata(request,("email", "password", "plan", "period", "intentSecret"),required=True)
+        email = "nick@lss.com"
+        password = "1234"
+        plan = "premium"
+        firstName = "nick"
+        lastName = "lien"
+        contactNumber = ""
+        country = "TW"
+        timezone = ""
+        period = ""
+        kwargs = {'email':email,'plan':plan,'period':period}
+
+        try:
+            country_plan = business_policy.subscription_plan.SubscriptionPlan.get_country(country_code)
+            subscription_plan = country_plan.get_plan(plan)
+
+            kwargs.update({'country_plan':country_plan, 'subscription_plan':subscription_plan})
+        except Exception as e:
+            print(str(e))
+            #TODO refund
+            raise lib.error_handle.error.api_error.ApiVerifyError('support_for_refunding')
+
+        email = kwargs.get('email')
+        amount = kwargs.get('amount')
+
+        ret = self.__create_new_register_account(plan, country_plan, subscription_plan, timezone, period, firstName, lastName, email, password, country, country_code,  contactNumber,  amount)
     def modify_database(self):
 
-        from api.models.user.user_subscription import UserSubscription
-        from api.models.user.user import User
-        from django.contrib.auth.models import User as AuthUser
-        from json import loads, dumps
-        from collections import OrderedDict
         import json
         import re
+        from collections import OrderedDict
+        from json import dumps, loads
+
+        from django.contrib.auth.models import User as AuthUser
+
         from api.models.campaign.campaign import Campaign
+        from api.models.user.user import User
+        from api.models.user.user_subscription import UserSubscription
         def to_dict(input_ordered_dict):
             return loads(dumps(input_ordered_dict))
         def add_activated_country():
@@ -143,35 +218,20 @@ class Command(BaseCommand):
         models.user.user_subscription.UserSubscription.objects.get(id=1).root_users.add(models.user.user.User.objects.get(id=44))
 
     def test_text_classifier(self):
-        from backend.api.nlp.classify import classify_comment_v1
+        from service.nlp.classification import classify_comment_v1
 
         print(classify_comment_v1(texts=[['Deliver Delivery delivery','payment payment payment']],threshold=0.7))
 
-    def test_pre_order_helper(self):
-        from api.utils.common.order_helper import PreOrderHelper
-        from api.models.user.user import User
-        from api.models.order.pre_order import PreOrder
-        from api.models.campaign.campaign_product import CampaignProduct
-        from api.models.order.order_product import OrderProduct
-
-        api_user = User.objects.get(id=1)
-        pre_order = PreOrder.objects.get(id=506)
-        # campaign_product = CampaignProduct.objects.get(id=7400)
-        # order_product = OrderProduct.objects.get(id=252464)
-        # PreOrderHelper.add_product(api_user,pre_order,campaign_product,1)
-        # PreOrderHelper.update_product(api_user,pre_order,order_product,2)
-        # PreOrderHelper.delete_product(api_user,pre_order,order_product)
-        PreOrderHelper.checkout(api_user,pre_order)
-
     
     def test_mongodb_query(self):
-        import database
         from pprint import pprint
+
+        import database
+
         # from backend.pymongo.mongodb import db
         # from api.utils.advance_query.dashboard import get_total_revenue, get_order_total_sales, get_pre_order_total_sales, \
         # get_order_total_sales_by_month,get_campaign_comment_rank, get_campaign_order_rank, get_campaign_complete_sales, get_total_order_complete_proceed,\
         # get_total_pre_order_count, get_campaign_order_complete_proceed,get_total_average_sales,get_total_average_comment_count,get_campaign_merge_order_list
-
         # print(get_total_revenue(1))
         # campaign_products = database.lss.campaign.get_ongoing_campaign_disallow_overbook_campaign_product()
         pre_orders = database.lss.pre_order.get_pre_order_contain_campaign_product(9381)
@@ -188,20 +248,17 @@ class Command(BaseCommand):
     def test_send_email(self):
         
         import lib
-        from automation import jobs
         from api import models
+        from automation import jobs
         order = models.order.order.Order.objects.get(id=32560)
         content = lib.helper.order_helper.OrderHelper.get_confirmation_email_content(order)
         jobs.send_email_job.send_email_job(order.campaign.title, order.shipping_email, content=content)
 
 
-        # service.email.email_service.EmailService.send_email_template('test','alphatw22193@gmail.com',
-        #     "email_reset_password_link.html",
-        #     {"url":settings.GCP_API_LOADBALANCER_URL +"/lss/#/password/reset","code":"1234","username":"test"},
-        #     lang='en')
     
     def test_user_plan(self):
         from datetime import datetime
+
         from api import models
         api_user_subscription = models.user.user_subscription.UserSubscription.objects.get(id=1)
         
@@ -242,8 +299,10 @@ class Command(BaseCommand):
         # sib.transaction_email.RegistraionConfirmationEmail(first_name="first_name",email="email",password="password", to="alphatw22193@gmail.com").send()
 
     def test_hubspot(self):
-        import service
         from datetime import datetime
+
+        import service
+
         # import pytz
         service.hubspot.contact.update("651",properties={"expiry_date":int(datetime.utcnow().replace(hour=0,minute=0,second=0,microsecond=0).timestamp()*1000)})
         # service.hubspot.contact.update("651",properties={"expiry_date":1652054400})
@@ -266,21 +325,22 @@ class Command(BaseCommand):
 
     
     def test_mongo_aggr(self):
-        from pprint import pprint 
+        from pprint import pprint
+
         import database
         l = database.lss.campaign.get_merge_order_list_pagination(campaign_id=958, status='', search='', filter_payment=[], filter_delivery=[], filter_platform=[])
         pprint(l)
 
     def test_websocket(self):
-        import service
         import database
+        import service
+
         # from asgiref.sync import async_to_sync
         # from channels.layers import get_channel_layer
-        
+
         # channel_layer = get_channel_layer()
         # # async_to_sync(channel_layer.send)("channel_name", {"type": "chat.force_disconnect"})
         # # async_to_sync(channel_layer.group_send)("user_subscription_1", {"type": "notification_message","data":{"message":"testmessage"}})
-
         # async_to_sync(channel_layer.group_send)("campaign_1356", {"type": "cart_data","data":{"message":"123"}})
         # async_to_sync(channel_layer.group_send)("campaign_440", {"type": "order_data","data":{"message":"testmessage"}})
         # async_to_sync(channel_layer.group_send)("campaign_440", {"type": "product_data","data":{"message":"testmessage"}})
@@ -332,10 +392,9 @@ class Command(BaseCommand):
         jobs.campaign_job.campaign_job(661)
 
         from datetime import datetime
+
         from dateutil import parser
 
-        from datetime import datetime
-        from dateutil import parser
         from database.lss._config import db
         ig_datas = db.api_campaign_comment.find({'platform': 'instagram'})
         for ig_data in ig_datas:
@@ -367,8 +426,8 @@ class Command(BaseCommand):
     def test_hitpay_verification(self):
 
 
-        import hmac
         import hashlib
+        import hmac
 
         KEY_LIST = ['amount', 'currency', 'payment_id', 'payment_request_id', 'phone', 'reference_number', 'status']
 
@@ -496,7 +555,11 @@ class Command(BaseCommand):
         print (ret)
 
     def test_create_developer(self):
-        import uuid, base64, random, string
+        import base64
+        import random
+        import string
+        import uuid
+
         from api import models
         data = {
             "api_key" : base64.urlsafe_b64encode(uuid.uuid4().bytes).rstrip(b'=').decode('ascii'),
@@ -508,10 +571,14 @@ class Command(BaseCommand):
         models.user.developer.Developer.objects.create(**data)
 
     def test_generate_developer_token(self):
-        import hashlib, hmac
-        import json, base64
-        from django.conf import settings
+        import base64
+        import hashlib
+        import hmac
+        import json
         from datetime import datetime, timedelta
+
+        from django.conf import settings
+
         from api import models
 
         header_data = {
@@ -545,11 +612,15 @@ class Command(BaseCommand):
         print(token)
 
     def test_discripting_token(self):
-        from api import models
-        import hashlib, hmac
-        import json, base64
-        from django.conf import settings
+        import base64
+        import hashlib
+        import hmac
+        import json
         from datetime import datetime, timedelta
+
+        from django.conf import settings
+
+        from api import models
 
         token = 'eyJhbGciOiAic2hhMjU2IiwgInR5cCI6ICJ2MSJ9.eyJrZXkiOiAiN2JiZHJBNWtRMDZuQVpQOWllRWhUQSIsICJwZXJtIjoge30sICJhdXRoIjogbnVsbCwgIm1ldGEiOiB7fSwgImV4cCI6IDE2NjI1NDAyNjh9.8a1a3f2735e90bd3a8abd9615e7bc26e5860297968250268d371a31728c04556.7bbdrA5kQ06nAZP9ieEhTA.a1ttdUyxI3KdlcO1evA_Fyy1icAxQd8nXgGUlEThLoE'
         header, payload, signature, api_key, secret_key_hash = token.split('.')
@@ -672,9 +743,11 @@ class Command(BaseCommand):
 
         
     def test_cache_redis(self):
-        import pottery
-        import database
         from pprint import pprint
+
+        import pottery
+
+        import database
 
         # database.lss_cache.redis.delete('default')
         campaign_products = database.lss_cache.campaign_product.get_products_all(1211, bypass=True)
@@ -713,9 +786,10 @@ class Command(BaseCommand):
 
 
     def test_shopify(self):
+        from pprint import pprint
+
         from api import models
         from automation import jobs
-        from pprint import pprint
         from plugins.shopify.service.checkouts import create_checkout
 
 
@@ -738,9 +812,10 @@ class Command(BaseCommand):
         # print(len(data.get('orders')))
         # pprint(data)
     def test_easy_store(self):
+        from pprint import pprint
+
         from api import models
         from automation import jobs
-        from pprint import pprint
 
         user_subscription = models.user.user_subscription.UserSubscription.objects.get(id=618)
         c = user_subscription.user_plan.get('plugins').get('easy_store')
@@ -774,7 +849,8 @@ class Command(BaseCommand):
         print(b)
     
     def test_get_facebook_app_secret_proof(self):
-        import hashlib, hmac
+        import hashlib
+        import hmac
 
         page_token = 'EAANwBngXqOABAAOHBdSPAZAWckuo6imoCtBHH8c26aAhZASsIGv9VBvaMuy7pb1lrpieSZASIkC5fQAQoxgPsnpeVRkG4KF5bsSvzmVJimvhxfVIGgcXEA3JdHkyYyZCenGYYeChEaZCWSeL9TK7e60uRU7GdxZAYtRTl4FTftSRvBf3Yg3Mr129Dc0ZA4MnMqlegX0oiAkKWUWriE1Ifzs1XUQUJeUxNkZD'
         app_secret='e36ab1560c8d85cbc413e07fb7232f99'
@@ -842,7 +918,7 @@ class Command(BaseCommand):
             # set new password
             auth_user.set_password(password)
             auth_user.save()
-
+        last_name = ""
         # else:
         #     auth_user = AuthUser.objects.create_user(
         #         username=f'{first_name} {last_name}', email=email, password=password)
@@ -873,7 +949,6 @@ class Command(BaseCommand):
         #     auth_user=auth_user, 
         #     user_subscription=user_subscription)
         
-        # record_subscription_for_trial_user(user_subscription, api_user)
         
         # lib.util.marking_tool.NewUserMark.mark(api_user, save = True)
         # marketing_plans = MarketingPlan.get_plans("current_plans")
@@ -902,8 +977,10 @@ class Command(BaseCommand):
         jobs.import_account_job.imoprt_account_job('Till End OCT2022.xlsx','1')
 
     def test_add_user_subscription_to_order(self):
-        from api import models
         import traceback
+
+        from api import models
+
         # for cart in models.cart.cart.Cart.objects.filter(user_subscription=None):
         #     try:
         #         print(cart.id)
@@ -924,3 +1001,95 @@ class Command(BaseCommand):
                 order.save()       
             except Exception:
                 print(traceback.format_exc())
+    
+    def test_cart_expired_adjustment(self):
+        import traceback
+        import database
+        from api import models
+        import lib
+        from datetime import datetime, timedelta
+        from pprint import pprint
+        data = database.lss.order.get_wallet_data_with_expired_points()
+        # data = database.lss.order.get_earned_used_expired_points_sum(buyer_id=673, user_subscription_id = 1)
+        pprint(data)   
+
+        # wallets = models.user.buyer_wallet.BuyerWallet.objects.all()
+        # for wallet in wallets:
+        #     lib.helper.wallet_helper.WalletHelper.adjust_wallet(wallet)
+
+
+        # end_at = datetime.utcnow()
+        # start_from = end_at - timedelta(days=1)
+        
+        # lib.helper.wallet_helper.WalletHelper.adjust_all_wallet_with_expired_points(start_from=start_from, end_at=end_at)
+
+
+    def test_add_all_order_buyer_to_user_subscription_customer(self):
+        import traceback
+        import database
+        from api import models
+        import lib
+        from datetime import datetime, timedelta
+
+
+        end_at = datetime.utcnow()
+        start_from = end_at - timedelta(days=365)
+
+        data = database.lss.order.get_wallet_data(start_from, end_at)
+        for _data in data:
+            user_subscription = models.user.user_subscription.UserSubscription.objects.get(id=_data.get('user_subscription_id'))
+            api_user = models.user.user.User.objects.get(id = _data.get('buyer_id'))
+            try:
+                user_subscription.customers.add(api_user)
+            except Exception:
+                print(traceback.format_exc())
+        print(data)
+
+    def test_auto_clear_idle_cart(self):
+        import traceback
+        import database
+        from api import models
+        import lib
+        from datetime import datetime, timedelta
+
+    def test_auto_remove_abandon_cart(self):
+        import traceback
+        import database
+        from api import models
+        import lib
+        from datetime import datetime, timedelta
+
+
+        end_at = datetime.utcnow()
+        start_from = end_at - timedelta(days=365)
+
+        data = database.lss.campaign.get_campaign_abandon_cart_which_enable_auto_clear(start_from, end_at)
+        print(data)
+        
+    def test_uncheckout_cart_remind(self):
+        print("run uncheckout_cart_reminder cron")
+        start_time = arrow.now()
+        utc_time_four_hours_ago = arrow.utcnow().shift(hours=-4)
+        campaigns_ended_over_4_hours = models.campaign.campaign.Campaign.objects.filter(id=1419) #, end_at__gte=utc_time_four_hours_ago.datetime, end_at__lt=utc_time_four_hours_ago.shift(minutes=+1).datetime)
+        carts = [cart for campaign in campaigns_ended_over_4_hours for cart in campaign.carts.all() if len(cart.products) > 0]
+        print("carts", carts)
+        for cart in carts:
+            pymongo_cart = database.lss.cart.Cart.get(id=cart.id)
+            service.rq.queue.enqueue_test_queue(job=send_reminder_messages_job, pymongo_cart=pymongo_cart, user_subscription_id=cart.campaign.user_subscription.id, lang=cart.campaign.lang)
+        end_time = arrow.now()
+        print(end_time-start_time)
+        
+    def test_transfter_point_data_from_order_to_point_table(self):
+        for order in models.order.order.Order.objects.filter(Q(points_used__gt=0)|Q(points_earned__gt=0)):
+            print("order id", order.id)
+            # if order.points_earned > 0 or order.points_used > 0:
+            models.user.point_transaction.PointTransaction.objects.create(
+                user_subscription=order.user_subscription,
+                buyer=order.buyer,
+                order=order,
+                earned=order.points_earned,
+                used=order.points_used,
+                expired_at=order.point_expired_at,
+                created_at=order.created_at
+            )
+            

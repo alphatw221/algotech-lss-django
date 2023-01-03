@@ -1,23 +1,28 @@
 from email.policy import default
+import json
 from re import S
-from django.http import JsonResponse
+from django.http import JsonResponse,HttpResponseRedirect
 from django.db.models import Q, Value
+from django.conf import settings
 
 from rest_framework import viewsets, status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.decorators import action
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.renderers import StaticHTMLRenderer
+
 
 from api import models
-from api import rule
+from api_v2 import rule
 from api.models.product import product_category
 
 from automation import jobs
 
 import factory
 import lib
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 import uuid
 import service
 import database
@@ -29,10 +34,11 @@ class CartPagination(PageNumberPagination):
 
 class UserSubscriptionSerializerWithProductCategory(models.user.user_subscription.UserSubscriptionSerializer):
     product_categories = models.product.product_category.ProductCategorySerializer(many=True, read_only=True, default=list)
-class CampaignSerializerWithSellerInfo(models.campaign.campaign.CampaignSerializer):
-    user_subscription = UserSubscriptionSerializerWithProductCategory(read_only=True)
+# class CampaignSerializerWithSellerInfo(models.campaign.campaign.CampaignSerializer):
+#     user_subscription = UserSubscriptionSerializerWithProductCategory(read_only=True)
 class CartSerializerWithSellerInfo(models.cart.cart.CartSerializer):
-    campaign = CampaignSerializerWithSellerInfo()
+    campaign = models.campaign.campaign.CampaignSerializer()
+    user_subscription = UserSubscriptionSerializerWithProductCategory()
 class CartViewSet(viewsets.ModelViewSet):
     queryset = models.cart.cart.Cart.objects.all().order_by('id')
     serializer_class = models.cart.cart.CartSerializer
@@ -117,6 +123,24 @@ class CartViewSet(viewsets.ModelViewSet):
         cart_oid = database.lss.cart.get_oid_by_id(cart.id)
         return Response({ 'cart_oid':cart_oid}, status=status.HTTP_200_OK)
     
+    @action(detail=False, methods=['GET'], url_path=r'buyer/retrieve/(?P<cart_oid>[^/.]+)/platform', permission_classes=())
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def buyer_retrieve_cart_platform(self, request, cart_oid):
+        cart_oid = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
+        return Response(cart_oid.platform, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['GET'], url_path=r'buyer/retrieve/(?P<cart_oid>[^/.]+)/platform_and_products', permission_classes=())
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def buyer_retrieve_cart_platform_and_products(self, request, cart_oid):
+        cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
+        response_data = {
+            "platform": cart.platform,
+            "products": cart.products
+            
+        }
+        print(response_data)
+        return Response(response_data, status=status.HTTP_200_OK)
+    
     @action(detail=False, methods=['GET'], url_path=r'buyer/retrieve/(?P<cart_oid>[^/.]+)', permission_classes=())
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def buyer_retrieve_cart(self, request, cart_oid):
@@ -128,18 +152,89 @@ class CartViewSet(viewsets.ModelViewSet):
             raise lib.error_handle.error.api_error.ApiVerifyError('invalid_user')
         data = CartSerializerWithSellerInfo(cart).data
         return Response(data, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['POST'], url_path=r'buyer/cvs_map/(?P<cart_oid>[^/.]+)', permission_classes=())
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def buyer_cvs_map(self, request, cart_oid):
+
+        shipping_method, shipping_option_index, logistic_sub_type, = lib.util.getter.getdata(request, ("shipping_method", "shipping_option_index", "LogisticsSubType",),required=True)
+        api_user = lib.util.verify.Verify.get_customer_user(request) if request.user.is_authenticated else None
+        cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
+        campaign = lib.util.verify.Verify.get_campaign_from_cart(cart)
+        merchant_id= campaign.meta_logistic.get('ecpay',{}).get('merchant_id','')
+        hash_key=campaign.meta_logistic.get('ecpay',{}).get('hash_key','')
+        hash_iv=campaign.meta_logistic.get('ecpay',{}).get('hash_iv','')
+        if not merchant_id:
+            merchant_id = service.ecpay.ecpay.MERCHANT_ID
+        if not hash_key:
+            hash_key = service.ecpay.ecpay.HASH_KEY
+        if not hash_iv:
+            hash_iv = service.ecpay.ecpay.HASH_IV
+        
+        action,map = service.ecpay.ecpay.cvs_map(cart_oid,merchant_id, hash_key, hash_iv,
+            logistic_sub_type, 
+            f'{settings.GCP_API_LOADBALANCER_URL}/api/v2/cart/buyer/cvsmap/callback/?shipping_method={shipping_method}&shipping_option_index={shipping_option_index}'
+        )
+        return Response({'action':action,'data':map})
+    
+    @action(detail=False, methods=['POST'], url_path=r'buyer/cvsmap/callback',parser_classes=(FormParser,MultiPartParser), renderer_classes = (StaticHTMLRenderer,),permission_classes=())
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def buyer_cvs_map_callback(self, request):
+        shipping_method, shipping_option_index, = lib.util.getter.getparams(request, ("shipping_method", "shipping_option_index",),with_user=False)
+        data = request.data.dict()
+        # {'MerchantID': '3344643', 
+        #  'MerchantTradeNo': 'ECPAY20221207094136', 
+        #  'LogisticsSubType': 'FAMIC2C', 
+        #  'CVSStoreID': '018965', 
+        #  'CVSStoreName': '全家新竹關新店', 
+        #  'CVSAddress': '新竹市東區關新東路350號1樓', 
+        #  'CVSTelephone': '03-5679359', 
+        #  'CVSOutSide': '', 
+        #  'ExtraData': '6390449bbc4b20ae3d99e212'}
+        cart_oid = data.get('ExtraData')
+        
+        cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
+        ecpay_cvs = {
+            'shipping_method': shipping_method,
+            'shipping_option_index': shipping_option_index,
+            'merchant_id':data['MerchantID'],
+            'merchant_trade_no':data['MerchantTradeNo'],
+            'logistics_sub_type':data['LogisticsSubType'],
+            'cvs_store_id':data['CVSStoreID'],
+            'cvs_store_name':data['CVSStoreName'],
+            'cvs_address':data['CVSAddress'],
+            'cvs_telephone':data['CVSTelephone'],
+            'cvs_out_side':data['CVSOutSide'],
+            'extra_data':data['ExtraData'],
+        }
+        cart.meta['ecpay_cvs'] = ecpay_cvs
+        cart.save()
+        response = HttpResponseRedirect(redirect_to=f'{settings.WEB_SERVER_URL}/buyer/cart/{cart_oid}?tab=2')
+        # max_age = 60 * 15
+        # expires = datetime.strftime(datetime.utcnow() + timedelta(seconds=max_age), "%a, %d-%b-%Y %H:%M:%S GMT")
+        # response.set_cookie(
+        #     key="selected_cvs", value=json.dumps(ecpay_cvs), 
+        #     domain=settings.WEB_SERVER_URL, path=f"/buyer/cart/{cart_oid}", expires=expires, max_age=max_age)
+        return response
 
     @action(detail=False, methods=['PUT'], url_path=r'(?P<cart_oid>[^/.]+)/buyer/checkout', permission_classes=())
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     @lib.error_handle.error_handler.cart_operation_error_handler.update_cart_product_error_handler
     def buyer_checkout_cart(self, request, cart_oid):
-        
         shipping_data, points_used = lib.util.getter.getdata(request, ("shipping_data", "points_used"), required=True)
 
         api_user = lib.util.verify.Verify.get_customer_user(request) if request.user.is_authenticated else None
         cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
         campaign = lib.util.verify.Verify.get_campaign_from_cart(cart)
         user_subscription = campaign.user_subscription
+
+        if not lib.helper.discount_helper.CartDiscountHelper.is_cart_applied_discount_eligable(user_subscription, api_user, cart):
+            cart.applied_discount = {}
+            cart.discount = 0
+            cart.save()
+            print('discount')
+            return Response(CartSerializerWithSellerInfo(cart).data, status=status.HTTP_200_OK)
+            
         ret = rule.rule_checker.cart_rule_checker.RuleChecker.check(
             check_list=[
                 rule.rule_checker.cart_rule_checker.CartCheckRule.allow_checkout,
@@ -154,6 +249,7 @@ class CartViewSet(viewsets.ModelViewSet):
 
         serializer =models.order.order.OrderSerializerUpdateShipping(data=shipping_data) 
         if not serializer.is_valid():
+            print(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         point_discount_processor_class:factory.point_discount.PointDiscountProcessor = factory.point_discount.get_point_discount_processor_class(user_subscription)
@@ -163,7 +259,7 @@ class CartViewSet(viewsets.ModelViewSet):
         if not success:
             cart = lib.util.verify.Verify.get_cart(cart.id)
             return Response(CartSerializerWithSellerInfo(cart).data, status=status.HTTP_200_OK)
-        
+        # cart.delete()
         order = lib.util.verify.Verify.get_order(pymongo_order.id)
         order_oid = str(pymongo_order._id)   
         
@@ -217,55 +313,67 @@ class CartViewSet(viewsets.ModelViewSet):
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def buyer_apply_discount_code(self, request, cart_oid):
 
+        LENGTH_OF_REFERRAL_ID = 24
+        
         discount_code, = \
             lib.util.getter.getdata(request, ("discount_code",), required=True)
-
+        api_user = lib.util.verify.Verify.get_customer_user(request)
         cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
         campaign = lib.util.verify.Verify.get_campaign_from_cart(cart)
-
-        discount_codes = campaign.user_subscription.discount_codes.filter(start_at__lte=datetime.utcnow(),end_at__gte=datetime.utcnow())
-
-        valid_discount_code = None
-        for _discount_code in discount_codes:
-
-            if _discount_code.type ==models.discount_code.discount_code.TYPE_GENERAL and discount_code == _discount_code.code:
-                valid_discount_code = _discount_code
-                break
-            elif _discount_code.type == models.discount_code.discount_code.TYPE_CART_REFERAL :
-                code_length = len(_discount_code.code)
-                if code_length+1 > len(discount_code) or _discount_code.code!=discount_code[:code_length]:
-                    continue
-                cart_oid = discount_code[code_length+1:]
-                try:
-                    referrer_cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
-                    # referrer_pre_order=lib.util.verify.Verify.get_pre_order_with_oid(pre_order_oid)
-                except Exception:
-                    break
-                if referrer_cart.campaign.user_subscription != campaign.user_subscription or referrer_cart == cart:
-                    continue
-                if not referrer_cart.applied_discount and lib.helper.discount_helper.CartDiscountHelper.check_limitations(_discount_code.limitations, cart = referrer_cart, discount_code = _discount_code) :
-                    discount_code_data = _discount_code.__dict__.copy()
-                    del discount_code_data['_state']
-                    referrer_cart.applied_discount = discount_code_data
-                    referrer_cart.save()
-                valid_discount_code = _discount_code
-                break
-
-        if not valid_discount_code:
+        user_subscription = campaign.user_subscription
+        queryset = user_subscription.discount_codes.all()
+        if not queryset.filter(Q(code = discount_code)|Q(code = discount_code[:-25])).exists():
             raise lib.error_handle.error.api_error.ApiVerifyError('invalid_discount_code')
         
-        for limitation in valid_discount_code.limitations:
-            if not lib.helper.discount_helper.CartDiscountHelper.check_limitation(limitation, cart=cart, discount_code=valid_discount_code):
-                raise lib.error_handle.error.api_error.ApiVerifyError('not_eligible')
+        _discount_code = queryset.get(Q(code = discount_code)|Q(code = discount_code[:-(LENGTH_OF_REFERRAL_ID+1)]))
 
-        discount_code_data = valid_discount_code.__dict__.copy()
+        if _discount_code.period_enabled and (datetime.now(timezone.utc) < _discount_code.start_at or datetime.now(timezone.utc) > _discount_code.end_at):
+            raise lib.error_handle.error.api_error.ApiVerifyError('invalid_discount_code')
+
+        if _discount_code.type == models.discount_code.discount_code.TYPE_CART_REFERAL :
+            cart_oid = discount_code[:-LENGTH_OF_REFERRAL_ID]
+            try:
+                referrer_cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
+            except Exception:
+                referrer_cart = None
+            
+            if referrer_cart and \
+                referrer_cart.campaign.user_subscription != user_subscription and \
+                referrer_cart != cart and \
+                referrer_cart.applied_discount and\
+                lib.helper.discount_helper.CartDiscountHelper.check_limitations(
+                    _discount_code.limitations, 
+                    cart = referrer_cart, 
+                    discount_code = _discount_code,
+                    user_subscription = user_subscription,
+                    api_user = None
+                    ):
+                
+                discount_code_data = _discount_code.__dict__.copy()
+                del discount_code_data['_state']
+                referrer_cart.applied_discount = discount_code_data
+                referrer_cart.save()
+
+
+        if not lib.helper.discount_helper.CartDiscountHelper.check_limitations(
+                    _discount_code.limitations, 
+                    cart = cart, 
+                    discount_code = _discount_code,
+                    user_subscription = user_subscription,
+                    api_user = api_user
+                    ):
+            raise lib.error_handle.error.api_error.ApiVerifyError('not_eligible')
+
+        discount_code_data = _discount_code.__dict__.copy()
         del discount_code_data['_state']
         cart.applied_discount = discount_code_data
         lib.helper.discount_helper.CartDiscountHelper.make_discount(cart)
         cart.save()
 
-        valid_discount_code.applied_count+=1
-        valid_discount_code.save()
+        _discount_code.applied_count+=1
+        buyer_usage_count = _discount_code.buyer_usage.get(api_user.email)
+        _discount_code.buyer_usage[api_user.email] = buyer_usage_count+1 if buyer_usage_count else 1
+        _discount_code.save()
 
         return Response(models.cart.cart.CartSerializerWithCampaign(cart).data, status=status.HTTP_200_OK)
     
@@ -306,16 +414,35 @@ class CartViewSet(viewsets.ModelViewSet):
 
         return Response(models.user.buyer_wallet.BuyerWalletSerializer(buyer_wallet).data, status=status.HTTP_200_OK)
 
+    @action(detail=False, methods=['GET'], url_path=r'buyer/search/(?P<campaign_id>[^/.]+)/tiktok', permission_classes=())
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def buyer_search_tiktok_cart(self, request, campaign_id):
+
+        recaptcha_token, customer_name, = lib.util.getter.getparams(request, ('recaptcha_token', 'customer_name', ), with_user=False)
+        
+        code, response = service.recaptcha.recaptcha.verify_token(recaptcha_token)
+
+        if code!=200 or not response.get('success'):
+            raise lib.error_handle.error.api_error.ApiVerifyError('refresh_try_again')
+        print(campaign_id)
+        print(customer_name)
+        if not models.cart.cart.Cart.objects.filter(campaign_id=campaign_id, customer_name=customer_name, platform=models.user.user_subscription.PLATFORM_TIKTOK).exists():
+            raise lib.error_handle.error.api_error.ApiVerifyError('cart_not_found')
+        cart = models.cart.cart.Cart.objects.filter(campaign_id=campaign_id, customer_name=customer_name, platform=models.user.user_subscription.PLATFORM_TIKTOK).first()
+        oid = database.lss.cart.get_oid_by_id(cart.id)
+        return Response(oid, status=status.HTTP_200_OK)
+
 # ---------------------------------------------- seller ------------------------------------------------------
 
-    @action(detail=False, methods=['GET'], url_path=r'seller/list', permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['POST'], url_path=r'seller/list', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def seller_list_cart(self, request):
         try:
             api_user, campaign_id = lib.util.getter.getparams(request, ('campaign_id',), with_user=True, seller=True)
             user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
             campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
-            queryset = campaign.carts.exclude(products=Value('null')).order_by('id')
+
+            queryset = self.__search_cart(user_subscription, request, campaign = campaign)
 
             serializer = models.cart.cart.CartSerializer(queryset, many=True)
             data = serializer.data
@@ -335,13 +462,7 @@ class CartViewSet(viewsets.ModelViewSet):
 
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
 
-        queryset = campaign.carts.exclude(products={}).order_by('id')
-
-        if search:
-            if search.isnumeric():
-                queryset = queryset.filter(Q(id=int(search)) | Q(customer_name__icontains=search) )
-            else:
-                queryset = queryset.filter(customer_name__icontains=search)
+        queryset = self.__search_cart(user_subscription, request, campaign = campaign)
 
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -360,9 +481,8 @@ class CartViewSet(viewsets.ModelViewSet):
     def seller_retrieve_cart(self, request, pk=None):
 
         api_user = lib.util.verify.Verify.get_seller_user(request)
-        cart = lib.util.verify.Verify.get_cart(pk)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
-        lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, cart.campaign.id)
+        cart = lib.util.verify.Verify.get_cart_from_user_subscription(user_subscription, pk)
 
         return Response(models.cart.cart.CartSerializer(cart).data, status=status.HTTP_200_OK)
     
@@ -371,8 +491,9 @@ class CartViewSet(viewsets.ModelViewSet):
     def seller_retrieve_cart_oid(self, request, pk=None):
 
         api_user = lib.util.verify.Verify.get_seller_user(request)
-        cart = lib.util.verify.Verify.get_cart(pk)
-        lib.util.verify.Verify.get_campaign_from_user_subscription(api_user.user_subscription, cart.campaign.id)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        cart = lib.util.verify.Verify.get_cart_from_user_subscription(user_subscription, pk)
+
         oid = database.lss.cart.get_oid_by_id(cart.id)
 
         return Response(oid, status=status.HTTP_200_OK)
@@ -382,10 +503,11 @@ class CartViewSet(viewsets.ModelViewSet):
     @lib.error_handle.error_handler.cart_operation_error_handler.update_cart_product_error_handler
     def seller_edit_cart_product(self, request, cart_id):
 
-        api_user = lib.util.verify.Verify.get_seller_user(request)
         campaign_product_id, qty = lib.util.getter.getdata(request, ('campaign_product_id', 'qty',), required=True)
-
-        cart = lib.util.verify.Verify.get_cart(cart_id)
+        
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        cart = lib.util.verify.Verify.get_cart_from_user_subscription(user_subscription, cart_id)
         campaign = lib.util.verify.Verify.get_campaign_from_cart(cart)
         campaign_product = lib.util.verify.Verify.get_campaign_product_from_campaign(campaign, campaign_product_id)
 
@@ -406,8 +528,9 @@ class CartViewSet(viewsets.ModelViewSet):
 
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
-        cart = lib.util.verify.Verify.get_cart(pk)
-        lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, cart.campaign.id)
+        cart = lib.util.verify.Verify.get_cart_from_user_subscription(user_subscription, pk)
+        # cart = lib.util.verify.Verify.get_cart(pk)
+        # lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, cart.campaign.id)
 
         cart.free_delivery = bool(free_delivery)
         cart.adjust_title = adjust_title
@@ -418,3 +541,89 @@ class CartViewSet(viewsets.ModelViewSet):
         cart.save()
         
         return Response(models.cart.cart.CartSerializer(cart).data, status=status.HTTP_200_OK)
+
+    def __search_cart(self, user_subscription, request, campaign = None):
+        
+        search, = lib.util.getter.getparams(request, ('search',), with_user=False)
+
+
+        platform_dict, sort_by_dict, = \
+            lib.util.getter.getdata(request, ('platform_options', 'sort_by'), required=False)
+
+        queryset = user_subscription.carts.exclude(products = Value('null'))
+        # pymongo_filter_query = {'user_subscription_id': user_subscription.id, 'products':{"$ne":{}}}
+
+        search_conditions = Q()
+
+        if campaign :
+            queryset=queryset.filter(campaign = campaign)
+            # pymongo_filter_query['campaign_id'] = campaign.id
+
+            if search not in ["",None,'undefined']:
+
+                for campaign_product in campaign.products.filter(Q(name__contains=search)|Q(order_code__contains=search)):
+                    search_conditions.add({'products__has_key':str(campaign_product.id)},Q.OR)
+
+        if search not in ["",None,'undefined'] and search.isnumeric():
+            search_conditions.add({'id':int(search)},Q.OR)
+            search_conditions.add({'customer_name__contains':search},Q.OR)
+
+            # pymongo_filter_query["$or"]=[{"id":{"$eq":int(search)}}, {"customer_name":{"$regex":str(search),"$options": 'i'}}]
+
+        elif search not in ["",None,'undefined']:
+            search_conditions.add({'customer_name__contains':search},Q.OR)
+            # pymongo_filter_query["customer_name"]={"$regex":str(search),"$options": 'i'}
+
+        queryset = queryset.filter(search_conditions)
+
+
+        if platform_dict and [key for key,value in platform_dict.items() if value]:
+            platforms =  [key for key,value in platform_dict.items() if value]
+            queryset=queryset.filter(platform__in=platforms)
+            # pymongo_filter_query['platform'] = {"$in": platforms}
+
+
+
+        queryset = queryset.order_by('-created_at')
+        # pymongo_sort_by = sort_by = {"id":-1}
+        if sort_by_dict:
+            for order_by, asc in sort_by_dict.items():
+                if order_by not in ["id", "customer_name", "updated_at"]:
+                    continue
+                order_by = order_by if asc==1 else f"-{order_by}"
+                queryset = queryset.order_by(order_by)
+                # pymongo_sort_by['order_by'] = asc
+
+        return queryset
+        # , pymongo_filter_query, pymongo_sort_by
+
+    @action(detail=True, methods=['PUT'], url_path=r'seller/clear', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    @lib.error_handle.error_handler.cart_operation_error_handler.update_cart_product_error_handler
+    def seller_clear_cart(self, request, pk=None):
+
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        cart = lib.util.verify.Verify.get_cart_from_user_subscription(user_subscription, pk)
+
+        lib.helper.cart_helper.CartHelper.clear(cart)
+
+        cart = lib.util.verify.Verify.get_cart(pk)
+
+        return Response(models.cart.cart.CartSerializer(cart).data, status=status.HTTP_200_OK)
+    
+    @action(detail=True, methods=['DELETE'], url_path=r'seller/delete', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    @lib.error_handle.error_handler.cart_operation_error_handler.update_cart_product_error_handler
+    def seller_delete_cart(self, request, pk=None):
+
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        cart = lib.util.verify.Verify.get_cart_from_user_subscription(user_subscription, pk)
+
+        lib.helper.cart_helper.CartHelper.clear(cart)
+        cart.delete()
+
+        return Response('OK', status=status.HTTP_200_OK)
+    
+    

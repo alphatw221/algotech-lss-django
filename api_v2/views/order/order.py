@@ -1,10 +1,12 @@
 from platform import platform
+from api_v2.views.payment.payment import update_wallet
 from rest_framework.response import Response
 from rest_framework import viewsets,status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.decorators import action
-from rest_framework.parsers import MultiPartParser
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.renderers import StaticHTMLRenderer
 
 
 from django.conf import settings
@@ -16,6 +18,7 @@ from api import models
 import database
 import lib
 import factory
+import service
 
 
 
@@ -24,15 +27,12 @@ from automation import jobs
 from datetime import datetime
 
 
-class OrderSerializerWithCampaign(models.order.order.OrderSerializer):
-    campaign = models.campaign.campaign.CampaignSerializer(read_only=True, default=dict)
-
 class OrderSerializerWithOrderProduct(models.order.order.OrderSerializer):
     order_products = models.order.order_product.OrderProductSerializer(many=True, read_only=True, default=list)
     
 class OrderSerializerWithOrderProductWithCampaign(OrderSerializerWithOrderProduct):
     campaign = models.campaign.campaign.CampaignSerializer(read_only=True, default=dict)
-
+    user_subscription = models.user.user_subscription.UserSubscriptionSerializer(read_only=True, default=dict)
 
 class OrderPagination(PageNumberPagination):
     page_query_param = 'page'
@@ -43,73 +43,6 @@ class OrderViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAdminUser,)
     queryset = models.order.order.Order.objects.all().order_by('id')
     pagination_class = OrderPagination
-
-    # ----------------------------------------------- guest ----------------------------------------------------
-    # @action(detail=False, methods=['GET'], url_path=r'guest/retrieve/(?P<order_oid>[^/.]+)/platform', permission_classes=(), authentication_classes=[])
-    # @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    # def guest_retrieve_order_platform(self, request, order_oid):
-    #     order = lib.util.verify.Verify.get_order_with_oid(order_oid)
-    #     return Response(order.platform, status=status.HTTP_200_OK)
-
-    # @action(detail=False, methods=['GET'], url_path=r'guest/retrieve/(?P<order_oid>[^/.]+)/subscription', permission_classes=(), authentication_classes=[])
-    # @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    # def guest_retrieve_order_with_user_subscription(self, request, order_oid):
-    #     order = lib.util.verify.Verify.get_order_with_oid(order_oid)
-    #     return Response(models.order.order.OrderSerializerWithUserSubscription(order).data, status=status.HTTP_200_OK)
-
-    # @action(detail=False, methods=['GET'], url_path=r'guest/retrieve/(?P<order_oid>[^/.]+)', permission_classes=(), authentication_classes=[])
-    # @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    # def guest_retrieve_order(self, request, order_oid):
-    #     order = lib.util.verify.Verify.get_order_with_oid(order_oid)
-    #     return Response(models.order.order.OrderSerializer(order).data, status=status.HTTP_200_OK)
-
-    # @action(detail=False, methods=['PUT'], url_path=r'(?P<order_oid>[^/.]+)/guest/receipt/upload', url_name='guest_upload_receipt', parser_classes=(MultiPartParser,), permission_classes=(), authentication_classes=[])
-    # @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    # def guest_upload_receipt(self, request, order_oid):
-
-    #     order = lib.util.verify.Verify.get_order_with_oid(order_oid)
-    #     campaign = lib.util.verify.Verify.get_campaign_from_order(order)
-
-    #     last_five_digit, image, account_name, account_mode = lib.util.getter.getdata(request,('last_five_digit', 'image', 'account_name', 'account_mode'), required=False)
-
-    #     if image in [None, '', "undefined", 'null']:
-    #         pass
-    #     elif image.size > models.order.order.IMAGE_MAXIMUM_SIZE:
-    #         raise lib.error_handle.error.api_error.ApiVerifyError('image_size_exceed_maximum_size')
-    #     elif image.content_type not in models.order.order.IMAGE_SUPPORTED_TYPE:
-    #         raise lib.error_handle.error.api_error.ApiVerifyError('not_support_this_image_type')
-    #     else:
-    #         try:
-    #             image_name = image.name.replace(" ","")
-    #             image_dir = f'campaign/{order.campaign.id}/order/{order.id}/receipt'
-    #             image_url = lib.util.storage.upload_image(image_dir, image_name, image)
-    #             order.meta["receipt_image"] = image_url
-    #         except Exception as e:
-    #             history = order.history
-    #             history["receipt_image_error"] = str(e)
-
-    #     order.meta["last_five_digit"] = last_five_digit
-    #     order.meta['account_name'] = account_name
-    #     order.meta['account_mode'] = account_mode
-    #     order.payment_method = models.order.order.PAYMENT_METHOD_DIRECT
-    #     order.status = "complete"
-    #     order.save()
-
-    #     lib.helper.order_helper.OrderHelper.sold_campaign_product(order.id)
-    #     # content = lib.helper.order_helper.OrderHelper.get_confirmation_email_content(order)
-    #     subject = lib.i18n.email.order_comfirm_mail.i18n_get_mail_subject(order, lang=campaign.lang)
-    #     content = lib.i18n.email.order_comfirm_mail.i18n_get_mail_content(order, campaign, lang=campaign.lang)
-    #     jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)     #queue this to redis if needed
-
-    #     return Response(models.order.order.OrderSerializer(order).data, status=status.HTTP_200_OK)
-
-
-    # @action(detail=False, methods=['GET'], url_path=r'guest/retrieve/(?P<order_oid>[^/.]+)/state', permission_classes=())
-    # @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    # def check_guest_order_state(self, request, order_oid):
-
-    #     order = lib.util.verify.Verify.get_order_with_oid(order_oid)
-    #     return Response(order.status, status=status.HTTP_200_OK)
 
 
     # ----------------------------------------------- buyer ----------------------------------------------------
@@ -146,10 +79,9 @@ class OrderViewSet(viewsets.ModelViewSet):
         data = models.order.order.OrderSerializerUpdateShipping(order).data
         return Response(data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['PUT'], url_path=r'(?P<order_oid>[^/.]+)/buyer/receipt/upload', parser_classes=(MultiPartParser,), permission_classes=())
+    @action(detail=False, methods=['PUT'], url_path=r'(?P<order_oid>[^/.]+)/buyer/receipt/upload', url_name='buyer_upload_receipt', parser_classes=(MultiPartParser,), permission_classes=())
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def buyer_upload_receipt(self, request, order_oid):
-
 
         order = lib.util.verify.Verify.get_order_with_oid(order_oid)
         campaign = lib.util.verify.Verify.get_campaign_from_order(order)
@@ -169,10 +101,15 @@ class OrderViewSet(viewsets.ModelViewSet):
         order.meta['account_name'] = account_name
         order.meta['account_mode'] = account_mode
         order.payment_method = models.order.order.PAYMENT_METHOD_DIRECT
-        order.payment_status = models.order.order.PAYMENT_STATUS_AWAITING_CONFIRM
         order.paid_at = datetime.utcnow()
-        lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
-
+        #payment status update
+        order.payment_status = models.order.order.PAYMENT_STATUS_AWAITING_CONFIRM
+        #delivery status update
+        delivery_params = {"order_oid": order_oid, "order": order, "extra_data": {}, "create_order": True, "update_status": True}
+        lib.helper.delivery_helper.DeliveryHelper.create_delivery_order_and_update_delivery_status(**delivery_params)
+                
+        #wallet
+        update_wallet(order)
 
         for campaign_product_id_str, qty in order.products.items():
             pymongo_campaign_product = database.lss.campaign_product.CampaignProduct(id=int(campaign_product_id_str))
@@ -182,35 +119,13 @@ class OrderViewSet(viewsets.ModelViewSet):
         content = lib.i18n.email.order_comfirm_mail.i18n_get_mail_content(order, campaign, lang=campaign.lang)
 
         jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)     #queue this to redis if needed
-
+        
+        #order status update
+        lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
         return Response(OrderSerializerWithOrderProductWithCampaign(order).data, status=status.HTTP_200_OK)
 
 
-    @action(detail=False, methods=['GET'], url_path=r'buyer/history', permission_classes=(IsAuthenticated,))
-    @lib.error_handle.error_handler.api_error_handler.api_error_handler
-    def list_buyer_order_history(self, request):
-
-        api_user = lib.util.verify.Verify.get_customer_user(request)
-        user_subscription_id, points_relative = lib.util.getter.getparams(request, ('user_subscription_id', 'points_relative'), with_user=False)
-
-        queryset = api_user.orders.all()
-        if user_subscription_id not in ["", None,'undefined','null'] and user_subscription_id.isnumeric():
-            queryset=queryset.filter(user_subscription_id = int(user_subscription_id))
-
-        if points_relative:
-            queryset=queryset.filter(Q(points_earned__gt = 0)|Q(points_used__gt = 0)|Q(point_discount__gt = 0))
- 
-
-        queryset = queryset.order_by('-created_at')
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = models.order.order.OrderSerializer(page, many=True)
-            data = self.get_paginated_response(serializer.data).data
-        else:
-            
-            data = models.order.order.OrderSerializer(api_user.orders, many=True).data
-
-        return Response(data, status=status.HTTP_200_OK)
+    
        
 
     @action(detail=False, methods=['GET'], url_path=r'buyer/retrieve/(?P<order_oid>[^/.]+)/state', permission_classes=())
@@ -218,8 +133,11 @@ class OrderViewSet(viewsets.ModelViewSet):
     def check_buyer_order_state(self, request, order_oid):
 
         order = lib.util.verify.Verify.get_order_with_oid(order_oid)
-
-        return Response(order.status, status=status.HTTP_200_OK)
+        response_data = {
+            "payment_method": order.payment_method,
+            "status": order.status
+        }
+        return Response(response_data, status=status.HTTP_200_OK)
     
     @action(detail=True, methods=['GET'], url_path=r'buyer/retrieve/oid', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
@@ -230,6 +148,10 @@ class OrderViewSet(viewsets.ModelViewSet):
         oid = database.lss.order.get_oid_by_id(order.id)
 
         return Response(oid, status=status.HTTP_200_OK)
+    
+    
+    
+    
     # ------------------------------------seller----------------------------------------
     
     @action(detail=True, methods=['GET'], url_path=r'seller/retrieve', permission_classes=(IsAuthenticated,))
@@ -299,13 +221,18 @@ class OrderViewSet(viewsets.ModelViewSet):
             queryset=queryset.filter(payment_status__in=payment_status_options)
             pymongo_filter_query['payment_status'] = {"$in": payment_status_options}
 
-
         if platform_dict and [key for key,value in platform_dict.items() if value]:
             platforms =  [key for key,value in platform_dict.items() if value]
-            queryset=queryset.filter(platform__in=platforms)
-            pymongo_filter_query['platform'] = {"$in": platforms}
-
-
+            if "" in platforms:
+                # contain express cart
+                queryset=queryset.filter(Q(platform__in=platforms) | Q(platform__isnull=True))
+                pymongo_filter_query['platform'] = {'$or': [{"platform": {"$in": platforms}},{"platform": {"$exists": False}}]}
+            else:
+                # not contain express cart
+                queryset=queryset.filter(platform__in=platforms)
+                pymongo_filter_query['platform'] = {"$in": platforms}
+                
+        
 
         queryset = queryset.order_by('-created_at')
         pymongo_sort_by = sort_by = {"id":-1}
@@ -372,10 +299,11 @@ class OrderViewSet(viewsets.ModelViewSet):
 
             point_discount_processor_class:lib.helper.discount_helper.PointDiscountProcessor = factory.point_discount.get_point_discount_processor_class(order.campaign.user_subscription)
             point_discount_processor = point_discount_processor_class(order.buyer, order.campaign.user_subscription, None, order.campaign.meta_point, points_earned = order.points_earned)
+            point_discount_processor.create_point_transaction(order_id = order.id)
             point_discount_processor.update_wallet()
 
         order.payment_status = payment_status
-        order.save()
+        lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
 
         return Response(OrderSerializerWithOrderProductWithCampaign(order).data, status=status.HTTP_200_OK)
     
@@ -388,11 +316,23 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         _, pymongo_filter_query, pymongo_sort_by = self.__search_order(user_subscription, request)
         iterable_objects = database.lss.order.get_order_export_cursor(pymongo_filter_query, pymongo_sort_by)
-
         order_export_processor_class:factory.order_export.default.DefaultOrderExportProcessor =\
              factory.order_export.get_order_export_processor_class(user_subscription)
         order_export_processor = order_export_processor_class(iterable_objects, user_subscription)
         
         order_data = order_export_processor.export_order_data()
-        print(order_data)
+        return Response(order_data, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['POST'], url_path=r'report/kol/json', permission_classes=(IsAuthenticated, ))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def get_order_report_for_kol(self, request, pk=None):
+
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+
+        _, pymongo_filter_query, pymongo_sort_by = self.__search_order(user_subscription, request)
+        iterable_objects = database.lss.order.get_order_export_cursor_for_kol(pymongo_filter_query, pymongo_sort_by)
+        order_export_processor = factory.order_export.kol.KOLOrderExportProcessor(iterable_objects, user_subscription)
+        
+        order_data = order_export_processor.export_order_data()
         return Response(order_data, status=status.HTTP_200_OK)

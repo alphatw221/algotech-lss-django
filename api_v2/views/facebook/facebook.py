@@ -13,6 +13,7 @@ import json
 def facebook_messenger_webhook(request):
     try:
         if request.method == 'GET':
+            
             mode = request.query_params.get('hub.mode', None)
             token = request.query_params.get('hub.verify_token', None)
             challenge = request.query_params.get('hub.challenge', None)

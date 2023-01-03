@@ -1,9 +1,10 @@
 from api import models
-from api import rule
+from api_v2 import rule
 import traceback
 import database
+from lib.error_handle.error_handler import cart_operation_error_handler
+from lib.error_handle.error import cart_error
 import service
-import lib
 
 from datetime import datetime
 
@@ -56,7 +57,7 @@ class CartHelper():
 
 
         if not cls.__check_stock_avaliable_and_add_to_cart_by_api(campaign_product.__dict__, qty_difference):
-            raise lib.error_handle.error.cart_error.CartErrors.UnderStock('out_of_stock') 
+            raise cart_error.CartErrors.UnderStock('out_of_stock') 
 
         pymongo_cart = database.lss.cart.Cart(id=cart.id)
         cls.__update_cart_product(   #pymongo_cart sync here
@@ -71,7 +72,7 @@ class CartHelper():
 
 
     @classmethod
-    @lib.error_handle.error_handler.cart_operation_error_handler.update_cart_product_by_comment_error_handler
+    @cart_operation_error_handler.update_cart_product_by_comment_error_handler
     def update_cart_product_by_comment(cls, pymongo_cart, campaign_product_data, qty):
 
         state = None
@@ -113,11 +114,46 @@ class CartHelper():
 
         return state
 
+    @classmethod
+    def clear(cls, cart):    
+
+        ## in case we need to do something else in the future
+
+        pymongo_cart, pymongo_campaign_products = cls.__clear_cart_and_return_campaign_product(cart)
+        for pymongo_campaign_product in pymongo_campaign_products:
+            cls.send_campaign_product_websocket_data(pymongo_campaign_product=pymongo_campaign_product)
+        cls.send_cart_websocket_data(pymongo_cart)
+
+        ## in case we need to do something else in the future
+
+    @classmethod
+    def __clear_cart_and_return_campaign_product(cls, cart, attempts=3):
+
+        try:
+            with database.lss.util.start_session() as session:
+                with session.start_transaction():
+                    campaign_products = []
+                    for campaign_product_id_str, qty in cart.products.items():
+                        campaign_product = database.lss.campaign_product.CampaignProduct(id=int(campaign_product_id_str))
+                        campaign_product.customer_return(qty, sync=True, session=session)
+                        campaign_products.append(campaign_product)
+                    pymongo_cart = database.lss.cart.Cart(id=cart.id)
+                    pymongo_cart.clear(sync=True, session=session)
+
+                    return pymongo_cart, campaign_products
+
+        except Exception:
+            if attempts > 0:
+                return cls.__clear_cart_and_return_campaign_product(cart, attempts=attempts-1)
+            else:
+                print(traceback.format_exc())
+                raise cart_error.CartErrors.ServerBusy('server_busy')
+
 
     @classmethod
     def checkout(cls, api_user, campaign, cart_id, point_discount_processor, shipping_data={}):
 
-        
+        #transfer cart to order ( transaction required )
         success, data = cls.__transfer_cart_to_order(api_user, cart_id, shipping_data)
         if not success:
             error_products_data = data.get('error_products_data', [])
@@ -132,9 +168,16 @@ class CartHelper():
         pymongo_order = data.get('pymongo_order')
         pymongo_cart = data.get('pymongo_cart')
         campaign_product_data_dict = data.get('campaign_product_data_dict')
+        is_new_customer = cls.__is_new_customer(campaign, api_user)
 
-        cls.__summarize_order(api_user, campaign, pymongo_order, campaign_product_data_dict, point_discount_processor)
+        #summarize order (discount, points , shippings fee computing happen here)
+        cls.__summarize_order(api_user, campaign, pymongo_order, campaign_product_data_dict, point_discount_processor, is_new_customer = is_new_customer)
 
+        #add new customer
+        if is_new_customer:
+            campaign.user_subscription.customers.add(api_user)
+
+        #push data to frontend
         for campaign_product_id_str, qty in pymongo_order.data.get('products',{}).copy().items():
             campaign_product_data = campaign_product_data_dict[campaign_product_id_str]
             cls.send_campaign_product_websocket_data(campaign_product_data)
@@ -159,14 +202,24 @@ class CartHelper():
                         try:
                             qty_avaliable = campaign_product_data.get('qty_for_sale')-campaign_product_data.get('qty_sold')-campaign_product_data.get('qty_pending_payment')
 
-                            if qty_avaliable < 1 or qty < 1:
+                            if qty < 1:
                                 del pymongo_cart.data.get('products',{})[campaign_product_id_str] 
                                 database.lss.campaign_product.CampaignProduct(id=campaign_product_data.get('id')).customer_return(qty, sync=False, session=session)
                                 error_products_data.append({'id':campaign_product_data.get('id')})
                                 success = False
+                                continue
 
+                            if campaign_product_data.get('oversell')==True:
+                                continue
 
-                            elif qty>qty_avaliable and not campaign_product_data.get('oversell'):
+                            if qty_avaliable < 1 :
+                                del pymongo_cart.data.get('products',{})[campaign_product_id_str] 
+                                database.lss.campaign_product.CampaignProduct(id=campaign_product_data.get('id')).customer_return(qty, sync=False, session=session)
+                                error_products_data.append({'id':campaign_product_data.get('id')})
+                                success = False
+                                continue
+
+                            if qty>qty_avaliable :
                                 return_qty = qty - qty_avaliable
                                 pymongo_cart.data.get('products',{})[campaign_product_id_str] = qty_avaliable
                                 database.lss.campaign_product.CampaignProduct(id=campaign_product_data.get('id')).customer_return(return_qty, sync=False, session=session)
@@ -190,7 +243,12 @@ class CartHelper():
                         **pymongo_cart.data, 
                         **shipping_data,
                         
-                        )  
+                        )
+                    
+                    #for ecpay logistic 
+                    if pymongo_cart.data['meta'].get('ecpay_cvs'):
+                        pymongo_order.data['meta']['ecpay_cvs'] = pymongo_cart.data['meta'].get('ecpay_cvs')
+                        pymongo_order.update(session=session, sync=True, **pymongo_order.data)
 
                     for campaign_product_id_str, qty in pymongo_order.data.get('products',{}).copy().items():
                         campaign_product_data = campaign_product_data_dict[campaign_product_id_str]
@@ -203,6 +261,7 @@ class CartHelper():
                             "type":campaign_product_data.get('type'),
                             "subtotal":campaign_product_data.get('price')*qty,
                             #relation:
+                            "order_code": campaign_product_data.get('order_code'),
                             "order_id":pymongo_order.id,
                             "campaign_product_id":int(campaign_product_id_str)
                         }
@@ -220,21 +279,49 @@ class CartHelper():
                 cls.__transfer_cart_to_order(api_user, cart_id, shipping_data, attempts=attempts-1)
             else:
                 print(traceback.format_exc())
-                raise lib.error_handle.error.cart_error.CartErrors.ServerBusy('server_busy')
+                raise cart_error.CartErrors.ServerBusy('server_busy')
 
-
+    @staticmethod
+    def __is_new_customer(campaign, api_user):
+        return True if api_user and not campaign.user_subscription.customers.filter(id=api_user.id).exists() else False
 
     @classmethod
-    def __summarize_order(cls, api_user, campaign:models.campaign.campaign.Campaign, pymongo_order:database.lss.order.Order, campaign_product_data_dict, point_discount_processor):
-
+    def __summarize_order(cls, api_user, campaign:models.campaign.campaign.Campaign, pymongo_order:database.lss.order.Order, campaign_product_data_dict, point_discount_processor, is_new_customer=False):
         subtotal = 0
         shipping_cost = 0
         total = 0
-        meta = {}
+        meta = pymongo_order.data.get('meta',{})
 
         product_category_data_dict={}
+        """
+        example: 
+        product_category_data_dict = {
+            <product_category_id1>: <product_category_data>.
+            <product_category_id2>: <product_category_data>
+            ...
+        }
+        """
         product_category_products_dict = {}
+        """
+        example: 
+        product_category_products_dict = {
+            <product_category_id1>: [
+                { "campaign_product_id": 545, "qty": 1},
+                { "campaign_product_id": 544, "qty": 3},
+                ...
+            ],
+            <product_category_id2>: [
+                { "campaign_product_id": 878, "qty": 1},
+                { "campaign_product_id": 788, "qty": 3},
+                ...
+            ]
+            ...
+        }
+        """
+        product_total_quantity = 0
         for campaign_prodcut_id_str, qty in pymongo_order.data.get('products',{}).items():
+            product_total_quantity += qty
+            
             campaign_product_data = campaign_product_data_dict.get(campaign_prodcut_id_str,{})
 
             if len(campaign_product_data.get('categories',[])) == 1 :
@@ -251,18 +338,17 @@ class CartHelper():
 
             subtotal += campaign_product_data.get('price',0)*qty
         shipping_cost, category_logistic_applied = cls.__compute_shipping_cost(campaign, pymongo_order, product_category_data_dict, product_category_products_dict, campaign_product_data_dict)
-        
 
         #compute free_delivery
         meta_logistic = campaign.meta_logistic
         is_subtotal_over_free_delivery_threshold = subtotal >= float(meta_logistic.get('free_delivery_for_order_above_price')) if meta_logistic.get('is_free_delivery_for_order_above_price') else False
-        is_items_over_free_delivery_threshold = len(pymongo_order.data.get('products')) >= float(meta_logistic.get('free_delivery_for_how_many_order_minimum')) if meta_logistic.get('is_free_delivery_for_how_many_order_minimum') else False
+        is_items_over_free_delivery_threshold = product_total_quantity >= float(meta_logistic.get('free_delivery_for_how_many_order_minimum')) if meta_logistic.get('is_free_delivery_for_how_many_order_minimum') else False
         meta['subtotal_over_free_delivery_threshold'] = True if is_subtotal_over_free_delivery_threshold else False
         meta['items_over_free_delivery_threshold'] = True if is_items_over_free_delivery_threshold else False
             
 
         #compute point discount
-        point_discount = point_discount_processor.compute_point_discount()
+        point_discount = point_discount_processor.compute_point_discount() if point_discount_processor else 0
         
 
         #summarize_total
@@ -278,8 +364,8 @@ class CartHelper():
         total = max(total, 0)
         
         #compute points earned
-        points_earned = point_discount_processor.compute_points_earned(subtotal_after_discount)
-        point_expired_at = point_discount_processor.compute_expired_date()
+        points_earned = point_discount_processor.compute_points_earned(subtotal_after_discount) if point_discount_processor else 0
+        # point_expired_at = point_discount_processor.compute_expired_date() if point_discount_processor else None
 
         pymongo_order.update(
 
@@ -291,17 +377,19 @@ class CartHelper():
             shipping_cost = shipping_cost,
             total = total,
             meta = meta,
-            points_used = point_discount_processor.points_used,
+            points_used = point_discount_processor.points_used if point_discount_processor else 0,
             point_discount = point_discount,
             points_earned = points_earned,
-            point_expired_at = point_expired_at,
+            # point_expired_at = point_expired_at,
             meta_point = campaign.meta_point,
 
-            remark = 'new user' if api_user and models.order.order.Order.objects.filter(buyer = api_user, user_subscription = campaign.user_subscription).count()==1 else '',
+            remark = 'new customer' if is_new_customer else '',
             **campaign.user_subscription.meta.get('order_default_fields',{}),
             sync=True)
 
-        point_discount_processor.update_wallet()
+        if point_discount_processor:
+            point_discount_processor.create_point_transaction(order_id = pymongo_order.id)
+            point_discount_processor.update_wallet()
 
     @classmethod 
     def __compute_shipping_cost(cls, campaign, pymongo_order, product_category_data_dict:dict, product_category_products_dict:dict, campaign_product_data_dict:dict):
@@ -309,6 +397,7 @@ class CartHelper():
             return 0, False
 
         shipping_cost = 0
+        
         category_logistic_applied = False
         for product_category_id_str, product_category_data in product_category_data_dict.items():
             if product_category_data.get('meta_logistic',{}).get('enable_flat_rate')==True:
@@ -321,7 +410,7 @@ class CartHelper():
                     for category_product in product_category_products_dict.get(product_category_id_str):
                         category_products_subtotal += campaign_product_data_dict.get(category_product.get('campaign_product_id'),{}).get('price') * category_product.get('qty')
                     
-                    is_category_product_subtotal_above = category_products_subtotal > product_category_data.get('meta_logistic',{}).get('free_delivery_for_order_above_price',0)
+                    is_category_product_subtotal_above = category_products_subtotal > product_category_data.get('meta_logistic',{}).get('free_delivery_for_order_above_price')
 
                 shipping_cost+=0 if is_category_product_subtotal_above else product_category_data.get('meta_logistic').get('flat_rate',0)
         
@@ -329,8 +418,7 @@ class CartHelper():
             return shipping_cost, True
 
         shipping_cost = float(campaign.meta_logistic.get('delivery_charge',0))
-
-        if(type(pymongo_order.data.get('shipping_option_index'))==int):
+        if(pymongo_order.data.get('shipping_option_data')):
             if pymongo_order.data.get('shipping_option_data',{}).get('type') == '+':
                 shipping_cost += float(pymongo_order.data.get('shipping_option_data',{}).get('price',0)) 
 
@@ -357,7 +445,7 @@ class CartHelper():
             if attempts > 0:
                 cls.__check_stock_avaliable_and_add_to_cart_by_api(campaign_product_data, qty_difference, attempts=attempts-1)
             else:
-                raise lib.error_handle.error.cart_error.CartErrors.ServerBusy('server_busy')
+                raise cart_error.CartErrors.ServerBusy('server_busy')
 
     @classmethod
     def __check_stock_avaliable_and_add_to_cart_by_comment(cls, campaign_product_data, pymongo_cart:database.lss.cart.Cart, qty, attempts=10):
@@ -382,7 +470,7 @@ class CartHelper():
             if attempts > 0:
                 cls.__check_stock_avaliable_and_add_to_cart_by_comment(campaign_product_data, pymongo_cart, qty, attempts=attempts-1)
             else:
-                raise lib.error_handle.error.cart_error.CartErrors.ServerBusy('server_busy')
+                raise cart_error.CartErrors.ServerBusy('server_busy')
 
     @staticmethod
     def __check_stock_avaliable_and_add_to_cart(campaign_product_data, qty_difference, session):
@@ -426,9 +514,13 @@ class CartHelper():
         service.channels.campaign.send_cart_data(pymongo_cart.data.get('campaign_id'), pymongo_cart.data)
     
     @staticmethod
-    def send_campaign_product_websocket_data(campaign_product_data):
-    
-        campaign_product_data = database.lss.campaign_product.CampaignProduct.get(id=campaign_product_data.get('id'))
+    def send_campaign_product_websocket_data(campaign_product_data={}, pymongo_campaign_product=None):
+
+        if pymongo_campaign_product:
+            campaign_product_data = pymongo_campaign_product.data
+        else:
+            campaign_product_data = database.lss.campaign_product.CampaignProduct.get(id=campaign_product_data.get('id'))
+
         product_data = {
             "id": campaign_product_data.get('id'),
             'qty_sold': campaign_product_data.get('qty_sold'),

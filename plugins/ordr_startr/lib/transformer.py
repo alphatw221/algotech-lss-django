@@ -53,7 +53,7 @@ def to_lss_order(ordr_startr_order_data, pre_order, campaign_product_external_in
         "shipping_first_name":ordr_startr_order_data.get('ShippingName'),
         "shipping_last_name":"",
         "shipping_email":ordr_startr_order_data.get('ShippingEmail'),
-        "shipping_phone":ordr_startr_order_data.get('ShippingMobile'),
+        "shipping_cellphone":ordr_startr_order_data.get('ShippingMobile'),
         "shipping_postcode":ordr_startr_order_data.get('ShippingPostalCode'),
         "shipping_address_1":ordr_startr_order_data.get('ShippingAddress1'),
 

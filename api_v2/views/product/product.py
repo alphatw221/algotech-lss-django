@@ -1,7 +1,7 @@
-
-from platform import platform
+import traceback
 from django.core.files.base import ContentFile
 from django.conf import settings
+from api_v2.views.user.user import UserSerializerSellerAccountInfo
 
 from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
@@ -9,13 +9,14 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.parsers import MultiPartParser
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.parsers import MultiPartParser
+
 
 from automation import jobs
 
 from api import models
-from api import rule
+from api_v2 import rule
 
+import factory
 import lib, json
 class ProductPagination(PageNumberPagination):
     page_query_param = 'page'
@@ -32,11 +33,13 @@ class ProductViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'], url_path=r'search', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def search_product(self, request):
-        api_user, search_column, keyword, product_status, product_type, category_id, exclude_products, sort_by = \
-            lib.util.getter.getparams(request, ("search_column", "keyword", "product_status", "product_type", "category_id", "exclude", "sort_by"), with_user=True, seller=True)
-        
+        api_user, support_stock_user_subscription_id, search_column, keyword, product_status, product_type, category_id, exclude_products, sort_by = \
+            lib.util.getter.getparams(request, ("support_stock_user_subscription_id", "search_column", "keyword", "product_status", "product_type", "category_id", "exclude", "sort_by"), with_user=True, seller=True)
         user_subscription = \
             lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        if support_stock_user_subscription_id not in ["", None, "null", "undefined"]:
+            user_subscription = lib.util.verify.Verify.get_support_stock_user_subscriptions_from_user_subscription(support_stock_user_subscription_id,user_subscription)
+        
         
         kwargs = {'status': product_status if product_status else 'enabled'}
         if (search_column in ["", None]) and (keyword not in [None, ""]):
@@ -88,7 +91,8 @@ class ProductViewSet(viewsets.ModelViewSet):
         data, = lib.util.getter.getdata(request,('data',),required=True)
         data = json.loads(data)
 
-        data['user_subscription'] = user_subscription.id
+        data['user_subscription'] = user_subscription.id                                                        #temp
+        data['category'] = int(data['categories'][0]) if 'categories' in data and data['categories'] else None  #temp
         rule.rule_checker.product_rule_checker.RuleChecker.check(check_list=[
             rule.check_rule.product_check_rule.ProductCheckRule.is_max_order_amount_less_than_qty,
             rule.check_rule.product_check_rule.ProductCheckRule.is_images_type_supported,
@@ -129,7 +133,8 @@ class ProductViewSet(viewsets.ModelViewSet):
         image, = lib.util.getter.getdata(request,('image', ), required=False)
         data, = lib.util.getter.getdata(request,('data',),required=True)
         data = json.loads(data)
-
+        data['category'] = int(data['categories'][0]) if 'categories' in data and data['categories'] else None  #temp
+        
         rule.rule_checker.product_rule_checker.RuleChecker.check(check_list=[
             rule.check_rule.product_check_rule.ProductCheckRule.is_max_order_amount_less_than_qty,
             rule.check_rule.product_check_rule.ProductCheckRule.is_images_type_supported,
@@ -212,7 +217,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         product = lib.util.verify.Verify.get_product_from_user_subscription(user_subscription, product_id)
 
-        for email, counter in product.meta.get('wish_list',{}).items():
+        for email, buyer_info in product.meta.get('wish_list',{}).items():
             title = ""
             #send email or do something #TODO
             # content = lib.helper.order_helper.OrderHelper.get_checkout_email_content(product,email)
@@ -221,7 +226,8 @@ class ProductViewSet(viewsets.ModelViewSet):
                 lib.i18n.email.notify_wishlist_email.i18n_get_notify_wishlist_subject(lang=api_user.lang),
                 email, 
                 'email_notify_wishlist.html', 
-                parameters={"product_name":product, "seller":api_user, "image_path":product.image}, 
+                parameters={"product_name":product, "seller":api_user, "image_path":product.image,
+                            "buyer_name":buyer_info.get('name','') if type(buyer_info) == dict else ''}, 
                 lang=api_user.lang)
             
         
@@ -230,19 +236,40 @@ class ProductViewSet(viewsets.ModelViewSet):
         
         return Response("OK", status=status.HTTP_200_OK)
 
+    
+    @action(detail=False, methods=['POST'], url_path=r'import', parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def seller_import_product(self, request):
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        try:
+            user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+
+            file, = lib.util.getter.getdata(request,('file', ), required=True)
+
+            product_import_processor_class:factory.product_import.default.DefaultProductImportProcessor \
+                = factory.product_import.get_product_import_processor_class(user_subscription)
+            product_import_processor = product_import_processor_class(user_subscription)
+            product_import_processor.process(file)
+        except:
+            print(traceback.format_exc())
+
+        return Response(UserSerializerSellerAccountInfo(api_user).data, status=status.HTTP_200_OK)
+
+
+
     #----------------------------------------------------------------for buyer-------------------------------------------------------------------------
     @action(detail=False, methods=['POST'], url_path=r'(?P<product_id>[^/.]+)/wish_list/add', permission_classes=(),  authentication_classes=[])
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def wish_list_add(self, request, product_id):
 
-        email, = lib.util.getter.getdata(request,('email',),required=True)
+        email,name, = lib.util.getter.getdata(request,('email','name',),required=True)
         product = lib.util.verify.Verify.get_product_by_id(product_id)
         
         if "wish_list" in product.meta:
-            if not email in product.meta["wish_list"]:
-                product.meta['wish_list'][email]=0
+            #重複add email update name
+            product.meta['wish_list'][email]={'name':name}
         else:
-            product.meta['wish_list'] = {email:0}
+            product.meta['wish_list'] = {email:{'name':name}}
         
         product.save()
         return Response(models.product.product.ProductSerializer(product).data, status=status.HTTP_200_OK)

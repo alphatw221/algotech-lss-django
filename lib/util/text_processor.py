@@ -1,4 +1,12 @@
+from enum import Enum, auto
+from abc import ABC, abstractmethod
 import string
+
+class TextProcessor(ABC):
+    @staticmethod
+    @abstractmethod
+    def process(text: str):
+        ...
 
 class OrderCodeTextProcessor():
     ordering_chars = set('+*Xx')

@@ -59,9 +59,6 @@ INSTALLED_APPS = [
     'django_cron',
     'api',
     'automation',
-    'backend',
-    'chat_bot',
-    'mail',
     'cron',
     'corsheaders',
     'django_extensions',
@@ -207,6 +204,7 @@ DATABASES = {
     #     }
     # }
 }
+DATA_UPLOAD_MAX_MEMORY_SIZE = 1024*1024*15
 MONGODB_CONNECTION_STRING = \
     'mongodb://'+config.MONGO_DB_USERNAME+':'+urllib.parse.quote_plus(config.MONGO_DB_PASSWORD)+\
     '@34.126.92.142:27017,35.240.200.4:27017,34.126.155.150:27017/'+\
@@ -294,27 +292,17 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # gcp load balancer
 GCP_API_LOADBALANCER_URL = "https://v2login.liveshowseller.com"
-# for social lab
-# GCP_API_LOADBALANCER_URL = "https://sb.liveshowseller.ph"
 
-LOCAL_API_SERVER = "http://localhost:8001"
-TEST_API_SERVER = "http://192.168.74.114/lss-backend"
 
 # Live Show Seller info
 WEB_SERVER_URL = "https://v2login.liveshowseller.com"
-# for social lab
-# WEB_SERVER_URL = "https://plusone.sociallab.ph/lss/public"
+
 
 # SHOPPING_CART_URL = f"{WEB_SERVER_URL}/buyer/login_to_cart"
 SHOPPING_CART_URL = f"{GCP_API_LOADBALANCER_URL}/buyer/cart"
 SHOPPING_CART_RECAPTCHA_URL = f"{GCP_API_LOADBALANCER_URL}/buyer/recaptcha"
 
-SUPPORTED_PLATFORMS = [
-    ("n/a", "No specific platform"),
-    ("facebook", "Facebook"),
-    ("youtube", "Youtube"),
-    ("instagram", "Instagram"),
-]
+
 
 # HITPAY_API_URL = 'https://api.sandbox.hit-pay.com/v1/payment-requests' # for test mode
 # HITPAY_API_KEY = '64044c7551b232cbf23b32d9b21e30ff1f4c5b42068c8c59864f161cad6af21b' # for test mode
@@ -383,21 +371,14 @@ GOOGLE_OAUTH_CLIENT_SECRET_FOR_LIVESHOWSELLER = "GOCSPX-oT9Wmr0nM0QRsCALC_H5j_yC
 TIKTOK_APP_ID = "7132396308677001218"
 TIKTOK_APP_SECRET = "e76d92bc644166d14c842d15d87a6c48a79e3717"
 
-# backend app
-COMMENT_PROCESSING = {
-    'REST_INTERVAL_SECONDS': 40,
-    'COMMENT_BATCH_SIZE': 300,
-    'MAX_RESPONSE_WORKERS': 50,
-}
-FACEBOOK_COMMENT_CAPTURING = {
-    'MAX_CONTINUOUS_REQUEST_TIMES': 10,
-    'REST_INTERVAL_SECONDS': 10,
-}
+TIKTOK_CLIENT_KEY = "aw8ec3na0zh867am"
+TIKTOK_CLIENT_SECRET = "03c59c635a59b40fd660f3c3cb56b121"
 
 # chat_bot app
 CHAT_BOT_FACEBOOK = {
     'VERIFY_TOKEN': 'ALGOTECHLSSMESSENGER'
 }
+
 #FTP
 FTP_STORAGE_LOCATION = "ftp://lssimages@tig.algotech.app:_TqUPZc*CMdG@74.124.210.137:21" #FTP server: ftp.tig.algotech.app
 BASE_URL = "https://tig.algotech.app/lssimages/"
@@ -426,7 +407,8 @@ EMAIL_HOST_PASSWORD = 'bq5^82DrrpQ4'  # jyhudyfbvpmewjsc
 # cron app
 CRON_CLASSES = [
     "cron.cron.CampaignReminderCronJob",
-    "cron.abandon_order_product_recycle.AbandonOrderProductRecycleCronJob"
+    "cron.uncheckout_cart_reminder.UncheckoutCartReminderCronJob",
+    "cron.adjust_wallet_with_expired_points.AdjustWalletWithExpiredPointsCronJob"
 ]
 DJANGO_CRON_DELETE_LOGS_OLDER_THAN = 10
 
@@ -470,22 +452,19 @@ PAYPAL_CONFIG = {
 STRIPE_API_KEY = "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"
 # STRIPE_API_KEY = "sk_test_51J2aFmF3j9D00CA0KABMZVKtOVnZNbBvM2hcokicJmfx8vvrmNyys5atEAcpp0Au2O3HtX0jz176my7g0ozbinof00RL4QAZrY"
 
-# APPEND_SLASH=False
-# OPERATION_CODE_NAME: AGILE
-ADMIN_LIST = [1, ]
 
 # for subscription code
 FERNET_KEY = '4zQFttQhIuTXZr15hKSEOwndw_VdLg_bQGc_vPRTtb8='
 
 
-WEBPACK_LOADER = {
-  'DEFAULT': {
-    'CACHE': not DEBUG,
-    'STATS_FILE': os.path.join(BASE_DIR.parent,'lss_vue/webpack-stats.json'),
-    'POLL_INTERVAL': 0.1,
-    'IGNORE': [r'.+\.hot-update.js', r'.+\.map'],
-  }
-}
+# WEBPACK_LOADER = {
+#   'DEFAULT': {
+#     'CACHE': not DEBUG,
+#     'STATS_FILE': os.path.join(BASE_DIR.parent,'lss_vue/webpack-stats.json'),
+#     'POLL_INTERVAL': 0.1,
+#     'IGNORE': [r'.+\.hot-update.js', r'.+\.map'],
+#   }
+# }
 
 # sendinblue api key
 SENDINBLUE_API_KEY = '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'

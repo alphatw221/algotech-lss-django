@@ -90,7 +90,7 @@ class SHCOrderExportProcessor(DefaultOrderExportProcessor):
             FieldMapper('id','OrderNo', width=10, first_only=True),
             FieldMapper('platform', 'Platform', width=15, first_only=True),
             FieldMapper('customer_name', 'Name', width=20, first_only=True),
-            FieldMapper('shipping_phone', 'Shipping Phone', width=20, first_only=True),
+            FieldMapper('shipping_cellphone', 'Shipping Phone', width=20, first_only=True),
             DeliveryInfonMapper('shipping_address_1', 'Shipping Address 1', width=40, first_only=True),
             DeliveryInfonMapper('shipping_postcode', 'Postcode', width=20, first_only=True),
             FieldMapper('shipping_email', 'E-mail', width=40, first_only=True),

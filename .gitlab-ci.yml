@@ -1,20 +1,48 @@
-build-job:
-    stage: build
-    image: python:latest
-    before_script:
-        - python --version  # For debugging
-        - pip install poetry
-    script: echo "build"
-
 unit-test:
-    stage: test
-    script: echo "unit-test"
+  stage: test
+  only: 
+    - web 
+  tags: 
+    - shared
+  image: ubuntu:20.04
+  before_script:
+    - apt -y update
+    - apt -y install apt-utils
+    - apt -y install net-tools python3.8 python3-pip mysql-client libmysqlclient-dev
+    - apt -y upgrade
+    - pip3 install poetry
+    - poetry install
+    - cp config_example.py config.py
+  script: 
+      - poetry run pytest
 
-lint-test:
-    stage: test
-    script: echo "lint-test"
 
 
-deploy-app:
+
+deploy-runner1:
   stage: deploy
-  script: echo "deploment"
+  only: 
+    - web 
+  tags:
+    - deploy_runner1
+  script: 
+    - pwd
+    - cd /home/agt-e5-2670-v3/liveshowseller
+    - pwd
+    - git config --global --add safe.directory /home/agt-e5-2670-v3/liveshowseller
+    - ./shell_script/deploy-worker.sh main
+
+
+
+deploy-runner2:
+  stage: deploy
+  only: 
+    - web 
+  tags:
+    - deploy_runner2
+  script: 
+    - pwd
+    - cd /home/liveshowseller
+    - pwd
+    - git config --global --add safe.directory /home/liveshowseller
+    - ./shell_script/deploy-worker.sh main

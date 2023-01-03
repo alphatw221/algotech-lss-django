@@ -1,8 +1,8 @@
 from xml.etree.ElementTree import tostring
-from backend.i18n._helper import lang_translate_default_en
 from django.conf import settings
 from django.utils.translation import ugettext as _
 from math import prod,floor
+from lib.i18n._i18n import lang_translate_default_en
 
 @lang_translate_default_en
 def i18n_get_mail_subject(order, lang=None):
@@ -54,7 +54,7 @@ def i18n_get_mail_content(order, campaign, lang=None):
                             <td style="color: #4b4b4b; font-weight: 600; width: 35%; text-align:left;" valign="top">' + _('EMAIL/DELIVERY_CONFIRM/RECEIVER') + f' : {order.shipping_first_name} {order.shipping_last_name}</td>\
                         </tr>\
                         <tr>\
-                            <td style="color: #4b4b4b; font-weight: 600; width: 35%; text-align:left;" valign="top">' + _('REPORT/COLUMN_TITLE/SHIPPING_PHONE') + f' : {order.shipping_phone}</td>\
+                            <td style="color: #4b4b4b; font-weight: 600; width: 35%; text-align:left;" valign="top">' + _('REPORT/COLUMN_TITLE/SHIPPING_PHONE') + f' : {order.shipping_cellphone}</td>\
                         </tr>'
     try:
         if order.shipping_method == 'pickup':

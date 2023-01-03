@@ -13,7 +13,6 @@ class Cart(Collection):
     collection_name='api_cart'
     template = models.cart.cart.api_cart_template
     
-
     def clear(self, sync=False, session=None):
         self.update(session=session, sync=sync, adjust_title=None, adjust_price=0, free_delivery = False, products={}, applied_discount={}, discount=0)
 
@@ -23,4 +22,6 @@ class Cart(Collection):
             self._sync()
 
 def get_count_in_campaign(campaign_id):
-    return __collection.find({'campaign_id': campaign_id, 'products': {'$ne': {}}}).count()
+    if campaign_id:
+        return __collection.find({'campaign_id': campaign_id, 'products': {'$ne': {}}}).count()
+    return 0
