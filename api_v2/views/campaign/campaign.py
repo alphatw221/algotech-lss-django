@@ -502,7 +502,7 @@ class CampaignViewSet(viewsets.ModelViewSet):
         if save_to_stock:
             product = models.product.product.Product.objects.create(user_subscription=user_subscription, created_by=api_user, name=name, order_code=order_code, categories=category, price=price, qty=0, type=models.product.product.TYPE_PRODUCT, image=settings.GOOGLE_STORAGE_STATIC_DIR+models.product.product.IMAGE_NULL)
 
-        campaign_product = models.campaign.campaign_product.CampaignProduct.objects.create(campaign=campaign, created_by=api_user, product=product, status=True, categories=category, type=models.product.product.TYPE_PRODUCT, name=name, order_code=order_code, price=float(price), qty_for_sale=int(qty), image=settings.GOOGLE_STORAGE_STATIC_DIR+models.campaign.campaign_product.IMAGE_NULL)
+        campaign_product = models.campaign.campaign_product.CampaignProduct.objects.create(campaign=campaign, created_by=api_user, product=product, status=True, categories=category, type=models.product.product.TYPE_PRODUCT, name=name, order_code=order_code, price=float(price), qty_for_sale=int(qty), image=settings.GOOGLE_STORAGE_STATIC_DIR+models.campaign.campaign_product.IMAGE_NULL, **user_subscription.meta.get('campaign_product_default_fields',{}))
 
         return Response(models.campaign.campaign_product.CampaignProductSerializer(campaign_product).data, status=status.HTTP_200_OK)
 
