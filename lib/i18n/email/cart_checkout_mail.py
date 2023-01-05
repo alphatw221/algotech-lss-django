@@ -29,7 +29,7 @@ def i18n_get_mail_content(order, order_oid, lang=None):
     mail_content += '<p data-key="1468270_order_number" style="text-align:center; color:#666363; font-weight: 500;">' + _('EMAIL/DELIVERY_CONFIRM/ORDER_NO') + f'# {str(order.id)} </p>'
     # mail_content = f'<h3>Order # {str(order.id)}</h3>'
 
-    mail_content += '<div style="margin-top: 1%; font-size: 0.9rem; line-height: 2; sm:padding: 13px 30px;">\
+    mail_content += '<div style="margin-top: 1%; font-size: 0.9rem; line-height: 2; padding: 13px 30px;">\
                 <p style="text-align: left; font-weight: 700; font-size: 1rem; line-height: 2;">' + _('EMAIL/DELIVERY_CONFIRM/ORDER_INFO') + '</p>\
                     <div style="border-bottom: 3px solid #ffd000; width: 20%; margin-bottom: 3%;"></div>'
     
@@ -65,10 +65,18 @@ def i18n_get_mail_content(order, order_oid, lang=None):
             mail_content+= f'<tr>\
                                 <td style="color: #4b4b4b; font-weight: 600; width: 35%; text-align:left;" valign="top">' + _('REPORT/COLUMN_TITLE/PICK_UP_STORE') + f' : {order.shipping_option} ,  {order.pickup_address}</td>\
                             </tr>'
-        else:
+        elif order.shipping_method == 'delivery':
             mail_content+= f'<tr>\
+                                <td style="color: #4b4b4b; font-weight: 600; width: 35%; text-align:left;" valign="top">{order.shipping_option} </td>\
+                            </tr>'
+            if order.shipping_option_data.is_cvs == True:
+                mail_content+= f'<tr>\
                                 <td style="color: #4b4b4b; font-weight: 600; width: 35%; text-align:left;" valign="top">' + _('EMAIL/DELIVERY_CONFIRM/DELIVERY_ADDRESS') + f' : {order.shipping_address_1}, {order.shipping_location}, {order.shipping_region}, {order.shipping_postcode}</td>\
                             </tr>'
+            else:                
+                mail_content+= f'<tr>\
+                                    <td style="color: #4b4b4b; font-weight: 600; width: 35%; text-align:left;" valign="top">' + _('EMAIL/DELIVERY_CONFIRM/DELIVERY_ADDRESS') + f' : {order.shipping_address_1}, {order.shipping_location}, {order.shipping_region}, {order.shipping_postcode}</td>\
+                                </tr>'
     except:
         pass
     # try:

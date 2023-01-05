@@ -1,0 +1,57 @@
+{% load i18n %}
+{% load settings_value %}
+
+<html>
+    <body style="color:black;">
+        <div style="width:100%; background: #eaeaea; font-family: \'Open Sans\', sans-serif;"> 
+            <div style="margin: auto; padding:5%; max-width:900px; background: #ffffff; text-align: left;">
+
+                <div align="center">
+                    <h1 style="text-align:center; font-size: 28px; line-height: 46px; font-weight: 700; color: #4b4b4b; text-transform: none; background-color: #ffffff; margin: 0;">{% translate "EMAIL/ORDER_PLACED/TITLE" %}</h1>
+                    <p data-key="1468270_order_number" style="text-align:center; color:#666363; font-weight: 500;">{% translate "EMAIL/DELIVERY_CONFIRM/ORDER_NO" %} # {{order.id}} </p>
+                </div>
+                <div style="margin-top: 1%; font-size: 0.9rem; padding: 13px 30px;">
+                    <p style="text-align: left; font-weight: 700; font-size: 1rem; line-height: 0;">{% translate "EMAIL/DELIVERY_CONFIRM/ORDER_INFO" %}</p>
+                    <div style="border-bottom: 3px solid #ffd000; width: 20%; margin-bottom: 24px;"></div>
+
+                    <table cellspacing="0" cellpadding="0" style="width:100%; border:0; color: #4b4b4b; font-weight: 600; line-height: 1.5; text-align:left;" role="presentation">
+                        <tbody>
+                            <tr>
+                                <td style="width: 80px; white-space: nowrap;" >{% translate "EMAIL/DELIVERY_CONFIRM/CAMPAIGN_TITLE" %} : </td>
+                                <td style="width: auto;">{{order.campaign.title}}</td>
+                            </tr>
+                            <tr>
+                                <td style="width: 80px; white-space: nowrap;">{% translate "EMAIL/DELIVERY_CONFIRM/ORDER_DATE" %} : </td>
+                                <td style="width: auto;">{{order.created_at.strftime("%b %d %Y")}}</td>
+                            </tr>
+                            <tr>
+                                <td style="width: 80px; white-space: nowrap;">{% translate "EMAIL/DELIVERY_CONFIRM/RECEIVER" %} : </td>
+                                <td style="width: auto;">{{order.shipping_first_name}} {{order.shipping_last_name}}</td>
+                            </tr>
+                            <tr>
+                                <td style="width: 80px; white-space: nowrap;">{% translate "REPORT/COLUMN_TITLE/SHIPPING_PHONE" %} : </td>
+                                <td style="width: auto;">{{order.shipping_cellphone}}</td>
+                            </tr>
+                            <tr>
+                                <td style="width: 80px; white-space: nowrap;">{% translate "EMAIL/ORDER_CONFIRM/SHIPPING_METHOD" %} : </td>
+                                <td style="width: auto;">{% translate "EMAIL/ORDER_CONFIRM/{{order.shipping_method}}" %} </td>
+                            </tr>
+
+                            <tr>
+                                <td style="width: 80px; white-space: nowrap; vertical-align: top;"> {% translate "REPORT/COLUMN_TITLE/PICK_UP_STORE" %}</td>
+                                <td style="width: auto; line-height: 0.5;"><p>{{order.shipping_option}},</p><p>{{order.pickup_address}}</p></td>
+                            </tr>
+
+                            <tr>
+                                <td style="width: 80px; white-space: nowrap; vertical-align: top;"> {% translate "EMAIL/DELIVERY_CONFIRM/DELIVERY_ADDRESS" %}</td>
+                                <td style="width: auto;"><p>{{order.shipping_address_1}}, {{order.shipping_location}}, {{order.shipping_region}}, {{order.shipping_postcode}}</p></td>
+                                <td style="width: auto; line-height: 0.5;"><p>{{order.shipping_option_data.cvs_store_name}},</p><p>{{order.shipping_option_data.cvs_address}}</p></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </body>
+</html>   
