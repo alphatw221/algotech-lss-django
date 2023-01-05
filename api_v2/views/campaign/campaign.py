@@ -619,3 +619,31 @@ class CampaignViewSet(viewsets.ModelViewSet):
             
         }
         return Response(res, status=status.HTTP_200_OK) 
+
+
+
+    @action(detail=True, methods=['GET'], url_path=r'link/short', permission_classes=(IsAuthenticated, ))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def get_short_link(self, request, pk):
+
+        type, = lib.util.getter.getparams(request, ('type',), with_user=False)
+
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, pk)
+
+        if type=='tiktok':
+            destination = f"{settings.GCP_API_LOADBALANCER_URL}/buyer/search/{campaign.id}/cart/tiktok"
+        else:
+            destination = f"{settings.SHOPPING_CART_RECAPTCHA_URL}/blank/{campaign.id}"
+        
+        success, data = service.rebrandly.rebrandly.create_link(destination)   
+        if not success:
+            raise lib.error_handle.error.api_error.ApiCallerError('error')
+        print(success)
+        print(data)
+        
+        res = {'link': f"https://{data.get('shortUrl')}" }
+
+        return Response(res, status=status.HTTP_200_OK)
+    
