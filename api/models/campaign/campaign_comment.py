@@ -19,6 +19,7 @@ class CampaignComment(models.Model):
     created_time=models.FloatField(null=True, blank=True, default=0)
     customer_id=models.CharField(max_length=255, null=True, blank=True)
     customer_name=models.CharField(max_length=255, null=True, blank=True)
+    customer_nickname=models.CharField(max_length=255, null=True, blank=True, default='')
     image=models.CharField(max_length=255, null=True, blank=True)
     categories=models.JSONField(default=list, null=True, blank=True)
     main_categories=models.JSONField(default=list, null=True, blank=True)
