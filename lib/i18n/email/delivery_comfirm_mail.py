@@ -23,7 +23,7 @@ def i18n_get_mail_content(order, user, lang=None):
     mail_content = f'<body style="background: #eaeaea; font-family: \'Open Sans\', sans-serif;"><main style="margin: 5% 5% 1% 5%;">'
     mail_content += f'<div style="background: #ffffff;"><div><div style=" sm:padding: 13px 15px; lg:padding: 13px 60px;"><div>\
                     <h1 data-key="1468266_heading" style="text-align:center; font-family: Georgia,serif,\'Playfair Display\'; font-size: 28px; line-height: 46px; font-weight: 700; color: #4b4b4b; text-transform: none; background-color: #ffffff; margin: 0;">' + _('EMAIL/DELIVERY_CONFIRM/TITLE') + '</h1>'
-    mail_content += '<p data-key="1468270_order_number" style="text-align:center; color:#666363; font-weight: 500;">' + _('EMAIL/DELIVERY_CONFIRM/ORDER_NO') + f' #{order.id}</p></div>'
+    mail_content += '<p data-key="1468270_order_number" style="text-align:center; color:#666363; font-weight: 500;">' + _('ORDER_NO') + f' #{order.id}</p></div>'
     
     mail_content += '<div style="margin-top: 1%; font-size: 0.9rem; line-height: 2; sm:padding: 13px 30px;">\
                     <p style="text-align: left; font-weight: 700; font-size: 1rem; line-height: 2;">' + _('EMAIL/DELIVERY_CONFIRM/ORDER_INFO') + '</p>\
