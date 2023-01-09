@@ -102,6 +102,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         order.meta['account_mode'] = account_mode
         order.payment_method = models.order.order.PAYMENT_METHOD_DIRECT
         order.paid_at = datetime.utcnow()
+
         #payment status update
         order.payment_status = models.order.order.PAYMENT_STATUS_AWAITING_CONFIRM
         #delivery status update
@@ -115,11 +116,20 @@ class OrderViewSet(viewsets.ModelViewSet):
             pymongo_campaign_product = database.lss.campaign_product.CampaignProduct(id=int(campaign_product_id_str))
             pymongo_campaign_product.sold(qty, sync=True)
             lib.helper.cart_helper.CartHelper.send_campaign_product_websocket_data(pymongo_campaign_product.data)
-        subject = lib.i18n.email.order_comfirm_mail.i18n_get_mail_subject(order, lang=campaign.lang)
-        content = lib.i18n.email.order_comfirm_mail.i18n_get_mail_content(order, campaign, lang=campaign.lang)
 
-        jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)     #queue this to redis if needed
-        
+        # subject = lib.i18n.email.order_comfirm_mail.i18n_get_mail_subject(order, lang=campaign.lang)
+        # content = lib.i18n.email.order_comfirm_mail.i18n_get_mail_content(order, campaign, lang=campaign.lang)
+        # jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)     #queue this to redis if needed
+
+        #send email
+        jobs.send_email_job.send_email_job(
+            subject=lib.i18n.email.mail_subjects.order_confirm_mail_subject(order=order, lang=order.campaign.lang),
+            email=order.shipping_email,
+            template="email_order_confirm.html",
+            parameters={"order":order,"order_oid":order_oid},
+            lang=order.campaign.lang,
+        )
+
         #order status update
         lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
         return Response(OrderSerializerWithOrderProductWithCampaign(order).data, status=status.HTTP_200_OK)

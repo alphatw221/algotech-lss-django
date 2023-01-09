@@ -261,15 +261,10 @@ class CartViewSet(viewsets.ModelViewSet):
             return Response(CartSerializerWithSellerInfo(cart).data, status=status.HTTP_200_OK)
         # cart.delete()
         order = lib.util.verify.Verify.get_order(pymongo_order.id)
-        order_oid = str(pymongo_order._id)   
+        order_oid = str(pymongo_order._id)
         
         data = models.order.order.OrderWithCampaignSerializer(order).data
         data['oid']=order_oid
-
-        #send email
-        subject = lib.i18n.email.cart_checkout_mail.i18n_get_mail_subject(order=order, lang=order.campaign.lang) 
-        content = lib.i18n.email.cart_checkout_mail.i18n_get_mail_content(order, order_oid, lang=order.campaign.lang) 
-        jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)  
         
         #discount used
         if type(order.applied_discount.get('id'))==int and models.discount_code.discount_code.DiscountCode.objects.filter(id=order.applied_discount.get('id')).exists():
@@ -281,6 +276,15 @@ class CartViewSet(viewsets.ModelViewSet):
         if request.user.is_authenticated:
             api_user.lang = campaign.lang
             api_user.save()
+
+        #send email
+        jobs.send_email_job.send_email_job(
+            subject=lib.i18n.email.mail_subjects.cart_checkout_mail_subject(order=order, lang=order.campaign.lang),
+            email=order.shipping_email,
+            template="email_cart_checkout.html",
+            parameters={"order":order,"order_oid":order_oid},
+            lang=order.campaign.lang,
+        )
 
         return Response(data, status=status.HTTP_200_OK)
 

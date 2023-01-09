@@ -1,1 +1,1 @@
-from . import order_comfirm_mail, registration_confirm,delivery_comfirm_mail,notify_wishlist_email, reset_password_link_mail, reset_password_success_mail,verification_code_email, cart_checkout_mail
+from . import order_comfirm_mail, registration_confirm,delivery_comfirm_mail,notify_wishlist_email, reset_password_link_mail, reset_password_success_mail,verification_code_email, cart_checkout_mail, mail_subjects

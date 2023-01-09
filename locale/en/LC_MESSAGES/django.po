@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-28 01:48+0000\n"
+"POT-Creation-Date: 2023-01-09 12:23+0800\n"
 "PO-Revision-Date: 2021-12-13 15:51+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -18,393 +18,440 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 3.0\n"
 
-#: business_policy/delivery.py:14 business_policy/payment.py:13
+#: .\business_policy\delivery.py:14 .\business_policy\payment.py:13
 msgid "PAYMENT/DIRECT_PAYMENT/NAME_OF_BANK_OR_PAYMENT_MODE"
 msgstr "Name of Bank/Payment Mode"
 
-#: business_policy/delivery.py:15 business_policy/payment.py:14
+#: .\business_policy\delivery.py:15 .\business_policy\payment.py:14
 msgid "PAYMENT/DIRECT_PAYMENT/ACCOUNT_NAME"
 msgstr "Account Name"
 
-#: business_policy/delivery.py:16 business_policy/payment.py:15
+#: .\business_policy\delivery.py:16 .\business_policy\payment.py:15
 msgid "PAYMENT/DIRECT_PAYMENT/ACCOUNT_NUMBER"
 msgstr "Account Number"
 
-#: business_policy/delivery.py:17 business_policy/payment.py:16
+#: .\business_policy\delivery.py:17 .\business_policy\payment.py:16
 msgid "PAYMENT/DIRECT_PAYMENT/OTHER_NOTE"
 msgstr "Other Note (Press enter to add new line)"
 
-#: business_policy/delivery.py:18 business_policy/payment.py:17
+#: .\business_policy\delivery.py:18 .\business_policy\payment.py:17
 msgid "PAYMENT/DIRECT_PAYMENT/REQUIRE_CUSTOMER_PAYMENT_RECORD"
 msgstr "Require Customer's Payment Record"
 
-#: business_policy/payment.py:30
+#: .\business_policy\payment.py:30
 msgid "PAYMENT/HIT_PAY/PAYMENT_BUTTON_TITLE"
 msgstr "Payment Button Title"
 
-#: business_policy/payment.py:31 business_policy/payment.py:46
-#: business_policy/payment.py:60 business_policy/payment.py:98
+#: .\business_policy\payment.py:31 .\business_policy\payment.py:46
+#: .\business_policy\payment.py:60 .\business_policy\payment.py:98
 msgid "PAYMENT/CURRENCY_CODE"
 msgstr "Currency Code"
 
-#: business_policy/payment.py:32
+#: .\business_policy\payment.py:32
 msgid "PAYMENT/HIT_PAY/API_KEY"
 msgstr "API Key"
 
-#: business_policy/payment.py:33
+#: .\business_policy\payment.py:33
 msgid "PAYMENT/HIT_PAY/SALT"
 msgstr "Salt"
 
-#: business_policy/payment.py:45
+#: .\business_policy\payment.py:45
 msgid "PAYMENT/PAYPAL/CLIENT_ID"
 msgstr "Client ID"
 
-#: business_policy/payment.py:47
+#: .\business_policy\payment.py:47
 msgid "PAYMENT/PAYPAL/SECRET"
 msgstr "Secret"
 
-#: business_policy/payment.py:59 business_policy/payment.py:84
+#: .\business_policy\payment.py:59 .\business_policy\payment.py:84
 msgid "PAYMENT/SECRET_KEY"
 msgstr "Secret Key"
 
-#: business_policy/payment.py:96
+#: .\business_policy\payment.py:96
 msgid "PAYMENT/FIRST_DATA/STORE_ID"
 msgstr "Store ID"
 
-#: business_policy/payment.py:97
+#: .\business_policy\payment.py:97
 msgid "PAYMENT/FIRST_DATA/SHARE_SECRET"
 msgstr "Share Secret"
 
-#: business_policy/payment.py:99
+#: .\business_policy\payment.py:99
 msgid "PAYMENT/FIRST_DATA/TIME_ZONE"
 msgstr "Time Zone"
 
-#: lib/i18n/campaign_announcement.py:7
+#: .\lib\i18n\campaign_announcement.py:7
 #, python-brace-format
 msgid "PRODUCT_CLOSED{order_code}"
 msgstr "Order code: {order_code} has closed."
 
-#: lib/i18n/campaign_announcement.py:14
+#: .\lib\i18n\campaign_announcement.py:14
 #, python-brace-format
 msgid "PRODUCT_SOLD_OUT{order_code}"
 msgstr "Order code: {order_code} is sold out."
 
-#: lib/i18n/campaign_announcement.py:21
+#: .\lib\i18n\campaign_announcement.py:21
 #, python-brace-format
 msgid "LUCKY_DRAW_WINNER{customer_name}{product_name}"
 msgstr ""
 "Congratulations to {customer_name} on winning lucky draw! Prize: "
 "{product_name}. Please check your shopping cart."
 
-#: lib/i18n/campaign_announcement.py:29
+#: .\lib\i18n\campaign_announcement.py:29
 #, python-brace-format
 msgid "QUIZ_GAME_WINNER{customer_name}{product_name}"
 msgstr ""
 "Congratulations to {customer_name} on winning quiz game! Prize: "
 "{product_name}. Please check your shopping cart."
 
-#: lib/i18n/cart_product_request.py:11
+#: .\lib\i18n\cart_product_request.py:11
 msgid "MESSAGE_PREFIX"
 msgstr "Live Show Seller: "
 
-#: lib/i18n/cart_product_request.py:24 lib/i18n/cart_product_request.py:32
-#: lib/i18n/cart_product_request.py:40 lib/i18n/cart_product_request.py:55
+#: .\lib\i18n\cart_product_request.py:24 .\lib\i18n\cart_product_request.py:32
+#: .\lib\i18n\cart_product_request.py:40 .\lib\i18n\cart_product_request.py:55
 #, python-brace-format
 msgid "SHOPPING_CART_INFO{link}"
 msgstr ""
 "please press/hold the Shopping Cart Link below and open on Safari or Chrome: "
 "{link}"
 
-#: lib/i18n/cart_product_request.py:26 lib/i18n/cart_product_request.py:34
-#: lib/i18n/cart_product_request.py:42 lib/i18n/cart_product_request.py:57
+#: .\lib\i18n\cart_product_request.py:26 .\lib\i18n\cart_product_request.py:34
+#: .\lib\i18n\cart_product_request.py:42 .\lib\i18n\cart_product_request.py:57
 msgid "MORE_INFO_IN_PM_NOTICE"
 msgstr ""
 "Shopping cart link is sent via FB Messenger, please contact page admin if "
 "not received any notification."
 
-#: lib/i18n/cart_product_request.py:64 lib/i18n/cart_product_request.py:104
+#: .\lib\i18n\cart_product_request.py:64 .\lib\i18n\cart_product_request.py:104
 #, python-brace-format
 msgid "INVALID_EXCEED_MAX_ORDER_AMOUNT{order_code}{max_order_amount}"
 msgstr ""
 "\"{order_code}\" has a maximum ordering quantity of {max_order_amount}. "
 
-#: lib/i18n/cart_product_request.py:70 lib/i18n/cart_product_request.py:111
+#: .\lib\i18n\cart_product_request.py:70 .\lib\i18n\cart_product_request.py:111
 msgid "ADDED"
 msgstr "is added"
 
-#: lib/i18n/cart_product_request.py:72 lib/i18n/cart_product_request.py:113
+#: .\lib\i18n\cart_product_request.py:72 .\lib\i18n\cart_product_request.py:113
 msgid "UPDATED"
 msgstr "is updated"
 
-#: lib/i18n/cart_product_request.py:74 lib/i18n/cart_product_request.py:115
+#: .\lib\i18n\cart_product_request.py:74 .\lib\i18n\cart_product_request.py:115
 msgid "DELETED"
 msgstr "is removed"
 
-#: lib/i18n/cart_product_request.py:76 lib/i18n/cart_product_request.py:117
+#: .\lib\i18n\cart_product_request.py:76 .\lib\i18n\cart_product_request.py:117
 msgid "INSUFFICIENT_INV"
 msgstr "is sold out"
 
-#: lib/i18n/cart_product_request.py:78 lib/i18n/cart_product_request.py:119
+#: .\lib\i18n\cart_product_request.py:78 .\lib\i18n\cart_product_request.py:119
 msgid "INVALID_PRODUCT_NOT_ACTIVATED"
 msgstr "is unavailable"
 
-#: lib/i18n/cart_product_request.py:79
+#: .\lib\i18n\cart_product_request.py:79
 #, python-brace-format
 msgid "ITEM_INFO{order_code}{result}"
 msgstr "\"{order_code}\" {result}."
 
-#: lib/i18n/cart_product_request.py:84 lib/i18n/cart_product_request.py:121
+#: .\lib\i18n\cart_product_request.py:84 .\lib\i18n\cart_product_request.py:121
 msgid "INVALID_REMOVE_NOT_ALLOWED"
 msgstr "is not allowed to remove"
 
-#: lib/i18n/cart_product_request.py:86 lib/i18n/cart_product_request.py:123
+#: .\lib\i18n\cart_product_request.py:86 .\lib\i18n\cart_product_request.py:123
 msgid "INVALID_EDIT_NOT_ALLOWED"
 msgstr "is not allowed to edit"
 
-#: lib/i18n/cart_product_request.py:88 lib/i18n/cart_product_request.py:125
+#: .\lib\i18n\cart_product_request.py:88 .\lib\i18n\cart_product_request.py:125
 msgid "INVALID_ADD_ZERO_QTY"
 msgstr "can not be added with 0 qty"
 
-#: lib/i18n/cart_product_request.py:90 lib/i18n/cart_product_request.py:127
+#: .\lib\i18n\cart_product_request.py:90 .\lib\i18n\cart_product_request.py:127
 msgid "N/A"
 msgstr "has an operation error"
 
-#: lib/i18n/cart_product_request.py:92 lib/i18n/cart_product_request.py:130
+#: .\lib\i18n\cart_product_request.py:92 .\lib\i18n\cart_product_request.py:130
 #, python-brace-format
 msgid "ITEM_INFO{order_code}{qty}{result}"
 msgstr "\"{order_code}\" Qty: {qty} {result}. "
 
-#: lib/i18n/comment_command.py:24 lib/i18n/comment_command.py:27
-#: lib/i18n/comment_command.py:29
+#: .\lib\i18n\comment_command.py:24 .\lib\i18n\comment_command.py:27
+#: .\lib\i18n\comment_command.py:29
 msgid "COMMENT_COMMAND_CART_NO_CART_PRODUCT"
 msgstr "There's no products in cart."
 
-#: lib/i18n/comment_command.py:34
+#: .\lib\i18n\comment_command.py:34
 msgid "COMMENT_COMMAND_CART_MESSAGE_HEADER"
 msgstr "Your shopping cart:"
 
-#: lib/i18n/comment_command.py:37
+#: .\lib\i18n\comment_command.py:37
 #, python-brace-format
 msgid "TOTAL{dollar_sign}{total}\n"
 msgstr ""
 "Total: {dollar_sign}{total}\n"
 "\n"
 
-#: lib/i18n/comment_command.py:39
+#: .\lib\i18n\comment_command.py:39
 #, python-brace-format
 msgid "DETAIL{link}\n"
 msgstr "Find out details: {link}\n"
 
-#: lib/i18n/comment_command.py:116
+#: .\lib\i18n\comment_command.py:116
 #, python-brace-format
 msgid "ITEM_INFO{name}{qty}{dollar_sign}{total}\n"
 msgstr "{name} Qty:{qty} {dollar_sign}{total}\n"
 
-#: lib/i18n/email/cart_checkout_mail.py:8
+#: .\lib\i18n\email\cart_checkout_mail.py:8 .\lib\i18n\email\mail_subjects.py:7
 #, python-brace-format
 msgid "EMAIL/ORDER_PLACED/SUBJECT{order_id}{campaign_title}"
 msgstr ""
-"Thanks for your order! Your order #{order_id} from {campaign_title} is been "
+"Thank you for shopping at {campaign_title}! Your order #{order_id} is been "
 "placed!"
 
-#: lib/i18n/email/cart_checkout_mail.py:28
-msgid "EMAIL/ORDER_PLACED/TITLE"
-msgstr "Your Order Has Been Placed!"
+#: .\lib\i18n\email\cart_checkout_mail.py:28
+#: .\templates\email_cart_checkout.html:12
+msgid "DIRECT_TO_PAYMENT"
+msgstr "Thank You for Your Order, Redirect to payment page via link under!"
 
-#: lib/i18n/email/cart_checkout_mail.py:29
-#: lib/i18n/email/delivery_comfirm_mail.py:26
-#: lib/i18n/email/order_comfirm_mail.py:31
-msgid "EMAIL/DELIVERY_CONFIRM/ORDER_NO"
+#: .\lib\i18n\email\cart_checkout_mail.py:29
+#: .\lib\i18n\email\delivery_comfirm_mail.py:26
+#: .\lib\i18n\email\order_comfirm_mail.py:31
+#: .\templates\email_cart_checkout.html:24
+#: .\templates\email_order_confirm.html:26
+msgid "ORDER_NO"
 msgstr "Order NO."
 
-#: lib/i18n/email/cart_checkout_mail.py:33
-#: lib/i18n/email/delivery_comfirm_mail.py:29
-#: lib/i18n/email/order_comfirm_mail.py:35
+#: .\lib\i18n\email\cart_checkout_mail.py:33
+#: .\lib\i18n\email\delivery_comfirm_mail.py:29
+#: .\lib\i18n\email\order_comfirm_mail.py:35
+#: .\templates\email_cart_checkout.html:16
+#: .\templates\email_order_confirm.html:18
 msgid "EMAIL/DELIVERY_CONFIRM/ORDER_INFO"
 msgstr "Order Information"
 
-#: lib/i18n/email/cart_checkout_mail.py:39
-#: lib/i18n/email/order_comfirm_mail.py:41
+#: .\lib\i18n\email\cart_checkout_mail.py:39
+#: .\lib\i18n\email\order_comfirm_mail.py:41
+#: .\templates\email_cart_checkout.html:28
+#: .\templates\email_order_confirm.html:30
 msgid "EMAIL/DELIVERY_CONFIRM/CAMPAIGN_TITLE"
-msgstr "Campaign Title"
+msgstr "Shopping Cart Title"
 
-#: lib/i18n/email/cart_checkout_mail.py:44
-#: lib/i18n/email/delivery_comfirm_mail.py:35
-#: lib/i18n/email/order_comfirm_mail.py:44
+#: .\lib\i18n\email\cart_checkout_mail.py:44
+#: .\lib\i18n\email\delivery_comfirm_mail.py:35
+#: .\lib\i18n\email\order_comfirm_mail.py:44
+#: .\templates\email_cart_checkout.html:32
+#: .\templates\email_order_confirm.html:34
 msgid "EMAIL/DELIVERY_CONFIRM/ORDER_DATE"
 msgstr "Order Date"
 
-#: lib/i18n/email/cart_checkout_mail.py:47
-#: lib/i18n/email/order_comfirm_mail.py:54
+#: .\lib\i18n\email\cart_checkout_mail.py:47
+#: .\lib\i18n\email\order_comfirm_mail.py:54
+#: .\templates\email_cart_checkout.html:36
+#: .\templates\email_order_confirm.html:38
 msgid "EMAIL/DELIVERY_CONFIRM/RECEIVER"
 msgstr "Receiver"
 
-#: lib/i18n/email/cart_checkout_mail.py:50
-#: lib/i18n/email/order_comfirm_mail.py:57
+#: .\lib\i18n\email\cart_checkout_mail.py:50
+#: .\lib\i18n\email\order_comfirm_mail.py:57
+#: .\templates\email_cart_checkout.html:40
+#: .\templates\email_order_confirm.html:42
 msgid "REPORT/COLUMN_TITLE/SHIPPING_PHONE"
 msgstr "Phone"
 
-#: lib/i18n/email/cart_checkout_mail.py:53
+#: .\lib\i18n\email\cart_checkout_mail.py:53
+#: .\templates\email_cart_checkout.html:55
+#: .\templates\email_cart_checkout.html:72
+#: .\templates\email_cart_checkout.html:96
+#: .\templates\email_cart_checkout.html:115
+#: .\templates\email_order_confirm.html:57
+#: .\templates\email_order_confirm.html:74
+#: .\templates\email_order_confirm.html:98
+#: .\templates\email_order_confirm.html:117
 msgid "EMAIL/ORDER_CONFIRM/SHIPPING_METHOD"
 msgstr "Shipping Method"
 
-#: lib/i18n/email/cart_checkout_mail.py:66
-#: lib/i18n/email/order_comfirm_mail.py:62
+#: .\lib\i18n\email\cart_checkout_mail.py:66
+#: .\lib\i18n\email\order_comfirm_mail.py:62
 msgid "REPORT/COLUMN_TITLE/PICK_UP_STORE"
 msgstr "Pick Up Store"
 
-#: lib/i18n/email/cart_checkout_mail.py:70
-#: lib/i18n/email/delivery_comfirm_mail.py:134
-#: lib/i18n/email/order_comfirm_mail.py:67
+#: .\lib\i18n\email\cart_checkout_mail.py:74
+#: .\lib\i18n\email\cart_checkout_mail.py:78
+#: .\lib\i18n\email\delivery_comfirm_mail.py:134
+#: .\lib\i18n\email\order_comfirm_mail.py:67
+#: .\templates\email_cart_checkout.html:82
+#: .\templates\email_cart_checkout.html:119
+#: .\templates\email_order_confirm.html:84
+#: .\templates\email_order_confirm.html:121
 msgid "EMAIL/DELIVERY_CONFIRM/DELIVERY_ADDRESS"
 msgstr "Delivery Address"
 
-#: lib/i18n/email/cart_checkout_mail.py:85
+#: .\lib\i18n\email\cart_checkout_mail.py:93
+#: .\templates\email_cart_checkout.html:132
 msgid "EMAIL/ORDER_CONFIRM/PROCESS_PAYMENT"
 msgstr "Process Payment"
 
-#: lib/i18n/email/cart_checkout_mail.py:134
-#: lib/i18n/email/delivery_comfirm_mail.py:84
-#: lib/i18n/email/order_comfirm_mail.py:200
+#: .\lib\i18n\email\cart_checkout_mail.py:142
+#: .\lib\i18n\email\delivery_comfirm_mail.py:84
+#: .\lib\i18n\email\order_comfirm_mail.py:200
+#: .\templates\email_cart_checkout.html:187
+#: .\templates\email_order_confirm.html:228
 msgid "EMAIL/DELIVERY_CONFIRM/SUBTOTAL"
 msgstr "Subtotal"
 
-#: lib/i18n/email/cart_checkout_mail.py:140
-#: lib/i18n/email/order_comfirm_mail.py:206
+#: .\lib\i18n\email\cart_checkout_mail.py:148
+#: .\lib\i18n\email\order_comfirm_mail.py:206
+#: .\templates\email_cart_checkout.html:198
+#: .\templates\email_order_confirm.html:239
 msgid "EMAIL/DELIVERY_CONFIRM/DISCOUNT"
 msgstr "Discount"
 
-#: lib/i18n/email/cart_checkout_mail.py:146
-#: lib/i18n/email/delivery_comfirm_mail.py:93
-#: lib/i18n/email/order_comfirm_mail.py:212
+#: .\lib\i18n\email\cart_checkout_mail.py:154
+#: .\lib\i18n\email\delivery_comfirm_mail.py:93
+#: .\lib\i18n\email\order_comfirm_mail.py:212
+#: .\templates\email_cart_checkout.html:217
+#: .\templates\email_order_confirm.html:258
 msgid "EMAIL/DELIVERY_CONFIRM/DELIVERY_CHARGE"
 msgstr "Delivery Charge"
 
-#: lib/i18n/email/cart_checkout_mail.py:153
-#: lib/i18n/email/delivery_comfirm_mail.py:111
-#: lib/i18n/email/order_comfirm_mail.py:228
+#: .\lib\i18n\email\cart_checkout_mail.py:161
+#: .\lib\i18n\email\delivery_comfirm_mail.py:111
+#: .\lib\i18n\email\order_comfirm_mail.py:228
+#: .\templates\email_cart_checkout.html:248
+#: .\templates\email_order_confirm.html:289
 msgid "EMAIL/DELIVERY_CONFIRM/TOTAL"
 msgstr "Total"
 
-#: lib/i18n/email/cart_checkout_mail.py:165
-#: lib/i18n/email/delivery_comfirm_mail.py:150
-#: lib/i18n/email/order_comfirm_mail.py:240
-#: templates/email_notify_wishlist.html:33
-#: templates/email_verification_code.html:16
+#: .\lib\i18n\email\cart_checkout_mail.py:173
+#: .\lib\i18n\email\delivery_comfirm_mail.py:150
+#: .\lib\i18n\email\order_comfirm_mail.py:240
+#: .\templates\email_cart_checkout.html:259
+#: .\templates\email_notify_wishlist.html:32
+#: .\templates\email_order_confirm.html:300
+#: .\templates\email_verification_code.html:16
 msgid "EMAIL/DELIVERY_CONFIRM/DO_NOT_REPLY_1"
 msgstr ""
 "Please do not reply to this e-mail. This mailbox is not monitored and you "
 "will not receive a response."
 
-#: lib/i18n/email/cart_checkout_mail.py:166
-#: lib/i18n/email/delivery_comfirm_mail.py:151
-#: lib/i18n/email/order_comfirm_mail.py:241
+#: .\lib\i18n\email\cart_checkout_mail.py:174
+#: .\lib\i18n\email\delivery_comfirm_mail.py:151
+#: .\lib\i18n\email\order_comfirm_mail.py:241
 msgid "EMAIL/DELIVERY_CONFIRM/DO_NOT_REPLY_2"
 msgstr ""
 "For questions about an order, other questions or comments, please contact "
 "Seller's email. You will be served faster than mail inquiry."
 
-#: lib/i18n/email/delivery_comfirm_mail.py:10
+#: .\lib\i18n\email\delivery_comfirm_mail.py:10
 #, python-brace-format
 msgid "EMAIL/DELIVERY_CONFIRM/SUBJECT{order_id}{campaign_title}"
 msgstr ""
 "Thanks for your order! Your order #{order_id} from {campaign_title} is "
 "confirmed!"
 
-#: lib/i18n/email/delivery_comfirm_mail.py:25
+#: .\lib\i18n\email\delivery_comfirm_mail.py:25
 msgid "EMAIL/DELIVERY_CONFIRM/TITLE"
 msgstr "Your Order Has Been Shipped !"
 
-#: lib/i18n/email/delivery_comfirm_mail.py:38
-#: lib/i18n/email/delivery_comfirm_mail.py:41
+#: .\lib\i18n\email\delivery_comfirm_mail.py:38
+#: .\lib\i18n\email\delivery_comfirm_mail.py:41
 msgid "EMAIL/DELIVERY_CONFIRM/SELLER"
 msgstr "Seller"
 
-#: lib/i18n/email/delivery_comfirm_mail.py:101
-#: lib/i18n/email/order_comfirm_mail.py:218
+#: .\lib\i18n\email\delivery_comfirm_mail.py:101
+#: .\lib\i18n\email\order_comfirm_mail.py:218
 msgid "EMAIL/DELIVERY_CONFIRM/TAX"
 msgstr "Tax"
 
-#: lib/i18n/email/delivery_comfirm_mail.py:123
+#: .\lib\i18n\email\delivery_comfirm_mail.py:123
 msgid "EMAIL/DELIVERY_CONFIRM/SHIPPING_INFO"
 msgstr "Shipping information"
 
-#: lib/i18n/email/delivery_comfirm_mail.py:129
+#: .\lib\i18n\email\delivery_comfirm_mail.py:129
 msgid "EMAIL/DELIVERY_CONFIRM/SHIPPING_DATE"
 msgstr "Shipping Date"
 
-#: lib/i18n/email/delivery_comfirm_mail.py:139
+#: .\lib\i18n\email\delivery_comfirm_mail.py:139
+#: .\templates\email_cart_checkout.html:46
+#: .\templates\email_order_confirm.html:48
 msgid "EMAIL/DELIVERY_CONFIRM/REMARK"
 msgstr "Remark"
 
-#: lib/i18n/email/notify_wishlist_email.py:6
-msgid "EMAIL/WISHLIST/SUBJECT"
-msgstr "Your item is back in stock!"
-
-#: lib/i18n/email/order_comfirm_mail.py:10
+#: .\lib\i18n\email\mail_subjects.py:13
+#: .\lib\i18n\email\order_comfirm_mail.py:10
 #, python-brace-format
 msgid "EMAIL/ORDER_CONFIRM/SUBJECT{order_id}{campaign_title}"
 msgstr ""
-"Thanks for your order! Your order #{order_id} from {campaign_title} is "
+"Thank you for shopping at {campaign_title}! Your order #{order_id} is "
 "confirmed!"
 
-#: lib/i18n/email/order_comfirm_mail.py:30
-msgid "EMAIL/ORDER_CONFIRM/TITLE"
+#: .\lib\i18n\email\notify_wishlist_email.py:6
+msgid "EMAIL/WISHLIST/SUBJECT"
+msgstr "Your item is back in stock!"
+
+#: .\lib\i18n\email\order_comfirm_mail.py:30
+msgid "ORDER_CONFIRM"
 msgstr "Thanks for your order!"
 
-#: lib/i18n/email/order_comfirm_mail.py:49
+#: .\lib\i18n\email\order_comfirm_mail.py:49
 msgid "EMAIL/DELIVERY_CONFIRM/BUYER"
 msgstr "Buyer"
 
-#: lib/i18n/email/order_comfirm_mail.py:77
+#: .\lib\i18n\email\order_comfirm_mail.py:77
+#: .\templates\email_order_confirm.html:143
 msgid "EMAIL/ORDER_CONFIRM/DIRECT_PAYMENT"
 msgstr "Direct Payment"
 
-#: lib/i18n/email/order_comfirm_mail.py:84
-msgid "REPORT/SECTION_TITLE/PAYMENT_INFO"
+#: .\lib\i18n\email\order_comfirm_mail.py:84
+#: .\templates\email_order_confirm.html:136
+msgid "PAYMENT_INFO"
 msgstr "Payment Information"
 
-#: lib/i18n/email/order_comfirm_mail.py:88
-#: lib/i18n/email/order_comfirm_mail.py:112
+#: .\lib\i18n\email\order_comfirm_mail.py:88
+#: .\lib\i18n\email\order_comfirm_mail.py:112
+#: .\templates\email_order_confirm.html:142
+#: .\templates\email_order_confirm.html:170
 msgid "REPORT/COLUMN_TITLE/PAYMENT_METHOD"
 msgstr "Payment Method"
 
-#: lib/i18n/email/order_comfirm_mail.py:91
+#: .\lib\i18n\email\order_comfirm_mail.py:91
+#: .\templates\email_order_confirm.html:146
 msgid "EMAIL/ORDER_CONFIRM/ACCOUNT_MODE"
-msgstr "Banking / Financial Services"
+msgstr "Financial Services"
 
-#: lib/i18n/email/order_comfirm_mail.py:94
+#: .\lib\i18n\email\order_comfirm_mail.py:94
+#: .\templates\email_order_confirm.html:150
 msgid "EMAIL/ORDER_CONFIRM/SELLER_ACCOUNT"
-msgstr "Seller's account number"
+msgstr "Seller's Account Number"
 
-#: lib/i18n/email/order_comfirm_mail.py:99
+#: .\lib\i18n\email\order_comfirm_mail.py:99
+#: .\templates\email_order_confirm.html:156
 msgid "EMAIL/ORDER_CONFIRM/LAST_FIVE_DIGIT"
-msgstr "Billing Account Last Five Digits"
+msgstr "Last 5 Digits of BAN"
 
-#: lib/i18n/email/order_comfirm_mail.py:121
+#: .\lib\i18n\email\order_comfirm_mail.py:121
 msgid "EMAIL/ORDER_CONFIRM/SELLER_CONTACT"
 msgstr "Contact seller"
 
-#: lib/i18n/email/registration_confirm.py:6
-#: templates/register_activation.html:10
+#: .\lib\i18n\email\registration_confirm.py:6
+#: .\templates\register_activation.html:10
 msgid "TITLE_ACTIVATION"
 msgstr "Activated account details at Live Show Seller."
 
-#: lib/i18n/email/reset_password_link_mail.py:7
-#: templates/reset_password_link_email.html:8
-#: templates/reset_password_success_email.html:7
+#: .\lib\i18n\email\reset_password_link_mail.py:7
+#: .\templates\reset_password_link_email.html:8
+#: .\templates\reset_password_success_email.html:7
 msgid "EMAIL/PASSWORD_RESET_LINK/SUBJECT"
 msgstr "Live Show Seller Password Reset"
 
-#: lib/i18n/email/reset_password_success_mail.py:10
+#: .\lib\i18n\email\reset_password_success_mail.py:10
 msgid "EMAIL/PASSWORD_RESET_SUCCESS/SUBJECT"
 msgstr "Your Live Show Seller password has been successfully changed"
 
-#: lib/i18n/email/verification_code_email.py:6
+#: .\lib\i18n\email\verification_code_email.py:6
 msgid "EMAIL/VERIFY/SUBJECT"
 msgstr "Your LSS login verification code"
 
-#: lib/i18n/reminder_message.py:10
+#: .\lib\i18n\reminder_message.py:10
 #, python-brace-format
 msgid "UNCHECKOUT_CART_REMINDER{link}"
 msgstr ""
@@ -413,246 +460,383 @@ msgstr ""
 "complete the order.\n"
 "{link}"
 
-#: templates/email_notify_wishlist.html:10
-#: templates/email_notify_wishlist.html:11
+#: .\templates\email_cart_checkout.html:56
+#: .\templates\email_order_confirm.html:58
+msgid "EMAIL/ORDER_CONFIRM/STORE_PICKUP"
+msgstr "Store Pickup"
+
+#: .\templates\email_cart_checkout.html:59
+#: .\templates\email_cart_checkout.html:77
+#: .\templates\email_cart_checkout.html:100
+#: .\templates\email_order_confirm.html:61
+#: .\templates\email_order_confirm.html:79
+#: .\templates\email_order_confirm.html:102
+msgid "EMAIL/DELIVERY_CONFIRM/PICK_UP_STORE"
+msgstr "Pickup Store"
+
+#: .\templates\email_cart_checkout.html:64
+#: .\templates\email_order_confirm.html:66
+msgid "PICKUP_TIME"
+msgstr "Pickup Time"
+
+#: .\templates\email_cart_checkout.html:87
+#: .\templates\email_cart_checkout.html:124
+#: .\templates\email_order_confirm.html:89
+#: .\templates\email_order_confirm.html:126
+msgid "EMAIL/DELIVERY_CONFIRM/SHIPPING_TIME"
+msgstr "Delivery Time"
+
+#: .\templates\email_cart_checkout.html:97
+#: .\templates\email_order_confirm.html:99
+msgid "CVS"
+msgstr "店到店"
+
+#: .\templates\email_cart_checkout.html:103
+#: .\templates\email_order_confirm.html:105
+msgid "familymart"
+msgstr "全家"
+
+#: .\templates\email_cart_checkout.html:105
+#: .\templates\email_order_confirm.html:107
+msgid "7_11"
+msgstr "7-11"
+
+#: .\templates\email_cart_checkout.html:116
+#: .\templates\email_order_confirm.html:118
+msgid "TCAT"
+msgstr "黑貓宅配"
+
+#: .\templates\email_cart_checkout.html:140
+#: .\templates\email_order_confirm.html:181
+msgid "EMAIL/DELIVERY_CONFIRM/PRODUCT_INFO"
+msgstr "Product Information"
+
+#: .\templates\email_cart_checkout.html:164
+#: .\templates\email_order_confirm.html:205
+msgid "QTY"
+msgstr "qty"
+
+#: .\templates\email_cart_checkout.html:210
+#: .\templates\email_order_confirm.html:251
+msgid "FREE_DELIVERY"
+msgstr "Free Delivery"
+
+#: .\templates\email_cart_checkout.html:228
+#: .\templates\email_order_confirm.html:269
+msgid "points applyed on this order"
+msgstr "Points Applied"
+
+#: .\templates\email_cart_checkout.html:229
+#: .\templates\email_order_confirm.html:270
+#, python-format
+msgid " You had applyed %(points)s points on this order. "
+msgstr "You had applyed %(points)s points on this order."
+
+#: .\templates\email_cart_checkout.html:238
+#: .\templates\email_order_confirm.html:279
+msgid "points earned from this order"
+msgstr "Points Earned"
+
+#: .\templates\email_cart_checkout.html:239
+#: .\templates\email_order_confirm.html:280
+#, python-format
+msgid " You could earn %(points)s points on this order. "
+msgstr "You could earn %(points)s points on this order."
+
+#: .\templates\email_cart_checkout.html:260
+#: .\templates\email_order_confirm.html:301
+msgid "CONTACT_SELLER"
+msgstr "For any questions about this order, please contact Seller"
+
+#: .\templates\email_cart_checkout.html:261
+#: .\templates\email_notify_wishlist.html:33
+#: .\templates\email_order_confirm.html:302
+msgid ""
+" This order system is powered by <a href=\"https://www.liveshowseller.com/"
+"\">Algotech</a> "
+msgstr ""
+" This order system is powered by <a href=\"https://www.liveshowseller.com/"
+"\">Algotech</a> "
+
+#: .\templates\email_cart_checkout.html:262
+#: .\templates\email_order_confirm.html:303
+msgid "Algotech Pte Ltd"
+msgstr "Algotech Pte Ltd"
+
+#: .\templates\email_cart_checkout.html:263
+#: .\templates\email_order_confirm.html:304
+msgid "UEN No. 200504141W"
+msgstr "UEN No. 200504141W"
+
+#: .\templates\email_cart_checkout.html:264
+#: .\templates\email_order_confirm.html:305
+msgid "If you have any problem about our system."
+msgstr "If you have any problem about our system."
+
+#: .\templates\email_cart_checkout.html:264
+#: .\templates\email_order_confirm.html:305
+msgid "https://www.liveshowseller.com/buyer-support"
+msgstr "https://www.liveshowseller.com/buyer-support"
+
+#: .\templates\email_cart_checkout.html:264
+#: .\templates\email_order_confirm.html:305
+msgid "Please contact us."
+msgstr "Please contact us."
+
+#: .\templates\email_notify_wishlist.html:10
+#: .\templates\email_notify_wishlist.html:11
 msgid "EMAIL/WISHLIST/TITLE"
 msgstr "is now back in stock!"
 
-#: templates/email_notify_wishlist.html:12
-#: templates/email_notify_wishlist.html:16
+#: .\templates\email_notify_wishlist.html:13
 msgid "EMAIL/WISHLIST/TEXT_1"
 msgstr ""
 "We are pleased to announce your wish-list item of interest is available "
 "again in limited quantities."
 
-#: templates/email_notify_wishlist.html:13
-#: templates/email_notify_wishlist.html:18
-msgid "EMAIL/WISHLIST/TEXT_2_1"
-msgstr "’s fan pages"
-
-#: templates/email_notify_wishlist.html:14
-msgid "EMAIL/WISHLIST/TEXT_2_2"
-msgstr "’s fan pages"
-
-#: templates/email_notify_wishlist.html:14
-#: templates/email_verification_code.html:14
-msgid "EMAIL/VERIFY/TEXT_2_3"
-msgstr "to secure your account."
-
-#: templates/email_notify_wishlist.html:18
+#: .\templates\email_notify_wishlist.html:14
 msgid "EMAIL/WISHLIST/TEXT_2"
 msgstr "Please follow up more information from "
 
-#: templates/email_verification_code.html:10
+#: .\templates\email_notify_wishlist.html:14
+msgid "EMAIL/WISHLIST/TEXT_2_1"
+msgstr "’s fan pages"
+
+#: .\templates\email_order_confirm.html:14
+msgid "PAYMENT_CONFIRM"
+msgstr "We have received your payment."
+
+#: .\templates\email_verification_code.html:10
 msgid "EMAIL/VERIFY/TITLE"
 msgstr "Hi, Someone tried to log in to your LSS account."
 
-#: templates/email_verification_code.html:11
+#: .\templates\email_verification_code.html:11
 msgid "EMAIL/VERIFY/TEXT_1"
 msgstr "If this was you, please use the following code to log in:"
 
-#: templates/email_verification_code.html:13
+#: .\templates\email_verification_code.html:13
 msgid "EMAIL/VERIFY/TEXT_2_1"
 msgstr "If this wasn't you, please"
 
-#: templates/email_verification_code.html:14
+#: .\templates\email_verification_code.html:14
 msgid "EMAIL/VERIFY/TEXT_2_2"
 msgstr "reset your password"
 
-#: templates/register_activation.html:18 templates/register_freetrial.html:16
+#: .\templates\email_verification_code.html:14
+msgid "EMAIL/VERIFY/TEXT_2_3"
+msgstr "to secure your account."
+
+#: .\templates\register_activation.html:18
+#: .\templates\register_freetrial.html:16
 msgid "YOUR_ACTIVATION"
 msgstr "Your"
 
-#: templates/register_activation.html:18 templates/register_freetrial.html:16
+#: .\templates\register_activation.html:18
+#: .\templates\register_freetrial.html:16
 msgid "PLAN_ACCOUNT_ACTIVATION"
 msgstr "account at Live Show Seller has been activated."
 
-#: templates/register_activation.html:19 templates/register_freetrial.html:17
+#: .\templates\register_activation.html:19
+#: .\templates\register_freetrial.html:17
 msgid "LOGIN_ACTIVATION"
 msgstr "You may now log in to the system"
 
-#: templates/register_activation.html:19
-#: templates/register_confirmation.html:20 templates/register_freetrial.html:17
-#: templates/register_freetrial.html:35
+#: .\templates\register_activation.html:19
+#: .\templates\register_confirmation.html:20
+#: .\templates\register_freetrial.html:17
+#: .\templates\register_freetrial.html:35
 msgid "LOGIN_2_WELCOME"
 msgstr "here"
 
-#: templates/register_activation.html:27 templates/register_freetrial.html:25
+#: .\templates\register_activation.html:27
+#: .\templates\register_freetrial.html:25
 msgid "STEP1_ACTIVATION"
 msgstr "WHAT HAPPENS NEXT?"
 
-#: templates/register_activation.html:28
+#: .\templates\register_activation.html:28
 msgid "STEP2_ACTIVATION"
 msgstr ""
 "Please refer to the user guide below, it will walk you through every step of "
 "the process."
 
-#: templates/register_activation.html:29
+#: .\templates\register_activation.html:29
 msgid "STEP3_ACTIVATION"
 msgstr "If any further assistance is needed, feel free to contact us at"
 
-#: templates/register_activation.html:29
+#: .\templates\register_activation.html:29
 msgid "STEP4_ACTIVATION"
 msgstr "during office hours."
 
-#: templates/register_activation.html:33 templates/register_freetrial.html:63
+#: .\templates\register_activation.html:33
+#: .\templates\register_freetrial.html:63
 msgid "REGARDS_ACTIVATION"
 msgstr "Best regards,"
 
-#: templates/register_activation.html:34
-#: templates/register_confirmation.html:36 templates/register_freetrial.html:64
+#: .\templates\register_activation.html:34
+#: .\templates\register_confirmation.html:36
+#: .\templates\register_freetrial.html:64
 msgid "CONGRATS_3_WELCOME"
 msgstr "The Live Show Seller Team"
 
-#: templates/register_confirmation.html:11
+#: .\templates\register_confirmation.html:11
 msgid "TITLE_WELCOME"
 msgstr "Thank you for registering Live Show Seller"
 
-#: templates/register_confirmation.html:19 templates/register_freetrial.html:13
+#: .\templates\register_confirmation.html:19
+#: .\templates\register_freetrial.html:13
 msgid "THANKS_PHRASE_WELCOME"
 msgstr ""
 "Thank you for signing up with Live Show Seller, we’re thrilled to have you "
 "here!"
 
-#: templates/register_confirmation.html:20
+#: .\templates\register_confirmation.html:20
 msgid "LOGIN_1_WELCOME"
 msgstr "Please log in"
 
-#: templates/register_confirmation.html:20
+#: .\templates\register_confirmation.html:20
 msgid "LOGIN_3_WELCOME"
 msgstr "to start the journey."
 
-#: templates/register_confirmation.html:28
+#: .\templates\register_confirmation.html:28
 msgid "PLAN_CHOOSE_1_WELCOME"
 msgstr ""
 "Choose an upgrade plan to boost your business with new member discount!"
 
-#: templates/register_confirmation.html:29
+#: .\templates\register_confirmation.html:29
 msgid "PLAN_CHOOSE_2_WELCOME"
 msgstr "Not sure which one suits your business the best?"
 
-#: templates/register_confirmation.html:30
+#: .\templates\register_confirmation.html:30
 msgid "PLAN_CHOOSE_3_WELCOME"
 msgstr "Feel free to contact us at"
 
-#: templates/register_confirmation.html:30
+#: .\templates\register_confirmation.html:30
 msgid "PLAN_CHOOSE_4_WELCOME"
 msgstr "at any time."
 
-#: templates/register_confirmation.html:34
+#: .\templates\register_confirmation.html:34
 msgid "CONGRATS_1_WELCOME"
 msgstr "Let’s start selling live now!"
 
-#: templates/register_confirmation.html:35
+#: .\templates\register_confirmation.html:35
 msgid "CONGRATS_2_WELCOME"
 msgstr "Cheers,"
 
-#: templates/register_freetrial.html:14
+#: .\templates\register_freetrial.html:14
 msgid "TITLE_GREETING"
 msgstr "Dear"
 
-#: templates/register_freetrial.html:18
+#: .\templates\register_freetrial.html:18
 msgid "EMAIL"
 msgstr "Email"
 
-#: templates/register_freetrial.html:19
+#: .\templates\register_freetrial.html:19
 msgid "PASSWORD"
 msgstr "Password"
 
-#: templates/register_freetrial.html:31
+#: .\templates\register_freetrial.html:31
 msgid "EMAIL/ACTIVATED/SUBTITLE_1"
 msgstr "Quickstart Guide:"
 
-#: templates/register_freetrial.html:33
+#: .\templates\register_freetrial.html:33
 msgid "EMAIL/ACTIVATED/GUIDE"
 msgstr ""
 "We think the best way to get familiar with the LSS system is to log in and "
 "play around with it. However, if you’d prefer to have a more formal "
 "introduction, feel free to contact us for an online demo or click"
 
-#: templates/register_freetrial.html:36
+#: .\templates\register_freetrial.html:36
 msgid "EMAIL/ACTIVATED/GUIDE_2"
 msgstr "to read our user guide."
 
-#: templates/register_freetrial.html:49
+#: .\templates\register_freetrial.html:49
 msgid "EMAIL/ACTIVATED/SCHEDULE"
 msgstr "Schedule a Meeting"
 
-#: templates/register_freetrial.html:54
+#: .\templates\register_freetrial.html:54
 msgid "EMAIL/ACTIVATED/SUBTITLE_2"
 msgstr "Frequently Asked Questions:"
 
-#: templates/register_freetrial.html:56
+#: .\templates\register_freetrial.html:56
 msgid "EMAIL/ACTIVATED/FAQ"
 msgstr ""
 "Find answers to the most frequently asked questions and start your live "
 "selling journey today!"
 
-#: templates/register_freetrial.html:57
+#: .\templates\register_freetrial.html:57
 msgid "EMAIL/ACTIVATED/FAQLINK"
 msgstr "Live Show Seller FAQ"
 
-#: templates/register_freetrial.html:59
+#: .\templates\register_freetrial.html:59
 msgid "EMAIL/ACTIVATED/CONTACT_1"
 msgstr "If any further assistance is needed, feel free to contact us at"
 
-#: templates/register_freetrial.html:59
+#: .\templates\register_freetrial.html:59
 msgid "EMAIL/ACTIVATED/CONTACT_2"
 msgstr "during office hours."
 
-#: templates/register_freetrial.html:77
+#: .\templates\register_freetrial.html:77
 msgid "EMAIL/ACTIVATED/LOGIN"
 msgstr "Log In Here"
 
-#: templates/reset_password_link_email.html:13
-#: templates/reset_password_success_email.html:12
+#: .\templates\reset_password_link_email.html:13
+#: .\templates\reset_password_success_email.html:12
 msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT1"
 msgstr "Hello "
 
-#: templates/reset_password_link_email.html:16
+#: .\templates\reset_password_link_email.html:16
 msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT2"
 msgstr ""
 "We received a request to reset your Live Show Seller password. Click the "
 "link below to reset your password:"
 
-#: templates/reset_password_link_email.html:19
+#: .\templates\reset_password_link_email.html:19
 msgid "EMAIL/PASSWORD_RESET_LINK/BUTTON"
 msgstr "Reset Password"
 
-#: templates/reset_password_link_email.html:22
+#: .\templates\reset_password_link_email.html:22
 msgid "EMAIL/IF_YOU_CAN_NOT_CLICK"
 msgstr ""
 "If you are having trouble resetting your password, please enter the URL in "
 "your browser."
 
-#: templates/reset_password_link_email.html:24
+#: .\templates\reset_password_link_email.html:24
 msgid "EMAIL/PASSWORD_RESET_LINK/CONTENT3"
 msgstr ""
 "If you ignore this message, your password will not be changed. If you didn’t "
 "request a password reset, let us know. "
 
-#: templates/reset_password_link_email.html:26
-#: templates/reset_password_success_email.html:17
+#: .\templates\reset_password_link_email.html:26
+#: .\templates\reset_password_success_email.html:17
 msgid "CONTACT_INFO/EMAIL"
 msgstr "Email: app@algotech.app"
 
-#: templates/reset_password_link_email.html:27
+#: .\templates\reset_password_link_email.html:27
 msgid "CONTACT_INFO/PHONE"
 msgstr "Contact Number: +65 9489 2086"
 
-#: templates/reset_password_link_email.html:28
+#: .\templates\reset_password_link_email.html:28
 msgid "CONTACT_INFO/ADDRESS"
 msgstr "Address: 8 Burn Road #15-13, Singapore 369977"
 
-#: templates/reset_password_success_email.html:15
+#: .\templates\reset_password_success_email.html:15
 msgid "EMAIL/PASSWORD_RESET_SUCCESS/CONTENT1"
 msgstr "The password for your Live Show Seller account"
 
-#: templates/reset_password_success_email.html:15
+#: .\templates\reset_password_success_email.html:15
 msgid "EMAIL/PASSWORD_RESET_SUCCESS/CONTENT2"
 msgstr ""
 "has been successfully changedIf you did not request this change, please "
 "contact support immediately."
+
+#~ msgid "https://liveshowseller.com"
+#~ msgstr "https://liveshowseller.com"
+
+#~ msgid "Powered by Algotech Pte Ltd"
+#~ msgstr "Powered by Algotech Pte Ltd"
+
+#~ msgid "EMAIL/ORDER_CONFIRM/PICK_UP_DATE"
+#~ msgstr "Pick up Date"
 
 #~ msgid "ORDER/REPORT/KOL/DISCOUNT_POINT_D"
 #~ msgstr "Discount(from points)(D)"
@@ -768,14 +952,14 @@ msgstr ""
 #~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_WAY"
 #~ msgstr "Delivery way"
 
-#~ msgid "EMAIL/ORDER_CONFIRM/PICK_UP_STORE"
-#~ msgstr "Pick up store"
-
-#~ msgid "EMAIL/ORDER_CONFIRM/PICK_UP_DATE"
-#~ msgstr "Pick up Date"
-
 #~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_ADDRESS"
 #~ msgstr "Delivery address"
 
 #~ msgid "EMAIL/ORDER_CONFIRM/DELIVERY_CHARGE"
 #~ msgstr "Delivery Charge"
+
+#~ msgid "FAMIC2C"
+#~ msgstr "全家"
+
+#~ msgid "UNIMARTC2C"
+#~ msgstr "7-11"

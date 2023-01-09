@@ -172,7 +172,7 @@ class XlsxHelper():
 #             cls._next_row()
 #             worksheet.merge_range(cls.row, 0, cls.row, 6, _('REPORT/SECTION_TITLE/CONTACT_INFO'), info_format)
 #             worksheet.merge_range(cls.row, 7, cls.row, 15, _('REPORT/SECTION_TITLE/DELIVERY_INFO'), info_format)
-#             worksheet.merge_range(cls.row, 16, cls.row, 19, _('REPORT/SECTION_TITLE/PAYMENT_INFO'), info_format)
+#             worksheet.merge_range(cls.row, 16, cls.row, 19, _('PAYMENT_INFO'), info_format)
 #             worksheet.merge_range(cls.row, 20, cls.row, 20 + campaign_products_count - 1, _('REPORT/SECTION_TITLE/ORDER_INFO'), info_format)
 #         cls._next_row()
 #         cls._reset_column()
