@@ -428,11 +428,10 @@ class CartViewSet(viewsets.ModelViewSet):
 
         if code!=200 or not response.get('success'):
             raise lib.error_handle.error.api_error.ApiVerifyError('refresh_try_again')
-        print(campaign_id)
-        print(customer_name)
-        if not models.cart.cart.Cart.objects.filter(campaign_id=campaign_id, customer_name=customer_name, platform=models.user.user_subscription.PLATFORM_TIKTOK).exists():
+
+        if not models.cart.cart.Cart.objects.filter(campaign_id=campaign_id, platform=models.user.user_subscription.PLATFORM_TIKTOK).filter(Q(customer_name=customer_name)|Q(customer_nickname=customer_name)).exists():
             raise lib.error_handle.error.api_error.ApiVerifyError('cart_not_found')
-        cart = models.cart.cart.Cart.objects.filter(campaign_id=campaign_id, customer_name=customer_name, platform=models.user.user_subscription.PLATFORM_TIKTOK).first()
+        cart = models.cart.cart.Cart.objects.filter(campaign_id=campaign_id, platform=models.user.user_subscription.PLATFORM_TIKTOK).filter(Q(customer_name=customer_name)|Q(customer_nickname=customer_name)).first()
         oid = database.lss.cart.get_oid_by_id(cart.id)
         return Response(oid, status=status.HTTP_200_OK)
 

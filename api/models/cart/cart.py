@@ -23,6 +23,7 @@ class Cart(models.Model):
 
     customer_id = models.CharField(max_length=255, null=True, blank=True)
     customer_name = models.CharField(max_length=255, null=True, blank=True)
+    customer_nickname = models.CharField(max_length=255, null=True, blank=True, default='')
     customer_img = models.CharField(max_length=255, null=True, blank=True)
 
     platform = models.CharField(max_length=255, blank=True, default=None)

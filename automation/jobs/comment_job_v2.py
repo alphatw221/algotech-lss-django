@@ -57,6 +57,7 @@ def comment_job(campaign_data, user_subscription_data, platform_name, platform_i
         pymongo_cart = database.lss.cart.Cart.create_object(
             customer_id= comment['customer_id'],
             customer_name= comment['customer_name'],
+            customer_nickname =comment.get('customer_nickname'),
             customer_img= comment['image'],
             campaign_id= campaign_data['id'],
             user_subscription_id = campaign_data['user_subscription_id'],
