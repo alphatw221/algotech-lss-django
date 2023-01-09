@@ -123,7 +123,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         #send email
         jobs.send_email_job.send_email_job(
-            subject=lib.i18n.email.mail_subjects.order_confirm_mail_subject(order=order, lang=campaign.lang),
+            subject=lib.i18n.email.mail_subjects.order_confirm_mail_subject(order=order, lang=order.campaign.lang),
             email=order.shipping_email,
             template="email_order_confirm.html",
             parameters={"order":order,"order_oid":order_oid},

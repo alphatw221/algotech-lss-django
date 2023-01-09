@@ -6,18 +6,18 @@
         {% check_free_delivery order as free_delivery %}
         {% get_order_products order as order_products %}
         <div style="width:100%; font-family: \'Open Sans\', sans-serif;"> 
-            <div style="padding:5%; max-width:900px; text-align: left; margin-left: auto; margin-right: auto;">
+            <div style="max-width:900px; text-align: left; margin-left: auto; margin-right: auto;">
                 <div text-align="center">
-                    <h1 style="text-align:center; font-size: 28px; line-height: 32px; font-weight: 700; color: #4b4b4b; text-transform: none; margin: 0;">
+                    <h1 style="text-align:center; font-size: 1.75rem; line-height: 32px; font-weight: 700; color: #4b4b4b; text-transform: none; margin: 0;">
                         {% translate "DIRECT_TO_PAYMENT" %} <br/>
                     </h1>
                 </div>
-                <div style="margin-top: 1%; font-size: 0.9rem; padding: 10px;">
+                <div style="margin-top: 1%;padding: 10px;">
                     <p style="text-align: left; font-weight: 700; font-size: 1rem; line-height: 0; margin-top: 24px;">{% translate "EMAIL/DELIVERY_CONFIRM/ORDER_INFO" %}</p>
                     <div style="border-bottom: 3px solid #ffd000; width: 20%; margin-bottom: 10px;"></div>
 
                     <!--Order Details -->
-                    <table cellspacing="0" cellpadding="0" style="width:100%; border:0; color: #4b4b4b; font-weight: 600; line-height: 1.5; text-align:left;" role="presentation">
+                    <table cellspacing="0" cellpadding="0" style="width:100%; font-size: 0.9rem; border:0; color: #4b4b4b; font-weight: 600; line-height: 1.5; text-align:left;" role="presentation">
                         <tbody>
                             
                             <tr>
@@ -141,9 +141,9 @@
                     <div style="border-bottom: 3px solid #ffd000; width: 20%; margin-bottom: 10px;"></div>
 
                     {% for order_product in order_products %}
-                    <table cellspacing="0" cellpadding="0" width="100%" style="min-width: 100%;" role="presentation">
+                    <table cellspacing="0" cellpadding="0" width="100%" style="min-width: 100%; font-size: 1rem; " role="presentation">
                     <tbody>
-                        <tr>
+                        <tr style="padding-top: 10px;">
                             <td width="1" style="mso-line-height-rule: exactly;" valign="middle">
                                 <img src="{{order_product.image}}" alt="Product Image" style="width: 150px; max-width: 300px; height: auto !important; border-radius: 1px; padding: 0px;">
                             </td>
@@ -152,20 +152,20 @@
                             <table cellspacing="0" cellpadding="0" width="100%" style="min-width: 100%; border-bottom: 1px solid #a5a5a5;" role="presentation">
                                 <tbody>
                                 <tr>
-                                    <td style="max-width: 50%; font-size: 16px; line-height: 26px; font-weight: 400; color: #666363; padding: 10px 13px;" text-align="left" valign="top">
-                                        <p style="font-size: 16px; line-height: 26px; font-weight: 400; color: #666363; margin: 0;">
+                                    <td style="max-width: 50%; font-size: 0.9rem; line-height: 26px; font-weight: 400; color: #666363; padding: 10px 13px;" text-align="left" valign="top">
+                                        <p style="line-height: 26px; font-weight: 400; color: #666363; margin: 0;">
                                             <a target="_blank" style="color: #666363; text-decoration: none !important; text-underline-offset: none; word-wrap: break-word; font-weight: bold;">
                                                 {{order_product.name}}
                                             </a>
                                         </p>
                                     </td>
                                     <td width="1" style="white-space:nowrap; padding: 10px 13px;" text-align="right" valign="top">
-                                        <p style="font-size: 16px; line-height: 26px; font-weight: 400; color: #666363; margin: 0;">
+                                        <p style="line-height: 26px; font-weight: 400; color: #666363; margin: 0;">
                                             {% translate "QTY" %} &nbsp;{{order_product.qty}}
                                         </p>
                                     </td>
                                     <td width="1" style="white-space: nowrap; padding: 10px 13px;" text-align="right" valign="top">
-                                        <p style="font-size: 16px; line-height: 26px; font-weight: 400; color: #666363; margin: 0;">
+                                        <p style="line-height: 26px; font-weight: 400; color: #666363; margin: 0;">
                                             {{order.campaign.currency}}
                                             {{order_product.subtotal}}{{order.campaign.decimal_places}}
                                             {% get_price_unit order.campaign.price_unit %}
@@ -180,7 +180,7 @@
                     {% endfor %}
 
                     <!-- Subtotal -->
-                    <table cellspacing="0" cellpadding="0" width="100%" style="width: 100%; font-size: 15px; color: #4b4b4b; font-weight: 600; text-align:right; margin-top: 10px;" role="presentation">
+                    <table cellspacing="0" cellpadding="0" width="100%" style="width: 100%; font-size: 1rem;  color: #4b4b4b; font-weight: 600; text-align:right; margin-top: 10px;" role="presentation">
                         <tbody>
                         <tr>
                             <td data-key="1468271_subtotal" text-align="right" valign="top">
@@ -254,7 +254,7 @@
                         </tbody>
                     </table>
 
-                    <div style="background-color: #f5f5f5; max-width: 100%; padding: 13px 52px; font-size: 1rem; margin-top: 5%; text-align: center; color: #616161;">
+                    <div style="background-color: #f5f5f5; max-width: 100%; padding: 20px 5px; font-size: 0.7rem; margin-top: 5%; text-align: center; color: #616161;">
                         <p>
                             {% translate "EMAIL/DELIVERY_CONFIRM/DO_NOT_REPLY_1" %}<br/>
                             {% translate "CONTACT_SELLER"%}<br/>
