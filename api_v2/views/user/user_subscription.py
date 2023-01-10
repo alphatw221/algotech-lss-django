@@ -329,7 +329,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         return Response(UserSerializerSellerAccountInfo(api_user).data, status=status.HTTP_200_OK)
     
         
-    @action(detail=False, methods=['POST'], url_path=r'upgrade/intent')
+    @action(detail=False, methods=['POST'], url_path=r'upgrade/intent', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def upgrade_intent(self, request):
         email, plan, period = lib.util.getter.getdata(request, ("email", "plan", "period"), required=True)
