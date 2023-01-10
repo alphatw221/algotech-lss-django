@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-01-09 12:23+0800\n"
+"POT-Creation-Date: 2023-01-10 11:19+0800\n"
 "PO-Revision-Date: 2021-12-13 15:50+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -578,8 +578,8 @@ msgstr "If you have any problem about our system."
 
 #: .\templates\email_cart_checkout.html:264
 #: .\templates\email_order_confirm.html:305
-msgid "https://www.liveshowseller.com/buyer-support"
-msgstr ""
+msgid "CONTACT_US_URL"
+msgstr "https://liveshowseller.com/contact-us/"
 
 #: .\templates\email_cart_checkout.html:264
 #: .\templates\email_order_confirm.html:305
