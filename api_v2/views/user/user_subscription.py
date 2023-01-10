@@ -396,7 +396,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
                 'type': plan,
                 'expired_at': expired_at,
                 'started_at': now,
-                'user_plan': {"activated_platform" : ["facebook","youtube","instagram"]},
+                'user_plan': {"activated_platform" : ["facebook","youtube","instagram","twitch","tiktok"]},
                 'purchase_price': amount
             }
         data.update(business_policy.subscription_plan.SubscriptionPlan.get_plan_limit(plan))
