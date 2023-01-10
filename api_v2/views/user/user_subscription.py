@@ -539,7 +539,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             data = OrderSerializerWithBuyerAccountInfo(queryset, many=True).data
         return Response(data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['GET'], url_path=r'list/buyer/(?P<buyer_id>[^/.]+)/points/history', permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['GET'], url_path=r'list/buyer/(?P<buyer_id>[^/.]+)/point/history', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def list_buyer_point_history(self, request, buyer_id):
         
@@ -549,7 +549,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         customer = lib.util.verify.Verify.get_customer_from_user_subscription(user_subscription, buyer_id)
-        wallet = customer.wallets.get(user_subscription=user_subscription)
+        wallet = customer.wallets.filter(user_subscription=user_subscription).first()
         queryset = customer.point_transactions.filter(user_subscription = user_subscription).order_by('-created_at') #temp 
         
         page = self.paginate_queryset(queryset)
