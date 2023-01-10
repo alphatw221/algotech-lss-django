@@ -149,7 +149,9 @@ class CampaignProductSerializerUpdate(CampaignProductSerializer):
             'category',
             'categories',
             'meta_variant',
-            'pinned'
+            'pinned',
+
+            'price'
         ]
 
 
