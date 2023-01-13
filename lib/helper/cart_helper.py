@@ -44,8 +44,8 @@ class CartHelper():
 
         ret = rule.rule_checker.cart_rule_checker.RuleChecker.check(check_list=[
             rule.check_rule.cart_check_rule.CartCheckRule.is_cart_lock,
-            rule.check_rule.cart_check_rule.CartCheckRule.is_campaign_product_editable,
             rule.check_rule.cart_check_rule.CartCheckRule.is_campaign_product_removeable,
+            rule.check_rule.cart_check_rule.CartCheckRule.is_campaign_product_editable,
             rule.check_rule.cart_check_rule.CartCheckRule.is_under_max_limit,
         ],**{
             'api_user':api_user,

@@ -75,7 +75,6 @@ class OrderViewSet(viewsets.ModelViewSet):
     def buyer_retrieve_latest_order_shipping(self, request):
         api_user = lib.util.verify.Verify.get_customer_user(request)
         order = api_user.orders.last()
-        print(order.id)
         data = models.order.order.OrderSerializerUpdateShipping(order).data
         return Response(data, status=status.HTTP_200_OK)
 

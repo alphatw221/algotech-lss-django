@@ -283,7 +283,7 @@ class CartViewSet(viewsets.ModelViewSet):
         if order.total<=0:
             from api_v2.views.payment.payment import update_wallet #temp
             #payment status update
-            order.payment_status = models.order.order.PAYMENT_METHOD_DIRECT
+            order.payment_status = models.order.order.PAYMENT_STATUS_PAID
             #delivery status update
             delivery_params = {"order_oid": order_oid, "order": order, "extra_data": {}, "create_order": True, "update_status": True}
             lib.helper.delivery_helper.DeliveryHelper.create_delivery_order_and_update_delivery_status(**delivery_params)
