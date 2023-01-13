@@ -91,9 +91,9 @@ class CartCheckRule():
             return
         # if not api_user or not campaign_product:
         #     return
-        if api_user.type=="user":
+        if api_user and api_user.type=="user" :
             return
-        if not campaign_product.customer_removable:
+        if campaign_product and not campaign_product.customer_removable:
             raise lib.error_handle.error.cart_error.CartErrors.RemoveNotAllowed("not_removable")
 
     @staticmethod
@@ -104,11 +104,11 @@ class CartCheckRule():
         campaign_product = kwargs.get('campaign_product')
         cart = kwargs.get('cart')
 
-        if not api_user or not campaign_product:
+        # if not api_user or not campaign_product:
+        #     return
+        if api_user and api_user.type=="user":
             return
-        if api_user.type=="user":
-            return
-        if not campaign_product.customer_editable and str(campaign_product.id) in cart.products:
+        if campaign_product and not campaign_product.customer_editable and str(campaign_product.id) in cart.products:
             raise lib.error_handle.error.cart_error.CartErrors.EditNotAllowed("not_editable")
         if campaign_product.type == models.campaign.campaign_product.TYPE_LUCKY_DRAW:
             raise lib.error_handle.error.cart_error.CartErrors.EditNotAllowed("not_editable")
