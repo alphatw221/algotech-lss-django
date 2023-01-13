@@ -89,8 +89,8 @@ class CartCheckRule():
         qty = kwargs.get('qty')
         if qty > 0:
             return
-        if not api_user or not campaign_product:
-            return
+        # if not api_user or not campaign_product:
+        #     return
         if api_user.type=="user":
             return
         if not campaign_product.customer_removable:
