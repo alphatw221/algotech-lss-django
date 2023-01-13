@@ -67,8 +67,9 @@ class JSXlsxProcessor():
         with translation.override(self.lang):
             self.__generate_header()
             self.__generate_data()
-
-        return {'header':self.header, 'display_header':self.display_header, 'data':self.data, 'column_settings':self.column_settings}
+        json = {'header':self.header, 'display_header':self.display_header, 'data':self.data, 'column_settings':self.column_settings}
+        print(json)
+        return json
 
     # @classmethod
     # def file_to_json(cls, file, sheet_name):

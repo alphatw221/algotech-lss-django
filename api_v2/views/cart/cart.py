@@ -277,14 +277,46 @@ class CartViewSet(viewsets.ModelViewSet):
             api_user.lang = campaign.lang
             api_user.save()
 
-        #send email
-        jobs.send_email_job.send_email_job(
-            subject=lib.i18n.email.mail_subjects.cart_checkout_mail_subject(order=order, lang=order.campaign.lang),
-            email=order.shipping_email,
-            template="email_cart_checkout.html",
-            parameters={"order":order,"order_oid":order_oid},
-            lang=order.campaign.lang,
-        )
+
+
+
+        if order.total<=0:
+            from api_v2.views.payment.payment import update_wallet #temp
+            #payment status update
+            order.payment_status = models.order.order.PAYMENT_METHOD_DIRECT
+            #delivery status update
+            delivery_params = {"order_oid": order_oid, "order": order, "extra_data": {}, "create_order": True, "update_status": True}
+            lib.helper.delivery_helper.DeliveryHelper.create_delivery_order_and_update_delivery_status(**delivery_params)
+                    
+            #wallet
+            update_wallet(order) #//temp
+
+            for campaign_product_id_str, qty in order.products.items():
+                pymongo_campaign_product = database.lss.campaign_product.CampaignProduct(id=int(campaign_product_id_str))
+                pymongo_campaign_product.sold(qty, sync=True)
+                lib.helper.cart_helper.CartHelper.send_campaign_product_websocket_data(pymongo_campaign_product.data)
+
+            #send email
+            jobs.send_email_job.send_email_job(
+                subject=lib.i18n.email.mail_subjects.order_confirm_mail_subject(order=order, lang=order.campaign.lang),
+                email=order.shipping_email,
+                template="email_order_confirm.html",
+                parameters={"order":order,"order_oid":order_oid},
+                lang=order.campaign.lang,
+            )
+
+            #order status update
+            lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
+
+        else:
+            #send email
+            jobs.send_email_job.send_email_job(
+                subject=lib.i18n.email.mail_subjects.cart_checkout_mail_subject(order=order, lang=order.campaign.lang),
+                email=order.shipping_email,
+                template="email_cart_checkout.html",
+                parameters={"order":order,"order_oid":order_oid},
+                lang=order.campaign.lang,
+            )
 
         return Response(data, status=status.HTTP_200_OK)
 
