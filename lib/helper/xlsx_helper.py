@@ -68,7 +68,7 @@ class JSXlsxProcessor():
             self.__generate_header()
             self.__generate_data()
         json = {'header':self.header, 'display_header':self.display_header, 'data':self.data, 'column_settings':self.column_settings}
-        print(json)
+
         return json
 
     # @classmethod

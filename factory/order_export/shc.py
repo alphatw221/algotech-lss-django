@@ -76,6 +76,13 @@ class OrderProductsSubtotalMapper(FieldMapper):
     def get_field_data(self, object):
         return object.get('order_products',{}).get('subtotal')
 
+class OrderProductsOrderCodeMapper(FieldMapper):
+    def get_field_data(self, object):
+        return object.get('order_products',{}).get('order_code')
+
+class OrderProductsSKUMapper(FieldMapper):
+    def get_field_data(self, object):
+        return object.get('order_products',{}).get('sku')
 
 class TotalMapper(FieldMapper):
     def get_field_data(self, object):
@@ -98,8 +105,8 @@ class SHCOrderExportProcessor(DefaultOrderExportProcessor):
             DeliveryInfonMapper('shipping_postcode', 'Postcode', width=20, first_only=True),
             FieldMapper('shipping_email', 'E-mail', width=40, first_only=True),
             #residentail type
-            FieldMapper('order_product_sku', 'SKU Code', width=20),
-            FieldMapper('order_product_order_code', 'Product Keyword', width=20),
+            OrderProductsSKUMapper('order_product_sku', 'SKU Code', width=20),
+            OrderProductsOrderCodeMapper('order_product_order_code', 'Product Keyword', width=20),
             #product keyword
             OrderProductsNameMapper('order_product_name', 'Product Name', width=40),
             OrderProductsPriceMapper('order_product_price', 'Product Price', width=20),
