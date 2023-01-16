@@ -163,15 +163,17 @@ class ProductCandidateSetGenerator(CandidateSetGenerator):
         winner_list = campaign.meta.get('winner_list',[])
         candidate_set = set()
 
+        order_data = database.lss.order.Order.filter(**{'campaign_id':campaign.id, 'platform':{'$ne':None}, f'products.{str(lucky_draw.campaign_product.id)}':{'$exists':True}})
+        cart_data = database.lss.cart.Cart.filter(**{'campaign_id':campaign.id, 'platform':{'$ne':None}, f'products.{str(lucky_draw.campaign_product.id)}':{'$exists':True}})
 
-        orders = models.order.order.Order.objects.filter(campaign=campaign, platform__isnull=False, products__has_key=str(lucky_draw.campaign_product.id))
-        carts = models.cart.cart.Cart.objects.filter(campaign=campaign, platform__isnull=False, products__has_key=str(lucky_draw.campaign_product.id))
-        for order in orders:
+        # orders = models.order.order.Order.objects.filter(campaign=campaign, platform__isnull=False, products__has_key=str(lucky_draw.campaign_product.id))
+        # carts = models.cart.cart.Cart.objects.filter(campaign=campaign, platform__isnull=False, products__has_key=str(lucky_draw.campaign_product.id))
+        for order in order_data:
             candidate = LuckyDrawCandidate(
-                platform=order.platform, 
-                customer_id=order.customer_id, 
-                customer_name=order.customer_name,
-                customer_image=order.customer_img,
+                platform=order.get('platform'), 
+                customer_id=order.get('customer_id'), 
+                customer_name=order.get('customer_name'),
+                customer_image=order.get('customer_img'),
                 draw_type=lucky_draw.type,
                 prize=lucky_draw.prize.name)
 
@@ -180,12 +182,12 @@ class ProductCandidateSetGenerator(CandidateSetGenerator):
 
             candidate_set.add(candidate)
         
-        for cart in carts:
+        for cart in cart_data:
             candidate = LuckyDrawCandidate(
-                platform=cart.platform, 
-                customer_id=cart.customer_id, 
-                customer_name=cart.customer_name,
-                customer_image=cart.customer_img,
+                platform=cart.get('platform'),
+                customer_id=cart.get('customer_id'),
+                customer_name=cart.get('customer_name'),
+                customer_image=cart.get('customer_img'),
                 draw_type=lucky_draw.type,
                 prize=lucky_draw.prize.name)
 
@@ -193,7 +195,7 @@ class ProductCandidateSetGenerator(CandidateSetGenerator):
                 continue
 
             candidate_set.add(candidate)
-        print(candidate_set)
+
         return candidate_set
 
 
