@@ -13,6 +13,7 @@ from api import models
 from collections import OrderedDict
 from django.db.models import Q, Value
 
+import database
 class LuckyDrawCandidate():
 
     def __init__(self,platform, customer_id, comment_id=None, customer_name="", customer_image="", draw_type=None, prize=None):
@@ -161,6 +162,7 @@ class ProductCandidateSetGenerator(CandidateSetGenerator):
 
         winner_list = campaign.meta.get('winner_list',[])
         candidate_set = set()
+
 
         orders = models.order.order.Order.objects.filter(campaign=campaign, platform__isnull=False, products__has_key=str(lucky_draw.campaign_product.id))
         carts = models.cart.cart.Cart.objects.filter(campaign=campaign, platform__isnull=False, products__has_key=str(lucky_draw.campaign_product.id))

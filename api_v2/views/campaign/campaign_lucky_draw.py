@@ -143,7 +143,7 @@ class CampaignLuckyDrawViewSet(viewsets.ModelViewSet):
         campaign = lucky_draw.campaign
         lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign.id)
 
-        winner_list = lib.helper.lucky_draw_helper.draw(campaign, lucky_draw)
+        winner_list = lib.helper.lucky_draw_helper.draw(campaign, lucky_draw, api_user)
         return Response(winner_list, status=status.HTTP_200_OK)
     
     @action(detail=True, methods=['GET'], url_path=r'draw/check', permission_classes=(IsAuthenticated,))
