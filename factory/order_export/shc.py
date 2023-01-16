@@ -87,24 +87,28 @@ class TotalMapper(FieldMapper):
 
 class SHCOrderExportProcessor(DefaultOrderExportProcessor):
     field_mappers = [
-            FieldMapper('id','OrderNo', width=10, first_only=True, i18n_key=''),
-            FieldMapper('platform', 'Platform', width=15, first_only=True, i18n_key=''),
+            FieldMapper('id','OrderNo', width=10, first_only=True),
+            FieldMapper('shipping_property_type','Residential Type', width=10, first_only=True),
+            DateTimeMapper('shipping_date_time','Delivery Date', width=20, first_only=True),
+            FieldMapper('shipping_time_slot','Delivery Time Range', width=20, first_only=True),
+            FieldMapper('platform', 'Platform', width=15, first_only=True),
             FieldMapper('customer_name', 'Name', width=20, first_only=True, i18n_key=''),
-            FieldMapper('shipping_cellphone', 'Shipping Phone', width=20, first_only=True, i18n_key=''),
-            DeliveryInfonMapper('shipping_address_1', 'Shipping Address 1', width=40, first_only=True, i18n_key=''),
-            DeliveryInfonMapper('shipping_postcode', 'Postcode', width=20, first_only=True, i18n_key=''),
-            FieldMapper('shipping_email', 'E-mail', width=40, first_only=True, i18n_key=''),
+            FieldMapper('shipping_cellphone', 'Shipping Phone', width=20, first_only=True),
+            DeliveryInfonMapper('shipping_address_1', 'Shipping Address 1', width=40, first_only=True),
+            DeliveryInfonMapper('shipping_postcode', 'Postcode', width=20, first_only=True),
+            FieldMapper('shipping_email', 'E-mail', width=40, first_only=True),
             #residentail type
-            FieldMapper('sku', 'SKU Code', width=20, i18n_key=''),
+            FieldMapper('order_product_sku', 'SKU Code', width=20),
+            FieldMapper('order_product_order_code', 'Product Keyword', width=20),
             #product keyword
-            OrderProductsNameMapper('order_product_name', 'Product Name', width=40, i18n_key=''),
-            OrderProductsPriceMapper('order_product_price', 'Product Price', width=20, i18n_key=''),
-            OrderProductsQtyMapper('order_product_qty', 'Qty', width=20, i18n_key=''),
-            OrderProductsSubtotalMapper('order_product_subtotal', 'Total Price', width=20, i18n_key=''),
-            FieldMapper('subtotal', 'After Total Sum', width=20, first_only=True, i18n_key=''),
-            FieldMapper('shipping_cost', 'Shipping ', width=20, first_only=True, i18n_key=''),
-            FieldMapper('total', 'Total ', width=20, first_only=True, i18n_key=''),
-            FieldMapper('payment_status', 'Payment Status', width=20, first_only=True, i18n_key=''),
-            DateTimeMapper('paid_at', 'Payment Date', width=40, first_only=True, i18n_key='')
+            OrderProductsNameMapper('order_product_name', 'Product Name', width=40),
+            OrderProductsPriceMapper('order_product_price', 'Product Price', width=20),
+            OrderProductsQtyMapper('order_product_qty', 'Qty', width=20),
+            OrderProductsSubtotalMapper('order_product_subtotal', 'Total Price', width=20),
+            FieldMapper('subtotal', 'After Total Sum', width=20, first_only=True),
+            FieldMapper('shipping_cost', 'Shipping ', width=20, first_only=True),
+            FieldMapper('total', 'Total ', width=20, first_only=True),
+            FieldMapper('payment_status', 'Payment Status', width=20, first_only=True),
+            DateTimeMapper('paid_at', 'Payment Date', width=40, first_only=True)
 
         ]
