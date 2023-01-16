@@ -191,7 +191,7 @@ class ProductCandidateSetGenerator(CandidateSetGenerator):
                 continue
 
             candidate_set.add(candidate)
-
+        print(candidate_set)
         return candidate_set
 
 
@@ -365,7 +365,7 @@ class SharedPostCandidateSetGenerator(CandidateSetGenerator):
 class LuckyDraw():
 
     @classmethod
-    def draw_from_candidate(cls, campaign, campaign_product, candidate_set=set(), num_of_winner=1):
+    def draw_from_candidate(cls, campaign, campaign_product, candidate_set=set(), num_of_winner=1, api_user=None):
         if not candidate_set:
             print('no candidate')
             return []
@@ -381,7 +381,7 @@ class LuckyDraw():
         
         for winner in winners:                                              #multithread needed
             try:
-                cls.__add_product(campaign, winner, campaign_product)
+                cls.__add_product(campaign, winner, campaign_product, api_user)
                 cls.__announce(campaign, winner, campaign_product)
                 cls.__send_private_message(campaign, winner, campaign_product)
                 winner_dict = winner.to_dict()
@@ -404,7 +404,9 @@ class LuckyDraw():
         cls, 
         campaign: models.campaign.campaign.Campaign, 
         winner:LuckyDrawCandidate, 
-        campaign_product:models.campaign.campaign_product.CampaignProduct ):
+        campaign_product:models.campaign.campaign_product.CampaignProduct ,
+        api_user
+        ):
 
             if models.cart.cart.Cart.objects.filter(
                 campaign=campaign, platform=winner.platform, customer_id=winner.customer_id, customer_name=winner.customer_name).exists():
@@ -430,7 +432,7 @@ class LuckyDraw():
                 qty = cart.products.get(str(campaign_product.id),0)+1
             else :
                 qty = 1
-            lib.helper.cart_helper.CartHelper.update_cart_product(api_user=None, cart=cart, campaign_product=campaign_product, qty=qty)
+            lib.helper.cart_helper.CartHelper.update_cart_product(api_user=api_user, cart=cart, campaign_product=campaign_product, qty=qty)
             # if prize_product := pre_order.products.get(str(campaign_product.id), None):
             #     qty = prize_product['qty'] + 1
             #     lib.helper.order_helper.PreOrderHelper.update_product(api_user=None, pre_order_id=pre_order.id, 
@@ -489,7 +491,7 @@ class LuckyDraw():
 
 
 
-def draw(campaign, lucky_draw):
+def draw(campaign, lucky_draw, api_user):
     
     if lucky_draw.type == models.campaign.campaign_lucky_draw.TYPE_KEYWORD:
         candidate_set = lib.helper.lucky_draw_helper.KeywordCandidateSetGenerator.get_candidate_set(campaign, lucky_draw, limit=100)
@@ -509,6 +511,6 @@ def draw(campaign, lucky_draw):
         candidate_set = lib.helper.lucky_draw_helper.SharedPostCandidateSetGenerator.get_candidate_set(campaign, lucky_draw)
     else:
         return []
-    return lib.helper.lucky_draw_helper.LuckyDraw.draw_from_candidate(campaign, lucky_draw.prize,  candidate_set=candidate_set, num_of_winner=lucky_draw.num_of_winner)
+    return lib.helper.lucky_draw_helper.LuckyDraw.draw_from_candidate(campaign, lucky_draw.prize,  candidate_set=candidate_set, num_of_winner=lucky_draw.num_of_winner, api_user=api_user)
 
 
