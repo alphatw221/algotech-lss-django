@@ -251,6 +251,7 @@ class CartViewSet(viewsets.ModelViewSet):
         if not serializer.is_valid():
             print(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        shipping_data = serializer.to_internal_value(serializer.data)
 
         point_discount_processor_class:factory.point_discount.PointDiscountProcessor = factory.point_discount.get_point_discount_processor_class(user_subscription)
         point_discount_processor = point_discount_processor_class(api_user, user_subscription, buyer_wallet, campaign.meta_point, points_used)
