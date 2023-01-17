@@ -144,6 +144,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         order = lib.util.verify.Verify.get_order_with_oid(order_oid)
         response_data = {
             "payment_method": order.payment_method,
+            "payment_status": order.payment_status,
             "status": order.status
         }
         return Response(response_data, status=status.HTTP_200_OK)
