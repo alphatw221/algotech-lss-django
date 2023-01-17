@@ -30,8 +30,8 @@ def __make_request(http_method, path, access_key, secret_key, body):
 
     # body = ''                             # JSON body goes here. Always empty string for GET; 
                                         # strip nonfunctional whitespace.
-
-    to_sign = http_method + path + salt + str(timestamp) + access_key + secret_key + body
+    str_body = json.dumps(body, separators=(',', ':'), ensure_ascii=False) if body else ''
+    to_sign = http_method + path + salt + str(timestamp) + access_key + secret_key + str_body
 
     h = hmac.new(bytes(secret_key, 'utf-8'), bytes(to_sign, 'utf-8'), hashlib.sha256)
 
