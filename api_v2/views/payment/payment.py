@@ -599,7 +599,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
                 "order_oid": order_oid
             },
         }
-
+        print(body)
 
         api_response = lib.helper.rapyd_helper.create_checkout('post', '/v1/checkout', access_key, secret_key, body)
 
