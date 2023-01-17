@@ -13,6 +13,7 @@ def __make_request(http_method, path, access_key, secret_key, body):
 
     # http_method = 'get'                   # get|put|post|delete - must be lowercase
     base_url = 'https://sandboxapi.rapyd.net'
+    base_url = 'https://api.rapyd.net'
     # path = '/v1/data/countries'           # Portion after the base URL. Hardkeyed for this example.
 
     # salt: randomly generated for each request.
