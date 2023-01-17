@@ -625,12 +625,12 @@ class PaymentViewSet(viewsets.GenericViewSet):
             raise lib.error_handle.error.api_error.ApiCallerError(error_message)
         data = api_response.json()
         result = service.rapyd.models.checkout.CheckoutModel(**data["data"])
-        # order.history[f'{models.order.order.PAYMENT_METHOD_RAPYD}_{checkout_time}']={
-        #     "id":result.id,
-        #     "action": "checkout",
-        #     "time": checkout_time
-        # }
-        # order.save()
+        order.history[f'{models.order.order.PAYMENT_METHOD_RAPYD}_{checkout_time}']={
+            "id":result.id,
+            "action": "checkout",
+            "time": checkout_time
+        }
+        order.save()
         return Response(result.redirect_url, status=status.HTTP_200_OK)
     
     @action(detail=False, methods=['GET'], url_path=r'rapyd/callback/success',)
