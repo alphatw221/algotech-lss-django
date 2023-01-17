@@ -50,4 +50,4 @@ def __make_request(http_method, path, access_key, secret_key, body):
     return url, headers
 def create_checkout(http_method, path, access_key, secret_key, body):
     url, headers = __make_request(http_method, path, access_key, secret_key, body)
-    return requests.post(url, headers = headers, body=body)
+    return requests.post(url, headers = headers, json=body)
