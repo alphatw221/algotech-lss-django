@@ -51,6 +51,10 @@ class PointDiscountProcessor:
         return datetime.utcnow()+timedelta(days=30*point_validity)
 
     def create_point_transaction(self, order_id=None):
+
+        if self.points_used<=0 and self.points_earned <= 0 :
+            return 
+            
         data = {
             "user_subscription": self.user_subscription,
             "buyer": self.api_user,

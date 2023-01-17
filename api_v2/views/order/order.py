@@ -1,5 +1,4 @@
 from platform import platform
-from api_v2.views.payment.payment import update_wallet
 from rest_framework.response import Response
 from rest_framework import viewsets,status
 from rest_framework.pagination import PageNumberPagination
@@ -108,8 +107,6 @@ class OrderViewSet(viewsets.ModelViewSet):
         delivery_params = {"order_oid": order_oid, "order": order, "extra_data": {}, "create_order": True, "update_status": True}
         lib.helper.delivery_helper.DeliveryHelper.create_delivery_order_and_update_delivery_status(**delivery_params)
                 
-        #wallet
-        update_wallet(order)
 
         for campaign_product_id_str, qty in order.products.items():
             pymongo_campaign_product = database.lss.campaign_product.CampaignProduct(id=int(campaign_product_id_str))
