@@ -583,61 +583,42 @@ class PaymentViewSet(viewsets.GenericViewSet):
         country = campaign.meta_payment.get("rapyd",{}).get("country")
         currency = campaign.meta_payment.get("rapyd",{}).get("currency")
         checkout_time = pendulum.now("UTC").to_iso8601_string()
-
-
-
         #//
 
-        body = {
-            'amount' : int(order.total) if isinstance(order.total, float) and order.total.is_integer() else order.total,
-            'country' : country, 
-            'currency' : currency,
-            'complete_checkout_url' : f"{settings.GCP_API_LOADBALANCER_URL}/api/v2/payment/rapyd/callback/success?order_oid={str(order_oid)}&checkout_time={checkout_time}",
-            'cancel_checkout_url' : f'{settings.WEB_SERVER_URL}/buyer/order/{str(order_oid)}/payment',
-            'payment_method_type_categories': ["bank_transfer", "card"],
-            'metadata' : {
-                "order_oid": order_oid
-            },
-        }
-        print(body)
-
-        api_response = lib.helper.rapyd_helper.create_checkout('post', '/v1/checkout', access_key, secret_key, body)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        # data = service.rapyd.models.checkout.CreateCheckoutModel(
-        #     amount = order.total, 
-        #     country = country, 
-        #     currency = currency,
-        #     # requested_currency = "TWD",
-        #     # custom_elements = {
-        #     #     "dynamic_currency_conversion": True
-        #     # },
-        #     complete_checkout_url = f"{settings.GCP_API_LOADBALANCER_URL}/api/v2/payment/rapyd/callback/success?order_oid={str(order_oid)}&checkout_time={checkout_time}",
-        #     cancel_checkout_url = f'{settings.WEB_SERVER_URL}/buyer/order/{str(order_oid)}/payment',
-        #     payment_method_type_categories = ["bank_transfer", "card"],
-        #     metadata = {
+        # body = {
+        #     'amount' : int(order.total) if isinstance(order.total, float) and order.total.is_integer() else order.total,
+        #     'country' : country, 
+        #     'currency' : currency,
+        #     'complete_checkout_url' : f"{settings.GCP_API_LOADBALANCER_URL}/api/v2/payment/rapyd/callback/success?order_oid={str(order_oid)}&checkout_time={checkout_time}",
+        #     'cancel_checkout_url' : f'{settings.WEB_SERVER_URL}/buyer/order/{str(order_oid)}/payment',
+        #     'payment_method_type_categories': ["bank_transfer", "card"],
+        #     'metadata' : {
         #         "order_oid": order_oid
         #     },
-        #     # fixed_side = "buy"
-        # )
-        # rapyd_service = service.rapyd.rapyd.RapydService(access_key=access_key, secret_key=secret_key)
+        # }
+        # print(body)
 
-        # api_response = rapyd_service.create_checkout(data)
+        # api_response = lib.helper.rapyd_helper.create_checkout('post', '/v1/checkout', access_key, secret_key, body)
+
+        data = service.rapyd.models.checkout.CreateCheckoutModel(
+            amount = order.total, 
+            country = country, 
+            currency = currency,
+            # requested_currency = "TWD",
+            # custom_elements = {
+            #     "dynamic_currency_conversion": True
+            # },
+            complete_checkout_url = f"{settings.GCP_API_LOADBALANCER_URL}/api/v2/payment/rapyd/callback/success?order_oid={str(order_oid)}&checkout_time={checkout_time}",
+            cancel_checkout_url = f'{settings.WEB_SERVER_URL}/buyer/order/{str(order_oid)}/payment',
+            payment_method_type_categories = ["bank_transfer", "card"],
+            metadata = {
+                "order_oid": order_oid
+            },
+            # fixed_side = "buy"
+        )
+        rapyd_service = service.rapyd.rapyd.RapydService(access_key=access_key, secret_key=secret_key)
+
+        api_response = rapyd_service.create_checkout(data)
         
         if api_response.status_code != 200:
             error_message = service.rapyd.rapyd.RapydService.get_error_message(api_response)

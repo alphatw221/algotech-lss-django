@@ -318,8 +318,8 @@ PAYMONGO_API_URL = 'https://api.paymongo.com'
 # Rapyd
 RAPYD_ACCESS_KEY="6C1EC9E97851F0675225" # for test
 RAPYD_SECRET_KEY="117af5b965d9f0bf7b9aa9b80b3c7c7f6275d4710861478943312241ba7486f5ec87445b9503d8b6" # for test
-BASERAPYDAPIURL="https://sandboxapi.rapyd.net" # sand box
-
+# BASERAPYDAPIURL="https://sandboxapi.rapyd.net" # sand box
+BASERAPYDAPIURL='https://api.rapyd.net'
 #NLP
 NLP_COMPUTING_MACHINE_URL = "http://127.0.0.1:8501"
 
