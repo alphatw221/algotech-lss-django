@@ -589,7 +589,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         #//
 
         body = {
-            'amount' : order.total, 
+            'amount' : int(order.total) if isinstance(order.total, float) and order.total.is_integer() else order.total,
             'country' : country, 
             'currency' : currency,
             'complete_checkout_url' : f"{settings.GCP_API_LOADBALANCER_URL}/api/v2/payment/rapyd/callback/success?order_oid={str(order_oid)}&checkout_time={checkout_time}",
