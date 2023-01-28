@@ -34,7 +34,8 @@ class Command(BaseCommand):
         # self.test_add_user_subscription_to_order()
        
         # self.test_cart_expired_adjustment()
-        self.create_kol_account()
+        # self.create_kol_account()
+        self.import_customer_data()
         pass
     
     def __create_new_register_account(self, plan, country_plan, subscription_plan, timezone, period, firstName, lastName, email, password, country, country_code,  contactNumber,  amount, paymentIntent=None, subscription_meta:dict={}):
@@ -1093,3 +1094,14 @@ class Command(BaseCommand):
                 created_at=order.created_at
             )
             
+    def import_customer_data(self):
+        import factory
+
+        user_subscription = lib.util.verify.Verify.get_user_subscription(617)
+        customer_import_processor_class:factory.customer_import.default.DefaultCustomerImportProcessor \
+            = factory.customer_import.get_user_import_processor_class(user_subscription)
+        customer_import_processor = customer_import_processor_class(user_subscription)
+        
+        with open("/Users/lin/Downloads/UserPointSummaryReport as of 20th Jan 2023.xlsx", "rb") as file:
+            setattr(file,'content_type','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') 
+            customer_import_processor.process(file)

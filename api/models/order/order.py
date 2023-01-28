@@ -116,7 +116,7 @@ class Order(models.Model):
     shipping_date = models.DateField(blank=True, null=True, default=None)
     shipping_date_time = models.DateTimeField(blank=True, null=True, default=None)
     shipping_property_type = models.CharField(max_length=32, blank=True, default='')
-    shipping_time_slot = models.CharField(max_length=64, blank=True, default='')
+    shipping_time_slot = models.CharField(max_length=64, blank=True, default='', null=True)
     shipping_option = models.CharField(max_length=32, blank=True, default='')
     shipping_option_index = models.IntegerField(blank=True, null=True, default=None)
     shipping_option_data = models.JSONField(default=dict, null=False, blank=False)

@@ -17,9 +17,15 @@ class SHCCustomerImportProcessor(DefaultCustomerImportProcessor):
     def save_data(self, data):
         point_expire_at = datetime.utcnow()+timedelta(days=30*6)
         for object in data:
+
+
             try:
-                
-                _, customer = lib.helper.login_helper.create_or_get_user(object.get('Email Address','').lower(), models.user.user.TYPE_BUYER,  user_name=object.get('Name'))
+                email = object.get('Email Address').lower() if type(object.get('Email Address'))==str else ''
+                user_name=object.get('Name','')
+                point_earned = object.get('PointsEarned') if object.get('PointsEarned') else 0
+                point_used = object.get('PointsUsed') if object.get('PointsUsed') else 0
+
+                _, customer = lib.helper.login_helper.create_or_get_user(email, models.user.user.TYPE_BUYER,  user_name=user_name)
                 
                 #delete all point transactions if there are
                 customer.point_transactions.all().delete()
@@ -29,8 +35,8 @@ class SHCCustomerImportProcessor(DefaultCustomerImportProcessor):
                 models.user.point_transaction.PointTransaction.objects.create(
                     buyer = customer,
                     user_subscription = self.user_subscription,
-                    earned = object.get('PointsEarned'),
-                    used = object.get('PointsUsed'),
+                    earned = point_earned,
+                    used = 0,
                     expired_at = point_expire_at,
                     remark = "migrate from ordr_startr"
                 )
@@ -40,11 +46,11 @@ class SHCCustomerImportProcessor(DefaultCustomerImportProcessor):
                     models.user.buyer_wallet.BuyerWallet.objects.create(
                     user_subscription = self.user_subscription,
                     buyer = customer,
-                    points = max(object.get('PointsEarned') - object.get('PointsUsed'), 0)
+                    points = max(point_earned , 0)
                     )
                 else:
                     wallet = models.user.buyer_wallet.BuyerWallet.objects.get(user_subscription = self.user_subscription, buyer=customer)
-                    wallet.points = max(object.get('PointsEarned') - object.get('PointsUsed'), 0)
+                    wallet.points = max(point_earned , 0)
                     wallet.save()
 
                 #add to user_subscription
