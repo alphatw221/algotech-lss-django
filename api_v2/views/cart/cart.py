@@ -222,7 +222,6 @@ class CartViewSet(viewsets.ModelViewSet):
     @lib.error_handle.error_handler.cart_operation_error_handler.update_cart_product_error_handler
     def buyer_checkout_cart(self, request, cart_oid):
         shipping_data, points_used = lib.util.getter.getdata(request, ("shipping_data", "points_used"), required=True)
-
         api_user = lib.util.verify.Verify.get_customer_user(request) if request.user.is_authenticated else None
         cart = lib.util.verify.Verify.get_cart_with_oid(cart_oid)
         campaign = lib.util.verify.Verify.get_campaign_from_cart(cart)

@@ -393,6 +393,7 @@ class CartHelper():
 
     @classmethod 
     def __compute_shipping_cost(cls, campaign, pymongo_order, product_category_data_dict:dict, product_category_products_dict:dict, campaign_product_data_dict:dict):
+
         if pymongo_order.data.get('shipping_method') == models.order.order.SHIPPING_METHOD_PICKUP:
             return 0, False
 
@@ -417,16 +418,22 @@ class CartHelper():
         if category_logistic_applied:
             return shipping_cost, True
 
-        shipping_cost = float(campaign.meta_logistic.get('delivery_charge',0))
-        if(pymongo_order.data.get('shipping_option_data')):
+        if campaign.meta_logistic.get('is_self_delivery_enabled'):
+            shipping_cost = float(campaign.meta_logistic.get('delivery_charge',0))
+
+        if (pymongo_order.data.get('shipping_method')== models.order.order.SHIPPING_METHOD_DELIVERY or pymongo_order.data.get('shipping_method')== models.order.order.SHIPPING_METHOD_ECPAY)  and pymongo_order.data.get('shipping_option_data'):
+        # if(pymongo_order.data.get('shipping_option_data')):
             if pymongo_order.data.get('shipping_option_data',{}).get('type') == '+':
                 shipping_cost += float(pymongo_order.data.get('shipping_option_data',{}).get('price',0)) 
 
             elif pymongo_order.data.get('shipping_option_data',{}).get('type') == '=':
                 shipping_cost =  float(pymongo_order.data.get('shipping_option_data',{}).get('price',0))
-
+            return shipping_cost, False
+        
+            
         return shipping_cost, False
 
+        
     @classmethod
     def __check_stock_avaliable_and_add_to_cart_by_api(cls, campaign_product_data, qty_difference, attempts=10):
 

@@ -44,6 +44,7 @@ PAYMENT_METHOD_RAPYD = 'rapyd'
 
 SHIPPING_METHOD_DELIVERY='delivery'
 SHIPPING_METHOD_PICKUP='pickup'
+SHIPPING_METHOD_ECPAY='ecpay'
 
 IMAGE_GIF = 'image/gif'
 IMAGE_JPEG = 'image/jpeg'
@@ -159,7 +160,8 @@ class OrderSerializerWithUserSubscription(OrderSerializer):
     campaign = CampaignSerializerWithUserSubscription()
 
 class OrderSerializerUpdateShipping(serializers.ModelSerializer):
-
+    
+    shipping_option_data = serializers.JSONField(default=dict)
     class Meta:
         model = Order
         fields = ["shipping_first_name",
@@ -180,7 +182,8 @@ class OrderSerializerUpdateShipping(serializers.ModelSerializer):
                   "shipping_option_index",
                   "shipping_property_type",
                   "pickup_address",
-                  "remark"
+                  "remark",
+                  "shipping_option_data"
                   ]
 
 
