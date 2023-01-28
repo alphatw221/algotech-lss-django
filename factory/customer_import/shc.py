@@ -19,7 +19,7 @@ class SHCCustomerImportProcessor(DefaultCustomerImportProcessor):
         for object in data:
             try:
                 
-                _, customer = lib.helper.login_helper.create_or_get_user(object.get('Email','').lower(), models.user.user.TYPE_BUYER,  user_name=object.get('Name'))
+                _, customer = lib.helper.login_helper.create_or_get_user(object.get('Email Address','').lower(), models.user.user.TYPE_BUYER,  user_name=object.get('Name'))
                 
                 #delete all point transactions if there are
                 customer.point_transactions.all().delete()
