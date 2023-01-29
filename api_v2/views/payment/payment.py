@@ -423,8 +423,8 @@ class PaymentViewSet(viewsets.GenericViewSet):
             raise lib.error_handle.error.api_error.ApiCallerError('choose_another_payment_method')
         
 
-        order.paid_at = datetime.utcnow()
-        order.payment_method = models.order.order.PAYMENT_METHOD_ECPAY
+        # order.paid_at = datetime.utcnow()
+        # order.payment_method = models.order.order.PAYMENT_METHOD_ECPAY
         
         #delivery status update
         delivery_params = {"order_oid": order_oid, "order": order, "extra_data": {}, "create_order": True, "update_status": True}
@@ -435,7 +435,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         }
         
         #order status update
-        lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
+        # lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
         return Response({'url':url,'params':params})
         
         # raise lib.error_handle.error.api_error.ApiCallerError('Payment Error, Please Choose Another Payment Method')
@@ -479,7 +479,8 @@ class PaymentViewSet(viewsets.GenericViewSet):
             raise lib.error_handle.error.api_error.ApiVerifyError('payment not successful',payment_res['RtnMsg'])
         elif payment_res['RtnCode'] == '1':
             order.payment_status = models.order.order.PAYMENT_STATUS_PAID
-        
+            order.paid_at = datetime.utcnow()
+            order.payment_method = models.order.order.PAYMENT_METHOD_ECPAY
         if order.campaign.meta_payment['ecpay']['invoice_enabled']:
             invoice = service.ecpay.ecpay.order_create_invoice(merchant_id, hash_key, hash_iv, order,int(payment_res['amount']))
             order.meta['InvoiceNumber'] = invoice['InvoiceNumber']
@@ -541,7 +542,8 @@ class PaymentViewSet(viewsets.GenericViewSet):
                 raise lib.error_handle.error.api_error.ApiVerifyError('payment not successful',payment_res['RtnMsg'])
             elif payment_res['RtnCode'] == '1':
                 order.payment_status = models.order.order.PAYMENT_STATUS_PAID
-                
+                order.paid_at = datetime.utcnow()
+                order.payment_method = models.order.order.PAYMENT_METHOD_ECPAY
 
             if order.campaign.meta_payment['ecpay']['invoice_enabled']:
                 invoice = service.ecpay.ecpay.order_create_invoice(merchant_id, hash_key, hash_iv, order,int(payment_res['amount']))
