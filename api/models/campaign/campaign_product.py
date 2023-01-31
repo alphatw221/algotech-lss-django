@@ -45,7 +45,7 @@ class CampaignProduct(models.Model):
         blank=False, null=False, default=False)
     overbook = models.BooleanField(
         blank=False, null=False, default=True)
-    active = models.BooleanField(blank=False, null=False, default=True)
+    active = models.BooleanField(blank=False, null=False, default=False)
     allow_add_on = models.BooleanField(blank=False, null=False, default=True)
     
     name = models.CharField(max_length=255, null=True,

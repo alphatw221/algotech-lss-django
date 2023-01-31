@@ -74,8 +74,11 @@ class OrderViewSet(viewsets.ModelViewSet):
     def buyer_retrieve_latest_order_shipping(self, request):
         api_user = lib.util.verify.Verify.get_customer_user(request)
         order = api_user.orders.last()
-        data = models.order.order.OrderSerializerUpdateShipping(order).data
-        return Response(data, status=status.HTTP_200_OK)
+        if order:
+            data = models.order.order.OrderSerializerUpdateShipping(order).data
+            return Response(data, status=status.HTTP_200_OK)
+        else:
+            return Response({}, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['PUT'], url_path=r'(?P<order_oid>[^/.]+)/buyer/receipt/upload', url_name='buyer_upload_receipt', parser_classes=(MultiPartParser,), permission_classes=())
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
