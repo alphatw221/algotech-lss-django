@@ -46,10 +46,10 @@ class DefaultProductImportProcessor(lib.helper.import_helper.ImportProcessor):
             FieldMapper('SKU', 'sku', ''),
             FieldMapper('Description', 'description', ''),
             FieldMapper('Keyword', 'order_code', ''),
-            FieldMapper('Cost', 'price_ori', ''),
-            FieldMapper('Price', 'price', ''),
-            FieldMapper('Stock', 'qty', ''),
-            FieldMapper('MaxQty', 'max_order_amount', ''),
+            FieldMapper('Cost', 'price_ori', 0),
+            FieldMapper('Price', 'price', 0),
+            FieldMapper('Stock', 'qty', 0),
+            FieldMapper('MaxQty', 'max_order_amount', 0),
             # FieldMapper('Reply Message', 'sku', ''),
             ProductCategoriesFieldMapper('Supplier', 'categories', [], product_category_dict=product_category_dict, user_subscription = user_subscription)
         ]
@@ -79,6 +79,7 @@ class DefaultProductImportProcessor(lib.helper.import_helper.ImportProcessor):
                     'user_subscription':self.user_subscription,
                     **{field_mapper.model_field:field_mapper.get_model_data(object) for field_mapper in self.field_mappers}
                 }
+                print(data)
                 models.product.product.Product.objects.create(**data)
             except Exception:
                 import traceback
