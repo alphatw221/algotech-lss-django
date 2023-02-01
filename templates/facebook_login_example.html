@@ -28,13 +28,14 @@
 
 
   window.fbAsyncInit = function() {
+    document.getElementById('debug').innerText='in init function'
     FB.init({
       appId      : '967598017063136',
       cookie     : true,                     // Enable cookies to allow the server to access the session.
       xfbml      : true,                     // Parse social plugins on this webpage.
       version    : 'v15.0'           // Use this Graph API version for this call.
     });
-
+    document.getElementById('debug').innerText='after fb init '
 
     FB.getLoginStatus(function(response) {   // Called after the JS SDK has been initialized.
       statusChangeCallback(response);        // Returns the login status.
@@ -61,6 +62,7 @@
 <div id="status">
 </div>
 
+<div id="debug"></div>
 <!-- Load the JS SDK asynchronously -->
 
 </body>
