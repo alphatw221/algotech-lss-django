@@ -290,7 +290,7 @@ class CartHelper():
         subtotal = 0
         shipping_cost = 0
         total = 0
-        meta = pymongo_order.data.get('meta',{})
+        order_meta = pymongo_order.data.get('meta',{})
 
         product_category_data_dict={}
         """
@@ -337,14 +337,15 @@ class CartHelper():
                     product_category_products_dict[product_category_id_str] = [{'campaign_product_id':campaign_prodcut_id_str, 'qty':qty}]
 
             subtotal += campaign_product_data.get('price',0)*qty
-        shipping_cost, category_logistic_applied = cls.__compute_shipping_cost(campaign, pymongo_order, product_category_data_dict, product_category_products_dict, campaign_product_data_dict)
+
+        shipping_cost, category_logistic_applied = cls.__compute_shipping_cost(campaign, pymongo_order, product_category_data_dict, product_category_products_dict, campaign_product_data_dict, subtotal, product_total_quantity, order_meta)
 
         #compute free_delivery
-        meta_logistic = campaign.meta_logistic
-        is_subtotal_over_free_delivery_threshold = subtotal >= float(meta_logistic.get('free_delivery_for_order_above_price')) if meta_logistic.get('is_free_delivery_for_order_above_price') else False
-        is_items_over_free_delivery_threshold = product_total_quantity >= float(meta_logistic.get('free_delivery_for_how_many_order_minimum')) if meta_logistic.get('is_free_delivery_for_how_many_order_minimum') else False
-        meta['subtotal_over_free_delivery_threshold'] = True if is_subtotal_over_free_delivery_threshold else False
-        meta['items_over_free_delivery_threshold'] = True if is_items_over_free_delivery_threshold else False
+        # meta_logistic = campaign.meta_logistic
+        # is_subtotal_over_free_delivery_threshold = subtotal >= float(meta_logistic.get('free_delivery_for_order_above_price')) if meta_logistic.get('is_free_delivery_for_order_above_price') else False
+        # is_items_over_free_delivery_threshold = product_total_quantity >= float(meta_logistic.get('free_delivery_for_how_many_order_minimum')) if meta_logistic.get('is_free_delivery_for_how_many_order_minimum') else False
+        # meta['subtotal_over_free_delivery_threshold'] = True if is_subtotal_over_free_delivery_threshold else False
+        # meta['items_over_free_delivery_threshold'] = True if is_items_over_free_delivery_threshold else False
             
 
         #compute point discount
@@ -356,10 +357,10 @@ class CartHelper():
         total -= pymongo_order.data.get('discount',0)
         total -= point_discount
         total = subtotal_after_discount = max(total, 0)
-        if pymongo_order.data.get('free_delivery') or is_subtotal_over_free_delivery_threshold or is_items_over_free_delivery_threshold:
-            pass
-        else:
-            total += shipping_cost
+        # if pymongo_order.data.get('free_delivery') or is_subtotal_over_free_delivery_threshold or is_items_over_free_delivery_threshold:
+        #     pass
+        # else:
+        total += shipping_cost
         total += pymongo_order.data.get('adjust_price',0)
         total = max(total, 0)
         
@@ -376,7 +377,7 @@ class CartHelper():
             subtotal = subtotal,
             shipping_cost = shipping_cost,
             total = total,
-            meta = meta,
+            meta = order_meta,
             points_used = point_discount_processor.points_used if point_discount_processor else 0,
             point_discount = point_discount,
             points_earned = points_earned,
@@ -392,13 +393,23 @@ class CartHelper():
             point_discount_processor.update_wallet()
 
     @classmethod 
-    def __compute_shipping_cost(cls, campaign, pymongo_order, product_category_data_dict:dict, product_category_products_dict:dict, campaign_product_data_dict:dict):
+    def __compute_shipping_cost(cls, campaign, pymongo_order, product_category_data_dict:dict, product_category_products_dict:dict, campaign_product_data_dict:dict, subtotal:float, product_total_quantity:int, order_meta:dict):
 
         if pymongo_order.data.get('shipping_method') == models.order.order.SHIPPING_METHOD_PICKUP:
             return 0, False
 
+        #compute free_delivery
+        is_subtotal_over_free_delivery_threshold = subtotal >= float(campaign.meta_logistic.get('free_delivery_for_order_above_price')) if campaign.meta_logistic.get('is_free_delivery_for_order_above_price') else False
+        is_items_over_free_delivery_threshold = product_total_quantity >= float(campaign.meta_logistic.get('free_delivery_for_how_many_order_minimum')) if campaign.meta_logistic.get('is_free_delivery_for_how_many_order_minimum') else False
+        order_meta['subtotal_over_free_delivery_threshold'] = True if is_subtotal_over_free_delivery_threshold else False
+        order_meta['items_over_free_delivery_threshold'] = True if is_items_over_free_delivery_threshold else False
+
+        if is_subtotal_over_free_delivery_threshold or is_items_over_free_delivery_threshold:
+            return 0, False
+
         shipping_cost = 0
         
+        #product category logistic
         category_logistic_applied = False
         for product_category_id_str, product_category_data in product_category_data_dict.items():
             if product_category_data.get('meta_logistic',{}).get('enable_flat_rate')==True:
@@ -418,6 +429,7 @@ class CartHelper():
         if category_logistic_applied:
             return shipping_cost, True
 
+        #self delivery
         if campaign.meta_logistic.get('is_self_delivery_enabled'):
             shipping_cost = float(campaign.meta_logistic.get('delivery_charge',0))
 

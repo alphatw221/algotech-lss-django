@@ -324,7 +324,7 @@ class OrderViewSet(viewsets.ModelViewSet):
                 parameters={"order":order,"order_oid":order_oid},
                 lang=order.campaign.lang,
             )
-            
+            order.paid_at = datetime.utcnow()
             #sold campaign product
             lib.helper.order_helper.OrderHelper.sold_campaign_product(order)
 

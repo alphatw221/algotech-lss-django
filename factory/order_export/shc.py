@@ -88,7 +88,12 @@ class TotalMapper(FieldMapper):
     def get_field_data(self, object):
         return int(super().get_field_data(object)) if object.get('decimal_places') == 0 else super().get_field_data(object)
 
-
+class ShippingCostMapper(FieldMapper):
+    def get_field_data(self, object):
+        if object.get('meta',{}).get('subtotal_over_free_delivery_threshold') or object.get('meta',{}).get('items_over_free_delivery_threshold'):
+            return 0
+        else:
+            return super().get_field_data(object)
 
 
 
@@ -100,6 +105,8 @@ class SHCOrderExportProcessor(DefaultOrderExportProcessor):
             FieldMapper('shipping_time_slot','Delivery Time Range', width=20, first_only=True),
             FieldMapper('platform', 'Platform', width=15, first_only=True),
             FieldMapper('customer_name', 'Name', width=20, first_only=True, i18n_key=''),
+            FieldMapper('shipping_first_name', 'Shipping Name', width=20, first_only=True),
+            FieldMapper('remark', 'Remark', width=20, first_only=True),
             FieldMapper('shipping_cellphone', 'Shipping Phone', width=20, first_only=True),
             DeliveryInfonMapper('shipping_address_1', 'Shipping Address 1', width=40, first_only=True),
             DeliveryInfonMapper('shipping_postcode', 'Postcode', width=20, first_only=True),
@@ -113,7 +120,7 @@ class SHCOrderExportProcessor(DefaultOrderExportProcessor):
             OrderProductsQtyMapper('order_product_qty', 'Qty', width=20),
             OrderProductsSubtotalMapper('order_product_subtotal', 'Total Price', width=20),
             FieldMapper('subtotal', 'After Total Sum', width=20, first_only=True),
-            FieldMapper('shipping_cost', 'Shipping ', width=20, first_only=True),
+            ShippingCostMapper('shipping_cost', 'Shipping ', width=20, first_only=True),
             FieldMapper('total', 'Total ', width=20, first_only=True),
             FieldMapper('payment_status', 'Payment Status', width=20, first_only=True),
             DateTimeMapper('paid_at', 'Payment Date', width=40, first_only=True)
