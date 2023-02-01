@@ -4,6 +4,8 @@
 <title>Facebook Login JavaScript Example</title>
 <meta charset="UTF-8">
 <script crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script>
+<script >
+</script>
 </head>
 <body>
 <script>
@@ -51,6 +53,10 @@
     });
   }
 
+  function test(){
+    console.log(FB)
+    document.getElementById('debug').innerText=FB
+  }
 </script>
 
 
@@ -59,6 +65,7 @@
 <fb:login-button scope="public_profile,email" onlogin="checkLoginState();">
 </fb:login-button>
 
+<button type="button" id='test_btn' onclick="test()">test button</button>
 <div id="status">
 </div>
 
