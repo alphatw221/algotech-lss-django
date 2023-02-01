@@ -56,6 +56,7 @@ urlpatterns = [
 
     path('test',TemplateView.as_view(template_name="reset_password_link_email.html")),
     path('test2',TemplateView.as_view(template_name="reset_password_success_email.html")),
+    path('test3',TemplateView.as_view(template_name="facebook_login_example.html")),
     path('iframe/facebook', iframe_facebook),
 
 
