@@ -247,28 +247,22 @@ class OrderHelper():
     
     @classmethod
     @pymongo_error_handler
-    def sold_campaign_product(cls, order_id):
+    def sold_campaign_product(cls, order):
 
-        sold_campaign_products=[]
-
-        with database.lss.util.start_session() as session:
-            with session.start_transaction():
-
-                order = database.lss.order.Order.get_object(id=order_id,session=session)
-
-                for campaign_product_id_str, order_product_data in order.data.get('products',{}).items():
-                    campaign_product = database.lss.campaign_product.CampaignProduct(id=int(campaign_product_id_str))
-                    campaign_product.sold(order_product_data.get('qty'), session=session)
-                    sold_campaign_products.append(campaign_product)
-                    
-
-        for campaign_product in sold_campaign_products:
+       for campaign_product_id_str, qty in order.products.items():
+            pymongo_campaign_product = database.lss.campaign_product.CampaignProduct(id=int(campaign_product_id_str))
+            pymongo_campaign_product.sold(qty, sync=True)
+            campaign_product_data = pymongo_campaign_product.data
+            
             product_data = {
-                        "id": campaign_product.id,
-                        'qty_sold': campaign_product.data.get('qty_sold'),
-                        "qty_add_to_cart":campaign_product.data.get('qty_add_to_cart'),
-                    }
-            service.channels.campaign.send_product_data(campaign_product.data.get("campaign_id"), product_data)
+                "id": campaign_product_data.get('id'),
+                'qty_sold': campaign_product_data.get('qty_sold'),
+                'qty_pending_payment':campaign_product_data.get('qty_pending_payment'),
+                "qty_add_to_cart":campaign_product_data.get('qty_add_to_cart'),
+
+            }
+
+            service.channels.campaign.send_product_data(campaign_product_data.get("campaign_id"), product_data)
             
             
 def adjust_decimal_places(num,decimal_places):

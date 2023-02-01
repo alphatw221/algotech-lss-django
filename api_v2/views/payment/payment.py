@@ -109,10 +109,6 @@ class PaymentViewSet(viewsets.GenericViewSet):
         update_wallet(order)
 
         #send email
-        # subject = lib.i18n.email.order_comfirm_mail.i18n_get_mail_subject(order, lang=campaign.lang)
-        # content = lib.i18n.email.order_comfirm_mail.i18n_get_mail_content(order, campaign, lang=campaign.lang)
-        # jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)
-
         jobs.send_email_job.send_email_job(
             subject=lib.i18n.email.mail_subjects.order_confirm_mail_subject(order=order, lang=campaign.lang),
             email=order.shipping_email,
@@ -120,6 +116,8 @@ class PaymentViewSet(viewsets.GenericViewSet):
             parameters={"order":order,"order_oid":order_oid},
             lang=order.campaign.lang,
         )
+        #sold campaign product
+        lib.helper.order_helper.OrderHelper.sold_campaign_product(order)
 
         #order status update
         lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
@@ -205,6 +203,9 @@ class PaymentViewSet(viewsets.GenericViewSet):
                 parameters={"order":order,"order_oid":order_oid},
                 lang=order.campaign.lang,
             )
+            #sold campaign product
+            lib.helper.order_helper.OrderHelper.sold_campaign_product(order)
+
         #order status update
         lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
         return Response('ok')
@@ -278,7 +279,9 @@ class PaymentViewSet(viewsets.GenericViewSet):
             parameters={"order":order,"order_oid":order_oid},
             lang=order.campaign.lang,
         )
-        
+        #sold campaign product
+        lib.helper.order_helper.OrderHelper.sold_campaign_product(order)
+
         #order status update
         lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
         return HttpResponseRedirect(redirect_to=f'{settings.WEB_SERVER_URL}/buyer/order/{order_oid}/confirmation')
@@ -375,10 +378,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             #wallet
             update_wallet(order)
 
-            # subject = lib.i18n.email.order_comfirm_mail.i18n_get_mail_subject(order, lang=order.campaign.lang)
-            # content = lib.i18n.email.order_comfirm_mail.i18n_get_mail_content(order, order.campaign, lang=order.campaign.lang)
-            # jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)
-
+            #send confirmation email
             jobs.send_email_job.send_email_job(
                 subject=lib.i18n.email.mail_subjects.order_confirm_mail_subject(order=order, lang=order.campaign.lang),
                 email=order.shipping_email,
@@ -387,6 +387,9 @@ class PaymentViewSet(viewsets.GenericViewSet):
                 lang=order.campaign.lang,
             )
             
+            #sold campaign product
+            lib.helper.order_helper.OrderHelper.sold_campaign_product(order)
+
         #order status update
         lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
         return Response('response', status=status.HTTP_200_OK)
@@ -488,10 +491,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
         #wallet
         update_wallet(order)
 
-        # subject = lib.i18n.email.order_comfirm_mail.i18n_get_mail_subject(order, lang=campaign.lang)
-        # content = lib.i18n.email.order_comfirm_mail.i18n_get_mail_content(order, campaign, lang=campaign.lang)
-        # jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)
-        
+        #send confirmation email
         jobs.send_email_job.send_email_job(
             subject=lib.i18n.email.mail_subjects.order_confirm_mail_subject(order=order, lang=campaign.lang),
             email=order.shipping_email,
@@ -499,6 +499,9 @@ class PaymentViewSet(viewsets.GenericViewSet):
             parameters={"order":order,"order_oid":order_oid},
             lang=order.campaign.lang,
         )
+
+        #sold campaign product
+        lib.helper.order_helper.OrderHelper.sold_campaign_product(order)
 
         #order status update
         lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
@@ -552,10 +555,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             #wallet
             update_wallet(order)
 
-            # subject = lib.i18n.email.order_comfirm_mail.i18n_get_mail_subject(order, lang=campaign.lang)
-            # content = lib.i18n.email.order_comfirm_mail.i18n_get_mail_content(order, campaign, lang=campaign.lang)
-            # jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)
-            
+            #send confirmation email
             jobs.send_email_job.send_email_job(
                 subject=lib.i18n.email.mail_subjects.order_confirm_mail_subject(order=order, lang=campaign.lang),
                 email=order.shipping_email,
@@ -563,6 +563,9 @@ class PaymentViewSet(viewsets.GenericViewSet):
                 parameters={"order":order,"order_oid":order_oid},
                 lang=order.campaign.lang,
             )
+
+            #sold campaign product
+            lib.helper.order_helper.OrderHelper.sold_campaign_product(order)
 
             #order status update
             lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
@@ -684,10 +687,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             #wallet
             update_wallet(order)
 
-            # subject = lib.i18n.email.order_comfirm_mail.i18n_get_mail_subject(order, lang=campaign.lang)
-            # content = lib.i18n.email.order_comfirm_mail.i18n_get_mail_content(order, campaign, lang=campaign.lang)
-            # jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)
-
+            #send confirmation email
             jobs.send_email_job.send_email_job(
                 subject=lib.i18n.email.mail_subjects.order_confirm_mail_subject(order=order, lang=campaign.lang),
                 email=order.shipping_email,
@@ -695,10 +695,19 @@ class PaymentViewSet(viewsets.GenericViewSet):
                 parameters={"order":order,"order_oid":order_oid},
                 lang=order.campaign.lang,
             )
+            #sold campaign product
+            lib.helper.order_helper.OrderHelper.sold_campaign_product(order)
+
+            #order status update
+            lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
 
             return HttpResponseRedirect(redirect_to=f'{settings.WEB_SERVER_URL}/buyer/order/{order_oid}/confirmation')
         elif payment_status == "ACT":
             order.payment_status = models.order.order.PAYMENT_STATUS_AWAITING_CONFIRM
+            #order status update
+            lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
+
+            return HttpResponseRedirect(redirect_to=f'{settings.WEB_SERVER_URL}/buyer/order/{order_oid}/awaiting_confirm')
         elif payment_status == "EXP":
             order.payment_status = models.order.order.PAYMENT_STATUS_EXPIRED
         
@@ -755,10 +764,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
                 #wallet
                 update_wallet(order)
 
-                # subject = lib.i18n.email.order_comfirm_mail.i18n_get_mail_subject(order, lang=campaign.lang)
-                # content = lib.i18n.email.order_comfirm_mail.i18n_get_mail_content(order, campaign, lang=campaign.lang)
-                # jobs.send_email_job.send_email_job(subject, order.shipping_email, content=content)
-
+                #send confirmation email
                 jobs.send_email_job.send_email_job(
                     subject=lib.i18n.email.mail_subjects.order_confirm_mail_subject(order=order, lang=campaign.lang),
                     email=order.shipping_email,
@@ -766,7 +772,10 @@ class PaymentViewSet(viewsets.GenericViewSet):
                     parameters={"order":order,"order_oid":order_oid},
                     lang=order.campaign.lang,
                 )
-                
+
+                #sold campaign product
+                lib.helper.order_helper.OrderHelper.sold_campaign_product(order)
+
             #order status update
             lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
         except Exception:

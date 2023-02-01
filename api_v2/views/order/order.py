@@ -109,12 +109,13 @@ class OrderViewSet(viewsets.ModelViewSet):
         #delivery status update
         delivery_params = {"order_oid": order_oid, "order": order, "extra_data": {}, "create_order": True, "update_status": True}
         lib.helper.delivery_helper.DeliveryHelper.create_delivery_order_and_update_delivery_status(**delivery_params)
-                
-
-        for campaign_product_id_str, qty in order.products.items():
-            pymongo_campaign_product = database.lss.campaign_product.CampaignProduct(id=int(campaign_product_id_str))
-            pymongo_campaign_product.sold(qty, sync=True)
-            lib.helper.cart_helper.CartHelper.send_campaign_product_websocket_data(pymongo_campaign_product.data)
+        
+        #sold_campaign_product        
+        # lib.helper.order_helper.OrderHelper.sold_campaign_product(order)
+        # for campaign_product_id_str, qty in order.products.items():
+        #     pymongo_campaign_product = database.lss.campaign_product.CampaignProduct(id=int(campaign_product_id_str))
+        #     pymongo_campaign_product.sold(qty, sync=True)
+        #     lib.helper.cart_helper.CartHelper.send_campaign_product_websocket_data(pymongo_campaign_product.data)
 
         # subject = lib.i18n.email.order_comfirm_mail.i18n_get_mail_subject(order, lang=campaign.lang)
         # content = lib.i18n.email.order_comfirm_mail.i18n_get_mail_content(order, campaign, lang=campaign.lang)
@@ -300,6 +301,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         payment_status, = lib.util.getter.getdata(request, ('payment_status',), required=True)
         api_user = lib.util.verify.Verify.get_seller_user(request)
         order = lib.util.verify.Verify.get_order(pk)
+        
         lib.util.verify.Verify.get_campaign_from_user_subscription(api_user.user_subscription, order.campaign.id)
         
         if payment_status not in models.order.order.PAYMENT_STATUS_CHOICES:
@@ -307,10 +309,24 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         if payment_status == models.order.order.PAYMENT_STATUS_PAID and order.payment_status != models.order.order.PAYMENT_STATUS_PAID:
 
+            #update customer point
             point_discount_processor_class:factory.point_discount.PointDiscountProcessor = factory.point_discount.get_point_discount_processor_class(order.campaign.user_subscription)
             point_discount_processor = point_discount_processor_class(order.buyer, order.campaign.user_subscription, None, order.campaign.meta_point, points_earned = order.points_earned)
             point_discount_processor.create_point_transaction(order_id = order.id)
             point_discount_processor.update_wallet()
+            
+            #send confirmation email
+            order_oid = database.lss.order.get_oid_by_id(order.id)
+            jobs.send_email_job.send_email_job(
+                subject=lib.i18n.email.mail_subjects.order_confirm_mail_subject(order=order, lang=order.campaign.lang),
+                email=order.shipping_email,
+                template="email_order_confirm.html",
+                parameters={"order":order,"order_oid":order_oid},
+                lang=order.campaign.lang,
+            )
+            
+            #sold campaign product
+            lib.helper.order_helper.OrderHelper.sold_campaign_product(order)
 
         order.payment_status = payment_status
         lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
