@@ -54,8 +54,16 @@
   }
 
   function test(){
-    console.log(FB)
-    document.getElementById('debug').innerText=FB
+
+    FB.getLoginStatus(function(response) {   // See the onlogin handler
+      statusChangeCallback(response);
+      document.getElementById('debug').innerText=response.status
+      console.log(response.status)
+    });
+
+
+
+
   }
 </script>
 
