@@ -37,13 +37,13 @@ def get_page_token_from_user(user_token: str, page_id: str):
     return ret
 
 
-def get_long_lived_token(token: str):
+def get_long_lived_token(code: str, redirect_uri: str):
     params = {
-        'grant_type': 'fb_exchange_token',
+        'code': code,
         'client_id': settings.FACEBOOK_APP_CREDS['app_id'],
         'client_secret': settings.FACEBOOK_APP_CREDS['app_secret'],
-        'fb_exchange_token': token,
+        'redirect_uri': redirect_uri,
     }
-    ret = FacebookApiCaller(f'oauth/access_token',
+    ret = FacebookApiCaller(f'v15.0/oauth/access_token',
                             params=params).get()
     return ret

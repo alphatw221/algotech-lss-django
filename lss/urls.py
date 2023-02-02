@@ -28,6 +28,7 @@ from django.views.generic import TemplateView
 from lss.views.email import test
 from lss.views.chat import index,room
 from api_v2.views.facebook.facebook import facebook_messenger_webhook
+from api_v2.views.oauth.oauth import oauth_redirect
 urlpatterns = [
     # path('admin/', admin.site.urls),
     path('api/', include('api.urls')),
@@ -48,6 +49,7 @@ urlpatterns = [
 
     
     path('temp/chat_bot/facebook/', facebook_messenger_webhook),
+    path('oauth/redirect/',oauth_redirect),
     
     re_path(r'^lss/',TemplateView.as_view(template_name="lss_entry.html")),
     re_path(r'^seller/',TemplateView.as_view(template_name="lss_enigma_entry.html")),
