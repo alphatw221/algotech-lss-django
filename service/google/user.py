@@ -12,7 +12,7 @@ def api_google_get_userinfo(token: str):
     return code, ret
 
 
-def api_google_get_token(code, redirect_uri):
+def get_token_with_code(code, redirect_uri):
     data = {
         "code": code,
         "client_id": settings.GOOGLE_OAUTH_CLIENT_ID_FOR_LIVESHOWSELLER,
@@ -21,7 +21,7 @@ def api_google_get_token(code, redirect_uri):
         "redirect_uri": redirect_uri,
         "grant_type": "authorization_code"
     }
-    return GoogleAccountApiCaller("o/oauth2/token", data=data).get()
+    return GoogleOauth2ApiCaller("token", data=data).post()
 
 
 def api_google_post_refresh_token(refresh_token):

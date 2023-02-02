@@ -15,24 +15,16 @@ def oauth_redirect(request):
     try:
         if request.method == 'GET':
             
-            print(request.META)
             code = request.query_params.get('code')
             state = request.query_params.get('state')
-            print(state)
             state = json.loads(state)
             redirect_to = state.get('redirect_to')
             redirect_uri = state.get('redirect_uri')
-            print(redirect_uri)
             platform = state.get('platform')
             role = state.get('role')
             response = HttpResponseRedirect(redirect_to=redirect_to)
 
             if platform == 'facebook':
-                # protocol = request.META['wsgi.url_scheme']    
-                # domain = request.META['HTTP_HOST']
-                # path = request.META['PATH_INFO']
-
-                # full_path = protocol + "://" + domain + path
                 code,res = service.facebook.user.get_long_lived_token(code, redirect_uri)
                 
                 if code==200:
@@ -40,6 +32,16 @@ def oauth_redirect(request):
                     lss_token = lib.helper.login_helper.FacebookLogin.get_token(facebook_token,user_type='customer')
                     response.set_cookie('access_token',lss_token.get('access'))
                     response.set_cookie('login_with', platform)
+            elif platform=='google':
+                code,res = service.google.user.get_token_with_code(code, redirect_uri)
+
+                if code==200:
+                    google_token = res.get('access_token')
+                    lss_token = lib.helper.login_helper.GoogleLogin.get_token_v0(google_token, user_type='customer')
+                    print(lss_token)
+                    response.set_cookie('access_token',lss_token.get('access'))
+                    response.set_cookie('login_with', platform)
+
             
             # return
             return response

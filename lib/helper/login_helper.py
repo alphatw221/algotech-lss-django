@@ -107,6 +107,32 @@ class FacebookLogin():
 class GoogleLogin():
 
     @classmethod
+    def get_token_v0(cls, token="", user_type='customer'):
+        status_code, response = service.google.user.api_google_get_userinfo(token)
+
+        if status_code / 100 != 2:
+            raise lib.error_handle.error.api_error.ApiVerifyError("user_google_token_invalid")
+
+        google_id, google_name, google_picture, email = response.get('id'),response.get('name'),response.get('picture'),response.get('email'),
+        auth_user, api_user = create_or_get_user(email, user_type='customer', user_name=google_name)
+        
+
+        api_user.google_info["id"] = google_id
+        api_user.google_info["name"] = google_name
+        api_user.google_info["picture"] = google_picture
+        lib.util.marking_tool.NewUserMark.check_mark(api_user)
+        auth_user.last_login = datetime.now()
+        auth_user.save()
+        api_user.save()
+
+        refresh = CustomTokenObtainPairSerializer.get_token(auth_user)
+
+        return {
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        }
+
+    @classmethod
     def get_token(cls, token="", user_type='customer'):
         # ValueError: Token has wrong audience 536277208137-okgj3vg6tskek5eg6r62jis5didrhfc3.apps.googleusercontent.com, expected one of ['647555482564-u2s769q2ve0b270gnmr5bpqdfmc9tphl.apps.googleusercontent.com']
         # GOOGLE_OAUTH_CLIENT_ID_FOR_LIVESHOWSELLER = "647555482564-u2s769q2ve0b270gnmr5bpqdfmc9tphl.apps.googleusercontent.com"      #temporarily     as v2 is on different domain

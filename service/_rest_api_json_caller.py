@@ -33,9 +33,6 @@ class RestApiJsonCaller:
                                        )
 
     def post(self):
-        print(self.domain_url)
-        print(self.path)
-        print(self.params)
         return self.__request_template(requests.post,
                                        headers=self.headers,
                                        params=self.params,
