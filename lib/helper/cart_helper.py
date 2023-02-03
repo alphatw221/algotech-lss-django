@@ -407,6 +407,9 @@ class CartHelper():
         if is_subtotal_over_free_delivery_threshold or is_items_over_free_delivery_threshold:
             return 0, False
 
+        if pymongo_order.data.get('free_delivery'):
+            return 0, False
+            
         shipping_cost = 0
         
         #product category logistic
