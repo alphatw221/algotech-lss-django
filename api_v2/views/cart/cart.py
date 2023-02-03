@@ -247,11 +247,14 @@ class CartViewSet(viewsets.ModelViewSet):
         buyer_wallet = ret.get('buyer_wallet')
 
         serializer =models.order.order.OrderSerializerUpdateShipping(data=shipping_data) 
+        # print(shipping_data)
         if not serializer.is_valid():
             print(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         shipping_data = serializer.to_internal_value(serializer.data)
-
+        shipping_data['shipping_date_time'] = datetime.combine(shipping_data.pop('shipping_date').today(), datetime.min.time())    #pymongo does not support datetime.date
+        # print(shipping_data)
+        # return
         point_discount_processor_class:factory.point_discount.PointDiscountProcessor = factory.point_discount.get_point_discount_processor_class(user_subscription)
         point_discount_processor = point_discount_processor_class(api_user, user_subscription, buyer_wallet, campaign.meta_point, points_used)
         success, pymongo_order = lib.helper.cart_helper.CartHelper.checkout(api_user, campaign, cart.id, point_discount_processor, shipping_data=shipping_data )

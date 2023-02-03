@@ -9,6 +9,9 @@ from rest_framework import serializers
 from api.models.user.user import User
 
 import business_policy
+from datetime import date
+from datetime import datetime
+
 
 STATUS_PROCEED = 'proceed'
 STATUS_COMPLETE = 'complete'
@@ -187,7 +190,10 @@ class OrderSerializerUpdateShipping(serializers.ModelSerializer):
                   "shipping_option_data"
                   ]
 
-
+    # def to_internal_value(self, data):
+    #     data =  super().to_internal_value(data)
+    #     data['shipping_date'] = datetime.combine(data.get('shipping_date').today(), datetime.min.time())
+    #     return data
     
 class OrderSerializerUpdatePaymentShipping(serializers.ModelSerializer):
 
