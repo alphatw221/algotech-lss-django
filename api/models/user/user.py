@@ -40,7 +40,8 @@ IDENTITY_CHOICES = [
 class User(models.Model):
     class Meta:
         db_table = 'api_user'
-
+        unique_together=('email','type')
+        
     user_subscription = models.ForeignKey(
         UserSubscription,  null=True, on_delete=models.SET_NULL, related_name='users')
     
