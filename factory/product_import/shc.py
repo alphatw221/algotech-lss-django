@@ -11,9 +11,9 @@ class SHCProductImportProcessor(DefaultProductImportProcessor):
         self.sheet_name = 'sheets'
         self.size_limit_bytes = size_limit_bytes
         self.accept_types = accept_types
-        
+
         self.field_mappers = [
-            FieldMapper('Product Name', 'name', ''),
+            FieldMapper('Description', 'name', ''),
             FieldMapper('SKU', 'sku', ''),
             FieldMapper('Description', 'description', ''),
             FieldMapper('Keyword', 'order_code', ''),
