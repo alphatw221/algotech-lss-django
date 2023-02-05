@@ -263,8 +263,43 @@ class OrderHelper():
             }
 
             service.channels.campaign.send_product_data(campaign_product_data.get("campaign_id"), product_data)
-            
-            
+    
+    @classmethod
+    @pymongo_error_handler
+    def return_campaign_product_and_delete_order(cls, order):
+    
+        if order.payment_status == models.order.order.PAYMENT_STATUS_PAID:
+            for campaign_product_id_str, qty in order.products.items():
+                pymongo_campaign_product = database.lss.campaign_product.CampaignProduct(id=int(campaign_product_id_str))
+                pymongo_campaign_product.return_after_paid(qty, sync=True)
+                campaign_product_data = pymongo_campaign_product.data
+                
+                product_data = {
+                    "id": campaign_product_data.get('id'),
+                    'qty_sold': campaign_product_data.get('qty_sold'),
+                    'qty_pending_payment':campaign_product_data.get('qty_pending_payment'),
+                    "qty_add_to_cart":campaign_product_data.get('qty_add_to_cart'),
+
+                }
+                service.channels.campaign.send_product_data(campaign_product_data.get("campaign_id"), product_data)
+        else:
+
+            for campaign_product_id_str, qty in order.products.items():
+                pymongo_campaign_product = database.lss.campaign_product.CampaignProduct(id=int(campaign_product_id_str))
+                pymongo_campaign_product.return_after_checkout(qty, sync=True)
+                campaign_product_data = pymongo_campaign_product.data
+                
+                product_data = {
+                    "id": campaign_product_data.get('id'),
+                    'qty_sold': campaign_product_data.get('qty_sold'),
+                    'qty_pending_payment':campaign_product_data.get('qty_pending_payment'),
+                    "qty_add_to_cart":campaign_product_data.get('qty_add_to_cart'),
+
+                }
+                service.channels.campaign.send_product_data(campaign_product_data.get("campaign_id"), product_data)
+        
+        order.delete()
+        
 def adjust_decimal_places(num,decimal_places):
   if decimal_places == 0:
     return floor((num * (10 ** decimal_places))) // (10 ** decimal_places)

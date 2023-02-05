@@ -189,6 +189,17 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         return Response(oid, status=status.HTTP_200_OK)
     
+    @action(detail=True, methods=['DELETE'], url_path=r'seller/delete', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def seller_delete_order(self, request, pk=None):
+
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        order = lib.util.verify.Verify.get_order(pk)
+        lib.util.verify.Verify.get_campaign_from_user_subscription(api_user.user_subscription, order.campaign.id)
+
+        lib.helper.order_helper.OrderHelper.return_campaign_product_and_delete_order(order)
+
+        return Response('ok', status=status.HTTP_200_OK)
 
     def __search_order(self, user_subscription, request):
         
