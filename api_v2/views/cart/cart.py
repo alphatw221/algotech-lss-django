@@ -253,7 +253,8 @@ class CartViewSet(viewsets.ModelViewSet):
             print(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         shipping_data = serializer.to_internal_value(serializer.data)
-        shipping_data['shipping_date_time'] = datetime.combine(shipping_data.pop('shipping_date').today(), datetime.min.time()) if shipping_data.get('shipping_date') else None   #pymongo does not support datetime.date
+        # print(shipping_data)
+        shipping_data['shipping_date_time'] = datetime.combine(shipping_data.pop('shipping_date'), datetime.min.time()) if shipping_data.get('shipping_date') else None   #pymongo does not support datetime.date
         # print(shipping_data)
         # return
         point_discount_processor_class:factory.point_discount.PointDiscountProcessor = factory.point_discount.get_point_discount_processor_class(user_subscription)

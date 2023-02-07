@@ -588,7 +588,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         point_transaction = serializer.save()
         
-        wallet = buyer.wallets.get(user_subscription=user_subscription)
+        wallet = buyer.wallets.get(user_subscription=user_subscription) if buyer.wallets.filter(user_subscription=user_subscription).exists() else buyer.wallets.create(user_subscription=user_subscription)
         wallet.points += point_transaction.earned
         wallet.save()
         
