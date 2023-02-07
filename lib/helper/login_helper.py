@@ -52,6 +52,9 @@ class FacebookLogin():
         facebook_picture = response.get('picture',{}).get('data',{}).get('url')
         email = response.get('email')
 
+        if not email:
+            raise lib.error_handle.error.api_error.ApiVerifyError("fb_user_token_invalid")
+
         auth_user, api_user = create_or_get_user(email, user_type, facebook_name)
         # if not email:
         #     raise lib.error_handle.error.api_error.ApiVerifyError("unable_get_fb_email")
@@ -115,6 +118,10 @@ class GoogleLogin():
             raise lib.error_handle.error.api_error.ApiVerifyError("user_google_token_invalid")
 
         google_id, google_name, google_picture, email = response.get('id'),response.get('name'),response.get('picture'),response.get('email'),
+        
+        if not email:
+            raise lib.error_handle.error.api_error.ApiVerifyError("user_google_token_invalid")
+            
         auth_user, api_user = create_or_get_user(email, user_type='customer', user_name=google_name)
         
 
