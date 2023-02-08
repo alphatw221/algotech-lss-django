@@ -110,6 +110,7 @@ class SHCOrderExportProcessor(DefaultOrderExportProcessor):
             FieldMapper('shipping_cellphone', 'Shipping Phone', width=20, first_only=True),
             DeliveryInfonMapper('shipping_address_1', 'Shipping Address 1', width=40, first_only=True),
             DeliveryInfonMapper('shipping_postcode', 'Postcode', width=20, first_only=True),
+            FieldMapper('shipping_remark', 'Shipping Remark', width=20, first_only=True),
             FieldMapper('shipping_email', 'E-mail', width=40, first_only=True),
             #residentail type
             OrderProductsSKUMapper('order_product_sku', 'SKU Code', width=20),

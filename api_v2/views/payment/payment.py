@@ -666,6 +666,10 @@ class PaymentViewSet(viewsets.GenericViewSet):
         response_data = api_response.json()
         payment_data = response_data.get('data',{}).get('payment', {})
         payment_status = payment_data.get("status", False)
+
+
+
+
         order.meta[models.order.order.PAYMENT_METHOD_RAPYD] = response_data
         order.payment_method = models.order.order.PAYMENT_METHOD_RAPYD
         order.checkout_details[models.order.order.PAYMENT_METHOD_RAPYD] = {
@@ -677,6 +681,7 @@ class PaymentViewSet(viewsets.GenericViewSet):
             "action": "checkout_success_callback",
             "time": callback_time
         }
+        
         if payment_status == "CLO":
             order.paid_at = datetime.utcnow()
             order.payment_status = models.order.order.PAYMENT_STATUS_PAID
