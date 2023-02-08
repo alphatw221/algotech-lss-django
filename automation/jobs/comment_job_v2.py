@@ -84,7 +84,7 @@ def comment_job(campaign_data, user_subscription_data, platform_name, platform_i
 def __comment_responding(platform_name, platform_instance_data, campaign_data, user_subscription_data, pymongo_cart, comment, campaign_product, qty, state):
     
     plugins = user_subscription_data.get('user_plan',{}).get('plugins')
-    link = __get_link(pymongo_cart, plugins)
+    link = __get_link(user_subscription_data, pymongo_cart, plugins)
     
     _, private_message = __get_comment_and_private_message( pymongo_cart, campaign_data, state, campaign_product, qty, plugins)
     if platform_name == 'facebook':
@@ -218,7 +218,7 @@ def __get_comment_and_private_message( pymongo_cart, campaign_data, state, campa
     return text+info_in_pm_notice, text+shopping_cart_info
 
 
-def __get_link(pymongo_cart, plugins=None):
+def __get_link(user_subscription_data, pymongo_cart, plugins=None):
     if plugins:
         if lss_plugins.easy_store.EASY_STORE in plugins:
             return settings.SHOPPING_CART_RECAPTCHA_URL + f'/{lss_plugins.easy_store.EASY_STORE}/{str(pymongo_cart._id)}'
@@ -228,6 +228,8 @@ def __get_link(pymongo_cart, plugins=None):
             return settings.SHOPPING_CART_URL + '/' + str(pymongo_cart._id)
 
         return settings.SHOPPING_CART_URL + '/' + str(pymongo_cart._id)
+    elif user_subscription_data.get('require_customer_login'):
+        return settings.SHOPPING_CART_LOGIN_URL + '/' + str(pymongo_cart._id)
     else:
         return settings.SHOPPING_CART_URL + '/' + str(pymongo_cart._id)
 

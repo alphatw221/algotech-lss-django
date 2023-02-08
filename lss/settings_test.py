@@ -8,7 +8,7 @@ GCP_API_LOADBALANCER_URL = "http://localhost:8000"
 WEB_SERVER_URL = "http://localhost:3000"
 
 SHOPPING_CART_URL = f"{WEB_SERVER_URL}/buyer/cart"
-
+SHOPPING_CART_LOGIN_URL = f"{WEB_SERVER_URL}/buyer/login/cart"
 GOOGLE_OAUTH_CLIENT_ID_FOR_LIVESHOWSELLER = "715361967747-fvvrbaf18n412htlb92p8k6558kj4ugi.apps.googleusercontent.com" # for nick test
 GOOGLE_OAUTH_CLIENT_SECRET_FOR_LIVESHOWSELLER = "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"
 

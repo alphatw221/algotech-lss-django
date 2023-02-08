@@ -110,6 +110,8 @@ class UserSubscription(models.Model):
     customers = models.ManyToManyField('User', related_name='stores')
     license = models.JSONField(null=True, blank=True, default=dict)
 
+    require_customer_login = models.BooleanField(null=False, blank=True, default=False)
+    
     def __str__(self) -> str:
         return str(self.name)
     

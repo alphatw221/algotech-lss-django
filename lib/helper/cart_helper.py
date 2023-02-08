@@ -238,6 +238,8 @@ class CartHelper():
                         return False, {'pymongo_cart':pymongo_cart, 'error_products_data':error_products_data, }
 
                     pymongo_cart.data['buyer_id']=api_user.id if api_user else None
+                    if api_user:
+                        pymongo_cart.data['customer_name']=api_user.name 
                     pymongo_order = database.lss.order.Order.create_object(
                         session=session,
                         **pymongo_cart.data, 
@@ -409,7 +411,7 @@ class CartHelper():
 
         if pymongo_order.data.get('free_delivery'):
             return 0, False
-            
+
         shipping_cost = 0
         
         #product category logistic
