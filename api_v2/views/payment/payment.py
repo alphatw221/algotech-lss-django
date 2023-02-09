@@ -681,8 +681,9 @@ class PaymentViewSet(viewsets.GenericViewSet):
             "action": "checkout_success_callback",
             "time": callback_time
         }
-        
+
         if payment_status == "CLO":
+            
             order.paid_at = datetime.utcnow()
             order.payment_status = models.order.order.PAYMENT_STATUS_PAID
             #delivery status update
@@ -789,6 +790,26 @@ class PaymentViewSet(viewsets.GenericViewSet):
             print(traceback.format_exc())
         return Response("OK", status=status.HTTP_200_OK)
         
+
+
+def get_order_latch(order_id, attempts=3):
+    # solving rapyd multiple callbacks
+    try:
+        with database.lss.util.start_session() as session:
+            with session.start_transaction():
+                pymongo_order:database.lss.order.Collection = database.lss.order.Order.get(id=order_id, session = session)
+                if pymongo_order.data.get('payment_status')==models.order.order.PAYMENT_STATUS_PAID:
+                    return False
+                pymongo_order.update(payment_status=models.order.order.PAYMENT_STATUS_PAID, session=session, sync=False)
+        return True
+
+    except Exception:
+        if attempts > 0:
+            return get_order_latch(order_id,  attempts=attempts-1)
+        else:
+            print(traceback.format_exc())
+            return False
+
 
 def update_wallet(order):
     point_discount_processor_class:factory.point_discount.PointDiscountProcessor = factory.point_discount.get_point_discount_processor_class(order.campaign.user_subscription)
