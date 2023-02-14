@@ -35,7 +35,7 @@ class Command(BaseCommand):
        
         # self.test_cart_expired_adjustment()
         # self.create_kol_account()
-        self.import_customer_data()
+        self.create_customer_for_seller(user_subscription_id=617, email='colt1705@yahoo.com',user_name='Cheery Tan', points=0)
         pass
     
     def __create_new_register_account(self, plan, country_plan, subscription_plan, timezone, period, firstName, lastName, email, password, country, country_code,  contactNumber,  amount, paymentIntent=None, subscription_meta:dict={}):
@@ -1105,3 +1105,21 @@ class Command(BaseCommand):
         with open("/Users/lin/Downloads/UserPointSummaryReport as of 20th Jan 2023.xlsx", "rb") as file:
             setattr(file,'content_type','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') 
             customer_import_processor.process(file)
+    
+    def create_customer_for_seller(self, user_subscription_id, email, user_name, points=None):
+        from datetime import datetime,timedelta
+        user_subscription = models.user.user_subscription.UserSubscription.objects.get(id=user_subscription_id)
+
+        from lib.helper.login_helper import create_or_get_user
+
+        auth_user, api_user = create_or_get_user(email=email,user_type='customer', user_name=user_name)
+
+        user_subscription.customers.add(api_user)
+
+        if points:
+            expired_date = datetime.now()+timedelta(days=180)
+            wallet, _ = models.user.buyer_wallet.BuyerWallet.objects.get_or_create(user_subscription=user_subscription, buyer = api_user)
+            models.user.point_transaction.PointTransaction.objects.create(user_subscription=user_subscription, buyer=api_user, earned=points, expired_at=expired_date, type=models.user.point_transaction.TYPE_SELLER_TRANSFER)
+
+            wallet.points+=points
+            wallet.save()

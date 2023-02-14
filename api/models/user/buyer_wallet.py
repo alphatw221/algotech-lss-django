@@ -16,7 +16,7 @@ class BuyerWallet(models.Model):
         UserSubscription,  null=True, on_delete=models.SET_NULL, related_name='buyer_wallets')
     
     buyer = models.ForeignKey(
-        User,  null=True, on_delete=models.SET_NULL, related_name='wallets')
+        User,  null=True, on_delete=models.CASCADE, related_name='wallets')
 
     points = models.IntegerField( blank=False, null=False, default=0)
     status = models.CharField(max_length=255, blank=False, null=False, default=STATUS_VALID)

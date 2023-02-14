@@ -24,7 +24,7 @@ class PointTransaction(models.Model):
         UserSubscription,  null=True, on_delete=models.DO_NOTHING, related_name='point_transactions')
     
     buyer = models.ForeignKey(
-        User,  null=True, on_delete=models.DO_NOTHING, related_name='point_transactions')
+        User,  null=True, on_delete=models.CASCADE, related_name='point_transactions')
     order = models.ForeignKey(
         Order,  null=True, on_delete=models.DO_NOTHING, related_name='point_transactions')
     earned = models.IntegerField(blank=True, null=True, default=0)
