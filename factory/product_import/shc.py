@@ -1,6 +1,7 @@
 from .default import DefaultProductImportProcessor, ProductCategoriesFieldMapper, CONTENT_TYPE_CSV, CONTENT_TYPE_XLSX
 
 from lib.helper.import_helper import FieldMapper
+from api import models
 class SHCProductImportProcessor(DefaultProductImportProcessor):
     
 
@@ -13,12 +14,13 @@ class SHCProductImportProcessor(DefaultProductImportProcessor):
         self.accept_types = accept_types
 
         self.field_mappers = [
-            FieldMapper('Description', 'name', ''),
             FieldMapper('SKU', 'sku', ''),
+            FieldMapper('Description', 'name', ''),
             FieldMapper('Description', 'description', ''),
             FieldMapper('Keyword', 'order_code', ''),
             FieldMapper('Price', 'price', 0),
             FieldMapper('Stock', 'qty', 0),
             FieldMapper('MaxQty', 'max_order_amount', 0),
-            ProductCategoriesFieldMapper('Supplier', 'categories', [], product_category_dict=product_category_dict, user_subscription = user_subscription)
+            ProductCategoriesFieldMapper('Supplier', 'categories', [], product_category_dict=product_category_dict, user_subscription = user_subscription),
+            FieldMapper('Photo URL', 'image', models.product.product.IMAGE_NULL),
         ]
