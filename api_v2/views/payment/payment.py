@@ -683,7 +683,8 @@ class PaymentViewSet(viewsets.GenericViewSet):
         }
 
         if payment_status == "CLO":
-            
+            # if not  get_order_latch(order.id):
+            #     return HttpResponseRedirect(redirect_to=f'{settings.WEB_SERVER_URL}/buyer/order/{order_oid}/awaiting_confirm')
             order.paid_at = datetime.utcnow()
             order.payment_status = models.order.order.PAYMENT_STATUS_PAID
             #delivery status update

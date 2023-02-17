@@ -86,7 +86,7 @@ def __comment_responding(platform_name, platform_instance_data, campaign_data, u
     plugins = user_subscription_data.get('user_plan',{}).get('plugins')
     link = __get_link(user_subscription_data, pymongo_cart, plugins)
     
-    _, private_message = __get_comment_and_private_message( pymongo_cart, campaign_data, state, campaign_product, qty, plugins)
+    _, private_message = __get_comment_and_private_message( pymongo_cart, campaign_data, state, campaign_product, qty, plugins, user_subscription_data)
     if platform_name == 'facebook':
 
         # if state == lib.helper.order_helper.RequestState.INSUFFICIENT_INV:    
@@ -94,7 +94,7 @@ def __comment_responding(platform_name, platform_instance_data, campaign_data, u
         #     if code!=200:
         #         print("response", ret)
 
-        if 'facebook_buttons' in campaign_data.get('meta_reply',{}):
+        if campaign_data.get('facebook_buttons_enabled') and 'facebook_buttons' in campaign_data.get('meta_reply',{}):
             facebook_buttons = campaign_data.get('meta_reply',{}).get('facebook_buttons',[])
             private_message = private_message.replace('[LINK]','')
             view_order_button =  {
@@ -191,7 +191,7 @@ def __comment_responding(platform_name, platform_instance_data, campaign_data, u
 #     elif platform_name == 'tiktok':
 #         pass
 
-def __get_comment_and_private_message( pymongo_cart, campaign_data, state, campaign_product, qty, plugins):
+def __get_comment_and_private_message( pymongo_cart, campaign_data, state, campaign_product, qty, plugins, user_subscription_data):
 
 
     if state in campaign_data.get('meta_reply',{}) and campaign_data.get('meta_reply',{}).get(f'{state}_enabled')==True:
@@ -214,7 +214,7 @@ def __get_comment_and_private_message( pymongo_cart, campaign_data, state, campa
             shopping_cart_info, info_in_pm_notice = "", ""
     
     text = lib.i18n.cart_product_request.get_request_response(
-            state, campaign_product, qty, lang=campaign_data.get('lang'))
+            state, campaign_product, qty, user_subscription_data, lang=campaign_data.get('lang'))
     return text+info_in_pm_notice, text+shopping_cart_info
 
 

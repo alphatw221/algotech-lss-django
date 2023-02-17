@@ -7,8 +7,10 @@ from..helper.order_helper import RequestState
 import plugins
 
 @lang_translate_default_en
-def get_request_response(state, api_campaign_product, qty, lang=None):
-    output = [_('MESSAGE_PREFIX')]
+def get_request_response(state, api_campaign_product, qty, user_subscription_data, lang=None):
+    # output = [_('MESSAGE_PREFIX')]
+    prefix = user_subscription_data.get('name') if user_subscription_data.get('name') else _('MESSAGE_PREFIX')
+    output = [prefix]
     output.extend(get_response_content(state, api_campaign_product, qty))
 
     return ''.join(output)

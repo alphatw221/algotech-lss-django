@@ -226,13 +226,17 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'], url_path=r'seller/search', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def seller_search_campaign_products(self, request):
-        api_user, campaign_id, category, type = lib.util.getter.getparams(request, ("campaign_id", "category", "type"), with_user=True, seller=True)
+        api_user, campaign_id, category, type, keyword = lib.util.getter.getparams(request, ("campaign_id", "category", "type", "keyword"), with_user=True, seller=True)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         campaign = lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign_id)
 
         kwargs = {'categories__icontains':category} if category not in ['undefined', '', None, 'null'] else {}
         kwargs = {'type__in':['product','product-fast']} if type not in ['undefined', '', None, 'null'] and type=='product' else kwargs
+
         queryset = campaign.products.filter(**kwargs)
+        if keyword not in ['undefined', '', None, 'null']:
+            queryset = queryset.filter( Q(name__icontains=keyword)|Q(order_code__icontains=keyword))
+            
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = CampaignProductSerializerWithProductInfo(page, many=True)
