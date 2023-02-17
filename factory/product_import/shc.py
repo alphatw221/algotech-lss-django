@@ -1,7 +1,9 @@
+from django.conf import settings
 from .default import DefaultProductImportProcessor, ProductCategoriesFieldMapper, CONTENT_TYPE_CSV, CONTENT_TYPE_XLSX
 
 from lib.helper.import_helper import FieldMapper
 from api import models
+
 class SHCProductImportProcessor(DefaultProductImportProcessor):
     
 
@@ -22,5 +24,5 @@ class SHCProductImportProcessor(DefaultProductImportProcessor):
             FieldMapper('Stock', 'qty', 0),
             FieldMapper('MaxQty', 'max_order_amount', 0),
             ProductCategoriesFieldMapper('Supplier', 'categories', [], product_category_dict=product_category_dict, user_subscription = user_subscription),
-            FieldMapper('Photo URL', 'image', models.product.product.IMAGE_NULL),
+            FieldMapper('Photo URL', 'image', settings.GOOGLE_STORAGE_STATIC_DIR+models.product.product.IMAGE_NULL),
         ]
