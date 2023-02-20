@@ -32,6 +32,8 @@ def oauth_redirect(request):
                     lss_token = lib.helper.login_helper.FacebookLogin.get_token(facebook_token,user_type='customer')
                     response.set_cookie('access_token',lss_token.get('access'))
                     response.set_cookie('login_with', platform)
+                else:
+                    lib.util.google_cloud_logging.ApiLogEntry.write_entry(str({'error':'facebook get long lived token error', 'response':res}))
             elif platform=='google':
                 code,res = service.google.user.get_token_with_code(code, redirect_uri)
 
@@ -41,6 +43,8 @@ def oauth_redirect(request):
                     print(lss_token)
                     response.set_cookie('access_token',lss_token.get('access'))
                     response.set_cookie('login_with', platform)
+                else:
+                    lib.util.google_cloud_logging.ApiLogEntry.write_entry(str({'error':'google get token error', 'response':res}))
 
             
             # return
