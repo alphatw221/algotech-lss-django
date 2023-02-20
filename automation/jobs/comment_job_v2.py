@@ -13,7 +13,7 @@ import lib
 import database
 import service
 import plugins as lss_plugins
-
+import traceback
 @lib.error_handle.error_handler.comment_job_error_handler.comment_job_error_handler
 def comment_job(campaign_data, user_subscription_data, platform_name, platform_instance_data, comment, order_codes_mapping):
     logs=[]
@@ -94,7 +94,7 @@ def __comment_responding(platform_name, platform_instance_data, campaign_data, u
         #     if code!=200:
         #         print("response", ret)
 
-        if campaign_data.get('facebook_buttons_enabled') and 'facebook_buttons' in campaign_data.get('meta_reply',{}):
+        if campaign_data.get('meta_reply',{}).get('facebook_buttons_enabled') and 'facebook_buttons' in campaign_data.get('meta_reply',{}):
             facebook_buttons = campaign_data.get('meta_reply',{}).get('facebook_buttons',[])
             private_message = private_message.replace('[LINK]','')
             view_order_button =  {
@@ -103,15 +103,17 @@ def __comment_responding(platform_name, platform_instance_data, campaign_data, u
                 "title":"View Order"
             }
             facebook_buttons.insert(0,view_order_button)    # for ordr_startr 
-
-            code, ret = service.facebook.message.send_private_message_with_buttons(platform_instance_data.get('token'), comment['id'], private_message, facebook_buttons)
-            if code!=200:
-                print("response", ret)
+            __send_facebook_message_with_button(platform_instance_data.get('token'), comment['id'], private_message, facebook_buttons)
+            # code, ret = service.facebook.message.send_private_message_with_buttons(platform_instance_data.get('token'), comment['id'], private_message, facebook_buttons)
+            # if code!=200:
+            #     print("response", ret)
             return
         private_message = private_message.replace('[LINK]', link)
-        code, ret = service.facebook.post.post_page_message_on_comment(platform_instance_data.get('token'), comment['id'], private_message)
-        if code!=200:
-            print("response", ret)
+
+        __send_facebook_message(platform_instance_data.get('token'), comment['id'], private_message)
+        # code, ret = service.facebook.post.post_page_message_on_comment(platform_instance_data.get('token'), comment['id'], private_message)
+        # if code!=200:
+        #     print("response", ret)
         
     elif platform_name == 'youtube':
         private_message = private_message.replace('[LINK]',link)
@@ -240,3 +242,32 @@ def __get_link(user_subscription_data, pymongo_cart, plugins=None):
 
 
 #test if auto deploy works
+
+
+def __send_facebook_message(token, comment_id, message, attempts=3):
+    try:
+        code, ret = service.facebook.post.post_page_message_on_comment(token, comment_id, message)
+        if code!=200:
+            # print("response", ret)
+            lib.util.google_cloud_logging.ApiLogEntry.write_entry(str(ret))
+
+            __send_facebook_message(token, comment_id, message, attempts=attempts-1)
+
+    except Exception:
+        lib.util.google_cloud_logging.ApiLogEntry.write_entry(traceback.format_exc())
+        if(attempts>0):
+            __send_facebook_message(token, comment_id, message, attempts=attempts-1)
+    
+def __send_facebook_message_with_button(token, comment_id, message, facebook_buttons, attempts=3):
+    try:
+
+        code, ret = service.facebook.message.send_private_message_with_buttons(token, comment_id, message, facebook_buttons)
+        if code!=200:
+            # print("response", ret)
+            lib.util.google_cloud_logging.ApiLogEntry.write_entry(str(ret))
+            __send_facebook_message_with_button(token, comment_id, message, facebook_buttons, attempts=attempts-1)
+
+    except Exception:
+        lib.util.google_cloud_logging.ApiLogEntry.write_entry(traceback.format_exc())
+        if(attempts>0):
+            __send_facebook_message_with_button(token, comment_id, message, facebook_buttons, attempts=attempts-1)
