@@ -45,6 +45,7 @@ class FacebookLogin():
     def get_token(cls, token, user_type):
         status_code, response = service.facebook.user.get_me_login(token)
         if status_code / 100 != 2:
+            lib.util.google_cloud_logging.ApiLogEntry.write_entry(str({'error':'get facebook me error', 'response':response}))
             raise lib.error_handle.error.api_error.ApiVerifyError("fb_user_token_invalid")
             
         facebook_id = response.get('id')
@@ -53,6 +54,7 @@ class FacebookLogin():
         email = response.get('email')
 
         if not email:
+            lib.util.google_cloud_logging.ApiLogEntry.write_entry(str({'error':'facebook email invalid', 'facebook_name':facebook_name}))
             raise lib.error_handle.error.api_error.ApiVerifyError("fb_user_token_invalid")
 
         auth_user, api_user = create_or_get_user(email, user_type, facebook_name)

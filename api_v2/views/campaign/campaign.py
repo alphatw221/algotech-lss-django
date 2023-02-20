@@ -634,6 +634,8 @@ class CampaignViewSet(viewsets.ModelViewSet):
 
         if type=='tiktok':
             destination = f"{settings.GCP_API_LOADBALANCER_URL}/buyer/search/{campaign.id}/cart/tiktok"
+        elif user_subscription.require_customer_login:
+            destination = f"{settings.GCP_API_LOADBALANCER_URL}/buyer/login/create/{campaign.id}"
         else:
             destination = f"{settings.SHOPPING_CART_RECAPTCHA_URL}/blank/{campaign.id}"
         
