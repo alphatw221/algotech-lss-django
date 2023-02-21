@@ -35,14 +35,14 @@ class Command(BaseCommand):
        
         # self.test_cart_expired_adjustment()
         # self.create_kol_account()
-        # self.create_customer_for_seller(user_subscription_id=617, email='colt1705@yahoo.com',user_name='Cheery Tan', points=0)
-        try:
-            raise Exception()
-        except Exception:
+        self.create_customer_for_seller(user_subscription_id=617, email='jocelynkwek@yahoo.com.sg',user_name='Jocelyn Kwek', points=800)
+        # try:
+        #     raise Exception()
+        # except Exception:
 
-            import traceback
-            print(traceback.format_exc())
-            lib.util.google_cloud_logging.ApiLogEntry.write_entry(traceback.format_exc())
+        #     import traceback
+        #     print(traceback.format_exc())
+        #     lib.util.google_cloud_logging.ApiLogEntry.write_entry(traceback.format_exc())
 
         pass
     

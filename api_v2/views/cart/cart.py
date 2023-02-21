@@ -313,15 +313,15 @@ class CartViewSet(viewsets.ModelViewSet):
             #order status update
             lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
 
-        else:
-            #send email
-            jobs.send_email_job.send_email_job(
-                subject=lib.i18n.email.mail_subjects.cart_checkout_mail_subject(order=order, lang=order.campaign.lang),
-                email=order.shipping_email,
-                template="email_cart_checkout.html",
-                parameters={"order":order,"order_oid":order_oid},
-                lang=order.campaign.lang,
-            )
+        # else:
+        #     #send email
+        #     jobs.send_email_job.send_email_job(
+        #         subject=lib.i18n.email.mail_subjects.cart_checkout_mail_subject(order=order, lang=order.campaign.lang),
+        #         email=order.shipping_email,
+        #         template="email_cart_checkout.html",
+        #         parameters={"order":order,"order_oid":order_oid},
+        #         lang=order.campaign.lang,
+        #     )
 
         return Response(data, status=status.HTTP_200_OK)
 

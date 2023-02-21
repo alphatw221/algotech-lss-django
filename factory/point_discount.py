@@ -12,6 +12,8 @@ class PointDiscountProcessor:
         self.points_used = points_used
         self.points_earned = points_earned
 
+        if self.compute_point_discount()<=0:
+            self.points_used = 0
         
     def compute_point_discount(self):
         

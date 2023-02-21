@@ -215,7 +215,7 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
             kwargs['type']=models.campaign.campaign_product.TYPE_LUCKY_DRAW
         elif type ==models.campaign.campaign_product.TYPE_PRODUCT:
             kwargs['type']=models.campaign.campaign_product.TYPE_PRODUCT
-        queryset = campaign.products.filter(**kwargs)
+        queryset = campaign.products.filter(**kwargs).order_by('created_at')
 
         serializer = models.campaign.campaign_product.CampaignProductSerializer(queryset, many=True)
         data = serializer.data
