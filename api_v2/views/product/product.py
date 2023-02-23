@@ -1,6 +1,7 @@
 import traceback
 from django.core.files.base import ContentFile
 from django.conf import settings
+from django.db.models import Q, Value
 from api_v2.views.user.user import UserSerializerSellerAccountInfo
 
 from rest_framework import status, viewsets
@@ -42,19 +43,24 @@ class ProductViewSet(viewsets.ModelViewSet):
         
         
         kwargs = {'status': product_status if product_status else 'enabled'}
-        if (search_column in ["", None]) and (keyword not in [None, ""]):
-            raise lib.error_handle.error.api_error.ApiVerifyError("search_can_not_empty")
-        if (search_column not in ['undefined', '']) and (keyword not in ['undefined', '', None]):
-            kwargs[search_column + '__icontains'] = keyword
+        # if (search_column in ["", None]) and (keyword not in [None, ""]):
+        #     raise lib.error_handle.error.api_error.ApiVerifyError("search_can_not_empty")
+        # if (search_column not in ['undefined', '']) and (keyword not in ['undefined', '', None]):
+        #     kwargs[search_column + '__icontains'] = keyword
         if ( product_type in [models.product.product.TYPE_PRODUCT, models.product.product.TYPE_LUCY_DRAW]):
             kwargs['type'] = product_type
         if category_id not in ['undefined', '', None]:
             kwargs['categories__icontains'] = category_id 
         
+        queryset = user_subscription.products.filter(**kwargs)
+
+        if keyword not in ['', 'null', 'undefined', None]:
+            queryset = queryset.filter(Q(name__icontains=keyword)|Q(order_code__icontains=keyword)|Q(sku__icontains=keyword))
+
         if(sort_by in ['undefined', '', None]):
-            queryset = user_subscription.products.filter(**kwargs).order_by("-updated_at")
+            queryset = queryset.order_by("-updated_at")
         else: 
-            queryset = user_subscription.products.filter(**kwargs).order_by(sort_by)
+            queryset = queryset.order_by(sort_by)
         
         if exclude_products:
             exclude_products = exclude_products.split(",")
