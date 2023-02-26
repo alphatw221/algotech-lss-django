@@ -203,7 +203,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     def __search_order(self, user_subscription, request):
         
-        campaign_id, search, page, page_size, order_status, = lib.util.getter.getparams(request, ( 'campaign_id', 'search', 'page', 'page_size','status'),with_user=False)
+        campaign_id, search, page, page_size, order_status, daterange = lib.util.getter.getparams(request, ( 'campaign_id', 'search', 'page', 'page_size','status', 'daterange'),with_user=False)
         payment_methods_dict, delivery_status_options_dict, payment_status_options_dict,  platform_dict, sort_by_dict = \
             lib.util.getter.getdata(request, ('payment_method_options','delivery_status_options', 'payment_status_options', 'platform_options', 'sort_by'), required=False)
 
@@ -222,9 +222,15 @@ class OrderViewSet(viewsets.ModelViewSet):
             queryset=queryset.filter(customer_name__contains=search)
             pymongo_filter_query["customer_name"]={"$regex":str(search),"$options": 'i'}
 
-        elif order_status in models.order.order.STATUS_CHOICES:
+        if order_status in models.order.order.STATUS_CHOICES:
             queryset=queryset.filter(status=order_status)
             pymongo_filter_query['status']=order_status
+
+        if daterange not in ["", None, 'null', 'undefined']:
+            start_datetime = datetime.strptime(daterange.split('~')[0], "%Y-%m-%d")
+            end_datetime = datetime.strptime(daterange.split('~')[1], "%Y-%m-%d").replace(hour=11, minute=59, second=59, microsecond=999)
+            queryset=queryset.filter(created_at__gte=start_datetime, created_at__lte=end_datetime)
+            pymongo_filter_query['created_at'] = {"$gte":start_datetime, '$lte':end_datetime}
 
 
         if payment_methods_dict and[key for key,value in payment_methods_dict.items() if value]:
@@ -352,6 +358,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
 
         _, pymongo_filter_query, pymongo_sort_by = self.__search_order(user_subscription, request)
+        print(pymongo_filter_query)
         iterable_objects = database.lss.order.get_order_export_cursor(pymongo_filter_query, pymongo_sort_by)
         order_export_processor_class:factory.order_export.default.DefaultOrderExportProcessor =\
              factory.order_export.get_order_export_processor_class(user_subscription)

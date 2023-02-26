@@ -798,7 +798,7 @@ def get_order_latch(order_id, attempts=3):
     try:
         with database.lss.util.start_session() as session:
             with session.start_transaction():
-                pymongo_order:database.lss.order.Collection = database.lss.order.Order.get(id=order_id, session = session)
+                pymongo_order:database.lss.order.Collection = database.lss.order.Order.get_object(id=order_id, session = session)
                 if pymongo_order.data.get('payment_status')==models.order.order.PAYMENT_STATUS_PAID:
                     return False
                 pymongo_order.update(payment_status=models.order.order.PAYMENT_STATUS_PAID, session=session, sync=False)
