@@ -683,8 +683,8 @@ class PaymentViewSet(viewsets.GenericViewSet):
         }
 
         if payment_status == "CLO":
-            # if not  get_order_latch(order.id):
-            #     return HttpResponseRedirect(redirect_to=f'{settings.WEB_SERVER_URL}/buyer/order/{order_oid}/awaiting_confirm')
+            if not  get_order_latch(order.id):
+                return HttpResponseRedirect(redirect_to=f'{settings.WEB_SERVER_URL}/buyer/order/{order_oid}/awaiting_confirm')
             order.paid_at = datetime.utcnow()
             order.payment_status = models.order.order.PAYMENT_STATUS_PAID
             #delivery status update
@@ -798,7 +798,7 @@ def get_order_latch(order_id, attempts=3):
     try:
         with database.lss.util.start_session() as session:
             with session.start_transaction():
-                pymongo_order:database.lss.order.Collection = database.lss.order.Order.get(id=order_id, session = session)
+                pymongo_order:database.lss.order.Collection = database.lss.order.Order.get_object(id=order_id, session = session)
                 if pymongo_order.data.get('payment_status')==models.order.order.PAYMENT_STATUS_PAID:
                     return False
                 pymongo_order.update(payment_status=models.order.order.PAYMENT_STATUS_PAID, session=session, sync=False)
@@ -808,7 +808,7 @@ def get_order_latch(order_id, attempts=3):
         if attempts > 0:
             return get_order_latch(order_id,  attempts=attempts-1)
         else:
-            print(traceback.format_exc())
+            lib.util.google_cloud_logging.ApiLogEntry.write_entry({'error':'get_order_latch_error','traceboack':traceback.format_exc()})
             return False
 
 
