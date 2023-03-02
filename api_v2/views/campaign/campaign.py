@@ -351,6 +351,10 @@ class CampaignViewSet(viewsets.ModelViewSet):
             facebook_page = lib.util.verify.Verify.get_facebook_page_from_user_subscription(user_subscription, platform_id)
             campaign.facebook_campaign['post_id']=post_id
             campaign.facebook_page = facebook_page
+        elif platform=='sub_facebook':
+            facebook_page = lib.util.verify.Verify.get_facebook_page_from_user_subscription(user_subscription, platform_id)
+            campaign.sub_facebook_campaign['post_id']=post_id
+            campaign.sub_facebook_page = facebook_page
         elif platform =='youtube':
             youtube_channel = lib.util.verify.Verify.get_youtube_channel_from_user_subscription(user_subscription, platform_id)
             campaign.youtube_campaign['live_video_id']=post_id
@@ -389,6 +393,9 @@ class CampaignViewSet(viewsets.ModelViewSet):
         if platform=='facebook':
             campaign.facebook_campaign['post_id']=''
             campaign.facebook_page = None
+        elif platform=='sub_facebook':
+            campaign.sub_facebook_campaign['post_id']=''
+            campaign.sub_facebook_page = None
         elif platform =='youtube':
             campaign.youtube_campaign['live_video_id']=''
             campaign.youtube_channel = None

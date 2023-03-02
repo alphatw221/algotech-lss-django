@@ -42,6 +42,7 @@ def campaign_job(campaign_id):
     user_subscription_data = database.lss.user_subscription.UserSubscription.get(id=campaign.data.get('user_subscription_id'))
 
     capture_facebook_v2(campaign, user_subscription_data, logs)
+    capture_sub_facebook_v2(campaign, user_subscription_data, logs)
     capture_youtube_v2(campaign, user_subscription_data, logs)
     capture_instagram_v2(campaign, user_subscription_data, logs)
     util.logger.print_table(["Campaign ID", campaign_id],logs)
@@ -582,6 +583,99 @@ def capture_facebook_v2(campaign, user_subscription_data, logs, attempts=2):
         print(traceback.format_exc())
 
 
+@capture_platform_error_handler.capture_platform_error_handler
+def capture_sub_facebook_v2(campaign, user_subscription_data, logs, attempts=2):
+    try:
+        logs.append(["facebook",""])
+        if not campaign.data.get('sub_facebook_page_id'):
+            return
+        facebook_page = database.lss.facebook_page.FacebookPage.get_object(id=campaign.data.get('sub_facebook_page_id'))
+
+        if not facebook_page:
+            logs.append(["error","no sub facebook_page found"])
+            return
+
+        page_token = facebook_page.data.get('token')
+        facebook_campaign = campaign.data.get('sub_facebook_campaign',{})
+        post_id = facebook_campaign.get('post_id', '')
+        facebook_comment_capture_since = facebook_campaign.get('comment_capture_since', 1)
+
+        if not page_token or not post_id:
+            return
+        
+        order_codes_mapping = OrderCodesMappingSingleton.get_mapping(campaign.id)
+        
+        code, data = service.facebook.post.get_post_comments(page_token, post_id, since = facebook_comment_capture_since)
+        logs.append(["post_id",post_id])
+        logs.append(["since",facebook_comment_capture_since])
+        logs.append(["code",code])
+
+        if code // 100 != 2 :
+            print(data)
+            facebook_campaign['post_id'] = ''
+            facebook_campaign['remark'] = f'Facebook API error: {data["error"]}'
+            campaign.update(sub_facebook_campaign=facebook_campaign, sync=False)
+            return
+
+        facebook_comments = data.get('data', [])
+
+        if facebook_comments and int(facebook_comments[-1].get('created_time')) == facebook_comment_capture_since:
+            logs.append(["number of comments",0])
+            __update_campaign_silent_count(campaign)
+            return
+
+        if not facebook_comments:
+            logs.append(["number of comments",0])
+            __update_campaign_silent_count(campaign)
+            return
+            
+        facebook_campaign['comment_capture_since'] = int(facebook_comments[-1].get('created_time'))
+        campaign.update(
+            sub_facebook_campaign=facebook_campaign,
+            priority=1,
+            silent_count=0,
+            sync=True)
+
+        logs.append(["number of comments", len(facebook_comments)])
+
+        try:
+            for comment in facebook_comments:
+                logs.append(["message", comment.get('message')])
+
+                if not comment.get('from',{}).get('id'):
+                    logs.append(["error", "can't get user"])
+                    continue
+
+                if comment.get('from',{}).get('id') == facebook_page.data.get('page_id'):
+                    continue
+
+                uni_format_comment = {
+                    'platform': models.user.user_subscription.PLATFORM_FACEBOOK,
+                    'id': comment['id'],
+                    "campaign_id": campaign.id,
+                    'message': comment['message'],
+                    "created_time": comment['created_time'],
+                    "customer_id": comment['from']['id'],
+                    "customer_name": comment['from']['name'],
+                    "image": comment['from']['picture']['data']['url'],
+                    "categories":service.nlp.classification.classify_comment_v2(texts=[comment['message']]),
+                }
+                try:
+                    database.lss.campaign_comment.CampaignComment.create(**uni_format_comment, auto_inc=False)
+                except Exception:
+                    continue
+
+                service.channels.campaign.send_comment_data(campaign.id, uni_format_comment)
+                service.rq.queue.enqueue_comment_queue(jobs.comment_job_v2.comment_job, campaign.data, user_subscription_data, models.user.user_subscription.PLATFORM_FACEBOOK, facebook_page.data, uni_format_comment, order_codes_mapping)
+
+        except Exception:
+            print(traceback.format_exc())
+    
+    except Exception:
+        if attempts>0:
+            print('retry')
+            capture_sub_facebook_v2(campaign, user_subscription_data, logs, attempts=attempts-1)
+        print(traceback.format_exc())
 
 
 @capture_platform_error_handler.capture_platform_error_handler
