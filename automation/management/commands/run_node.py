@@ -132,14 +132,14 @@ class Command(BaseCommand):
         lib.util.logger.print_table(["Level 3 Campaign ID", "Status"],rows)
 
     def __capture_campaign(self, campaign, rows):
-        print(campaign.sub_facebook_campaign.get('post_id',None))
+
 
         invalid_facebook = not campaign.facebook_campaign.get("post_id", None)
         invalid_sub_facebook = not campaign.sub_facebook_campaign.get("post_id", None)
         invalid_instagram = not campaign.instagram_campaign.get("live_media_id", None)
         invalid_youtube = not campaign.youtube_campaign.get("live_video_id", None)
 
-        print(invalid_sub_facebook)
+
         # invalid_twitch = not campaign.twitch_campaign.get("channel_name", None)
         # invalid_tiktok = not campaign.tiktok_campaign.get("username", None)
         if invalid_facebook and invalid_sub_facebook and invalid_instagram and invalid_youtube :
