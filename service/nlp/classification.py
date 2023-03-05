@@ -27,7 +27,7 @@ def classify_comment_v1(texts, threshold=0.9):
     return list(categories[index])
 
 def classify_comment_v2(texts):
-
+    return []
     try:
         categories = np.array(["chat","purchase", "delivery", "return"])
 
