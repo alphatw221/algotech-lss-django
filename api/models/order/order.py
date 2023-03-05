@@ -126,6 +126,9 @@ class Order(models.Model):
     shipping_option_index = models.IntegerField(blank=True, null=True, default=None)
     shipping_option_data = models.JSONField(default=dict, null=False, blank=False)
 
+    delivery_option_index = models.IntegerField(blank=True, null=True, default=None)
+    pickup_option_index = models.IntegerField(blank=True, null=True, default=None)
+
     checkout_details = models.JSONField(default=dict, null=True, blank=True)
     history = models.JSONField(default=dict, null=True, blank=True)
     
@@ -165,13 +168,13 @@ class OrderSerializerWithUserSubscription(OrderSerializer):
 
 class OrderSerializerUpdateShipping(serializers.ModelSerializer):
     
-    shipping_option_data = serializers.JSONField(default=dict)
+    # shipping_option_data = serializers.JSONField(default=dict)
     class Meta:
         model = Order
         fields = ["shipping_first_name",
                   "shipping_last_name",
                   "shipping_email",
-                  "shipping_phone",
+                #   "shipping_phone",
                   "shipping_cellphone",
                   "shipping_postcode",
                   "shipping_region",
@@ -182,12 +185,15 @@ class OrderSerializerUpdateShipping(serializers.ModelSerializer):
                   "shipping_date", 
                   "shipping_date_time", 
                   "shipping_time_slot", 
-                  "shipping_option",
-                  "shipping_option_index",
+                #   "shipping_option",
+                #   "shipping_option_index",
                   "shipping_property_type",
-                  "pickup_address",
+                #   "pickup_address",
                   "remark",
-                  "shipping_option_data"
+                #   "shipping_option_data"
+
+                    "delivery_option_index",
+                    "pickup_option_index"
                   ]
 
     # def to_internal_value(self, data):
