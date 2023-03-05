@@ -423,7 +423,7 @@ REDIS_SERVER = {
     "host": "34.124.140.74",
     "port": "6379",
     "username": None,
-    "password": r"algo83111T%%"}
+    "password": r"algo83111TPP"}
 
 CACHE_SERVER = {
     "host": "34.124.140.74",
