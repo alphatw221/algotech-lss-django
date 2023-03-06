@@ -236,7 +236,7 @@ class CartViewSet(viewsets.ModelViewSet):
             
         ret = rule.rule_checker.cart_rule_checker.RuleChecker.check(
             check_list=[
-                rule.rule_checker.cart_rule_checker.CartCheckRule.allow_checkout,
+                # rule.rule_checker.cart_rule_checker.CartCheckRule.allow_checkout,
                 rule.rule_checker.cart_rule_checker.CartCheckRule.is_cart_lock,
                 rule.rule_checker.cart_rule_checker.CartCheckRule.is_cart_empty,
                 rule.rule_checker.cart_rule_checker.CartCheckRule.wallet_enough_points,
@@ -255,8 +255,7 @@ class CartViewSet(viewsets.ModelViewSet):
         shipping_data = serializer.to_internal_value(serializer.data)
         # print(shipping_data)
         shipping_data['shipping_date_time'] = datetime.combine(shipping_data.pop('shipping_date'), datetime.min.time()) if shipping_data.get('shipping_date') else None   #pymongo does not support datetime.date
-        # print(shipping_data)
-        # return
+
         point_discount_processor_class:factory.point_discount.PointDiscountProcessor = factory.point_discount.get_point_discount_processor_class(user_subscription)
         point_discount_processor = point_discount_processor_class(api_user, user_subscription, buyer_wallet, campaign.meta_point, points_used)
         success, pymongo_order = lib.helper.cart_helper.CartHelper.checkout(api_user, campaign, cart.id, point_discount_processor, shipping_data=shipping_data )
