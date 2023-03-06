@@ -18,6 +18,7 @@ import database
 from api import models
 from lib.error_handle.error_handler import campaign_job_error_handler, capture_platform_error_handler
 from lib import util
+import numpy
 C_VALUE = 60
 LOWEST_PRIORITY = 3
 class OrderCodesMappingSingleton:
@@ -27,11 +28,20 @@ class OrderCodesMappingSingleton:
     @classmethod
     def get_mapping(cls, campaign_id):
         if cls.order_codes_mapping == None:
-            # database.lss.campaign_product.CampaignProduct.filter(campaign_id=campaign_id)
             kwargs = {"campaign_id": campaign_id, "$or": [{"type": "product"}, {"type": "product-fast"}]}
             campaign_products = database.lss.campaign_product.CampaignProduct.filter(**kwargs)
-            cls.order_codes_mapping = {campaign_product['order_code'].lower(): campaign_product
-                                for campaign_product in campaign_products}
+
+            lenlist=[]
+            campaign_product_list=[]
+            for campaign_product in campaign_products:
+                lenlist.append(len(campaign_product.get('order_code')))
+                campaign_product_list.append(campaign_product)
+            sorted_index = numpy.argsort(lenlist)[::-1]
+            cls.order_codes_mapping = {campaign_product_list[index]['order_code'].lower(): campaign_product_list[index]
+                                for index in sorted_index}
+
+            # cls.order_codes_mapping = {campaign_product['order_code'].lower(): campaign_product
+            #                     for campaign_product in campaign_products}
         return cls.order_codes_mapping
 
 @campaign_job_error_handler.campaign_job_error_handler
