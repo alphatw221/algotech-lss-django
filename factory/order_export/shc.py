@@ -105,6 +105,8 @@ class PlatformInstanceMapper(FieldMapper):
         platform_name = object.get('platform')
         platform_id = object.get('platform_id')
         
+        if not platform_name:
+            return ''
         if platform_name+str(platform_id) in self.cache:
             platform_instance = self.cache.get(platform_name+str(platform_id))
         else:
