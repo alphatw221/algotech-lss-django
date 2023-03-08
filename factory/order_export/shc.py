@@ -95,8 +95,30 @@ class ShippingCostMapper(FieldMapper):
         else:
             return super().get_field_data(object)
 
+class PlatformInstanceMapper(FieldMapper):
 
+    def __init__(self, field_name='', title='', i18n_key=None, width=None, i18n_text=None, first_only=False, **kwargs):
+        super().__init__(field_name, title, i18n_key, width, i18n_text, first_only, **kwargs)
+        self.cache = {}
 
+    def get_field_data(self, object):
+        platform_name = object.get('platform')
+        platform_id = object.get('platform_id')
+        
+        if platform_name+str(platform_id) in self.cache:
+            platform_instance = self.cache.get(platform_name+str(platform_id))
+        else:
+            platform_model = models.user.user_subscription.PLATFORM_ATTR.get(platform_name,{}).get('model',None)
+            if not platform_model:
+                return ''
+            
+            if not platform_model.objects.filter(id = platform_id).exists():
+                return ''
+            
+            platform_instance = platform_model.objects.get(id = platform_id) 
+            self.cache[platform_name+str(platform_id)] = platform_instance
+        
+        return platform_instance.name
 class SHCOrderExportProcessor(DefaultOrderExportProcessor):
     field_mappers = [
             # FieldMapper('id','OrderNo', width=10, first_only=True),
@@ -131,6 +153,7 @@ class SHCOrderExportProcessor(DefaultOrderExportProcessor):
             DateTimeMapper('shipping_date_time','Delivery Date', width=20, first_only=True),
             FieldMapper('shipping_time_slot','Delivery Time Range', width=20, first_only=True),
             FieldMapper('platform', 'Platform', width=15, first_only=True),
+            PlatformInstanceMapper('platform_instance_name', 'Platform Name', width=20, first_only=False),
             FieldMapper('id','OrderNo', width=10, first_only=False),
             FieldMapper('customer_name', 'Name', width=20, first_only=False),
             FieldMapper('shipping_first_name', 'Shipping Name', width=20, first_only=False),

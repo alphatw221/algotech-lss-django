@@ -51,7 +51,7 @@ def comment_job(campaign_data, user_subscription_data, platform_name, platform_i
         #     lib.util.logger.print_table(["Campaign ID", campaign_data.get('id')],logs)
         #     return
         
-    pymongo_cart = database.lss.cart.Cart.get_object(customer_id= comment['customer_id'], campaign_id= campaign_data['id'], platform= comment['platform'], platform_id=platform_instance_data.get('id'))
+    pymongo_cart = database.lss.cart.Cart.get_object(customer_id= comment['customer_id'], campaign_id= campaign_data['id'], platform= comment['platform'])
 
     if not pymongo_cart:
         pymongo_cart = database.lss.cart.Cart.create_object(
