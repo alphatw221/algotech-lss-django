@@ -12,6 +12,7 @@ from rest_framework import status
 
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.renderers import StaticHTMLRenderer
+from rest_framework.pagination import PageNumberPagination
 
 from api import models
 from api_v2 import rule
@@ -61,12 +62,17 @@ class OrderSerializerWithCampaign(models.order.order.OrderSerializer):
     
 #------------------------------------------------------------------------------------------
 
+
+class OrderHistoryPagination(PageNumberPagination):
+    page_query_param = 'page'
+    page_size_query_param = 'page_size'
+
 class UserViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAdminUser,)
     queryset = models.user.user.User.objects.all().order_by('id')
     serializer_class = models.user.user.UserSerializer
     filterset_fields = []
-
+    
 # #-----------------------------------------admin----------------------------------------------------------------------------------------------
 
 #     @action(detail=False, methods=['GET'], url_path=r'dealer/search/list', permission_classes=(IsAuthenticated,))
@@ -114,7 +120,7 @@ class UserViewSet(viewsets.ModelViewSet):
         api_user = lib.util.verify.Verify.get_customer_user(request)
         return Response(UserSerializerBuyerAccountInfo(api_user).data, status=status.HTTP_200_OK)    
 
-    @action(detail=False, methods=['GET'], url_path=r'buyer/order/history', permission_classes=(IsAuthenticated,))
+    @action(detail=False, methods=['GET'], url_path=r'buyer/order/history', permission_classes=(IsAuthenticated,), pagination_class=OrderHistoryPagination)
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def list_buyer_order_history(self, request):
 
