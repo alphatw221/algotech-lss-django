@@ -575,6 +575,7 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
             file = file)
 
         return Response("OK", status=status.HTTP_200_OK)
+    
     @action(detail=False, methods=['POST'], url_path=r'buyer/(?P<buyer_id>[^/.]+)/points/transaction/create', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def buyer_point_transaction_create(self, request, buyer_id):
@@ -600,7 +601,63 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         else:
             data = PointTransactionSerializer(queryset, many=True).data
         return Response({"data":data, "wallet":WalletSerializerWithBuyerInfo(wallet).data}, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['PUT'], url_path=r'buyer/merge', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def merge_buyer(self, request):
+
+        source_email, target_email = lib.util.getter.getdata(request, ('source_email', 'target_email'), required=True)
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+
+
+        source_customer = user_subscription.customers.filter(email=source_email).first()
+        target_customer = user_subscription.customers.filter(email=target_email).first()
+
+        if not source_customer :
+            raise lib.error_handle.error.api_error.ApiVerifyError('Source Customer Not Found')
+        if not target_customer:
+            raise lib.error_handle.error.api_error.ApiVerifyError('Target Customer Not Found')
+
+        # print(source_customer)
+        # print(target_customer)
+
+        # return Response('ok', status=status.HTTP_200_OK)
+        source_customer.orders.filter(user_subscription=user_subscription).update(buyer = target_customer)
+        source_customer.point_transactions.filter(user_subscription=user_subscription).update(buyer = target_customer)
+
+
+        source_customer_wallet = source_customer.wallets.filter(user_subscription = user_subscription).first() 
+        target_customer_wallet = target_customer.wallets.get(user_subscription=user_subscription) if target_customer.wallets.filter(user_subscription=user_subscription).exists() else target_customer.wallets.create(user_subscription=user_subscription)
+
+        if source_customer_wallet:
+            target_customer_wallet.points+=source_customer_wallet.points 
+            target_customer_wallet.save()
+            source_customer_wallet.delete()
+
+        user_subscription.customers.remove(source_customer)
        
+        return Response('ok', status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['DELETE'], url_path=r'buyer/(?P<buyer_id>[^/.]+)/remove', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def remove_buyer(self, request, buyer_id):
+
+
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+
+        buyer = user_subscription.customers.get(id=buyer_id) if user_subscription.customers.filter(id=buyer_id).exists() else None
+        if not buyer:
+            raise lib.error_handle.error.api_error.ApiVerifyError('Target Customer Not Found')
+
+        buyer.point_transactions.filter(user_subscription=user_subscription).delete()
+        buyer.wallets.filter(user_subscription=user_subscription) .delete()
+
+        user_subscription.customers.remove(buyer)
+
+       
+        return Response('ok', status=status.HTTP_200_OK)
 # --------------------------------- dealer ---------------------------------
 
     @action(detail=False, methods=['GET'], url_path=r'dashboard/cards', permission_classes=(IsAuthenticated,))
