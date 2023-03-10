@@ -237,8 +237,8 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
         
         getattr(user_subscription, models.user.user_subscription.PLATFORM_ATTR[platform_name]['attr']).remove(platform_instance)
         
-        if not platform_instance.user_subscriptions.all().exists():
-            platform_instance.delete()
+        # if not platform_instance.user_subscriptions.all().exists():
+        #     platform_instance.delete()
 
         queryset = getattr(user_subscription, models.user.user_subscription.PLATFORM_ATTR[platform_name]['attr']).all()
         serializer = models.user.user_subscription.PLATFORM_ATTR[platform_name]['serializer']
