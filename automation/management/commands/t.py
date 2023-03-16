@@ -35,7 +35,7 @@ class Command(BaseCommand):
        
         # self.test_cart_expired_adjustment()
         # self.create_kol_account()
-        self.create_customer_for_seller(user_subscription_id=617, email='agneslimcl@gmail.com',user_name='Chen Xiaoni', points=3514)
+        self.create_customer_for_seller(user_subscription_id=617, email='eunicealpha39@yahoo.com.sg',user_name='Eunice Sim', points=800)
         # try:
         #     raise Exception()
         # except Exception:
@@ -43,8 +43,8 @@ class Command(BaseCommand):
         #     import traceback
         #     print(traceback.format_exc())
         #     lib.util.google_cloud_logging.ApiLogEntry.write_entry(traceback.format_exc())
-
-        pass
+        # self.send_confirm_email(35480)
+        # self.get_customer(617)
     
     def __create_new_register_account(self, plan, country_plan, subscription_plan, timezone, period, firstName, lastName, email, password, country, country_code,  contactNumber,  amount, paymentIntent=None, subscription_meta:dict={}):
         now = datetime.now(pytz.timezone(timezone)) if timezone in pytz.common_timezones else datetime.now()
@@ -1131,3 +1131,22 @@ class Command(BaseCommand):
 
             wallet.points+=points
             wallet.save()
+    
+    def send_confirm_email(self, order_id):
+        from automation import jobs
+        order = models.order.order.Order.objects.get(id=order_id)
+        order_oid = database.lss.order.get_oid_by_id(order.id)
+        jobs.send_email_job.send_email_job(
+            subject=lib.i18n.email.mail_subjects.order_confirm_mail_subject(order=order, lang=order.campaign.lang),
+            email=order.shipping_email,
+            template="email_order_confirm.html",
+            parameters={"order":order,"order_oid":order_oid},
+            lang=order.campaign.lang,
+        )
+
+    def get_customer(self, user_subscription_id):
+
+        import database
+        from pprint import pprint
+        l = database.lss.user_subscription.get_customer_with_wallet(user_subscription_id)
+        pprint(l)

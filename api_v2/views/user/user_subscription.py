@@ -576,6 +576,26 @@ class UserSubscriptionViewSet(viewsets.ModelViewSet):
 
         return Response("OK", status=status.HTTP_200_OK)
     
+
+    @action(detail=False, methods=['GET'], url_path=r'points/report/json', permission_classes=(IsAuthenticated, ))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def get_points_report(self, request, pk=None):
+
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+
+        iterable_objects = database.lss.user_subscription.get_customer_with_wallet(user_subscription.id)
+  
+        points_export_processor_class:factory.points_export.default.DefaultPointsExportProcessor =\
+             factory.points_export.get_points_export_processor_class(user_subscription)
+        points_export_processor = points_export_processor_class(iterable_objects, user_subscription)
+        
+        data = points_export_processor.export_data()
+        return Response(data, status=status.HTTP_200_OK)
+    
+
+
+
     @action(detail=False, methods=['POST'], url_path=r'buyer/(?P<buyer_id>[^/.]+)/points/transaction/create', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def buyer_point_transaction_create(self, request, buyer_id):

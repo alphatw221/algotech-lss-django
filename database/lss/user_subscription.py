@@ -230,3 +230,28 @@ def get_average_comment_count(user_subscription_id):
     l = list(cursor)
     return l[0].get('average_comment_count',0) if l else 0
 
+
+
+def get_customer_with_wallet(user_subscription_id):
+
+    cursor=db.api_user_wallet.aggregate([
+        
+        {"$match":{"user_subscription_id":user_subscription_id}},
+        {
+            "$lookup": {
+                "from": "api_user",
+                "localField": "buyer_id",
+                "foreignField": "id",
+                "as": "customer",
+                 "pipeline":[
+                                {"$project":{"_id":0,"id":1,"email":1, "name":1}},
+                            ]
+
+            },
+        },
+        {"$unwind": '$customer'},
+        {"$project":{"_id":0, "id":1, "points":1, "email":"$customer.email",  "name":"$customer.name",}},
+        # {"$limit":5},
+    ])
+    # l = list(cursor)
+    return cursor

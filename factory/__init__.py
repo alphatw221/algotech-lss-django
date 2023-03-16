@@ -1,1 +1,1 @@
-from . import order_export, point_discount, product_import, campaign_product_import, discount_code_import, customer_import
+from . import order_export, point_discount, product_import, campaign_product_import, discount_code_import, customer_import, points_export
