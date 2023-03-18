@@ -236,7 +236,7 @@ class CartViewSet(viewsets.ModelViewSet):
             
         ret = rule.rule_checker.cart_rule_checker.RuleChecker.check(
             check_list=[
-                # rule.rule_checker.cart_rule_checker.CartCheckRule.allow_checkout,
+                rule.rule_checker.cart_rule_checker.CartCheckRule.allow_checkout,
                 rule.rule_checker.cart_rule_checker.CartCheckRule.is_cart_lock,
                 rule.rule_checker.cart_rule_checker.CartCheckRule.is_cart_empty,
                 rule.rule_checker.cart_rule_checker.CartCheckRule.wallet_enough_points,
