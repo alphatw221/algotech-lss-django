@@ -231,8 +231,12 @@ def __get_link(user_subscription_data, pymongo_cart, plugins=None):
 
         return settings.SHOPPING_CART_URL + '/' + str(pymongo_cart._id)
     elif user_subscription_data.get('require_customer_login'):
+        if user_subscription_data.get('domain'):
+            return 'https://' + user_subscription_data.get('domain') + '/buyer/login/cart/' + str(pymongo_cart._id)
         return settings.SHOPPING_CART_LOGIN_URL + '/' + str(pymongo_cart._id)
     else:
+        if user_subscription_data.get('domain'):
+            return 'https://' + user_subscription_data.get('domain') + '/buyer/cart/' + str(pymongo_cart._id)
         return settings.SHOPPING_CART_URL + '/' + str(pymongo_cart._id)
 
     # {

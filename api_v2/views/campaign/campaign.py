@@ -642,16 +642,20 @@ class CampaignViewSet(viewsets.ModelViewSet):
         if type=='tiktok':
             destination = f"{settings.GCP_API_LOADBALANCER_URL}/buyer/search/{campaign.id}/cart/tiktok"
         elif user_subscription.require_customer_login:
-            destination = f"{settings.GCP_API_LOADBALANCER_URL}/buyer/login/create/{campaign.id}"
+            if user_subscription.domain:
+                destination =  f"https://{user_subscription.domain}/buyer/login/create/{campaign.id}"
+            else:
+                destination = f"{settings.GCP_API_LOADBALANCER_URL}/buyer/login/create/{campaign.id}"
         else:
-            destination = f"{settings.SHOPPING_CART_RECAPTCHA_URL}/blank/{campaign.id}"
+            if user_subscription.domain:
+                destination =  f"https://{user_subscription.domain}/blank/{campaign.id}"
+            else:
+                destination = f"{settings.SHOPPING_CART_RECAPTCHA_URL}/blank/{campaign.id}"
         
         success, data = service.rebrandly.rebrandly.create_link(destination)   
         if not success:
             raise lib.error_handle.error.api_error.ApiCallerError('error')
-        print(success)
-        print(data)
-        
+
         res = {'link': f"https://{data.get('shortUrl')}" }
 
         return Response(res, status=status.HTTP_200_OK)

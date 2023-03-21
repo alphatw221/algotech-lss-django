@@ -70,6 +70,8 @@ class UserSubscription(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    domain = models.CharField(max_length=255, blank=True, null=True, default=None)
+
     meta = models.JSONField(null=True, blank=True, default=dict)
     meta_payment = models.JSONField(null=True, blank=True, default=dict)
     meta_logistic = models.JSONField(null=True, blank=True, default=dict)
