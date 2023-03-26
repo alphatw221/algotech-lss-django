@@ -338,9 +338,11 @@ class CartViewSet(viewsets.ModelViewSet):
 
         rule.rule_checker.cart_rule_checker.RuleChecker.check(check_list=[
             rule.check_rule.cart_check_rule.CartCheckRule.campaign_product_type,
+            rule.check_rule.cart_check_rule.CartCheckRule.allow_checkout,
         ],**{
             'api_user':api_user,
             'campaign_product':campaign_product,
+            'campaign':campaign
         })
 
         lib.helper.cart_helper.CartHelper.update_cart_product(api_user, cart, campaign_product, qty)
