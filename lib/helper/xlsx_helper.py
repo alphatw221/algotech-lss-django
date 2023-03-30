@@ -9,13 +9,17 @@ import pandas
 
 class FieldMapper():
 
-    def __init__(self, field_name='', title='', i18n_key=None, width=None, i18n_text=None, first_only=False, **kwargs):
+    def __init__(self, field_name='', title='', i18n_key=None, width=None, i18n_text=None, first_only=False, title_key=None, data_key=None, **kwargs):
         self.field_name = field_name
         self.title = title
         self._width = width
         self.i18n_key = i18n_key
         self.i18n_text = i18n_text
         self.first_only = first_only
+
+        self.title_key = title_key
+        self.data_key = data_key
+
         self.kwargs = kwargs
         
     def get_field_data(self,object):
@@ -33,8 +37,9 @@ class JSXlsxProcessor():
 
     
 
-    def __init__(self, field_mappers:list=[], iterable_objects=[], reference_key = 'id',lang='en') -> None:
+    def __init__(self, field_mappers:list=[], iterable_objects=[], reference_key = 'id',lang='en', additional_field_mappers:list=[]) -> None:
         self.field_mappers = field_mappers
+        self.additional_field_mappers = additional_field_mappers
         self.iterable_objects = iterable_objects
         self.lang = lang
 
@@ -56,6 +61,14 @@ class JSXlsxProcessor():
         for object in  self.iterable_objects:
 
             same_object = reference==object.get(self.reference_key) if reference else False
+            if reference and not same_object:
+
+                for field_mapper in self.additional_field_mappers:
+                    row = {}
+                    row[field_mapper.title_key] = field_mapper.title
+                    row[field_mapper.data_key] = field_mapper.get_field_data(object)
+                    self.data.append(row)
+
             reference = object.get(self.reference_key)
 
             row = {}

@@ -248,7 +248,7 @@ def __get_link(user_subscription_data, pymongo_cart, plugins=None):
 #test if auto deploy works
 
 
-def __send_facebook_message(token, comment_id, message, attempts=3):
+def __send_facebook_message(token, comment_id, message, attempts=5):
     try:
         code, ret = service.facebook.post.post_page_message_on_comment(token, comment_id, message)
         if code!=200:
@@ -262,7 +262,7 @@ def __send_facebook_message(token, comment_id, message, attempts=3):
         if(attempts>0):
             __send_facebook_message(token, comment_id, message, attempts=attempts-1)
     
-def __send_facebook_message_with_button(token, comment_id, message, facebook_buttons, attempts=3):
+def __send_facebook_message_with_button(token, comment_id, message, facebook_buttons, attempts=5):
     try:
 
         code, ret = service.facebook.message.send_private_message_with_buttons(token, comment_id, message, facebook_buttons)

@@ -107,11 +107,13 @@ class DefaultOrderExportProcessor:
         OrderProductsSubtotalMapper('order_product_subtotal', 'order_product_subtotal', width=20)
     ]
 
+    additional_field_mappers=[]
+
     def __init__(self, iterable_objects, user_subscription) -> None:
         self.iterable_objects = iterable_objects
         self.user_subscription = user_subscription
         
     def export_order_data(self):
 
-        js_xlsx_processor = lib.helper.xlsx_helper.JSXlsxProcessor(field_mappers=self.field_mappers, iterable_objects=self.iterable_objects, lang = self.user_subscription.lang)
+        js_xlsx_processor = lib.helper.xlsx_helper.JSXlsxProcessor(field_mappers=self.field_mappers, iterable_objects=self.iterable_objects, lang = self.user_subscription.lang, additional_field_mappers=self.additional_field_mappers)
         return js_xlsx_processor.generate_json()

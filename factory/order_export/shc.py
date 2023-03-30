@@ -95,6 +95,11 @@ class ShippingCostMapper(FieldMapper):
         else:
             return super().get_field_data(object)
 
+
+class PromoCodeMapper(FieldMapper):
+    def get_field_data(self, object):
+        return object.get('applied_discount',{}).get('code','')
+        
 class PlatformInstanceMapper(FieldMapper):
 
     def __init__(self, field_name='', title='', i18n_key=None, width=None, i18n_text=None, first_only=False, **kwargs):
@@ -178,3 +183,10 @@ class SHCOrderExportProcessor(DefaultOrderExportProcessor):
 
 
         ]
+
+    additional_field_mappers=[
+        FieldMapper(field_name='points_used', title='Points Applied',  title_key='shipping_date_time',data_key='shipping_time_slot'),
+        PromoCodeMapper(title='Promo Code ', title_key='shipping_date_time',data_key='shipping_time_slot'),
+        ShippingCostMapper(field_name='shipping_cost', title='Shipping ', title_key='shipping_date_time',data_key='shipping_time_slot'),
+
+    ]
