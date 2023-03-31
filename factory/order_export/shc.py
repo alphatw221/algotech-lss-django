@@ -185,8 +185,8 @@ class SHCOrderExportProcessor(DefaultOrderExportProcessor):
         ]
 
     additional_field_mappers=[
-        FieldMapper(field_name='points_used', title='Points Applied',  title_key='shipping_date_time',data_key='shipping_time_slot'),
-        PromoCodeMapper(title='Promo Code ', title_key='shipping_date_time',data_key='shipping_time_slot'),
-        ShippingCostMapper(field_name='shipping_cost', title='Shipping ', title_key='shipping_date_time',data_key='shipping_time_slot'),
+        # FieldMapper(field_name='points_used', title='Points Applied',  title_key='shipping_date_time',data_key='shipping_time_slot'),
+        # PromoCodeMapper(title='Promo Code ', title_key='shipping_date_time',data_key='shipping_time_slot'),
+        # ShippingCostMapper(field_name='shipping_cost', title='Shipping ', title_key='shipping_date_time',data_key='shipping_time_slot'),
 
     ]
