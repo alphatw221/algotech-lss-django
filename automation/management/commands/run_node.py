@@ -126,6 +126,10 @@ class Command(BaseCommand):
 
         self.__heart_beating()
 
+        lib.util.google_cloud_monitoring.CampaignQueueLengthMetric.write_time_series(len(service.rq.queue.campaign_queue.jobs))
+        lib.util.google_cloud_monitoring.CommentQueueLengthMetric.write_time_series(len(service.rq.queue.comment_queue.jobs))
+
+
         rows=[]
         for campaign in models.campaign.campaign.Campaign.objects.filter(user_subscription__isnull=False, start_at__lt=datetime.utcnow(),end_at__gt=datetime.utcnow(), priority__gte=3):
             self.__capture_campaign(campaign, rows)
