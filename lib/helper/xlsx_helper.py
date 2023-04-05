@@ -32,6 +32,27 @@ class FieldMapper():
         return len(self.title)+2
 
 
+class AdditionalFieldMapper():
+
+    def __init__(self, title='', title_field_name='', title_key=None, indicator_key='', data_field_name='', data_key=None, **kwargs):
+        self.title = title
+        self.title_field_name = title_field_name
+        self.title_key = title_key
+        self.indicator_key = indicator_key
+        self.data_field_name = data_field_name
+        self.data_key = data_key
+
+        self.kwargs = kwargs
+    
+    def get_title(self, object):
+
+        if self.title_field_name:
+            return self.title + f'({object.get(self.title_field_name)})'
+        return self.title
+    
+    def get_field_data(self,object):
+        return int(bool(object.get(self.data_field_name))), object.get(self.data_field_name)
+
 
 class JSXlsxProcessor():
 
@@ -63,10 +84,15 @@ class JSXlsxProcessor():
             same_object = reference==object.get(self.reference_key) if reference else False
             if reference and not same_object:
 
-                for field_mapper in self.additional_field_mappers:
+                for additional_field_mapper in self.additional_field_mappers:
                     row = {}
-                    row[field_mapper.title_key] = field_mapper.title
-                    row[field_mapper.data_key] = field_mapper.get_field_data(object)
+
+                    row[additional_field_mapper.title_key] = additional_field_mapper.get_title(object)
+                    indicator, field_data = additional_field_mapper.get_field_data(object)
+
+                    if additional_field_mapper.indicator_key:
+                        row[additional_field_mapper.indicator_key] = indicator
+                    row[additional_field_mapper.data_key] = field_data
                     self.data.append(row)
 
             reference = object.get(self.reference_key)

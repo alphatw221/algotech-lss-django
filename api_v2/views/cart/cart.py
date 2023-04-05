@@ -324,6 +324,88 @@ class CartViewSet(viewsets.ModelViewSet):
 
         return Response(data, status=status.HTTP_200_OK)
 
+
+    @action(detail=True, methods=['PUT'], url_path=r'seller/checkout', permission_classes=[IsAuthenticated])
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    @lib.error_handle.error_handler.cart_operation_error_handler.update_cart_product_error_handler
+    def seller_checkout_cart(self, request, pk):
+        shipping_data,  = lib.util.getter.getdata(request, ("shipping_data", ), required=True)
+
+
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
+        cart = lib.util.verify.Verify.get_cart_from_user_subscription(user_subscription, pk)
+        campaign = lib.util.verify.Verify.get_campaign_from_cart(cart)
+
+        ret = rule.rule_checker.cart_rule_checker.RuleChecker.check(
+            check_list=[
+                rule.rule_checker.cart_rule_checker.CartCheckRule.allow_checkout,
+                rule.rule_checker.cart_rule_checker.CartCheckRule.is_cart_lock,
+                rule.rule_checker.cart_rule_checker.CartCheckRule.is_cart_empty,
+            ],
+            **{'api_user':api_user, 'campaign':campaign, 'cart':cart, 
+               'user_subscription':user_subscription}
+        )
+
+        serializer =models.order.order.OrderSerializerUpdateShipping(data=shipping_data) 
+        shipping_data['shipping_date'] = shipping_data.get('shipping_date') if shipping_data.get('shipping_date') else None
+        if not serializer.is_valid():
+            print(serializer.errors)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        shipping_data = serializer.to_internal_value(serializer.data)
+        shipping_data['shipping_date_time'] = datetime.combine(shipping_data.pop('shipping_date'), datetime.min.time()) if shipping_data.get('shipping_date') else None   #pymongo does not support datetime.date
+
+        success, pymongo_order = lib.helper.cart_helper.CartHelper.checkout_v2(api_user, campaign, cart.id, point_discount_processor = None, shipping_data=shipping_data )
+        
+        if not success:
+            cart = lib.util.verify.Verify.get_cart(cart.id)
+            return Response(CartSerializerWithSellerInfo(cart).data, status=status.HTTP_200_OK)
+        
+        # cart.delete()
+        order = lib.util.verify.Verify.get_order(pymongo_order.id)
+        order_oid = str(pymongo_order._id)
+        
+        data = models.order.order.OrderWithCampaignSerializer(order).data
+        data['oid']=order_oid
+        
+        #discount used
+        if type(order.applied_discount.get('id'))==int and models.discount_code.discount_code.DiscountCode.objects.filter(id=order.applied_discount.get('id')).exists():
+            discount_code = models.discount_code.discount_code.DiscountCode.objects.get(id=order.applied_discount.get('id'))
+            discount_code.used_count+=1
+            discount_code.save()
+         
+        if order.total<=0:
+            from api_v2.views.payment.payment import update_wallet #temp
+            #payment status update
+            order.payment_status = models.order.order.PAYMENT_STATUS_PAID
+            #delivery status update
+            delivery_params = {"order_oid": order_oid, "order": order, "extra_data": {}, "create_order": True, "update_status": True}
+            lib.helper.delivery_helper.DeliveryHelper.create_delivery_order_and_update_delivery_status(**delivery_params)
+                    
+            #wallet
+            update_wallet(order) #//temp
+
+            for campaign_product_id_str, qty in order.products.items():
+                pymongo_campaign_product = database.lss.campaign_product.CampaignProduct(id=int(campaign_product_id_str))
+                pymongo_campaign_product.sold(qty, sync=True)
+                lib.helper.cart_helper.CartHelper.send_campaign_product_websocket_data(pymongo_campaign_product.data)
+
+            #send email
+            jobs.send_email_job.send_email_job(
+                subject=lib.i18n.email.mail_subjects.order_confirm_mail_subject(order=order, lang=order.campaign.lang),
+                email=order.shipping_email,
+                template="email_order_confirm.html",
+                parameters={"order":order,"order_oid":order_oid},
+                lang=order.campaign.lang,
+            )
+
+            #order status update
+            lib.helper.order_helper.OrderStatusHelper.update_order_status(order, save=True)
+
+
+        return Response(data, status=status.HTTP_200_OK)
+    
+
     @action(detail=False, methods=['PUT'], url_path=r'(?P<cart_oid>[^/.]+)/buyer/product/edit', permission_classes=())
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     @lib.error_handle.error_handler.cart_operation_error_handler.update_cart_product_error_handler
@@ -524,8 +606,8 @@ class CartViewSet(viewsets.ModelViewSet):
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = lib.util.verify.Verify.get_user_subscription_from_api_user(api_user)
         cart = lib.util.verify.Verify.get_cart_from_user_subscription(user_subscription, pk)
-
-        return Response(models.cart.cart.CartSerializer(cart).data, status=status.HTTP_200_OK)
+        res = CartSerializerWithSellerInfo(cart).data
+        return Response(res, status=status.HTTP_200_OK)
     
     @action(detail=True, methods=['GET'], url_path=r'seller/retrieve/oid', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler

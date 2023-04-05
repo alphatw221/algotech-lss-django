@@ -339,7 +339,7 @@ class CartHelper():
         return subtotal, shipping_cost, order_meta
     
     @classmethod
-    def checkout_v2(cls, api_user, campaign, cart_id, point_discount_processor, shipping_data={}, attempts=3):
+    def checkout_v2(cls, api_user, campaign, cart_id, point_discount_processor=None, shipping_data={}, attempts=3):
         try:
             with database.lss.util.start_session() as session:
                 with session.start_transaction():
@@ -347,8 +347,8 @@ class CartHelper():
 
                     pymongo_cart = database.lss.cart.Cart.get_object(id=cart_id,session=session)
                     campaign_product_data_dict = {}
-                    for campaign_product_id_str, qty in pymongo_cart.data.get('products',{}).copy().items():
-                        product_ids = [int(_id) for _id in pymongo_cart.data.get('products',{}).keys()]
+                    # for campaign_product_id_str, qty in pymongo_cart.data.get('products',{}).copy().items():
+                    product_ids = [int(_id) for _id in pymongo_cart.data.get('products',{}).keys()]
                     campaign_products_data = database.lss.campaign_product.CampaignProduct.filter(**{'id':{'$in':product_ids}}, session=session)
                     for campaign_product_data in campaign_products_data:
                         campaign_product_data_dict[str(campaign_product_data.get('id'))] = campaign_product_data
@@ -366,6 +366,7 @@ class CartHelper():
                     
 
                     #summarize_total
+                    total = 0
                     total += subtotal
                     total -= pymongo_cart.data.get('discount',0)
                     total -= point_discount
@@ -378,29 +379,78 @@ class CartHelper():
                     points_earned = point_discount_processor.compute_points_earned(subtotal_after_discount) if point_discount_processor else 0
 
 
-                    pymongo_cart.data['buyer_id']=api_user.id if api_user else None
-                    if api_user:
+                    pymongo_cart.data['buyer_id'] = None
+                    pymongo_cart.data['meta'].update(order_meta)
+                    if api_user and api_user.type=='customer':
                         pymongo_cart.data['customer_name']=api_user.name 
+                        pymongo_cart.data['buyer_id']=api_user.id
+                    
+                    
+                    is_new_customer = cls.__is_new_customer(campaign, api_user)
 
-                    pymongo_order = database.lss.order.Order.create_object(
-                        session=session,
-                        price_unit = campaign.price_unit,
-                        decimal_places = campaign.decimal_places,
-                        currency = campaign.currency,
-                        subtotal = subtotal,
-                        shipping_cost = shipping_cost,
-                        total = total,
-                        meta = order_meta,
-                        points_used = point_discount_processor.points_used if point_discount_processor else 0,
-                        point_discount = point_discount,
-                        points_earned = points_earned,
-                        meta_point = campaign.meta_point,
-                        shipping_option_data = shipping_option_data,
-                        remark = 'new customer' if is_new_customer else '',
+
+                    {
+                        'user_subscription_id': 617, 
+                        'campaign_id': 1771, 
+                        'customer_id': '1508909916131805', 
+                        'customer_name': 'Yi-Hsueh Lin', 
+                        'customer_nickname': '', 
+                        'customer_img': None, 
+                        'platform': None, 
+                        'platform_id': None, 
+                        'products': {'22308': 1}, 
+                        
+                        'adjust_title': None, 
+                        'adjust_price': 0.0, 
+                        'free_delivery': False, 
+                        'buyer_id': None, 
+                        'discount': 0.0, 
+                        'applied_discount': {}, 
+                        'tax': 0.0, 
+                        'meta':{}
+                        
+                    }
+
+                 
+                    order_data = {
                         **campaign.user_subscription.meta.get('order_default_fields',{}),
-                        **pymongo_cart.data, 
                         **shipping_data,
-                        )
+                    }
+                    order_data.update({
+                        'user_subscription_id': pymongo_cart.data.get('user_subscription_id'), 
+                        'campaign_id': pymongo_cart.data.get('campaign_id'), 
+                        'customer_id': pymongo_cart.data.get('customer_id'), 
+                        'customer_name': pymongo_cart.data.get('customer_name'), 
+                        'customer_nickname': pymongo_cart.data.get('customer_nickname'), 
+                        'customer_img':pymongo_cart.data.get('customer_img'), 
+                        'platform': pymongo_cart.data.get('platform'), 
+                        'platform_id': pymongo_cart.data.get('platform_id'), 
+                        'products': pymongo_cart.data.get('products'), 
+                        'adjust_title': pymongo_cart.data.get('adjust_title'), 
+                        'adjust_price': pymongo_cart.data.get('adjust_price'), 
+                        'free_delivery': pymongo_cart.data.get('free_delivery'), 
+                        'buyer_id': pymongo_cart.data.get('buyer_id'), 
+                        'discount': pymongo_cart.data.get('discount'), 
+                        'applied_discount': pymongo_cart.data.get('applied_discount'), 
+                        'tax': pymongo_cart.data.get('tax'), 
+                        'meta': pymongo_cart.data.get('meta').update(order_meta), 
+
+                        'price_unit' : campaign.price_unit,
+                        'decimal_places' : campaign.decimal_places,
+                        'currency' : campaign.currency,
+                        'subtotal' : subtotal,
+                        'shipping_cost' : shipping_cost,
+                        'total' : total,
+                        'points_used' : point_discount_processor.points_used if point_discount_processor else 0,
+                        'point_discount' : point_discount,
+                        'points_earned' : points_earned,
+                        'meta_point' : campaign.meta_point,
+                        'shipping_option_data' : shipping_option_data,
+                        'remark' : 'new customer' if is_new_customer else '',
+
+                    })
+
+                    pymongo_order = database.lss.order.Order.create_object(session=session,**order_data)
                     
 
                     for campaign_product_id_str, qty in pymongo_order.data.get('products',{}).copy().items():
@@ -425,29 +475,27 @@ class CartHelper():
 
                     pymongo_cart.clear(session=session, sync=True)        
 
-                    if point_discount_processor:
-                        point_discount_processor.create_point_transaction(order_id = pymongo_order.id)
-                        point_discount_processor.update_wallet()
+            #transaction end
 
+            if point_discount_processor:
+                point_discount_processor.create_point_transaction(order_id = pymongo_order.id)
+                point_discount_processor.update_wallet()
 
-                    is_new_customer = cls.__is_new_customer(campaign, api_user)
+            #add new customer      
+            if is_new_customer:
+                campaign.user_subscription.customers.add(api_user)
 
+            #push data to frontend
+            for campaign_product_id_str, qty in pymongo_order.data.get('products',{}).copy().items():
+                campaign_product_data = campaign_product_data_dict[campaign_product_id_str]
+                cls.send_campaign_product_websocket_data(campaign_product_data)
+            cls.send_cart_websocket_data(pymongo_cart)
 
-                    #add new customer
-                    if is_new_customer:
-                        campaign.user_subscription.customers.add(api_user)
-
-                    #push data to frontend
-                    for campaign_product_id_str, qty in pymongo_order.data.get('products',{}).copy().items():
-                        campaign_product_data = campaign_product_data_dict[campaign_product_id_str]
-                        cls.send_campaign_product_websocket_data(campaign_product_data)
-                    cls.send_cart_websocket_data(pymongo_cart)
-
-                    return True, pymongo_order
+            return True, pymongo_order
                 
         except Exception:
             if attempts > 0:
-                cls.checkout_v2(cls, api_user, campaign, cart_id, point_discount_processor, shipping_data={}, attempts=attempts-1)
+                cls.checkout_v2(api_user, campaign, cart_id, point_discount_processor, shipping_data, attempts=attempts-1)
             else:
                 print(traceback.format_exc())
                 raise cart_error.CartErrors.ServerBusy('server_busy')
@@ -554,6 +602,8 @@ class CartHelper():
 
     @staticmethod
     def __is_new_customer(campaign, api_user):
+        if not api_user or api_user.type!='customer':
+            return False
         return True if api_user and not campaign.user_subscription.customers.filter(id=api_user.id).exists() else False
 
     @classmethod

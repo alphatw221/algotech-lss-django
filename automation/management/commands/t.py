@@ -35,7 +35,7 @@ class Command(BaseCommand):
        
         # self.test_cart_expired_adjustment()
         # self.create_kol_account()
-        self.create_customer_for_seller(user_subscription_id=617, email='eunicealpha39@yahoo.com.sg',user_name='Eunice Sim', points=800)
+        self.create_customer_for_seller(user_subscription_id=617, email='yamei9222@yahoo.com.sg',user_name='Ng Yah Moi', points=0)
         # try:
         #     raise Exception()
         # except Exception:

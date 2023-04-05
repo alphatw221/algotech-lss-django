@@ -4,7 +4,7 @@ from api import models
 
 
 
-from lib.helper.xlsx_helper import FieldMapper
+from lib.helper.xlsx_helper import FieldMapper, AdditionalFieldMapper
 
 from datetime import datetime
 
@@ -88,17 +88,9 @@ class TotalMapper(FieldMapper):
     def get_field_data(self, object):
         return int(super().get_field_data(object)) if object.get('decimal_places') == 0 else super().get_field_data(object)
 
-class ShippingCostMapper(FieldMapper):
-    def get_field_data(self, object):
-        if object.get('meta',{}).get('subtotal_over_free_delivery_threshold') or object.get('meta',{}).get('items_over_free_delivery_threshold'):
-            return 0
-        else:
-            return super().get_field_data(object)
 
 
-class PromoCodeMapper(FieldMapper):
-    def get_field_data(self, object):
-        return object.get('applied_discount',{}).get('code','')
+
         
 class PlatformInstanceMapper(FieldMapper):
 
@@ -126,6 +118,39 @@ class PlatformInstanceMapper(FieldMapper):
             self.cache[platform_name+str(platform_id)] = platform_instance
         
         return platform_instance.name
+    
+
+
+
+
+class ShippingCostMapper(AdditionalFieldMapper):
+    def get_field_data(self, object):
+        if object.get('meta',{}).get('subtotal_over_free_delivery_threshold') or object.get('meta',{}).get('items_over_free_delivery_threshold') or object.get('free_delivery'):
+            return int(False), 0
+        else:
+            return super().get_field_data(object)
+
+
+class PromoCodeMapper(AdditionalFieldMapper):
+
+    def get_title(self, object):
+        if object.get('applied_discount',{}).get('code',''):
+            return self.title+ f"({ object.get('applied_discount',{}).get('code','')   })"
+        return self.title
+    
+    def get_field_data(self, object):
+        return int(object.get('discount')!=0), object.get('discount')
+    
+class PointsMapper(AdditionalFieldMapper):
+
+    def get_title(self, object):
+        return self.title+ f"({ object.get('applied_discount',{}).get('code','')   })"
+    
+    def get_field_data(self, object):
+        return object.get('discount')!=0, object.get('discount')
+    
+
+
 class SHCOrderExportProcessor(DefaultOrderExportProcessor):
     field_mappers = [
             # FieldMapper('id','OrderNo', width=10, first_only=True),
@@ -175,8 +200,8 @@ class SHCOrderExportProcessor(DefaultOrderExportProcessor):
             OrderProductsNameMapper('order_product_name', 'Product Name', width=40),
             OrderProductsQtyMapper('order_product_qty', 'Qty', width=20),
             OrderProductsSubtotalMapper('order_product_subtotal', 'Total Price', width=20),
-            FieldMapper('subtotal', 'After Total Sum', width=20, first_only=True),
-            ShippingCostMapper('shipping_cost', 'Shipping ', width=20, first_only=True),
+            # FieldMapper('subtotal', 'After Total Sum', width=20, first_only=True),
+            # ShippingCostMapper('shipping_cost', 'Shipping ', width=20, first_only=True),
             FieldMapper('total', 'Total ', width=20, first_only=True),
             FieldMapper('payment_status', 'Payment Status', width=20, first_only=True),
             DateTimeMapper('paid_at', 'Payment Date', width=40, first_only=True),
@@ -185,8 +210,8 @@ class SHCOrderExportProcessor(DefaultOrderExportProcessor):
         ]
 
     additional_field_mappers=[
-        # FieldMapper(field_name='points_used', title='Points Applied',  title_key='shipping_date_time',data_key='shipping_time_slot'),
-        # PromoCodeMapper(title='Promo Code ', title_key='shipping_date_time',data_key='shipping_time_slot'),
-        # ShippingCostMapper(field_name='shipping_cost', title='Shipping ', title_key='shipping_date_time',data_key='shipping_time_slot'),
+        AdditionalFieldMapper(title='Points Applied', title_field_name='points_used', title_key='order_product_name', indicator_key='order_product_qty', data_field_name='point_discount', data_key='order_product_subtotal'),
+        PromoCodeMapper(title='Promo Code', title_field_name=None, title_key='order_product_name', indicator_key='order_product_qty', data_field_name=None, data_key='order_product_subtotal'),
+        ShippingCostMapper(title='Shipping', title_field_name=None, title_key='order_product_name', indicator_key='order_product_qty', data_field_name='shipping_cost', data_key='order_product_subtotal'),
 
     ]

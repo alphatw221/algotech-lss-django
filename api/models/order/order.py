@@ -158,6 +158,11 @@ class OrderSerializer(serializers.ModelSerializer):
     applied_discount = serializers.JSONField(default=dict)
     shipping_option_data = serializers.JSONField(default=dict)
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if instance.buyer:
+            data['buyer_name'] = instance.buyer.name
+        return data
 class OrderWithCampaignSerializer(OrderSerializer):
 
     campaign = CampaignSerializerRetreive()
