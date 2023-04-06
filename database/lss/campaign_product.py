@@ -60,6 +60,11 @@ class CampaignProduct(Collection):
             self._sync(session=session)
 
 
+    def back_to_cart(self, qty, sync=True, session=None):
+        self._collection.update_one({'id':self.id},{"$inc": {'qty_pending_payment': -qty, 'qty_add_to_cart': qty},"$set":{'updated_at':datetime.utcnow()}}, session=session)
+        if sync:
+            self._sync(session=session)
+
 
 # def remove_categories(product_category_id, session=None):
 #     __collection.update_many({f"categories.{str(product_category_id)}":{"$exists":True}},{"$unset":{f"categories.{str(product_category_id)}":1}}, session=session)

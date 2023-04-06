@@ -339,14 +339,14 @@ class CartHelper():
         return subtotal, shipping_cost, order_meta
     
     @classmethod
-    def checkout_v2(cls, api_user, campaign, cart_id, point_discount_processor=None, shipping_data={}, attempts=3):
+    def __checkout_transaction(cls, api_user, campaign, cart_id, point_discount_processor=None, shipping_data={}, campaign_product_data_dict = {}, is_new_customer=False, attempts=3):
+
         try:
             with database.lss.util.start_session() as session:
                 with session.start_transaction():
 
-
                     pymongo_cart = database.lss.cart.Cart.get_object(id=cart_id,session=session)
-                    campaign_product_data_dict = {}
+                    # campaign_product_data_dict = {}
                     # for campaign_product_id_str, qty in pymongo_cart.data.get('products',{}).copy().items():
                     product_ids = [int(_id) for _id in pymongo_cart.data.get('products',{}).keys()]
                     campaign_products_data = database.lss.campaign_product.CampaignProduct.filter(**{'id':{'$in':product_ids}}, session=session)
@@ -356,7 +356,7 @@ class CartHelper():
 
                     success = cls.check_stock_sufficient_v2(pymongo_cart, campaign_product_data_dict, session)
                     if not success:
-                        return False, None
+                        return False, None, None
 
                     shipping_option_data = cls.get_shipping_option_data_v2(campaign, shipping_data)
                     subtotal, shipping_cost, order_meta = cls.compute_shipping_cost_v2(pymongo_cart, campaign_product_data_dict, campaign, shipping_data, shipping_option_data)
@@ -384,9 +384,6 @@ class CartHelper():
                     if api_user and api_user.type=='customer':
                         pymongo_cart.data['customer_name']=api_user.name 
                         pymongo_cart.data['buyer_id']=api_user.id
-                    
-                    
-                    is_new_customer = cls.__is_new_customer(campaign, api_user)
 
 
                     {
@@ -473,32 +470,43 @@ class CartHelper():
                         campaign_product.checkout(qty=qty, sync=True, session=session)
                         campaign_product_data_dict[campaign_product_id_str] = campaign_product.data
 
-                    pymongo_cart.clear(session=session, sync=True)        
+                    pymongo_cart.clear(session=session, sync=True)    
 
-            #transaction end
-
-            if point_discount_processor:
-                point_discount_processor.create_point_transaction(order_id = pymongo_order.id)
-                point_discount_processor.update_wallet()
-
-            #add new customer      
-            if is_new_customer:
-                campaign.user_subscription.customers.add(api_user)
-
-            #push data to frontend
-            for campaign_product_id_str, qty in pymongo_order.data.get('products',{}).copy().items():
-                campaign_product_data = campaign_product_data_dict[campaign_product_id_str]
-                cls.send_campaign_product_websocket_data(campaign_product_data)
-            cls.send_cart_websocket_data(pymongo_cart)
-
-            return True, pymongo_order
+                    return True, pymongo_cart, pymongo_order
                 
         except Exception:
             if attempts > 0:
-                cls.checkout_v2(api_user, campaign, cart_id, point_discount_processor, shipping_data, attempts=attempts-1)
+                return cls.__checkout_transaction(api_user, campaign, cart_id, point_discount_processor, shipping_data, campaign_product_data_dict, is_new_customer, attempts=attempts-1)
             else:
                 print(traceback.format_exc())
                 raise cart_error.CartErrors.ServerBusy('server_busy')
+
+    @classmethod
+    def checkout_v2(cls, api_user, campaign, cart_id, point_discount_processor=None, shipping_data={}, attempts=3):
+
+        campaign_product_data_dict = {}
+        is_new_customer = cls.__is_new_customer(campaign, api_user)
+        success, pymongo_cart, pymongo_order  = cls.__checkout_transaction(api_user, campaign, cart_id, point_discount_processor, shipping_data, campaign_product_data_dict, is_new_customer)
+       
+        if not success:
+            return False, None
+
+        if point_discount_processor:
+            point_discount_processor.create_point_transaction(order_id = pymongo_order.id)
+            point_discount_processor.update_wallet()
+
+        #add new customer      
+        if is_new_customer:
+            campaign.user_subscription.customers.add(api_user)
+
+        #push data to frontend
+        for campaign_product_id_str, qty in pymongo_order.data.get('products',{}).copy().items():
+            campaign_product_data = campaign_product_data_dict[campaign_product_id_str]
+            cls.send_campaign_product_websocket_data(campaign_product_data)
+        cls.send_cart_websocket_data(pymongo_cart)
+
+        return True, pymongo_order
+                
 
 
 

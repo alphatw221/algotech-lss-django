@@ -299,6 +299,34 @@ class OrderHelper():
                 service.channels.campaign.send_product_data(campaign_product_data.get("campaign_id"), product_data)
         
         order.delete()
+
+
+    @classmethod
+    def back_to_cart(cls, order, cart):
+    
+        for campaign_product_id_str, qty in order.products.items():
+            pymongo_campaign_product = database.lss.campaign_product.CampaignProduct(id=int(campaign_product_id_str))
+            pymongo_campaign_product.back_to_cart(qty, sync=True)
+            campaign_product_data = pymongo_campaign_product.data
+            
+            if campaign_product_id_str in cart.products:
+                cart.products[campaign_product_id_str]+=qty
+            else:
+                cart.products[campaign_product_id_str]=qty
+        
+            product_data = {
+                "id": campaign_product_data.get('id'),
+                'qty_sold': campaign_product_data.get('qty_sold'),
+                'qty_pending_payment':campaign_product_data.get('qty_pending_payment'),
+                "qty_add_to_cart":campaign_product_data.get('qty_add_to_cart'),
+
+            }
+            service.channels.campaign.send_product_data(campaign_product_data.get("campaign_id"), product_data)
+
+        cart.save()
+        order.delete()
+
+
         
 def adjust_decimal_places(num,decimal_places):
   if decimal_places == 0:

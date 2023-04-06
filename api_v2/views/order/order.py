@@ -161,7 +161,25 @@ class OrderViewSet(viewsets.ModelViewSet):
         return Response(oid, status=status.HTTP_200_OK)
     
     
-    
+    @action(detail=False, methods=['PUT'], url_path=r'(?P<order_oid>[^/.]+)/buyer/to_cart', permission_classes=())
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def buyer_order_to_cart(self, request, order_oid):
+
+        order = lib.util.verify.Verify.get_order_with_oid(order_oid)
+
+        if order.status == models.order.order.STATUS_COMPLETE:
+            raise lib.error_handle.error.api_error.ApiVerifyError('invalid')
+
+        if not models.cart.cart.Cart.objects.filter(campaign=order.campaign, customer_id = order.customer_id, platform = order.platform).exists():
+            raise lib.error_handle.error.api_error.ApiVerifyError('invalid')
+
+        cart = models.cart.cart.Cart.objects.get(campaign=order.campaign, customer_id = order.customer_id, platform = order.platform)
+
+        lib.helper.order_helper.OrderHelper.back_to_cart(order, cart)
+
+        cart_oid = database.lss.cart.get_oid_by_id(cart.id)
+
+        return Response(cart_oid, status=status.HTTP_200_OK)
     
     # ------------------------------------seller----------------------------------------
     
@@ -200,6 +218,8 @@ class OrderViewSet(viewsets.ModelViewSet):
         lib.helper.order_helper.OrderHelper.return_campaign_product_and_delete_order(order)
 
         return Response('ok', status=status.HTTP_200_OK)
+
+
 
     def __search_order(self, user_subscription, request):
         
@@ -289,6 +309,30 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         return Response(data, status=status.HTTP_200_OK)
 
+    @action(detail=True, methods=['PUT'], url_path=r'seller/to_cart', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def seller_order_to_cart(self, request, pk=None):
+
+
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = api_user.user_subscription
+        order = lib.util.verify.Verify.get_order_from_user_subscription(user_subscription, pk)
+        
+        if order.status == models.order.order.STATUS_COMPLETE:
+            raise lib.error_handle.error.api_error.ApiVerifyError('invalid')
+
+        if not models.cart.cart.Cart.objects.filter(campaign=order.campaign, customer_id = order.customer_id, platform = order.platform).exists():
+            raise lib.error_handle.error.api_error.ApiVerifyError('invalid')
+
+        cart = models.cart.cart.Cart.objects.get(campaign=order.campaign, customer_id = order.customer_id, platform = order.platform)
+
+        lib.helper.order_helper.OrderHelper.back_to_cart(order, cart)
+
+        res = models.cart.cart.CartSerializerWithCampaign(cart).data
+
+        return Response(res, status=status.HTTP_200_OK)
+    
+
     @action(detail=True, methods=['PUT'], url_path=r'seller/delivery', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def seller_update_delivery_status(self, request, pk=None):
@@ -310,7 +354,42 @@ class OrderViewSet(viewsets.ModelViewSet):
         
         return Response(OrderSerializerWithOrderProductWithCampaign(order).data, status=status.HTTP_200_OK)
     
+    @action(detail=True, methods=['PUT'], url_path=r'seller/shipping_info', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def seller_update_shipping_info(self, request, pk=None):
+
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = api_user.user_subscription
+        order = lib.util.verify.Verify.get_order_from_user_subscription(user_subscription, pk)
+        
+        serializer = models.order.order.OrderSerializerUpdateShipping(order, request.data)
+        if not serializer.is_valid():
+            raise lib.error_handle.error.api_error.ApiVerifyError('invalid')
+
+        order = serializer.save()
+        res = OrderSerializerWithOrderProductWithCampaign(order).data
+        
+        return Response(res, status=status.HTTP_200_OK)
     
+    
+    @action(detail=True, methods=['PUT'], url_path=r'seller/buyer', permission_classes=(IsAuthenticated,))
+    @lib.error_handle.error_handler.api_error_handler.api_error_handler
+    def seller_update_buyer(self, request, pk=None):
+
+        buyer_id, = lib.util.getter.getdata(request, ('buyer_id',), required=True)
+        api_user = lib.util.verify.Verify.get_seller_user(request)
+        user_subscription = api_user.user_subscription
+        order = lib.util.verify.Verify.get_order_from_user_subscription(user_subscription, pk)
+        
+        if not user_subscription.customers.filter(id=buyer_id).exists():
+            raise lib.error_handle.error.api_error.ApiVerifyError('invalid')
+
+        order.buyer = user_subscription.customers.get(id=buyer_id)
+        order.save()
+
+        return Response(OrderSerializerWithOrderProductWithCampaign(order).data, status=status.HTTP_200_OK)
+    
+
     @action(detail=True, methods=['PUT'], url_path=r'seller/payment', permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def seller_update_payment_status(self, request, pk=None):
