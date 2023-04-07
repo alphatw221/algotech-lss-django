@@ -14,6 +14,10 @@ import database
 import service
 import plugins as lss_plugins
 import traceback
+
+from . import send_message_job
+
+
 @lib.error_handle.error_handler.comment_job_error_handler.comment_job_error_handler
 def comment_job(campaign_data, user_subscription_data, platform_name, platform_instance_data, comment, order_codes_mapping):
     logs=[]
@@ -248,20 +252,28 @@ def __get_link(user_subscription_data, pymongo_cart, plugins=None):
 #test if auto deploy works
 
 
-def __send_facebook_message(token, comment_id, message, attempts=5):
+def __send_facebook_message(token, comment_id, message, attempts=3):
     try:
         code, ret = service.facebook.post.post_page_message_on_comment(token, comment_id, message)
         if code!=200:
             # print("response", ret)
-            lib.util.google_cloud_logging.ApiLogEntry.write_entry(str(ret))
-
+            # lib.util.google_cloud_logging.ApiLogEntry.write_entry(str(ret))
+            raise
             __send_facebook_message(token, comment_id, message, attempts=attempts-1)
 
     except Exception:
-        lib.util.google_cloud_logging.ApiLogEntry.write_entry(traceback.format_exc())
+        # lib.util.google_cloud_logging.ApiLogEntry.write_entry(traceback.format_exc())
         if(attempts>0):
             __send_facebook_message(token, comment_id, message, attempts=attempts-1)
-    
+        else:
+            service.rq.queue.enqueue_comment_with_retry(
+                send_message_job.send_facebook_message,
+                max=3,
+                token=token,
+                comment_id=comment_id,
+                message=message,
+            )
+
 def __send_facebook_message_with_button(token, comment_id, message, facebook_buttons, attempts=5):
     try:
 

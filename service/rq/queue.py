@@ -1,5 +1,5 @@
 from ._rq import redis_connection,campaign_queue,comment_queue, email_queue, general_queue, test_queue
-from rq.job import Job
+from rq.job import Job, Retry
 
 
 def enqueue_unique_job_to_campaign_queue(job, **kwargs):
@@ -15,6 +15,9 @@ def enqueue_comment_queue(job,campaign_data, user_subscription_data,  platform_n
                                   uni_format_comment, order_codes_mapping), result_ttl=10, failure_ttl=10)
     pass
 
+def enqueue_comment_with_retry(job, max=1, **kwargs):
+    comment_queue.enqueue(job, kwargs=kwargs, retry=Retry(max=max), result_ttl=10, failure_ttl=10)
+    
 def enqueue_email_queue(job, subject, email, template, parameters, file, lang):
 
     email_queue.enqueue(

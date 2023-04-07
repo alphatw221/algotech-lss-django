@@ -413,6 +413,8 @@ class CartHelper():
                         **campaign.user_subscription.meta.get('order_default_fields',{}),
                         **shipping_data,
                     }
+                    meta = pymongo_cart.data.get('meta',{})
+                    meta.update(order_meta)
                     order_data.update({
                         'user_subscription_id': pymongo_cart.data.get('user_subscription_id'), 
                         'campaign_id': pymongo_cart.data.get('campaign_id'), 
@@ -430,7 +432,7 @@ class CartHelper():
                         'discount': pymongo_cart.data.get('discount'), 
                         'applied_discount': pymongo_cart.data.get('applied_discount'), 
                         'tax': pymongo_cart.data.get('tax'), 
-                        'meta': pymongo_cart.data.get('meta').update(order_meta), 
+                        'meta': meta, 
 
                         'price_unit' : campaign.price_unit,
                         'decimal_places' : campaign.decimal_places,
