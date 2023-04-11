@@ -377,14 +377,14 @@ class OrderViewSet(viewsets.ModelViewSet):
     def seller_update_buyer(self, request, pk=None):
 
         buyer_id, = lib.util.getter.getdata(request, ('buyer_id',), required=True)
-        print(pk)
-        print(buyer_id)
+        # print(pk)
+        # print(buyer_id)
 
 
         api_user = lib.util.verify.Verify.get_seller_user(request)
         user_subscription = api_user.user_subscription
         order = lib.util.verify.Verify.get_order_from_user_subscription(user_subscription, pk)
-        return Response(OrderSerializerWithOrderProductWithCampaign(order).data, status=status.HTTP_200_OK)
+        # return Response(OrderSerializerWithOrderProductWithCampaign(order).data, status=status.HTTP_200_OK)
 
         if not user_subscription.customers.filter(id=buyer_id).exists():
             raise lib.error_handle.error.api_error.ApiVerifyError('invalid')

@@ -146,9 +146,9 @@ class CampaignProductSerializerUpdate(CampaignProductSerializer):
             'order_code', 
             'oversell', 
             'overbook',
-            'category',
-            'categories',
-            'meta_variant',
+            # 'category',
+            # 'categories',
+            # 'meta_variant',
             'pinned',
 
             'price'

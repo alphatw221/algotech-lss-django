@@ -115,6 +115,7 @@ class CartViewSet(viewsets.ModelViewSet):
             cart = models.cart.cart.Cart.objects.create(
                 customer_id = customer_id,
                 customer_name = customer_name,
+                customer_img = customer_img,
                 campaign = campaign,
                 user_subscription = campaign.user_subscription,
                 platform = None,

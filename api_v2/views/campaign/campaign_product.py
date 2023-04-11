@@ -8,8 +8,10 @@ from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser
 
 from django.db.models import Q
+from django.conf import settings
 
 from api import models
+from api_v2 import rule
 
 import lib
 from datetime import datetime
@@ -273,7 +275,7 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
         return Response({"message": "delete success"}, status=status.HTTP_200_OK)
     
 
-    @action(detail=True, methods=['PUT'], url_path=r'seller/update', permission_classes=(IsAuthenticated,))
+    @action(detail=True, methods=['PUT'], url_path=r'seller/update',  parser_classes=[MultiPartParser], permission_classes=(IsAuthenticated,))
     @lib.error_handle.error_handler.api_error_handler.api_error_handler
     def update_campaign_product(self, request, pk=None):
 
@@ -283,12 +285,36 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
         original_campaign_product_qyt = campaign_product.qty_for_sale
         campaign = campaign_product.campaign
         
+        image, = lib.util.getter.getdata(request,('image', ), required=False)
+
+
+        
+        rule.rule_checker.product_rule_checker.RuleChecker.check(check_list=[
+            rule.check_rule.product_check_rule.ProductCheckRule.is_images_type_supported,
+            rule.check_rule.product_check_rule.ProductCheckRule.is_images_exceed_max_size
+        ], image=image)
+
+        serializer_kwargs = {}
+        if image in ['null', None, '', 'undefined']:
+            
+            pass
+        elif image =='._no_image':
+            image_url = settings.GOOGLE_STORAGE_STATIC_DIR+models.product.product.IMAGE_NULL
+            serializer_kwargs['image'] = image_url 
+        elif image:
+            image_name = image.name.replace(" ","")
+            image_dir = f'user_subscription/{user_subscription.id}/product/{product.id}'
+            image_url = lib.util.storage.upload_image(image_dir, image_name, image)
+            serializer_kwargs['image'] = image_url 
+
+
+
         lib.util.verify.Verify.get_campaign_from_user_subscription(user_subscription, campaign.id)
         serializer = models.campaign.campaign_product.CampaignProductSerializerUpdate(
             campaign_product, data=request.data, partial=True)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        campaign_product = serializer.save()
+        campaign_product = serializer.save(**serializer_kwargs)
         serializer = models.campaign.campaign_product.CampaignProductSerializer(campaign_product)
         
         #update stock product qty

@@ -374,7 +374,8 @@ class CartHelper():
                     total += shipping_cost
                     total += pymongo_cart.data.get('adjust_price',0)
                     total = max(total, 0)
-                    
+                    total += 0.0000001   #adjust error
+
                     #compute points earned
                     points_earned = point_discount_processor.compute_points_earned(subtotal_after_discount) if point_discount_processor else 0
 
