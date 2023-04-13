@@ -296,14 +296,14 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
 
         serializer_kwargs = {}
         if image in ['null', None, '', 'undefined']:
-            
+
             pass
         elif image =='._no_image':
             image_url = settings.GOOGLE_STORAGE_STATIC_DIR+models.product.product.IMAGE_NULL
             serializer_kwargs['image'] = image_url 
         elif image:
             image_name = image.name.replace(" ","")
-            image_dir = f'user_subscription/{user_subscription.id}/product/{product.id}'
+            image_dir = f'user_subscription/{user_subscription.id}/campaign_product/{campaign_product.id}'
             image_url = lib.util.storage.upload_image(image_dir, image_name, image)
             serializer_kwargs['image'] = image_url 
 

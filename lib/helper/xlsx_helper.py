@@ -102,6 +102,20 @@ class JSXlsxProcessor():
                 row[field_mapper.field_name] = '' if (same_object and field_mapper.first_only) else field_mapper.get_field_data(object)
             self.data.append(row)
 
+
+        if len(self.iterable_objects):
+            object = self.iterable_objects[-1]
+            for additional_field_mapper in self.additional_field_mappers:
+                row = {}
+
+                row[additional_field_mapper.title_key] = additional_field_mapper.get_title(object)
+                indicator, field_data = additional_field_mapper.get_field_data(object)
+
+                if additional_field_mapper.indicator_key:
+                    row[additional_field_mapper.indicator_key] = indicator
+                row[additional_field_mapper.data_key] = field_data
+                self.data.append(row)
+
     def generate_json(self):
         with translation.override(self.lang):
             self.__generate_header()
