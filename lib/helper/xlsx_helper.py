@@ -79,8 +79,9 @@ class JSXlsxProcessor():
 
     def __generate_data(self):
         reference = None
+        last_object = None
         for object in  self.iterable_objects:
-
+            last_object = object
             same_object = reference==object.get(self.reference_key) if reference else False
             if reference and not same_object:
 
@@ -103,13 +104,12 @@ class JSXlsxProcessor():
             self.data.append(row)
 
 
-        if len(self.iterable_objects):
-            object = self.iterable_objects[-1]
+        if last_object:
             for additional_field_mapper in self.additional_field_mappers:
                 row = {}
 
-                row[additional_field_mapper.title_key] = additional_field_mapper.get_title(object)
-                indicator, field_data = additional_field_mapper.get_field_data(object)
+                row[additional_field_mapper.title_key] = additional_field_mapper.get_title(last_object)
+                indicator, field_data = additional_field_mapper.get_field_data(last_object)
 
                 if additional_field_mapper.indicator_key:
                     row[additional_field_mapper.indicator_key] = indicator
