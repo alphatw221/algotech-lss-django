@@ -151,9 +151,9 @@ class CampaignProductViewSet(viewsets.ModelViewSet):
                             else:
                                 order_code_set.add(request_data.get('order_code'))
 
-                            if not request_data.get('assign_qty'):
-                                e['assign_qty']='invalid_qty'
-                                got_error = True
+                            # if not request_data.get('assign_qty'):
+                            #     e['assign_qty']='invalid_qty'
+                            #     got_error = True
 
                             # elif api_product.data.get('qty') < request_data.get('qty'):
                             #     e['qty']=f"only {api_product.data.get('qty')} left"
