@@ -291,7 +291,7 @@ class CartHelper():
         order_meta = {}
 
         if shipping_data.get('shipping_method') == models.order.order.SHIPPING_METHOD_PICKUP:
-            return subtotal, shipping_cost, order_meta
+            return round(subtotal+0.0000001,2), round(shipping_cost+0.0000001,2), order_meta
         
         #compute free_delivery
         is_subtotal_over_free_delivery_threshold = subtotal >= float(campaign.meta_logistic.get('free_delivery_for_order_above_price')) if campaign.meta_logistic.get('is_free_delivery_for_order_above_price') else False
@@ -300,10 +300,10 @@ class CartHelper():
         order_meta['items_over_free_delivery_threshold'] = True if is_items_over_free_delivery_threshold else False
 
         if is_subtotal_over_free_delivery_threshold or is_items_over_free_delivery_threshold:
-            return subtotal, shipping_cost, order_meta
+            return round(subtotal+0.0000001,2), round(shipping_cost+0.0000001,2), order_meta
 
         elif pymongo_cart.data.get('free_delivery'):
-            return subtotal, shipping_cost, order_meta
+            return round(subtotal+0.0000001,2), round(shipping_cost+0.0000001,2), order_meta
         
         for product_category_id_str, product_category_data in product_category_data_dict.items():
             if product_category_data.get('meta_logistic',{}).get('enable_flat_rate')==True:
@@ -322,7 +322,7 @@ class CartHelper():
             
         if category_logistic_applied:
             order_meta['category_logistic_applied'] = True
-            return subtotal, shipping_cost, order_meta
+            return round(subtotal+0.0000001,2), round(shipping_cost+0.0000001,2), order_meta
 
         #self delivery
         if campaign.meta_logistic.get('is_self_delivery_enabled'):
@@ -336,7 +336,7 @@ class CartHelper():
             elif shipping_option_data.get('type') == '=':
                 shipping_cost =  float(shipping_option_data.get('price',0))
                 
-        return subtotal, shipping_cost, order_meta
+        return round(subtotal+0.0000001,2), round(shipping_cost+0.0000001,2), order_meta
     
     @classmethod
     def __checkout_transaction(cls, api_user, campaign, cart_id, point_discount_processor=None, shipping_data={}, campaign_product_data_dict = {}, is_new_customer=False, attempts=3):
@@ -374,8 +374,8 @@ class CartHelper():
                     total += shipping_cost
                     total += pymongo_cart.data.get('adjust_price',0)
                     total = max(total, 0)
-                    total += 0.0000001   #adjust error
 
+                    total = round(total+0.0000001,2)
                     #compute points earned
                     points_earned = point_discount_processor.compute_points_earned(subtotal_after_discount) if point_discount_processor else 0
 
