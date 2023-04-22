@@ -15,7 +15,7 @@ import pottery
 from multiprocessing import Process
 import threading
 import time
-
+import uuid
 POSITION_FOLLOWER = 'follower'
 POSITION_LEADER = 'leader'
 
@@ -23,11 +23,14 @@ WAIT_HEART_BEAT_SECOND = 20
 class Command(BaseCommand):
 
     position = POSITION_FOLLOWER
+    node_name = ''
 
     def add_arguments(self, parser):
         pass
     
     def handle(self, *args, **options):
+
+        self.node_name = str(uuid.uuid4())
         while True:
             if self.position == POSITION_FOLLOWER:
                 self.follower_task()
@@ -77,7 +80,8 @@ class Command(BaseCommand):
             self.__run_election()
             return  'break'
 
-        if node_name == config.COMMENT_CAPTURE_NODE_NAME:
+        # if node_name == config.COMMENT_CAPTURE_NODE_NAME:
+        if node_name == self.node_name:
             self.position = POSITION_LEADER
             return 'break'
 
@@ -199,7 +203,8 @@ class Command(BaseCommand):
         if datetime.utcnow().timestamp() - float(last_heart_beat) >= WAIT_HEART_BEAT_SECOND:
             return False
 
-        if node_name == config.COMMENT_CAPTURE_NODE_NAME:
+        # if node_name == config.COMMENT_CAPTURE_NODE_NAME:
+        if node_name == self.node_name:
             return False
         
         return True
@@ -209,4 +214,5 @@ class Command(BaseCommand):
     def __heart_beating(self):
         if self.position != POSITION_LEADER:
             return
-        service.redis.redis.set('leader',f'{config.COMMENT_CAPTURE_NODE_NAME}-{datetime.utcnow().timestamp()}')
+        # service.redis.redis.set('leader',f'{config.COMMENT_CAPTURE_NODE_NAME}-{datetime.utcnow().timestamp()}')
+        service.redis.redis.set('leader',f'{self.node_name}-{datetime.utcnow().timestamp()}')
