@@ -130,6 +130,12 @@ class ShippingCostMapper(AdditionalFieldMapper):
         else:
             return super().get_field_data(object)
 
+class SellerAdjustMapper(AdditionalFieldMapper):
+    def get_field_data(self, object):
+        if object.get('adjust_price') == 0:
+            return int(False), 0
+        else:
+            return int(True), object.get('adjust_price')
 
 class PromoCodeMapper(AdditionalFieldMapper):
 
@@ -213,5 +219,5 @@ class SHCOrderExportProcessor(DefaultOrderExportProcessor):
         AdditionalFieldMapper(title='Points Applied', title_field_name='points_used', title_key='order_product_name', indicator_key='order_product_qty', data_field_name='point_discount', data_key='order_product_subtotal'),
         PromoCodeMapper(title='Promo Code', title_field_name=None, title_key='order_product_name', indicator_key='order_product_qty', data_field_name=None, data_key='order_product_subtotal'),
         ShippingCostMapper(title='Shipping', title_field_name=None, title_key='order_product_name', indicator_key='order_product_qty', data_field_name='shipping_cost', data_key='order_product_subtotal'),
-
+        SellerAdjustMapper(title='Seller Adjust', title_field_name=None, title_key='order_product_name', indicator_key='order_product_qty',data_field_name=None, data_key='order_product_subtotal')
     ]
