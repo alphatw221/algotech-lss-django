@@ -606,7 +606,7 @@ class CartHelper():
 
         except Exception:
             if attempts > 0:
-                cls.__transfer_cart_to_order(api_user, cart_id, shipping_data, attempts=attempts-1)
+                return cls.__transfer_cart_to_order(api_user, cart_id, shipping_data, attempts=attempts-1)
             else:
                 print(traceback.format_exc())
                 raise cart_error.CartErrors.ServerBusy('server_busy')
@@ -816,7 +816,7 @@ class CartHelper():
                     return cls.__check_stock_avaliable_and_add_to_cart(campaign_product_data, qty_difference, session)
         except Exception:
             if attempts > 0:
-                cls.__check_stock_avaliable_and_add_to_cart_by_api(campaign_product_data, qty_difference, attempts=attempts-1)
+                return cls.__check_stock_avaliable_and_add_to_cart_by_api(campaign_product_data, qty_difference, attempts=attempts-1)
             else:
                 raise cart_error.CartErrors.ServerBusy('server_busy')
 
