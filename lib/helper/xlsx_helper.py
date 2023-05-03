@@ -88,8 +88,11 @@ class JSXlsxProcessor():
                 for additional_field_mapper in self.additional_field_mappers:
                     row = {}
 
-                    row[additional_field_mapper.title_key] = additional_field_mapper.get_title(object)
-                    indicator, field_data = additional_field_mapper.get_field_data(object)
+                    for field_mapper in self.field_mappers:
+                        row[field_mapper.field_name] = '' if (field_mapper.first_only) else field_mapper.get_field_data(last_object)
+
+                    row[additional_field_mapper.title_key] = additional_field_mapper.get_title(last_object)
+                    indicator, field_data = additional_field_mapper.get_field_data(last_object)
 
                     if additional_field_mapper.indicator_key:
                         row[additional_field_mapper.indicator_key] = indicator
@@ -108,6 +111,9 @@ class JSXlsxProcessor():
             for additional_field_mapper in self.additional_field_mappers:
                 row = {}
 
+                for field_mapper in self.field_mappers:
+                        row[field_mapper.field_name] = '' if (field_mapper.first_only) else field_mapper.get_field_data(last_object)
+                        
                 row[additional_field_mapper.title_key] = additional_field_mapper.get_title(last_object)
                 indicator, field_data = additional_field_mapper.get_field_data(last_object)
 
