@@ -7,8 +7,8 @@ git pull https://alphatw221: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@github.com/
 
 # poetry install
 # sudo mkdir /run/daphne/
-# service supervisor stop
-# service supervisor start
-# supervisorctl reread
-# supervisorctl reload
+service supervisor stop
+service supervisor start
+supervisorctl reread
+supervisorctl reload
 service apache2 restart
