@@ -841,7 +841,7 @@ class CartHelper():
                     
         except Exception:
             if attempts > 0:
-                cls.__check_stock_avaliable_and_add_to_cart_by_comment(campaign_product_data, pymongo_cart, qty, attempts=attempts-1)
+                return cls.__check_stock_avaliable_and_add_to_cart_by_comment(campaign_product_data, pymongo_cart, qty, attempts=attempts-1)
             else:
                 raise cart_error.CartErrors.ServerBusy('server_busy')
 
