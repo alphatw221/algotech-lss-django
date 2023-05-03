@@ -81,10 +81,9 @@ class JSXlsxProcessor():
         reference = None
         last_object = None
         for object in  self.iterable_objects:
-            last_object = object
             same_object = reference==object.get(self.reference_key) if reference else False
+            
             if reference and not same_object:
-
                 for additional_field_mapper in self.additional_field_mappers:
                     row = {}
 
@@ -99,12 +98,13 @@ class JSXlsxProcessor():
                     row[additional_field_mapper.data_key] = field_data
                     self.data.append(row)
 
-            reference = object.get(self.reference_key)
-
             row = {}
             for field_mapper in self.field_mappers:
                 row[field_mapper.field_name] = '' if (same_object and field_mapper.first_only) else field_mapper.get_field_data(object)
             self.data.append(row)
+            
+            reference = object.get(self.reference_key)
+            last_object = object
 
 
         if last_object:
@@ -113,7 +113,7 @@ class JSXlsxProcessor():
 
                 for field_mapper in self.field_mappers:
                         row[field_mapper.field_name] = '' if (field_mapper.first_only) else field_mapper.get_field_data(last_object)
-                        
+
                 row[additional_field_mapper.title_key] = additional_field_mapper.get_title(last_object)
                 indicator, field_data = additional_field_mapper.get_field_data(last_object)
 
