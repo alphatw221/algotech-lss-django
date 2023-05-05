@@ -137,6 +137,11 @@ class SellerAdjustMapper(AdditionalFieldMapper):
         else:
             return int(True), object.get('adjust_price')
 
+class PointsApplyMapper(AdditionalFieldMapper):
+    def get_field_data(self, object):
+        indicator, data =  super().get_field_data(object)
+        return indicator, -data
+
 class PromoCodeMapper(AdditionalFieldMapper):
 
     def get_title(self, object):
@@ -145,7 +150,7 @@ class PromoCodeMapper(AdditionalFieldMapper):
         return self.title
     
     def get_field_data(self, object):
-        return int(object.get('discount')!=0), object.get('discount')
+        return int(object.get('discount')!=0), -object.get('discount')
     
 class PointsMapper(AdditionalFieldMapper):
 
@@ -201,8 +206,8 @@ class SHCOrderExportProcessor(DefaultOrderExportProcessor):
             FieldMapper('shipping_property_type','Residential Type', width=10, first_only=True),
             FieldMapper('shipping_remark', 'Shipping Remark', width=20, first_only=True),
             FieldMapper('shipping_email', 'E-mail', width=40, first_only=True),
-            OrderProductsSKUMapper('order_product_sku', 'SKU Code', width=20),
-            OrderProductsOrderCodeMapper('order_product_order_code', 'Product Keyword', width=20),
+            OrderProductsSKUMapper('order_product_sku', 'SKU Code', width=20, no_addition=True),
+            OrderProductsOrderCodeMapper('order_product_order_code', 'Product Keyword', width=20, no_addition=True),
             OrderProductsNameMapper('order_product_name', 'Product Name', width=40),
             OrderProductsQtyMapper('order_product_qty', 'Qty', width=20),
             OrderProductsSubtotalMapper('order_product_subtotal', 'Total Price', width=20),
@@ -216,7 +221,7 @@ class SHCOrderExportProcessor(DefaultOrderExportProcessor):
         ]
 
     additional_field_mappers=[
-        AdditionalFieldMapper(title='Points Applied', title_field_name='points_used', title_key='order_product_name', indicator_key='order_product_qty', data_field_name='point_discount', data_key='order_product_subtotal'),
+        PointsApplyMapper(title='Points Applied', title_field_name='points_used', title_key='order_product_name', indicator_key='order_product_qty', data_field_name='point_discount', data_key='order_product_subtotal'),
         PromoCodeMapper(title='Promo Code', title_field_name=None, title_key='order_product_name', indicator_key='order_product_qty', data_field_name=None, data_key='order_product_subtotal'),
         ShippingCostMapper(title='Shipping', title_field_name=None, title_key='order_product_name', indicator_key='order_product_qty', data_field_name='shipping_cost', data_key='order_product_subtotal'),
         SellerAdjustMapper(title='Seller Adjust', title_field_name=None, title_key='order_product_name', indicator_key='order_product_qty',data_field_name=None, data_key='order_product_subtotal')
