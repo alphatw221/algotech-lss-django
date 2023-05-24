@@ -74,7 +74,8 @@ class Command(BaseCommand):
         if not info :
             self.__run_election()
             return 'break'
-        node_name, last_heart_beat = info.split('-')
+        print(info)
+        node_name, last_heart_beat = info.split(',')
 
         if datetime.utcnow().timestamp() - float(last_heart_beat) >= WAIT_HEART_BEAT_SECOND:
             self.__run_election()
@@ -96,7 +97,7 @@ class Command(BaseCommand):
                 self.position = POSITION_LEADER
                 self.__heart_beating()
                 return
-            node_name, last_heart_beat = info.split('-')
+            node_name, last_heart_beat = info.split(',')
             if datetime.utcnow().timestamp() - float(last_heart_beat) >= WAIT_HEART_BEAT_SECOND:
                 self.position = POSITION_LEADER
                 self.__heart_beating()
@@ -198,7 +199,7 @@ class Command(BaseCommand):
         if not info :
             return False
 
-        node_name, last_heart_beat = info.split('-')
+        node_name, last_heart_beat = info.split(',')
 
         if datetime.utcnow().timestamp() - float(last_heart_beat) >= WAIT_HEART_BEAT_SECOND:
             return False
@@ -215,4 +216,4 @@ class Command(BaseCommand):
         if self.position != POSITION_LEADER:
             return
         # service.redis.redis.set('leader',f'{config.COMMENT_CAPTURE_NODE_NAME}-{datetime.utcnow().timestamp()}')
-        service.redis.redis.set('leader',f'{self.node_name}-{datetime.utcnow().timestamp()}')
+        service.redis.redis.set('leader',f'{self.node_name},{datetime.utcnow().timestamp()}')
