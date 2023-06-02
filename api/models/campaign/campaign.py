@@ -185,6 +185,15 @@ class CampaignSerializer(serializers.ModelSerializer):
     facebook_campaign = FacebookCampaignSerializer(default=dict)
     sub_facebook_page = FacebookPageInfoSerializer(default=dict)
     sub_facebook_campaign = FacebookCampaignSerializer(default=dict)
+    sub_facebook_page_3 = FacebookPageInfoSerializer(default=dict)
+    sub_facebook_campaign_3 = FacebookCampaignSerializer(default=dict)
+    sub_facebook_page_4 = FacebookPageInfoSerializer(default=dict)
+    sub_facebook_campaign_4 = FacebookCampaignSerializer(default=dict)
+    sub_facebook_page_5 = FacebookPageInfoSerializer(default=dict)
+    sub_facebook_campaign_5 = FacebookCampaignSerializer(default=dict)
+    sub_facebook_page_6 = FacebookPageInfoSerializer(default=dict)
+    sub_facebook_campaign_6 = FacebookCampaignSerializer(default=dict)
+
     youtube_channel = YoutubeChannelInfoSerializer(default=dict)
     youtube_campaign = YoutubeCampaignSerializer(default=dict)
     instagram_profile = InstagramProfileInfoSerializer(default=dict)
@@ -208,6 +217,12 @@ class CampaignSerializerCreate(serializers.ModelSerializer):
 
     facebook_campaign = FacebookCampaignSerializer(default=dict)
     sub_facebook_campaign = FacebookCampaignSerializer(default=dict)
+    sub_facebook_campaign_3 = FacebookCampaignSerializer(default=dict)
+    sub_facebook_campaign_4 = FacebookCampaignSerializer(default=dict)
+    sub_facebook_campaign_5 = FacebookCampaignSerializer(default=dict)
+    sub_facebook_campaign_6 = FacebookCampaignSerializer(default=dict)
+
+
     youtube_campaign = YoutubeCampaignSerializer(default=dict)
     instagram_campaign = InstagramCampaignSerializer(default=dict)
     twitch_campaign = TwitchCampaignSerializer(default=dict)
@@ -228,6 +243,11 @@ class CampaignSerializerEdit(serializers.ModelSerializer):
 
     facebook_campaign = FacebookCampaignSerializer(default=dict)
     sub_facebook_campaign = FacebookCampaignSerializer(default=dict)
+    sub_facebook_campaign_3 = FacebookCampaignSerializer(default=dict)
+    sub_facebook_campaign_4 = FacebookCampaignSerializer(default=dict)
+    sub_facebook_campaign_5 = FacebookCampaignSerializer(default=dict)
+    sub_facebook_campaign_6 = FacebookCampaignSerializer(default=dict)
+
     youtube_campaign = YoutubeCampaignSerializer(default=dict)
     instagram_campaign = InstagramCampaignSerializer(default=dict)
     twitch_campaign = TwitchCampaignSerializer(default=dict)
@@ -253,6 +273,11 @@ class CampaignSerializerUpdate(serializers.ModelSerializer):
 class CampaignSerializerRetreive(CampaignSerializer):
     facebook_page = FacebookPageSerializer(read_only=True)
     sub_facebook_page = FacebookPageSerializer(read_only=True)
+    sub_facebook_page_3 = FacebookPageSerializer(read_only=True)
+    sub_facebook_page_4 = FacebookPageSerializer(read_only=True)
+    sub_facebook_page_5 = FacebookPageSerializer(read_only=True)
+    sub_facebook_page_6 = FacebookPageSerializer(read_only=True)
+
     youtube_channel = YoutubeChannelSerializer(read_only=True)
     instagram_profile = InstagramProfileSerializer(read_only=True)
     twitch_channel = TwitchChannelSerializer(read_only=True)
@@ -262,6 +287,11 @@ class CampaignSerializerWithUserSubscription(CampaignSerializer):
     user_subscription = UserSubscriptionSerializer(read_only=True)
     facebook_page = FacebookPageSerializer(read_only=True)
     sub_facebook_page = FacebookPageSerializer(read_only=True)
+    sub_facebook_page_3 = FacebookPageSerializer(read_only=True)
+    sub_facebook_page_4 = FacebookPageSerializer(read_only=True)
+    sub_facebook_page_5 = FacebookPageSerializer(read_only=True)
+    sub_facebook_page_6 = FacebookPageSerializer(read_only=True)
+
     youtube_channel = YoutubeChannelSerializer(read_only=True)
     instagram_profile = InstagramProfileSerializer(read_only=True)
     twitch_channel = TwitchChannelSerializer(read_only=True)

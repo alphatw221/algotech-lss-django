@@ -355,15 +355,15 @@ class CampaignViewSet(viewsets.ModelViewSet):
             facebook_page = lib.util.verify.Verify.get_facebook_page_from_user_subscription(user_subscription, platform_id)
             campaign.sub_facebook_campaign['post_id']=post_id
             campaign.sub_facebook_page = facebook_page
-        elif platform=='sub_facebook':
+        elif platform=='sub_facebook_3':
             facebook_page = lib.util.verify.Verify.get_facebook_page_from_user_subscription(user_subscription, platform_id)
             campaign.sub_facebook_campaign_3['post_id']=post_id
             campaign.sub_facebook_page_3 = facebook_page
-        elif platform=='sub_facebook':
+        elif platform=='sub_facebook_4':
             facebook_page = lib.util.verify.Verify.get_facebook_page_from_user_subscription(user_subscription, platform_id)
             campaign.sub_facebook_campaign_4['post_id']=post_id
             campaign.sub_facebook_page_4 = facebook_page
-        elif platform=='sub_facebook':
+        elif platform=='sub_facebook_5':
             facebook_page = lib.util.verify.Verify.get_facebook_page_from_user_subscription(user_subscription, platform_id)
             campaign.sub_facebook_campaign_5['post_id']=post_id
             campaign.sub_facebook_page_5 = facebook_page
