@@ -76,6 +76,22 @@ class Campaign(models.Model):
         FacebookPage, blank=True, null=True, on_delete=models.SET_NULL, related_name='sub_campaigns')
     sub_facebook_campaign = models.JSONField(null=True, blank=True, default=dict)
 
+    sub_facebook_page_3 = models.ForeignKey(
+        FacebookPage, blank=True, null=True, on_delete=models.SET_NULL, related_name='sub_campaigns_3')
+    sub_facebook_campaign_3 = models.JSONField(null=True, blank=True, default=dict)
+
+    sub_facebook_page_4 = models.ForeignKey(
+        FacebookPage, blank=True, null=True, on_delete=models.SET_NULL, related_name='sub_campaigns_4')
+    sub_facebook_campaign_4 = models.JSONField(null=True, blank=True, default=dict)
+
+    sub_facebook_page_5 = models.ForeignKey(
+        FacebookPage, blank=True, null=True, on_delete=models.SET_NULL, related_name='sub_campaigns_5')
+    sub_facebook_campaign_5 = models.JSONField(null=True, blank=True, default=dict)
+
+    sub_facebook_page_6 = models.ForeignKey(
+        FacebookPage, blank=True, null=True, on_delete=models.SET_NULL, related_name='sub_campaigns_6')
+    sub_facebook_campaign_6 = models.JSONField(null=True, blank=True, default=dict)
+
     instagram_profile = models.ForeignKey(
         InstagramProfile, blank=True, null=True, on_delete=models.SET_NULL, related_name='campaigns')
     instagram_campaign = models.JSONField(null=True, blank=True, default=dict)

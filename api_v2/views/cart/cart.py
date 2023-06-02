@@ -272,6 +272,23 @@ class CartViewSet(viewsets.ModelViewSet):
         data = models.order.order.OrderWithCampaignSerializer(order).data
         data['oid']=order_oid
         
+        #delivery time slot
+        if order.shipping_time_slot :
+            _save=False
+            for delivery_date in campaign.meta_logistic.get('delivery_dates',[]):
+                for time_slot in delivery_date.get('time_slots',[]):
+                    if time_slot.get('time_slot') == order.shipping_time_slot:
+                        time_slot['selected']=time_slot.get('selected',0)+1
+                        _save=True
+            for delivery_option in campaign.meta_logistic.get('additional_delivery_options',[]):
+                for delivery_date in delivery_option.get('delivery_dates',[]):
+                    for time_slot in delivery_date.get('time_slots',[]):
+                        if time_slot.get('time_slot') == order.shipping_time_slot:
+                            time_slot['selected']=time_slot.get('selected',0)+1
+                            _save=True
+            if _save:
+                campaign.save()
+
         #discount used
         if type(order.applied_discount.get('id'))==int and models.discount_code.discount_code.DiscountCode.objects.filter(id=order.applied_discount.get('id')).exists():
             discount_code = models.discount_code.discount_code.DiscountCode.objects.get(id=order.applied_discount.get('id'))
@@ -370,6 +387,19 @@ class CartViewSet(viewsets.ModelViewSet):
         data = models.order.order.OrderWithCampaignSerializer(order).data
         data['oid']=order_oid
         
+        #delivery time slot
+        if order.shipping_time_slot :
+            for delivery_date in campaign.meta_logistic.get('delivery_dates'):
+                    for time_slot in delivery_date.get('time_slots',[]):
+                        if time_slot.get('time_slot') == order.shipping_time_slot:
+                            time_slot['selected']=time_slot.get('selected',0)+1
+            for delivery_option in campaign.meta_logistic.get('additional_delivery_options',[]):
+                for delivery_date in delivery_option.get('delivery_dates',[]):
+                    for time_slot in delivery_date.get('time_slots',[]):
+                       if time_slot.get('time_slot') == order.shipping_time_slot:
+                            time_slot['selected']=time_slot.get('selected',0)+1
+            campaign.save()
+
         #discount used
         if type(order.applied_discount.get('id'))==int and models.discount_code.discount_code.DiscountCode.objects.filter(id=order.applied_discount.get('id')).exists():
             discount_code = models.discount_code.discount_code.DiscountCode.objects.get(id=order.applied_discount.get('id'))

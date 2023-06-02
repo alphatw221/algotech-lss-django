@@ -355,6 +355,23 @@ class CampaignViewSet(viewsets.ModelViewSet):
             facebook_page = lib.util.verify.Verify.get_facebook_page_from_user_subscription(user_subscription, platform_id)
             campaign.sub_facebook_campaign['post_id']=post_id
             campaign.sub_facebook_page = facebook_page
+        elif platform=='sub_facebook':
+            facebook_page = lib.util.verify.Verify.get_facebook_page_from_user_subscription(user_subscription, platform_id)
+            campaign.sub_facebook_campaign_3['post_id']=post_id
+            campaign.sub_facebook_page_3 = facebook_page
+        elif platform=='sub_facebook':
+            facebook_page = lib.util.verify.Verify.get_facebook_page_from_user_subscription(user_subscription, platform_id)
+            campaign.sub_facebook_campaign_4['post_id']=post_id
+            campaign.sub_facebook_page_4 = facebook_page
+        elif platform=='sub_facebook':
+            facebook_page = lib.util.verify.Verify.get_facebook_page_from_user_subscription(user_subscription, platform_id)
+            campaign.sub_facebook_campaign_5['post_id']=post_id
+            campaign.sub_facebook_page_5 = facebook_page
+        elif platform=='sub_facebook_6':
+            facebook_page = lib.util.verify.Verify.get_facebook_page_from_user_subscription(user_subscription, platform_id)
+            campaign.sub_facebook_campaign_6['post_id']=post_id
+            campaign.sub_facebook_page_6 = facebook_page
+
         elif platform =='youtube':
             youtube_channel = lib.util.verify.Verify.get_youtube_channel_from_user_subscription(user_subscription, platform_id)
             campaign.youtube_campaign['live_video_id']=post_id
@@ -396,6 +413,18 @@ class CampaignViewSet(viewsets.ModelViewSet):
         elif platform=='sub_facebook':
             campaign.sub_facebook_campaign['post_id']=''
             campaign.sub_facebook_page = None
+        elif platform=='sub_facebook_3':
+            campaign.sub_facebook_campaign_3['post_id']=''
+            campaign.sub_facebook_page_3 = None
+        elif platform=='sub_facebook_4':
+            campaign.sub_facebook_campaign_4['post_id']=''
+            campaign.sub_facebook_page_4 = None
+        elif platform=='sub_facebook_5':
+            campaign.sub_facebook_campaign_5['post_id']=''
+            campaign.sub_facebook_page_5 = None
+        elif platform=='sub_facebook_6':
+            campaign.sub_facebook_campaign_6['post_id']=''
+            campaign.sub_facebook_page_6 = None
         elif platform =='youtube':
             campaign.youtube_campaign['live_video_id']=''
             campaign.youtube_channel = None

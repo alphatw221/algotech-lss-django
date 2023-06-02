@@ -52,7 +52,11 @@ def campaign_job(campaign_id):
     user_subscription_data = database.lss.user_subscription.UserSubscription.get(id=campaign.data.get('user_subscription_id'))
 
     capture_facebook_v2(campaign, user_subscription_data, logs)
-    capture_sub_facebook_v2(campaign, user_subscription_data, logs)
+    capture_sub_facebook_v2(campaign, user_subscription_data, logs, index=0)
+    capture_sub_facebook_v2(campaign, user_subscription_data, logs, index=3)
+    capture_sub_facebook_v2(campaign, user_subscription_data, logs, index=4)
+    capture_sub_facebook_v2(campaign, user_subscription_data, logs, index=5)
+    capture_sub_facebook_v2(campaign, user_subscription_data, logs, index=6)
     capture_youtube_v2(campaign, user_subscription_data, logs)
     capture_instagram_v2(campaign, user_subscription_data, logs)
     util.logger.print_table(["Campaign ID", campaign_id],logs)
@@ -594,19 +598,20 @@ def capture_facebook_v2(campaign, user_subscription_data, logs, attempts=2):
 
 
 @capture_platform_error_handler.capture_platform_error_handler
-def capture_sub_facebook_v2(campaign, user_subscription_data, logs, attempts=2):
+def capture_sub_facebook_v2(campaign, user_subscription_data, logs, index=0, attempts=2):
     try:
+        postfix = f'_{index}' if index else ''
         logs.append(["facebook",""])
-        if not campaign.data.get('sub_facebook_page_id'):
+        if not campaign.data.get(f'sub_facebook_page{postfix}_id'):
             return
-        facebook_page = database.lss.facebook_page.FacebookPage.get_object(id=campaign.data.get('sub_facebook_page_id'))
+        facebook_page = database.lss.facebook_page.FacebookPage.get_object(id=campaign.data.get(f'sub_facebook_page{postfix}_id'))
 
         if not facebook_page:
             logs.append(["error","no sub facebook_page found"])
             return
 
         page_token = facebook_page.data.get('token')
-        facebook_campaign = campaign.data.get('sub_facebook_campaign',{})
+        facebook_campaign = campaign.data.get(f'sub_facebook_campaign{postfix}',{})
         post_id = facebook_campaign.get('post_id', '')
         facebook_comment_capture_since = facebook_campaign.get('comment_capture_since', 1)
 
@@ -624,7 +629,7 @@ def capture_sub_facebook_v2(campaign, user_subscription_data, logs, attempts=2):
             print(data)
             facebook_campaign['post_id'] = ''
             facebook_campaign['remark'] = f'Facebook API error: {data["error"]}'
-            campaign.update(sub_facebook_campaign=facebook_campaign, sync=False)
+            campaign.update(sync=False, **{f'sub_facebook_campaign{postfix}':facebook_campaign})
             return
 
         facebook_comments = data.get('data', [])
@@ -641,10 +646,12 @@ def capture_sub_facebook_v2(campaign, user_subscription_data, logs, attempts=2):
             
         facebook_campaign['comment_capture_since'] = int(facebook_comments[-1].get('created_time'))
         campaign.update(
-            sub_facebook_campaign=facebook_campaign,
+            # sub_facebook_campaign=facebook_campaign,
             priority=1,
             silent_count=0,
-            sync=True)
+            sync=True,
+             **{f'sub_facebook_campaign{postfix}':facebook_campaign}
+            )
 
         logs.append(["number of comments", len(facebook_comments)])
 
@@ -684,7 +691,7 @@ def capture_sub_facebook_v2(campaign, user_subscription_data, logs, attempts=2):
     except Exception:
         if attempts>0:
             print('retry')
-            capture_sub_facebook_v2(campaign, user_subscription_data, logs, attempts=attempts-1)
+            capture_sub_facebook_v2(campaign, user_subscription_data, logs, index=index,attempts=attempts-1)
         print(traceback.format_exc())
 
 

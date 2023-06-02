@@ -173,13 +173,17 @@ class Command(BaseCommand):
 
         invalid_facebook = not campaign.facebook_campaign.get("post_id", None)
         invalid_sub_facebook = not campaign.sub_facebook_campaign.get("post_id", None)
+        invalid_sub_facebook_3 = not campaign.sub_facebook_campaign_3.get("post_id", None)
+        invalid_sub_facebook_4 = not campaign.sub_facebook_campaign_4.get("post_id", None)
+        invalid_sub_facebook_5 = not campaign.sub_facebook_campaign_5.get("post_id", None)
+        invalid_sub_facebook_6 = not campaign.sub_facebook_campaign_6.get("post_id", None)
         invalid_instagram = not campaign.instagram_campaign.get("live_media_id", None)
         invalid_youtube = not campaign.youtube_campaign.get("live_video_id", None)
 
 
         # invalid_twitch = not campaign.twitch_campaign.get("channel_name", None)
         # invalid_tiktok = not campaign.tiktok_campaign.get("username", None)
-        if invalid_facebook and invalid_sub_facebook and invalid_instagram and invalid_youtube :
+        if invalid_facebook and invalid_sub_facebook and invalid_sub_facebook_3 and invalid_sub_facebook_4 and invalid_sub_facebook_5 and invalid_sub_facebook_6 and invalid_instagram and invalid_youtube :
             
             rows.append([campaign.id, "invalid"])
             return
