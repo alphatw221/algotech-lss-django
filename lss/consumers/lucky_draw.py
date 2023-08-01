@@ -1,6 +1,6 @@
 import json
 from asgiref.sync import async_to_sync
-from automation.jobs.crawler_job import crawler_shared_post_job
+# from automation.jobs.crawler_job import crawler_shared_post_job
 from channels.generic.websocket import WebsocketConsumer  
 import lib
 import uuid
@@ -31,14 +31,16 @@ class SharedPostCrawlerConsumer(WebsocketConsumer):
             self.channel_name
         )
     def receive(self, text_data):
-        text_data_json = json.loads(text_data)
-        action = text_data_json.get("action")
-        if action == "start_crawler":
-            campaign_lucky_draw_id = text_data_json.get('lucky_draw_id')
-            lucky_draw = lib.util.verify.Verify.get_lucky_draw(campaign_lucky_draw_id)
-            username = lucky_draw.campaign.facebook_page.username
-            post_id = lucky_draw.campaign.facebook_campaign.get("post_id", "")
-            service.rq.queue.enqueue_general_queue(job=crawler_shared_post_job, room_id=self.room_group_name, lucky_draw_id=lucky_draw.id, facebook_page_username=username, post_id=post_id)
+        pass
+
+        # text_data_json = json.loads(text_data)
+        # action = text_data_json.get("action")
+        # if action == "start_crawler":
+        #     campaign_lucky_draw_id = text_data_json.get('lucky_draw_id')
+        #     lucky_draw = lib.util.verify.Verify.get_lucky_draw(campaign_lucky_draw_id)
+        #     username = lucky_draw.campaign.facebook_page.username
+        #     post_id = lucky_draw.campaign.facebook_campaign.get("post_id", "")
+        #     service.rq.queue.enqueue_general_queue(job=crawler_shared_post_job, room_id=self.room_group_name, lucky_draw_id=lucky_draw.id, facebook_page_username=username, post_id=post_id)
     def success_data(self, event):
         self.send(text_data=json.dumps(event))
 

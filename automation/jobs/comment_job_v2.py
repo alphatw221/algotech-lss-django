@@ -12,13 +12,14 @@ from django.conf import settings
 import lib
 import database
 import service
-import plugins as lss_plugins
+
 import traceback
 
 from . import send_message_job
+from lib.error_handle.error_handler.comment_job_error_handler import comment_job_error_handler
 
 
-@lib.error_handle.error_handler.comment_job_error_handler.comment_job_error_handler
+@comment_job_error_handler
 def comment_job(campaign_data, user_subscription_data, platform_name, platform_instance_data, comment, order_codes_mapping):
     logs=[]
 
@@ -225,16 +226,8 @@ def __get_comment_and_private_message( pymongo_cart, campaign_data, state, campa
 
 
 def __get_link(user_subscription_data, pymongo_cart, plugins=None):
-    if plugins:
-        if lss_plugins.easy_store.EASY_STORE in plugins:
-            return settings.SHOPPING_CART_RECAPTCHA_URL + f'/{lss_plugins.easy_store.EASY_STORE}/{str(pymongo_cart._id)}'
-        elif lss_plugins.ordr_startr.ORDR_STARTR in plugins:
-            return settings.SHOPPING_CART_RECAPTCHA_URL + f'/{lss_plugins.ordr_startr.ORDR_STARTR}/{str(pymongo_cart._id)}'
-        elif lss_plugins.shopify.SHOPIFY in plugins:
-            return settings.SHOPPING_CART_URL + '/' + str(pymongo_cart._id)
-
-        return settings.SHOPPING_CART_URL + '/' + str(pymongo_cart._id)
-    elif user_subscription_data.get('require_customer_login'):
+  
+    if user_subscription_data.get('require_customer_login'):
         if user_subscription_data.get('domain'):
             return 'https://' + user_subscription_data.get('domain') + '/buyer/login/cart/' + str(pymongo_cart._id)
         return settings.SHOPPING_CART_LOGIN_URL + '/' + str(pymongo_cart._id)

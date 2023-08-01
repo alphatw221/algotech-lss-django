@@ -8,15 +8,16 @@ except Exception:
     pass
 
 from automation import jobs
-import lib
+
 import service
 import database
 
 from datetime import datetime
 import traceback
 
+from lib.error_handle.error_handler.comment_job_error_handler import comment_job_error_handler
 
-@lib.error_handle.error_handler.comment_job_error_handler.comment_job_error_handler
+@comment_job_error_handler
 def comment_create_job(campaign_id, comments, platform, push_comment:bool):
 
     campaign = database.lss.campaign.Campaign.get_object(id=int(campaign_id))

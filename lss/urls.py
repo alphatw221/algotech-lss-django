@@ -17,12 +17,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path, re_path
 from lss.views.iframe import iframe_facebook
-from rest_framework_simplejwt.views import (TokenObtainPairView,
-                                            TokenRefreshView, TokenVerifyView)
+# from rest_framework_simplejwt.views import (TokenObtainPairView,
+#                                             TokenRefreshView, TokenVerifyView)
 
-from lss.views.custom_jwt import (CustomTokenObtainPairView,
-                                  CustomTokenRefreshView,
-                                  CustomTokenVerifyView)
+# from lss.views.custom_jwt import (CustomTokenObtainPairView,
+#                                   CustomTokenRefreshView,
+#                                   CustomTokenVerifyView)
 from django.views.generic import TemplateView
 
 from lss.views.email import test
@@ -36,16 +36,16 @@ urlpatterns = [
     # path('chat_bot/', include('chat_bot.urls')),
     
 
-    path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('token/verify/', TokenVerifyView.as_view(), name='token_verify'),
+    # path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    # path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    # path('token/verify/', TokenVerifyView.as_view(), name='token_verify'),
 
-    path('custom_token/', CustomTokenObtainPairView.as_view(),
-         name='custom_token_obtain_pair'),
-    path('custom_token/refresh/', CustomTokenRefreshView.as_view(),
-         name='custom_token_refresh'),
-    path('custom_token/verify/', CustomTokenVerifyView.as_view(),
-         name='custom_token_verify'),
+    # path('custom_token/', CustomTokenObtainPairView.as_view(),
+    #      name='custom_token_obtain_pair'),
+    # path('custom_token/refresh/', CustomTokenRefreshView.as_view(),
+    #      name='custom_token_refresh'),
+    # path('custom_token/verify/', CustomTokenVerifyView.as_view(),
+    #      name='custom_token_verify'),
 
     
     path('temp/chat_bot/facebook/', facebook_messenger_webhook),
@@ -62,8 +62,4 @@ urlpatterns = [
     path('iframe/facebook', iframe_facebook),
 
 
-    #-------------------------plugin---------------------------------------------------
-    path('api/plugin/easy_store/', include(('plugins.easy_store.urls','easy_store'), namespace='easy_store')),
-    path('api/plugin/ordr_startr/', include(('plugins.ordr_startr.urls','ordr_startr'), namespace='ordr_startr')),
-    path('api/plugin/shopify/', include(('plugins.shopify.urls','shopify'), namespace='shopify'))
 ]

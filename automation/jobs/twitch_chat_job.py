@@ -8,15 +8,15 @@ except Exception:
     pass
 
 from automation import jobs
-import lib
 import service
 import database
 
 from datetime import datetime
 import traceback
 
+from lib.error_handle.error_handler.twitch_chat_job_error_handler import twitch_chat_job_error_handler
 
-@lib.error_handle.error_handler.twitch_chat_job_error_handler.twitch_chat_job_error_handler
+@twitch_chat_job_error_handler
 def twitch_chat_job(campaign_id, comments):
 
     campaign = database.lss.campaign.Campaign.get_object(id=int(campaign_id))

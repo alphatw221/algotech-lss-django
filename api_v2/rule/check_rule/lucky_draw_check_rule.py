@@ -1,5 +1,5 @@
 from api import models
-from automation.jobs.crawler_job import crawler_shared_post_job
+
 import lib
 import service
 
@@ -51,13 +51,14 @@ class LuckyDrawCheckRule():
         
     @staticmethod
     def is_needed_to_start_sharedpost_crawler(**kwargs):
-        lucky_draw = kwargs.get('lucky_draw')
-        campaign = kwargs.get('campaign')
-        username = campaign.facebook_page.username
-        post_id = campaign.facebook_campaign.get("post_id", "")
-        if not username:
-            raise lib.error_handle.error.api_error.ApiVerifyError('missing_username_of_facebook_page')
+        pass
+        # lucky_draw = kwargs.get('lucky_draw')
+        # campaign = kwargs.get('campaign')
+        # username = campaign.facebook_page.username
+        # post_id = campaign.facebook_campaign.get("post_id", "")
+        # if not username:
+        #     raise lib.error_handle.error.api_error.ApiVerifyError('missing_username_of_facebook_page')
         
-        if lucky_draw.type in [models.campaign.campaign_lucky_draw.TYPE_POST]:
-            print("start crawler")
-            service.rq.queue.enqueue_general_queue(job=crawler_shared_post_job, lucky_draw_id=lucky_draw.id, facebook_page_username=username, post_id=post_id)
+        # if lucky_draw.type in [models.campaign.campaign_lucky_draw.TYPE_POST]:
+        #     print("start crawler")
+        #     service.rq.queue.enqueue_general_queue(job=crawler_shared_post_job, lucky_draw_id=lucky_draw.id, facebook_page_username=username, post_id=post_id)

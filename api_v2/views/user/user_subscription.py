@@ -5,7 +5,7 @@ from django.core.files.base import ContentFile
 from django.http import HttpResponseRedirect
 from api.models.user.point_transaction import PointTransactionSerializer
 from api.models.user.buyer_wallet import BuyerWalletSerializer
-from itsdangerous import Serializer
+
 from numpy import require
 from django.db.models import Q, Value
 

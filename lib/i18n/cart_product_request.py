@@ -4,7 +4,7 @@ from django.conf import settings
 from django.utils.translation import ugettext as _
 import lib
 from..helper.order_helper import RequestState
-import plugins
+
 
 @lang_translate_default_en
 def get_request_response(state, api_campaign_product, qty, user_subscription_data, lang=None):
@@ -19,33 +19,7 @@ def get_request_response(state, api_campaign_product, qty, user_subscription_dat
 @lang_translate_default_en
 def get_plugins_additional_text(pre_order, _plugins:dict, lang=None):
 
-    if plugins.easy_store.EASY_STORE in _plugins:
-        
-        link = settings.SHOPPING_CART_RECAPTCHA_URL + f'/{plugins.easy_store.EASY_STORE}/{str(pre_order._id)}'
-    
-        shopping_cart_info = _('SHOPPING_CART_INFO{link}'
-                            ).format(link=link)
-        more_info_in_pm_notice = _('MORE_INFO_IN_PM_NOTICE')
-
-        return shopping_cart_info, more_info_in_pm_notice
-    elif plugins.ordr_startr.ORDR_STARTR in _plugins:
-        link = settings.SHOPPING_CART_RECAPTCHA_URL + f'/{plugins.ordr_startr.ORDR_STARTR}/{str(pre_order._id)}'
-    
-        shopping_cart_info = _('SHOPPING_CART_INFO{link}'
-                            ).format(link=link)
-        more_info_in_pm_notice = _('MORE_INFO_IN_PM_NOTICE')
-
-        return shopping_cart_info, more_info_in_pm_notice
-    elif plugins.shopify.SHOPIFY in _plugins:
-        link = settings.SHOPPING_CART_URL + '/' + str(pre_order._id)
-    
-        shopping_cart_info = _('SHOPPING_CART_INFO{link}'
-                            ).format(link=link)
-        more_info_in_pm_notice = _('MORE_INFO_IN_PM_NOTICE')
-
-        return shopping_cart_info, more_info_in_pm_notice
-    else:
-        return get_additional_text(pre_order, lang=lang)
+  return ''
 
 
 @lang_translate_default_en

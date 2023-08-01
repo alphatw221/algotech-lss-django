@@ -9,13 +9,21 @@ https://docs.djangoproject.com/en/3.2/howto/deployment/wsgi/
 
 
 import os
-import config
-#------add thoes line if server with apache--------
-import sys
-sys.path.append(config.POETRY_ENVIRONMENT)
-#--------------------------------------------------
+import pathlib
+import dotenv
+
+
+
+CURRENT_DIR = pathlib.Path(__file__).parent
+BASE_DIR = CURRENT_DIR.parent
+ENV_FILE_PATH = BASE_DIR / ".env"
+
+
+dotenv.read_dotenv(str(ENV_FILE_PATH))
+
+
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', config.DJANGO_SETTINGS)
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'lss.settings') 
 
 application = get_wsgi_application()

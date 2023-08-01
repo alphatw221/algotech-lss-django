@@ -55,15 +55,15 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'rest_framework_simplejwt',
+    # 'rest_framework_simplejwt',
     'django_cron',
     'api',
     'automation',
     'cron',
     'corsheaders',
-    'django_extensions',
-    'webpack_loader',
-    'channels',
+    # 'django_extensions',
+    # 'webpack_loader',
+    # 'channels',
     'api_v2',
     'django_vite',
 ]
@@ -110,21 +110,21 @@ LOGGING = {
 }
 
 # Framework Settings
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ),
-    'DEFAULT_RENDERER_CLASSES': [
-        'rest_framework.renderers.JSONRenderer',
-    ],
-    'DEFAULT_PARSER_CLASSES': [
-        'rest_framework.parsers.JSONParser',
-    ],
-    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 25,
-    # 'DATETIME_FORMAT': '%s',
-}
+# REST_FRAMEWORK = {
+#     'DEFAULT_AUTHENTICATION_CLASSES': (
+#         'rest_framework_simplejwt.authentication.JWTAuthentication',
+#     ),
+#     'DEFAULT_RENDERER_CLASSES': [
+#         'rest_framework.renderers.JSONRenderer',
+#     ],
+#     'DEFAULT_PARSER_CLASSES': [
+#         'rest_framework.parsers.JSONParser',
+#     ],
+#     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+#     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+#     'PAGE_SIZE': 25,
+#     # 'DATETIME_FORMAT': '%s',
+# }
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=7),
@@ -187,6 +187,30 @@ DATABASES = {
             'ssl': False,
         }
     },
+    'pg-s1-p1': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get("POSTGRES_S1_P_NAME",'king_pork'),
+        'USER': os.environ.get("POSTGRES_S1_P_USER",'kp1234'),
+        'PASSWORD': os.environ.get("POSTGRES_S1_P_PASSWORD",'kp1234'),
+        'HOST': os.environ.get("POSTGRES_S1_P_HOST",'localhost'),
+        'PORT': os.environ.get("POSTGRES_S1_P_PORT",'5432'),
+        # 'OPTIONS': {} if str(os.environ.get("PG_IGNORE_SSL"))=="true" else {"sslmode":"required"} 
+
+    },
+    'pg-s1-r1': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get("POSTGRES_S1_R1_NAME",'king_pork'),
+        'USER': os.environ.get("POSTGRES_S1_R1_USER",'kp1234'),
+        'PASSWORD': os.environ.get("POSTGRES_S1_R1_PASSWORD",'kp1234'),
+        'HOST': os.environ.get("POSTGRES_S1_R1_HOST",'localhost'),
+        'PORT': os.environ.get("POSTGRES_S1_R1_PORT",'5432'),
+        # 'OPTIONS': {} if str(os.environ.get("PG_IGNORE_SSL"))=="true" else {"sslmode":"required"} 
+
+    },
+
+
+
+
     # for social lab
     # 'default': {
     #     'ENGINE': 'djongo',
@@ -387,9 +411,11 @@ FTP_STORAGE_ENCODING = 'utf-8'
 # google storage
 DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
 GS_BUCKET_NAME = 'lss_public_bucket'
+
 GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
     os.path.join(BASE_DIR, "liveshowseller-b4308e2f9dc6.json")
 )
+
 GS_URL = "https://storage.googleapis.com/lss_public_bucket/"
 GOOGLE_STORAGE_STATIC_DIR=GS_URL+'static/'
 # google monitoring

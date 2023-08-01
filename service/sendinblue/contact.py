@@ -1,4 +1,4 @@
-from attr import attributes
+# from attr import attributes
 import sib_api_v3_sdk
 from sib_api_v3_sdk.rest import ApiException
 from ._sendinblue import api_client

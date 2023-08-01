@@ -3,7 +3,7 @@ from django.conf import settings
 
 from api import models
 
-from lss.views.custom_jwt import CustomTokenObtainPairSerializer
+# from lss.views.custom_jwt import CustomTokenObtainPairSerializer
 
 import lib
 from datetime import datetime
@@ -31,8 +31,8 @@ class GeneralLogin():
         if not auth_user.check_password(password):
             return
 
-        refresh = CustomTokenObtainPairSerializer.get_token(auth_user)
-
+        # refresh = CustomTokenObtainPairSerializer.get_token(auth_user)
+        refresh = ''
         return {
             'refresh': str(refresh),
             'access': str(refresh.access_token),
@@ -104,8 +104,8 @@ class FacebookLogin():
         auth_user.last_login = datetime.now()
         auth_user.save()
 
-        refresh = CustomTokenObtainPairSerializer.get_token(auth_user)
-
+        # refresh = CustomTokenObtainPairSerializer.get_token(auth_user)
+        refresh = ''
         return {
             'refresh': str(refresh),
             'access': str(refresh.access_token),
@@ -136,8 +136,8 @@ class GoogleLogin():
         auth_user.save()
         api_user.save()
 
-        refresh = CustomTokenObtainPairSerializer.get_token(auth_user)
-
+        # refresh = CustomTokenObtainPairSerializer.get_token(auth_user)
+        refresh = ''
         return {
             'refresh': str(refresh),
             'access': str(refresh.access_token),
@@ -195,8 +195,8 @@ class GoogleLogin():
         auth_user.save()
         api_user.save()
 
-        refresh = CustomTokenObtainPairSerializer.get_token(auth_user)
-
+        # refresh = CustomTokenObtainPairSerializer.get_token(auth_user)
+        refresh = ''
         return {
             'refresh': str(refresh),
             'access': str(refresh.access_token),
