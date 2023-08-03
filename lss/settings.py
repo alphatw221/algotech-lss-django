@@ -189,9 +189,9 @@ DATABASES = {
     },
     'pg-s1-p1': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get("POSTGRES_S1_P_NAME",'king_pork'),
-        'USER': os.environ.get("POSTGRES_S1_P_USER",'kp1234'),
-        'PASSWORD': os.environ.get("POSTGRES_S1_P_PASSWORD",'kp1234'),
+        'NAME': os.environ.get("POSTGRES_S1_P_NAME",'postgres'),
+        'USER': os.environ.get("POSTGRES_S1_P_USER",'postgres'),
+        'PASSWORD': os.environ.get("POSTGRES_S1_P_PASSWORD",'postgres'),
         'HOST': os.environ.get("POSTGRES_S1_P_HOST",'localhost'),
         'PORT': os.environ.get("POSTGRES_S1_P_PORT",'5432'),
         # 'OPTIONS': {} if str(os.environ.get("PG_IGNORE_SSL"))=="true" else {"sslmode":"required"} 
@@ -199,9 +199,9 @@ DATABASES = {
     },
     'pg-s1-r1': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get("POSTGRES_S1_R1_NAME",'king_pork'),
-        'USER': os.environ.get("POSTGRES_S1_R1_USER",'kp1234'),
-        'PASSWORD': os.environ.get("POSTGRES_S1_R1_PASSWORD",'kp1234'),
+        'NAME': os.environ.get("POSTGRES_S1_R1_NAME",'postgres'),
+        'USER': os.environ.get("POSTGRES_S1_R1_USER",'postgres'),
+        'PASSWORD': os.environ.get("POSTGRES_S1_R1_PASSWORD",'postgres'),
         'HOST': os.environ.get("POSTGRES_S1_R1_HOST",'localhost'),
         'PORT': os.environ.get("POSTGRES_S1_R1_PORT",'5432'),
         # 'OPTIONS': {} if str(os.environ.get("PG_IGNORE_SSL"))=="true" else {"sslmode":"required"} 
@@ -209,25 +209,11 @@ DATABASES = {
     },
 
 
-
-
-    # for social lab
-    # 'default': {
-    #     'ENGINE': 'djongo',
-    #     'NAME': 'lss',
-    #     'ENFORCE_SCHEMA': False,
-    #     'CLIENT': {
-    #         'host': 'mongodb://52.221.239.166:27017, 13.215.51.14:27017, 18.142.57.3:27017',
-    #         'replicaSet': 'rs1',
-    #         'username': 'admin',
-    #         'password': 'admin',
-    #         'authSource': 'admin',
-    #         'authMechanism': 'SCRAM-SHA-1',
-    #         'readPreference': 'primary',
-    #         'ssl': False,
-    #     }
-    # }
 }
+
+
+DATABASE_ROUTERS = ['lss.db_router.AuthRouter','lss.db_router.ShardPrimaryReplicaRouter']
+
 DATA_UPLOAD_MAX_MEMORY_SIZE = 1024*1024*15
 MONGODB_CONNECTION_STRING = \
     'mongodb://'+config.MONGO_DB_USERNAME+':'+urllib.parse.quote_plus(config.MONGO_DB_PASSWORD)+\

@@ -16,7 +16,7 @@ import dotenv
 
 CURRENT_DIR = pathlib.Path(__file__).parent
 BASE_DIR = CURRENT_DIR.parent
-ENV_FILE_PATH = BASE_DIR / ".env"
+ENV_FILE_PATH = BASE_DIR / ".env.prod"
 
 
 dotenv.read_dotenv(str(ENV_FILE_PATH))
