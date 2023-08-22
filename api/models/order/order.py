@@ -160,8 +160,11 @@ class OrderSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        if instance.buyer:
-            data['buyer_name'] = instance.buyer.name
+        try:
+            if instance.buyer:
+                data['buyer_name'] = instance.buyer.name
+        except:
+            data['buyer_name'] = ''
         return data
 class OrderWithCampaignSerializer(OrderSerializer):
 
