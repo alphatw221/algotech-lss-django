@@ -34,6 +34,9 @@ class OrderCodesMappingSingleton:
             lenlist=[]
             campaign_product_list=[]
             for campaign_product in campaign_products:
+
+                if not campaign_product.get('order_code'):
+                    continue
                 lenlist.append(len(campaign_product.get('order_code')))
                 campaign_product_list.append(campaign_product)
             sorted_index = numpy.argsort(lenlist)[::-1]
