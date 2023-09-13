@@ -1,12 +1,11 @@
 [tool.poetry]
-name = "liveshowseller"
+name = "LiveShowSeller"
 version = "0.1.0"
 description = ""
-authors = ["lin <yihsuehlin@accoladeglobal.com>"]
-readme = "README.md"
+authors = ["Ian Liu <ipuppyian@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.8"
 pendulum = "^2.1.2"
 pymongo = "3.12.3"
 requests = "^2.26.0"
@@ -56,6 +55,9 @@ setuptools = "^65.4.1"
 selenium = "^4.5.0"
 pytest = "^7.2.0"
 
+[tool.poetry.dev-dependencies]
+autopep8 = "^1.5.7"
+
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core>=1.0.0","setuptools"]
 build-backend = "poetry.core.masonry.api"
