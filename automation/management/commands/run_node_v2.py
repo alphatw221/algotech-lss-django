@@ -159,8 +159,8 @@ class Command(BaseCommand):
 
         # self.__heart_beating()
 
-        lib.util.google_cloud_monitoring.CampaignQueueLengthMetric.write_time_series(len(service.rq.queue.campaign_queue.jobs))
-        lib.util.google_cloud_monitoring.CommentQueueLengthMetric.write_time_series(len(service.rq.queue.comment_queue.jobs))
+        # lib.util.google_cloud_monitoring.CampaignQueueLengthMetric.write_time_series(len(service.rq.queue.campaign_queue.jobs))
+        # lib.util.google_cloud_monitoring.CommentQueueLengthMetric.write_time_series(len(service.rq.queue.comment_queue.jobs))
 
 
         rows=[]
