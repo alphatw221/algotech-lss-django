@@ -6,7 +6,7 @@ authors = ["lin <yihsuehlin@accoladeglobal.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.10"
 pendulum = "^2.1.2"
 pymongo = "3.12.3"
 requests = "^2.26.0"
