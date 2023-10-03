@@ -434,7 +434,7 @@ ORDER_REPORT_DOWNLOAD_INTERVAL = 180
 
 # redis server
 REDIS_SERVER = {
-    "host": "34.124.181.79",
+    "host": "34.143.136.14",
     "port": "6379",
     "username": None,
     "password": r"algo83111TPP"}
@@ -501,7 +501,7 @@ CHANNEL_LAYERS = {
         {
             # "hosts": [('127.0.0.1', 6379)],
             # "hosts": [r"redis://:algo83111TPP@34.124.140.74:6379/0"],
-            "hosts": [r"redis://:algo83111TPP@34.124.181.79:6379/0"],
+            "hosts": [r"redis://:algo83111TPP@34.143.136.14:6379/0"],
 
         }
         ,
