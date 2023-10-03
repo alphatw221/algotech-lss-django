@@ -71,7 +71,7 @@ class Command(BaseCommand):
         print('follower')
         _byte = service.redis.redis.get('leader')
         if _byte == None:
-            info == None
+            info = None
         else:
             info = _byte.decode()
         if not info :
