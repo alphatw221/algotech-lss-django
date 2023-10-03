@@ -69,11 +69,8 @@ class Command(BaseCommand):
     def follower_task(self):
 
         print('follower')
-        _byte = service.redis.redis.get('leader')
-        if _byte == None:
-            info = None
-        else:
-            info = _byte.decode()
+        
+        info = self.__get_info()
         if not info :
             self.__run_election()
             return 'break'
@@ -95,7 +92,7 @@ class Command(BaseCommand):
 
         lock = pottery.Redlock(key='leader', masters={service.redis.redis.redis_connection}, auto_release_time=5)
         with lock:
-            info = service.redis.redis.get('leader').decode()
+            info = self.__get_info()
             if not info:
                 self.position = POSITION_LEADER
                 self.__heart_beating()
@@ -202,7 +199,7 @@ class Command(BaseCommand):
 
     def __new_leader_exist(self):
 
-        info = service.redis.redis.get('leader').decode()
+        info = self.__get_info()
         if not info :
             return False
 
@@ -217,7 +214,12 @@ class Command(BaseCommand):
         
         return True
 
-
+    def __get_info(self):
+        _byte = service.redis.redis.get('leader')
+        if _byte == None:
+            return ''
+        else:
+            return _byte.decode()
 
     def __heart_beating(self):
         if self.position != POSITION_LEADER:
