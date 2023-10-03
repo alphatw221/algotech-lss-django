@@ -69,8 +69,11 @@ class Command(BaseCommand):
     def follower_task(self):
 
         print('follower')
-        
-        info = service.redis.redis.get('leader').decode()
+        _byte = service.redis.redis.get('leader')
+        if _byte == None:
+            info == None
+        else:
+            info = _byte.decode()
         if not info :
             self.__run_election()
             return 'break'
