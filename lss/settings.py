@@ -177,14 +177,15 @@ DATABASES = {
             # Production internal
             # 'host': 'mongodb://10.148.0.7:27017, 10.148.0.8:27017, 10.148.0.9:27017',
             # Production external
-            'host': 'mongodb://34.126.92.142:27017, 35.240.200.4:27017, 34.126.155.150:27017',
-            'replicaSet': 'rs0',
+            'host':'mongodb+srv://cluster0.veosu.mongodb.net/',
+            # 'host': 'mongodb://34.126.92.142:27017, 35.240.200.4:27017, 34.126.155.150:27017',
+            # 'replicaSet': 'rs0',
             'username': config.MONGO_DB_USERNAME,
             'password': config.MONGO_DB_PASSWORD,
-            'authSource': config.MONGO_DB_DATABASE_NAME,
-            'authMechanism': 'SCRAM-SHA-1',
-            'readPreference': 'secondaryPreferred',
-            'ssl': False,
+            # 'authSource': config.MONGO_DB_DATABASE_NAME,
+            # 'authMechanism': 'SCRAM-SHA-1',
+            # 'readPreference': 'secondaryPreferred',
+            # 'ssl': False,
         }
     },
     # for social lab
@@ -205,10 +206,14 @@ DATABASES = {
     # }
 }
 DATA_UPLOAD_MAX_MEMORY_SIZE = 1024*1024*15
+# MONGODB_CONNECTION_STRING = \
+#     'mongodb://'+config.MONGO_DB_USERNAME+':'+urllib.parse.quote_plus(config.MONGO_DB_PASSWORD)+\
+#     '@34.126.92.142:27017,35.240.200.4:27017,34.126.155.150:27017/'+\
+#     '?authSource='+config.MONGO_DB_DATABASE_NAME
 MONGODB_CONNECTION_STRING = \
-    'mongodb://'+config.MONGO_DB_USERNAME+':'+urllib.parse.quote_plus(config.MONGO_DB_PASSWORD)+\
-    '@34.126.92.142:27017,35.240.200.4:27017,34.126.155.150:27017/'+\
-    '?authSource='+config.MONGO_DB_DATABASE_NAME
+    'mongodb+srv://'+config.MONGO_DB_USERNAME+':'+urllib.parse.quote_plus(config.MONGO_DB_PASSWORD)+\
+    '@cluster0.veosu.mongodb.net/'+\
+    '?retryWrites=true&w=majority'
     
 # for social lab
 # MONGODB_CONNECTION_STRING = 'mongodb://admin:admin@52.221.239.166:27017,13.215.51.14:27017,18.142.57.3:27017'
@@ -386,14 +391,23 @@ FTP_STORAGE_ENCODING = 'utf-8'
 
 # google storage
 DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
-GS_BUCKET_NAME = 'lss_public_bucket'
+# GS_BUCKET_NAME = 'lss_public_bucket'
+GS_BUCKET_NAME = 'lss_bucket'
+
+# GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
+#     os.path.join(BASE_DIR, "liveshowseller-b4308e2f9dc6.json")
+# )
 GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
-    os.path.join(BASE_DIR, "liveshowseller-b4308e2f9dc6.json")
+    os.path.join(BASE_DIR, "liveshowseller-400012-0ad472937996.json")
 )
-GS_URL = "https://storage.googleapis.com/lss_public_bucket/"
+
+# GS_URL = "https://storage.googleapis.com/lss_public_bucket/"
+GS_URL = "https://storage.googleapis.com/lss_bucket/"
+
 GOOGLE_STORAGE_STATIC_DIR=GS_URL+'static/'
 # google monitoring
-GCP_PROJECT_ID = "liveshowseller"
+# GCP_PROJECT_ID = "liveshowseller"
+GCP_PROJECT_ID = "liveshowseller-400012"
 
 # mail app
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -420,7 +434,7 @@ ORDER_REPORT_DOWNLOAD_INTERVAL = 180
 
 # redis server
 REDIS_SERVER = {
-    "host": "34.124.140.74",
+    "host": "34.124.181.79",
     "port": "6379",
     "username": None,
     "password": r"algo83111TPP"}
@@ -486,7 +500,9 @@ CHANNEL_LAYERS = {
         'CONFIG': 
         {
             # "hosts": [('127.0.0.1', 6379)],
-            "hosts": [r"redis://:algo83111TPP@34.124.140.74:6379/0"],
+            # "hosts": [r"redis://:algo83111TPP@34.124.140.74:6379/0"],
+            "hosts": [r"redis://:algo83111TPP@34.124.181.79:6379/0"],
+
         }
         ,
     },

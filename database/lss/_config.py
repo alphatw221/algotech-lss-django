@@ -4,7 +4,7 @@ from django.conf import settings
 
 from datetime import datetime
 
-client = MongoClient(settings.MONGODB_CONNECTION_STRING)
+client = MongoClient(settings.MONGODB_CONNECTION_STRING, connect=False)
 db = client[settings.MONGODB_DATABASE_NAME]
 
 

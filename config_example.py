@@ -5,7 +5,7 @@
 
 DJANGO_SETTINGS='lss.settings'
 MONGO_DB_USERNAME='lss'
-MONGO_DB_PASSWORD= 'algo83111T%%'
+MONGO_DB_PASSWORD= 'agt83111NPP'
 MONGO_DB_DATABASE_NAME= 'lss'
 
 POETRY_ENVIRONMENT='/Users/lin/Library/Caches/pypoetry/virtualenvs/liveshowseller-qMMnj7tO-py3.10'
