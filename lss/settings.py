@@ -177,7 +177,7 @@ DATABASES = {
             # Production internal
             # 'host': 'mongodb://10.148.0.7:27017, 10.148.0.8:27017, 10.148.0.9:27017',
             # Production external
-            'host':'mongodb+srv://cluster0.veosu.mongodb.net/',
+            'host':'mongodb+srv://cluster1.veosu.mongodb.net/',
             # 'host': 'mongodb://34.126.92.142:27017, 35.240.200.4:27017, 34.126.155.150:27017',
             # 'replicaSet': 'rs0',
             'username': config.MONGO_DB_USERNAME,
@@ -212,7 +212,7 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 1024*1024*15
 #     '?authSource='+config.MONGO_DB_DATABASE_NAME
 MONGODB_CONNECTION_STRING = \
     'mongodb+srv://'+config.MONGO_DB_USERNAME+':'+urllib.parse.quote_plus(config.MONGO_DB_PASSWORD)+\
-    '@cluster0.veosu.mongodb.net/'+\
+    '@cluster1.veosu.mongodb.net/'+\
     '?retryWrites=true&w=majority'
     
 # for social lab
