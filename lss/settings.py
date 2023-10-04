@@ -296,11 +296,13 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 
 # gcp load balancer
-GCP_API_LOADBALANCER_URL = "https://v2login.liveshowseller.com"
+# GCP_API_LOADBALANCER_URL = "https://v2login.liveshowseller.com"
+GCP_API_LOADBALANCER_URL = "https://liveshowseller.net"
 
 
 # Live Show Seller info
-WEB_SERVER_URL = "https://v2login.liveshowseller.com"
+# WEB_SERVER_URL = "https://v2login.liveshowseller.com"
+WEB_SERVER_URL = "https://liveshowseller.net"
 
 # SHOPPING_CART_URL = f"{WEB_SERVER_URL}/buyer/login_to_cart"
 SHOPPING_CART_URL = f"{GCP_API_LOADBALANCER_URL}/buyer/cart"
