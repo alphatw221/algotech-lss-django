@@ -180,6 +180,8 @@ class CartDiscountHelper:
                 amount = limitation['amount']
                 cart = kwargs['cart']
                 cart_subtotal = cls.__caculate_subtotal(cart)
+                print(amount)
+                print(cart_subtotal)
                 if cart_subtotal < amount:
                     return False
 
@@ -214,7 +216,8 @@ class CartDiscountHelper:
                 # if api_user.orders.filter(user_subscription=user_subscription).exists():
                 #     return False
 
-        except Exception:
+        except Exception as e:
+            print(e)
             return False
         return True
 
@@ -225,20 +228,25 @@ class CartDiscountHelper:
         try:
             for limitation in limitations:
                 if not cls.check_limitation(limitation, **kwargs):
+                    print(limitation)
                     return False
-        except Exception:
+        except Exception as e:
+            print(e)
             return False
         return True
     
 
     @staticmethod
-    def __caculate_subtotal(cart):
+    def  __caculate_subtotal(cart):
 
-        cart.campaign
-        campaign_product_dict = database.lss_cache.campaign_product.get_product_dict(cart.campaign.id, bypass=True)      #temp
+        campaign_products = cart.campaign.products.all()
+
+        campaign_product_dict = {str(campaign_product.id):campaign_product.price for campaign_product in campaign_products}
+
+
         subtotal = 0
         for campaign_product_id_str, qty in cart.products.items():
-            subtotal+=campaign_product_dict.get(campaign_product_id_str,{}).get('price',0)*qty
+            subtotal+=campaign_product_dict.get(campaign_product_id_str,{})*qty
         return subtotal
 
 
