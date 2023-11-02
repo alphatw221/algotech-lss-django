@@ -46,9 +46,20 @@ class Command(BaseCommand):
         #     import traceback
         #     print(traceback.format_exc())
         #     lib.util.google_cloud_logging.ApiLogEntry.write_entry(traceback.format_exc())
-        self.send_confirm_email(57840)
+        # self.send_confirm_email(57840)
         # self.get_customer(617)
-    
+
+        # campaigns = models.campaign.campaign.Campaign.objects.filter(id__gte=2150)
+        # for campaign in campaigns:
+        #     print(campaign)
+        orders = models.order.order.Order.objects.filter(campaign_id__gte=2150)
+        for order in orders:
+            try:
+                print(order.id)
+                self.send_confirm_email(order.id)
+            except Exception as e:
+                print(e)
+
     def __create_new_register_account(self, plan, country_plan, subscription_plan, timezone, period, firstName, lastName, email, password, country, country_code,  contactNumber,  amount, paymentIntent=None, subscription_meta:dict={}):
         now = datetime.now(pytz.timezone(timezone)) if timezone in pytz.common_timezones else datetime.now()
         expired_at = now+timedelta(days=90) if period == business_policy.subscription.PERIOD_QUARTER else now+timedelta(days=365)

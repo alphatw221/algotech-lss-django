@@ -413,12 +413,12 @@ GCP_PROJECT_ID = "liveshowseller-400012"
 
 # mail app
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'mail.liveshowseller.com'  # smtp.gmail.com
+EMAIL_HOST = 'smtp.gmail.com'  # smtp.gmail.com
 EMAIL_PORT = 465
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
-EMAIL_HOST_USER = 'noreply@liveshowseller.com'  # derekhwang@accoladeglobal.net
-EMAIL_HOST_PASSWORD = 'bq5^82DrrpQ4'  # jyhudyfbvpmewjsc
+EMAIL_HOST_USER = 'noreply@liveshowseller.net'  # derekhwang@accoladeglobal.net noreply@liveshowseller.com
+EMAIL_HOST_PASSWORD = 'bbbmncinwtthxfuw'  # jyhudyfbvpmewjsc   bq5^82DrrpQ4'
 
 # cron app
 CRON_CLASSES = [
