@@ -52,11 +52,12 @@ class Command(BaseCommand):
         # campaigns = models.campaign.campaign.Campaign.objects.filter(id__gte=2150)
         # for campaign in campaigns:
         #     print(campaign)
-        orders = models.order.order.Order.objects.filter(campaign_id__gte=2150)
-        for order in orders:
+
+        order_ids = [ 62366, 62639, 62986, 63135, 63578, 63692, 64519, 64697, 65451]
+        for order_id in order_ids:
             try:
-                print(order.id)
-                self.send_confirm_email(order.id)
+                print(order_id)
+                self.send_confirm_email(order_id)
             except Exception as e:
                 print(e)
 

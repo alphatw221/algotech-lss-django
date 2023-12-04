@@ -249,12 +249,13 @@ class CartViewSet(viewsets.ModelViewSet):
 
         serializer =models.order.order.OrderSerializerUpdateShipping(data=shipping_data) 
         # print(shipping_data)
-        shipping_data['shipping_date'] = shipping_data.get('shipping_date') if shipping_data.get('shipping_date') else None
+        shipping_data['shipping_date'] = _shipping_date =  shipping_data.get('shipping_date') if shipping_data.get('shipping_date') else None
         if not serializer.is_valid():
             print(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         shipping_data = serializer.to_internal_value(serializer.data)
         # print(shipping_data)
+
         shipping_data['shipping_date_time'] = datetime.combine(shipping_data.pop('shipping_date'), datetime.min.time()) if shipping_data.get('shipping_date') else None   #pymongo does not support datetime.date
 
         point_discount_processor_class:factory.point_discount.PointDiscountProcessor = factory.point_discount.get_point_discount_processor_class(user_subscription)
@@ -276,12 +277,16 @@ class CartViewSet(viewsets.ModelViewSet):
         if order.shipping_time_slot :
             _save=False
             for delivery_date in campaign.meta_logistic.get('delivery_dates',[]):
+                if delivery_date.get('date') != _shipping_date:
+                    continue
                 for time_slot in delivery_date.get('time_slots',[]):
                     if time_slot.get('time_slot') == order.shipping_time_slot:
                         time_slot['selected']=time_slot.get('selected',0)+1
                         _save=True
             for delivery_option in campaign.meta_logistic.get('additional_delivery_options',[]):
                 for delivery_date in delivery_option.get('delivery_dates',[]):
+                    if delivery_date.get('date') != _shipping_date:
+                        continue
                     for time_slot in delivery_date.get('time_slots',[]):
                         if time_slot.get('time_slot') == order.shipping_time_slot:
                             time_slot['selected']=time_slot.get('selected',0)+1
